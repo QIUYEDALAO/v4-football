@@ -16,10 +16,11 @@ import urllib.request
 from pathlib import Path
 from datetime import datetime, date, timedelta
 from typing import Optional
+from logger import logger, log_event
 
 API_KEY = "e5e315b1f9ba1ba51dc2124b35f07a01"
 API_HOST = "https://v3.football.api-sports.io"
-BASE_DIR = Path("/Users/chenguoqing/.openclaw/workspace/v2_football_quant")
+BASE_DIR = Path(__file__).resolve().parent.parent
 DATA_DIR = BASE_DIR / "data" / "raw_fixtures"
 REPORT_DIR = BASE_DIR / "data" / "daily_reports"
 REPORT_DIR.mkdir(exist_ok=True)
@@ -56,7 +57,7 @@ def api(endpoint: str) -> Optional[dict]:
 def map_to_decile(att_def_spread: float) -> dict:
     """将 att_def_spread 映射到 Fair Odds Matrix 的档位"""
     for row in FAIR_MATRIX:
-        if row["spread_lo"] <= att_def_spread <= row["spread_hi"]:
+        if row["spread_lo"] <= att_def_spread < row["spread_hi"]:
             return row
     # 超出范围 → 最极端档
     if att_def_spread < FAIR_MATRIX[0]["spread_lo"]:
@@ -73,7 +74,7 @@ def fetch_today_fixtures() -> list[dict]:
     td = date.today()
     td_str = td.strftime("%Y-%m-%d")
     nd_str = (td + timedelta(days=1)).strftime("%Y-%m-%d")
-    print(f"[1/7] 拉取赛程 (BJ {td_str} 12:00 → {nd_str} 12:00)...")
+    logger.info(f"[1/7] 拉取赛程 (BJ {td_str} 12:00 → {nd_str} 12:00)...")
 
     wl_set = set(str(k) for k in LEAGUE_CN.keys())
     all_fixtures = []
@@ -138,11 +139,11 @@ def fetch_today_fixtures() -> list[dict]:
             unique.append(fx)
 
     unique.sort(key=lambda x: x["date"])
-    print(f"  → {len(unique)} 场未开始")
+    logger.info(f"  → {len(unique)} 场未开始")
     return unique
 
 def fetch_details(fixtures: list[dict]) -> list[dict]:
-    print(f"[2/7] 拉取 Predictions...")
+    logger.info(f"[2/7] 拉取 Predictions...")
     enriched = []
 
     for i, fx in enumerate(fixtures):
@@ -151,7 +152,7 @@ def fetch_details(fixtures: list[dict]) -> list[dict]:
             pred_resp = api(f"predictions?fixture={fid}")
         except Exception as e:
             pred_resp = None
-            print(f"  ⚠️ Predictions失败 {fid}")
+            logger.warning(f"  ⚠️ Predictions失败 {fid}")
         time.sleep(SLEEP_MS)
 
         pred_data = pred_resp.get("response", [{}])[0] if pred_resp else {}
@@ -162,7 +163,7 @@ def fetch_details(fixtures: list[dict]) -> list[dict]:
         if (i + 1) % 20 == 0:
             print(f"  {i + 1}/{len(fixtures)}")
 
-    print(f"  → {len(enriched)} 场")
+    logger.info(f"  → {len(enriched)} 场")
     return enriched
 
 
@@ -357,11 +358,11 @@ def run_once():
 
     fixtures = fetch_details(fixtures)
 
-    print(f"[3/7] 计算 att_def_spread + decile 映射...")
+    logger.info(f"[3/7] 计算 att_def_spread + decile 映射...")
     for fx in fixtures:
         calc_spread(fx)
 
-    print(f"[4/7] 拉取 HT 1X2 赔率...")
+    logger.info(f"[4/7] 拉取 HT 1X2 赔率...")
     for fx in fixtures:
         odds = fetch_ht_1x2(fx["id"])
         fx["_ht_1x2"] = odds
@@ -369,7 +370,7 @@ def run_once():
             print(f"  {fx['home']}vs{fx['away']}: H={odds.get('H','?')} D={odds.get('D','?')} A={odds.get('A','?')}")
         time.sleep(SLEEP_MS)
 
-    print(f"[5/7] Edge 计算...")
+    logger.info(f"[5/7] Edge 计算...")
     recommendations = []
     for fx in fixtures:
         edge = calc_edge(fx)
@@ -387,19 +388,19 @@ def run_once():
                 "bookmaker": fx.get("_ht_1x2", {}).get("bookmaker", "?"),
                 "stake": calc_stake(edge["model_prob"], edge["odds"], row["decile"]),
             })
-            print(f"  ✅ {fx['home']}vs{fx['away']}: 推{edge['outcome']} "
+            logger.success(f"  ✅ {fx['home']}vs{fx['away']}: 推{edge['outcome']} "
                   f"odds={edge['odds']:.2f} edge={edge['edge']*100:+.1f}%")
 
     recommendations.sort(key=lambda x: -x["edge"]["ev"])
 
-    print(f"[6/7] 生成日报...")
+    logger.info(f"[6/7] 生成日报...")
     report = generate_report(fixtures, recommendations[:3])
     report_path = REPORT_DIR / f"daily_{date.today().strftime('%Y%m%d')}.md"
     with open(report_path, "w") as f:
         f.write(report)
-    print(f"  → {report_path}")
+    logger.info(f"  → {report_path}")
 
-    print(f"[7/7] 保存预测 + 输出")
+    logger.info(f"[7/7] 保存预测 + 输出")
     print()
     print(report)
 
@@ -430,9 +431,20 @@ def run_once():
         })
 
     pred_path = REPORT_DIR / f"predictions_{date.today().strftime('%Y%m%d')}.json"
+    # 读取现有 → 合并 → 去重（防止重复运行覆盖之前的结果）
+    existing = []
+    existing_ids = set()
+    if pred_path.exists():
+        try:
+            with open(pred_path) as f:
+                existing = json.load(f)
+            existing_ids = {p["fixture_id"] for p in existing if isinstance(p, dict)}
+        except:
+            pass
+    merged = existing + [p for p in pred_save if p["fixture_id"] not in existing_ids]
     with open(pred_path, "w") as f:
-        json.dump(pred_save, f, ensure_ascii=False, indent=2)
-    print(f"\n预测数据: {pred_path}")
+        json.dump(merged, f, ensure_ascii=False, indent=2)
+    logger.info(f"\n预测数据: {pred_path}")
 
     # 昨日验证
     yesterday = (date.today() - timedelta(days=1)).strftime("%Y-%m-%d")
@@ -441,11 +453,11 @@ def run_once():
         from paper_trading import verify_date as pt_verify
         result = pt_verify(yesterday)
         if "error" not in result and result.get("total_completed", 0) > 0:
-            print(f"\n📊 昨日 ({yesterday}) 验证: "
+            logger.info(f"\n📊 昨日 ({yesterday}) 验证: "
                   f"{result['hits']}/{result['total_completed']} 命中, "
                   f"ROI {result['roi_pct']:+.1f}%")
     except Exception as e:
-        print(f"\n⚠️ 昨日验证跳过: {e}")
+        logger.warning(f"\n⚠️ 昨日验证跳过: {e}")
 
 
 if __name__ == "__main__":

@@ -95,6 +95,52 @@ def ev(placed_odds: float, fair_prob: float) -> Optional[float]:
     return placed_odds * fair_prob - 1.0
 
 
+def true_clv(placed_odds: float, closing_odds_hda: dict) -> Optional[float]:
+    """
+    Vig-Free (去水) CLV 计算
+    
+    专家建议：Pinnacle 收盘赔率含抽水，需去除后再算真实CLV。
+    
+    Args:
+        placed_odds: 投注时的 decimal odds (如 3.05)
+        closing_odds_hda: 收盘时 H/D/A 三向赔率 {"H": 2.23, "D": 2.90, "A": 6.23}
+    
+    Returns:
+        Vig-Free CLV 百分比
+    """
+    if not closing_odds_hda:
+        return None
+    
+    # 计算隐含概率总和（庄家抽水）
+    implied_sum = sum(1.0 / o for o in closing_odds_hda.values() if o > 0)
+    
+    # 找到投注方向的收盘赔率
+    # 假设默认是 D（Draw）方向
+    closing_d = closing_odds_hda.get("D", closing_odds_hda.get("draw", 0))
+    if closing_d <= 0:
+        return None
+    
+    # 去水后的真实收盘赔率
+    true_closing = closing_d * implied_sum
+    
+    # Vig-Free CLV
+    return (placed_odds / true_closing) - 1.0
+
+
+def clv_verdict(clv_value: float) -> str:
+    """CLV 判定"""
+    if clv_value is None:
+        return "⚪ N/A"
+    if clv_value > 0.02:
+        return f"🟢 +{clv_value*100:.1f}% 跑赢市场"
+    elif clv_value > 0:
+        return f"🟡 +{clv_value*100:.1f}% 轻微跑赢"
+    elif clv_value > -0.02:
+        return f"🟠 {clv_value*100:.1f}% 轻微跑输"
+    else:
+        return f"🔴 {clv_value*100:.1f}% 市场反向"
+
+
 # ===== 测试 =====
 if __name__ == "__main__":
     # 单场 CLV

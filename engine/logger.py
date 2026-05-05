@@ -18,7 +18,7 @@ import sys
 from pathlib import Path
 from datetime import datetime
 
-LOG_DIR = Path("/Users/chenguoqing/.openclaw/workspace/v2_football_quant/logs")
+LOG_DIR = Path(__file__).resolve().parent.parent / "logs"
 LOG_DIR.mkdir(exist_ok=True)
 
 # 移除默认 handler
