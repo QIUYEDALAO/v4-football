@@ -1,7 +1,8 @@
+data/
+db/v2_football.db
 __pycache__/
 *.pyc
-.db
 node_modules/
 logs/
+*.log
 .DS_Store
-data/
