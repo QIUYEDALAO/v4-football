@@ -1,0 +1,702 @@
+[
+  {
+    "fixture": {
+      "id": 1387014,
+      "referee": "Oliver Langford, England",
+      "timezone": "UTC",
+      "date": "2026-03-21T12:30:00+00:00",
+      "timestamp": 1774096200,
+      "periods": {
+        "first": 1774096200,
+        "second": 1774099800
+      },
+      "venue": {
+        "id": null,
+        "name": "Ewood Park",
+        "city": "Blackburn"
+      },
+      "status": {
+        "long": "Match Finished",
+        "short": "FT",
+        "elapsed": 90,
+        "extra": 6
+      }
+    },
+    "league": {
+      "id": 40,
+      "name": "Championship",
+      "country": "England",
+      "logo": "https://media.api-sports.io/football/leagues/40.png",
+      "flag": "https://media.api-sports.io/flags/gb-eng.svg",
+      "season": 2025,
+      "round": "Regular Season - 39",
+      "standings": true
+    },
+    "teams": {
+      "home": {
+        "id": 67,
+        "name": "Blackburn",
+        "logo": "https://media.api-sports.io/football/teams/67.png",
+        "winner": null
+      },
+      "away": {
+        "id": 70,
+        "name": "Middlesbrough",
+        "logo": "https://media.api-sports.io/football/teams/70.png",
+        "winner": null
+      }
+    },
+    "goals": {
+      "home": 0,
+      "away": 0
+    },
+    "score": {
+      "halftime": {
+        "home": 0,
+        "away": 0
+      },
+      "fulltime": {
+        "home": 0,
+        "away": 0
+      },
+      "extratime": {
+        "home": null,
+        "away": null
+      },
+      "penalty": {
+        "home": null,
+        "away": null
+      }
+    }
+  },
+  {
+    "fixture": {
+      "id": 1386824,
+      "referee": "James Bell, England",
+      "timezone": "UTC",
+      "date": "2025-12-26T15:00:00+00:00",
+      "timestamp": 1766761200,
+      "periods": {
+        "first": 1766761200,
+        "second": 1766764800
+      },
+      "venue": {
+        "id": 558,
+        "name": "Riverside Stadium",
+        "city": "Middlesbrough"
+      },
+      "status": {
+        "long": "Match Finished",
+        "short": "FT",
+        "elapsed": 90,
+        "extra": 6
+      }
+    },
+    "league": {
+      "id": 40,
+      "name": "Championship",
+      "country": "England",
+      "logo": "https://media.api-sports.io/football/leagues/40.png",
+      "flag": "https://media.api-sports.io/flags/gb-eng.svg",
+      "season": 2025,
+      "round": "Regular Season - 23",
+      "standings": true
+    },
+    "teams": {
+      "home": {
+        "id": 70,
+        "name": "Middlesbrough",
+        "logo": "https://media.api-sports.io/football/teams/70.png",
+        "winner": null
+      },
+      "away": {
+        "id": 67,
+        "name": "Blackburn",
+        "logo": "https://media.api-sports.io/football/teams/67.png",
+        "winner": null
+      }
+    },
+    "goals": {
+      "home": 0,
+      "away": 0
+    },
+    "score": {
+      "halftime": {
+        "home": 0,
+        "away": 0
+      },
+      "fulltime": {
+        "home": 0,
+        "away": 0
+      },
+      "extratime": {
+        "home": null,
+        "away": null
+      },
+      "penalty": {
+        "home": null,
+        "away": null
+      }
+    }
+  },
+  {
+    "fixture": {
+      "id": 1216311,
+      "referee": "J. Busby",
+      "timezone": "UTC",
+      "date": "2025-04-04T19:00:00+00:00",
+      "timestamp": 1743793200,
+      "periods": {
+        "first": 1743793200,
+        "second": 1743796800
+      },
+      "venue": {
+        "id": 500,
+        "name": "Ewood Park",
+        "city": "Blackburn, Lancashire"
+      },
+      "status": {
+        "long": "Match Finished",
+        "short": "FT",
+        "elapsed": 90,
+        "extra": 5
+      }
+    },
+    "league": {
+      "id": 40,
+      "name": "Championship",
+      "country": "England",
+      "logo": "https://media.api-sports.io/football/leagues/40.png",
+      "flag": "https://media.api-sports.io/flags/gb-eng.svg",
+      "season": 2024,
+      "round": "Regular Season - 40",
+      "standings": true
+    },
+    "teams": {
+      "home": {
+        "id": 67,
+        "name": "Blackburn",
+        "logo": "https://media.api-sports.io/football/teams/67.png",
+        "winner": false
+      },
+      "away": {
+        "id": 70,
+        "name": "Middlesbrough",
+        "logo": "https://media.api-sports.io/football/teams/70.png",
+        "winner": true
+      }
+    },
+    "goals": {
+      "home": 0,
+      "away": 2
+    },
+    "score": {
+      "halftime": {
+        "home": 0,
+        "away": 2
+      },
+      "fulltime": {
+        "home": 0,
+        "away": 2
+      },
+      "extratime": {
+        "home": null,
+        "away": null
+      },
+      "penalty": {
+        "home": null,
+        "away": null
+      }
+    }
+  },
+  {
+    "fixture": {
+      "id": 1318849,
+      "referee": "D. Whitestone",
+      "timezone": "UTC",
+      "date": "2025-01-11T12:00:00+00:00",
+      "timestamp": 1736596800,
+      "periods": {
+        "first": 1736596800,
+        "second": 1736600400
+      },
+      "venue": {
+        "id": 558,
+        "name": "Riverside Stadium",
+        "city": "Middlesbrough"
+      },
+      "status": {
+        "long": "Match Finished",
+        "short": "FT",
+        "elapsed": 90,
+        "extra": 4
+      }
+    },
+    "league": {
+      "id": 45,
+      "name": "FA Cup",
+      "country": "England",
+      "logo": "https://media.api-sports.io/football/leagues/45.png",
+      "flag": "https://media.api-sports.io/flags/gb-eng.svg",
+      "season": 2024,
+      "round": "3rd Round",
+      "standings": false
+    },
+    "teams": {
+      "home": {
+        "id": 70,
+        "name": "Middlesbrough",
+        "logo": "https://media.api-sports.io/football/teams/70.png",
+        "winner": false
+      },
+      "away": {
+        "id": 67,
+        "name": "Blackburn",
+        "logo": "https://media.api-sports.io/football/teams/67.png",
+        "winner": true
+      }
+    },
+    "goals": {
+      "home": 0,
+      "away": 1
+    },
+    "score": {
+      "halftime": {
+        "home": 0,
+        "away": 0
+      },
+      "fulltime": {
+        "home": 0,
+        "away": 1
+      },
+      "extratime": {
+        "home": null,
+        "away": null
+      },
+      "penalty": {
+        "home": null,
+        "away": null
+      }
+    }
+  },
+  {
+    "fixture": {
+      "id": 1216045,
+      "referee": "J. Bell",
+      "timezone": "UTC",
+      "date": "2024-11-27T19:45:00+00:00",
+      "timestamp": 1732736700,
+      "periods": {
+        "first": 1732736700,
+        "second": 1732740300
+      },
+      "venue": {
+        "id": 558,
+        "name": "Riverside Stadium",
+        "city": "Middlesbrough"
+      },
+      "status": {
+        "long": "Match Finished",
+        "short": "FT",
+        "elapsed": 90,
+        "extra": 4
+      }
+    },
+    "league": {
+      "id": 40,
+      "name": "Championship",
+      "country": "England",
+      "logo": "https://media.api-sports.io/football/leagues/40.png",
+      "flag": "https://media.api-sports.io/flags/gb-eng.svg",
+      "season": 2024,
+      "round": "Regular Season - 17",
+      "standings": true
+    },
+    "teams": {
+      "home": {
+        "id": 70,
+        "name": "Middlesbrough",
+        "logo": "https://media.api-sports.io/football/teams/70.png",
+        "winner": false
+      },
+      "away": {
+        "id": 67,
+        "name": "Blackburn",
+        "logo": "https://media.api-sports.io/football/teams/67.png",
+        "winner": true
+      }
+    },
+    "goals": {
+      "home": 0,
+      "away": 1
+    },
+    "score": {
+      "halftime": {
+        "home": 0,
+        "away": 0
+      },
+      "fulltime": {
+        "home": 0,
+        "away": 1
+      },
+      "extratime": {
+        "home": null,
+        "away": null
+      },
+      "penalty": {
+        "home": null,
+        "away": null
+      }
+    }
+  },
+  {
+    "fixture": {
+      "id": 1047880,
+      "referee": "K. Stroud",
+      "timezone": "UTC",
+      "date": "2024-03-16T15:00:00+00:00",
+      "timestamp": 1710601200,
+      "periods": {
+        "first": 1710601200,
+        "second": 1710604800
+      },
+      "venue": {
+        "id": 558,
+        "name": "Riverside Stadium",
+        "city": "Middlesbrough"
+      },
+      "status": {
+        "long": "Match Finished",
+        "short": "FT",
+        "elapsed": 90,
+        "extra": null
+      }
+    },
+    "league": {
+      "id": 40,
+      "name": "Championship",
+      "country": "England",
+      "logo": "https://media.api-sports.io/football/leagues/40.png",
+      "flag": "https://media.api-sports.io/flags/gb-eng.svg",
+      "season": 2023,
+      "round": "Regular Season - 38",
+      "standings": true
+    },
+    "teams": {
+      "home": {
+        "id": 70,
+        "name": "Middlesbrough",
+        "logo": "https://media.api-sports.io/football/teams/70.png",
+        "winner": null
+      },
+      "away": {
+        "id": 67,
+        "name": "Blackburn",
+        "logo": "https://media.api-sports.io/football/teams/67.png",
+        "winner": null
+      }
+    },
+    "goals": {
+      "home": 0,
+      "away": 0
+    },
+    "score": {
+      "halftime": {
+        "home": 0,
+        "away": 0
+      },
+      "fulltime": {
+        "home": 0,
+        "away": 0
+      },
+      "extratime": {
+        "home": null,
+        "away": null
+      },
+      "penalty": {
+        "home": null,
+        "away": null
+      }
+    }
+  },
+  {
+    "fixture": {
+      "id": 1047495,
+      "referee": "J. Bell",
+      "timezone": "UTC",
+      "date": "2023-09-16T14:00:00+00:00",
+      "timestamp": 1694872800,
+      "periods": {
+        "first": 1694872800,
+        "second": 1694876400
+      },
+      "venue": {
+        "id": 500,
+        "name": "Ewood Park",
+        "city": "Blackburn, Lancashire"
+      },
+      "status": {
+        "long": "Match Finished",
+        "short": "FT",
+        "elapsed": 90,
+        "extra": null
+      }
+    },
+    "league": {
+      "id": 40,
+      "name": "Championship",
+      "country": "England",
+      "logo": "https://media.api-sports.io/football/leagues/40.png",
+      "flag": "https://media.api-sports.io/flags/gb-eng.svg",
+      "season": 2023,
+      "round": "Regular Season - 6",
+      "standings": true
+    },
+    "teams": {
+      "home": {
+        "id": 67,
+        "name": "Blackburn",
+        "logo": "https://media.api-sports.io/football/teams/67.png",
+        "winner": true
+      },
+      "away": {
+        "id": 70,
+        "name": "Middlesbrough",
+        "logo": "https://media.api-sports.io/football/teams/70.png",
+        "winner": false
+      }
+    },
+    "goals": {
+      "home": 2,
+      "away": 1
+    },
+    "score": {
+      "halftime": {
+        "home": 1,
+        "away": 0
+      },
+      "fulltime": {
+        "home": 2,
+        "away": 1
+      },
+      "extratime": {
+        "home": null,
+        "away": null
+      },
+      "penalty": {
+        "home": null,
+        "away": null
+      }
+    }
+  },
+  {
+    "fixture": {
+      "id": 881008,
+      "referee": "L. Doughty",
+      "timezone": "UTC",
+      "date": "2022-12-29T19:45:00+00:00",
+      "timestamp": 1672343100,
+      "periods": {
+        "first": 1672343100,
+        "second": 1672346700
+      },
+      "venue": {
+        "id": 500,
+        "name": "Ewood Park",
+        "city": "Blackburn, Lancashire"
+      },
+      "status": {
+        "long": "Match Finished",
+        "short": "FT",
+        "elapsed": 90,
+        "extra": null
+      }
+    },
+    "league": {
+      "id": 40,
+      "name": "Championship",
+      "country": "England",
+      "logo": "https://media.api-sports.io/football/leagues/40.png",
+      "flag": "https://media.api-sports.io/flags/gb-eng.svg",
+      "season": 2022,
+      "round": "Regular Season - 25",
+      "standings": true
+    },
+    "teams": {
+      "home": {
+        "id": 67,
+        "name": "Blackburn",
+        "logo": "https://media.api-sports.io/football/teams/67.png",
+        "winner": false
+      },
+      "away": {
+        "id": 70,
+        "name": "Middlesbrough",
+        "logo": "https://media.api-sports.io/football/teams/70.png",
+        "winner": true
+      }
+    },
+    "goals": {
+      "home": 1,
+      "away": 2
+    },
+    "score": {
+      "halftime": {
+        "home": 1,
+        "away": 0
+      },
+      "fulltime": {
+        "home": 1,
+        "away": 2
+      },
+      "extratime": {
+        "home": null,
+        "away": null
+      },
+      "penalty": {
+        "home": null,
+        "away": null
+      }
+    }
+  },
+  {
+    "fixture": {
+      "id": 880892,
+      "referee": "D. Bond",
+      "timezone": "UTC",
+      "date": "2022-10-15T14:00:00+00:00",
+      "timestamp": 1665842400,
+      "periods": {
+        "first": 1665842400,
+        "second": 1665846000
+      },
+      "venue": {
+        "id": 558,
+        "name": "Riverside Stadium",
+        "city": "Middlesbrough"
+      },
+      "status": {
+        "long": "Match Finished",
+        "short": "FT",
+        "elapsed": 90,
+        "extra": null
+      }
+    },
+    "league": {
+      "id": 40,
+      "name": "Championship",
+      "country": "England",
+      "logo": "https://media.api-sports.io/football/leagues/40.png",
+      "flag": "https://media.api-sports.io/flags/gb-eng.svg",
+      "season": 2022,
+      "round": "Regular Season - 15",
+      "standings": true
+    },
+    "teams": {
+      "home": {
+        "id": 70,
+        "name": "Middlesbrough",
+        "logo": "https://media.api-sports.io/football/teams/70.png",
+        "winner": false
+      },
+      "away": {
+        "id": 67,
+        "name": "Blackburn",
+        "logo": "https://media.api-sports.io/football/teams/67.png",
+        "winner": true
+      }
+    },
+    "goals": {
+      "home": 1,
+      "away": 2
+    },
+    "score": {
+      "halftime": {
+        "home": 1,
+        "away": 2
+      },
+      "fulltime": {
+        "home": 1,
+        "away": 2
+      },
+      "extratime": {
+        "home": null,
+        "away": null
+      },
+      "penalty": {
+        "home": null,
+        "away": null
+      }
+    }
+  },
+  {
+    "fixture": {
+      "id": 717122,
+      "referee": "D. England",
+      "timezone": "UTC",
+      "date": "2022-01-24T19:45:00+00:00",
+      "timestamp": 1643053500,
+      "periods": {
+        "first": 1643053500,
+        "second": 1643057100
+      },
+      "venue": {
+        "id": 500,
+        "name": "Ewood Park",
+        "city": "Blackburn, Lancashire"
+      },
+      "status": {
+        "long": "Match Finished",
+        "short": "FT",
+        "elapsed": 90,
+        "extra": null
+      }
+    },
+    "league": {
+      "id": 40,
+      "name": "Championship",
+      "country": "England",
+      "logo": "https://media.api-sports.io/football/leagues/40.png",
+      "flag": "https://media.api-sports.io/flags/gb-eng.svg",
+      "season": 2021,
+      "round": "Regular Season - 28",
+      "standings": true
+    },
+    "teams": {
+      "home": {
+        "id": 67,
+        "name": "Blackburn",
+        "logo": "https://media.api-sports.io/football/teams/67.png",
+        "winner": true
+      },
+      "away": {
+        "id": 70,
+        "name": "Middlesbrough",
+        "logo": "https://media.api-sports.io/football/teams/70.png",
+        "winner": false
+      }
+    },
+    "goals": {
+      "home": 1,
+      "away": 0
+    },
+    "score": {
+      "halftime": {
+        "home": 0,
+        "away": 0
+      },
+      "fulltime": {
+        "home": 1,
+        "away": 0
+      },
+      "extratime": {
+        "home": null,
+        "away": null
+      },
+      "penalty": {
+        "home": null,
+        "away": null
+      }
+    }
+  }
+]

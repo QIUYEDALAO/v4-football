@@ -1,0 +1,702 @@
+[
+  {
+    "fixture": {
+      "id": 1387004,
+      "referee": "Josh Smith, England",
+      "timezone": "UTC",
+      "date": "2026-03-14T15:00:00+00:00",
+      "timestamp": 1773500400,
+      "periods": {
+        "first": 1773500400,
+        "second": 1773504000
+      },
+      "venue": {
+        "id": 597,
+        "name": "The Hawthorns",
+        "city": "West Bromwich"
+      },
+      "status": {
+        "long": "Match Finished",
+        "short": "FT",
+        "elapsed": 90,
+        "extra": 6
+      }
+    },
+    "league": {
+      "id": 40,
+      "name": "Championship",
+      "country": "England",
+      "logo": "https://media.api-sports.io/football/leagues/40.png",
+      "flag": "https://media.api-sports.io/flags/gb-eng.svg",
+      "season": 2025,
+      "round": "Regular Season - 38",
+      "standings": true
+    },
+    "teams": {
+      "home": {
+        "id": 60,
+        "name": "West Brom",
+        "logo": "https://media.api-sports.io/football/teams/60.png",
+        "winner": true
+      },
+      "away": {
+        "id": 64,
+        "name": "Hull City",
+        "logo": "https://media.api-sports.io/football/teams/64.png",
+        "winner": false
+      }
+    },
+    "goals": {
+      "home": 3,
+      "away": 0
+    },
+    "score": {
+      "halftime": {
+        "home": 1,
+        "away": 0
+      },
+      "fulltime": {
+        "home": 3,
+        "away": 0
+      },
+      "extratime": {
+        "home": null,
+        "away": null
+      },
+      "penalty": {
+        "home": null,
+        "away": null
+      }
+    }
+  },
+  {
+    "fixture": {
+      "id": 1386808,
+      "referee": "Ruebyn Ricardo, England",
+      "timezone": "UTC",
+      "date": "2025-12-20T15:00:00+00:00",
+      "timestamp": 1766242800,
+      "periods": {
+        "first": 1766242800,
+        "second": 1766246400
+      },
+      "venue": {
+        "id": null,
+        "name": "MKM Stadium",
+        "city": "Hull"
+      },
+      "status": {
+        "long": "Match Finished",
+        "short": "FT",
+        "elapsed": 90,
+        "extra": 5
+      }
+    },
+    "league": {
+      "id": 40,
+      "name": "Championship",
+      "country": "England",
+      "logo": "https://media.api-sports.io/football/leagues/40.png",
+      "flag": "https://media.api-sports.io/flags/gb-eng.svg",
+      "season": 2025,
+      "round": "Regular Season - 22",
+      "standings": true
+    },
+    "teams": {
+      "home": {
+        "id": 64,
+        "name": "Hull City",
+        "logo": "https://media.api-sports.io/football/teams/64.png",
+        "winner": true
+      },
+      "away": {
+        "id": 60,
+        "name": "West Brom",
+        "logo": "https://media.api-sports.io/football/teams/60.png",
+        "winner": false
+      }
+    },
+    "goals": {
+      "home": 1,
+      "away": 0
+    },
+    "score": {
+      "halftime": {
+        "home": 1,
+        "away": 0
+      },
+      "fulltime": {
+        "home": 1,
+        "away": 0
+      },
+      "extratime": {
+        "home": null,
+        "away": null
+      },
+      "penalty": {
+        "home": null,
+        "away": null
+      }
+    }
+  },
+  {
+    "fixture": {
+      "id": 1216298,
+      "referee": "J. Simpson",
+      "timezone": "UTC",
+      "date": "2025-03-15T15:00:00+00:00",
+      "timestamp": 1742050800,
+      "periods": {
+        "first": 1742050800,
+        "second": 1742054400
+      },
+      "venue": {
+        "id": 597,
+        "name": "The Hawthorns",
+        "city": "West Bromwich"
+      },
+      "status": {
+        "long": "Match Finished",
+        "short": "FT",
+        "elapsed": 90,
+        "extra": 6
+      }
+    },
+    "league": {
+      "id": 40,
+      "name": "Championship",
+      "country": "England",
+      "logo": "https://media.api-sports.io/football/leagues/40.png",
+      "flag": "https://media.api-sports.io/flags/gb-eng.svg",
+      "season": 2024,
+      "round": "Regular Season - 38",
+      "standings": true
+    },
+    "teams": {
+      "home": {
+        "id": 60,
+        "name": "West Brom",
+        "logo": "https://media.api-sports.io/football/teams/60.png",
+        "winner": null
+      },
+      "away": {
+        "id": 64,
+        "name": "Hull City",
+        "logo": "https://media.api-sports.io/football/teams/64.png",
+        "winner": null
+      }
+    },
+    "goals": {
+      "home": 1,
+      "away": 1
+    },
+    "score": {
+      "halftime": {
+        "home": 0,
+        "away": 0
+      },
+      "fulltime": {
+        "home": 1,
+        "away": 1
+      },
+      "extratime": {
+        "home": null,
+        "away": null
+      },
+      "penalty": {
+        "home": null,
+        "away": null
+      }
+    }
+  },
+  {
+    "fixture": {
+      "id": 1216014,
+      "referee": "A. Kitchen",
+      "timezone": "UTC",
+      "date": "2024-11-10T13:00:00+00:00",
+      "timestamp": 1731243600,
+      "periods": {
+        "first": 1731243600,
+        "second": 1731247200
+      },
+      "venue": {
+        "id": 12051,
+        "name": "The MKM Stadium",
+        "city": "Hull"
+      },
+      "status": {
+        "long": "Match Finished",
+        "short": "FT",
+        "elapsed": 90,
+        "extra": 7
+      }
+    },
+    "league": {
+      "id": 40,
+      "name": "Championship",
+      "country": "England",
+      "logo": "https://media.api-sports.io/football/leagues/40.png",
+      "flag": "https://media.api-sports.io/flags/gb-eng.svg",
+      "season": 2024,
+      "round": "Regular Season - 15",
+      "standings": true
+    },
+    "teams": {
+      "home": {
+        "id": 64,
+        "name": "Hull City",
+        "logo": "https://media.api-sports.io/football/teams/64.png",
+        "winner": false
+      },
+      "away": {
+        "id": 60,
+        "name": "West Brom",
+        "logo": "https://media.api-sports.io/football/teams/60.png",
+        "winner": true
+      }
+    },
+    "goals": {
+      "home": 1,
+      "away": 2
+    },
+    "score": {
+      "halftime": {
+        "home": 1,
+        "away": 2
+      },
+      "fulltime": {
+        "home": 1,
+        "away": 2
+      },
+      "extratime": {
+        "home": null,
+        "away": null
+      },
+      "penalty": {
+        "home": null,
+        "away": null
+      }
+    }
+  },
+  {
+    "fixture": {
+      "id": 1047831,
+      "referee": "S. Martin",
+      "timezone": "UTC",
+      "date": "2024-02-24T12:30:00+00:00",
+      "timestamp": 1708777800,
+      "periods": {
+        "first": 1708777800,
+        "second": 1708781400
+      },
+      "venue": {
+        "id": 12051,
+        "name": "The MKM Stadium",
+        "city": "Hull"
+      },
+      "status": {
+        "long": "Match Finished",
+        "short": "FT",
+        "elapsed": 90,
+        "extra": null
+      }
+    },
+    "league": {
+      "id": 40,
+      "name": "Championship",
+      "country": "England",
+      "logo": "https://media.api-sports.io/football/leagues/40.png",
+      "flag": "https://media.api-sports.io/flags/gb-eng.svg",
+      "season": 2023,
+      "round": "Regular Season - 34",
+      "standings": true
+    },
+    "teams": {
+      "home": {
+        "id": 64,
+        "name": "Hull City",
+        "logo": "https://media.api-sports.io/football/teams/64.png",
+        "winner": null
+      },
+      "away": {
+        "id": 60,
+        "name": "West Brom",
+        "logo": "https://media.api-sports.io/football/teams/60.png",
+        "winner": null
+      }
+    },
+    "goals": {
+      "home": 1,
+      "away": 1
+    },
+    "score": {
+      "halftime": {
+        "home": 1,
+        "away": 1
+      },
+      "fulltime": {
+        "home": 1,
+        "away": 1
+      },
+      "extratime": {
+        "home": null,
+        "away": null
+      },
+      "penalty": {
+        "home": null,
+        "away": null
+      }
+    }
+  },
+  {
+    "fixture": {
+      "id": 1047612,
+      "referee": "A. Kitchen",
+      "timezone": "UTC",
+      "date": "2023-11-04T15:00:00+00:00",
+      "timestamp": 1699110000,
+      "periods": {
+        "first": 1699110000,
+        "second": 1699113600
+      },
+      "venue": {
+        "id": 597,
+        "name": "The Hawthorns",
+        "city": "West Bromwich"
+      },
+      "status": {
+        "long": "Match Finished",
+        "short": "FT",
+        "elapsed": 90,
+        "extra": null
+      }
+    },
+    "league": {
+      "id": 40,
+      "name": "Championship",
+      "country": "England",
+      "logo": "https://media.api-sports.io/football/leagues/40.png",
+      "flag": "https://media.api-sports.io/flags/gb-eng.svg",
+      "season": 2023,
+      "round": "Regular Season - 15",
+      "standings": true
+    },
+    "teams": {
+      "home": {
+        "id": 60,
+        "name": "West Brom",
+        "logo": "https://media.api-sports.io/football/teams/60.png",
+        "winner": true
+      },
+      "away": {
+        "id": 64,
+        "name": "Hull City",
+        "logo": "https://media.api-sports.io/football/teams/64.png",
+        "winner": false
+      }
+    },
+    "goals": {
+      "home": 3,
+      "away": 1
+    },
+    "score": {
+      "halftime": {
+        "home": 1,
+        "away": 1
+      },
+      "fulltime": {
+        "home": 3,
+        "away": 1
+      },
+      "extratime": {
+        "home": null,
+        "away": null
+      },
+      "penalty": {
+        "home": null,
+        "away": null
+      }
+    }
+  },
+  {
+    "fixture": {
+      "id": 881131,
+      "referee": "J. Linington",
+      "timezone": "UTC",
+      "date": "2023-03-03T20:00:00+00:00",
+      "timestamp": 1677873600,
+      "periods": {
+        "first": 1677873600,
+        "second": 1677877200
+      },
+      "venue": {
+        "id": 12051,
+        "name": "The MKM Stadium",
+        "city": "Hull"
+      },
+      "status": {
+        "long": "Match Finished",
+        "short": "FT",
+        "elapsed": 90,
+        "extra": null
+      }
+    },
+    "league": {
+      "id": 40,
+      "name": "Championship",
+      "country": "England",
+      "logo": "https://media.api-sports.io/football/leagues/40.png",
+      "flag": "https://media.api-sports.io/flags/gb-eng.svg",
+      "season": 2022,
+      "round": "Regular Season - 35",
+      "standings": true
+    },
+    "teams": {
+      "home": {
+        "id": 64,
+        "name": "Hull City",
+        "logo": "https://media.api-sports.io/football/teams/64.png",
+        "winner": true
+      },
+      "away": {
+        "id": 60,
+        "name": "West Brom",
+        "logo": "https://media.api-sports.io/football/teams/60.png",
+        "winner": false
+      }
+    },
+    "goals": {
+      "home": 2,
+      "away": 0
+    },
+    "score": {
+      "halftime": {
+        "home": 1,
+        "away": 0
+      },
+      "fulltime": {
+        "home": 2,
+        "away": 0
+      },
+      "extratime": {
+        "home": null,
+        "away": null
+      },
+      "penalty": {
+        "home": null,
+        "away": null
+      }
+    }
+  },
+  {
+    "fixture": {
+      "id": 880778,
+      "referee": "J. Bell",
+      "timezone": "UTC",
+      "date": "2022-08-20T14:00:00+00:00",
+      "timestamp": 1661004000,
+      "periods": {
+        "first": 1661004000,
+        "second": 1661007600
+      },
+      "venue": {
+        "id": 597,
+        "name": "The Hawthorns",
+        "city": "West Bromwich"
+      },
+      "status": {
+        "long": "Match Finished",
+        "short": "FT",
+        "elapsed": 90,
+        "extra": null
+      }
+    },
+    "league": {
+      "id": 40,
+      "name": "Championship",
+      "country": "England",
+      "logo": "https://media.api-sports.io/football/leagues/40.png",
+      "flag": "https://media.api-sports.io/flags/gb-eng.svg",
+      "season": 2022,
+      "round": "Regular Season - 5",
+      "standings": true
+    },
+    "teams": {
+      "home": {
+        "id": 60,
+        "name": "West Brom",
+        "logo": "https://media.api-sports.io/football/teams/60.png",
+        "winner": true
+      },
+      "away": {
+        "id": 64,
+        "name": "Hull City",
+        "logo": "https://media.api-sports.io/football/teams/64.png",
+        "winner": false
+      }
+    },
+    "goals": {
+      "home": 5,
+      "away": 2
+    },
+    "score": {
+      "halftime": {
+        "home": 1,
+        "away": 0
+      },
+      "fulltime": {
+        "home": 5,
+        "away": 2
+      },
+      "extratime": {
+        "home": null,
+        "away": null
+      },
+      "penalty": {
+        "home": null,
+        "away": null
+      }
+    }
+  },
+  {
+    "fixture": {
+      "id": 717220,
+      "referee": "J. Linington",
+      "timezone": "UTC",
+      "date": "2022-03-05T15:00:00+00:00",
+      "timestamp": 1646492400,
+      "periods": {
+        "first": 1646492400,
+        "second": 1646496000
+      },
+      "venue": {
+        "id": 12051,
+        "name": "The MKM Stadium",
+        "city": "Hull"
+      },
+      "status": {
+        "long": "Match Finished",
+        "short": "FT",
+        "elapsed": 90,
+        "extra": null
+      }
+    },
+    "league": {
+      "id": 40,
+      "name": "Championship",
+      "country": "England",
+      "logo": "https://media.api-sports.io/football/leagues/40.png",
+      "flag": "https://media.api-sports.io/flags/gb-eng.svg",
+      "season": 2021,
+      "round": "Regular Season - 36",
+      "standings": true
+    },
+    "teams": {
+      "home": {
+        "id": 64,
+        "name": "Hull City",
+        "logo": "https://media.api-sports.io/football/teams/64.png",
+        "winner": false
+      },
+      "away": {
+        "id": 60,
+        "name": "West Brom",
+        "logo": "https://media.api-sports.io/football/teams/60.png",
+        "winner": true
+      }
+    },
+    "goals": {
+      "home": 0,
+      "away": 2
+    },
+    "score": {
+      "halftime": {
+        "home": 0,
+        "away": 1
+      },
+      "fulltime": {
+        "home": 0,
+        "away": 2
+      },
+      "extratime": {
+        "home": null,
+        "away": null
+      },
+      "penalty": {
+        "home": null,
+        "away": null
+      }
+    }
+  },
+  {
+    "fixture": {
+      "id": 716987,
+      "referee": "D. Whitestone",
+      "timezone": "UTC",
+      "date": "2021-11-03T20:00:00+00:00",
+      "timestamp": 1635969600,
+      "periods": {
+        "first": 1635969600,
+        "second": 1635973200
+      },
+      "venue": {
+        "id": 597,
+        "name": "The Hawthorns",
+        "city": "West Bromwich"
+      },
+      "status": {
+        "long": "Match Finished",
+        "short": "FT",
+        "elapsed": 90,
+        "extra": null
+      }
+    },
+    "league": {
+      "id": 40,
+      "name": "Championship",
+      "country": "England",
+      "logo": "https://media.api-sports.io/football/leagues/40.png",
+      "flag": "https://media.api-sports.io/flags/gb-eng.svg",
+      "season": 2021,
+      "round": "Regular Season - 16",
+      "standings": true
+    },
+    "teams": {
+      "home": {
+        "id": 60,
+        "name": "West Brom",
+        "logo": "https://media.api-sports.io/football/teams/60.png",
+        "winner": true
+      },
+      "away": {
+        "id": 64,
+        "name": "Hull City",
+        "logo": "https://media.api-sports.io/football/teams/64.png",
+        "winner": false
+      }
+    },
+    "goals": {
+      "home": 1,
+      "away": 0
+    },
+    "score": {
+      "halftime": {
+        "home": 0,
+        "away": 0
+      },
+      "fulltime": {
+        "home": 1,
+        "away": 0
+      },
+      "extratime": {
+        "home": null,
+        "away": null
+      },
+      "penalty": {
+        "home": null,
+        "away": null
+      }
+    }
+  }
+]

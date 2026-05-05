@@ -1,0 +1,702 @@
+[
+  {
+    "fixture": {
+      "id": 1386991,
+      "referee": "Benjamin Speedie, England",
+      "timezone": "UTC",
+      "date": "2026-03-11T19:45:00+00:00",
+      "timestamp": 1773258300,
+      "periods": {
+        "first": 1773258300,
+        "second": 1773261900
+      },
+      "venue": {
+        "id": 597,
+        "name": "The Hawthorns",
+        "city": "West Bromwich"
+      },
+      "status": {
+        "long": "Match Finished",
+        "short": "FT",
+        "elapsed": 90,
+        "extra": 7
+      }
+    },
+    "league": {
+      "id": 40,
+      "name": "Championship",
+      "country": "England",
+      "logo": "https://media.api-sports.io/football/leagues/40.png",
+      "flag": "https://media.api-sports.io/flags/gb-eng.svg",
+      "season": 2025,
+      "round": "Regular Season - 37",
+      "standings": true
+    },
+    "teams": {
+      "home": {
+        "id": 60,
+        "name": "West Brom",
+        "logo": "https://media.api-sports.io/football/teams/60.png",
+        "winner": null
+      },
+      "away": {
+        "id": 41,
+        "name": "Southampton",
+        "logo": "https://media.api-sports.io/football/teams/41.png",
+        "winner": null
+      }
+    },
+    "goals": {
+      "home": 1,
+      "away": 1
+    },
+    "score": {
+      "halftime": {
+        "home": 1,
+        "away": 0
+      },
+      "fulltime": {
+        "home": 1,
+        "away": 1
+      },
+      "extratime": {
+        "home": null,
+        "away": null
+      },
+      "penalty": {
+        "home": null,
+        "away": null
+      }
+    }
+  },
+  {
+    "fixture": {
+      "id": 1386784,
+      "referee": "Sam Allison, England",
+      "timezone": "UTC",
+      "date": "2025-12-09T19:45:00+00:00",
+      "timestamp": 1765309500,
+      "periods": {
+        "first": 1765309500,
+        "second": 1765313100
+      },
+      "venue": {
+        "id": 585,
+        "name": "St. Mary's Stadium",
+        "city": "Southampton"
+      },
+      "status": {
+        "long": "Match Finished",
+        "short": "FT",
+        "elapsed": 90,
+        "extra": 6
+      }
+    },
+    "league": {
+      "id": 40,
+      "name": "Championship",
+      "country": "England",
+      "logo": "https://media.api-sports.io/football/leagues/40.png",
+      "flag": "https://media.api-sports.io/flags/gb-eng.svg",
+      "season": 2025,
+      "round": "Regular Season - 20",
+      "standings": true
+    },
+    "teams": {
+      "home": {
+        "id": 41,
+        "name": "Southampton",
+        "logo": "https://media.api-sports.io/football/teams/41.png",
+        "winner": true
+      },
+      "away": {
+        "id": 60,
+        "name": "West Brom",
+        "logo": "https://media.api-sports.io/football/teams/60.png",
+        "winner": false
+      }
+    },
+    "goals": {
+      "home": 3,
+      "away": 2
+    },
+    "score": {
+      "halftime": {
+        "home": 3,
+        "away": 0
+      },
+      "fulltime": {
+        "home": 3,
+        "away": 2
+      },
+      "extratime": {
+        "home": null,
+        "away": null
+      },
+      "penalty": {
+        "home": null,
+        "away": null
+      }
+    }
+  },
+  {
+    "fixture": {
+      "id": 1198891,
+      "referee": "T. Robinson",
+      "timezone": "UTC",
+      "date": "2024-05-17T19:00:00+00:00",
+      "timestamp": 1715972400,
+      "periods": {
+        "first": 1715972400,
+        "second": 1715976000
+      },
+      "venue": {
+        "id": 585,
+        "name": "St. Mary's Stadium",
+        "city": "Southampton, Hampshire"
+      },
+      "status": {
+        "long": "Match Finished",
+        "short": "FT",
+        "elapsed": 90,
+        "extra": null
+      }
+    },
+    "league": {
+      "id": 40,
+      "name": "Championship",
+      "country": "England",
+      "logo": "https://media.api-sports.io/football/leagues/40.png",
+      "flag": "https://media.api-sports.io/flags/gb-eng.svg",
+      "season": 2023,
+      "round": "Promotion Play-offs - Semi-finals",
+      "standings": true
+    },
+    "teams": {
+      "home": {
+        "id": 41,
+        "name": "Southampton",
+        "logo": "https://media.api-sports.io/football/teams/41.png",
+        "winner": true
+      },
+      "away": {
+        "id": 60,
+        "name": "West Brom",
+        "logo": "https://media.api-sports.io/football/teams/60.png",
+        "winner": false
+      }
+    },
+    "goals": {
+      "home": 3,
+      "away": 1
+    },
+    "score": {
+      "halftime": {
+        "home": 0,
+        "away": 0
+      },
+      "fulltime": {
+        "home": 3,
+        "away": 1
+      },
+      "extratime": {
+        "home": null,
+        "away": null
+      },
+      "penalty": {
+        "home": null,
+        "away": null
+      }
+    }
+  },
+  {
+    "fixture": {
+      "id": 1198890,
+      "referee": "S. Barrott",
+      "timezone": "UTC",
+      "date": "2024-05-12T13:15:00+00:00",
+      "timestamp": 1715519700,
+      "periods": {
+        "first": 1715519700,
+        "second": 1715523300
+      },
+      "venue": {
+        "id": 597,
+        "name": "The Hawthorns",
+        "city": "West Bromwich"
+      },
+      "status": {
+        "long": "Match Finished",
+        "short": "FT",
+        "elapsed": 90,
+        "extra": null
+      }
+    },
+    "league": {
+      "id": 40,
+      "name": "Championship",
+      "country": "England",
+      "logo": "https://media.api-sports.io/football/leagues/40.png",
+      "flag": "https://media.api-sports.io/flags/gb-eng.svg",
+      "season": 2023,
+      "round": "Promotion Play-offs - Semi-finals",
+      "standings": true
+    },
+    "teams": {
+      "home": {
+        "id": 60,
+        "name": "West Brom",
+        "logo": "https://media.api-sports.io/football/teams/60.png",
+        "winner": null
+      },
+      "away": {
+        "id": 41,
+        "name": "Southampton",
+        "logo": "https://media.api-sports.io/football/teams/41.png",
+        "winner": null
+      }
+    },
+    "goals": {
+      "home": 0,
+      "away": 0
+    },
+    "score": {
+      "halftime": {
+        "home": 0,
+        "away": 0
+      },
+      "fulltime": {
+        "home": 0,
+        "away": 0
+      },
+      "extratime": {
+        "home": null,
+        "away": null
+      },
+      "penalty": {
+        "home": null,
+        "away": null
+      }
+    }
+  },
+  {
+    "fixture": {
+      "id": 1047827,
+      "referee": "S. Allison",
+      "timezone": "UTC",
+      "date": "2024-02-16T20:00:00+00:00",
+      "timestamp": 1708113600,
+      "periods": {
+        "first": 1708113600,
+        "second": 1708117200
+      },
+      "venue": {
+        "id": 597,
+        "name": "The Hawthorns",
+        "city": "West Bromwich"
+      },
+      "status": {
+        "long": "Match Finished",
+        "short": "FT",
+        "elapsed": 90,
+        "extra": null
+      }
+    },
+    "league": {
+      "id": 40,
+      "name": "Championship",
+      "country": "England",
+      "logo": "https://media.api-sports.io/football/leagues/40.png",
+      "flag": "https://media.api-sports.io/flags/gb-eng.svg",
+      "season": 2023,
+      "round": "Regular Season - 33",
+      "standings": true
+    },
+    "teams": {
+      "home": {
+        "id": 60,
+        "name": "West Brom",
+        "logo": "https://media.api-sports.io/football/teams/60.png",
+        "winner": false
+      },
+      "away": {
+        "id": 41,
+        "name": "Southampton",
+        "logo": "https://media.api-sports.io/football/teams/41.png",
+        "winner": true
+      }
+    },
+    "goals": {
+      "home": 0,
+      "away": 2
+    },
+    "score": {
+      "halftime": {
+        "home": 0,
+        "away": 1
+      },
+      "fulltime": {
+        "home": 0,
+        "away": 2
+      },
+      "extratime": {
+        "home": null,
+        "away": null
+      },
+      "penalty": {
+        "home": null,
+        "away": null
+      }
+    }
+  },
+  {
+    "fixture": {
+      "id": 1047622,
+      "referee": "T. Nield",
+      "timezone": "UTC",
+      "date": "2023-11-11T15:00:00+00:00",
+      "timestamp": 1699714800,
+      "periods": {
+        "first": 1699714800,
+        "second": 1699718400
+      },
+      "venue": {
+        "id": 585,
+        "name": "St. Mary's Stadium",
+        "city": "Southampton, Hampshire"
+      },
+      "status": {
+        "long": "Match Finished",
+        "short": "FT",
+        "elapsed": 90,
+        "extra": null
+      }
+    },
+    "league": {
+      "id": 40,
+      "name": "Championship",
+      "country": "England",
+      "logo": "https://media.api-sports.io/football/leagues/40.png",
+      "flag": "https://media.api-sports.io/flags/gb-eng.svg",
+      "season": 2023,
+      "round": "Regular Season - 16",
+      "standings": true
+    },
+    "teams": {
+      "home": {
+        "id": 41,
+        "name": "Southampton",
+        "logo": "https://media.api-sports.io/football/teams/41.png",
+        "winner": true
+      },
+      "away": {
+        "id": 60,
+        "name": "West Brom",
+        "logo": "https://media.api-sports.io/football/teams/60.png",
+        "winner": false
+      }
+    },
+    "goals": {
+      "home": 2,
+      "away": 1
+    },
+    "score": {
+      "halftime": {
+        "home": 1,
+        "away": 0
+      },
+      "fulltime": {
+        "home": 2,
+        "away": 1
+      },
+      "extratime": {
+        "home": null,
+        "away": null
+      },
+      "penalty": {
+        "home": null,
+        "away": null
+      }
+    }
+  },
+  {
+    "fixture": {
+      "id": 592804,
+      "referee": "S. Hooper",
+      "timezone": "UTC",
+      "date": "2021-04-12T17:00:00+00:00",
+      "timestamp": 1618246800,
+      "periods": {
+        "first": 1618246800,
+        "second": 1618250400
+      },
+      "venue": {
+        "id": 597,
+        "name": "The Hawthorns",
+        "city": "West Bromwich"
+      },
+      "status": {
+        "long": "Match Finished",
+        "short": "FT",
+        "elapsed": 90,
+        "extra": null
+      }
+    },
+    "league": {
+      "id": 39,
+      "name": "Premier League",
+      "country": "England",
+      "logo": "https://media.api-sports.io/football/leagues/39.png",
+      "flag": "https://media.api-sports.io/flags/gb-eng.svg",
+      "season": 2020,
+      "round": "Regular Season - 31",
+      "standings": true
+    },
+    "teams": {
+      "home": {
+        "id": 60,
+        "name": "West Brom",
+        "logo": "https://media.api-sports.io/football/teams/60.png",
+        "winner": true
+      },
+      "away": {
+        "id": 41,
+        "name": "Southampton",
+        "logo": "https://media.api-sports.io/football/teams/41.png",
+        "winner": false
+      }
+    },
+    "goals": {
+      "home": 3,
+      "away": 0
+    },
+    "score": {
+      "halftime": {
+        "home": 2,
+        "away": 0
+      },
+      "fulltime": {
+        "home": 3,
+        "away": 0
+      },
+      "extratime": {
+        "home": null,
+        "away": null
+      },
+      "penalty": {
+        "home": null,
+        "away": null
+      }
+    }
+  },
+  {
+    "fixture": {
+      "id": 592179,
+      "referee": "C. Kavanagh",
+      "timezone": "UTC",
+      "date": "2020-10-04T11:00:00+00:00",
+      "timestamp": 1601809200,
+      "periods": {
+        "first": 1601809200,
+        "second": 1601812800
+      },
+      "venue": {
+        "id": 585,
+        "name": "St. Mary's Stadium",
+        "city": "Southampton, Hampshire"
+      },
+      "status": {
+        "long": "Match Finished",
+        "short": "FT",
+        "elapsed": 90,
+        "extra": null
+      }
+    },
+    "league": {
+      "id": 39,
+      "name": "Premier League",
+      "country": "England",
+      "logo": "https://media.api-sports.io/football/leagues/39.png",
+      "flag": "https://media.api-sports.io/flags/gb-eng.svg",
+      "season": 2020,
+      "round": "Regular Season - 4",
+      "standings": true
+    },
+    "teams": {
+      "home": {
+        "id": 41,
+        "name": "Southampton",
+        "logo": "https://media.api-sports.io/football/teams/41.png",
+        "winner": true
+      },
+      "away": {
+        "id": 60,
+        "name": "West Brom",
+        "logo": "https://media.api-sports.io/football/teams/60.png",
+        "winner": false
+      }
+    },
+    "goals": {
+      "home": 2,
+      "away": 0
+    },
+    "score": {
+      "halftime": {
+        "home": 1,
+        "away": 0
+      },
+      "fulltime": {
+        "home": 2,
+        "away": 0
+      },
+      "extratime": {
+        "home": null,
+        "away": null
+      },
+      "penalty": {
+        "home": null,
+        "away": null
+      }
+    }
+  },
+  {
+    "fixture": {
+      "id": 209978,
+      "referee": null,
+      "timezone": "UTC",
+      "date": "2018-02-17T15:00:00+00:00",
+      "timestamp": 1518879600,
+      "periods": {
+        "first": 1518879600,
+        "second": 1518883200
+      },
+      "venue": {
+        "id": null,
+        "name": "The Hawthorns (West Bromwich)",
+        "city": null
+      },
+      "status": {
+        "long": "Match Finished",
+        "short": "FT",
+        "elapsed": 90,
+        "extra": null
+      }
+    },
+    "league": {
+      "id": 45,
+      "name": "FA Cup",
+      "country": "England",
+      "logo": "https://media.api-sports.io/football/leagues/45.png",
+      "flag": "https://media.api-sports.io/flags/gb-eng.svg",
+      "season": 2017,
+      "round": "5th Round",
+      "standings": false
+    },
+    "teams": {
+      "home": {
+        "id": 60,
+        "name": "West Brom",
+        "logo": "https://media.api-sports.io/football/teams/60.png",
+        "winner": false
+      },
+      "away": {
+        "id": 41,
+        "name": "Southampton",
+        "logo": "https://media.api-sports.io/football/teams/41.png",
+        "winner": true
+      }
+    },
+    "goals": {
+      "home": 1,
+      "away": 2
+    },
+    "score": {
+      "halftime": {
+        "home": 0,
+        "away": 1
+      },
+      "fulltime": {
+        "home": 1,
+        "away": 2
+      },
+      "extratime": {
+        "home": null,
+        "away": null
+      },
+      "penalty": {
+        "home": null,
+        "away": null
+      }
+    }
+  },
+  {
+    "fixture": {
+      "id": 11660,
+      "referee": "Michael Oliver, England",
+      "timezone": "UTC",
+      "date": "2018-02-03T15:00:00+00:00",
+      "timestamp": 1517670000,
+      "periods": {
+        "first": 1517670000,
+        "second": 1517673600
+      },
+      "venue": {
+        "id": 597,
+        "name": "The Hawthorns",
+        "city": "West Bromwich"
+      },
+      "status": {
+        "long": "Match Finished",
+        "short": "FT",
+        "elapsed": 90,
+        "extra": null
+      }
+    },
+    "league": {
+      "id": 39,
+      "name": "Premier League",
+      "country": "England",
+      "logo": "https://media.api-sports.io/football/leagues/39.png",
+      "flag": "https://media.api-sports.io/flags/gb-eng.svg",
+      "season": 2017,
+      "round": "Regular Season - 26",
+      "standings": true
+    },
+    "teams": {
+      "home": {
+        "id": 60,
+        "name": "West Brom",
+        "logo": "https://media.api-sports.io/football/teams/60.png",
+        "winner": false
+      },
+      "away": {
+        "id": 41,
+        "name": "Southampton",
+        "logo": "https://media.api-sports.io/football/teams/41.png",
+        "winner": true
+      }
+    },
+    "goals": {
+      "home": 2,
+      "away": 3
+    },
+    "score": {
+      "halftime": {
+        "home": 1,
+        "away": 2
+      },
+      "fulltime": {
+        "home": 2,
+        "away": 3
+      },
+      "extratime": {
+        "home": null,
+        "away": null
+      },
+      "penalty": {
+        "home": null,
+        "away": null
+      }
+    }
+  }
+]

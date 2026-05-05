@@ -1,0 +1,702 @@
+[
+  {
+    "fixture": {
+      "id": 1387001,
+      "referee": "Gavin Ward, England",
+      "timezone": "UTC",
+      "date": "2026-03-14T15:00:00+00:00",
+      "timestamp": 1773500400,
+      "periods": {
+        "first": 1773500400,
+        "second": 1773504000
+      },
+      "venue": {
+        "id": null,
+        "name": "Carrow Road",
+        "city": "Norwich"
+      },
+      "status": {
+        "long": "Match Finished",
+        "short": "FT",
+        "elapsed": 90,
+        "extra": 3
+      }
+    },
+    "league": {
+      "id": 40,
+      "name": "Championship",
+      "country": "England",
+      "logo": "https://media.api-sports.io/football/leagues/40.png",
+      "flag": "https://media.api-sports.io/flags/gb-eng.svg",
+      "season": 2025,
+      "round": "Regular Season - 38",
+      "standings": true
+    },
+    "teams": {
+      "home": {
+        "id": 71,
+        "name": "Norwich",
+        "logo": "https://media.api-sports.io/football/teams/71.png",
+        "winner": true
+      },
+      "away": {
+        "id": 59,
+        "name": "Preston",
+        "logo": "https://media.api-sports.io/football/teams/59.png",
+        "winner": false
+      }
+    },
+    "goals": {
+      "home": 2,
+      "away": 0
+    },
+    "score": {
+      "halftime": {
+        "home": 2,
+        "away": 0
+      },
+      "fulltime": {
+        "home": 2,
+        "away": 0
+      },
+      "extratime": {
+        "home": null,
+        "away": null
+      },
+      "penalty": {
+        "home": null,
+        "away": null
+      }
+    }
+  },
+  {
+    "fixture": {
+      "id": 1386813,
+      "referee": "Stephen Martin, England",
+      "timezone": "UTC",
+      "date": "2025-12-20T12:30:00+00:00",
+      "timestamp": 1766233800,
+      "periods": {
+        "first": 1766233800,
+        "second": 1766237400
+      },
+      "venue": {
+        "id": 574,
+        "name": "Deepdale",
+        "city": "Preston"
+      },
+      "status": {
+        "long": "Match Finished",
+        "short": "FT",
+        "elapsed": 90,
+        "extra": 8
+      }
+    },
+    "league": {
+      "id": 40,
+      "name": "Championship",
+      "country": "England",
+      "logo": "https://media.api-sports.io/football/leagues/40.png",
+      "flag": "https://media.api-sports.io/flags/gb-eng.svg",
+      "season": 2025,
+      "round": "Regular Season - 22",
+      "standings": true
+    },
+    "teams": {
+      "home": {
+        "id": 59,
+        "name": "Preston",
+        "logo": "https://media.api-sports.io/football/teams/59.png",
+        "winner": null
+      },
+      "away": {
+        "id": 71,
+        "name": "Norwich",
+        "logo": "https://media.api-sports.io/football/teams/71.png",
+        "winner": null
+      }
+    },
+    "goals": {
+      "home": 1,
+      "away": 1
+    },
+    "score": {
+      "halftime": {
+        "home": 0,
+        "away": 0
+      },
+      "fulltime": {
+        "home": 1,
+        "away": 1
+      },
+      "extratime": {
+        "home": null,
+        "away": null
+      },
+      "penalty": {
+        "home": null,
+        "away": null
+      }
+    }
+  },
+  {
+    "fixture": {
+      "id": 1216218,
+      "referee": "G. Ward",
+      "timezone": "UTC",
+      "date": "2025-02-11T20:00:00+00:00",
+      "timestamp": 1739304000,
+      "periods": {
+        "first": 1739304000,
+        "second": 1739307600
+      },
+      "venue": {
+        "id": 565,
+        "name": "Carrow Road",
+        "city": "Norwich, Norfolk"
+      },
+      "status": {
+        "long": "Match Finished",
+        "short": "FT",
+        "elapsed": 90,
+        "extra": 6
+      }
+    },
+    "league": {
+      "id": 40,
+      "name": "Championship",
+      "country": "England",
+      "logo": "https://media.api-sports.io/football/leagues/40.png",
+      "flag": "https://media.api-sports.io/flags/gb-eng.svg",
+      "season": 2024,
+      "round": "Regular Season - 32",
+      "standings": true
+    },
+    "teams": {
+      "home": {
+        "id": 71,
+        "name": "Norwich",
+        "logo": "https://media.api-sports.io/football/teams/71.png",
+        "winner": false
+      },
+      "away": {
+        "id": 59,
+        "name": "Preston",
+        "logo": "https://media.api-sports.io/football/teams/59.png",
+        "winner": true
+      }
+    },
+    "goals": {
+      "home": 0,
+      "away": 1
+    },
+    "score": {
+      "halftime": {
+        "home": 0,
+        "away": 1
+      },
+      "fulltime": {
+        "home": 0,
+        "away": 1
+      },
+      "extratime": {
+        "home": null,
+        "away": null
+      },
+      "penalty": {
+        "home": null,
+        "away": null
+      }
+    }
+  },
+  {
+    "fixture": {
+      "id": 1215967,
+      "referee": "W. Finnie",
+      "timezone": "UTC",
+      "date": "2024-10-22T18:45:00+00:00",
+      "timestamp": 1729622700,
+      "periods": {
+        "first": 1729622700,
+        "second": 1729626300
+      },
+      "venue": {
+        "id": 574,
+        "name": "Deepdale",
+        "city": "Preston"
+      },
+      "status": {
+        "long": "Match Finished",
+        "short": "FT",
+        "elapsed": 90,
+        "extra": 4
+      }
+    },
+    "league": {
+      "id": 40,
+      "name": "Championship",
+      "country": "England",
+      "logo": "https://media.api-sports.io/football/leagues/40.png",
+      "flag": "https://media.api-sports.io/flags/gb-eng.svg",
+      "season": 2024,
+      "round": "Regular Season - 11",
+      "standings": true
+    },
+    "teams": {
+      "home": {
+        "id": 59,
+        "name": "Preston",
+        "logo": "https://media.api-sports.io/football/teams/59.png",
+        "winner": null
+      },
+      "away": {
+        "id": 71,
+        "name": "Norwich",
+        "logo": "https://media.api-sports.io/football/teams/71.png",
+        "winner": null
+      }
+    },
+    "goals": {
+      "home": 2,
+      "away": 2
+    },
+    "score": {
+      "halftime": {
+        "home": 2,
+        "away": 1
+      },
+      "fulltime": {
+        "home": 2,
+        "away": 2
+      },
+      "extratime": {
+        "home": null,
+        "away": null
+      },
+      "penalty": {
+        "home": null,
+        "away": null
+      }
+    }
+  },
+  {
+    "fixture": {
+      "id": 1047942,
+      "referee": "A. Kitchen",
+      "timezone": "UTC",
+      "date": "2024-04-13T14:00:00+00:00",
+      "timestamp": 1713016800,
+      "periods": {
+        "first": 1713016800,
+        "second": 1713020400
+      },
+      "venue": {
+        "id": 574,
+        "name": "Deepdale",
+        "city": "Preston"
+      },
+      "status": {
+        "long": "Match Finished",
+        "short": "FT",
+        "elapsed": 90,
+        "extra": null
+      }
+    },
+    "league": {
+      "id": 40,
+      "name": "Championship",
+      "country": "England",
+      "logo": "https://media.api-sports.io/football/leagues/40.png",
+      "flag": "https://media.api-sports.io/flags/gb-eng.svg",
+      "season": 2023,
+      "round": "Regular Season - 43",
+      "standings": true
+    },
+    "teams": {
+      "home": {
+        "id": 59,
+        "name": "Preston",
+        "logo": "https://media.api-sports.io/football/teams/59.png",
+        "winner": false
+      },
+      "away": {
+        "id": 71,
+        "name": "Norwich",
+        "logo": "https://media.api-sports.io/football/teams/71.png",
+        "winner": true
+      }
+    },
+    "goals": {
+      "home": 0,
+      "away": 1
+    },
+    "score": {
+      "halftime": {
+        "home": 0,
+        "away": 0
+      },
+      "fulltime": {
+        "home": 0,
+        "away": 1
+      },
+      "extratime": {
+        "home": null,
+        "away": null
+      },
+      "penalty": {
+        "home": null,
+        "away": null
+      }
+    }
+  },
+  {
+    "fixture": {
+      "id": 1047667,
+      "referee": "O. Langford",
+      "timezone": "UTC",
+      "date": "2023-12-09T15:00:00+00:00",
+      "timestamp": 1702134000,
+      "periods": {
+        "first": 1702134000,
+        "second": 1702137600
+      },
+      "venue": {
+        "id": 565,
+        "name": "Carrow Road",
+        "city": "Norwich, Norfolk"
+      },
+      "status": {
+        "long": "Match Finished",
+        "short": "FT",
+        "elapsed": 90,
+        "extra": null
+      }
+    },
+    "league": {
+      "id": 40,
+      "name": "Championship",
+      "country": "England",
+      "logo": "https://media.api-sports.io/football/leagues/40.png",
+      "flag": "https://media.api-sports.io/flags/gb-eng.svg",
+      "season": 2023,
+      "round": "Regular Season - 20",
+      "standings": true
+    },
+    "teams": {
+      "home": {
+        "id": 71,
+        "name": "Norwich",
+        "logo": "https://media.api-sports.io/football/teams/71.png",
+        "winner": null
+      },
+      "away": {
+        "id": 59,
+        "name": "Preston",
+        "logo": "https://media.api-sports.io/football/teams/59.png",
+        "winner": null
+      }
+    },
+    "goals": {
+      "home": 0,
+      "away": 0
+    },
+    "score": {
+      "halftime": {
+        "home": 0,
+        "away": 0
+      },
+      "fulltime": {
+        "home": 0,
+        "away": 0
+      },
+      "extratime": {
+        "home": null,
+        "away": null
+      },
+      "penalty": {
+        "home": null,
+        "away": null
+      }
+    }
+  },
+  {
+    "fixture": {
+      "id": 881037,
+      "referee": "S. Martin",
+      "timezone": "UTC",
+      "date": "2023-01-14T15:00:00+00:00",
+      "timestamp": 1673708400,
+      "periods": {
+        "first": 1673708400,
+        "second": 1673712000
+      },
+      "venue": {
+        "id": 574,
+        "name": "Deepdale",
+        "city": "Preston"
+      },
+      "status": {
+        "long": "Match Finished",
+        "short": "FT",
+        "elapsed": 90,
+        "extra": null
+      }
+    },
+    "league": {
+      "id": 40,
+      "name": "Championship",
+      "country": "England",
+      "logo": "https://media.api-sports.io/football/leagues/40.png",
+      "flag": "https://media.api-sports.io/flags/gb-eng.svg",
+      "season": 2022,
+      "round": "Regular Season - 27",
+      "standings": true
+    },
+    "teams": {
+      "home": {
+        "id": 59,
+        "name": "Preston",
+        "logo": "https://media.api-sports.io/football/teams/59.png",
+        "winner": false
+      },
+      "away": {
+        "id": 71,
+        "name": "Norwich",
+        "logo": "https://media.api-sports.io/football/teams/71.png",
+        "winner": true
+      }
+    },
+    "goals": {
+      "home": 0,
+      "away": 4
+    },
+    "score": {
+      "halftime": {
+        "home": 0,
+        "away": 3
+      },
+      "fulltime": {
+        "home": 0,
+        "away": 4
+      },
+      "extratime": {
+        "home": null,
+        "away": null
+      },
+      "penalty": {
+        "home": null,
+        "away": null
+      }
+    }
+  },
+  {
+    "fixture": {
+      "id": 880881,
+      "referee": "O. Langford",
+      "timezone": "UTC",
+      "date": "2022-10-08T14:00:00+00:00",
+      "timestamp": 1665237600,
+      "periods": {
+        "first": 1665237600,
+        "second": 1665241200
+      },
+      "venue": {
+        "id": 565,
+        "name": "Carrow Road",
+        "city": "Norwich, Norfolk"
+      },
+      "status": {
+        "long": "Match Finished",
+        "short": "FT",
+        "elapsed": 90,
+        "extra": null
+      }
+    },
+    "league": {
+      "id": 40,
+      "name": "Championship",
+      "country": "England",
+      "logo": "https://media.api-sports.io/football/leagues/40.png",
+      "flag": "https://media.api-sports.io/flags/gb-eng.svg",
+      "season": 2022,
+      "round": "Regular Season - 14",
+      "standings": true
+    },
+    "teams": {
+      "home": {
+        "id": 71,
+        "name": "Norwich",
+        "logo": "https://media.api-sports.io/football/teams/71.png",
+        "winner": false
+      },
+      "away": {
+        "id": 59,
+        "name": "Preston",
+        "logo": "https://media.api-sports.io/football/teams/59.png",
+        "winner": true
+      }
+    },
+    "goals": {
+      "home": 2,
+      "away": 3
+    },
+    "score": {
+      "halftime": {
+        "home": 1,
+        "away": 1
+      },
+      "fulltime": {
+        "home": 2,
+        "away": 3
+      },
+      "extratime": {
+        "home": null,
+        "away": null
+      },
+      "penalty": {
+        "home": null,
+        "away": null
+      }
+    }
+  },
+  {
+    "fixture": {
+      "id": 593340,
+      "referee": "D. Whitestone",
+      "timezone": "UTC",
+      "date": "2021-04-02T14:00:00+00:00",
+      "timestamp": 1617372000,
+      "periods": {
+        "first": 1617372000,
+        "second": 1617375600
+      },
+      "venue": {
+        "id": 574,
+        "name": "Deepdale",
+        "city": "Preston"
+      },
+      "status": {
+        "long": "Match Finished",
+        "short": "FT",
+        "elapsed": 90,
+        "extra": null
+      }
+    },
+    "league": {
+      "id": 40,
+      "name": "Championship",
+      "country": "England",
+      "logo": "https://media.api-sports.io/football/leagues/40.png",
+      "flag": "https://media.api-sports.io/flags/gb-eng.svg",
+      "season": 2020,
+      "round": "Regular Season - 39",
+      "standings": true
+    },
+    "teams": {
+      "home": {
+        "id": 59,
+        "name": "Preston",
+        "logo": "https://media.api-sports.io/football/teams/59.png",
+        "winner": null
+      },
+      "away": {
+        "id": 71,
+        "name": "Norwich",
+        "logo": "https://media.api-sports.io/football/teams/71.png",
+        "winner": null
+      }
+    },
+    "goals": {
+      "home": 1,
+      "away": 1
+    },
+    "score": {
+      "halftime": {
+        "home": 0,
+        "away": 1
+      },
+      "fulltime": {
+        "home": 1,
+        "away": 1
+      },
+      "extratime": {
+        "home": null,
+        "away": null
+      },
+      "penalty": {
+        "home": null,
+        "away": null
+      }
+    }
+  },
+  {
+    "fixture": {
+      "id": 592899,
+      "referee": "J. Brooks",
+      "timezone": "UTC",
+      "date": "2020-09-19T14:00:00+00:00",
+      "timestamp": 1600524000,
+      "periods": {
+        "first": 1600524000,
+        "second": 1600527600
+      },
+      "venue": {
+        "id": 565,
+        "name": "Carrow Road",
+        "city": "Norwich, Norfolk"
+      },
+      "status": {
+        "long": "Match Finished",
+        "short": "FT",
+        "elapsed": 90,
+        "extra": null
+      }
+    },
+    "league": {
+      "id": 40,
+      "name": "Championship",
+      "country": "England",
+      "logo": "https://media.api-sports.io/football/leagues/40.png",
+      "flag": "https://media.api-sports.io/flags/gb-eng.svg",
+      "season": 2020,
+      "round": "Regular Season - 2",
+      "standings": true
+    },
+    "teams": {
+      "home": {
+        "id": 71,
+        "name": "Norwich",
+        "logo": "https://media.api-sports.io/football/teams/71.png",
+        "winner": null
+      },
+      "away": {
+        "id": 59,
+        "name": "Preston",
+        "logo": "https://media.api-sports.io/football/teams/59.png",
+        "winner": null
+      }
+    },
+    "goals": {
+      "home": 2,
+      "away": 2
+    },
+    "score": {
+      "halftime": {
+        "home": 1,
+        "away": 2
+      },
+      "fulltime": {
+        "home": 2,
+        "away": 2
+      },
+      "extratime": {
+        "home": null,
+        "away": null
+      },
+      "penalty": {
+        "home": null,
+        "away": null
+      }
+    }
+  }
+]

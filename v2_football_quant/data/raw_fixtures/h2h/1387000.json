@@ -1,0 +1,702 @@
+[
+  {
+    "fixture": {
+      "id": 1387000,
+      "referee": "Tim Robinson, England",
+      "timezone": "UTC",
+      "date": "2026-03-14T15:00:00+00:00",
+      "timestamp": 1773500400,
+      "periods": {
+        "first": 1773500400,
+        "second": 1773504000
+      },
+      "venue": {
+        "id": 22764,
+        "name": "St. Andrew's @ Knighthead Park",
+        "city": "Birmingham"
+      },
+      "status": {
+        "long": "Match Finished",
+        "short": "FT",
+        "elapsed": 90,
+        "extra": 7
+      }
+    },
+    "league": {
+      "id": 40,
+      "name": "Championship",
+      "country": "England",
+      "logo": "https://media.api-sports.io/football/leagues/40.png",
+      "flag": "https://media.api-sports.io/flags/gb-eng.svg",
+      "season": 2025,
+      "round": "Regular Season - 38",
+      "standings": true
+    },
+    "teams": {
+      "home": {
+        "id": 54,
+        "name": "Birmingham",
+        "logo": "https://media.api-sports.io/football/teams/54.png",
+        "winner": null
+      },
+      "away": {
+        "id": 62,
+        "name": "Sheffield Utd",
+        "logo": "https://media.api-sports.io/football/teams/62.png",
+        "winner": null
+      }
+    },
+    "goals": {
+      "home": 1,
+      "away": 1
+    },
+    "score": {
+      "halftime": {
+        "home": 1,
+        "away": 1
+      },
+      "fulltime": {
+        "home": 1,
+        "away": 1
+      },
+      "extratime": {
+        "home": null,
+        "away": null
+      },
+      "penalty": {
+        "home": null,
+        "away": null
+      }
+    }
+  },
+  {
+    "fixture": {
+      "id": 1386812,
+      "referee": "Simon Hooper, England",
+      "timezone": "UTC",
+      "date": "2025-12-20T15:00:00+00:00",
+      "timestamp": 1766242800,
+      "periods": {
+        "first": 1766242800,
+        "second": 1766246400
+      },
+      "venue": {
+        "id": 581,
+        "name": "Bramall Lane",
+        "city": "Sheffield"
+      },
+      "status": {
+        "long": "Match Finished",
+        "short": "FT",
+        "elapsed": 90,
+        "extra": 4
+      }
+    },
+    "league": {
+      "id": 40,
+      "name": "Championship",
+      "country": "England",
+      "logo": "https://media.api-sports.io/football/leagues/40.png",
+      "flag": "https://media.api-sports.io/flags/gb-eng.svg",
+      "season": 2025,
+      "round": "Regular Season - 22",
+      "standings": true
+    },
+    "teams": {
+      "home": {
+        "id": 62,
+        "name": "Sheffield Utd",
+        "logo": "https://media.api-sports.io/football/teams/62.png",
+        "winner": true
+      },
+      "away": {
+        "id": 54,
+        "name": "Birmingham",
+        "logo": "https://media.api-sports.io/football/teams/54.png",
+        "winner": false
+      }
+    },
+    "goals": {
+      "home": 3,
+      "away": 0
+    },
+    "score": {
+      "halftime": {
+        "home": 2,
+        "away": 0
+      },
+      "fulltime": {
+        "home": 3,
+        "away": 0
+      },
+      "extratime": {
+        "home": null,
+        "away": null
+      },
+      "penalty": {
+        "home": null,
+        "away": null
+      }
+    }
+  },
+  {
+    "fixture": {
+      "id": 1393260,
+      "referee": "Gavin Ward, England",
+      "timezone": "UTC",
+      "date": "2025-08-13T19:00:00+00:00",
+      "timestamp": 1755111600,
+      "periods": {
+        "first": 1755111600,
+        "second": 1755115200
+      },
+      "venue": {
+        "id": 22764,
+        "name": "St. Andrew's @ Knighthead Park",
+        "city": "Birmingham"
+      },
+      "status": {
+        "long": "Match Finished",
+        "short": "FT",
+        "elapsed": 90,
+        "extra": 7
+      }
+    },
+    "league": {
+      "id": 48,
+      "name": "League Cup",
+      "country": "England",
+      "logo": "https://media.api-sports.io/football/leagues/48.png",
+      "flag": "https://media.api-sports.io/flags/gb-eng.svg",
+      "season": 2025,
+      "round": "1st Round",
+      "standings": false
+    },
+    "teams": {
+      "home": {
+        "id": 54,
+        "name": "Birmingham",
+        "logo": "https://media.api-sports.io/football/teams/54.png",
+        "winner": true
+      },
+      "away": {
+        "id": 62,
+        "name": "Sheffield Utd",
+        "logo": "https://media.api-sports.io/football/teams/62.png",
+        "winner": false
+      }
+    },
+    "goals": {
+      "home": 2,
+      "away": 1
+    },
+    "score": {
+      "halftime": {
+        "home": 1,
+        "away": 0
+      },
+      "fulltime": {
+        "home": 2,
+        "away": 1
+      },
+      "extratime": {
+        "home": null,
+        "away": null
+      },
+      "penalty": {
+        "home": null,
+        "away": null
+      }
+    }
+  },
+  {
+    "fixture": {
+      "id": 881259,
+      "referee": "D. Webb",
+      "timezone": "UTC",
+      "date": "2023-05-08T14:00:00+00:00",
+      "timestamp": 1683554400,
+      "periods": {
+        "first": 1683554400,
+        "second": 1683558000
+      },
+      "venue": {
+        "id": 12596,
+        "name": "St Andrew's Stadium",
+        "city": "Birmingham"
+      },
+      "status": {
+        "long": "Match Finished",
+        "short": "FT",
+        "elapsed": 90,
+        "extra": null
+      }
+    },
+    "league": {
+      "id": 40,
+      "name": "Championship",
+      "country": "England",
+      "logo": "https://media.api-sports.io/football/leagues/40.png",
+      "flag": "https://media.api-sports.io/flags/gb-eng.svg",
+      "season": 2022,
+      "round": "Regular Season - 46",
+      "standings": true
+    },
+    "teams": {
+      "home": {
+        "id": 54,
+        "name": "Birmingham",
+        "logo": "https://media.api-sports.io/football/teams/54.png",
+        "winner": false
+      },
+      "away": {
+        "id": 62,
+        "name": "Sheffield Utd",
+        "logo": "https://media.api-sports.io/football/teams/62.png",
+        "winner": true
+      }
+    },
+    "goals": {
+      "home": 1,
+      "away": 2
+    },
+    "score": {
+      "halftime": {
+        "home": 0,
+        "away": 0
+      },
+      "fulltime": {
+        "home": 1,
+        "away": 2
+      },
+      "extratime": {
+        "home": null,
+        "away": null
+      },
+      "penalty": {
+        "home": null,
+        "away": null
+      }
+    }
+  },
+  {
+    "fixture": {
+      "id": 880859,
+      "referee": "D. Bond",
+      "timezone": "UTC",
+      "date": "2022-10-01T14:00:00+00:00",
+      "timestamp": 1664632800,
+      "periods": {
+        "first": 1664632800,
+        "second": 1664636400
+      },
+      "venue": {
+        "id": 581,
+        "name": "Bramall Lane",
+        "city": "Sheffield"
+      },
+      "status": {
+        "long": "Match Finished",
+        "short": "FT",
+        "elapsed": 90,
+        "extra": null
+      }
+    },
+    "league": {
+      "id": 40,
+      "name": "Championship",
+      "country": "England",
+      "logo": "https://media.api-sports.io/football/leagues/40.png",
+      "flag": "https://media.api-sports.io/flags/gb-eng.svg",
+      "season": 2022,
+      "round": "Regular Season - 12",
+      "standings": true
+    },
+    "teams": {
+      "home": {
+        "id": 62,
+        "name": "Sheffield Utd",
+        "logo": "https://media.api-sports.io/football/teams/62.png",
+        "winner": null
+      },
+      "away": {
+        "id": 54,
+        "name": "Birmingham",
+        "logo": "https://media.api-sports.io/football/teams/54.png",
+        "winner": null
+      }
+    },
+    "goals": {
+      "home": 1,
+      "away": 1
+    },
+    "score": {
+      "halftime": {
+        "home": 0,
+        "away": 0
+      },
+      "fulltime": {
+        "home": 1,
+        "away": 1
+      },
+      "extratime": {
+        "home": null,
+        "away": null
+      },
+      "penalty": {
+        "home": null,
+        "away": null
+      }
+    }
+  },
+  {
+    "fixture": {
+      "id": 717145,
+      "referee": "K. Stroud",
+      "timezone": "UTC",
+      "date": "2022-02-04T19:45:00+00:00",
+      "timestamp": 1644003900,
+      "periods": {
+        "first": 1644003900,
+        "second": 1644007500
+      },
+      "venue": {
+        "id": 12596,
+        "name": "St Andrew's Stadium",
+        "city": "Birmingham"
+      },
+      "status": {
+        "long": "Match Finished",
+        "short": "FT",
+        "elapsed": 90,
+        "extra": null
+      }
+    },
+    "league": {
+      "id": 40,
+      "name": "Championship",
+      "country": "England",
+      "logo": "https://media.api-sports.io/football/leagues/40.png",
+      "flag": "https://media.api-sports.io/flags/gb-eng.svg",
+      "season": 2021,
+      "round": "Regular Season - 30",
+      "standings": true
+    },
+    "teams": {
+      "home": {
+        "id": 54,
+        "name": "Birmingham",
+        "logo": "https://media.api-sports.io/football/teams/54.png",
+        "winner": false
+      },
+      "away": {
+        "id": 62,
+        "name": "Sheffield Utd",
+        "logo": "https://media.api-sports.io/football/teams/62.png",
+        "winner": true
+      }
+    },
+    "goals": {
+      "home": 1,
+      "away": 2
+    },
+    "score": {
+      "halftime": {
+        "home": 0,
+        "away": 0
+      },
+      "fulltime": {
+        "home": 1,
+        "away": 2
+      },
+      "extratime": {
+        "home": null,
+        "away": null
+      },
+      "penalty": {
+        "home": null,
+        "away": null
+      }
+    }
+  },
+  {
+    "fixture": {
+      "id": 716806,
+      "referee": "T. Robinson",
+      "timezone": "UTC",
+      "date": "2021-08-07T19:00:00+00:00",
+      "timestamp": 1628362800,
+      "periods": {
+        "first": 1628362800,
+        "second": 1628366400
+      },
+      "venue": {
+        "id": 581,
+        "name": "Bramall Lane",
+        "city": "Sheffield"
+      },
+      "status": {
+        "long": "Match Finished",
+        "short": "FT",
+        "elapsed": 90,
+        "extra": null
+      }
+    },
+    "league": {
+      "id": 40,
+      "name": "Championship",
+      "country": "England",
+      "logo": "https://media.api-sports.io/football/leagues/40.png",
+      "flag": "https://media.api-sports.io/flags/gb-eng.svg",
+      "season": 2021,
+      "round": "Regular Season - 1",
+      "standings": true
+    },
+    "teams": {
+      "home": {
+        "id": 62,
+        "name": "Sheffield Utd",
+        "logo": "https://media.api-sports.io/football/teams/62.png",
+        "winner": false
+      },
+      "away": {
+        "id": 54,
+        "name": "Birmingham",
+        "logo": "https://media.api-sports.io/football/teams/54.png",
+        "winner": true
+      }
+    },
+    "goals": {
+      "home": 0,
+      "away": 1
+    },
+    "score": {
+      "halftime": {
+        "home": 0,
+        "away": 1
+      },
+      "fulltime": {
+        "home": 0,
+        "away": 1
+      },
+      "extratime": {
+        "home": null,
+        "away": null
+      },
+      "penalty": {
+        "home": null,
+        "away": null
+      }
+    }
+  },
+  {
+    "fixture": {
+      "id": 932,
+      "referee": "Darren Bond, England",
+      "timezone": "UTC",
+      "date": "2019-04-10T18:45:00+00:00",
+      "timestamp": 1554921900,
+      "periods": {
+        "first": 1554921900,
+        "second": 1554925500
+      },
+      "venue": {
+        "id": 499,
+        "name": "St. Andrew's Stadium",
+        "city": "Birmingham"
+      },
+      "status": {
+        "long": "Match Finished",
+        "short": "FT",
+        "elapsed": 90,
+        "extra": null
+      }
+    },
+    "league": {
+      "id": 40,
+      "name": "Championship",
+      "country": "England",
+      "logo": "https://media.api-sports.io/football/leagues/40.png",
+      "flag": "https://media.api-sports.io/flags/gb-eng.svg",
+      "season": 2018,
+      "round": "Regular Season - 41",
+      "standings": true
+    },
+    "teams": {
+      "home": {
+        "id": 54,
+        "name": "Birmingham",
+        "logo": "https://media.api-sports.io/football/teams/54.png",
+        "winner": null
+      },
+      "away": {
+        "id": 62,
+        "name": "Sheffield Utd",
+        "logo": "https://media.api-sports.io/football/teams/62.png",
+        "winner": null
+      }
+    },
+    "goals": {
+      "home": 1,
+      "away": 1
+    },
+    "score": {
+      "halftime": {
+        "home": 1,
+        "away": 1
+      },
+      "fulltime": {
+        "home": 1,
+        "away": 1
+      },
+      "extratime": {
+        "home": null,
+        "away": null
+      },
+      "penalty": {
+        "home": null,
+        "away": null
+      }
+    }
+  },
+  {
+    "fixture": {
+      "id": 540,
+      "referee": "Gavin Ward, England",
+      "timezone": "UTC",
+      "date": "2018-09-19T18:45:00+00:00",
+      "timestamp": 1537382700,
+      "periods": {
+        "first": 1537382700,
+        "second": 1537386300
+      },
+      "venue": {
+        "id": 581,
+        "name": "Bramall Lane",
+        "city": "Sheffield"
+      },
+      "status": {
+        "long": "Match Finished",
+        "short": "FT",
+        "elapsed": 90,
+        "extra": null
+      }
+    },
+    "league": {
+      "id": 40,
+      "name": "Championship",
+      "country": "England",
+      "logo": "https://media.api-sports.io/football/leagues/40.png",
+      "flag": "https://media.api-sports.io/flags/gb-eng.svg",
+      "season": 2018,
+      "round": "Regular Season - 8",
+      "standings": true
+    },
+    "teams": {
+      "home": {
+        "id": 62,
+        "name": "Sheffield Utd",
+        "logo": "https://media.api-sports.io/football/teams/62.png",
+        "winner": null
+      },
+      "away": {
+        "id": 54,
+        "name": "Birmingham",
+        "logo": "https://media.api-sports.io/football/teams/54.png",
+        "winner": null
+      }
+    },
+    "goals": {
+      "home": 0,
+      "away": 0
+    },
+    "score": {
+      "halftime": {
+        "home": 0,
+        "away": 0
+      },
+      "fulltime": {
+        "home": 0,
+        "away": 0
+      },
+      "extratime": {
+        "home": null,
+        "away": null
+      },
+      "penalty": {
+        "home": null,
+        "away": null
+      }
+    }
+  },
+  {
+    "fixture": {
+      "id": 11939,
+      "referee": "Tim Robinson, England",
+      "timezone": "UTC",
+      "date": "2018-04-21T14:00:00+00:00",
+      "timestamp": 1524319200,
+      "periods": {
+        "first": 1524319200,
+        "second": 1524322800
+      },
+      "venue": {
+        "id": 499,
+        "name": "St. Andrew's Stadium",
+        "city": "Birmingham"
+      },
+      "status": {
+        "long": "Match Finished",
+        "short": "FT",
+        "elapsed": 90,
+        "extra": null
+      }
+    },
+    "league": {
+      "id": 40,
+      "name": "Championship",
+      "country": "England",
+      "logo": "https://media.api-sports.io/football/leagues/40.png",
+      "flag": "https://media.api-sports.io/flags/gb-eng.svg",
+      "season": 2017,
+      "round": "Regular Season - 44",
+      "standings": true
+    },
+    "teams": {
+      "home": {
+        "id": 54,
+        "name": "Birmingham",
+        "logo": "https://media.api-sports.io/football/teams/54.png",
+        "winner": true
+      },
+      "away": {
+        "id": 62,
+        "name": "Sheffield Utd",
+        "logo": "https://media.api-sports.io/football/teams/62.png",
+        "winner": false
+      }
+    },
+    "goals": {
+      "home": 2,
+      "away": 1
+    },
+    "score": {
+      "halftime": {
+        "home": 1,
+        "away": 1
+      },
+      "fulltime": {
+        "home": 2,
+        "away": 1
+      },
+      "extratime": {
+        "home": null,
+        "away": null
+      },
+      "penalty": {
+        "home": null,
+        "away": null
+      }
+    }
+  }
+]

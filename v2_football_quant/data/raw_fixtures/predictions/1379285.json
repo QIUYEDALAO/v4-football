@@ -1,0 +1,1337 @@
+{
+  "predictions": {
+    "winner": {
+      "id": 33,
+      "name": "Manchester United",
+      "comment": null
+    },
+    "win_or_draw": false,
+    "under_over": null,
+    "goals": {
+      "home": "-3.5",
+      "away": "-1.5"
+    },
+    "advice": "Winner : Manchester United",
+    "percent": {
+      "home": "45%",
+      "draw": "45%",
+      "away": "10%"
+    }
+  },
+  "league": {
+    "id": 39,
+    "name": "Premier League",
+    "country": "England",
+    "logo": "https://media.api-sports.io/football/leagues/39.png",
+    "flag": "https://media.api-sports.io/flags/gb-eng.svg",
+    "season": 2025
+  },
+  "teams": {
+    "home": {
+      "id": 33,
+      "name": "Manchester United",
+      "logo": "https://media.api-sports.io/football/teams/33.png",
+      "last_5": {
+        "played": 5,
+        "form": "67%",
+        "att": "82%",
+        "def": "45%",
+        "goals": {
+          "for": {
+            "total": 9,
+            "average": "1.8"
+          },
+          "against": {
+            "total": 6,
+            "average": "1.2"
+          }
+        }
+      },
+      "league": {
+        "form": "LDWLWLWWWDDLWDWDLWDDDWWWWDWWLWD",
+        "fixtures": {
+          "played": {
+            "home": 15,
+            "away": 16,
+            "total": 31
+          },
+          "wins": {
+            "home": 10,
+            "away": 5,
+            "total": 15
+          },
+          "draws": {
+            "home": 3,
+            "away": 7,
+            "total": 10
+          },
+          "loses": {
+            "home": 2,
+            "away": 4,
+            "total": 6
+          }
+        },
+        "goals": {
+          "for": {
+            "total": {
+              "home": 30,
+              "away": 26,
+              "total": 56
+            },
+            "average": {
+              "home": "2.0",
+              "away": "1.6",
+              "total": "1.8"
+            },
+            "minute": {
+              "0-15": {
+                "total": 5,
+                "percentage": "9.09%"
+              },
+              "16-30": {
+                "total": 7,
+                "percentage": "12.73%"
+              },
+              "31-45": {
+                "total": 10,
+                "percentage": "18.18%"
+              },
+              "46-60": {
+                "total": 10,
+                "percentage": "18.18%"
+              },
+              "61-75": {
+                "total": 9,
+                "percentage": "16.36%"
+              },
+              "76-90": {
+                "total": 14,
+                "percentage": "25.45%"
+              },
+              "91-105": {
+                "total": null,
+                "percentage": null
+              },
+              "106-120": {
+                "total": null,
+                "percentage": null
+              }
+            },
+            "under_over": {
+              "0.5": {
+                "over": 28,
+                "under": 3
+              },
+              "1.5": {
+                "over": 18,
+                "under": 13
+              },
+              "2.5": {
+                "over": 7,
+                "under": 24
+              },
+              "3.5": {
+                "over": 3,
+                "under": 28
+              },
+              "4.5": {
+                "over": 0,
+                "under": 31
+              }
+            }
+          },
+          "against": {
+            "total": {
+              "home": 17,
+              "away": 26,
+              "total": 43
+            },
+            "average": {
+              "home": "1.1",
+              "away": "1.6",
+              "total": "1.4"
+            },
+            "minute": {
+              "0-15": {
+                "total": 3,
+                "percentage": "6.82%"
+              },
+              "16-30": {
+                "total": 4,
+                "percentage": "9.09%"
+              },
+              "31-45": {
+                "total": 6,
+                "percentage": "13.64%"
+              },
+              "46-60": {
+                "total": 9,
+                "percentage": "20.45%"
+              },
+              "61-75": {
+                "total": 9,
+                "percentage": "20.45%"
+              },
+              "76-90": {
+                "total": 13,
+                "percentage": "29.55%"
+              },
+              "91-105": {
+                "total": null,
+                "percentage": null
+              },
+              "106-120": {
+                "total": null,
+                "percentage": null
+              }
+            },
+            "under_over": {
+              "0.5": {
+                "over": 26,
+                "under": 5
+              },
+              "1.5": {
+                "over": 13,
+                "under": 18
+              },
+              "2.5": {
+                "over": 3,
+                "under": 28
+              },
+              "3.5": {
+                "over": 1,
+                "under": 30
+              },
+              "4.5": {
+                "over": 0,
+                "under": 31
+              }
+            }
+          }
+        },
+        "biggest": {
+          "streak": {
+            "wins": 4,
+            "draws": 3,
+            "loses": 1
+          },
+          "wins": {
+            "home": "4-2",
+            "away": "1-4"
+          },
+          "loses": {
+            "home": "0-1",
+            "away": "3-0"
+          },
+          "goals": {
+            "for": {
+              "home": 4,
+              "away": 4
+            },
+            "against": {
+              "home": 4,
+              "away": 3
+            }
+          }
+        },
+        "clean_sheet": {
+          "home": 4,
+          "away": 1,
+          "total": 5
+        },
+        "failed_to_score": {
+          "home": 2,
+          "away": 1,
+          "total": 3
+        },
+        "penalty": {
+          "scored": {
+            "total": 4,
+            "percentage": "100.00%"
+          },
+          "missed": {
+            "total": 0,
+            "percentage": "0%"
+          },
+          "total": 4
+        },
+        "lineups": [
+          {
+            "formation": "3-4-2-1",
+            "played": 18
+          },
+          {
+            "formation": "4-2-3-1",
+            "played": 13
+          }
+        ],
+        "cards": {
+          "yellow": {
+            "0-15": {
+              "total": 2,
+              "percentage": "4.17%"
+            },
+            "16-30": {
+              "total": 4,
+              "percentage": "8.33%"
+            },
+            "31-45": {
+              "total": 8,
+              "percentage": "16.67%"
+            },
+            "46-60": {
+              "total": 9,
+              "percentage": "18.75%"
+            },
+            "61-75": {
+              "total": 8,
+              "percentage": "16.67%"
+            },
+            "76-90": {
+              "total": 11,
+              "percentage": "22.92%"
+            },
+            "91-105": {
+              "total": 6,
+              "percentage": "12.50%"
+            },
+            "106-120": {
+              "total": null,
+              "percentage": null
+            }
+          },
+          "red": {
+            "0-15": {
+              "total": null,
+              "percentage": null
+            },
+            "16-30": {
+              "total": null,
+              "percentage": null
+            },
+            "31-45": {
+              "total": null,
+              "percentage": null
+            },
+            "46-60": {
+              "total": 1,
+              "percentage": "50.00%"
+            },
+            "61-75": {
+              "total": null,
+              "percentage": null
+            },
+            "76-90": {
+              "total": 1,
+              "percentage": "50.00%"
+            },
+            "91-105": {
+              "total": null,
+              "percentage": null
+            },
+            "106-120": {
+              "total": null,
+              "percentage": null
+            }
+          }
+        }
+      }
+    },
+    "away": {
+      "id": 63,
+      "name": "Leeds",
+      "logo": "https://media.api-sports.io/football/teams/63.png",
+      "last_5": {
+        "played": 5,
+        "form": "20%",
+        "att": "9%",
+        "def": "73%",
+        "goals": {
+          "for": {
+            "total": 1,
+            "average": "0.2"
+          },
+          "against": {
+            "total": 3,
+            "average": "0.6"
+          }
+        }
+      },
+      "league": {
+        "form": "WLDLWDLLWLLLLWDDWDDDLWDLWDDLLDD",
+        "fixtures": {
+          "played": {
+            "home": 16,
+            "away": 15,
+            "total": 31
+          },
+          "wins": {
+            "home": 6,
+            "away": 1,
+            "total": 7
+          },
+          "draws": {
+            "home": 5,
+            "away": 7,
+            "total": 12
+          },
+          "loses": {
+            "home": 5,
+            "away": 7,
+            "total": 12
+          }
+        },
+        "goals": {
+          "for": {
+            "total": {
+              "home": 22,
+              "away": 15,
+              "total": 37
+            },
+            "average": {
+              "home": "1.4",
+              "away": "1.0",
+              "total": "1.2"
+            },
+            "minute": {
+              "0-15": {
+                "total": 5,
+                "percentage": "13.16%"
+              },
+              "16-30": {
+                "total": 3,
+                "percentage": "7.89%"
+              },
+              "31-45": {
+                "total": 11,
+                "percentage": "28.95%"
+              },
+              "46-60": {
+                "total": 5,
+                "percentage": "13.16%"
+              },
+              "61-75": {
+                "total": 7,
+                "percentage": "18.42%"
+              },
+              "76-90": {
+                "total": 7,
+                "percentage": "18.42%"
+              },
+              "91-105": {
+                "total": null,
+                "percentage": null
+              },
+              "106-120": {
+                "total": null,
+                "percentage": null
+              }
+            },
+            "under_over": {
+              "0.5": {
+                "over": 20,
+                "under": 11
+              },
+              "1.5": {
+                "over": 10,
+                "under": 21
+              },
+              "2.5": {
+                "over": 6,
+                "under": 25
+              },
+              "3.5": {
+                "over": 1,
+                "under": 30
+              },
+              "4.5": {
+                "over": 0,
+                "under": 31
+              }
+            }
+          },
+          "against": {
+            "total": {
+              "home": 20,
+              "away": 28,
+              "total": 48
+            },
+            "average": {
+              "home": "1.3",
+              "away": "1.9",
+              "total": "1.5"
+            },
+            "minute": {
+              "0-15": {
+                "total": 4,
+                "percentage": "8.51%"
+              },
+              "16-30": {
+                "total": 7,
+                "percentage": "14.89%"
+              },
+              "31-45": {
+                "total": 5,
+                "percentage": "10.64%"
+              },
+              "46-60": {
+                "total": 9,
+                "percentage": "19.15%"
+              },
+              "61-75": {
+                "total": 9,
+                "percentage": "19.15%"
+              },
+              "76-90": {
+                "total": 13,
+                "percentage": "27.66%"
+              },
+              "91-105": {
+                "total": null,
+                "percentage": null
+              },
+              "106-120": {
+                "total": null,
+                "percentage": null
+              }
+            },
+            "under_over": {
+              "0.5": {
+                "over": 25,
+                "under": 6
+              },
+              "1.5": {
+                "over": 12,
+                "under": 19
+              },
+              "2.5": {
+                "over": 7,
+                "under": 24
+              },
+              "3.5": {
+                "over": 3,
+                "under": 28
+              },
+              "4.5": {
+                "over": 1,
+                "under": 30
+              }
+            }
+          }
+        },
+        "biggest": {
+          "streak": {
+            "wins": 1,
+            "draws": 3,
+            "loses": 4
+          },
+          "wins": {
+            "home": "4-1",
+            "away": "1-3"
+          },
+          "loses": {
+            "home": "0-4",
+            "away": "5-0"
+          },
+          "goals": {
+            "for": {
+              "home": 4,
+              "away": 3
+            },
+            "against": {
+              "home": 4,
+              "away": 5
+            }
+          }
+        },
+        "clean_sheet": {
+          "home": 4,
+          "away": 2,
+          "total": 6
+        },
+        "failed_to_score": {
+          "home": 5,
+          "away": 6,
+          "total": 11
+        },
+        "penalty": {
+          "scored": {
+            "total": 4,
+            "percentage": "100.00%"
+          },
+          "missed": {
+            "total": 0,
+            "percentage": "0%"
+          },
+          "total": 4
+        },
+        "lineups": [
+          {
+            "formation": "4-3-3",
+            "played": 12
+          },
+          {
+            "formation": "3-5-2",
+            "played": 8
+          },
+          {
+            "formation": "3-4-2-1",
+            "played": 3
+          },
+          {
+            "formation": "5-4-1",
+            "played": 3
+          },
+          {
+            "formation": "3-4-1-2",
+            "played": 2
+          },
+          {
+            "formation": "4-1-4-1",
+            "played": 1
+          },
+          {
+            "formation": "3-1-4-2",
+            "played": 1
+          },
+          {
+            "formation": "4-5-1",
+            "played": 1
+          }
+        ],
+        "cards": {
+          "yellow": {
+            "0-15": {
+              "total": 2,
+              "percentage": "3.92%"
+            },
+            "16-30": {
+              "total": 6,
+              "percentage": "11.76%"
+            },
+            "31-45": {
+              "total": 10,
+              "percentage": "19.61%"
+            },
+            "46-60": {
+              "total": 6,
+              "percentage": "11.76%"
+            },
+            "61-75": {
+              "total": 12,
+              "percentage": "23.53%"
+            },
+            "76-90": {
+              "total": 8,
+              "percentage": "15.69%"
+            },
+            "91-105": {
+              "total": 7,
+              "percentage": "13.73%"
+            },
+            "106-120": {
+              "total": null,
+              "percentage": null
+            }
+          },
+          "red": {
+            "0-15": {
+              "total": null,
+              "percentage": null
+            },
+            "16-30": {
+              "total": null,
+              "percentage": null
+            },
+            "31-45": {
+              "total": null,
+              "percentage": null
+            },
+            "46-60": {
+              "total": 1,
+              "percentage": "100.00%"
+            },
+            "61-75": {
+              "total": null,
+              "percentage": null
+            },
+            "76-90": {
+              "total": null,
+              "percentage": null
+            },
+            "91-105": {
+              "total": null,
+              "percentage": null
+            },
+            "106-120": {
+              "total": null,
+              "percentage": null
+            }
+          }
+        }
+      }
+    }
+  },
+  "comparison": {
+    "form": {
+      "home": "77%",
+      "away": "23%"
+    },
+    "att": {
+      "home": "90%",
+      "away": "10%"
+    },
+    "def": {
+      "home": "33%",
+      "away": "67%"
+    },
+    "poisson_distribution": {
+      "home": "73%",
+      "away": "27%"
+    },
+    "h2h": {
+      "home": "75%",
+      "away": "25%"
+    },
+    "goals": {
+      "home": "70%",
+      "away": "30%"
+    },
+    "total": {
+      "home": "69.7%",
+      "away": "30.3%"
+    }
+  },
+  "h2h": [
+    {
+      "fixture": {
+        "id": 1379164,
+        "referee": "Jarred Gillett, Australia",
+        "timezone": "UTC",
+        "date": "2026-01-04T12:30:00+00:00",
+        "timestamp": 1767529800,
+        "periods": {
+          "first": 1767529800,
+          "second": 1767533400
+        },
+        "venue": {
+          "id": 546,
+          "name": "Elland Road",
+          "city": "Leeds"
+        },
+        "status": {
+          "long": "Match Finished",
+          "short": "FT",
+          "elapsed": 90,
+          "extra": 5
+        }
+      },
+      "league": {
+        "id": 39,
+        "name": "Premier League",
+        "country": "England",
+        "logo": "https://media.api-sports.io/football/leagues/39.png",
+        "flag": "https://media.api-sports.io/flags/gb-eng.svg",
+        "season": 2025,
+        "round": "Regular Season - 20",
+        "standings": true
+      },
+      "teams": {
+        "home": {
+          "id": 63,
+          "name": "Leeds",
+          "logo": "https://media.api-sports.io/football/teams/63.png",
+          "winner": null
+        },
+        "away": {
+          "id": 33,
+          "name": "Manchester United",
+          "logo": "https://media.api-sports.io/football/teams/33.png",
+          "winner": null
+        }
+      },
+      "goals": {
+        "home": 1,
+        "away": 1
+      },
+      "score": {
+        "halftime": {
+          "home": 0,
+          "away": 0
+        },
+        "fulltime": {
+          "home": 1,
+          "away": 1
+        },
+        "extratime": {
+          "home": null,
+          "away": null
+        },
+        "penalty": {
+          "home": null,
+          "away": null
+        }
+      }
+    },
+    {
+      "fixture": {
+        "id": 1371777,
+        "referee": "Adam Ladebäck",
+        "timezone": "UTC",
+        "date": "2025-07-19T13:00:00+00:00",
+        "timestamp": 1752930000,
+        "periods": {
+          "first": 1752930000,
+          "second": 1752933600
+        },
+        "venue": {
+          "id": 21411,
+          "name": "Strawberry Arena",
+          "city": "Solna"
+        },
+        "status": {
+          "long": "Match Finished",
+          "short": "FT",
+          "elapsed": 90,
+          "extra": 4
+        }
+      },
+      "league": {
+        "id": 667,
+        "name": "Friendlies Clubs",
+        "country": "World",
+        "logo": "https://media.api-sports.io/football/leagues/667.png",
+        "flag": null,
+        "season": 2025,
+        "round": "Club Friendlies 1",
+        "standings": false
+      },
+      "teams": {
+        "home": {
+          "id": 33,
+          "name": "Manchester United",
+          "logo": "https://media.api-sports.io/football/teams/33.png",
+          "winner": null
+        },
+        "away": {
+          "id": 63,
+          "name": "Leeds",
+          "logo": "https://media.api-sports.io/football/teams/63.png",
+          "winner": null
+        }
+      },
+      "goals": {
+        "home": 0,
+        "away": 0
+      },
+      "score": {
+        "halftime": {
+          "home": 0,
+          "away": 0
+        },
+        "fulltime": {
+          "home": 0,
+          "away": 0
+        },
+        "extratime": {
+          "home": null,
+          "away": null
+        },
+        "penalty": {
+          "home": null,
+          "away": null
+        }
+      }
+    },
+    {
+      "fixture": {
+        "id": 1030298,
+        "referee": "R. Saggi",
+        "timezone": "UTC",
+        "date": "2023-07-12T15:00:00+00:00",
+        "timestamp": 1689174000,
+        "periods": {
+          "first": 1689174000,
+          "second": 1689177600
+        },
+        "venue": {
+          "id": 11603,
+          "name": "Ullevaal Stadion",
+          "city": "Oslo"
+        },
+        "status": {
+          "long": "Match Finished",
+          "short": "FT",
+          "elapsed": 90,
+          "extra": null
+        }
+      },
+      "league": {
+        "id": 667,
+        "name": "Friendlies Clubs",
+        "country": "World",
+        "logo": "https://media.api-sports.io/football/leagues/667.png",
+        "flag": null,
+        "season": 2023,
+        "round": "Club Friendlies 1",
+        "standings": false
+      },
+      "teams": {
+        "home": {
+          "id": 33,
+          "name": "Manchester United",
+          "logo": "https://media.api-sports.io/football/teams/33.png",
+          "winner": true
+        },
+        "away": {
+          "id": 63,
+          "name": "Leeds",
+          "logo": "https://media.api-sports.io/football/teams/63.png",
+          "winner": false
+        }
+      },
+      "goals": {
+        "home": 2,
+        "away": 0
+      },
+      "score": {
+        "halftime": {
+          "home": 0,
+          "away": 0
+        },
+        "fulltime": {
+          "home": 2,
+          "away": 0
+        },
+        "extratime": {
+          "home": null,
+          "away": null
+        },
+        "penalty": {
+          "home": null,
+          "away": null
+        }
+      }
+    },
+    {
+      "fixture": {
+        "id": 868170,
+        "referee": "P. Tierney",
+        "timezone": "UTC",
+        "date": "2023-02-12T14:00:00+00:00",
+        "timestamp": 1676210400,
+        "periods": {
+          "first": 1676210400,
+          "second": 1676214000
+        },
+        "venue": {
+          "id": 546,
+          "name": "Elland Road",
+          "city": "Leeds, West Yorkshire"
+        },
+        "status": {
+          "long": "Match Finished",
+          "short": "FT",
+          "elapsed": 90,
+          "extra": null
+        }
+      },
+      "league": {
+        "id": 39,
+        "name": "Premier League",
+        "country": "England",
+        "logo": "https://media.api-sports.io/football/leagues/39.png",
+        "flag": "https://media.api-sports.io/flags/gb-eng.svg",
+        "season": 2022,
+        "round": "Regular Season - 23",
+        "standings": true
+      },
+      "teams": {
+        "home": {
+          "id": 63,
+          "name": "Leeds",
+          "logo": "https://media.api-sports.io/football/teams/63.png",
+          "winner": false
+        },
+        "away": {
+          "id": 33,
+          "name": "Manchester United",
+          "logo": "https://media.api-sports.io/football/teams/33.png",
+          "winner": true
+        }
+      },
+      "goals": {
+        "home": 0,
+        "away": 2
+      },
+      "score": {
+        "halftime": {
+          "home": 0,
+          "away": 0
+        },
+        "fulltime": {
+          "home": 0,
+          "away": 2
+        },
+        "extratime": {
+          "home": null,
+          "away": null
+        },
+        "penalty": {
+          "home": null,
+          "away": null
+        }
+      }
+    },
+    {
+      "fixture": {
+        "id": 868021,
+        "referee": "S. Hooper",
+        "timezone": "UTC",
+        "date": "2023-02-08T20:00:00+00:00",
+        "timestamp": 1675886400,
+        "periods": {
+          "first": 1675886400,
+          "second": 1675890000
+        },
+        "venue": {
+          "id": 556,
+          "name": "Old Trafford",
+          "city": "Manchester"
+        },
+        "status": {
+          "long": "Match Finished",
+          "short": "FT",
+          "elapsed": 90,
+          "extra": null
+        }
+      },
+      "league": {
+        "id": 39,
+        "name": "Premier League",
+        "country": "England",
+        "logo": "https://media.api-sports.io/football/leagues/39.png",
+        "flag": "https://media.api-sports.io/flags/gb-eng.svg",
+        "season": 2022,
+        "round": "Regular Season - 8",
+        "standings": true
+      },
+      "teams": {
+        "home": {
+          "id": 33,
+          "name": "Manchester United",
+          "logo": "https://media.api-sports.io/football/teams/33.png",
+          "winner": null
+        },
+        "away": {
+          "id": 63,
+          "name": "Leeds",
+          "logo": "https://media.api-sports.io/football/teams/63.png",
+          "winner": null
+        }
+      },
+      "goals": {
+        "home": 2,
+        "away": 2
+      },
+      "score": {
+        "halftime": {
+          "home": 0,
+          "away": 1
+        },
+        "fulltime": {
+          "home": 2,
+          "away": 2
+        },
+        "extratime": {
+          "home": null,
+          "away": null
+        },
+        "penalty": {
+          "home": null,
+          "away": null
+        }
+      }
+    },
+    {
+      "fixture": {
+        "id": 710810,
+        "referee": "P. Tierney",
+        "timezone": "UTC",
+        "date": "2022-02-20T14:00:00+00:00",
+        "timestamp": 1645365600,
+        "periods": {
+          "first": 1645365600,
+          "second": 1645369200
+        },
+        "venue": {
+          "id": 546,
+          "name": "Elland Road",
+          "city": "Leeds, West Yorkshire"
+        },
+        "status": {
+          "long": "Match Finished",
+          "short": "FT",
+          "elapsed": 90,
+          "extra": null
+        }
+      },
+      "league": {
+        "id": 39,
+        "name": "Premier League",
+        "country": "England",
+        "logo": "https://media.api-sports.io/football/leagues/39.png",
+        "flag": "https://media.api-sports.io/flags/gb-eng.svg",
+        "season": 2021,
+        "round": "Regular Season - 26",
+        "standings": true
+      },
+      "teams": {
+        "home": {
+          "id": 63,
+          "name": "Leeds",
+          "logo": "https://media.api-sports.io/football/teams/63.png",
+          "winner": false
+        },
+        "away": {
+          "id": 33,
+          "name": "Manchester United",
+          "logo": "https://media.api-sports.io/football/teams/33.png",
+          "winner": true
+        }
+      },
+      "goals": {
+        "home": 2,
+        "away": 4
+      },
+      "score": {
+        "halftime": {
+          "home": 0,
+          "away": 2
+        },
+        "fulltime": {
+          "home": 2,
+          "away": 4
+        },
+        "extratime": {
+          "home": null,
+          "away": null
+        },
+        "penalty": {
+          "home": null,
+          "away": null
+        }
+      }
+    },
+    {
+      "fixture": {
+        "id": 710561,
+        "referee": "P. Tierney",
+        "timezone": "UTC",
+        "date": "2021-08-14T11:30:00+00:00",
+        "timestamp": 1628940600,
+        "periods": {
+          "first": 1628940600,
+          "second": 1628944200
+        },
+        "venue": {
+          "id": 556,
+          "name": "Old Trafford",
+          "city": "Manchester"
+        },
+        "status": {
+          "long": "Match Finished",
+          "short": "FT",
+          "elapsed": 90,
+          "extra": null
+        }
+      },
+      "league": {
+        "id": 39,
+        "name": "Premier League",
+        "country": "England",
+        "logo": "https://media.api-sports.io/football/leagues/39.png",
+        "flag": "https://media.api-sports.io/flags/gb-eng.svg",
+        "season": 2021,
+        "round": "Regular Season - 1",
+        "standings": true
+      },
+      "teams": {
+        "home": {
+          "id": 33,
+          "name": "Manchester United",
+          "logo": "https://media.api-sports.io/football/teams/33.png",
+          "winner": true
+        },
+        "away": {
+          "id": 63,
+          "name": "Leeds",
+          "logo": "https://media.api-sports.io/football/teams/63.png",
+          "winner": false
+        }
+      },
+      "goals": {
+        "home": 5,
+        "away": 1
+      },
+      "score": {
+        "halftime": {
+          "home": 1,
+          "away": 0
+        },
+        "fulltime": {
+          "home": 5,
+          "away": 1
+        },
+        "extratime": {
+          "home": null,
+          "away": null
+        },
+        "penalty": {
+          "home": null,
+          "away": null
+        }
+      }
+    },
+    {
+      "fixture": {
+        "id": 592819,
+        "referee": "C. Pawson",
+        "timezone": "UTC",
+        "date": "2021-04-25T13:00:00+00:00",
+        "timestamp": 1619355600,
+        "periods": {
+          "first": 1619355600,
+          "second": 1619359200
+        },
+        "venue": {
+          "id": 546,
+          "name": "Elland Road",
+          "city": "Leeds, West Yorkshire"
+        },
+        "status": {
+          "long": "Match Finished",
+          "short": "FT",
+          "elapsed": 90,
+          "extra": null
+        }
+      },
+      "league": {
+        "id": 39,
+        "name": "Premier League",
+        "country": "England",
+        "logo": "https://media.api-sports.io/football/leagues/39.png",
+        "flag": "https://media.api-sports.io/flags/gb-eng.svg",
+        "season": 2020,
+        "round": "Regular Season - 33",
+        "standings": true
+      },
+      "teams": {
+        "home": {
+          "id": 63,
+          "name": "Leeds",
+          "logo": "https://media.api-sports.io/football/teams/63.png",
+          "winner": null
+        },
+        "away": {
+          "id": 33,
+          "name": "Manchester United",
+          "logo": "https://media.api-sports.io/football/teams/33.png",
+          "winner": null
+        }
+      },
+      "goals": {
+        "home": 0,
+        "away": 0
+      },
+      "score": {
+        "halftime": {
+          "home": 0,
+          "away": 0
+        },
+        "fulltime": {
+          "home": 0,
+          "away": 0
+        },
+        "extratime": {
+          "home": null,
+          "away": null
+        },
+        "penalty": {
+          "home": null,
+          "away": null
+        }
+      }
+    },
+    {
+      "fixture": {
+        "id": 592276,
+        "referee": "A. Taylor",
+        "timezone": "UTC",
+        "date": "2020-12-20T16:30:00+00:00",
+        "timestamp": 1608481800,
+        "periods": {
+          "first": 1608481800,
+          "second": 1608485400
+        },
+        "venue": {
+          "id": 556,
+          "name": "Old Trafford",
+          "city": "Manchester"
+        },
+        "status": {
+          "long": "Match Finished",
+          "short": "FT",
+          "elapsed": 90,
+          "extra": null
+        }
+      },
+      "league": {
+        "id": 39,
+        "name": "Premier League",
+        "country": "England",
+        "logo": "https://media.api-sports.io/football/leagues/39.png",
+        "flag": "https://media.api-sports.io/flags/gb-eng.svg",
+        "season": 2020,
+        "round": "Regular Season - 14",
+        "standings": true
+      },
+      "teams": {
+        "home": {
+          "id": 33,
+          "name": "Manchester United",
+          "logo": "https://media.api-sports.io/football/teams/33.png",
+          "winner": true
+        },
+        "away": {
+          "id": 63,
+          "name": "Leeds",
+          "logo": "https://media.api-sports.io/football/teams/63.png",
+          "winner": false
+        }
+      },
+      "goals": {
+        "home": 6,
+        "away": 2
+      },
+      "score": {
+        "halftime": {
+          "home": 4,
+          "away": 1
+        },
+        "fulltime": {
+          "home": 6,
+          "away": 2
+        },
+        "extratime": {
+          "home": null,
+          "away": null
+        },
+        "penalty": {
+          "home": null,
+          "away": null
+        }
+      }
+    }
+  ]
+}

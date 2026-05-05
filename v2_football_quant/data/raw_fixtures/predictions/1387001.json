@@ -1,0 +1,1345 @@
+{
+  "predictions": {
+    "winner": {
+      "id": 71,
+      "name": "Norwich",
+      "comment": "Win or draw"
+    },
+    "win_or_draw": true,
+    "under_over": null,
+    "goals": {
+      "home": "-2.5",
+      "away": "-1.5"
+    },
+    "advice": "Double chance : Norwich or draw",
+    "percent": {
+      "home": "45%",
+      "draw": "45%",
+      "away": "10%"
+    }
+  },
+  "league": {
+    "id": 40,
+    "name": "Championship",
+    "country": "England",
+    "logo": "https://media.api-sports.io/football/leagues/40.png",
+    "flag": "https://media.api-sports.io/flags/gb-eng.svg",
+    "season": 2025
+  },
+  "teams": {
+    "home": {
+      "id": 71,
+      "name": "Norwich",
+      "logo": "https://media.api-sports.io/football/teams/71.png",
+      "last_5": {
+        "played": 5,
+        "form": "80%",
+        "att": "83%",
+        "def": "75%",
+        "goals": {
+          "for": {
+            "total": 10,
+            "average": "2.0"
+          },
+          "against": {
+            "total": 3,
+            "average": "0.6"
+          }
+        }
+      },
+      "league": {
+        "form": "LWLWDLDLLLLLLDLLDWLDWDWLWLWWWLWWLWWW",
+        "fixtures": {
+          "played": {
+            "home": 18,
+            "away": 18,
+            "total": 36
+          },
+          "wins": {
+            "home": 7,
+            "away": 7,
+            "total": 14
+          },
+          "draws": {
+            "home": 1,
+            "away": 5,
+            "total": 6
+          },
+          "loses": {
+            "home": 10,
+            "away": 6,
+            "total": 16
+          }
+        },
+        "goals": {
+          "for": {
+            "total": {
+              "home": 21,
+              "away": 28,
+              "total": 49
+            },
+            "average": {
+              "home": "1.2",
+              "away": "1.6",
+              "total": "1.4"
+            },
+            "minute": {
+              "0-15": {
+                "total": 6,
+                "percentage": "12.77%"
+              },
+              "16-30": {
+                "total": 5,
+                "percentage": "10.64%"
+              },
+              "31-45": {
+                "total": 9,
+                "percentage": "19.15%"
+              },
+              "46-60": {
+                "total": 7,
+                "percentage": "14.89%"
+              },
+              "61-75": {
+                "total": 11,
+                "percentage": "23.40%"
+              },
+              "76-90": {
+                "total": 9,
+                "percentage": "19.15%"
+              },
+              "91-105": {
+                "total": null,
+                "percentage": null
+              },
+              "106-120": {
+                "total": null,
+                "percentage": null
+              }
+            },
+            "under_over": {
+              "0.5": {
+                "over": 29,
+                "under": 7
+              },
+              "1.5": {
+                "over": 15,
+                "under": 21
+              },
+              "2.5": {
+                "over": 3,
+                "under": 33
+              },
+              "3.5": {
+                "over": 1,
+                "under": 35
+              },
+              "4.5": {
+                "over": 1,
+                "under": 35
+              }
+            }
+          },
+          "against": {
+            "total": {
+              "home": 23,
+              "away": 22,
+              "total": 45
+            },
+            "average": {
+              "home": "1.3",
+              "away": "1.2",
+              "total": "1.3"
+            },
+            "minute": {
+              "0-15": {
+                "total": 6,
+                "percentage": "12.77%"
+              },
+              "16-30": {
+                "total": 5,
+                "percentage": "10.64%"
+              },
+              "31-45": {
+                "total": 8,
+                "percentage": "17.02%"
+              },
+              "46-60": {
+                "total": 10,
+                "percentage": "21.28%"
+              },
+              "61-75": {
+                "total": 6,
+                "percentage": "12.77%"
+              },
+              "76-90": {
+                "total": 12,
+                "percentage": "25.53%"
+              },
+              "91-105": {
+                "total": null,
+                "percentage": null
+              },
+              "106-120": {
+                "total": null,
+                "percentage": null
+              }
+            },
+            "under_over": {
+              "0.5": {
+                "over": 29,
+                "under": 7
+              },
+              "1.5": {
+                "over": 11,
+                "under": 25
+              },
+              "2.5": {
+                "over": 4,
+                "under": 32
+              },
+              "3.5": {
+                "over": 1,
+                "under": 35
+              },
+              "4.5": {
+                "over": 0,
+                "under": 36
+              }
+            }
+          }
+        },
+        "biggest": {
+          "streak": {
+            "wins": 3,
+            "draws": 1,
+            "loses": 6
+          },
+          "wins": {
+            "home": "3-1",
+            "away": "0-5"
+          },
+          "loses": {
+            "home": "0-2",
+            "away": "4-1"
+          },
+          "goals": {
+            "for": {
+              "home": 3,
+              "away": 5
+            },
+            "against": {
+              "home": 3,
+              "away": 4
+            }
+          }
+        },
+        "clean_sheet": {
+          "home": 3,
+          "away": 4,
+          "total": 7
+        },
+        "failed_to_score": {
+          "home": 5,
+          "away": 2,
+          "total": 7
+        },
+        "penalty": {
+          "scored": {
+            "total": 1,
+            "percentage": "100.00%"
+          },
+          "missed": {
+            "total": 0,
+            "percentage": "0%"
+          },
+          "total": 1
+        },
+        "lineups": [
+          {
+            "formation": "4-2-3-1",
+            "played": 29
+          },
+          {
+            "formation": "3-4-2-1",
+            "played": 5
+          },
+          {
+            "formation": "3-4-3",
+            "played": 2
+          }
+        ],
+        "cards": {
+          "yellow": {
+            "0-15": {
+              "total": 3,
+              "percentage": "4.84%"
+            },
+            "16-30": {
+              "total": 7,
+              "percentage": "11.29%"
+            },
+            "31-45": {
+              "total": 7,
+              "percentage": "11.29%"
+            },
+            "46-60": {
+              "total": 9,
+              "percentage": "14.52%"
+            },
+            "61-75": {
+              "total": 11,
+              "percentage": "17.74%"
+            },
+            "76-90": {
+              "total": 19,
+              "percentage": "30.65%"
+            },
+            "91-105": {
+              "total": 6,
+              "percentage": "9.68%"
+            },
+            "106-120": {
+              "total": null,
+              "percentage": null
+            }
+          },
+          "red": {
+            "0-15": {
+              "total": null,
+              "percentage": null
+            },
+            "16-30": {
+              "total": null,
+              "percentage": null
+            },
+            "31-45": {
+              "total": null,
+              "percentage": null
+            },
+            "46-60": {
+              "total": 1,
+              "percentage": "100.00%"
+            },
+            "61-75": {
+              "total": null,
+              "percentage": null
+            },
+            "76-90": {
+              "total": null,
+              "percentage": null
+            },
+            "91-105": {
+              "total": null,
+              "percentage": null
+            },
+            "106-120": {
+              "total": null,
+              "percentage": null
+            }
+          }
+        }
+      }
+    },
+    "away": {
+      "id": 59,
+      "name": "Preston",
+      "logo": "https://media.api-sports.io/football/teams/59.png",
+      "last_5": {
+        "played": 5,
+        "form": "7%",
+        "att": "17%",
+        "def": "17%",
+        "goals": {
+          "for": {
+            "total": 2,
+            "average": "0.4"
+          },
+          "against": {
+            "total": 10,
+            "average": "2.0"
+          }
+        }
+      },
+      "league": {
+        "form": "DWWLDWDDWLLWWWDLDWDDWDDLWWLLLDWDLDLLL",
+        "fixtures": {
+          "played": {
+            "home": 19,
+            "away": 18,
+            "total": 37
+          },
+          "wins": {
+            "home": 7,
+            "away": 5,
+            "total": 12
+          },
+          "draws": {
+            "home": 6,
+            "away": 7,
+            "total": 13
+          },
+          "loses": {
+            "home": 6,
+            "away": 6,
+            "total": 12
+          }
+        },
+        "goals": {
+          "for": {
+            "total": {
+              "home": 23,
+              "away": 19,
+              "total": 42
+            },
+            "average": {
+              "home": "1.2",
+              "away": "1.1",
+              "total": "1.1"
+            },
+            "minute": {
+              "0-15": {
+                "total": 9,
+                "percentage": "20.45%"
+              },
+              "16-30": {
+                "total": 7,
+                "percentage": "15.91%"
+              },
+              "31-45": {
+                "total": 5,
+                "percentage": "11.36%"
+              },
+              "46-60": {
+                "total": 6,
+                "percentage": "13.64%"
+              },
+              "61-75": {
+                "total": 6,
+                "percentage": "13.64%"
+              },
+              "76-90": {
+                "total": 11,
+                "percentage": "25.00%"
+              },
+              "91-105": {
+                "total": null,
+                "percentage": null
+              },
+              "106-120": {
+                "total": null,
+                "percentage": null
+              }
+            },
+            "under_over": {
+              "0.5": {
+                "over": 27,
+                "under": 10
+              },
+              "1.5": {
+                "over": 12,
+                "under": 25
+              },
+              "2.5": {
+                "over": 3,
+                "under": 34
+              },
+              "3.5": {
+                "over": 0,
+                "under": 37
+              },
+              "4.5": {
+                "over": 0,
+                "under": 37
+              }
+            }
+          },
+          "against": {
+            "total": {
+              "home": 23,
+              "away": 23,
+              "total": 46
+            },
+            "average": {
+              "home": "1.2",
+              "away": "1.3",
+              "total": "1.2"
+            },
+            "minute": {
+              "0-15": {
+                "total": 6,
+                "percentage": "13.64%"
+              },
+              "16-30": {
+                "total": 4,
+                "percentage": "9.09%"
+              },
+              "31-45": {
+                "total": 11,
+                "percentage": "25.00%"
+              },
+              "46-60": {
+                "total": 8,
+                "percentage": "18.18%"
+              },
+              "61-75": {
+                "total": 6,
+                "percentage": "13.64%"
+              },
+              "76-90": {
+                "total": 9,
+                "percentage": "20.45%"
+              },
+              "91-105": {
+                "total": null,
+                "percentage": null
+              },
+              "106-120": {
+                "total": null,
+                "percentage": null
+              }
+            },
+            "under_over": {
+              "0.5": {
+                "over": 28,
+                "under": 9
+              },
+              "1.5": {
+                "over": 13,
+                "under": 24
+              },
+              "2.5": {
+                "over": 4,
+                "under": 33
+              },
+              "3.5": {
+                "over": 1,
+                "under": 36
+              },
+              "4.5": {
+                "over": 0,
+                "under": 37
+              }
+            }
+          }
+        },
+        "biggest": {
+          "streak": {
+            "wins": 3,
+            "draws": 2,
+            "loses": 3
+          },
+          "wins": {
+            "home": "3-0",
+            "away": "0-2"
+          },
+          "loses": {
+            "home": "0-3",
+            "away": "4-0"
+          },
+          "goals": {
+            "for": {
+              "home": 3,
+              "away": 3
+            },
+            "against": {
+              "home": 3,
+              "away": 4
+            }
+          }
+        },
+        "clean_sheet": {
+          "home": 5,
+          "away": 4,
+          "total": 9
+        },
+        "failed_to_score": {
+          "home": 5,
+          "away": 5,
+          "total": 10
+        },
+        "penalty": {
+          "scored": {
+            "total": 1,
+            "percentage": "100.00%"
+          },
+          "missed": {
+            "total": 0,
+            "percentage": "0%"
+          },
+          "total": 1
+        },
+        "lineups": [
+          {
+            "formation": "3-5-2",
+            "played": 15
+          },
+          {
+            "formation": "3-1-4-2",
+            "played": 8
+          },
+          {
+            "formation": "5-3-2",
+            "played": 4
+          },
+          {
+            "formation": "3-4-1-2",
+            "played": 4
+          },
+          {
+            "formation": "3-4-2-1",
+            "played": 2
+          },
+          {
+            "formation": "3-5-1-1",
+            "played": 1
+          },
+          {
+            "formation": "3-4-3",
+            "played": 1
+          },
+          {
+            "formation": "4-4-2",
+            "played": 1
+          },
+          {
+            "formation": "4-2-3-1",
+            "played": 1
+          }
+        ],
+        "cards": {
+          "yellow": {
+            "0-15": {
+              "total": 2,
+              "percentage": "2.70%"
+            },
+            "16-30": {
+              "total": 5,
+              "percentage": "6.76%"
+            },
+            "31-45": {
+              "total": 8,
+              "percentage": "10.81%"
+            },
+            "46-60": {
+              "total": 11,
+              "percentage": "14.86%"
+            },
+            "61-75": {
+              "total": 18,
+              "percentage": "24.32%"
+            },
+            "76-90": {
+              "total": 21,
+              "percentage": "28.38%"
+            },
+            "91-105": {
+              "total": 9,
+              "percentage": "12.16%"
+            },
+            "106-120": {
+              "total": null,
+              "percentage": null
+            }
+          },
+          "red": {
+            "0-15": {
+              "total": null,
+              "percentage": null
+            },
+            "16-30": {
+              "total": null,
+              "percentage": null
+            },
+            "31-45": {
+              "total": 1,
+              "percentage": "33.33%"
+            },
+            "46-60": {
+              "total": 1,
+              "percentage": "33.33%"
+            },
+            "61-75": {
+              "total": null,
+              "percentage": null
+            },
+            "76-90": {
+              "total": null,
+              "percentage": null
+            },
+            "91-105": {
+              "total": 1,
+              "percentage": "33.33%"
+            },
+            "106-120": {
+              "total": null,
+              "percentage": null
+            }
+          }
+        }
+      }
+    }
+  },
+  "comparison": {
+    "form": {
+      "home": "92%",
+      "away": "8%"
+    },
+    "att": {
+      "home": "83%",
+      "away": "17%"
+    },
+    "def": {
+      "home": "77%",
+      "away": "23%"
+    },
+    "poisson_distribution": {
+      "home": "49%",
+      "away": "51%"
+    },
+    "h2h": {
+      "home": "50%",
+      "away": "50%"
+    },
+    "goals": {
+      "home": "50%",
+      "away": "50%"
+    },
+    "total": {
+      "home": "66.8%",
+      "away": "33.2%"
+    }
+  },
+  "h2h": [
+    {
+      "fixture": {
+        "id": 1386813,
+        "referee": "Stephen Martin, England",
+        "timezone": "UTC",
+        "date": "2025-12-20T12:30:00+00:00",
+        "timestamp": 1766233800,
+        "periods": {
+          "first": 1766233800,
+          "second": 1766237400
+        },
+        "venue": {
+          "id": 574,
+          "name": "Deepdale",
+          "city": "Preston"
+        },
+        "status": {
+          "long": "Match Finished",
+          "short": "FT",
+          "elapsed": 90,
+          "extra": 8
+        }
+      },
+      "league": {
+        "id": 40,
+        "name": "Championship",
+        "country": "England",
+        "logo": "https://media.api-sports.io/football/leagues/40.png",
+        "flag": "https://media.api-sports.io/flags/gb-eng.svg",
+        "season": 2025,
+        "round": "Regular Season - 22",
+        "standings": true
+      },
+      "teams": {
+        "home": {
+          "id": 59,
+          "name": "Preston",
+          "logo": "https://media.api-sports.io/football/teams/59.png",
+          "winner": null
+        },
+        "away": {
+          "id": 71,
+          "name": "Norwich",
+          "logo": "https://media.api-sports.io/football/teams/71.png",
+          "winner": null
+        }
+      },
+      "goals": {
+        "home": 1,
+        "away": 1
+      },
+      "score": {
+        "halftime": {
+          "home": 0,
+          "away": 0
+        },
+        "fulltime": {
+          "home": 1,
+          "away": 1
+        },
+        "extratime": {
+          "home": null,
+          "away": null
+        },
+        "penalty": {
+          "home": null,
+          "away": null
+        }
+      }
+    },
+    {
+      "fixture": {
+        "id": 1216218,
+        "referee": "G. Ward",
+        "timezone": "UTC",
+        "date": "2025-02-11T20:00:00+00:00",
+        "timestamp": 1739304000,
+        "periods": {
+          "first": 1739304000,
+          "second": 1739307600
+        },
+        "venue": {
+          "id": 565,
+          "name": "Carrow Road",
+          "city": "Norwich, Norfolk"
+        },
+        "status": {
+          "long": "Match Finished",
+          "short": "FT",
+          "elapsed": 90,
+          "extra": 6
+        }
+      },
+      "league": {
+        "id": 40,
+        "name": "Championship",
+        "country": "England",
+        "logo": "https://media.api-sports.io/football/leagues/40.png",
+        "flag": "https://media.api-sports.io/flags/gb-eng.svg",
+        "season": 2024,
+        "round": "Regular Season - 32",
+        "standings": true
+      },
+      "teams": {
+        "home": {
+          "id": 71,
+          "name": "Norwich",
+          "logo": "https://media.api-sports.io/football/teams/71.png",
+          "winner": false
+        },
+        "away": {
+          "id": 59,
+          "name": "Preston",
+          "logo": "https://media.api-sports.io/football/teams/59.png",
+          "winner": true
+        }
+      },
+      "goals": {
+        "home": 0,
+        "away": 1
+      },
+      "score": {
+        "halftime": {
+          "home": 0,
+          "away": 1
+        },
+        "fulltime": {
+          "home": 0,
+          "away": 1
+        },
+        "extratime": {
+          "home": null,
+          "away": null
+        },
+        "penalty": {
+          "home": null,
+          "away": null
+        }
+      }
+    },
+    {
+      "fixture": {
+        "id": 1215967,
+        "referee": "W. Finnie",
+        "timezone": "UTC",
+        "date": "2024-10-22T18:45:00+00:00",
+        "timestamp": 1729622700,
+        "periods": {
+          "first": 1729622700,
+          "second": 1729626300
+        },
+        "venue": {
+          "id": 574,
+          "name": "Deepdale",
+          "city": "Preston"
+        },
+        "status": {
+          "long": "Match Finished",
+          "short": "FT",
+          "elapsed": 90,
+          "extra": 4
+        }
+      },
+      "league": {
+        "id": 40,
+        "name": "Championship",
+        "country": "England",
+        "logo": "https://media.api-sports.io/football/leagues/40.png",
+        "flag": "https://media.api-sports.io/flags/gb-eng.svg",
+        "season": 2024,
+        "round": "Regular Season - 11",
+        "standings": true
+      },
+      "teams": {
+        "home": {
+          "id": 59,
+          "name": "Preston",
+          "logo": "https://media.api-sports.io/football/teams/59.png",
+          "winner": null
+        },
+        "away": {
+          "id": 71,
+          "name": "Norwich",
+          "logo": "https://media.api-sports.io/football/teams/71.png",
+          "winner": null
+        }
+      },
+      "goals": {
+        "home": 2,
+        "away": 2
+      },
+      "score": {
+        "halftime": {
+          "home": 2,
+          "away": 1
+        },
+        "fulltime": {
+          "home": 2,
+          "away": 2
+        },
+        "extratime": {
+          "home": null,
+          "away": null
+        },
+        "penalty": {
+          "home": null,
+          "away": null
+        }
+      }
+    },
+    {
+      "fixture": {
+        "id": 1047942,
+        "referee": "A. Kitchen",
+        "timezone": "UTC",
+        "date": "2024-04-13T14:00:00+00:00",
+        "timestamp": 1713016800,
+        "periods": {
+          "first": 1713016800,
+          "second": 1713020400
+        },
+        "venue": {
+          "id": 574,
+          "name": "Deepdale",
+          "city": "Preston"
+        },
+        "status": {
+          "long": "Match Finished",
+          "short": "FT",
+          "elapsed": 90,
+          "extra": null
+        }
+      },
+      "league": {
+        "id": 40,
+        "name": "Championship",
+        "country": "England",
+        "logo": "https://media.api-sports.io/football/leagues/40.png",
+        "flag": "https://media.api-sports.io/flags/gb-eng.svg",
+        "season": 2023,
+        "round": "Regular Season - 43",
+        "standings": true
+      },
+      "teams": {
+        "home": {
+          "id": 59,
+          "name": "Preston",
+          "logo": "https://media.api-sports.io/football/teams/59.png",
+          "winner": false
+        },
+        "away": {
+          "id": 71,
+          "name": "Norwich",
+          "logo": "https://media.api-sports.io/football/teams/71.png",
+          "winner": true
+        }
+      },
+      "goals": {
+        "home": 0,
+        "away": 1
+      },
+      "score": {
+        "halftime": {
+          "home": 0,
+          "away": 0
+        },
+        "fulltime": {
+          "home": 0,
+          "away": 1
+        },
+        "extratime": {
+          "home": null,
+          "away": null
+        },
+        "penalty": {
+          "home": null,
+          "away": null
+        }
+      }
+    },
+    {
+      "fixture": {
+        "id": 1047667,
+        "referee": "O. Langford",
+        "timezone": "UTC",
+        "date": "2023-12-09T15:00:00+00:00",
+        "timestamp": 1702134000,
+        "periods": {
+          "first": 1702134000,
+          "second": 1702137600
+        },
+        "venue": {
+          "id": 565,
+          "name": "Carrow Road",
+          "city": "Norwich, Norfolk"
+        },
+        "status": {
+          "long": "Match Finished",
+          "short": "FT",
+          "elapsed": 90,
+          "extra": null
+        }
+      },
+      "league": {
+        "id": 40,
+        "name": "Championship",
+        "country": "England",
+        "logo": "https://media.api-sports.io/football/leagues/40.png",
+        "flag": "https://media.api-sports.io/flags/gb-eng.svg",
+        "season": 2023,
+        "round": "Regular Season - 20",
+        "standings": true
+      },
+      "teams": {
+        "home": {
+          "id": 71,
+          "name": "Norwich",
+          "logo": "https://media.api-sports.io/football/teams/71.png",
+          "winner": null
+        },
+        "away": {
+          "id": 59,
+          "name": "Preston",
+          "logo": "https://media.api-sports.io/football/teams/59.png",
+          "winner": null
+        }
+      },
+      "goals": {
+        "home": 0,
+        "away": 0
+      },
+      "score": {
+        "halftime": {
+          "home": 0,
+          "away": 0
+        },
+        "fulltime": {
+          "home": 0,
+          "away": 0
+        },
+        "extratime": {
+          "home": null,
+          "away": null
+        },
+        "penalty": {
+          "home": null,
+          "away": null
+        }
+      }
+    },
+    {
+      "fixture": {
+        "id": 881037,
+        "referee": "S. Martin",
+        "timezone": "UTC",
+        "date": "2023-01-14T15:00:00+00:00",
+        "timestamp": 1673708400,
+        "periods": {
+          "first": 1673708400,
+          "second": 1673712000
+        },
+        "venue": {
+          "id": 574,
+          "name": "Deepdale",
+          "city": "Preston"
+        },
+        "status": {
+          "long": "Match Finished",
+          "short": "FT",
+          "elapsed": 90,
+          "extra": null
+        }
+      },
+      "league": {
+        "id": 40,
+        "name": "Championship",
+        "country": "England",
+        "logo": "https://media.api-sports.io/football/leagues/40.png",
+        "flag": "https://media.api-sports.io/flags/gb-eng.svg",
+        "season": 2022,
+        "round": "Regular Season - 27",
+        "standings": true
+      },
+      "teams": {
+        "home": {
+          "id": 59,
+          "name": "Preston",
+          "logo": "https://media.api-sports.io/football/teams/59.png",
+          "winner": false
+        },
+        "away": {
+          "id": 71,
+          "name": "Norwich",
+          "logo": "https://media.api-sports.io/football/teams/71.png",
+          "winner": true
+        }
+      },
+      "goals": {
+        "home": 0,
+        "away": 4
+      },
+      "score": {
+        "halftime": {
+          "home": 0,
+          "away": 3
+        },
+        "fulltime": {
+          "home": 0,
+          "away": 4
+        },
+        "extratime": {
+          "home": null,
+          "away": null
+        },
+        "penalty": {
+          "home": null,
+          "away": null
+        }
+      }
+    },
+    {
+      "fixture": {
+        "id": 880881,
+        "referee": "O. Langford",
+        "timezone": "UTC",
+        "date": "2022-10-08T14:00:00+00:00",
+        "timestamp": 1665237600,
+        "periods": {
+          "first": 1665237600,
+          "second": 1665241200
+        },
+        "venue": {
+          "id": 565,
+          "name": "Carrow Road",
+          "city": "Norwich, Norfolk"
+        },
+        "status": {
+          "long": "Match Finished",
+          "short": "FT",
+          "elapsed": 90,
+          "extra": null
+        }
+      },
+      "league": {
+        "id": 40,
+        "name": "Championship",
+        "country": "England",
+        "logo": "https://media.api-sports.io/football/leagues/40.png",
+        "flag": "https://media.api-sports.io/flags/gb-eng.svg",
+        "season": 2022,
+        "round": "Regular Season - 14",
+        "standings": true
+      },
+      "teams": {
+        "home": {
+          "id": 71,
+          "name": "Norwich",
+          "logo": "https://media.api-sports.io/football/teams/71.png",
+          "winner": false
+        },
+        "away": {
+          "id": 59,
+          "name": "Preston",
+          "logo": "https://media.api-sports.io/football/teams/59.png",
+          "winner": true
+        }
+      },
+      "goals": {
+        "home": 2,
+        "away": 3
+      },
+      "score": {
+        "halftime": {
+          "home": 1,
+          "away": 1
+        },
+        "fulltime": {
+          "home": 2,
+          "away": 3
+        },
+        "extratime": {
+          "home": null,
+          "away": null
+        },
+        "penalty": {
+          "home": null,
+          "away": null
+        }
+      }
+    },
+    {
+      "fixture": {
+        "id": 593340,
+        "referee": "D. Whitestone",
+        "timezone": "UTC",
+        "date": "2021-04-02T14:00:00+00:00",
+        "timestamp": 1617372000,
+        "periods": {
+          "first": 1617372000,
+          "second": 1617375600
+        },
+        "venue": {
+          "id": 574,
+          "name": "Deepdale",
+          "city": "Preston"
+        },
+        "status": {
+          "long": "Match Finished",
+          "short": "FT",
+          "elapsed": 90,
+          "extra": null
+        }
+      },
+      "league": {
+        "id": 40,
+        "name": "Championship",
+        "country": "England",
+        "logo": "https://media.api-sports.io/football/leagues/40.png",
+        "flag": "https://media.api-sports.io/flags/gb-eng.svg",
+        "season": 2020,
+        "round": "Regular Season - 39",
+        "standings": true
+      },
+      "teams": {
+        "home": {
+          "id": 59,
+          "name": "Preston",
+          "logo": "https://media.api-sports.io/football/teams/59.png",
+          "winner": null
+        },
+        "away": {
+          "id": 71,
+          "name": "Norwich",
+          "logo": "https://media.api-sports.io/football/teams/71.png",
+          "winner": null
+        }
+      },
+      "goals": {
+        "home": 1,
+        "away": 1
+      },
+      "score": {
+        "halftime": {
+          "home": 0,
+          "away": 1
+        },
+        "fulltime": {
+          "home": 1,
+          "away": 1
+        },
+        "extratime": {
+          "home": null,
+          "away": null
+        },
+        "penalty": {
+          "home": null,
+          "away": null
+        }
+      }
+    },
+    {
+      "fixture": {
+        "id": 592899,
+        "referee": "J. Brooks",
+        "timezone": "UTC",
+        "date": "2020-09-19T14:00:00+00:00",
+        "timestamp": 1600524000,
+        "periods": {
+          "first": 1600524000,
+          "second": 1600527600
+        },
+        "venue": {
+          "id": 565,
+          "name": "Carrow Road",
+          "city": "Norwich, Norfolk"
+        },
+        "status": {
+          "long": "Match Finished",
+          "short": "FT",
+          "elapsed": 90,
+          "extra": null
+        }
+      },
+      "league": {
+        "id": 40,
+        "name": "Championship",
+        "country": "England",
+        "logo": "https://media.api-sports.io/football/leagues/40.png",
+        "flag": "https://media.api-sports.io/flags/gb-eng.svg",
+        "season": 2020,
+        "round": "Regular Season - 2",
+        "standings": true
+      },
+      "teams": {
+        "home": {
+          "id": 71,
+          "name": "Norwich",
+          "logo": "https://media.api-sports.io/football/teams/71.png",
+          "winner": null
+        },
+        "away": {
+          "id": 59,
+          "name": "Preston",
+          "logo": "https://media.api-sports.io/football/teams/59.png",
+          "winner": null
+        }
+      },
+      "goals": {
+        "home": 2,
+        "away": 2
+      },
+      "score": {
+        "halftime": {
+          "home": 1,
+          "away": 2
+        },
+        "fulltime": {
+          "home": 2,
+          "away": 2
+        },
+        "extratime": {
+          "home": null,
+          "away": null
+        },
+        "penalty": {
+          "home": null,
+          "away": null
+        }
+      }
+    }
+  ]
+}

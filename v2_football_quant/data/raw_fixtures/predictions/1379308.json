@@ -1,0 +1,1353 @@
+{
+  "predictions": {
+    "winner": {
+      "id": 39,
+      "name": "Wolves",
+      "comment": "Win or draw"
+    },
+    "win_or_draw": true,
+    "under_over": null,
+    "goals": {
+      "home": "-2.5",
+      "away": "-2.5"
+    },
+    "advice": "Double chance : Wolves or draw",
+    "percent": {
+      "home": "45%",
+      "draw": "45%",
+      "away": "10%"
+    }
+  },
+  "league": {
+    "id": 39,
+    "name": "Premier League",
+    "country": "England",
+    "logo": "https://media.api-sports.io/football/leagues/39.png",
+    "flag": "https://media.api-sports.io/flags/gb-eng.svg",
+    "season": 2025
+  },
+  "teams": {
+    "home": {
+      "id": 39,
+      "name": "Wolves",
+      "logo": "https://media.api-sports.io/football/teams/39.png",
+      "last_5": {
+        "played": 5,
+        "form": "47%",
+        "att": "43%",
+        "def": "29%",
+        "goals": {
+          "for": {
+            "total": 6,
+            "average": "1.2"
+          },
+          "against": {
+            "total": 10,
+            "average": "2.0"
+          }
+        }
+      },
+      "league": {
+        "form": "LLLLLDDLLLLLLLLLLLDWDDLLLDDLWWDLL",
+        "fixtures": {
+          "played": {
+            "home": 16,
+            "away": 17,
+            "total": 33
+          },
+          "wins": {
+            "home": 3,
+            "away": 0,
+            "total": 3
+          },
+          "draws": {
+            "home": 3,
+            "away": 5,
+            "total": 8
+          },
+          "loses": {
+            "home": 10,
+            "away": 12,
+            "total": 22
+          }
+        },
+        "goals": {
+          "for": {
+            "total": {
+              "home": 17,
+              "away": 7,
+              "total": 24
+            },
+            "average": {
+              "home": "1.1",
+              "away": "0.4",
+              "total": "0.7"
+            },
+            "minute": {
+              "0-15": {
+                "total": 2,
+                "percentage": "7.41%"
+              },
+              "16-30": {
+                "total": 1,
+                "percentage": "3.70%"
+              },
+              "31-45": {
+                "total": 7,
+                "percentage": "25.93%"
+              },
+              "46-60": {
+                "total": 3,
+                "percentage": "11.11%"
+              },
+              "61-75": {
+                "total": 5,
+                "percentage": "18.52%"
+              },
+              "76-90": {
+                "total": 9,
+                "percentage": "33.33%"
+              },
+              "91-105": {
+                "total": null,
+                "percentage": null
+              },
+              "106-120": {
+                "total": null,
+                "percentage": null
+              }
+            },
+            "under_over": {
+              "0.5": {
+                "over": 16,
+                "under": 17
+              },
+              "1.5": {
+                "over": 7,
+                "under": 26
+              },
+              "2.5": {
+                "over": 1,
+                "under": 32
+              },
+              "3.5": {
+                "over": 0,
+                "under": 33
+              },
+              "4.5": {
+                "over": 0,
+                "under": 33
+              }
+            }
+          },
+          "against": {
+            "total": {
+              "home": 31,
+              "away": 30,
+              "total": 61
+            },
+            "average": {
+              "home": "1.9",
+              "away": "1.8",
+              "total": "1.8"
+            },
+            "minute": {
+              "0-15": {
+                "total": 7,
+                "percentage": "12.07%"
+              },
+              "16-30": {
+                "total": 10,
+                "percentage": "17.24%"
+              },
+              "31-45": {
+                "total": 14,
+                "percentage": "24.14%"
+              },
+              "46-60": {
+                "total": 4,
+                "percentage": "6.90%"
+              },
+              "61-75": {
+                "total": 12,
+                "percentage": "20.69%"
+              },
+              "76-90": {
+                "total": 11,
+                "percentage": "18.97%"
+              },
+              "91-105": {
+                "total": null,
+                "percentage": null
+              },
+              "106-120": {
+                "total": null,
+                "percentage": null
+              }
+            },
+            "under_over": {
+              "0.5": {
+                "over": 29,
+                "under": 4
+              },
+              "1.5": {
+                "over": 19,
+                "under": 14
+              },
+              "2.5": {
+                "over": 10,
+                "under": 23
+              },
+              "3.5": {
+                "over": 3,
+                "under": 30
+              },
+              "4.5": {
+                "over": 0,
+                "under": 33
+              }
+            }
+          }
+        },
+        "biggest": {
+          "streak": {
+            "wins": 2,
+            "draws": 2,
+            "loses": 11
+          },
+          "wins": {
+            "home": "3-0",
+            "away": null
+          },
+          "loses": {
+            "home": "0-4",
+            "away": "4-0"
+          },
+          "goals": {
+            "for": {
+              "home": 3,
+              "away": 2
+            },
+            "against": {
+              "home": 4,
+              "away": 4
+            }
+          }
+        },
+        "clean_sheet": {
+          "home": 3,
+          "away": 1,
+          "total": 4
+        },
+        "failed_to_score": {
+          "home": 6,
+          "away": 11,
+          "total": 17
+        },
+        "penalty": {
+          "scored": {
+            "total": 2,
+            "percentage": "100.00%"
+          },
+          "missed": {
+            "total": 0,
+            "percentage": "0%"
+          },
+          "total": 2
+        },
+        "lineups": [
+          {
+            "formation": "3-5-2",
+            "played": 9
+          },
+          {
+            "formation": "3-4-2-1",
+            "played": 8
+          },
+          {
+            "formation": "3-4-3",
+            "played": 5
+          },
+          {
+            "formation": "4-3-3",
+            "played": 4
+          },
+          {
+            "formation": "5-3-2",
+            "played": 3
+          },
+          {
+            "formation": "3-5-1-1",
+            "played": 2
+          },
+          {
+            "formation": "4-2-3-1",
+            "played": 1
+          },
+          {
+            "formation": "3-4-1-2",
+            "played": 1
+          }
+        ],
+        "cards": {
+          "yellow": {
+            "0-15": {
+              "total": 4,
+              "percentage": "5.56%"
+            },
+            "16-30": {
+              "total": 3,
+              "percentage": "4.17%"
+            },
+            "31-45": {
+              "total": 8,
+              "percentage": "11.11%"
+            },
+            "46-60": {
+              "total": 19,
+              "percentage": "26.39%"
+            },
+            "61-75": {
+              "total": 15,
+              "percentage": "20.83%"
+            },
+            "76-90": {
+              "total": 15,
+              "percentage": "20.83%"
+            },
+            "91-105": {
+              "total": 8,
+              "percentage": "11.11%"
+            },
+            "106-120": {
+              "total": null,
+              "percentage": null
+            }
+          },
+          "red": {
+            "0-15": {
+              "total": null,
+              "percentage": null
+            },
+            "16-30": {
+              "total": null,
+              "percentage": null
+            },
+            "31-45": {
+              "total": 1,
+              "percentage": "33.33%"
+            },
+            "46-60": {
+              "total": 1,
+              "percentage": "33.33%"
+            },
+            "61-75": {
+              "total": 1,
+              "percentage": "33.33%"
+            },
+            "76-90": {
+              "total": null,
+              "percentage": null
+            },
+            "91-105": {
+              "total": null,
+              "percentage": null
+            },
+            "106-120": {
+              "total": null,
+              "percentage": null
+            }
+          }
+        }
+      }
+    },
+    "away": {
+      "id": 47,
+      "name": "Tottenham",
+      "logo": "https://media.api-sports.io/football/teams/47.png",
+      "last_5": {
+        "played": 5,
+        "form": "13%",
+        "att": "29%",
+        "def": "29%",
+        "goals": {
+          "for": {
+            "total": 4,
+            "average": "0.8"
+          },
+          "against": {
+            "total": 10,
+            "average": "2.0"
+          }
+        }
+      },
+      "league": {
+        "form": "WWLWDDWLWLDLLDWLLWDDLLDDLLLLLDLLD",
+        "fixtures": {
+          "played": {
+            "home": 17,
+            "away": 16,
+            "total": 33
+          },
+          "wins": {
+            "home": 2,
+            "away": 5,
+            "total": 7
+          },
+          "draws": {
+            "home": 5,
+            "away": 5,
+            "total": 10
+          },
+          "loses": {
+            "home": 10,
+            "away": 6,
+            "total": 16
+          }
+        },
+        "goals": {
+          "for": {
+            "total": {
+              "home": 20,
+              "away": 22,
+              "total": 42
+            },
+            "average": {
+              "home": "1.2",
+              "away": "1.4",
+              "total": "1.3"
+            },
+            "minute": {
+              "0-15": {
+                "total": 3,
+                "percentage": "7.32%"
+              },
+              "16-30": {
+                "total": 4,
+                "percentage": "9.76%"
+              },
+              "31-45": {
+                "total": 10,
+                "percentage": "24.39%"
+              },
+              "46-60": {
+                "total": 7,
+                "percentage": "17.07%"
+              },
+              "61-75": {
+                "total": 6,
+                "percentage": "14.63%"
+              },
+              "76-90": {
+                "total": 11,
+                "percentage": "26.83%"
+              },
+              "91-105": {
+                "total": null,
+                "percentage": null
+              },
+              "106-120": {
+                "total": null,
+                "percentage": null
+              }
+            },
+            "under_over": {
+              "0.5": {
+                "over": 26,
+                "under": 7
+              },
+              "1.5": {
+                "over": 13,
+                "under": 20
+              },
+              "2.5": {
+                "over": 3,
+                "under": 30
+              },
+              "3.5": {
+                "over": 0,
+                "under": 33
+              },
+              "4.5": {
+                "over": 0,
+                "under": 33
+              }
+            }
+          },
+          "against": {
+            "total": {
+              "home": 30,
+              "away": 23,
+              "total": 53
+            },
+            "average": {
+              "home": "1.8",
+              "away": "1.4",
+              "total": "1.6"
+            },
+            "minute": {
+              "0-15": {
+                "total": 7,
+                "percentage": "12.96%"
+              },
+              "16-30": {
+                "total": 3,
+                "percentage": "5.56%"
+              },
+              "31-45": {
+                "total": 19,
+                "percentage": "35.19%"
+              },
+              "46-60": {
+                "total": 5,
+                "percentage": "9.26%"
+              },
+              "61-75": {
+                "total": 6,
+                "percentage": "11.11%"
+              },
+              "76-90": {
+                "total": 14,
+                "percentage": "25.93%"
+              },
+              "91-105": {
+                "total": null,
+                "percentage": null
+              },
+              "106-120": {
+                "total": null,
+                "percentage": null
+              }
+            },
+            "under_over": {
+              "0.5": {
+                "over": 26,
+                "under": 7
+              },
+              "1.5": {
+                "over": 19,
+                "under": 14
+              },
+              "2.5": {
+                "over": 6,
+                "under": 27
+              },
+              "3.5": {
+                "over": 2,
+                "under": 31
+              },
+              "4.5": {
+                "over": 0,
+                "under": 33
+              }
+            }
+          }
+        },
+        "biggest": {
+          "streak": {
+            "wins": 2,
+            "draws": 2,
+            "loses": 5
+          },
+          "wins": {
+            "home": "3-0",
+            "away": "0-3"
+          },
+          "loses": {
+            "home": "1-4",
+            "away": "4-1"
+          },
+          "goals": {
+            "for": {
+              "home": 3,
+              "away": 3
+            },
+            "against": {
+              "home": 4,
+              "away": 4
+            }
+          }
+        },
+        "clean_sheet": {
+          "home": 2,
+          "away": 5,
+          "total": 7
+        },
+        "failed_to_score": {
+          "home": 3,
+          "away": 4,
+          "total": 7
+        },
+        "penalty": {
+          "scored": {
+            "total": 0,
+            "percentage": "0%"
+          },
+          "missed": {
+            "total": 0,
+            "percentage": "0%"
+          },
+          "total": 0
+        },
+        "lineups": [
+          {
+            "formation": "4-2-3-1",
+            "played": 14
+          },
+          {
+            "formation": "4-3-3",
+            "played": 9
+          },
+          {
+            "formation": "3-4-2-1",
+            "played": 4
+          },
+          {
+            "formation": "4-4-2",
+            "played": 3
+          },
+          {
+            "formation": "4-2-2-2",
+            "played": 2
+          },
+          {
+            "formation": "3-5-2",
+            "played": 1
+          }
+        ],
+        "cards": {
+          "yellow": {
+            "0-15": {
+              "total": 4,
+              "percentage": "4.82%"
+            },
+            "16-30": {
+              "total": 10,
+              "percentage": "12.05%"
+            },
+            "31-45": {
+              "total": 14,
+              "percentage": "16.87%"
+            },
+            "46-60": {
+              "total": 13,
+              "percentage": "15.66%"
+            },
+            "61-75": {
+              "total": 20,
+              "percentage": "24.10%"
+            },
+            "76-90": {
+              "total": 13,
+              "percentage": "15.66%"
+            },
+            "91-105": {
+              "total": 9,
+              "percentage": "10.84%"
+            },
+            "106-120": {
+              "total": null,
+              "percentage": null
+            }
+          },
+          "red": {
+            "0-15": {
+              "total": null,
+              "percentage": null
+            },
+            "16-30": {
+              "total": 1,
+              "percentage": "25.00%"
+            },
+            "31-45": {
+              "total": 2,
+              "percentage": "50.00%"
+            },
+            "46-60": {
+              "total": null,
+              "percentage": null
+            },
+            "61-75": {
+              "total": null,
+              "percentage": null
+            },
+            "76-90": {
+              "total": null,
+              "percentage": null
+            },
+            "91-105": {
+              "total": 1,
+              "percentage": "25.00%"
+            },
+            "106-120": {
+              "total": null,
+              "percentage": null
+            }
+          }
+        }
+      }
+    }
+  },
+  "comparison": {
+    "form": {
+      "home": "78%",
+      "away": "22%"
+    },
+    "att": {
+      "home": "60%",
+      "away": "40%"
+    },
+    "def": {
+      "home": "50%",
+      "away": "50%"
+    },
+    "poisson_distribution": {
+      "home": "32%",
+      "away": "68%"
+    },
+    "h2h": {
+      "home": "85%",
+      "away": "15%"
+    },
+    "goals": {
+      "home": "61%",
+      "away": "39%"
+    },
+    "total": {
+      "home": "61.0%",
+      "away": "39.0%"
+    }
+  },
+  "h2h": [
+    {
+      "fixture": {
+        "id": 1379028,
+        "referee": "Michael Salisbury, England",
+        "timezone": "UTC",
+        "date": "2025-09-27T19:00:00+00:00",
+        "timestamp": 1758999600,
+        "periods": {
+          "first": 1758999600,
+          "second": 1759003200
+        },
+        "venue": {
+          "id": 593,
+          "name": "Tottenham Hotspur Stadium",
+          "city": "London"
+        },
+        "status": {
+          "long": "Match Finished",
+          "short": "FT",
+          "elapsed": 90,
+          "extra": 7
+        }
+      },
+      "league": {
+        "id": 39,
+        "name": "Premier League",
+        "country": "England",
+        "logo": "https://media.api-sports.io/football/leagues/39.png",
+        "flag": "https://media.api-sports.io/flags/gb-eng.svg",
+        "season": 2025,
+        "round": "Regular Season - 6",
+        "standings": true
+      },
+      "teams": {
+        "home": {
+          "id": 47,
+          "name": "Tottenham",
+          "logo": "https://media.api-sports.io/football/teams/47.png",
+          "winner": null
+        },
+        "away": {
+          "id": 39,
+          "name": "Wolves",
+          "logo": "https://media.api-sports.io/football/teams/39.png",
+          "winner": null
+        }
+      },
+      "goals": {
+        "home": 1,
+        "away": 1
+      },
+      "score": {
+        "halftime": {
+          "home": 0,
+          "away": 0
+        },
+        "fulltime": {
+          "home": 1,
+          "away": 1
+        },
+        "extratime": {
+          "home": null,
+          "away": null
+        },
+        "penalty": {
+          "home": null,
+          "away": null
+        }
+      }
+    },
+    {
+      "fixture": {
+        "id": 1208342,
+        "referee": "A. Taylor",
+        "timezone": "UTC",
+        "date": "2025-04-13T13:00:00+00:00",
+        "timestamp": 1744549200,
+        "periods": {
+          "first": 1744549200,
+          "second": 1744552800
+        },
+        "venue": {
+          "id": 600,
+          "name": "Molineux Stadium",
+          "city": "Wolverhampton, West Midlands"
+        },
+        "status": {
+          "long": "Match Finished",
+          "short": "FT",
+          "elapsed": 90,
+          "extra": 5
+        }
+      },
+      "league": {
+        "id": 39,
+        "name": "Premier League",
+        "country": "England",
+        "logo": "https://media.api-sports.io/football/leagues/39.png",
+        "flag": "https://media.api-sports.io/flags/gb-eng.svg",
+        "season": 2024,
+        "round": "Regular Season - 32",
+        "standings": true
+      },
+      "teams": {
+        "home": {
+          "id": 39,
+          "name": "Wolves",
+          "logo": "https://media.api-sports.io/football/teams/39.png",
+          "winner": true
+        },
+        "away": {
+          "id": 47,
+          "name": "Tottenham",
+          "logo": "https://media.api-sports.io/football/teams/47.png",
+          "winner": false
+        }
+      },
+      "goals": {
+        "home": 4,
+        "away": 2
+      },
+      "score": {
+        "halftime": {
+          "home": 2,
+          "away": 0
+        },
+        "fulltime": {
+          "home": 4,
+          "away": 2
+        },
+        "extratime": {
+          "home": null,
+          "away": null
+        },
+        "penalty": {
+          "home": null,
+          "away": null
+        }
+      }
+    },
+    {
+      "fixture": {
+        "id": 1208211,
+        "referee": "C. Kavanagh",
+        "timezone": "UTC",
+        "date": "2024-12-29T15:00:00+00:00",
+        "timestamp": 1735484400,
+        "periods": {
+          "first": 1735484400,
+          "second": 1735488000
+        },
+        "venue": {
+          "id": 593,
+          "name": "Tottenham Hotspur Stadium",
+          "city": "London"
+        },
+        "status": {
+          "long": "Match Finished",
+          "short": "FT",
+          "elapsed": 90,
+          "extra": 12
+        }
+      },
+      "league": {
+        "id": 39,
+        "name": "Premier League",
+        "country": "England",
+        "logo": "https://media.api-sports.io/football/leagues/39.png",
+        "flag": "https://media.api-sports.io/flags/gb-eng.svg",
+        "season": 2024,
+        "round": "Regular Season - 19",
+        "standings": true
+      },
+      "teams": {
+        "home": {
+          "id": 47,
+          "name": "Tottenham",
+          "logo": "https://media.api-sports.io/football/teams/47.png",
+          "winner": null
+        },
+        "away": {
+          "id": 39,
+          "name": "Wolves",
+          "logo": "https://media.api-sports.io/football/teams/39.png",
+          "winner": null
+        }
+      },
+      "goals": {
+        "home": 2,
+        "away": 2
+      },
+      "score": {
+        "halftime": {
+          "home": 2,
+          "away": 1
+        },
+        "fulltime": {
+          "home": 2,
+          "away": 2
+        },
+        "extratime": {
+          "home": null,
+          "away": null
+        },
+        "penalty": {
+          "home": null,
+          "away": null
+        }
+      }
+    },
+    {
+      "fixture": {
+        "id": 1035423,
+        "referee": "A. Taylor",
+        "timezone": "UTC",
+        "date": "2024-02-17T15:00:00+00:00",
+        "timestamp": 1708182000,
+        "periods": {
+          "first": 1708182000,
+          "second": 1708185600
+        },
+        "venue": {
+          "id": 593,
+          "name": "Tottenham Hotspur Stadium",
+          "city": "London"
+        },
+        "status": {
+          "long": "Match Finished",
+          "short": "FT",
+          "elapsed": 90,
+          "extra": null
+        }
+      },
+      "league": {
+        "id": 39,
+        "name": "Premier League",
+        "country": "England",
+        "logo": "https://media.api-sports.io/football/leagues/39.png",
+        "flag": "https://media.api-sports.io/flags/gb-eng.svg",
+        "season": 2023,
+        "round": "Regular Season - 25",
+        "standings": true
+      },
+      "teams": {
+        "home": {
+          "id": 47,
+          "name": "Tottenham",
+          "logo": "https://media.api-sports.io/football/teams/47.png",
+          "winner": false
+        },
+        "away": {
+          "id": 39,
+          "name": "Wolves",
+          "logo": "https://media.api-sports.io/football/teams/39.png",
+          "winner": true
+        }
+      },
+      "goals": {
+        "home": 1,
+        "away": 2
+      },
+      "score": {
+        "halftime": {
+          "home": 0,
+          "away": 1
+        },
+        "fulltime": {
+          "home": 1,
+          "away": 2
+        },
+        "extratime": {
+          "home": null,
+          "away": null
+        },
+        "penalty": {
+          "home": null,
+          "away": null
+        }
+      }
+    },
+    {
+      "fixture": {
+        "id": 1035156,
+        "referee": "T. Robinson",
+        "timezone": "UTC",
+        "date": "2023-11-11T12:30:00+00:00",
+        "timestamp": 1699705800,
+        "periods": {
+          "first": 1699705800,
+          "second": 1699709400
+        },
+        "venue": {
+          "id": 600,
+          "name": "Molineux Stadium",
+          "city": "Wolverhampton, West Midlands"
+        },
+        "status": {
+          "long": "Match Finished",
+          "short": "FT",
+          "elapsed": 90,
+          "extra": null
+        }
+      },
+      "league": {
+        "id": 39,
+        "name": "Premier League",
+        "country": "England",
+        "logo": "https://media.api-sports.io/football/leagues/39.png",
+        "flag": "https://media.api-sports.io/flags/gb-eng.svg",
+        "season": 2023,
+        "round": "Regular Season - 12",
+        "standings": true
+      },
+      "teams": {
+        "home": {
+          "id": 39,
+          "name": "Wolves",
+          "logo": "https://media.api-sports.io/football/teams/39.png",
+          "winner": true
+        },
+        "away": {
+          "id": 47,
+          "name": "Tottenham",
+          "logo": "https://media.api-sports.io/football/teams/47.png",
+          "winner": false
+        }
+      },
+      "goals": {
+        "home": 2,
+        "away": 1
+      },
+      "score": {
+        "halftime": {
+          "home": 0,
+          "away": 1
+        },
+        "fulltime": {
+          "home": 2,
+          "away": 1
+        },
+        "extratime": {
+          "home": null,
+          "away": null
+        },
+        "penalty": {
+          "home": null,
+          "away": null
+        }
+      }
+    },
+    {
+      "fixture": {
+        "id": 868205,
+        "referee": "T. Robinson",
+        "timezone": "UTC",
+        "date": "2023-03-04T15:00:00+00:00",
+        "timestamp": 1677942000,
+        "periods": {
+          "first": 1677942000,
+          "second": 1677945600
+        },
+        "venue": {
+          "id": 600,
+          "name": "Molineux Stadium",
+          "city": "Wolverhampton, West Midlands"
+        },
+        "status": {
+          "long": "Match Finished",
+          "short": "FT",
+          "elapsed": 90,
+          "extra": null
+        }
+      },
+      "league": {
+        "id": 39,
+        "name": "Premier League",
+        "country": "England",
+        "logo": "https://media.api-sports.io/football/leagues/39.png",
+        "flag": "https://media.api-sports.io/flags/gb-eng.svg",
+        "season": 2022,
+        "round": "Regular Season - 26",
+        "standings": true
+      },
+      "teams": {
+        "home": {
+          "id": 39,
+          "name": "Wolves",
+          "logo": "https://media.api-sports.io/football/teams/39.png",
+          "winner": true
+        },
+        "away": {
+          "id": 47,
+          "name": "Tottenham",
+          "logo": "https://media.api-sports.io/football/teams/47.png",
+          "winner": false
+        }
+      },
+      "goals": {
+        "home": 1,
+        "away": 0
+      },
+      "score": {
+        "halftime": {
+          "home": 0,
+          "away": 0
+        },
+        "fulltime": {
+          "home": 1,
+          "away": 0
+        },
+        "extratime": {
+          "home": null,
+          "away": null
+        },
+        "penalty": {
+          "home": null,
+          "away": null
+        }
+      }
+    },
+    {
+      "fixture": {
+        "id": 867974,
+        "referee": "S. Hooper",
+        "timezone": "UTC",
+        "date": "2022-08-20T11:30:00+00:00",
+        "timestamp": 1660995000,
+        "periods": {
+          "first": 1660995000,
+          "second": 1660998600
+        },
+        "venue": {
+          "id": 593,
+          "name": "Tottenham Hotspur Stadium",
+          "city": "London"
+        },
+        "status": {
+          "long": "Match Finished",
+          "short": "FT",
+          "elapsed": 90,
+          "extra": null
+        }
+      },
+      "league": {
+        "id": 39,
+        "name": "Premier League",
+        "country": "England",
+        "logo": "https://media.api-sports.io/football/leagues/39.png",
+        "flag": "https://media.api-sports.io/flags/gb-eng.svg",
+        "season": 2022,
+        "round": "Regular Season - 3",
+        "standings": true
+      },
+      "teams": {
+        "home": {
+          "id": 47,
+          "name": "Tottenham",
+          "logo": "https://media.api-sports.io/football/teams/47.png",
+          "winner": true
+        },
+        "away": {
+          "id": 39,
+          "name": "Wolves",
+          "logo": "https://media.api-sports.io/football/teams/39.png",
+          "winner": false
+        }
+      },
+      "goals": {
+        "home": 1,
+        "away": 0
+      },
+      "score": {
+        "halftime": {
+          "home": 0,
+          "away": 0
+        },
+        "fulltime": {
+          "home": 1,
+          "away": 0
+        },
+        "extratime": {
+          "home": null,
+          "away": null
+        },
+        "penalty": {
+          "home": null,
+          "away": null
+        }
+      }
+    },
+    {
+      "fixture": {
+        "id": 710804,
+        "referee": "K. Friend",
+        "timezone": "UTC",
+        "date": "2022-02-13T14:00:00+00:00",
+        "timestamp": 1644760800,
+        "periods": {
+          "first": 1644760800,
+          "second": 1644764400
+        },
+        "venue": {
+          "id": 593,
+          "name": "Tottenham Hotspur Stadium",
+          "city": "London"
+        },
+        "status": {
+          "long": "Match Finished",
+          "short": "FT",
+          "elapsed": 90,
+          "extra": null
+        }
+      },
+      "league": {
+        "id": 39,
+        "name": "Premier League",
+        "country": "England",
+        "logo": "https://media.api-sports.io/football/leagues/39.png",
+        "flag": "https://media.api-sports.io/flags/gb-eng.svg",
+        "season": 2021,
+        "round": "Regular Season - 25",
+        "standings": true
+      },
+      "teams": {
+        "home": {
+          "id": 47,
+          "name": "Tottenham",
+          "logo": "https://media.api-sports.io/football/teams/47.png",
+          "winner": false
+        },
+        "away": {
+          "id": 39,
+          "name": "Wolves",
+          "logo": "https://media.api-sports.io/football/teams/39.png",
+          "winner": true
+        }
+      },
+      "goals": {
+        "home": 0,
+        "away": 2
+      },
+      "score": {
+        "halftime": {
+          "home": 0,
+          "away": 2
+        },
+        "fulltime": {
+          "home": 0,
+          "away": 2
+        },
+        "extratime": {
+          "home": null,
+          "away": null
+        },
+        "penalty": {
+          "home": null,
+          "away": null
+        }
+      }
+    },
+    {
+      "fixture": {
+        "id": 787062,
+        "referee": "P. Bankes",
+        "timezone": "UTC",
+        "date": "2021-09-22T18:45:00+00:00",
+        "timestamp": 1632336300,
+        "periods": {
+          "first": 1632336300,
+          "second": 1632339900
+        },
+        "venue": {
+          "id": 600,
+          "name": "Molineux Stadium",
+          "city": "Wolverhampton, West Midlands"
+        },
+        "status": {
+          "long": "Match Finished",
+          "short": "PEN",
+          "elapsed": 120,
+          "extra": null
+        }
+      },
+      "league": {
+        "id": 48,
+        "name": "League Cup",
+        "country": "England",
+        "logo": "https://media.api-sports.io/football/leagues/48.png",
+        "flag": "https://media.api-sports.io/flags/gb-eng.svg",
+        "season": 2021,
+        "round": "3rd Round",
+        "standings": false
+      },
+      "teams": {
+        "home": {
+          "id": 39,
+          "name": "Wolves",
+          "logo": "https://media.api-sports.io/football/teams/39.png",
+          "winner": false
+        },
+        "away": {
+          "id": 47,
+          "name": "Tottenham",
+          "logo": "https://media.api-sports.io/football/teams/47.png",
+          "winner": true
+        }
+      },
+      "goals": {
+        "home": 2,
+        "away": 2
+      },
+      "score": {
+        "halftime": {
+          "home": 1,
+          "away": 2
+        },
+        "fulltime": {
+          "home": 2,
+          "away": 2
+        },
+        "extratime": {
+          "home": 0,
+          "away": 0
+        },
+        "penalty": {
+          "home": 2,
+          "away": 3
+        }
+      }
+    }
+  ]
+}

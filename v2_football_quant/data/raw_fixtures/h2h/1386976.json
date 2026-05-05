@@ -1,0 +1,702 @@
+[
+  {
+    "fixture": {
+      "id": 1386976,
+      "referee": "David Webb, England",
+      "timezone": "UTC",
+      "date": "2026-03-07T12:30:00+00:00",
+      "timestamp": 1772886600,
+      "periods": {
+        "first": 1772886600,
+        "second": 1772890200
+      },
+      "venue": {
+        "id": null,
+        "name": "MKM Stadium",
+        "city": "Hull"
+      },
+      "status": {
+        "long": "Match Finished",
+        "short": "FT",
+        "elapsed": 90,
+        "extra": null
+      }
+    },
+    "league": {
+      "id": 40,
+      "name": "Championship",
+      "country": "England",
+      "logo": "https://media.api-sports.io/football/leagues/40.png",
+      "flag": "https://media.api-sports.io/flags/gb-eng.svg",
+      "season": 2025,
+      "round": "Regular Season - 36",
+      "standings": true
+    },
+    "teams": {
+      "home": {
+        "id": 64,
+        "name": "Hull City",
+        "logo": "https://media.api-sports.io/football/teams/64.png",
+        "winner": false
+      },
+      "away": {
+        "id": 58,
+        "name": "Millwall",
+        "logo": "https://media.api-sports.io/football/teams/58.png",
+        "winner": true
+      }
+    },
+    "goals": {
+      "home": 1,
+      "away": 3
+    },
+    "score": {
+      "halftime": {
+        "home": 1,
+        "away": 1
+      },
+      "fulltime": {
+        "home": 1,
+        "away": 3
+      },
+      "extratime": {
+        "home": null,
+        "away": null
+      },
+      "penalty": {
+        "home": null,
+        "away": null
+      }
+    }
+  },
+  {
+    "fixture": {
+      "id": 1386797,
+      "referee": "Gavin Ward, England",
+      "timezone": "UTC",
+      "date": "2025-12-13T15:00:00+00:00",
+      "timestamp": 1765638000,
+      "periods": {
+        "first": 1765638000,
+        "second": 1765641600
+      },
+      "venue": {
+        "id": 559,
+        "name": "The Den",
+        "city": "London"
+      },
+      "status": {
+        "long": "Match Finished",
+        "short": "FT",
+        "elapsed": 90,
+        "extra": 10
+      }
+    },
+    "league": {
+      "id": 40,
+      "name": "Championship",
+      "country": "England",
+      "logo": "https://media.api-sports.io/football/leagues/40.png",
+      "flag": "https://media.api-sports.io/flags/gb-eng.svg",
+      "season": 2025,
+      "round": "Regular Season - 21",
+      "standings": true
+    },
+    "teams": {
+      "home": {
+        "id": 58,
+        "name": "Millwall",
+        "logo": "https://media.api-sports.io/football/teams/58.png",
+        "winner": false
+      },
+      "away": {
+        "id": 64,
+        "name": "Hull City",
+        "logo": "https://media.api-sports.io/football/teams/64.png",
+        "winner": true
+      }
+    },
+    "goals": {
+      "home": 1,
+      "away": 3
+    },
+    "score": {
+      "halftime": {
+        "home": 0,
+        "away": 2
+      },
+      "fulltime": {
+        "home": 1,
+        "away": 3
+      },
+      "extratime": {
+        "home": null,
+        "away": null
+      },
+      "penalty": {
+        "home": null,
+        "away": null
+      }
+    }
+  },
+  {
+    "fixture": {
+      "id": 1216161,
+      "referee": "S. Martin",
+      "timezone": "UTC",
+      "date": "2025-01-18T12:30:00+00:00",
+      "timestamp": 1737203400,
+      "periods": {
+        "first": 1737203400,
+        "second": 1737207000
+      },
+      "venue": {
+        "id": 559,
+        "name": "The Den",
+        "city": "London"
+      },
+      "status": {
+        "long": "Match Finished",
+        "short": "FT",
+        "elapsed": 90,
+        "extra": 7
+      }
+    },
+    "league": {
+      "id": 40,
+      "name": "Championship",
+      "country": "England",
+      "logo": "https://media.api-sports.io/football/leagues/40.png",
+      "flag": "https://media.api-sports.io/flags/gb-eng.svg",
+      "season": 2024,
+      "round": "Regular Season - 27",
+      "standings": true
+    },
+    "teams": {
+      "home": {
+        "id": 58,
+        "name": "Millwall",
+        "logo": "https://media.api-sports.io/football/teams/58.png",
+        "winner": false
+      },
+      "away": {
+        "id": 64,
+        "name": "Hull City",
+        "logo": "https://media.api-sports.io/football/teams/64.png",
+        "winner": true
+      }
+    },
+    "goals": {
+      "home": 0,
+      "away": 1
+    },
+    "score": {
+      "halftime": {
+        "home": 0,
+        "away": 0
+      },
+      "fulltime": {
+        "home": 0,
+        "away": 1
+      },
+      "extratime": {
+        "home": null,
+        "away": null
+      },
+      "penalty": {
+        "home": null,
+        "away": null
+      }
+    }
+  },
+  {
+    "fixture": {
+      "id": 1215869,
+      "referee": "D. Webb",
+      "timezone": "UTC",
+      "date": "2024-08-24T11:30:00+00:00",
+      "timestamp": 1724499000,
+      "periods": {
+        "first": 1724499000,
+        "second": 1724502600
+      },
+      "venue": {
+        "id": 12051,
+        "name": "The MKM Stadium",
+        "city": "Hull"
+      },
+      "status": {
+        "long": "Match Finished",
+        "short": "FT",
+        "elapsed": 90,
+        "extra": null
+      }
+    },
+    "league": {
+      "id": 40,
+      "name": "Championship",
+      "country": "England",
+      "logo": "https://media.api-sports.io/football/leagues/40.png",
+      "flag": "https://media.api-sports.io/flags/gb-eng.svg",
+      "season": 2024,
+      "round": "Regular Season - 3",
+      "standings": true
+    },
+    "teams": {
+      "home": {
+        "id": 64,
+        "name": "Hull City",
+        "logo": "https://media.api-sports.io/football/teams/64.png",
+        "winner": null
+      },
+      "away": {
+        "id": 58,
+        "name": "Millwall",
+        "logo": "https://media.api-sports.io/football/teams/58.png",
+        "winner": null
+      }
+    },
+    "goals": {
+      "home": 0,
+      "away": 0
+    },
+    "score": {
+      "halftime": {
+        "home": 0,
+        "away": 0
+      },
+      "fulltime": {
+        "home": 0,
+        "away": 0
+      },
+      "extratime": {
+        "home": null,
+        "away": null
+      },
+      "penalty": {
+        "home": null,
+        "away": null
+      }
+    }
+  },
+  {
+    "fixture": {
+      "id": 1047783,
+      "referee": "A. Backhouse",
+      "timezone": "UTC",
+      "date": "2024-02-03T15:00:00+00:00",
+      "timestamp": 1706972400,
+      "periods": {
+        "first": 1706972400,
+        "second": 1706976000
+      },
+      "venue": {
+        "id": 12051,
+        "name": "The MKM Stadium",
+        "city": "Hull"
+      },
+      "status": {
+        "long": "Match Finished",
+        "short": "FT",
+        "elapsed": 90,
+        "extra": null
+      }
+    },
+    "league": {
+      "id": 40,
+      "name": "Championship",
+      "country": "England",
+      "logo": "https://media.api-sports.io/football/leagues/40.png",
+      "flag": "https://media.api-sports.io/flags/gb-eng.svg",
+      "season": 2023,
+      "round": "Regular Season - 30",
+      "standings": true
+    },
+    "teams": {
+      "home": {
+        "id": 64,
+        "name": "Hull City",
+        "logo": "https://media.api-sports.io/football/teams/64.png",
+        "winner": true
+      },
+      "away": {
+        "id": 58,
+        "name": "Millwall",
+        "logo": "https://media.api-sports.io/football/teams/58.png",
+        "winner": false
+      }
+    },
+    "goals": {
+      "home": 1,
+      "away": 0
+    },
+    "score": {
+      "halftime": {
+        "home": 1,
+        "away": 0
+      },
+      "fulltime": {
+        "home": 1,
+        "away": 0
+      },
+      "extratime": {
+        "home": null,
+        "away": null
+      },
+      "penalty": {
+        "home": null,
+        "away": null
+      }
+    }
+  },
+  {
+    "fixture": {
+      "id": 1047559,
+      "referee": "T. Robinson",
+      "timezone": "UTC",
+      "date": "2023-10-07T14:00:00+00:00",
+      "timestamp": 1696687200,
+      "periods": {
+        "first": 1696687200,
+        "second": 1696690800
+      },
+      "venue": {
+        "id": 559,
+        "name": "The Den",
+        "city": "London"
+      },
+      "status": {
+        "long": "Match Finished",
+        "short": "FT",
+        "elapsed": 90,
+        "extra": null
+      }
+    },
+    "league": {
+      "id": 40,
+      "name": "Championship",
+      "country": "England",
+      "logo": "https://media.api-sports.io/football/leagues/40.png",
+      "flag": "https://media.api-sports.io/flags/gb-eng.svg",
+      "season": 2023,
+      "round": "Regular Season - 11",
+      "standings": true
+    },
+    "teams": {
+      "home": {
+        "id": 58,
+        "name": "Millwall",
+        "logo": "https://media.api-sports.io/football/teams/58.png",
+        "winner": null
+      },
+      "away": {
+        "id": 64,
+        "name": "Hull City",
+        "logo": "https://media.api-sports.io/football/teams/64.png",
+        "winner": null
+      }
+    },
+    "goals": {
+      "home": 2,
+      "away": 2
+    },
+    "score": {
+      "halftime": {
+        "home": 1,
+        "away": 2
+      },
+      "fulltime": {
+        "home": 2,
+        "away": 2
+      },
+      "extratime": {
+        "home": null,
+        "away": null
+      },
+      "penalty": {
+        "home": null,
+        "away": null
+      }
+    }
+  },
+  {
+    "fixture": {
+      "id": 881205,
+      "referee": "J. Smith",
+      "timezone": "UTC",
+      "date": "2023-04-10T14:00:00+00:00",
+      "timestamp": 1681135200,
+      "periods": {
+        "first": 1681135200,
+        "second": 1681138800
+      },
+      "venue": {
+        "id": 12051,
+        "name": "The MKM Stadium",
+        "city": "Hull"
+      },
+      "status": {
+        "long": "Match Finished",
+        "short": "FT",
+        "elapsed": 90,
+        "extra": null
+      }
+    },
+    "league": {
+      "id": 40,
+      "name": "Championship",
+      "country": "England",
+      "logo": "https://media.api-sports.io/football/leagues/40.png",
+      "flag": "https://media.api-sports.io/flags/gb-eng.svg",
+      "season": 2022,
+      "round": "Regular Season - 41",
+      "standings": true
+    },
+    "teams": {
+      "home": {
+        "id": 64,
+        "name": "Hull City",
+        "logo": "https://media.api-sports.io/football/teams/64.png",
+        "winner": true
+      },
+      "away": {
+        "id": 58,
+        "name": "Millwall",
+        "logo": "https://media.api-sports.io/football/teams/58.png",
+        "winner": false
+      }
+    },
+    "goals": {
+      "home": 1,
+      "away": 0
+    },
+    "score": {
+      "halftime": {
+        "home": 0,
+        "away": 0
+      },
+      "fulltime": {
+        "home": 1,
+        "away": 0
+      },
+      "extratime": {
+        "home": null,
+        "away": null
+      },
+      "penalty": {
+        "home": null,
+        "away": null
+      }
+    }
+  },
+  {
+    "fixture": {
+      "id": 880950,
+      "referee": "J. Busby",
+      "timezone": "UTC",
+      "date": "2022-11-05T15:00:00+00:00",
+      "timestamp": 1667660400,
+      "periods": {
+        "first": 1667660400,
+        "second": 1667664000
+      },
+      "venue": {
+        "id": 559,
+        "name": "The Den",
+        "city": "London"
+      },
+      "status": {
+        "long": "Match Finished",
+        "short": "FT",
+        "elapsed": 90,
+        "extra": null
+      }
+    },
+    "league": {
+      "id": 40,
+      "name": "Championship",
+      "country": "England",
+      "logo": "https://media.api-sports.io/football/leagues/40.png",
+      "flag": "https://media.api-sports.io/flags/gb-eng.svg",
+      "season": 2022,
+      "round": "Regular Season - 20",
+      "standings": true
+    },
+    "teams": {
+      "home": {
+        "id": 58,
+        "name": "Millwall",
+        "logo": "https://media.api-sports.io/football/teams/58.png",
+        "winner": null
+      },
+      "away": {
+        "id": 64,
+        "name": "Hull City",
+        "logo": "https://media.api-sports.io/football/teams/64.png",
+        "winner": null
+      }
+    },
+    "goals": {
+      "home": 0,
+      "away": 0
+    },
+    "score": {
+      "halftime": {
+        "home": 0,
+        "away": 0
+      },
+      "fulltime": {
+        "home": 0,
+        "away": 0
+      },
+      "extratime": {
+        "home": null,
+        "away": null
+      },
+      "penalty": {
+        "home": null,
+        "away": null
+      }
+    }
+  },
+  {
+    "fixture": {
+      "id": 717308,
+      "referee": "D. Whitestone",
+      "timezone": "UTC",
+      "date": "2022-04-18T14:00:00+00:00",
+      "timestamp": 1650290400,
+      "periods": {
+        "first": 1650290400,
+        "second": 1650294000
+      },
+      "venue": {
+        "id": 559,
+        "name": "The Den",
+        "city": "London"
+      },
+      "status": {
+        "long": "Match Finished",
+        "short": "FT",
+        "elapsed": 90,
+        "extra": null
+      }
+    },
+    "league": {
+      "id": 40,
+      "name": "Championship",
+      "country": "England",
+      "logo": "https://media.api-sports.io/football/leagues/40.png",
+      "flag": "https://media.api-sports.io/flags/gb-eng.svg",
+      "season": 2021,
+      "round": "Regular Season - 43",
+      "standings": true
+    },
+    "teams": {
+      "home": {
+        "id": 58,
+        "name": "Millwall",
+        "logo": "https://media.api-sports.io/football/teams/58.png",
+        "winner": true
+      },
+      "away": {
+        "id": 64,
+        "name": "Hull City",
+        "logo": "https://media.api-sports.io/football/teams/64.png",
+        "winner": false
+      }
+    },
+    "goals": {
+      "home": 2,
+      "away": 1
+    },
+    "score": {
+      "halftime": {
+        "home": 0,
+        "away": 0
+      },
+      "fulltime": {
+        "home": 2,
+        "away": 1
+      },
+      "extratime": {
+        "home": null,
+        "away": null
+      },
+      "penalty": {
+        "home": null,
+        "away": null
+      }
+    }
+  },
+  {
+    "fixture": {
+      "id": 717028,
+      "referee": "J. Smith",
+      "timezone": "UTC",
+      "date": "2021-11-27T15:00:00+00:00",
+      "timestamp": 1638025200,
+      "periods": {
+        "first": 1638025200,
+        "second": 1638028800
+      },
+      "venue": {
+        "id": 12051,
+        "name": "The MKM Stadium",
+        "city": "Hull"
+      },
+      "status": {
+        "long": "Match Finished",
+        "short": "FT",
+        "elapsed": 90,
+        "extra": null
+      }
+    },
+    "league": {
+      "id": 40,
+      "name": "Championship",
+      "country": "England",
+      "logo": "https://media.api-sports.io/football/leagues/40.png",
+      "flag": "https://media.api-sports.io/flags/gb-eng.svg",
+      "season": 2021,
+      "round": "Regular Season - 20",
+      "standings": true
+    },
+    "teams": {
+      "home": {
+        "id": 64,
+        "name": "Hull City",
+        "logo": "https://media.api-sports.io/football/teams/64.png",
+        "winner": true
+      },
+      "away": {
+        "id": 58,
+        "name": "Millwall",
+        "logo": "https://media.api-sports.io/football/teams/58.png",
+        "winner": false
+      }
+    },
+    "goals": {
+      "home": 2,
+      "away": 1
+    },
+    "score": {
+      "halftime": {
+        "home": 1,
+        "away": 1
+      },
+      "fulltime": {
+        "home": 2,
+        "away": 1
+      },
+      "extratime": {
+        "home": null,
+        "away": null
+      },
+      "penalty": {
+        "home": null,
+        "away": null
+      }
+    }
+  }
+]

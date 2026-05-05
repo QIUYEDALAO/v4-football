@@ -1,0 +1,458 @@
+"""
+球队英文名 → 中文名 映射表
+==========================
+使用 fuzzy match (difflib) 进行模糊匹配，兼容大小写和简写差异。
+
+更新方法：
+  1. 跑完批量拉取后，收集 unknown teams
+  2. 手动补充映射
+  3. 定期维护
+"""
+
+# ===== 英超 (Premier League) =====
+TEAM_CN_PREMIER_LEAGUE = {
+    # 正选
+    "Arsenal": "阿森纳",
+    "Aston Villa": "阿斯顿维拉",
+    "Bournemouth": "伯恩茅斯",
+    "Brentford": "布伦特福德",
+    "Brighton": "布莱顿",
+    "Chelsea": "切尔西",
+    "Crystal Palace": "水晶宫",
+    "Everton": "埃弗顿",
+    "Fulham": "富勒姆",
+    "Ipswich": "伊普斯维奇",
+    "Leeds": "利兹联",
+    "Leicester": "莱斯特城",
+    "Liverpool": "利物浦",
+    "Manchester City": "曼城",
+    "Manchester United": "曼联",
+    "Manchester Utd": "曼联",
+    "Newcastle": "纽卡斯尔",
+    "Newcastle United": "纽卡斯尔",
+    "Newcastle Utd": "纽卡斯尔",
+    "Nottingham Forest": "诺丁汉森林",
+    "Sheffield United": "谢菲联",
+    "Sheffield Utd": "谢菲联",
+    "Southampton": "南安普顿",
+    "Tottenham": "热刺",
+    "West Ham": "西汉姆联",
+    "West Ham United": "西汉姆联",
+    "Wolves": "狼队",
+    "Wolverhampton": "狼队",
+}
+
+# ===== 英冠 (Championship) =====
+TEAM_CN_CHAMPIONSHIP = {
+    "Blackburn": "布莱克本",
+    "Bristol City": "布里斯托城",
+    "Burnley": "伯恩利",
+    "Cardiff": "卡迪夫城",
+    "Coventry": "考文垂",
+    "Derby": "德比郡",
+    "Hull": "赫尔城",
+    "Hull City": "赫尔城",
+    "Luton": "卢顿",
+    "Luton Town": "卢顿",
+    "Middlesbrough": "米德尔斯堡",
+    "Millwall": "米尔沃尔",
+    "Norwich": "诺维奇",
+    "Norwich City": "诺维奇",
+    "Oxford United": "牛津联",
+    "Plymouth": "普利茅斯",
+    "Portsmouth": "朴茨茅斯",
+    "Preston": "普雷斯顿",
+    "QPR": "女王公园巡游者",
+    "Queens Park Rangers": "女王公园巡游者",
+    "Sheffield Wednesday": "谢周三",
+    "Stoke": "斯托克城",
+    "Stoke City": "斯托克城",
+    "Sunderland": "桑德兰",
+    "Swansea": "斯旺西",
+    "Swansea City": "斯旺西",
+    "Watford": "沃特福德",
+    "West Brom": "西布朗",
+    "West Bromwich Albion": "西布朗",
+}
+
+# ===== 意甲 (Serie A) =====
+TEAM_CN_SERIE_A = {
+    "AC Milan": "AC米兰",
+    "Milan": "AC米兰",
+    "Atalanta": "亚特兰大",
+    "Bologna": "博洛尼亚",
+    "Cagliari": "卡利亚里",
+    "Como": "科莫",
+    "Empoli": "恩波利",
+    "Fiorentina": "佛罗伦萨",
+    "Genoa": "热那亚",
+    "Inter": "国际米兰",
+    "Inter Milan": "国际米兰",
+    "Juventus": "尤文图斯",
+    "Lazio": "拉齐奥",
+    "Lecce": "莱切",
+    "Monza": "蒙扎",
+    "Napoli": "那不勒斯",
+    "Parma": "帕尔马",
+    "Roma": "罗马",
+    "AS Roma": "罗马",
+    "Torino": "都灵",
+    "Udinese": "乌迪内斯",
+    "Venezia": "威尼斯",
+    "Verona": "维罗纳",
+    "Hellas Verona": "维罗纳",
+    "Cremonese": "克雷莫纳",
+    "Sassuolo": "萨索洛",
+    "Salernitana": "萨勒尼塔纳",
+    "Spezia": "斯佩齐亚",
+    "Sampdoria": "桑普多利亚",
+}
+
+# ===== 西甲 (La Liga) =====
+TEAM_CN_LA_LIGA = {
+    "Alaves": "阿拉维斯",
+    "Athletic Club": "毕尔巴鄂竞技",
+    "Athletic Bilbao": "毕尔巴鄂竞技",
+    "Atletico Madrid": "马竞",
+    "Barcelona": "巴塞罗那",
+    "Betis": "皇家贝蒂斯",
+    "Celta Vigo": "塞尔塔",
+    "Espanyol": "西班牙人",
+    "Getafe": "赫塔费",
+    "Girona": "吉罗纳",
+    "Las Palmas": "拉斯帕尔马斯",
+    "Leganes": "莱加内斯",
+    "Mallorca": "马洛卡",
+    "Osasuna": "奥萨苏纳",
+    "Real Madrid": "皇马",
+    "Rayo Vallecano": "巴列卡诺",
+    "Real Sociedad": "皇家社会",
+    "Sevilla": "塞维利亚",
+    "Valencia": "瓦伦西亚",
+    "Valladolid": "巴拉多利德",
+    "Villarreal": "比利亚雷亚尔",
+    # 西乙
+    "Almeria": "阿尔梅里亚",
+    "Mirandes": "米兰德斯",
+    "Elche": "埃尔切",
+    "Malaga": "马拉加",
+    "Levante": "莱万特",
+    "Granada": "格拉纳达",
+    "Tenerife": "特内里费",
+    "Oviedo": "奥维多",
+    "Cadiz": "加的斯",
+    "Huesca": "韦斯卡",
+    "Zaragoza": "萨拉戈萨",
+    "Eibar": "埃瓦尔",
+    "Racing Santander": "桑坦德竞技",
+    "Ferrol": "费罗尔竞技",
+    "Sporting Gijon": "希洪竞技",
+    "Burgos": "布尔戈斯",
+    "Albacete": "阿尔巴塞特",
+    "Castellon": "卡斯特利翁",
+    "Deportivo La Coruna": "拉科鲁尼亚",
+    "Deportivo": "拉科鲁尼亚",
+}
+
+# ===== 德甲 (Bundesliga) =====
+TEAM_CN_BUNDESLIGA = {
+    "Bayern Munich": "拜仁慕尼黑",
+    "FC Bayern München": "拜仁慕尼黑",
+    "Borussia Dortmund": "多特蒙德",
+    "BVB": "多特蒙德",
+    "RB Leipzig": "莱比锡红牛",
+    "Bayer Leverkusen": "勒沃库森",
+    "Eintracht Frankfurt": "法兰克福",
+    "SC Freiburg": "弗赖堡",
+    "VfB Stuttgart": "斯图加特",
+    "VfL Wolfsburg": "沃尔夫斯堡",
+    "1. FC Union Berlin": "柏林联合",
+    "Mainz 05": "美因茨",
+    "FC Augsburg": "奥格斯堡",
+    "Werder Bremen": "云达不莱梅",
+    "FC Köln": "科隆",
+    "1. FC Köln": "科隆",
+    "FC Heidenheim": "海登海姆",
+    "TSG Hoffenheim": "霍芬海姆",
+    "Holstein Kiel": "基尔",
+    "St. Pauli": "圣保利",
+    "Bochum": "波鸿",
+    "Borussia M.Gladbach": "门兴",
+    "Borussia Mönchengladbach": "门兴",
+    "Schalke 04": "沙尔克04",
+    "Hertha Berlin": "柏林赫塔",
+    "Hamburger SV": "汉堡",
+    "Fortuna Düsseldorf": "杜塞尔多夫",
+    # 德乙
+    "1. FC Magdeburg": "马格德堡",
+    "FC Nürnberg": "纽伦堡",
+    "Hansa Rostock": "汉莎罗斯托克",
+    "Hannover 96": "汉诺威96",
+    "Karlsruher SC": "卡尔斯鲁厄",
+    "SC Paderborn": "帕德博恩",
+    "Darmstadt 98": "达姆施塔特",
+    "Greuther Fürth": "菲尔特",
+    "Elversberg": "埃尔沃斯堡",
+    "Ulm": "乌尔姆",
+    "Eintracht Braunschweig": "布伦瑞克",
+    "Preußen Münster": "普鲁明斯特",
+    "Jahn Regensburg": "雷根斯堡",
+    "Kaiserslautern": "凯泽斯劳滕",
+    "Osnabrück": "奥斯纳布吕克",
+    "Wehen Wiesbaden": "韦恩",
+}
+
+# ===== 法甲 (Ligue 1) =====
+TEAM_CN_LIGUE_1 = {
+    "Paris Saint Germain": "大巴黎",
+    "PSG": "大巴黎",
+    "Marseille": "马赛",
+    "Olympique Marseille": "马赛",
+    "Olympique Lyonnais": "里昂",
+    "Lyon": "里昂",
+    "Monaco": "摩纳哥",
+    "Lille": "里尔",
+    "Nice": "尼斯",
+    "Lens": "朗斯",
+    "Stade Brestois 29": "布雷斯特",
+    "Brest": "布雷斯特",
+    "Rennes": "雷恩",
+    "Reims": "兰斯",
+    "Stade Rennais": "雷恩",
+    "Montpellier": "蒙彼利埃",
+    "Toulouse": "图卢兹",
+    "Strasbourg": "斯特拉斯堡",
+    "Nantes": "南特",
+    "AJ Auxerre": "欧塞尔",
+    "Auxerre": "欧塞尔",
+    "Angers": "昂热",
+    "Le Havre": "勒阿弗尔",
+    "Saint Etienne": "圣埃蒂安",
+    "Saint-Étienne": "圣埃蒂安",
+    "Metz": "梅斯",
+    "Clermont Foot": "克莱蒙",
+    "Lorient": "洛里昂",
+    "Troyes": "特鲁瓦",
+}
+
+# ===== 荷甲 (Eredivisie) =====
+TEAM_CN_EREDIVISIE = {
+    "Ajax": "阿贾克斯",
+    "PSV Eindhoven": "埃因霍温",
+    "Feyenoord": "费耶诺德",
+    "AZ Alkmaar": "阿尔克马尔",
+    "FC Twente": "特温特",
+    "FC Utrecht": "乌得勒支",
+    "FC Groningen": "格罗宁根",
+    "Heerenveen": "海伦芬",
+    "NEC Nijmegen": "奈梅亨",
+    "Go Ahead Eagles": "前进之鹰",
+    "Sparta Rotterdam": "鹿特丹斯巴达",
+    "PEC Zwolle": "兹沃勒",
+    "Fortuna Sittard": "福图纳",
+    "Heracles Almelo": "赫拉克勒斯",
+    "Willem II": "威廉二世",
+    "NAC Breda": "布雷达",
+    "Excelsior": "精英",
+    "RKC Waalwijk": "瓦尔韦克",
+    "Almere City FC": "阿尔梅勒城",
+    "Almere City": "阿尔梅勒城",
+}
+
+# ===== 葡超 (Primeira Liga) =====
+TEAM_CN_PRIMEIRA_LIGA = {
+    "Benfica": "本菲卡",
+    "FC Porto": "波尔图",
+    "Sporting CP": "葡萄牙体育",
+    "Sporting Lisbon": "葡萄牙体育",
+    "Braga": "布拉加",
+    "Vitoria Guimaraes": "吉马良斯",
+    "Guimaraes": "吉马良斯",
+    "Boavista": "博阿维斯塔",
+    "Rio Ave": "里奥阿维",
+    "Famalicao": "法马利康",
+    "Gil Vicente": "吉维森特",
+    "Arouca": "阿罗卡",
+    "Estoril": "埃斯托里尔",
+    "Santa Clara": "圣克拉拉",
+    "Moreirense": "摩雷伦斯",
+    "Farense": "法鲁",
+    "Estrela": "阿马多拉",
+    "Estrela Amadora": "阿马多拉",
+    "Casa Pia": "卡萨皮亚",
+    "Portimonense": "波尔蒂芒人",
+    "Nacional": "国民队",
+    "Chaves": "查维斯",
+    "Vizela": "维泽拉",
+    "Maritimo": "马里迪莫",
+    "Pacos Ferreira": "费雷拉",
+}
+
+# ===== 比甲 (Pro League) =====
+TEAM_CN_PRO_LEAGUE_BELGIUM = {
+    "Anderlecht": "安德莱赫特",
+    "Club Brugge": "布鲁日",
+    "Club Brugge KV": "布鲁日",
+    "Standard Liege": "标准列日",
+    "Standard Liège": "标准列日",
+    "KRC Genk": "亨克",
+    "Genk": "亨克",
+    "Antwerp": "安特卫普",
+    "KAA Gent": "根特",
+    "Gent": "根特",
+    "Union St. Gilloise": "圣吉罗斯",
+    "Union Saint-Gilloise": "圣吉罗斯",
+    "Cercle Brugge": "色格拉布鲁日",
+    "KV Mechelen": "梅赫伦",
+    "OH Leuven": "鲁汶",
+    "Sint-Truiden": "圣图尔登",
+    "CLUB NXT": "布鲁日NXT",
+    "Westerlo": "韦斯特鲁",
+    "Charleroi": "沙勒罗瓦",
+    "Kortrijk": "科特赖克",
+    "Beerschot VA": "比斯查",
+    "Dender": "登德尔",
+    "Eupen": "奥伊彭",
+    "RWDM": "莫伦贝克",
+    "Patro Eisden": "帕特罗艾斯登",
+}
+
+# ===== 韩K联 (K League 1) =====
+TEAM_CN_K_LEAGUE = {
+    "Ulsan Hyundai": "蔚山现代",
+    "Ulsan Hyundai FC": "蔚山现代",
+    "Ulsan HD FC": "蔚山现代",
+    "Jeonbuk Motors": "全北现代",
+    "Jeonbuk Hyundai Motors": "全北现代",
+    "Pohang Steelers": "浦项制铁",
+    "FC Seoul": "首尔FC",
+    "Incheon United": "仁川联",
+    "Gwangju FC": "光州FC",
+    "Gangwon FC": "江原FC",
+    "Suwon FC": "水原FC",
+    "Suwon Samsung Bluewings": "水原三星",
+    "Daegu FC": "大邱FC",
+    "Daejeon Citizen": "大田市民",
+    "Daejeon Hana Citizen": "大田市民",
+    "Jeju United": "济州联",
+    "Jeju United FC": "济州联",
+    "Bucheon FC 1995": "富川FC",
+    "Gimcheon Sangmu": "金泉尚武",
+    "Gimcheon Sangmu FC": "金泉尚武",
+    "FC Anyang": "安养FC",
+    "Seongnam FC": "城南FC",
+    "Chungnam Asan": "忠南牙山",
+    "Chungbuk Cheongju": "清州FC",
+    "Ansan Greeners": "安山绿人",
+    "Gimpo FC": "金浦FC",
+    "Busan IPark": "釜山IPark",
+}
+
+# ===== 日职联 (J League) =====
+TEAM_CN_J_LEAGUE = {
+    "Kashima Antlers": "鹿岛鹿角",
+    "Kawasaki Frontale": "川崎前锋",
+    "Yokohama F. Marinos": "横滨水手",
+    "Yokohama Marinos": "横滨水手",
+    "Urawa Red Diamonds": "浦和红钻",
+    "Sanfrecce Hiroshima": "广岛三箭",
+    "Nagoya Grampus": "名古屋鲸八",
+    "Gamba Osaka": "大阪钢巴",
+    "Cerezo Osaka": "大阪樱花",
+    "FC Tokyo": "FC东京",
+    "Vissel Kobe": "神户胜利船",
+    "Kyoto Sanga": "京都不死鸟",
+    "Sagan Tosu": "鸟栖砂岩",
+    "Shonan Bellmare": "湘南比马",
+    "Albirex Niigata": "新泻天鹅",
+    "Kashiwa Reysol": "柏太阳神",
+    "Avispa Fukuoka": "福冈黄蜂",
+    "Consadole Sapporo": "札幌冈萨多",
+    "Tokyo Verdy": "东京绿茵",
+    "Jubilo Iwata": "磐田喜悦",
+    "Shimizu S-Pulse": "清水心跳",
+    "Vegalta Sendai": "仙台七夕",
+    "Oita Trinita": "大分三神",
+    "Yokohama FC": "横滨FC",
+}
+
+# ===== 合并全部 =====
+TEAM_CN_MAP = {}
+for league_map in [
+    TEAM_CN_PREMIER_LEAGUE,
+    TEAM_CN_CHAMPIONSHIP,
+    TEAM_CN_SERIE_A,
+    TEAM_CN_LA_LIGA,
+    TEAM_CN_BUNDESLIGA,
+    TEAM_CN_LIGUE_1,
+    TEAM_CN_EREDIVISIE,
+    TEAM_CN_PRIMEIRA_LIGA,
+    TEAM_CN_PRO_LEAGUE_BELGIUM,
+    TEAM_CN_K_LEAGUE,
+    TEAM_CN_J_LEAGUE,
+]:
+    TEAM_CN_MAP.update(league_map)
+
+# fuzzy match 辅助
+import difflib
+import json
+import os
+
+MAP_PATH = os.path.join(os.path.dirname(__file__), "team_cn_map.json")
+
+
+def fuzzy_match(name: str, threshold: float = 0.6) -> str:
+    """
+    模糊匹配球队中文名。
+    
+    Args:
+        name: 英文队名
+        threshold: 相似度阈值 (0-1)
+    
+    Returns:
+        中文名，找不到返回原英文名
+    """
+    # 精确匹配
+    if name in TEAM_CN_MAP:
+        return TEAM_CN_MAP[name]
+    
+    # 大小写不敏感
+    low = name.lower()
+    for en, cn in TEAM_CN_MAP.items():
+        if en.lower() == low:
+            return cn
+    
+    # 子串匹配
+    for en, cn in TEAM_CN_MAP.items():
+        if en.lower() in low or low in en.lower():
+            return cn
+    
+    # difflib fuzzy
+    matches = difflib.get_close_matches(name, TEAM_CN_MAP.keys(), n=1, cutoff=threshold)
+    if matches:
+        return TEAM_CN_MAP[matches[0]]
+    
+    return name
+
+
+def save_map():
+    """保存映射表到 JSON（带 fuzzy 标记）"""
+    with open(MAP_PATH, "w", encoding="utf-8") as f:
+        json.dump({
+            "exact": TEAM_CN_MAP,
+            "note": "fuzzy match via difflib, threshold=0.6",
+            "unknown": [],  # 运行时发现的新球队追加在这
+        }, f, ensure_ascii=False, indent=2)
+    print(f"✅ 保存 {len(TEAM_CN_MAP)} 条映射到 {MAP_PATH}")
+
+
+if __name__ == "__main__":
+    save_map()
+    # 快速测试
+    tests = [
+        "Everton", "Manchester City", "FC Seoul", "Ulsan Hyundai FC",
+        "FC Barcelona", "Paris Saint Germain", "Juventus", "Bayern Munich",
+        "Some Unknown Team", "Liverpool",
+    ]
+    for t in tests:
+        print(f"  {t} → {fuzzy_match(t)}")

@@ -1,0 +1,24 @@
+[
+  {
+    "fixture_id": 1436164,
+    "date": "2026-05-05",
+    "home": "Al Khaleej Saihat",
+    "away": "Al-Hilal Saudi FC",
+    "league": "沙特联",
+    "time_bj": "02:00",
+    "att_def_spread": -57.0,
+    "decile": 1,
+    "outcome": "D",
+    "fair_odds": {
+      "H": 4.64,
+      "D": 2.42,
+      "A": 2.7
+    },
+    "placed_odds": 3.05,
+    "model_prob": 0.4132,
+    "implied_prob": 0.3279,
+    "edge": 0.0854,
+    "ev": 0.2603,
+    "bookmaker": "Pinnacle"
+  }
+]

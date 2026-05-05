@@ -1,0 +1,702 @@
+[
+  {
+    "fixture": {
+      "id": 1379315,
+      "referee": "Thomas Bramall, England",
+      "timezone": "UTC",
+      "date": "2026-05-01T19:00:00+00:00",
+      "timestamp": 1777662000,
+      "periods": {
+        "first": 1777662000,
+        "second": 1777665600
+      },
+      "venue": {
+        "id": 546,
+        "name": "Elland Road",
+        "city": "Leeds"
+      },
+      "status": {
+        "long": "Match Finished",
+        "short": "FT",
+        "elapsed": 90,
+        "extra": null
+      }
+    },
+    "league": {
+      "id": 39,
+      "name": "Premier League",
+      "country": "England",
+      "logo": "https://media.api-sports.io/football/leagues/39.png",
+      "flag": "https://media.api-sports.io/flags/gb-eng.svg",
+      "season": 2025,
+      "round": "Regular Season - 35",
+      "standings": true
+    },
+    "teams": {
+      "home": {
+        "id": 63,
+        "name": "Leeds",
+        "logo": "https://media.api-sports.io/football/teams/63.png",
+        "winner": true
+      },
+      "away": {
+        "id": 44,
+        "name": "Burnley",
+        "logo": "https://media.api-sports.io/football/teams/44.png",
+        "winner": false
+      }
+    },
+    "goals": {
+      "home": 3,
+      "away": 1
+    },
+    "score": {
+      "halftime": {
+        "home": 1,
+        "away": 0
+      },
+      "fulltime": {
+        "home": 3,
+        "away": 1
+      },
+      "extratime": {
+        "home": null,
+        "away": null
+      },
+      "penalty": {
+        "home": null,
+        "away": null
+      }
+    }
+  },
+  {
+    "fixture": {
+      "id": 1379040,
+      "referee": "Tim Robinson, England",
+      "timezone": "UTC",
+      "date": "2025-10-18T14:00:00+00:00",
+      "timestamp": 1760796000,
+      "periods": {
+        "first": 1760796000,
+        "second": 1760799600
+      },
+      "venue": {
+        "id": 512,
+        "name": "Turf Moor",
+        "city": "Burnley"
+      },
+      "status": {
+        "long": "Match Finished",
+        "short": "FT",
+        "elapsed": 90,
+        "extra": 8
+      }
+    },
+    "league": {
+      "id": 39,
+      "name": "Premier League",
+      "country": "England",
+      "logo": "https://media.api-sports.io/football/leagues/39.png",
+      "flag": "https://media.api-sports.io/flags/gb-eng.svg",
+      "season": 2025,
+      "round": "Regular Season - 8",
+      "standings": true
+    },
+    "teams": {
+      "home": {
+        "id": 44,
+        "name": "Burnley",
+        "logo": "https://media.api-sports.io/football/teams/44.png",
+        "winner": true
+      },
+      "away": {
+        "id": 63,
+        "name": "Leeds",
+        "logo": "https://media.api-sports.io/football/teams/63.png",
+        "winner": false
+      }
+    },
+    "goals": {
+      "home": 2,
+      "away": 0
+    },
+    "score": {
+      "halftime": {
+        "home": 1,
+        "away": 0
+      },
+      "fulltime": {
+        "home": 2,
+        "away": 0
+      },
+      "extratime": {
+        "home": null,
+        "away": null
+      },
+      "penalty": {
+        "home": null,
+        "away": null
+      }
+    }
+  },
+  {
+    "fixture": {
+      "id": 1216180,
+      "referee": "J. Smith",
+      "timezone": "UTC",
+      "date": "2025-01-27T20:00:00+00:00",
+      "timestamp": 1738008000,
+      "periods": {
+        "first": 1738008000,
+        "second": 1738011600
+      },
+      "venue": {
+        "id": 512,
+        "name": "Turf Moor",
+        "city": "Burnley"
+      },
+      "status": {
+        "long": "Match Finished",
+        "short": "FT",
+        "elapsed": 90,
+        "extra": 4
+      }
+    },
+    "league": {
+      "id": 40,
+      "name": "Championship",
+      "country": "England",
+      "logo": "https://media.api-sports.io/football/leagues/40.png",
+      "flag": "https://media.api-sports.io/flags/gb-eng.svg",
+      "season": 2024,
+      "round": "Regular Season - 29",
+      "standings": true
+    },
+    "teams": {
+      "home": {
+        "id": 44,
+        "name": "Burnley",
+        "logo": "https://media.api-sports.io/football/teams/44.png",
+        "winner": null
+      },
+      "away": {
+        "id": 63,
+        "name": "Leeds",
+        "logo": "https://media.api-sports.io/football/teams/63.png",
+        "winner": null
+      }
+    },
+    "goals": {
+      "home": 0,
+      "away": 0
+    },
+    "score": {
+      "halftime": {
+        "home": 0,
+        "away": 0
+      },
+      "fulltime": {
+        "home": 0,
+        "away": 0
+      },
+      "extratime": {
+        "home": null,
+        "away": null
+      },
+      "penalty": {
+        "home": null,
+        "away": null
+      }
+    }
+  },
+  {
+    "fixture": {
+      "id": 1215894,
+      "referee": "J. Bell",
+      "timezone": "UTC",
+      "date": "2024-09-14T11:30:00+00:00",
+      "timestamp": 1726313400,
+      "periods": {
+        "first": 1726313400,
+        "second": 1726317000
+      },
+      "venue": {
+        "id": 546,
+        "name": "Elland Road",
+        "city": "Leeds, West Yorkshire"
+      },
+      "status": {
+        "long": "Match Finished",
+        "short": "FT",
+        "elapsed": 90,
+        "extra": null
+      }
+    },
+    "league": {
+      "id": 40,
+      "name": "Championship",
+      "country": "England",
+      "logo": "https://media.api-sports.io/football/leagues/40.png",
+      "flag": "https://media.api-sports.io/flags/gb-eng.svg",
+      "season": 2024,
+      "round": "Regular Season - 5",
+      "standings": true
+    },
+    "teams": {
+      "home": {
+        "id": 63,
+        "name": "Leeds",
+        "logo": "https://media.api-sports.io/football/teams/63.png",
+        "winner": false
+      },
+      "away": {
+        "id": 44,
+        "name": "Burnley",
+        "logo": "https://media.api-sports.io/football/teams/44.png",
+        "winner": true
+      }
+    },
+    "goals": {
+      "home": 0,
+      "away": 1
+    },
+    "score": {
+      "halftime": {
+        "home": 0,
+        "away": 1
+      },
+      "fulltime": {
+        "home": 0,
+        "away": 1
+      },
+      "extratime": {
+        "home": null,
+        "away": null
+      },
+      "penalty": {
+        "home": null,
+        "away": null
+      }
+    }
+  },
+  {
+    "fixture": {
+      "id": 710761,
+      "referee": "P. Tierney",
+      "timezone": "UTC",
+      "date": "2022-01-02T14:00:00+00:00",
+      "timestamp": 1641132000,
+      "periods": {
+        "first": 1641132000,
+        "second": 1641135600
+      },
+      "venue": {
+        "id": 546,
+        "name": "Elland Road",
+        "city": "Leeds, West Yorkshire"
+      },
+      "status": {
+        "long": "Match Finished",
+        "short": "FT",
+        "elapsed": 90,
+        "extra": null
+      }
+    },
+    "league": {
+      "id": 39,
+      "name": "Premier League",
+      "country": "England",
+      "logo": "https://media.api-sports.io/football/leagues/39.png",
+      "flag": "https://media.api-sports.io/flags/gb-eng.svg",
+      "season": 2021,
+      "round": "Regular Season - 21",
+      "standings": true
+    },
+    "teams": {
+      "home": {
+        "id": 63,
+        "name": "Leeds",
+        "logo": "https://media.api-sports.io/football/teams/63.png",
+        "winner": true
+      },
+      "away": {
+        "id": 44,
+        "name": "Burnley",
+        "logo": "https://media.api-sports.io/football/teams/44.png",
+        "winner": false
+      }
+    },
+    "goals": {
+      "home": 3,
+      "away": 1
+    },
+    "score": {
+      "halftime": {
+        "home": 1,
+        "away": 0
+      },
+      "fulltime": {
+        "home": 3,
+        "away": 1
+      },
+      "extratime": {
+        "home": null,
+        "away": null
+      },
+      "penalty": {
+        "home": null,
+        "away": null
+      }
+    }
+  },
+  {
+    "fixture": {
+      "id": 710578,
+      "referee": "M. Oliver",
+      "timezone": "UTC",
+      "date": "2021-08-29T13:00:00+00:00",
+      "timestamp": 1630242000,
+      "periods": {
+        "first": 1630242000,
+        "second": 1630245600
+      },
+      "venue": {
+        "id": 512,
+        "name": "Turf Moor",
+        "city": "Burnley"
+      },
+      "status": {
+        "long": "Match Finished",
+        "short": "FT",
+        "elapsed": 90,
+        "extra": null
+      }
+    },
+    "league": {
+      "id": 39,
+      "name": "Premier League",
+      "country": "England",
+      "logo": "https://media.api-sports.io/football/leagues/39.png",
+      "flag": "https://media.api-sports.io/flags/gb-eng.svg",
+      "season": 2021,
+      "round": "Regular Season - 3",
+      "standings": true
+    },
+    "teams": {
+      "home": {
+        "id": 44,
+        "name": "Burnley",
+        "logo": "https://media.api-sports.io/football/teams/44.png",
+        "winner": null
+      },
+      "away": {
+        "id": 63,
+        "name": "Leeds",
+        "logo": "https://media.api-sports.io/football/teams/63.png",
+        "winner": null
+      }
+    },
+    "goals": {
+      "home": 1,
+      "away": 1
+    },
+    "score": {
+      "halftime": {
+        "home": 0,
+        "away": 0
+      },
+      "fulltime": {
+        "home": 1,
+        "away": 1
+      },
+      "extratime": {
+        "home": null,
+        "away": null
+      },
+      "penalty": {
+        "home": null,
+        "away": null
+      }
+    }
+  },
+  {
+    "fixture": {
+      "id": 592847,
+      "referee": "G. Scott",
+      "timezone": "UTC",
+      "date": "2021-05-15T11:30:00+00:00",
+      "timestamp": 1621078200,
+      "periods": {
+        "first": 1621078200,
+        "second": 1621081800
+      },
+      "venue": {
+        "id": 512,
+        "name": "Turf Moor",
+        "city": "Burnley"
+      },
+      "status": {
+        "long": "Match Finished",
+        "short": "FT",
+        "elapsed": 90,
+        "extra": null
+      }
+    },
+    "league": {
+      "id": 39,
+      "name": "Premier League",
+      "country": "England",
+      "logo": "https://media.api-sports.io/football/leagues/39.png",
+      "flag": "https://media.api-sports.io/flags/gb-eng.svg",
+      "season": 2020,
+      "round": "Regular Season - 36",
+      "standings": true
+    },
+    "teams": {
+      "home": {
+        "id": 44,
+        "name": "Burnley",
+        "logo": "https://media.api-sports.io/football/teams/44.png",
+        "winner": false
+      },
+      "away": {
+        "id": 63,
+        "name": "Leeds",
+        "logo": "https://media.api-sports.io/football/teams/63.png",
+        "winner": true
+      }
+    },
+    "goals": {
+      "home": 0,
+      "away": 4
+    },
+    "score": {
+      "halftime": {
+        "home": 0,
+        "away": 1
+      },
+      "fulltime": {
+        "home": 0,
+        "away": 4
+      },
+      "extratime": {
+        "home": null,
+        "away": null
+      },
+      "penalty": {
+        "home": null,
+        "away": null
+      }
+    }
+  },
+  {
+    "fixture": {
+      "id": 592284,
+      "referee": "R. Jones",
+      "timezone": "UTC",
+      "date": "2020-12-27T12:00:00+00:00",
+      "timestamp": 1609070400,
+      "periods": {
+        "first": 1609070400,
+        "second": 1609074000
+      },
+      "venue": {
+        "id": 546,
+        "name": "Elland Road",
+        "city": "Leeds, West Yorkshire"
+      },
+      "status": {
+        "long": "Match Finished",
+        "short": "FT",
+        "elapsed": 90,
+        "extra": null
+      }
+    },
+    "league": {
+      "id": 39,
+      "name": "Premier League",
+      "country": "England",
+      "logo": "https://media.api-sports.io/football/leagues/39.png",
+      "flag": "https://media.api-sports.io/flags/gb-eng.svg",
+      "season": 2020,
+      "round": "Regular Season - 15",
+      "standings": true
+    },
+    "teams": {
+      "home": {
+        "id": 63,
+        "name": "Leeds",
+        "logo": "https://media.api-sports.io/football/teams/63.png",
+        "winner": true
+      },
+      "away": {
+        "id": 44,
+        "name": "Burnley",
+        "logo": "https://media.api-sports.io/football/teams/44.png",
+        "winner": false
+      }
+    },
+    "goals": {
+      "home": 1,
+      "away": 0
+    },
+    "score": {
+      "halftime": {
+        "home": 1,
+        "away": 0
+      },
+      "fulltime": {
+        "home": 1,
+        "away": 0
+      },
+      "extratime": {
+        "home": null,
+        "away": null
+      },
+      "penalty": {
+        "home": null,
+        "away": null
+      }
+    }
+  },
+  {
+    "fixture": {
+      "id": 455060,
+      "referee": "Darren Bond, England",
+      "timezone": "UTC",
+      "date": "2017-09-19T18:45:00+00:00",
+      "timestamp": 1505846700,
+      "periods": {
+        "first": 1505846700,
+        "second": 1505850300
+      },
+      "venue": {
+        "id": 512,
+        "name": "Turf Moor",
+        "city": "Burnley"
+      },
+      "status": {
+        "long": "Match Finished",
+        "short": "PEN",
+        "elapsed": 120,
+        "extra": null
+      }
+    },
+    "league": {
+      "id": 48,
+      "name": "League Cup",
+      "country": "England",
+      "logo": "https://media.api-sports.io/football/leagues/48.png",
+      "flag": "https://media.api-sports.io/flags/gb-eng.svg",
+      "season": 2017,
+      "round": "3rd Round",
+      "standings": false
+    },
+    "teams": {
+      "home": {
+        "id": 44,
+        "name": "Burnley",
+        "logo": "https://media.api-sports.io/football/teams/44.png",
+        "winner": false
+      },
+      "away": {
+        "id": 63,
+        "name": "Leeds",
+        "logo": "https://media.api-sports.io/football/teams/63.png",
+        "winner": true
+      }
+    },
+    "goals": {
+      "home": 4,
+      "away": 4
+    },
+    "score": {
+      "halftime": {
+        "home": 0,
+        "away": 0
+      },
+      "fulltime": {
+        "home": 2,
+        "away": 2
+      },
+      "extratime": {
+        "home": 2,
+        "away": 2
+      },
+      "penalty": {
+        "home": 3,
+        "away": 5
+      }
+    }
+  },
+  {
+    "fixture": {
+      "id": 371287,
+      "referee": "Lee Mason, England",
+      "timezone": "UTC",
+      "date": "2016-04-09T11:30:00+00:00",
+      "timestamp": 1460201400,
+      "periods": {
+        "first": 1460201400,
+        "second": 1460205000
+      },
+      "venue": {
+        "id": 512,
+        "name": "Turf Moor",
+        "city": "Burnley"
+      },
+      "status": {
+        "long": "Match Finished",
+        "short": "FT",
+        "elapsed": 90,
+        "extra": null
+      }
+    },
+    "league": {
+      "id": 40,
+      "name": "Championship",
+      "country": "England",
+      "logo": "https://media.api-sports.io/football/leagues/40.png",
+      "flag": "https://media.api-sports.io/flags/gb-eng.svg",
+      "season": 2015,
+      "round": "Regular Season - 41",
+      "standings": true
+    },
+    "teams": {
+      "home": {
+        "id": 44,
+        "name": "Burnley",
+        "logo": "https://media.api-sports.io/football/teams/44.png",
+        "winner": true
+      },
+      "away": {
+        "id": 63,
+        "name": "Leeds",
+        "logo": "https://media.api-sports.io/football/teams/63.png",
+        "winner": false
+      }
+    },
+    "goals": {
+      "home": 1,
+      "away": 0
+    },
+    "score": {
+      "halftime": {
+        "home": 1,
+        "away": 0
+      },
+      "fulltime": {
+        "home": 1,
+        "away": 0
+      },
+      "extratime": {
+        "home": null,
+        "away": null
+      },
+      "penalty": {
+        "home": null,
+        "away": null
+      }
+    }
+  }
+]

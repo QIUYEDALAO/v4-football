@@ -1,0 +1,1353 @@
+{
+  "predictions": {
+    "winner": {
+      "id": 69,
+      "name": "Derby",
+      "comment": "Win or draw"
+    },
+    "win_or_draw": true,
+    "under_over": null,
+    "goals": {
+      "home": "-2.5",
+      "away": "-1.5"
+    },
+    "advice": "Double chance : Derby or draw",
+    "percent": {
+      "home": "45%",
+      "draw": "45%",
+      "away": "10%"
+    }
+  },
+  "league": {
+    "id": 40,
+    "name": "Championship",
+    "country": "England",
+    "logo": "https://media.api-sports.io/football/leagues/40.png",
+    "flag": "https://media.api-sports.io/flags/gb-eng.svg",
+    "season": 2025
+  },
+  "teams": {
+    "home": {
+      "id": 69,
+      "name": "Derby",
+      "logo": "https://media.api-sports.io/football/teams/69.png",
+      "last_5": {
+        "played": 5,
+        "form": "40%",
+        "att": "53%",
+        "def": "40%",
+        "goals": {
+          "for": {
+            "total": 8,
+            "average": "1.6"
+          },
+          "against": {
+            "total": 9,
+            "average": "1.8"
+          }
+        }
+      },
+      "league": {
+        "form": "LLDDWLDDDLWWWWWLWLLDWDDLWLWWDWLWLLW",
+        "fixtures": {
+          "played": {
+            "home": 18,
+            "away": 17,
+            "total": 35
+          },
+          "wins": {
+            "home": 6,
+            "away": 8,
+            "total": 14
+          },
+          "draws": {
+            "home": 6,
+            "away": 3,
+            "total": 9
+          },
+          "loses": {
+            "home": 6,
+            "away": 6,
+            "total": 12
+          }
+        },
+        "goals": {
+          "for": {
+            "total": {
+              "home": 24,
+              "away": 28,
+              "total": 52
+            },
+            "average": {
+              "home": "1.3",
+              "away": "1.6",
+              "total": "1.5"
+            },
+            "minute": {
+              "0-15": {
+                "total": 7,
+                "percentage": "13.46%"
+              },
+              "16-30": {
+                "total": 6,
+                "percentage": "11.54%"
+              },
+              "31-45": {
+                "total": 10,
+                "percentage": "19.23%"
+              },
+              "46-60": {
+                "total": 11,
+                "percentage": "21.15%"
+              },
+              "61-75": {
+                "total": 10,
+                "percentage": "19.23%"
+              },
+              "76-90": {
+                "total": 8,
+                "percentage": "15.38%"
+              },
+              "91-105": {
+                "total": null,
+                "percentage": null
+              },
+              "106-120": {
+                "total": null,
+                "percentage": null
+              }
+            },
+            "under_over": {
+              "0.5": {
+                "over": 32,
+                "under": 3
+              },
+              "1.5": {
+                "over": 13,
+                "under": 22
+              },
+              "2.5": {
+                "over": 5,
+                "under": 30
+              },
+              "3.5": {
+                "over": 1,
+                "under": 34
+              },
+              "4.5": {
+                "over": 1,
+                "under": 34
+              }
+            }
+          },
+          "against": {
+            "total": {
+              "home": 24,
+              "away": 22,
+              "total": 46
+            },
+            "average": {
+              "home": "1.3",
+              "away": "1.3",
+              "total": "1.3"
+            },
+            "minute": {
+              "0-15": {
+                "total": 7,
+                "percentage": "15.22%"
+              },
+              "16-30": {
+                "total": 5,
+                "percentage": "10.87%"
+              },
+              "31-45": {
+                "total": 8,
+                "percentage": "17.39%"
+              },
+              "46-60": {
+                "total": 3,
+                "percentage": "6.52%"
+              },
+              "61-75": {
+                "total": 10,
+                "percentage": "21.74%"
+              },
+              "76-90": {
+                "total": 13,
+                "percentage": "28.26%"
+              },
+              "91-105": {
+                "total": null,
+                "percentage": null
+              },
+              "106-120": {
+                "total": null,
+                "percentage": null
+              }
+            },
+            "under_over": {
+              "0.5": {
+                "over": 27,
+                "under": 8
+              },
+              "1.5": {
+                "over": 11,
+                "under": 24
+              },
+              "2.5": {
+                "over": 5,
+                "under": 30
+              },
+              "3.5": {
+                "over": 2,
+                "under": 33
+              },
+              "4.5": {
+                "over": 1,
+                "under": 34
+              }
+            }
+          }
+        },
+        "biggest": {
+          "streak": {
+            "wins": 5,
+            "draws": 3,
+            "loses": 2
+          },
+          "wins": {
+            "home": "3-1",
+            "away": "0-5"
+          },
+          "loses": {
+            "home": "3-5",
+            "away": "4-2"
+          },
+          "goals": {
+            "for": {
+              "home": 3,
+              "away": 5
+            },
+            "against": {
+              "home": 5,
+              "away": 4
+            }
+          }
+        },
+        "clean_sheet": {
+          "home": 4,
+          "away": 4,
+          "total": 8
+        },
+        "failed_to_score": {
+          "home": 1,
+          "away": 2,
+          "total": 3
+        },
+        "penalty": {
+          "scored": {
+            "total": 4,
+            "percentage": "100.00%"
+          },
+          "missed": {
+            "total": 0,
+            "percentage": "0%"
+          },
+          "total": 4
+        },
+        "lineups": [
+          {
+            "formation": "4-2-3-1",
+            "played": 12
+          },
+          {
+            "formation": "3-4-2-1",
+            "played": 11
+          },
+          {
+            "formation": "4-4-2",
+            "played": 5
+          },
+          {
+            "formation": "3-4-1-2",
+            "played": 5
+          },
+          {
+            "formation": "3-5-2",
+            "played": 1
+          },
+          {
+            "formation": "3-4-3",
+            "played": 1
+          }
+        ],
+        "cards": {
+          "yellow": {
+            "0-15": {
+              "total": 5,
+              "percentage": "5.95%"
+            },
+            "16-30": {
+              "total": 8,
+              "percentage": "9.52%"
+            },
+            "31-45": {
+              "total": 14,
+              "percentage": "16.67%"
+            },
+            "46-60": {
+              "total": 20,
+              "percentage": "23.81%"
+            },
+            "61-75": {
+              "total": 16,
+              "percentage": "19.05%"
+            },
+            "76-90": {
+              "total": 10,
+              "percentage": "11.90%"
+            },
+            "91-105": {
+              "total": 11,
+              "percentage": "13.10%"
+            },
+            "106-120": {
+              "total": null,
+              "percentage": null
+            }
+          },
+          "red": {
+            "0-15": {
+              "total": null,
+              "percentage": null
+            },
+            "16-30": {
+              "total": null,
+              "percentage": null
+            },
+            "31-45": {
+              "total": 1,
+              "percentage": "33.33%"
+            },
+            "46-60": {
+              "total": null,
+              "percentage": null
+            },
+            "61-75": {
+              "total": null,
+              "percentage": null
+            },
+            "76-90": {
+              "total": 1,
+              "percentage": "33.33%"
+            },
+            "91-105": {
+              "total": 1,
+              "percentage": "33.33%"
+            },
+            "106-120": {
+              "total": null,
+              "percentage": null
+            }
+          }
+        }
+      }
+    },
+    "away": {
+      "id": 74,
+      "name": "Sheffield Wednesday",
+      "logo": "https://media.api-sports.io/football/teams/74.png",
+      "last_5": {
+        "played": 5,
+        "form": "0%",
+        "att": "20%",
+        "def": "13%",
+        "goals": {
+          "for": {
+            "total": 3,
+            "average": "0.6"
+          },
+          "against": {
+            "total": 13,
+            "average": "2.6"
+          }
+        }
+      },
+      "league": {
+        "form": "LLDLLWDDLLLLDDLLLLDLLDDLLLLLLLLLLLL",
+        "fixtures": {
+          "played": {
+            "home": 18,
+            "away": 17,
+            "total": 35
+          },
+          "wins": {
+            "home": 0,
+            "away": 1,
+            "total": 1
+          },
+          "draws": {
+            "home": 4,
+            "away": 4,
+            "total": 8
+          },
+          "loses": {
+            "home": 14,
+            "away": 12,
+            "total": 26
+          }
+        },
+        "goals": {
+          "for": {
+            "total": {
+              "home": 9,
+              "away": 12,
+              "total": 21
+            },
+            "average": {
+              "home": "0.5",
+              "away": "0.7",
+              "total": "0.6"
+            },
+            "minute": {
+              "0-15": {
+                "total": 5,
+                "percentage": "21.74%"
+              },
+              "16-30": {
+                "total": 5,
+                "percentage": "21.74%"
+              },
+              "31-45": {
+                "total": 1,
+                "percentage": "4.35%"
+              },
+              "46-60": {
+                "total": 6,
+                "percentage": "26.09%"
+              },
+              "61-75": {
+                "total": 4,
+                "percentage": "17.39%"
+              },
+              "76-90": {
+                "total": 2,
+                "percentage": "8.70%"
+              },
+              "91-105": {
+                "total": null,
+                "percentage": null
+              },
+              "106-120": {
+                "total": null,
+                "percentage": null
+              }
+            },
+            "under_over": {
+              "0.5": {
+                "over": 16,
+                "under": 19
+              },
+              "1.5": {
+                "over": 5,
+                "under": 30
+              },
+              "2.5": {
+                "over": 0,
+                "under": 35
+              },
+              "3.5": {
+                "over": 0,
+                "under": 35
+              },
+              "4.5": {
+                "over": 0,
+                "under": 35
+              }
+            }
+          },
+          "against": {
+            "total": {
+              "home": 38,
+              "away": 33,
+              "total": 71
+            },
+            "average": {
+              "home": "2.1",
+              "away": "1.9",
+              "total": "2.0"
+            },
+            "minute": {
+              "0-15": {
+                "total": 12,
+                "percentage": "17.39%"
+              },
+              "16-30": {
+                "total": 7,
+                "percentage": "10.14%"
+              },
+              "31-45": {
+                "total": 12,
+                "percentage": "17.39%"
+              },
+              "46-60": {
+                "total": 10,
+                "percentage": "14.49%"
+              },
+              "61-75": {
+                "total": 13,
+                "percentage": "18.84%"
+              },
+              "76-90": {
+                "total": 15,
+                "percentage": "21.74%"
+              },
+              "91-105": {
+                "total": null,
+                "percentage": null
+              },
+              "106-120": {
+                "total": null,
+                "percentage": null
+              }
+            },
+            "under_over": {
+              "0.5": {
+                "over": 32,
+                "under": 3
+              },
+              "1.5": {
+                "over": 24,
+                "under": 11
+              },
+              "2.5": {
+                "over": 12,
+                "under": 23
+              },
+              "3.5": {
+                "over": 2,
+                "under": 33
+              },
+              "4.5": {
+                "over": 1,
+                "under": 34
+              }
+            }
+          }
+        },
+        "biggest": {
+          "streak": {
+            "wins": 1,
+            "draws": 2,
+            "loses": 4
+          },
+          "wins": {
+            "home": null,
+            "away": "0-2"
+          },
+          "loses": {
+            "home": "0-5",
+            "away": "4-0"
+          },
+          "goals": {
+            "for": {
+              "home": 2,
+              "away": 2
+            },
+            "against": {
+              "home": 5,
+              "away": 4
+            }
+          }
+        },
+        "clean_sheet": {
+          "home": 1,
+          "away": 2,
+          "total": 3
+        },
+        "failed_to_score": {
+          "home": 11,
+          "away": 8,
+          "total": 19
+        },
+        "penalty": {
+          "scored": {
+            "total": 0,
+            "percentage": "0%"
+          },
+          "missed": {
+            "total": 0,
+            "percentage": "0%"
+          },
+          "total": 0
+        },
+        "lineups": [
+          {
+            "formation": "3-5-2",
+            "played": 11
+          },
+          {
+            "formation": "3-4-2-1",
+            "played": 8
+          },
+          {
+            "formation": "4-2-3-1",
+            "played": 6
+          },
+          {
+            "formation": "3-4-1-2",
+            "played": 3
+          },
+          {
+            "formation": "3-4-3",
+            "played": 3
+          },
+          {
+            "formation": "5-3-2",
+            "played": 2
+          },
+          {
+            "formation": "3-1-4-2",
+            "played": 2
+          }
+        ],
+        "cards": {
+          "yellow": {
+            "0-15": {
+              "total": 2,
+              "percentage": "3.64%"
+            },
+            "16-30": {
+              "total": 4,
+              "percentage": "7.27%"
+            },
+            "31-45": {
+              "total": 8,
+              "percentage": "14.55%"
+            },
+            "46-60": {
+              "total": 10,
+              "percentage": "18.18%"
+            },
+            "61-75": {
+              "total": 10,
+              "percentage": "18.18%"
+            },
+            "76-90": {
+              "total": 15,
+              "percentage": "27.27%"
+            },
+            "91-105": {
+              "total": 4,
+              "percentage": "7.27%"
+            },
+            "106-120": {
+              "total": null,
+              "percentage": null
+            },
+            "": {
+              "total": 2,
+              "percentage": "3.64%"
+            }
+          },
+          "red": {
+            "0-15": {
+              "total": null,
+              "percentage": null
+            },
+            "16-30": {
+              "total": null,
+              "percentage": null
+            },
+            "31-45": {
+              "total": null,
+              "percentage": null
+            },
+            "46-60": {
+              "total": null,
+              "percentage": null
+            },
+            "61-75": {
+              "total": null,
+              "percentage": null
+            },
+            "76-90": {
+              "total": 2,
+              "percentage": "66.67%"
+            },
+            "91-105": {
+              "total": 1,
+              "percentage": "33.33%"
+            },
+            "106-120": {
+              "total": null,
+              "percentage": null
+            }
+          }
+        }
+      }
+    }
+  },
+  "comparison": {
+    "form": {
+      "home": "100%",
+      "away": "0%"
+    },
+    "att": {
+      "home": "73%",
+      "away": "27%"
+    },
+    "def": {
+      "home": "59%",
+      "away": "41%"
+    },
+    "poisson_distribution": {
+      "home": "71%",
+      "away": "29%"
+    },
+    "h2h": {
+      "home": "29%",
+      "away": "71%"
+    },
+    "goals": {
+      "home": "46%",
+      "away": "54%"
+    },
+    "total": {
+      "home": "55.6%",
+      "away": "44.4%"
+    }
+  },
+  "h2h": [
+    {
+      "fixture": {
+        "id": 1386802,
+        "referee": "Lewis Smith, England",
+        "timezone": "UTC",
+        "date": "2025-12-15T20:00:00+00:00",
+        "timestamp": 1765828800,
+        "periods": {
+          "first": 1765828800,
+          "second": 1765832400
+        },
+        "venue": {
+          "id": 582,
+          "name": "Hillsborough",
+          "city": "Sheffield"
+        },
+        "status": {
+          "long": "Match Finished",
+          "short": "FT",
+          "elapsed": 90,
+          "extra": 5
+        }
+      },
+      "league": {
+        "id": 40,
+        "name": "Championship",
+        "country": "England",
+        "logo": "https://media.api-sports.io/football/leagues/40.png",
+        "flag": "https://media.api-sports.io/flags/gb-eng.svg",
+        "season": 2025,
+        "round": "Regular Season - 21",
+        "standings": true
+      },
+      "teams": {
+        "home": {
+          "id": 74,
+          "name": "Sheffield Wednesday",
+          "logo": "https://media.api-sports.io/football/teams/74.png",
+          "winner": false
+        },
+        "away": {
+          "id": 69,
+          "name": "Derby",
+          "logo": "https://media.api-sports.io/football/teams/69.png",
+          "winner": true
+        }
+      },
+      "goals": {
+        "home": 0,
+        "away": 3
+      },
+      "score": {
+        "halftime": {
+          "home": 0,
+          "away": 1
+        },
+        "fulltime": {
+          "home": 0,
+          "away": 3
+        },
+        "extratime": {
+          "home": null,
+          "away": null
+        },
+        "penalty": {
+          "home": null,
+          "away": null
+        }
+      }
+    },
+    {
+      "fixture": {
+        "id": 1216140,
+        "referee": "L. Smith",
+        "timezone": "UTC",
+        "date": "2025-01-01T15:00:00+00:00",
+        "timestamp": 1735743600,
+        "periods": {
+          "first": 1735743600,
+          "second": 1735747200
+        },
+        "venue": {
+          "id": 582,
+          "name": "Hillsborough",
+          "city": "Sheffield"
+        },
+        "status": {
+          "long": "Match Finished",
+          "short": "FT",
+          "elapsed": 90,
+          "extra": 6
+        }
+      },
+      "league": {
+        "id": 40,
+        "name": "Championship",
+        "country": "England",
+        "logo": "https://media.api-sports.io/football/leagues/40.png",
+        "flag": "https://media.api-sports.io/flags/gb-eng.svg",
+        "season": 2024,
+        "round": "Regular Season - 25",
+        "standings": true
+      },
+      "teams": {
+        "home": {
+          "id": 74,
+          "name": "Sheffield Wednesday",
+          "logo": "https://media.api-sports.io/football/teams/74.png",
+          "winner": true
+        },
+        "away": {
+          "id": 69,
+          "name": "Derby",
+          "logo": "https://media.api-sports.io/football/teams/69.png",
+          "winner": false
+        }
+      },
+      "goals": {
+        "home": 4,
+        "away": 2
+      },
+      "score": {
+        "halftime": {
+          "home": 1,
+          "away": 0
+        },
+        "fulltime": {
+          "home": 4,
+          "away": 2
+        },
+        "extratime": {
+          "home": null,
+          "away": null
+        },
+        "penalty": {
+          "home": null,
+          "away": null
+        }
+      }
+    },
+    {
+      "fixture": {
+        "id": 1216050,
+        "referee": "J. Busby",
+        "timezone": "UTC",
+        "date": "2024-12-01T15:00:00+00:00",
+        "timestamp": 1733065200,
+        "periods": {
+          "first": 1733065200,
+          "second": 1733068800
+        },
+        "venue": {
+          "id": 527,
+          "name": "Pride Park Stadium",
+          "city": "Derby"
+        },
+        "status": {
+          "long": "Match Finished",
+          "short": "FT",
+          "elapsed": 90,
+          "extra": 6
+        }
+      },
+      "league": {
+        "id": 40,
+        "name": "Championship",
+        "country": "England",
+        "logo": "https://media.api-sports.io/football/leagues/40.png",
+        "flag": "https://media.api-sports.io/flags/gb-eng.svg",
+        "season": 2024,
+        "round": "Regular Season - 18",
+        "standings": true
+      },
+      "teams": {
+        "home": {
+          "id": 69,
+          "name": "Derby",
+          "logo": "https://media.api-sports.io/football/teams/69.png",
+          "winner": false
+        },
+        "away": {
+          "id": 74,
+          "name": "Sheffield Wednesday",
+          "logo": "https://media.api-sports.io/football/teams/74.png",
+          "winner": true
+        }
+      },
+      "goals": {
+        "home": 1,
+        "away": 2
+      },
+      "score": {
+        "halftime": {
+          "home": 1,
+          "away": 0
+        },
+        "fulltime": {
+          "home": 1,
+          "away": 2
+        },
+        "extratime": {
+          "home": null,
+          "away": null
+        },
+        "penalty": {
+          "home": null,
+          "away": null
+        }
+      }
+    },
+    {
+      "fixture": {
+        "id": 876051,
+        "referee": "L. Doughty",
+        "timezone": "UTC",
+        "date": "2023-05-07T11:00:00+00:00",
+        "timestamp": 1683457200,
+        "periods": {
+          "first": 1683457200,
+          "second": 1683460800
+        },
+        "venue": {
+          "id": 582,
+          "name": "Hillsborough",
+          "city": "Sheffield"
+        },
+        "status": {
+          "long": "Match Finished",
+          "short": "FT",
+          "elapsed": 90,
+          "extra": null
+        }
+      },
+      "league": {
+        "id": 41,
+        "name": "League One",
+        "country": "England",
+        "logo": "https://media.api-sports.io/football/leagues/41.png",
+        "flag": "https://media.api-sports.io/flags/gb-eng.svg",
+        "season": 2022,
+        "round": "Regular Season - 46",
+        "standings": true
+      },
+      "teams": {
+        "home": {
+          "id": 74,
+          "name": "Sheffield Wednesday",
+          "logo": "https://media.api-sports.io/football/teams/74.png",
+          "winner": true
+        },
+        "away": {
+          "id": 69,
+          "name": "Derby",
+          "logo": "https://media.api-sports.io/football/teams/69.png",
+          "winner": false
+        }
+      },
+      "goals": {
+        "home": 1,
+        "away": 0
+      },
+      "score": {
+        "halftime": {
+          "home": 1,
+          "away": 0
+        },
+        "fulltime": {
+          "home": 1,
+          "away": 0
+        },
+        "extratime": {
+          "home": null,
+          "away": null
+        },
+        "penalty": {
+          "home": null,
+          "away": null
+        }
+      }
+    },
+    {
+      "fixture": {
+        "id": 875731,
+        "referee": "D. Whitestone",
+        "timezone": "UTC",
+        "date": "2022-12-03T12:30:00+00:00",
+        "timestamp": 1670070600,
+        "periods": {
+          "first": 1670070600,
+          "second": 1670074200
+        },
+        "venue": {
+          "id": 527,
+          "name": "Pride Park Stadium",
+          "city": "Derby"
+        },
+        "status": {
+          "long": "Match Finished",
+          "short": "FT",
+          "elapsed": 90,
+          "extra": null
+        }
+      },
+      "league": {
+        "id": 41,
+        "name": "League One",
+        "country": "England",
+        "logo": "https://media.api-sports.io/football/leagues/41.png",
+        "flag": "https://media.api-sports.io/flags/gb-eng.svg",
+        "season": 2022,
+        "round": "Regular Season - 20",
+        "standings": true
+      },
+      "teams": {
+        "home": {
+          "id": 69,
+          "name": "Derby",
+          "logo": "https://media.api-sports.io/football/teams/69.png",
+          "winner": null
+        },
+        "away": {
+          "id": 74,
+          "name": "Sheffield Wednesday",
+          "logo": "https://media.api-sports.io/football/teams/74.png",
+          "winner": null
+        }
+      },
+      "goals": {
+        "home": 0,
+        "away": 0
+      },
+      "score": {
+        "halftime": {
+          "home": 0,
+          "away": 0
+        },
+        "fulltime": {
+          "home": 0,
+          "away": 0
+        },
+        "extratime": {
+          "home": null,
+          "away": null
+        },
+        "penalty": {
+          "home": null,
+          "away": null
+        }
+      }
+    },
+    {
+      "fixture": {
+        "id": 593421,
+        "referee": "M. Dean",
+        "timezone": "UTC",
+        "date": "2021-05-08T11:30:00+00:00",
+        "timestamp": 1620473400,
+        "periods": {
+          "first": 1620473400,
+          "second": 1620477000
+        },
+        "venue": {
+          "id": 527,
+          "name": "Pride Park Stadium",
+          "city": "Derby"
+        },
+        "status": {
+          "long": "Match Finished",
+          "short": "FT",
+          "elapsed": 90,
+          "extra": null
+        }
+      },
+      "league": {
+        "id": 40,
+        "name": "Championship",
+        "country": "England",
+        "logo": "https://media.api-sports.io/football/leagues/40.png",
+        "flag": "https://media.api-sports.io/flags/gb-eng.svg",
+        "season": 2020,
+        "round": "Regular Season - 46",
+        "standings": true
+      },
+      "teams": {
+        "home": {
+          "id": 69,
+          "name": "Derby",
+          "logo": "https://media.api-sports.io/football/teams/69.png",
+          "winner": null
+        },
+        "away": {
+          "id": 74,
+          "name": "Sheffield Wednesday",
+          "logo": "https://media.api-sports.io/football/teams/74.png",
+          "winner": null
+        }
+      },
+      "goals": {
+        "home": 3,
+        "away": 3
+      },
+      "score": {
+        "halftime": {
+          "home": 0,
+          "away": 1
+        },
+        "fulltime": {
+          "home": 3,
+          "away": 3
+        },
+        "extratime": {
+          "home": null,
+          "away": null
+        },
+        "penalty": {
+          "home": null,
+          "away": null
+        }
+      }
+    },
+    {
+      "fixture": {
+        "id": 593151,
+        "referee": "M. Donohue",
+        "timezone": "UTC",
+        "date": "2021-01-01T17:30:00+00:00",
+        "timestamp": 1609522200,
+        "periods": {
+          "first": 1609522200,
+          "second": 1609525800
+        },
+        "venue": {
+          "id": 582,
+          "name": "Hillsborough",
+          "city": "Sheffield"
+        },
+        "status": {
+          "long": "Match Finished",
+          "short": "FT",
+          "elapsed": 90,
+          "extra": null
+        }
+      },
+      "league": {
+        "id": 40,
+        "name": "Championship",
+        "country": "England",
+        "logo": "https://media.api-sports.io/football/leagues/40.png",
+        "flag": "https://media.api-sports.io/flags/gb-eng.svg",
+        "season": 2020,
+        "round": "Regular Season - 23",
+        "standings": true
+      },
+      "teams": {
+        "home": {
+          "id": 74,
+          "name": "Sheffield Wednesday",
+          "logo": "https://media.api-sports.io/football/teams/74.png",
+          "winner": true
+        },
+        "away": {
+          "id": 69,
+          "name": "Derby",
+          "logo": "https://media.api-sports.io/football/teams/69.png",
+          "winner": false
+        }
+      },
+      "goals": {
+        "home": 1,
+        "away": 0
+      },
+      "score": {
+        "halftime": {
+          "home": 0,
+          "away": 0
+        },
+        "fulltime": {
+          "home": 1,
+          "away": 0
+        },
+        "extratime": {
+          "home": null,
+          "away": null
+        },
+        "penalty": {
+          "home": null,
+          "away": null
+        }
+      }
+    },
+    {
+      "fixture": {
+        "id": 164604,
+        "referee": "D. Whitestone",
+        "timezone": "UTC",
+        "date": "2020-02-29T15:00:00+00:00",
+        "timestamp": 1582988400,
+        "periods": {
+          "first": 1582988400,
+          "second": 1582992000
+        },
+        "venue": {
+          "id": 582,
+          "name": "Hillsborough",
+          "city": "Sheffield"
+        },
+        "status": {
+          "long": "Match Finished",
+          "short": "FT",
+          "elapsed": 90,
+          "extra": null
+        }
+      },
+      "league": {
+        "id": 40,
+        "name": "Championship",
+        "country": "England",
+        "logo": "https://media.api-sports.io/football/leagues/40.png",
+        "flag": "https://media.api-sports.io/flags/gb-eng.svg",
+        "season": 2019,
+        "round": "Regular Season - 36",
+        "standings": true
+      },
+      "teams": {
+        "home": {
+          "id": 74,
+          "name": "Sheffield Wednesday",
+          "logo": "https://media.api-sports.io/football/teams/74.png",
+          "winner": false
+        },
+        "away": {
+          "id": 69,
+          "name": "Derby",
+          "logo": "https://media.api-sports.io/football/teams/69.png",
+          "winner": true
+        }
+      },
+      "goals": {
+        "home": 1,
+        "away": 3
+      },
+      "score": {
+        "halftime": {
+          "home": 0,
+          "away": 3
+        },
+        "fulltime": {
+          "home": 1,
+          "away": 3
+        },
+        "extratime": {
+          "home": null,
+          "away": null
+        },
+        "penalty": {
+          "home": null,
+          "away": null
+        }
+      }
+    },
+    {
+      "fixture": {
+        "id": 164423,
+        "referee": "S. Martin",
+        "timezone": "UTC",
+        "date": "2019-12-11T19:45:00+00:00",
+        "timestamp": 1576093500,
+        "periods": {
+          "first": 1576093500,
+          "second": 1576097100
+        },
+        "venue": {
+          "id": 527,
+          "name": "Pride Park Stadium",
+          "city": "Derby"
+        },
+        "status": {
+          "long": "Match Finished",
+          "short": "FT",
+          "elapsed": 90,
+          "extra": null
+        }
+      },
+      "league": {
+        "id": 40,
+        "name": "Championship",
+        "country": "England",
+        "logo": "https://media.api-sports.io/football/leagues/40.png",
+        "flag": "https://media.api-sports.io/flags/gb-eng.svg",
+        "season": 2019,
+        "round": "Regular Season - 21",
+        "standings": true
+      },
+      "teams": {
+        "home": {
+          "id": 69,
+          "name": "Derby",
+          "logo": "https://media.api-sports.io/football/teams/69.png",
+          "winner": null
+        },
+        "away": {
+          "id": 74,
+          "name": "Sheffield Wednesday",
+          "logo": "https://media.api-sports.io/football/teams/74.png",
+          "winner": null
+        }
+      },
+      "goals": {
+        "home": 1,
+        "away": 1
+      },
+      "score": {
+        "halftime": {
+          "home": 0,
+          "away": 1
+        },
+        "fulltime": {
+          "home": 1,
+          "away": 1
+        },
+        "extratime": {
+          "home": null,
+          "away": null
+        },
+        "penalty": {
+          "home": null,
+          "away": null
+        }
+      }
+    }
+  ]
+}

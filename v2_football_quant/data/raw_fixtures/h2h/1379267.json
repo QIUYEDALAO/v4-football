@@ -1,0 +1,212 @@
+[
+  {
+    "fixture": {
+      "id": 1379267,
+      "referee": "Thomas Kirk, England",
+      "timezone": "UTC",
+      "date": "2026-03-14T15:00:00+00:00",
+      "timestamp": 1773500400,
+      "periods": {
+        "first": 1773500400,
+        "second": 1773504000
+      },
+      "venue": {
+        "id": 589,
+        "name": "Stadium of Light",
+        "city": "Sunderland"
+      },
+      "status": {
+        "long": "Match Finished",
+        "short": "FT",
+        "elapsed": 90,
+        "extra": 8
+      }
+    },
+    "league": {
+      "id": 39,
+      "name": "Premier League",
+      "country": "England",
+      "logo": "https://media.api-sports.io/football/leagues/39.png",
+      "flag": "https://media.api-sports.io/flags/gb-eng.svg",
+      "season": 2025,
+      "round": "Regular Season - 30",
+      "standings": true
+    },
+    "teams": {
+      "home": {
+        "id": 746,
+        "name": "Sunderland",
+        "logo": "https://media.api-sports.io/football/teams/746.png",
+        "winner": false
+      },
+      "away": {
+        "id": 51,
+        "name": "Brighton",
+        "logo": "https://media.api-sports.io/football/teams/51.png",
+        "winner": true
+      }
+    },
+    "goals": {
+      "home": 0,
+      "away": 1
+    },
+    "score": {
+      "halftime": {
+        "home": 0,
+        "away": 0
+      },
+      "fulltime": {
+        "home": 0,
+        "away": 1
+      },
+      "extratime": {
+        "home": null,
+        "away": null
+      },
+      "penalty": {
+        "home": null,
+        "away": null
+      }
+    }
+  },
+  {
+    "fixture": {
+      "id": 1379131,
+      "referee": "Darren England, England",
+      "timezone": "UTC",
+      "date": "2025-12-20T15:00:00+00:00",
+      "timestamp": 1766242800,
+      "periods": {
+        "first": 1766242800,
+        "second": 1766246400
+      },
+      "venue": {
+        "id": 508,
+        "name": "Amex Stadium",
+        "city": "Brighton"
+      },
+      "status": {
+        "long": "Match Finished",
+        "short": "FT",
+        "elapsed": 90,
+        "extra": 5
+      }
+    },
+    "league": {
+      "id": 39,
+      "name": "Premier League",
+      "country": "England",
+      "logo": "https://media.api-sports.io/football/leagues/39.png",
+      "flag": "https://media.api-sports.io/flags/gb-eng.svg",
+      "season": 2025,
+      "round": "Regular Season - 17",
+      "standings": true
+    },
+    "teams": {
+      "home": {
+        "id": 51,
+        "name": "Brighton",
+        "logo": "https://media.api-sports.io/football/teams/51.png",
+        "winner": null
+      },
+      "away": {
+        "id": 746,
+        "name": "Sunderland",
+        "logo": "https://media.api-sports.io/football/teams/746.png",
+        "winner": null
+      }
+    },
+    "goals": {
+      "home": 0,
+      "away": 0
+    },
+    "score": {
+      "halftime": {
+        "home": 0,
+        "away": 0
+      },
+      "fulltime": {
+        "home": 0,
+        "away": 0
+      },
+      "extratime": {
+        "home": null,
+        "away": null
+      },
+      "penalty": {
+        "home": null,
+        "away": null
+      }
+    }
+  },
+  {
+    "fixture": {
+      "id": 455635,
+      "referee": null,
+      "timezone": "UTC",
+      "date": "2011-08-23T18:45:00+00:00",
+      "timestamp": 1314125100,
+      "periods": {
+        "first": 1314125100,
+        "second": 1314128700
+      },
+      "venue": {
+        "id": null,
+        "name": "The American Express Community Stadium (Brighton, East Sussex)",
+        "city": null
+      },
+      "status": {
+        "long": "Match Finished",
+        "short": "AET",
+        "elapsed": 120,
+        "extra": null
+      }
+    },
+    "league": {
+      "id": 48,
+      "name": "League Cup",
+      "country": "England",
+      "logo": "https://media.api-sports.io/football/leagues/48.png",
+      "flag": "https://media.api-sports.io/flags/gb-eng.svg",
+      "season": 2011,
+      "round": "2nd Round",
+      "standings": false
+    },
+    "teams": {
+      "home": {
+        "id": 51,
+        "name": "Brighton",
+        "logo": "https://media.api-sports.io/football/teams/51.png",
+        "winner": true
+      },
+      "away": {
+        "id": 746,
+        "name": "Sunderland",
+        "logo": "https://media.api-sports.io/football/teams/746.png",
+        "winner": false
+      }
+    },
+    "goals": {
+      "home": 1,
+      "away": 0
+    },
+    "score": {
+      "halftime": {
+        "home": 0,
+        "away": 0
+      },
+      "fulltime": {
+        "home": 0,
+        "away": 0
+      },
+      "extratime": {
+        "home": 1,
+        "away": 0
+      },
+      "penalty": {
+        "home": null,
+        "away": null
+      }
+    }
+  }
+]

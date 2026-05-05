@@ -1,0 +1,1345 @@
+{
+  "predictions": {
+    "winner": {
+      "id": 70,
+      "name": "Middlesbrough",
+      "comment": "Win or draw"
+    },
+    "win_or_draw": true,
+    "under_over": null,
+    "goals": {
+      "home": "-2.5",
+      "away": "-2.5"
+    },
+    "advice": "Double chance : draw or Middlesbrough",
+    "percent": {
+      "home": "10%",
+      "draw": "45%",
+      "away": "45%"
+    }
+  },
+  "league": {
+    "id": 40,
+    "name": "Championship",
+    "country": "England",
+    "logo": "https://media.api-sports.io/football/leagues/40.png",
+    "flag": "https://media.api-sports.io/flags/gb-eng.svg",
+    "season": 2025
+  },
+  "teams": {
+    "home": {
+      "id": 72,
+      "name": "QPR",
+      "logo": "https://media.api-sports.io/football/teams/72.png",
+      "last_5": {
+        "played": 5,
+        "form": "27%",
+        "att": "40%",
+        "def": "0%",
+        "goals": {
+          "for": {
+            "total": 4,
+            "average": "0.8"
+          },
+          "against": {
+            "total": 11,
+            "average": "2.2"
+          }
+        }
+      },
+      "league": {
+        "form": "DLLWWWDDWLWLLLDWWLWWLWDLLWDDLWDLWLL",
+        "fixtures": {
+          "played": {
+            "home": 17,
+            "away": 18,
+            "total": 35
+          },
+          "wins": {
+            "home": 8,
+            "away": 5,
+            "total": 13
+          },
+          "draws": {
+            "home": 2,
+            "away": 6,
+            "total": 8
+          },
+          "loses": {
+            "home": 7,
+            "away": 7,
+            "total": 14
+          }
+        },
+        "goals": {
+          "for": {
+            "total": {
+              "home": 29,
+              "away": 17,
+              "total": 46
+            },
+            "average": {
+              "home": "1.7",
+              "away": "0.9",
+              "total": "1.3"
+            },
+            "minute": {
+              "0-15": {
+                "total": 5,
+                "percentage": "11.63%"
+              },
+              "16-30": {
+                "total": 3,
+                "percentage": "6.98%"
+              },
+              "31-45": {
+                "total": 9,
+                "percentage": "20.93%"
+              },
+              "46-60": {
+                "total": 3,
+                "percentage": "6.98%"
+              },
+              "61-75": {
+                "total": 9,
+                "percentage": "20.93%"
+              },
+              "76-90": {
+                "total": 14,
+                "percentage": "32.56%"
+              },
+              "91-105": {
+                "total": null,
+                "percentage": null
+              },
+              "106-120": {
+                "total": null,
+                "percentage": null
+              }
+            },
+            "under_over": {
+              "0.5": {
+                "over": 27,
+                "under": 8
+              },
+              "1.5": {
+                "over": 11,
+                "under": 24
+              },
+              "2.5": {
+                "over": 7,
+                "under": 28
+              },
+              "3.5": {
+                "over": 1,
+                "under": 34
+              },
+              "4.5": {
+                "over": 0,
+                "under": 35
+              }
+            }
+          },
+          "against": {
+            "total": {
+              "home": 26,
+              "away": 28,
+              "total": 54
+            },
+            "average": {
+              "home": "1.5",
+              "away": "1.6",
+              "total": "1.5"
+            },
+            "minute": {
+              "0-15": {
+                "total": 6,
+                "percentage": "10.53%"
+              },
+              "16-30": {
+                "total": 9,
+                "percentage": "15.79%"
+              },
+              "31-45": {
+                "total": 16,
+                "percentage": "28.07%"
+              },
+              "46-60": {
+                "total": 15,
+                "percentage": "26.32%"
+              },
+              "61-75": {
+                "total": 5,
+                "percentage": "8.77%"
+              },
+              "76-90": {
+                "total": 6,
+                "percentage": "10.53%"
+              },
+              "91-105": {
+                "total": null,
+                "percentage": null
+              },
+              "106-120": {
+                "total": null,
+                "percentage": null
+              }
+            },
+            "under_over": {
+              "0.5": {
+                "over": 26,
+                "under": 9
+              },
+              "1.5": {
+                "over": 14,
+                "under": 21
+              },
+              "2.5": {
+                "over": 7,
+                "under": 28
+              },
+              "3.5": {
+                "over": 3,
+                "under": 32
+              },
+              "4.5": {
+                "over": 2,
+                "under": 33
+              }
+            }
+          }
+        },
+        "biggest": {
+          "streak": {
+            "wins": 3,
+            "draws": 2,
+            "loses": 3
+          },
+          "wins": {
+            "home": "4-1",
+            "away": "1-3"
+          },
+          "loses": {
+            "home": "1-4",
+            "away": "7-1"
+          },
+          "goals": {
+            "for": {
+              "home": 4,
+              "away": 3
+            },
+            "against": {
+              "home": 4,
+              "away": 7
+            }
+          }
+        },
+        "clean_sheet": {
+          "home": 3,
+          "away": 6,
+          "total": 9
+        },
+        "failed_to_score": {
+          "home": 2,
+          "away": 6,
+          "total": 8
+        },
+        "penalty": {
+          "scored": {
+            "total": 2,
+            "percentage": "100.00%"
+          },
+          "missed": {
+            "total": 0,
+            "percentage": "0%"
+          },
+          "total": 2
+        },
+        "lineups": [
+          {
+            "formation": "4-2-3-1",
+            "played": 22
+          },
+          {
+            "formation": "4-4-2",
+            "played": 13
+          }
+        ],
+        "cards": {
+          "yellow": {
+            "0-15": {
+              "total": 1,
+              "percentage": "1.72%"
+            },
+            "16-30": {
+              "total": 5,
+              "percentage": "8.62%"
+            },
+            "31-45": {
+              "total": 10,
+              "percentage": "17.24%"
+            },
+            "46-60": {
+              "total": 9,
+              "percentage": "15.52%"
+            },
+            "61-75": {
+              "total": 11,
+              "percentage": "18.97%"
+            },
+            "76-90": {
+              "total": 12,
+              "percentage": "20.69%"
+            },
+            "91-105": {
+              "total": 9,
+              "percentage": "15.52%"
+            },
+            "106-120": {
+              "total": null,
+              "percentage": null
+            },
+            "": {
+              "total": 1,
+              "percentage": "1.72%"
+            }
+          },
+          "red": {
+            "0-15": {
+              "total": null,
+              "percentage": null
+            },
+            "16-30": {
+              "total": null,
+              "percentage": null
+            },
+            "31-45": {
+              "total": null,
+              "percentage": null
+            },
+            "46-60": {
+              "total": null,
+              "percentage": null
+            },
+            "61-75": {
+              "total": null,
+              "percentage": null
+            },
+            "76-90": {
+              "total": 1,
+              "percentage": "100.00%"
+            },
+            "91-105": {
+              "total": null,
+              "percentage": null
+            },
+            "106-120": {
+              "total": null,
+              "percentage": null
+            }
+          }
+        }
+      }
+    },
+    "away": {
+      "id": 70,
+      "name": "Middlesbrough",
+      "logo": "https://media.api-sports.io/football/teams/70.png",
+      "last_5": {
+        "played": 5,
+        "form": "53%",
+        "att": "70%",
+        "def": "40%",
+        "goals": {
+          "for": {
+            "total": 7,
+            "average": "1.4"
+          },
+          "against": {
+            "total": 6,
+            "average": "1.2"
+          }
+        }
+      },
+      "league": {
+        "form": "WWWWDWDDLWWDLDWDLWWWWLDLLWWWWWWLDDW",
+        "fixtures": {
+          "played": {
+            "home": 17,
+            "away": 18,
+            "total": 35
+          },
+          "wins": {
+            "home": 10,
+            "away": 9,
+            "total": 19
+          },
+          "draws": {
+            "home": 5,
+            "away": 4,
+            "total": 9
+          },
+          "loses": {
+            "home": 2,
+            "away": 5,
+            "total": 7
+          }
+        },
+        "goals": {
+          "for": {
+            "total": {
+              "home": 26,
+              "away": 28,
+              "total": 54
+            },
+            "average": {
+              "home": "1.5",
+              "away": "1.6",
+              "total": "1.5"
+            },
+            "minute": {
+              "0-15": {
+                "total": 4,
+                "percentage": "7.69%"
+              },
+              "16-30": {
+                "total": 7,
+                "percentage": "13.46%"
+              },
+              "31-45": {
+                "total": 13,
+                "percentage": "25.00%"
+              },
+              "46-60": {
+                "total": 11,
+                "percentage": "21.15%"
+              },
+              "61-75": {
+                "total": 7,
+                "percentage": "13.46%"
+              },
+              "76-90": {
+                "total": 10,
+                "percentage": "19.23%"
+              },
+              "91-105": {
+                "total": null,
+                "percentage": null
+              },
+              "106-120": {
+                "total": null,
+                "percentage": null
+              }
+            },
+            "under_over": {
+              "0.5": {
+                "over": 27,
+                "under": 8
+              },
+              "1.5": {
+                "over": 17,
+                "under": 18
+              },
+              "2.5": {
+                "over": 7,
+                "under": 28
+              },
+              "3.5": {
+                "over": 3,
+                "under": 32
+              },
+              "4.5": {
+                "over": 0,
+                "under": 35
+              }
+            }
+          },
+          "against": {
+            "total": {
+              "home": 12,
+              "away": 23,
+              "total": 35
+            },
+            "average": {
+              "home": "0.7",
+              "away": "1.3",
+              "total": "1.0"
+            },
+            "minute": {
+              "0-15": {
+                "total": 7,
+                "percentage": "18.92%"
+              },
+              "16-30": {
+                "total": 7,
+                "percentage": "18.92%"
+              },
+              "31-45": {
+                "total": 4,
+                "percentage": "10.81%"
+              },
+              "46-60": {
+                "total": 4,
+                "percentage": "10.81%"
+              },
+              "61-75": {
+                "total": 8,
+                "percentage": "21.62%"
+              },
+              "76-90": {
+                "total": 7,
+                "percentage": "18.92%"
+              },
+              "91-105": {
+                "total": null,
+                "percentage": null
+              },
+              "106-120": {
+                "total": null,
+                "percentage": null
+              }
+            },
+            "under_over": {
+              "0.5": {
+                "over": 25,
+                "under": 10
+              },
+              "1.5": {
+                "over": 6,
+                "under": 29
+              },
+              "2.5": {
+                "over": 3,
+                "under": 32
+              },
+              "3.5": {
+                "over": 1,
+                "under": 34
+              },
+              "4.5": {
+                "over": 0,
+                "under": 35
+              }
+            }
+          }
+        },
+        "biggest": {
+          "streak": {
+            "wins": 6,
+            "draws": 2,
+            "loses": 2
+          },
+          "wins": {
+            "home": "4-0",
+            "away": "1-4"
+          },
+          "loses": {
+            "home": "2-4",
+            "away": "3-0"
+          },
+          "goals": {
+            "for": {
+              "home": 4,
+              "away": 4
+            },
+            "against": {
+              "home": 4,
+              "away": 3
+            }
+          }
+        },
+        "clean_sheet": {
+          "home": 8,
+          "away": 2,
+          "total": 10
+        },
+        "failed_to_score": {
+          "home": 4,
+          "away": 4,
+          "total": 8
+        },
+        "penalty": {
+          "scored": {
+            "total": 1,
+            "percentage": "100.00%"
+          },
+          "missed": {
+            "total": 0,
+            "percentage": "0%"
+          },
+          "total": 1
+        },
+        "lineups": [
+          {
+            "formation": "4-2-3-1",
+            "played": 9
+          },
+          {
+            "formation": "3-4-2-1",
+            "played": 7
+          },
+          {
+            "formation": "4-4-2",
+            "played": 5
+          },
+          {
+            "formation": "4-2-2-2",
+            "played": 5
+          },
+          {
+            "formation": "4-3-3",
+            "played": 4
+          },
+          {
+            "formation": "3-4-1-2",
+            "played": 3
+          },
+          {
+            "formation": "3-4-3",
+            "played": 1
+          },
+          {
+            "formation": "3-5-2",
+            "played": 1
+          }
+        ],
+        "cards": {
+          "yellow": {
+            "0-15": {
+              "total": 4,
+              "percentage": "7.14%"
+            },
+            "16-30": {
+              "total": 5,
+              "percentage": "8.93%"
+            },
+            "31-45": {
+              "total": 9,
+              "percentage": "16.07%"
+            },
+            "46-60": {
+              "total": 7,
+              "percentage": "12.50%"
+            },
+            "61-75": {
+              "total": 10,
+              "percentage": "17.86%"
+            },
+            "76-90": {
+              "total": 13,
+              "percentage": "23.21%"
+            },
+            "91-105": {
+              "total": 7,
+              "percentage": "12.50%"
+            },
+            "106-120": {
+              "total": null,
+              "percentage": null
+            },
+            "": {
+              "total": 1,
+              "percentage": "1.79%"
+            }
+          },
+          "red": {
+            "0-15": {
+              "total": null,
+              "percentage": null
+            },
+            "16-30": {
+              "total": null,
+              "percentage": null
+            },
+            "31-45": {
+              "total": null,
+              "percentage": null
+            },
+            "46-60": {
+              "total": null,
+              "percentage": null
+            },
+            "61-75": {
+              "total": null,
+              "percentage": null
+            },
+            "76-90": {
+              "total": 1,
+              "percentage": "100.00%"
+            },
+            "91-105": {
+              "total": null,
+              "percentage": null
+            },
+            "106-120": {
+              "total": null,
+              "percentage": null
+            }
+          }
+        }
+      }
+    }
+  },
+  "comparison": {
+    "form": {
+      "home": "33%",
+      "away": "67%"
+    },
+    "att": {
+      "home": "36%",
+      "away": "64%"
+    },
+    "def": {
+      "home": "35%",
+      "away": "65%"
+    },
+    "poisson_distribution": {
+      "home": "44%",
+      "away": "56%"
+    },
+    "h2h": {
+      "home": "20%",
+      "away": "80%"
+    },
+    "goals": {
+      "home": "31%",
+      "away": "69%"
+    },
+    "total": {
+      "home": "33.2%",
+      "away": "66.8%"
+    }
+  },
+  "h2h": [
+    {
+      "fixture": {
+        "id": 1386800,
+        "referee": "Josh Smith, England",
+        "timezone": "UTC",
+        "date": "2025-12-13T15:00:00+00:00",
+        "timestamp": 1765638000,
+        "periods": {
+          "first": 1765638000,
+          "second": 1765641600
+        },
+        "venue": {
+          "id": 558,
+          "name": "Riverside Stadium",
+          "city": "Middlesbrough"
+        },
+        "status": {
+          "long": "Match Finished",
+          "short": "FT",
+          "elapsed": 90,
+          "extra": 6
+        }
+      },
+      "league": {
+        "id": 40,
+        "name": "Championship",
+        "country": "England",
+        "logo": "https://media.api-sports.io/football/leagues/40.png",
+        "flag": "https://media.api-sports.io/flags/gb-eng.svg",
+        "season": 2025,
+        "round": "Regular Season - 21",
+        "standings": true
+      },
+      "teams": {
+        "home": {
+          "id": 70,
+          "name": "Middlesbrough",
+          "logo": "https://media.api-sports.io/football/teams/70.png",
+          "winner": true
+        },
+        "away": {
+          "id": 72,
+          "name": "QPR",
+          "logo": "https://media.api-sports.io/football/teams/72.png",
+          "winner": false
+        }
+      },
+      "goals": {
+        "home": 3,
+        "away": 1
+      },
+      "score": {
+        "halftime": {
+          "home": 2,
+          "away": 0
+        },
+        "fulltime": {
+          "home": 3,
+          "away": 1
+        },
+        "extratime": {
+          "home": null,
+          "away": null
+        },
+        "penalty": {
+          "home": null,
+          "away": null
+        }
+      }
+    },
+    {
+      "fixture": {
+        "id": 1216278,
+        "referee": "D. Webb",
+        "timezone": "UTC",
+        "date": "2025-03-11T19:45:00+00:00",
+        "timestamp": 1741722300,
+        "periods": {
+          "first": 1741722300,
+          "second": 1741725900
+        },
+        "venue": {
+          "id": 558,
+          "name": "Riverside Stadium",
+          "city": "Middlesbrough"
+        },
+        "status": {
+          "long": "Match Finished",
+          "short": "FT",
+          "elapsed": 90,
+          "extra": 8
+        }
+      },
+      "league": {
+        "id": 40,
+        "name": "Championship",
+        "country": "England",
+        "logo": "https://media.api-sports.io/football/leagues/40.png",
+        "flag": "https://media.api-sports.io/flags/gb-eng.svg",
+        "season": 2024,
+        "round": "Regular Season - 37",
+        "standings": true
+      },
+      "teams": {
+        "home": {
+          "id": 70,
+          "name": "Middlesbrough",
+          "logo": "https://media.api-sports.io/football/teams/70.png",
+          "winner": true
+        },
+        "away": {
+          "id": 72,
+          "name": "QPR",
+          "logo": "https://media.api-sports.io/football/teams/72.png",
+          "winner": false
+        }
+      },
+      "goals": {
+        "home": 2,
+        "away": 1
+      },
+      "score": {
+        "halftime": {
+          "home": 1,
+          "away": 0
+        },
+        "fulltime": {
+          "home": 2,
+          "away": 1
+        },
+        "extratime": {
+          "home": null,
+          "away": null
+        },
+        "penalty": {
+          "home": null,
+          "away": null
+        }
+      }
+    },
+    {
+      "fixture": {
+        "id": 1216003,
+        "referee": "O. Langford",
+        "timezone": "UTC",
+        "date": "2024-11-05T19:45:00+00:00",
+        "timestamp": 1730835900,
+        "periods": {
+          "first": 1730835900,
+          "second": 1730839500
+        },
+        "venue": {
+          "id": 20414,
+          "name": "MATRADE Loftus Road",
+          "city": "London"
+        },
+        "status": {
+          "long": "Match Finished",
+          "short": "FT",
+          "elapsed": 90,
+          "extra": 6
+        }
+      },
+      "league": {
+        "id": 40,
+        "name": "Championship",
+        "country": "England",
+        "logo": "https://media.api-sports.io/football/leagues/40.png",
+        "flag": "https://media.api-sports.io/flags/gb-eng.svg",
+        "season": 2024,
+        "round": "Regular Season - 14",
+        "standings": true
+      },
+      "teams": {
+        "home": {
+          "id": 72,
+          "name": "QPR",
+          "logo": "https://media.api-sports.io/football/teams/72.png",
+          "winner": false
+        },
+        "away": {
+          "id": 70,
+          "name": "Middlesbrough",
+          "logo": "https://media.api-sports.io/football/teams/70.png",
+          "winner": true
+        }
+      },
+      "goals": {
+        "home": 1,
+        "away": 4
+      },
+      "score": {
+        "halftime": {
+          "home": 0,
+          "away": 2
+        },
+        "fulltime": {
+          "home": 1,
+          "away": 4
+        },
+        "extratime": {
+          "home": null,
+          "away": null
+        },
+        "penalty": {
+          "home": null,
+          "away": null
+        }
+      }
+    },
+    {
+      "fixture": {
+        "id": 1047870,
+        "referee": "L. Doughty",
+        "timezone": "UTC",
+        "date": "2024-03-09T15:00:00+00:00",
+        "timestamp": 1709996400,
+        "periods": {
+          "first": 1709996400,
+          "second": 1710000000
+        },
+        "venue": {
+          "id": 20414,
+          "name": "MATRADE Loftus Road",
+          "city": "London"
+        },
+        "status": {
+          "long": "Match Finished",
+          "short": "FT",
+          "elapsed": 90,
+          "extra": null
+        }
+      },
+      "league": {
+        "id": 40,
+        "name": "Championship",
+        "country": "England",
+        "logo": "https://media.api-sports.io/football/leagues/40.png",
+        "flag": "https://media.api-sports.io/flags/gb-eng.svg",
+        "season": 2023,
+        "round": "Regular Season - 37",
+        "standings": true
+      },
+      "teams": {
+        "home": {
+          "id": 72,
+          "name": "QPR",
+          "logo": "https://media.api-sports.io/football/teams/72.png",
+          "winner": false
+        },
+        "away": {
+          "id": 70,
+          "name": "Middlesbrough",
+          "logo": "https://media.api-sports.io/football/teams/70.png",
+          "winner": true
+        }
+      },
+      "goals": {
+        "home": 0,
+        "away": 2
+      },
+      "score": {
+        "halftime": {
+          "home": 0,
+          "away": 0
+        },
+        "fulltime": {
+          "home": 0,
+          "away": 2
+        },
+        "extratime": {
+          "home": null,
+          "away": null
+        },
+        "penalty": {
+          "home": null,
+          "away": null
+        }
+      }
+    },
+    {
+      "fixture": {
+        "id": 1047487,
+        "referee": "T. Bramall",
+        "timezone": "UTC",
+        "date": "2023-09-02T14:00:00+00:00",
+        "timestamp": 1693663200,
+        "periods": {
+          "first": 1693663200,
+          "second": 1693666800
+        },
+        "venue": {
+          "id": 558,
+          "name": "Riverside Stadium",
+          "city": "Middlesbrough"
+        },
+        "status": {
+          "long": "Match Finished",
+          "short": "FT",
+          "elapsed": 90,
+          "extra": null
+        }
+      },
+      "league": {
+        "id": 40,
+        "name": "Championship",
+        "country": "England",
+        "logo": "https://media.api-sports.io/football/leagues/40.png",
+        "flag": "https://media.api-sports.io/flags/gb-eng.svg",
+        "season": 2023,
+        "round": "Regular Season - 5",
+        "standings": true
+      },
+      "teams": {
+        "home": {
+          "id": 70,
+          "name": "Middlesbrough",
+          "logo": "https://media.api-sports.io/football/teams/70.png",
+          "winner": false
+        },
+        "away": {
+          "id": 72,
+          "name": "QPR",
+          "logo": "https://media.api-sports.io/football/teams/72.png",
+          "winner": true
+        }
+      },
+      "goals": {
+        "home": 0,
+        "away": 2
+      },
+      "score": {
+        "halftime": {
+          "home": 0,
+          "away": 1
+        },
+        "fulltime": {
+          "home": 0,
+          "away": 2
+        },
+        "extratime": {
+          "home": null,
+          "away": null
+        },
+        "penalty": {
+          "home": null,
+          "away": null
+        }
+      }
+    },
+    {
+      "fixture": {
+        "id": 881109,
+        "referee": "D. Webb",
+        "timezone": "UTC",
+        "date": "2023-02-18T15:00:00+00:00",
+        "timestamp": 1676732400,
+        "periods": {
+          "first": 1676732400,
+          "second": 1676736000
+        },
+        "venue": {
+          "id": 558,
+          "name": "Riverside Stadium",
+          "city": "Middlesbrough"
+        },
+        "status": {
+          "long": "Match Finished",
+          "short": "FT",
+          "elapsed": 90,
+          "extra": null
+        }
+      },
+      "league": {
+        "id": 40,
+        "name": "Championship",
+        "country": "England",
+        "logo": "https://media.api-sports.io/football/leagues/40.png",
+        "flag": "https://media.api-sports.io/flags/gb-eng.svg",
+        "season": 2022,
+        "round": "Regular Season - 33",
+        "standings": true
+      },
+      "teams": {
+        "home": {
+          "id": 70,
+          "name": "Middlesbrough",
+          "logo": "https://media.api-sports.io/football/teams/70.png",
+          "winner": true
+        },
+        "away": {
+          "id": 72,
+          "name": "QPR",
+          "logo": "https://media.api-sports.io/football/teams/72.png",
+          "winner": false
+        }
+      },
+      "goals": {
+        "home": 3,
+        "away": 1
+      },
+      "score": {
+        "halftime": {
+          "home": 0,
+          "away": 0
+        },
+        "fulltime": {
+          "home": 3,
+          "away": 1
+        },
+        "extratime": {
+          "home": null,
+          "away": null
+        },
+        "penalty": {
+          "home": null,
+          "away": null
+        }
+      }
+    },
+    {
+      "fixture": {
+        "id": 874689,
+        "referee": "J. Smith",
+        "timezone": "UTC",
+        "date": "2022-08-06T14:00:00+00:00",
+        "timestamp": 1659794400,
+        "periods": {
+          "first": 1659794400,
+          "second": 1659798000
+        },
+        "venue": {
+          "id": 18619,
+          "name": "Loftus Road",
+          "city": "London"
+        },
+        "status": {
+          "long": "Match Finished",
+          "short": "FT",
+          "elapsed": 90,
+          "extra": null
+        }
+      },
+      "league": {
+        "id": 40,
+        "name": "Championship",
+        "country": "England",
+        "logo": "https://media.api-sports.io/football/leagues/40.png",
+        "flag": "https://media.api-sports.io/flags/gb-eng.svg",
+        "season": 2022,
+        "round": "Regular Season - 2",
+        "standings": true
+      },
+      "teams": {
+        "home": {
+          "id": 72,
+          "name": "QPR",
+          "logo": "https://media.api-sports.io/football/teams/72.png",
+          "winner": true
+        },
+        "away": {
+          "id": 70,
+          "name": "Middlesbrough",
+          "logo": "https://media.api-sports.io/football/teams/70.png",
+          "winner": false
+        }
+      },
+      "goals": {
+        "home": 3,
+        "away": 2
+      },
+      "score": {
+        "halftime": {
+          "home": 3,
+          "away": 1
+        },
+        "fulltime": {
+          "home": 3,
+          "away": 2
+        },
+        "extratime": {
+          "home": null,
+          "away": null
+        },
+        "penalty": {
+          "home": null,
+          "away": null
+        }
+      }
+    },
+    {
+      "fixture": {
+        "id": 717166,
+        "referee": "D. Whitestone",
+        "timezone": "UTC",
+        "date": "2022-02-09T19:45:00+00:00",
+        "timestamp": 1644435900,
+        "periods": {
+          "first": 1644435900,
+          "second": 1644439500
+        },
+        "venue": {
+          "id": 575,
+          "name": "Kiyan Prince Foundation Stadium",
+          "city": "London"
+        },
+        "status": {
+          "long": "Match Finished",
+          "short": "FT",
+          "elapsed": 90,
+          "extra": null
+        }
+      },
+      "league": {
+        "id": 40,
+        "name": "Championship",
+        "country": "England",
+        "logo": "https://media.api-sports.io/football/leagues/40.png",
+        "flag": "https://media.api-sports.io/flags/gb-eng.svg",
+        "season": 2021,
+        "round": "Regular Season - 31",
+        "standings": true
+      },
+      "teams": {
+        "home": {
+          "id": 72,
+          "name": "QPR",
+          "logo": "https://media.api-sports.io/football/teams/72.png",
+          "winner": null
+        },
+        "away": {
+          "id": 70,
+          "name": "Middlesbrough",
+          "logo": "https://media.api-sports.io/football/teams/70.png",
+          "winner": null
+        }
+      },
+      "goals": {
+        "home": 2,
+        "away": 2
+      },
+      "score": {
+        "halftime": {
+          "home": 1,
+          "away": 1
+        },
+        "fulltime": {
+          "home": 2,
+          "away": 2
+        },
+        "extratime": {
+          "home": null,
+          "away": null
+        },
+        "penalty": {
+          "home": null,
+          "away": null
+        }
+      }
+    },
+    {
+      "fixture": {
+        "id": 716828,
+        "referee": "S. Martin",
+        "timezone": "UTC",
+        "date": "2021-08-18T18:45:00+00:00",
+        "timestamp": 1629312300,
+        "periods": {
+          "first": 1629312300,
+          "second": 1629315900
+        },
+        "venue": {
+          "id": 558,
+          "name": "Riverside Stadium",
+          "city": "Middlesbrough"
+        },
+        "status": {
+          "long": "Match Finished",
+          "short": "FT",
+          "elapsed": 90,
+          "extra": null
+        }
+      },
+      "league": {
+        "id": 40,
+        "name": "Championship",
+        "country": "England",
+        "logo": "https://media.api-sports.io/football/leagues/40.png",
+        "flag": "https://media.api-sports.io/flags/gb-eng.svg",
+        "season": 2021,
+        "round": "Regular Season - 3",
+        "standings": true
+      },
+      "teams": {
+        "home": {
+          "id": 70,
+          "name": "Middlesbrough",
+          "logo": "https://media.api-sports.io/football/teams/70.png",
+          "winner": false
+        },
+        "away": {
+          "id": 72,
+          "name": "QPR",
+          "logo": "https://media.api-sports.io/football/teams/72.png",
+          "winner": true
+        }
+      },
+      "goals": {
+        "home": 2,
+        "away": 3
+      },
+      "score": {
+        "halftime": {
+          "home": 1,
+          "away": 0
+        },
+        "fulltime": {
+          "home": 2,
+          "away": 3
+        },
+        "extratime": {
+          "home": null,
+          "away": null
+        },
+        "penalty": {
+          "home": null,
+          "away": null
+        }
+      }
+    }
+  ]
+}

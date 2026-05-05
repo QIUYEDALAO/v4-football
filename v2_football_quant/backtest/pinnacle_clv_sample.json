@@ -1,0 +1,46 @@
+{
+  "fixture_id": 1436164,
+  "match": "Al Khaleej vs Al Hilal",
+  "date": "2026-05-05",
+  "result": {
+    "halftime": "1-1 ✅ (2 goals)",
+    "fulltime": "1-2"
+  },
+  "pinnacle_closing": {
+    "ht_over_1.5": { "price": 1.99, "implied_prob": 0.5025 },
+    "ht_under_1.5": { "price": 1.79, "implied_prob": 0.5587 },
+    "ht_over_0.5": "N/A (not offered by Pinnacle)",
+    "ht_under_0.5": "N/A",
+    "match_winner_home": 9.61,
+    "match_winner_draw": 6.19,
+    "match_winner_away": 1.25
+  },
+  "bet365_closing": {
+    "ht_over_0.5": 1.18,
+    "ht_under_0.5": 4.50,
+    "ht_over_1.5": 1.83,
+    "ht_under_1.5": 1.83
+  },
+  "10bet_closing": {
+    "ht_over_0.5": 1.20,
+    "ht_under_0.5": 4.00,
+    "ht_over_1.5": 1.90,
+    "ht_under_1.5": 1.80,
+    "both_teams_score_1h_yes": 3.45,
+    "both_teams_score_1h_no": 1.25,
+    "first_half_winner_home": 6.50,
+    "first_half_winner_draw": 2.80,
+    "first_half_winner_away": 1.65,
+    "correct_score_0-0": 4.00,
+    "correct_score_1-0": 9.00,
+    "correct_score_0-1": 3.65,
+    "correct_score_1-1": 7.00,
+    "correct_score_0-2": 5.50
+  },
+  "key_insights": {
+    "ht_result": "HT 1-1 → over 0.5 ✅, over 1.5 ✅, both teams scored ✅",
+    "pinnacle_ht_over_0.5_price": "Not directly offered; derived from over/under 1.0 or 1.5 market",
+    "best_ht_over_0.5_price_among_bookmakers": "1.20 (10Bet)",
+    "clv_analysis_notes": "Pinnacle ht_over_1.5 at 1.99 implies ~50% prob. Result was over 1.5 (1-1 at HT). Positive CLV if we got >1.99 elsewhere."
+  }
+}

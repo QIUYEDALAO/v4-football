@@ -1,0 +1,7581 @@
+{
+  "league": {
+    "id": 39,
+    "name": "Premier League",
+    "country": "England",
+    "logo": "https://media.api-sports.io/football/leagues/39.png",
+    "flag": "https://media.api-sports.io/flags/gb-eng.svg",
+    "season": 2025
+  },
+  "fixture": {
+    "id": 1379318,
+    "timezone": "UTC",
+    "date": "2026-05-02T14:00:00+00:00",
+    "timestamp": 1777730400
+  },
+  "update": "2026-05-02T06:02:22+00:00",
+  "bookmakers": [
+    {
+      "id": 8,
+      "name": "Bet365",
+      "bets": [
+        {
+          "id": 1,
+          "name": "Match Winner",
+          "values": [
+            {
+              "value": "Home",
+              "odd": "3.60"
+            },
+            {
+              "value": "Draw",
+              "odd": "3.60"
+            },
+            {
+              "value": "Away",
+              "odd": "2.00"
+            }
+          ]
+        },
+        {
+          "id": 2,
+          "name": "Home/Away",
+          "values": [
+            {
+              "value": "Home",
+              "odd": "2.50"
+            },
+            {
+              "value": "Away",
+              "odd": "1.50"
+            }
+          ]
+        },
+        {
+          "id": 3,
+          "name": "Second Half Winner",
+          "values": [
+            {
+              "value": "Home",
+              "odd": "3.50"
+            },
+            {
+              "value": "Draw",
+              "odd": "2.40"
+            },
+            {
+              "value": "Away",
+              "odd": "2.40"
+            }
+          ]
+        },
+        {
+          "id": 4,
+          "name": "Asian Handicap",
+          "values": [
+            {
+              "value": "Home -1.25",
+              "odd": "7.00"
+            },
+            {
+              "value": "Away -1.25",
+              "odd": "1.10"
+            },
+            {
+              "value": "Home -1",
+              "odd": "7.00"
+            },
+            {
+              "value": "Away -1",
+              "odd": "1.10"
+            },
+            {
+              "value": "Home -0.75",
+              "odd": "4.40"
+            },
+            {
+              "value": "Away -0.75",
+              "odd": "1.20"
+            },
+            {
+              "value": "Home -0.5",
+              "odd": "3.45"
+            },
+            {
+              "value": "Away -0.5",
+              "odd": "1.30"
+            },
+            {
+              "value": "Home -0.25",
+              "odd": "3.00"
+            },
+            {
+              "value": "Away -0.25",
+              "odd": "1.38"
+            },
+            {
+              "value": "Home +0",
+              "odd": "2.60"
+            },
+            {
+              "value": "Away +0",
+              "odd": "1.48"
+            },
+            {
+              "value": "Home +0.25",
+              "odd": "2.08"
+            },
+            {
+              "value": "Away +0.25",
+              "odd": "1.72"
+            },
+            {
+              "value": "Home +0.5",
+              "odd": "1.85"
+            },
+            {
+              "value": "Away +0.5",
+              "odd": "2.00"
+            },
+            {
+              "value": "Home +0.75",
+              "odd": "1.60"
+            },
+            {
+              "value": "Away +0.75",
+              "odd": "2.30"
+            },
+            {
+              "value": "Home +1",
+              "odd": "1.40"
+            },
+            {
+              "value": "Away +1",
+              "odd": "2.85"
+            },
+            {
+              "value": "Home +2",
+              "odd": "1.10"
+            },
+            {
+              "value": "Away +2",
+              "odd": "7.00"
+            },
+            {
+              "value": "Home -1.5",
+              "odd": "6.80"
+            },
+            {
+              "value": "Away -1.5",
+              "odd": "1.10"
+            },
+            {
+              "value": "Home +1.25",
+              "odd": "1.32"
+            },
+            {
+              "value": "Away +1.25",
+              "odd": "3.30"
+            },
+            {
+              "value": "Home +1.5",
+              "odd": "1.27"
+            },
+            {
+              "value": "Away +1.5",
+              "odd": "3.55"
+            },
+            {
+              "value": "Home +1.75",
+              "odd": "1.18"
+            },
+            {
+              "value": "Away +1.75",
+              "odd": "4.65"
+            }
+          ]
+        },
+        {
+          "id": 5,
+          "name": "Goals Over/Under",
+          "values": [
+            {
+              "value": "Over 1.5",
+              "odd": "1.28"
+            },
+            {
+              "value": "Under 1.5",
+              "odd": "3.75"
+            },
+            {
+              "value": "Over 2.5",
+              "odd": "1.91"
+            },
+            {
+              "value": "Under 2.5",
+              "odd": "1.91"
+            },
+            {
+              "value": "Over 3.5",
+              "odd": "3.40"
+            },
+            {
+              "value": "Under 3.5",
+              "odd": "1.33"
+            },
+            {
+              "value": "Over 0.5",
+              "odd": "1.05"
+            },
+            {
+              "value": "Under 0.5",
+              "odd": "11.00"
+            },
+            {
+              "value": "Over 4.5",
+              "odd": "6.00"
+            },
+            {
+              "value": "Under 4.5",
+              "odd": "1.12"
+            },
+            {
+              "value": "Over 7.5",
+              "odd": "51.00"
+            },
+            {
+              "value": "Under 7.5",
+              "odd": "1.00"
+            },
+            {
+              "value": "Over 5.5",
+              "odd": "13.00"
+            },
+            {
+              "value": "Under 5.5",
+              "odd": "1.04"
+            },
+            {
+              "value": "Over 6.5",
+              "odd": "26.00"
+            },
+            {
+              "value": "Under 6.5",
+              "odd": "1.01"
+            }
+          ]
+        },
+        {
+          "id": 6,
+          "name": "Goals Over/Under First Half",
+          "values": [
+            {
+              "value": "Over 1.5",
+              "odd": "2.75"
+            },
+            {
+              "value": "Under 1.5",
+              "odd": "1.40"
+            },
+            {
+              "value": "Over 2.5",
+              "odd": "8.00"
+            },
+            {
+              "value": "Under 2.5",
+              "odd": "1.08"
+            },
+            {
+              "value": "Over 3.5",
+              "odd": "21.00"
+            },
+            {
+              "value": "Under 3.5",
+              "odd": "1.01"
+            },
+            {
+              "value": "Over 0.5",
+              "odd": "1.40"
+            },
+            {
+              "value": "Under 0.5",
+              "odd": "2.75"
+            }
+          ]
+        },
+        {
+          "id": 26,
+          "name": "Goals Over/Under - Second Half",
+          "values": [
+            {
+              "value": "Over 1.5",
+              "odd": "2.20"
+            },
+            {
+              "value": "Under 1.5",
+              "odd": "1.62"
+            },
+            {
+              "value": "Over 2.5",
+              "odd": "5.00"
+            },
+            {
+              "value": "Under 2.5",
+              "odd": "1.17"
+            },
+            {
+              "value": "Over 3.5",
+              "odd": "15.00"
+            },
+            {
+              "value": "Under 3.5",
+              "odd": "1.03"
+            },
+            {
+              "value": "Over 0.5",
+              "odd": "1.25"
+            },
+            {
+              "value": "Under 0.5",
+              "odd": "3.75"
+            }
+          ]
+        },
+        {
+          "id": 7,
+          "name": "HT/FT Double",
+          "values": [
+            {
+              "value": "Home/Draw",
+              "odd": "15.00"
+            },
+            {
+              "value": "Home/Away",
+              "odd": "26.00"
+            },
+            {
+              "value": "Draw/Away",
+              "odd": "5.50"
+            },
+            {
+              "value": "Draw/Draw",
+              "odd": "5.50"
+            },
+            {
+              "value": "Home/Home",
+              "odd": "6.00"
+            },
+            {
+              "value": "Draw/Home",
+              "odd": "8.00"
+            },
+            {
+              "value": "Away/Home",
+              "odd": "34.00"
+            },
+            {
+              "value": "Away/Draw",
+              "odd": "15.00"
+            },
+            {
+              "value": "Away/Away",
+              "odd": "3.40"
+            }
+          ]
+        },
+        {
+          "id": 27,
+          "name": "Clean Sheet - Home",
+          "values": [
+            {
+              "value": "Yes",
+              "odd": "4.00"
+            },
+            {
+              "value": "No",
+              "odd": "1.22"
+            }
+          ]
+        },
+        {
+          "id": 28,
+          "name": "Clean Sheet - Away",
+          "values": [
+            {
+              "value": "Yes",
+              "odd": "2.62"
+            },
+            {
+              "value": "No",
+              "odd": "1.44"
+            }
+          ]
+        },
+        {
+          "id": 8,
+          "name": "Both Teams Score",
+          "values": [
+            {
+              "value": "Yes",
+              "odd": "1.80"
+            },
+            {
+              "value": "No",
+              "odd": "1.95"
+            }
+          ]
+        },
+        {
+          "id": 9,
+          "name": "Handicap Result",
+          "values": [
+            {
+              "value": "Home -1",
+              "odd": "8.00"
+            },
+            {
+              "value": "Away -1",
+              "odd": "1.28"
+            },
+            {
+              "value": "Draw -1",
+              "odd": "5.00"
+            },
+            {
+              "value": "Home -2",
+              "odd": "21.00"
+            },
+            {
+              "value": "Draw -2",
+              "odd": "11.00"
+            },
+            {
+              "value": "Away -2",
+              "odd": "1.07"
+            },
+            {
+              "value": "Home +1",
+              "odd": "1.80"
+            },
+            {
+              "value": "Draw +1",
+              "odd": "3.75"
+            },
+            {
+              "value": "Away +1",
+              "odd": "3.60"
+            },
+            {
+              "value": "Home +2",
+              "odd": "1.25"
+            },
+            {
+              "value": "Draw +2",
+              "odd": "6.00"
+            },
+            {
+              "value": "Away +2",
+              "odd": "8.50"
+            },
+            {
+              "value": "Home +3",
+              "odd": "1.06"
+            },
+            {
+              "value": "Draw +3",
+              "odd": "12.00"
+            },
+            {
+              "value": "Away +3",
+              "odd": "21.00"
+            }
+          ]
+        },
+        {
+          "id": 10,
+          "name": "Exact Score",
+          "values": [
+            {
+              "value": "1:0",
+              "odd": "12.00"
+            },
+            {
+              "value": "2:0",
+              "odd": "21.00"
+            },
+            {
+              "value": "2:1",
+              "odd": "13.00"
+            },
+            {
+              "value": "3:0",
+              "odd": "41.00"
+            },
+            {
+              "value": "3:1",
+              "odd": "34.00"
+            },
+            {
+              "value": "3:2",
+              "odd": "41.00"
+            },
+            {
+              "value": "4:0",
+              "odd": "101.00"
+            },
+            {
+              "value": "4:1",
+              "odd": "67.00"
+            },
+            {
+              "value": "0:0",
+              "odd": "10.00"
+            },
+            {
+              "value": "1:1",
+              "odd": "7.00"
+            },
+            {
+              "value": "2:2",
+              "odd": "17.00"
+            },
+            {
+              "value": "0:1",
+              "odd": "8.00"
+            },
+            {
+              "value": "0:2",
+              "odd": "11.00"
+            },
+            {
+              "value": "0:3",
+              "odd": "21.00"
+            },
+            {
+              "value": "1:2",
+              "odd": "9.50"
+            },
+            {
+              "value": "1:3",
+              "odd": "19.00"
+            },
+            {
+              "value": "2:3",
+              "odd": "29.00"
+            },
+            {
+              "value": "3:3",
+              "odd": "51.00"
+            },
+            {
+              "value": "0:4",
+              "odd": "41.00"
+            },
+            {
+              "value": "1:4",
+              "odd": "41.00"
+            },
+            {
+              "value": "2:4",
+              "odd": "51.00"
+            },
+            {
+              "value": "4:2",
+              "odd": "81.00"
+            },
+            {
+              "value": "0:5",
+              "odd": "81.00"
+            },
+            {
+              "value": "0:6",
+              "odd": "251.00"
+            },
+            {
+              "value": "1:5",
+              "odd": "81.00"
+            },
+            {
+              "value": "1:6",
+              "odd": "251.00"
+            },
+            {
+              "value": "2:5",
+              "odd": "126.00"
+            },
+            {
+              "value": "2:6",
+              "odd": "401.00"
+            },
+            {
+              "value": "3:4",
+              "odd": "101.00"
+            },
+            {
+              "value": "5:0",
+              "odd": "351.00"
+            },
+            {
+              "value": "5:1",
+              "odd": "251.00"
+            },
+            {
+              "value": "5:2",
+              "odd": "301.00"
+            },
+            {
+              "value": "4:3",
+              "odd": "151.00"
+            },
+            {
+              "value": "3:5",
+              "odd": "301.00"
+            },
+            {
+              "value": "5:3",
+              "odd": "501.00"
+            },
+            {
+              "value": "4:4",
+              "odd": "301.00"
+            }
+          ]
+        },
+        {
+          "id": 11,
+          "name": "Highest Scoring Half",
+          "values": [
+            {
+              "value": "Draw",
+              "odd": "3.50"
+            },
+            {
+              "value": "1st Half",
+              "odd": "3.00"
+            },
+            {
+              "value": "2nd Half",
+              "odd": "2.10"
+            }
+          ]
+        },
+        {
+          "id": 31,
+          "name": "Correct Score - First Half",
+          "values": [
+            {
+              "value": "1:0",
+              "odd": "5.50"
+            },
+            {
+              "value": "2:0",
+              "odd": "21.00"
+            },
+            {
+              "value": "2:1",
+              "odd": "26.00"
+            },
+            {
+              "value": "3:0",
+              "odd": "67.00"
+            },
+            {
+              "value": "3:1",
+              "odd": "81.00"
+            },
+            {
+              "value": "3:2",
+              "odd": "201.00"
+            },
+            {
+              "value": "4:0",
+              "odd": "301.00"
+            },
+            {
+              "value": "4:1",
+              "odd": "451.00"
+            },
+            {
+              "value": "0:0",
+              "odd": "2.75"
+            },
+            {
+              "value": "1:1",
+              "odd": "8.00"
+            },
+            {
+              "value": "2:2",
+              "odd": "51.00"
+            },
+            {
+              "value": "0:1",
+              "odd": "4.00"
+            },
+            {
+              "value": "0:2",
+              "odd": "11.00"
+            },
+            {
+              "value": "0:3",
+              "odd": "41.00"
+            },
+            {
+              "value": "1:2",
+              "odd": "21.00"
+            },
+            {
+              "value": "1:3",
+              "odd": "51.00"
+            },
+            {
+              "value": "2:3",
+              "odd": "151.00"
+            },
+            {
+              "value": "0:4",
+              "odd": "101.00"
+            },
+            {
+              "value": "1:4",
+              "odd": "201.00"
+            },
+            {
+              "value": "0:5",
+              "odd": "501.00"
+            }
+          ]
+        },
+        {
+          "id": 12,
+          "name": "Double Chance",
+          "values": [
+            {
+              "value": "Home/Draw",
+              "odd": "1.73"
+            },
+            {
+              "value": "Home/Away",
+              "odd": "1.28"
+            },
+            {
+              "value": "Draw/Away",
+              "odd": "1.28"
+            }
+          ]
+        },
+        {
+          "id": 13,
+          "name": "First Half Winner",
+          "values": [
+            {
+              "value": "Home",
+              "odd": "4.00"
+            },
+            {
+              "value": "Draw",
+              "odd": "2.20"
+            },
+            {
+              "value": "Away",
+              "odd": "2.62"
+            }
+          ]
+        },
+        {
+          "id": 14,
+          "name": "Team To Score First",
+          "values": [
+            {
+              "value": "Home",
+              "odd": "2.30"
+            },
+            {
+              "value": "Draw",
+              "odd": "11.00"
+            },
+            {
+              "value": "Away",
+              "odd": "1.67"
+            }
+          ]
+        },
+        {
+          "id": 15,
+          "name": "Team To Score Last",
+          "values": [
+            {
+              "value": "Home",
+              "odd": "2.25"
+            },
+            {
+              "value": "Draw",
+              "odd": "10.00"
+            },
+            {
+              "value": "Away",
+              "odd": "1.73"
+            }
+          ]
+        },
+        {
+          "id": 32,
+          "name": "Win Both Halves",
+          "values": [
+            {
+              "value": "Home",
+              "odd": "15.00"
+            },
+            {
+              "value": "Away",
+              "odd": "6.50"
+            }
+          ]
+        },
+        {
+          "id": 16,
+          "name": "Total - Home",
+          "values": [
+            {
+              "value": "Over 1.5",
+              "odd": "3.25"
+            },
+            {
+              "value": "Under 1.5",
+              "odd": "1.33"
+            },
+            {
+              "value": "Over 2.5",
+              "odd": "9.00"
+            },
+            {
+              "value": "Under 2.5",
+              "odd": "1.07"
+            },
+            {
+              "value": "Over 3.5",
+              "odd": "26.00"
+            },
+            {
+              "value": "Under 3.5",
+              "odd": "1.01"
+            },
+            {
+              "value": "Over 0.5",
+              "odd": "1.44"
+            },
+            {
+              "value": "Under 0.5",
+              "odd": "2.62"
+            },
+            {
+              "value": "Over 4.5",
+              "odd": "51.00"
+            },
+            {
+              "value": "Under 4.5",
+              "odd": "1.00"
+            }
+          ]
+        },
+        {
+          "id": 17,
+          "name": "Total - Away",
+          "values": [
+            {
+              "value": "Over 1.5",
+              "odd": "2.00"
+            },
+            {
+              "value": "Under 1.5",
+              "odd": "1.73"
+            },
+            {
+              "value": "Over 2.5",
+              "odd": "4.50"
+            },
+            {
+              "value": "Under 2.5",
+              "odd": "1.18"
+            },
+            {
+              "value": "Over 3.5",
+              "odd": "11.00"
+            },
+            {
+              "value": "Under 3.5",
+              "odd": "1.05"
+            },
+            {
+              "value": "Over 0.5",
+              "odd": "1.22"
+            },
+            {
+              "value": "Under 0.5",
+              "odd": "4.00"
+            },
+            {
+              "value": "Over 4.5",
+              "odd": "29.00"
+            },
+            {
+              "value": "Under 4.5",
+              "odd": "1.01"
+            }
+          ]
+        },
+        {
+          "id": 18,
+          "name": "Handicap Result - First Half",
+          "values": [
+            {
+              "value": "Home -1",
+              "odd": "15.00"
+            },
+            {
+              "value": "Away -1",
+              "odd": "1.22"
+            },
+            {
+              "value": "Draw -1",
+              "odd": "4.50"
+            },
+            {
+              "value": "Home +1",
+              "odd": "1.44"
+            },
+            {
+              "value": "Draw +1",
+              "odd": "3.40"
+            },
+            {
+              "value": "Away +1",
+              "odd": "8.00"
+            },
+            {
+              "value": "Home +2",
+              "odd": "1.06"
+            },
+            {
+              "value": "Draw +2",
+              "odd": "10.00"
+            },
+            {
+              "value": "Away +2",
+              "odd": "29.00"
+            },
+            {
+              "value": "Home +3",
+              "odd": "1.01"
+            },
+            {
+              "value": "Draw +3",
+              "odd": "34.00"
+            },
+            {
+              "value": "Away +3",
+              "odd": "81.00"
+            }
+          ]
+        },
+        {
+          "id": 19,
+          "name": "Asian Handicap First Half",
+          "values": [
+            {
+              "value": "Home -0.75",
+              "odd": "5.90"
+            },
+            {
+              "value": "Away -0.75",
+              "odd": "1.13"
+            },
+            {
+              "value": "Home -0.5",
+              "odd": "4.00"
+            },
+            {
+              "value": "Away -0.5",
+              "odd": "1.23"
+            },
+            {
+              "value": "Home -0.25",
+              "odd": "3.30"
+            },
+            {
+              "value": "Away -0.25",
+              "odd": "1.32"
+            },
+            {
+              "value": "Home +0",
+              "odd": "2.38"
+            },
+            {
+              "value": "Away +0",
+              "odd": "1.55"
+            },
+            {
+              "value": "Home +0.25",
+              "odd": "1.70"
+            },
+            {
+              "value": "Away +0.25",
+              "odd": "2.10"
+            },
+            {
+              "value": "Home +0.5",
+              "odd": "1.48"
+            },
+            {
+              "value": "Away +0.5",
+              "odd": "2.60"
+            },
+            {
+              "value": "Home +0.75",
+              "odd": "1.30"
+            },
+            {
+              "value": "Away +0.75",
+              "odd": "3.45"
+            },
+            {
+              "value": "Home +1",
+              "odd": "1.12"
+            },
+            {
+              "value": "Away +1",
+              "odd": "6.25"
+            },
+            {
+              "value": "Home +1.25",
+              "odd": "1.10"
+            },
+            {
+              "value": "Away +1.25",
+              "odd": "7.00"
+            }
+          ]
+        },
+        {
+          "id": 20,
+          "name": "Double Chance - First Half",
+          "values": [
+            {
+              "value": "Home/Draw",
+              "odd": "1.44"
+            },
+            {
+              "value": "Home/Away",
+              "odd": "1.62"
+            },
+            {
+              "value": "Draw/Away",
+              "odd": "1.22"
+            }
+          ]
+        },
+        {
+          "id": 34,
+          "name": "Both Teams Score - First Half",
+          "values": [
+            {
+              "value": "Yes",
+              "odd": "4.50"
+            },
+            {
+              "value": "No",
+              "odd": "1.18"
+            }
+          ]
+        },
+        {
+          "id": 35,
+          "name": "Both Teams To Score - Second Half",
+          "values": [
+            {
+              "value": "Yes",
+              "odd": "3.40"
+            },
+            {
+              "value": "No",
+              "odd": "1.30"
+            }
+          ]
+        },
+        {
+          "id": 36,
+          "name": "Win To Nil",
+          "values": [
+            {
+              "value": "Home",
+              "odd": "6.00"
+            },
+            {
+              "value": "Away",
+              "odd": "3.50"
+            }
+          ]
+        },
+        {
+          "id": 21,
+          "name": "Odd/Even",
+          "values": [
+            {
+              "value": "Odd",
+              "odd": "1.98"
+            },
+            {
+              "value": "Even",
+              "odd": "1.88"
+            }
+          ]
+        },
+        {
+          "id": 22,
+          "name": "Odd/Even - First Half",
+          "values": [
+            {
+              "value": "Odd",
+              "odd": "2.10"
+            },
+            {
+              "value": "Even",
+              "odd": "1.73"
+            }
+          ]
+        },
+        {
+          "id": 23,
+          "name": "Home Odd/Even",
+          "values": [
+            {
+              "value": "Odd",
+              "odd": "2.10"
+            },
+            {
+              "value": "Even",
+              "odd": "1.67"
+            }
+          ]
+        },
+        {
+          "id": 60,
+          "name": "Away Odd/Even",
+          "values": [
+            {
+              "value": "Odd",
+              "odd": "1.91"
+            },
+            {
+              "value": "Even",
+              "odd": "1.80"
+            }
+          ]
+        },
+        {
+          "id": 38,
+          "name": "Exact Goals Number",
+          "values": [
+            {
+              "value": 0,
+              "odd": "10.00"
+            },
+            {
+              "value": 1,
+              "odd": "4.75"
+            },
+            {
+              "value": 2,
+              "odd": "3.60"
+            },
+            {
+              "value": 3,
+              "odd": "4.00"
+            },
+            {
+              "value": 4,
+              "odd": "6.00"
+            },
+            {
+              "value": 5,
+              "odd": "11.00"
+            },
+            {
+              "value": 6,
+              "odd": "23.00"
+            },
+            {
+              "value": "more 7",
+              "odd": "29.00"
+            }
+          ]
+        },
+        {
+          "id": 39,
+          "name": "To Win Either Half",
+          "values": [
+            {
+              "value": "Home",
+              "odd": "2.20"
+            },
+            {
+              "value": "Away",
+              "odd": "1.57"
+            }
+          ]
+        },
+        {
+          "id": 40,
+          "name": "Home Team Exact Goals Number",
+          "values": [
+            {
+              "value": 0,
+              "odd": "2.62"
+            },
+            {
+              "value": 1,
+              "odd": "2.50"
+            },
+            {
+              "value": 2,
+              "odd": "4.33"
+            },
+            {
+              "value": "more 3",
+              "odd": "9.00"
+            }
+          ]
+        },
+        {
+          "id": 41,
+          "name": "Away Team Exact Goals Number",
+          "values": [
+            {
+              "value": 0,
+              "odd": "4.00"
+            },
+            {
+              "value": 1,
+              "odd": "2.75"
+            },
+            {
+              "value": 2,
+              "odd": "3.50"
+            },
+            {
+              "value": "more 3",
+              "odd": "4.50"
+            }
+          ]
+        },
+        {
+          "id": 42,
+          "name": "Second Half Exact Goals Number",
+          "values": [
+            {
+              "value": 0,
+              "odd": "3.75"
+            },
+            {
+              "value": 1,
+              "odd": "2.75"
+            },
+            {
+              "value": 2,
+              "odd": "3.60"
+            },
+            {
+              "value": 3,
+              "odd": "7.00"
+            },
+            {
+              "value": 4,
+              "odd": "17.00"
+            },
+            {
+              "value": "more 5",
+              "odd": "29.00"
+            }
+          ]
+        },
+        {
+          "id": 24,
+          "name": "Results/Both Teams Score",
+          "values": [
+            {
+              "value": "Home/Yes",
+              "odd": "7.00"
+            },
+            {
+              "value": "Draw/Yes",
+              "odd": "4.50"
+            },
+            {
+              "value": "Away/Yes",
+              "odd": "4.33"
+            },
+            {
+              "value": "Home/No",
+              "odd": "6.00"
+            },
+            {
+              "value": "Draw/No",
+              "odd": "10.00"
+            },
+            {
+              "value": "Away/No",
+              "odd": "3.50"
+            }
+          ]
+        },
+        {
+          "id": 25,
+          "name": "Result/Total Goals",
+          "values": [
+            {
+              "value": "Home/Over 2.5",
+              "odd": "6.00"
+            },
+            {
+              "value": "Draw/Over 2.5",
+              "odd": "13.00"
+            },
+            {
+              "value": "Away/Over 2.5",
+              "odd": "3.25"
+            },
+            {
+              "value": "Home/Under 2.5",
+              "odd": "7.00"
+            },
+            {
+              "value": "Draw/Under 2.5",
+              "odd": "4.33"
+            },
+            {
+              "value": "Away/Under 2.5",
+              "odd": "4.50"
+            }
+          ]
+        },
+        {
+          "id": 54,
+          "name": "First 10 min Winner",
+          "values": [
+            {
+              "value": "Home",
+              "odd": "9.50"
+            },
+            {
+              "value": "Draw",
+              "odd": "1.14"
+            },
+            {
+              "value": "Away",
+              "odd": "7.50"
+            }
+          ]
+        },
+        {
+          "id": 45,
+          "name": "Corners Over Under",
+          "values": [
+            {
+              "value": "Over 9.5",
+              "odd": "1.95"
+            },
+            {
+              "value": "Under 9.5",
+              "odd": "1.85"
+            }
+          ]
+        },
+        {
+          "id": 46,
+          "name": "Exact Goals Number - First Half",
+          "values": [
+            {
+              "value": 0,
+              "odd": "2.75"
+            },
+            {
+              "value": 1,
+              "odd": "2.50"
+            },
+            {
+              "value": 2,
+              "odd": "4.00"
+            },
+            {
+              "value": 3,
+              "odd": "10.00"
+            },
+            {
+              "value": 4,
+              "odd": "29.00"
+            },
+            {
+              "value": "more 5",
+              "odd": "51.00"
+            }
+          ]
+        },
+        {
+          "id": 63,
+          "name": "Odd/Even - Second Half",
+          "values": [
+            {
+              "value": "Odd",
+              "odd": "1.91"
+            },
+            {
+              "value": "Even",
+              "odd": "1.80"
+            }
+          ]
+        },
+        {
+          "id": 47,
+          "name": "Winning Margin",
+          "values": [
+            {
+              "value": "1 by 1",
+              "odd": "5.00"
+            },
+            {
+              "value": "2 by 1",
+              "odd": "3.75"
+            },
+            {
+              "value": "1 by 4+",
+              "odd": "51.00"
+            },
+            {
+              "value": "1 by 2",
+              "odd": "11.00"
+            },
+            {
+              "value": "2 by 2",
+              "odd": "6.00"
+            },
+            {
+              "value": "1 by 3",
+              "odd": "26.00"
+            },
+            {
+              "value": "2 by 3",
+              "odd": "12.00"
+            },
+            {
+              "value": "2 by 4+",
+              "odd": "21.00"
+            },
+            {
+              "value": "Score Draw",
+              "odd": "4.50"
+            },
+            {
+              "value": "Draw",
+              "odd": "10.00"
+            }
+          ]
+        },
+        {
+          "id": 48,
+          "name": "To Score In Both Halves By Teams",
+          "values": [
+            {
+              "value": "Home",
+              "odd": "5.00"
+            },
+            {
+              "value": "Away",
+              "odd": "3.25"
+            }
+          ]
+        },
+        {
+          "id": 49,
+          "name": "Total Goals/Both Teams To Score",
+          "values": [
+            {
+              "value": "o/yes 2.5",
+              "odd": "2.30"
+            },
+            {
+              "value": "o/no 2.5",
+              "odd": "9.50"
+            },
+            {
+              "value": "u/yes 2.5",
+              "odd": "6.50"
+            },
+            {
+              "value": "u/no 2.5",
+              "odd": "2.30"
+            }
+          ]
+        },
+        {
+          "id": 50,
+          "name": "Goal Line",
+          "values": [
+            {
+              "value": "Over 1.5",
+              "odd": "1.27"
+            },
+            {
+              "value": "Under 1.5",
+              "odd": "3.55"
+            },
+            {
+              "value": "Over 1.75",
+              "odd": "1.35"
+            },
+            {
+              "value": "Under 1.75",
+              "odd": "3.10"
+            },
+            {
+              "value": "Over 2.25",
+              "odd": "1.65"
+            },
+            {
+              "value": "Under 2.25",
+              "odd": "2.20"
+            },
+            {
+              "value": "Over 2.5",
+              "odd": "2.02"
+            },
+            {
+              "value": "Under 2.5",
+              "odd": "1.82"
+            },
+            {
+              "value": "Over 2.75",
+              "odd": "2.10"
+            },
+            {
+              "value": "Under 2.75",
+              "odd": "1.70"
+            },
+            {
+              "value": "Over 3.5",
+              "odd": "3.30"
+            },
+            {
+              "value": "Under 3.5",
+              "odd": "1.32"
+            },
+            {
+              "value": "Over 2",
+              "odd": "1.42"
+            },
+            {
+              "value": "Under 2",
+              "odd": "2.75"
+            },
+            {
+              "value": "Over 3",
+              "odd": "2.50"
+            },
+            {
+              "value": "Under 3",
+              "odd": "1.50"
+            },
+            {
+              "value": "Over 4",
+              "odd": "5.50"
+            },
+            {
+              "value": "Under 4",
+              "odd": "1.15"
+            },
+            {
+              "value": "Over 1.25",
+              "odd": "1.17"
+            },
+            {
+              "value": "Under 1.25",
+              "odd": "5.00"
+            },
+            {
+              "value": "Over 4.5",
+              "odd": "6.25"
+            },
+            {
+              "value": "Under 4.5",
+              "odd": "1.12"
+            },
+            {
+              "value": "Over 3.25",
+              "odd": "2.85"
+            },
+            {
+              "value": "Under 3.25",
+              "odd": "1.40"
+            },
+            {
+              "value": "Over 3.75",
+              "odd": "3.90"
+            },
+            {
+              "value": "Under 3.75",
+              "odd": "1.24"
+            },
+            {
+              "value": "Over 4.25",
+              "odd": "5.90"
+            },
+            {
+              "value": "Under 4.25",
+              "odd": "1.13"
+            }
+          ]
+        },
+        {
+          "id": 72,
+          "name": "Goal Line (1st Half)",
+          "values": [
+            {
+              "value": "Over 1.5",
+              "odd": "2.85"
+            },
+            {
+              "value": "Under 1.5",
+              "odd": "1.40"
+            },
+            {
+              "value": "Over 1.75",
+              "odd": "3.70"
+            },
+            {
+              "value": "Under 1.75",
+              "odd": "1.26"
+            },
+            {
+              "value": "Over 2.25",
+              "odd": "6.80"
+            },
+            {
+              "value": "Under 2.25",
+              "odd": "1.10"
+            },
+            {
+              "value": "Over 1",
+              "odd": "1.85"
+            },
+            {
+              "value": "Under 1",
+              "odd": "1.95"
+            },
+            {
+              "value": "Over 2",
+              "odd": "6.25"
+            },
+            {
+              "value": "Under 2",
+              "odd": "1.12"
+            },
+            {
+              "value": "Over 0.5",
+              "odd": "1.40"
+            },
+            {
+              "value": "Under 0.5",
+              "odd": "2.85"
+            },
+            {
+              "value": "Over 0.75",
+              "odd": "1.58"
+            },
+            {
+              "value": "Under 0.75",
+              "odd": "2.35"
+            },
+            {
+              "value": "Over 1.25",
+              "odd": "2.38"
+            },
+            {
+              "value": "Under 1.25",
+              "odd": "1.55"
+            }
+          ]
+        },
+        {
+          "id": 97,
+          "name": "First Goal Method",
+          "values": [
+            {
+              "value": "Shot",
+              "odd": "1.50"
+            },
+            {
+              "value": "Header",
+              "odd": "6.50"
+            },
+            {
+              "value": "Penalty",
+              "odd": "7.50"
+            },
+            {
+              "value": "FreeKick",
+              "odd": "23.00"
+            },
+            {
+              "value": "OwnGoal",
+              "odd": "29.00"
+            },
+            {
+              "value": "Draw",
+              "odd": "10.00"
+            }
+          ]
+        },
+        {
+          "id": 56,
+          "name": "Corners Asian Handicap",
+          "values": [
+            {
+              "value": "Home +0.5",
+              "odd": "1.85"
+            },
+            {
+              "value": "Away +0.5",
+              "odd": "1.95"
+            }
+          ]
+        },
+        {
+          "id": 57,
+          "name": "Home Corners Over/Under",
+          "values": [
+            {
+              "value": "Over 4.5",
+              "odd": "1.91"
+            },
+            {
+              "value": "Under 4.5",
+              "odd": "1.80"
+            }
+          ]
+        },
+        {
+          "id": 58,
+          "name": "Away Corners Over/Under",
+          "values": [
+            {
+              "value": "Over 4.5",
+              "odd": "1.73"
+            },
+            {
+              "value": "Under 4.5",
+              "odd": "2.00"
+            }
+          ]
+        },
+        {
+          "id": 59,
+          "name": "Own Goal",
+          "values": [
+            {
+              "value": "Yes",
+              "odd": "9.00"
+            },
+            {
+              "value": "No",
+              "odd": "1.07"
+            }
+          ]
+        },
+        {
+          "id": 92,
+          "name": "Anytime Goal Scorer",
+          "values": [
+            {
+              "value": "Angel Gomes",
+              "odd": "6.50"
+            },
+            {
+              "value": "Hugo Bueno",
+              "odd": "13.00"
+            },
+            {
+              "value": "David Wolfe",
+              "odd": "13.00"
+            },
+            {
+              "value": "Ladislav Krejci",
+              "odd": "9.00"
+            },
+            {
+              "value": "Daniel Ballard",
+              "odd": "7.50"
+            },
+            {
+              "value": "Trai Hume",
+              "odd": "8.00"
+            },
+            {
+              "value": "Brian Brobbey",
+              "odd": "2.62"
+            },
+            {
+              "value": "Habib Diarra",
+              "odd": "4.50"
+            },
+            {
+              "value": "Jackson Tchatchoua",
+              "odd": "13.00"
+            },
+            {
+              "value": "Jack Whittaker",
+              "odd": "7.00"
+            },
+            {
+              "value": "Jayden Jones",
+              "odd": "7.50"
+            },
+            {
+              "value": "Jenson Jones",
+              "odd": "9.00"
+            },
+            {
+              "value": "Eliezer Mayenda",
+              "odd": "3.20"
+            },
+            {
+              "value": "Wilson Isidor",
+              "odd": "2.62"
+            },
+            {
+              "value": "Romaine Mundle",
+              "odd": "5.00"
+            },
+            {
+              "value": "Chris Rigg",
+              "odd": "5.00"
+            },
+            {
+              "value": "Milan Aleksic",
+              "odd": "4.33"
+            },
+            {
+              "value": "Dennis Cirkin",
+              "odd": "11.00"
+            },
+            {
+              "value": "Luke O'Nien",
+              "odd": "11.00"
+            },
+            {
+              "value": "Nilson Angulo",
+              "odd": "4.33"
+            },
+            {
+              "value": "Toluwalase Arokodare",
+              "odd": "3.50"
+            },
+            {
+              "value": "Chemsdine Talbi",
+              "odd": "4.00"
+            },
+            {
+              "value": "Noah Sadiki",
+              "odd": "9.00"
+            },
+            {
+              "value": "Jeanricner Bellegarde",
+              "odd": "6.50"
+            },
+            {
+              "value": "Bertrand Traore",
+              "odd": "4.00"
+            },
+            {
+              "value": "Enzo Le Fee",
+              "odd": "4.00"
+            },
+            {
+              "value": "Reinildo Mandava",
+              "odd": "13.00"
+            },
+            {
+              "value": "Saheed Olagunju",
+              "odd": "13.00"
+            },
+            {
+              "value": "Jocelin Ta Bi",
+              "odd": "6.00"
+            },
+            {
+              "value": "Jerome Abbey",
+              "odd": "8.50"
+            },
+            {
+              "value": "Finn Geragusyan",
+              "odd": "3.25"
+            },
+            {
+              "value": "Pedro Lima",
+              "odd": "15.00"
+            },
+            {
+              "value": "Omar Alderete",
+              "odd": "9.00"
+            },
+            {
+              "value": "Santiago Bueno",
+              "odd": "15.00"
+            },
+            {
+              "value": "Yerson Mosquera",
+              "odd": "13.00"
+            },
+            {
+              "value": "Harrison Jones",
+              "odd": "5.00"
+            },
+            {
+              "value": "Lutsharel Geertruida",
+              "odd": "11.00"
+            },
+            {
+              "value": "Matt Doherty",
+              "odd": "13.00"
+            },
+            {
+              "value": "Joao Gomes",
+              "odd": "8.00"
+            },
+            {
+              "value": "Rodrigo Gomes",
+              "odd": "6.00"
+            },
+            {
+              "value": "Toti Gomes",
+              "odd": "13.00"
+            },
+            {
+              "value": "Adam Armstrong",
+              "odd": "3.50"
+            },
+            {
+              "value": "Hee-Chan Hwang",
+              "odd": "4.00"
+            },
+            {
+              "value": "Tom Edozie",
+              "odd": "6.00"
+            },
+            {
+              "value": "Ethan Sutherland",
+              "odd": "7.50"
+            },
+            {
+              "value": "Granit Xhaka",
+              "odd": "7.50"
+            },
+            {
+              "value": "Nordi Mukiele",
+              "odd": "11.00"
+            },
+            {
+              "value": "Andre Trindade",
+              "odd": "13.00"
+            },
+            {
+              "value": "Ahmed Abdullahi",
+              "odd": "3.60"
+            },
+            {
+              "value": "Mateus Mane",
+              "odd": "4.75"
+            }
+          ]
+        },
+        {
+          "id": 93,
+          "name": "First Goal Scorer",
+          "values": [
+            {
+              "value": "Angel Gomes",
+              "odd": "17.00"
+            },
+            {
+              "value": "Hugo Bueno",
+              "odd": "34.00"
+            },
+            {
+              "value": "No Goalscorer",
+              "odd": "11.00"
+            },
+            {
+              "value": "David Wolfe",
+              "odd": "34.00"
+            },
+            {
+              "value": "Ladislav Krejci",
+              "odd": "23.00"
+            },
+            {
+              "value": "Daniel Ballard",
+              "odd": "19.00"
+            },
+            {
+              "value": "Trai Hume",
+              "odd": "21.00"
+            },
+            {
+              "value": "Brian Brobbey",
+              "odd": "6.00"
+            },
+            {
+              "value": "Habib Diarra",
+              "odd": "11.00"
+            },
+            {
+              "value": "Jackson Tchatchoua",
+              "odd": "34.00"
+            },
+            {
+              "value": "Jack Whittaker",
+              "odd": "17.00"
+            },
+            {
+              "value": "Jayden Jones",
+              "odd": "19.00"
+            },
+            {
+              "value": "Jenson Jones",
+              "odd": "23.00"
+            },
+            {
+              "value": "Eliezer Mayenda",
+              "odd": "7.50"
+            },
+            {
+              "value": "Wilson Isidor",
+              "odd": "6.00"
+            },
+            {
+              "value": "Romaine Mundle",
+              "odd": "12.00"
+            },
+            {
+              "value": "Chris Rigg",
+              "odd": "13.00"
+            },
+            {
+              "value": "Milan Aleksic",
+              "odd": "10.00"
+            },
+            {
+              "value": "Dennis Cirkin",
+              "odd": "29.00"
+            },
+            {
+              "value": "Luke O'Nien",
+              "odd": "29.00"
+            },
+            {
+              "value": "Nilson Angulo",
+              "odd": "10.00"
+            },
+            {
+              "value": "Toluwalase Arokodare",
+              "odd": "8.50"
+            },
+            {
+              "value": "Chemsdine Talbi",
+              "odd": "9.50"
+            },
+            {
+              "value": "Noah Sadiki",
+              "odd": "23.00"
+            },
+            {
+              "value": "Jeanricner Bellegarde",
+              "odd": "17.00"
+            },
+            {
+              "value": "Bertrand Traore",
+              "odd": "9.50"
+            },
+            {
+              "value": "Enzo Le Fee",
+              "odd": "9.50"
+            },
+            {
+              "value": "Reinildo Mandava",
+              "odd": "34.00"
+            },
+            {
+              "value": "Saheed Olagunju",
+              "odd": "34.00"
+            },
+            {
+              "value": "Jocelin Ta Bi",
+              "odd": "15.00"
+            },
+            {
+              "value": "Jerome Abbey",
+              "odd": "21.00"
+            },
+            {
+              "value": "Finn Geragusyan",
+              "odd": "7.50"
+            },
+            {
+              "value": "Pedro Lima",
+              "odd": "41.00"
+            },
+            {
+              "value": "Omar Alderete",
+              "odd": "23.00"
+            },
+            {
+              "value": "Santiago Bueno",
+              "odd": "41.00"
+            },
+            {
+              "value": "Yerson Mosquera",
+              "odd": "34.00"
+            },
+            {
+              "value": "Harrison Jones",
+              "odd": "12.00"
+            },
+            {
+              "value": "Lutsharel Geertruida",
+              "odd": "29.00"
+            },
+            {
+              "value": "Matt Doherty",
+              "odd": "34.00"
+            },
+            {
+              "value": "Joao Gomes",
+              "odd": "21.00"
+            },
+            {
+              "value": "Rodrigo Gomes",
+              "odd": "15.00"
+            },
+            {
+              "value": "Toti Gomes",
+              "odd": "34.00"
+            },
+            {
+              "value": "Adam Armstrong",
+              "odd": "8.50"
+            },
+            {
+              "value": "Hee-Chan Hwang",
+              "odd": "10.00"
+            },
+            {
+              "value": "Tom Edozie",
+              "odd": "15.00"
+            },
+            {
+              "value": "Ethan Sutherland",
+              "odd": "19.00"
+            },
+            {
+              "value": "Granit Xhaka",
+              "odd": "19.00"
+            },
+            {
+              "value": "Nordi Mukiele",
+              "odd": "29.00"
+            },
+            {
+              "value": "Andre Trindade",
+              "odd": "34.00"
+            },
+            {
+              "value": "Ahmed Abdullahi",
+              "odd": "8.50"
+            },
+            {
+              "value": "Mateus Mane",
+              "odd": "12.00"
+            }
+          ]
+        },
+        {
+          "id": 94,
+          "name": "Last Goal Scorer",
+          "values": [
+            {
+              "value": "Angel Gomes",
+              "odd": "17.00"
+            },
+            {
+              "value": "Hugo Bueno",
+              "odd": "34.00"
+            },
+            {
+              "value": "No Goalscorer",
+              "odd": "11.00"
+            },
+            {
+              "value": "David Wolfe",
+              "odd": "34.00"
+            },
+            {
+              "value": "Ladislav Krejci",
+              "odd": "23.00"
+            },
+            {
+              "value": "Daniel Ballard",
+              "odd": "19.00"
+            },
+            {
+              "value": "Trai Hume",
+              "odd": "21.00"
+            },
+            {
+              "value": "Brian Brobbey",
+              "odd": "6.00"
+            },
+            {
+              "value": "Habib Diarra",
+              "odd": "11.00"
+            },
+            {
+              "value": "Jackson Tchatchoua",
+              "odd": "34.00"
+            },
+            {
+              "value": "Jack Whittaker",
+              "odd": "17.00"
+            },
+            {
+              "value": "Jayden Jones",
+              "odd": "19.00"
+            },
+            {
+              "value": "Jenson Jones",
+              "odd": "23.00"
+            },
+            {
+              "value": "Eliezer Mayenda",
+              "odd": "7.50"
+            },
+            {
+              "value": "Wilson Isidor",
+              "odd": "6.00"
+            },
+            {
+              "value": "Romaine Mundle",
+              "odd": "12.00"
+            },
+            {
+              "value": "Chris Rigg",
+              "odd": "13.00"
+            },
+            {
+              "value": "Milan Aleksic",
+              "odd": "10.00"
+            },
+            {
+              "value": "Dennis Cirkin",
+              "odd": "29.00"
+            },
+            {
+              "value": "Luke O'Nien",
+              "odd": "29.00"
+            },
+            {
+              "value": "Nilson Angulo",
+              "odd": "10.00"
+            },
+            {
+              "value": "Toluwalase Arokodare",
+              "odd": "8.50"
+            },
+            {
+              "value": "Chemsdine Talbi",
+              "odd": "9.50"
+            },
+            {
+              "value": "Noah Sadiki",
+              "odd": "23.00"
+            },
+            {
+              "value": "Jeanricner Bellegarde",
+              "odd": "17.00"
+            },
+            {
+              "value": "Bertrand Traore",
+              "odd": "9.50"
+            },
+            {
+              "value": "Enzo Le Fee",
+              "odd": "9.50"
+            },
+            {
+              "value": "Reinildo Mandava",
+              "odd": "34.00"
+            },
+            {
+              "value": "Saheed Olagunju",
+              "odd": "34.00"
+            },
+            {
+              "value": "Jocelin Ta Bi",
+              "odd": "15.00"
+            },
+            {
+              "value": "Jerome Abbey",
+              "odd": "21.00"
+            },
+            {
+              "value": "Finn Geragusyan",
+              "odd": "7.50"
+            },
+            {
+              "value": "Pedro Lima",
+              "odd": "41.00"
+            },
+            {
+              "value": "Omar Alderete",
+              "odd": "23.00"
+            },
+            {
+              "value": "Santiago Bueno",
+              "odd": "41.00"
+            },
+            {
+              "value": "Yerson Mosquera",
+              "odd": "34.00"
+            },
+            {
+              "value": "Harrison Jones",
+              "odd": "12.00"
+            },
+            {
+              "value": "Lutsharel Geertruida",
+              "odd": "29.00"
+            },
+            {
+              "value": "Matt Doherty",
+              "odd": "34.00"
+            },
+            {
+              "value": "Joao Gomes",
+              "odd": "21.00"
+            },
+            {
+              "value": "Rodrigo Gomes",
+              "odd": "15.00"
+            },
+            {
+              "value": "Toti Gomes",
+              "odd": "34.00"
+            },
+            {
+              "value": "Adam Armstrong",
+              "odd": "8.50"
+            },
+            {
+              "value": "Hee-Chan Hwang",
+              "odd": "10.00"
+            },
+            {
+              "value": "Tom Edozie",
+              "odd": "15.00"
+            },
+            {
+              "value": "Ethan Sutherland",
+              "odd": "19.00"
+            },
+            {
+              "value": "Granit Xhaka",
+              "odd": "19.00"
+            },
+            {
+              "value": "Nordi Mukiele",
+              "odd": "29.00"
+            },
+            {
+              "value": "Andre Trindade",
+              "odd": "34.00"
+            },
+            {
+              "value": "Ahmed Abdullahi",
+              "odd": "8.50"
+            },
+            {
+              "value": "Mateus Mane",
+              "odd": "12.00"
+            }
+          ]
+        },
+        {
+          "id": 85,
+          "name": "Total Corners (3 way)",
+          "values": [
+            {
+              "value": "Exactly 4",
+              "odd": "21.00"
+            },
+            {
+              "value": "Over 4",
+              "odd": "1.02"
+            },
+            {
+              "value": "Under 4",
+              "odd": "26.00"
+            },
+            {
+              "value": "Exactly 5",
+              "odd": "15.00"
+            },
+            {
+              "value": "Over 5",
+              "odd": "1.07"
+            },
+            {
+              "value": "Under 5",
+              "odd": "17.00"
+            },
+            {
+              "value": "Exactly 8",
+              "odd": "8.00"
+            },
+            {
+              "value": "Over 8",
+              "odd": "1.53"
+            },
+            {
+              "value": "Under 8",
+              "odd": "3.40"
+            },
+            {
+              "value": "Exactly 9",
+              "odd": "7.50"
+            },
+            {
+              "value": "Over 9",
+              "odd": "1.83"
+            },
+            {
+              "value": "Under 9",
+              "odd": "2.38"
+            },
+            {
+              "value": "Exactly 10",
+              "odd": "8.00"
+            },
+            {
+              "value": "Over 10",
+              "odd": "2.50"
+            },
+            {
+              "value": "Under 10",
+              "odd": "1.83"
+            },
+            {
+              "value": "Exactly 11",
+              "odd": "9.00"
+            },
+            {
+              "value": "Over 11",
+              "odd": "3.40"
+            },
+            {
+              "value": "Under 11",
+              "odd": "1.50"
+            },
+            {
+              "value": "Exactly 7",
+              "odd": "8.50"
+            },
+            {
+              "value": "Over 7",
+              "odd": "1.30"
+            },
+            {
+              "value": "Under 7",
+              "odd": "5.00"
+            },
+            {
+              "value": "Exactly 12",
+              "odd": "11.00"
+            },
+            {
+              "value": "Over 12",
+              "odd": "4.50"
+            },
+            {
+              "value": "Under 12",
+              "odd": "1.30"
+            },
+            {
+              "value": "Exactly 6",
+              "odd": "11.00"
+            },
+            {
+              "value": "Over 6",
+              "odd": "1.17"
+            },
+            {
+              "value": "Under 6",
+              "odd": "9.00"
+            },
+            {
+              "value": "Exactly 13",
+              "odd": "13.00"
+            },
+            {
+              "value": "Over 13",
+              "odd": "7.00"
+            },
+            {
+              "value": "Under 13",
+              "odd": "1.18"
+            },
+            {
+              "value": "Exactly 14",
+              "odd": "17.00"
+            },
+            {
+              "value": "Over 14",
+              "odd": "11.00"
+            },
+            {
+              "value": "Under 14",
+              "odd": "1.10"
+            },
+            {
+              "value": "Exactly 16",
+              "odd": "26.00"
+            },
+            {
+              "value": "Over 16",
+              "odd": "21.00"
+            },
+            {
+              "value": "Under 16",
+              "odd": "1.02"
+            },
+            {
+              "value": "Exactly 15",
+              "odd": "21.00"
+            },
+            {
+              "value": "Over 15",
+              "odd": "15.00"
+            },
+            {
+              "value": "Under 15",
+              "odd": "1.05"
+            }
+          ]
+        },
+        {
+          "id": 77,
+          "name": "Total Corners (1st Half)",
+          "values": [
+            {
+              "value": "Exactly 4",
+              "odd": "5.00"
+            },
+            {
+              "value": "Over 4",
+              "odd": "2.00"
+            },
+            {
+              "value": "Under 4",
+              "odd": "2.60"
+            },
+            {
+              "value": "Over 4.5",
+              "odd": "2.05"
+            },
+            {
+              "value": "Under 4.5",
+              "odd": "1.75"
+            }
+          ]
+        },
+        {
+          "id": 78,
+          "name": "RTG_H1",
+          "values": [
+            {
+              "value": "Draw/Over 1.5",
+              "odd": "7.50"
+            },
+            {
+              "value": "Away/Over 1.5",
+              "odd": "6.50"
+            },
+            {
+              "value": "Home/Over 1.5",
+              "odd": "11.00"
+            },
+            {
+              "value": "Home/Under 1.5",
+              "odd": "5.50"
+            },
+            {
+              "value": "Draw/Under 1.5",
+              "odd": "2.75"
+            },
+            {
+              "value": "Away/Under 1.5",
+              "odd": "4.00"
+            }
+          ]
+        },
+        {
+          "id": 79,
+          "name": "Cards European Handicap",
+          "values": [
+            {
+              "value": "Home +0",
+              "odd": "2.50"
+            },
+            {
+              "value": "Away +0",
+              "odd": "2.30"
+            },
+            {
+              "value": "Draw +0",
+              "odd": "3.50"
+            }
+          ]
+        },
+        {
+          "id": 80,
+          "name": "Cards Over/Under",
+          "values": [
+            {
+              "value": "Over 3.5",
+              "odd": "1.85"
+            },
+            {
+              "value": "Under 3.5",
+              "odd": "1.95"
+            }
+          ]
+        },
+        {
+          "id": 81,
+          "name": "Cards Asian Handicap",
+          "values": [
+            {
+              "value": "Home +0",
+              "odd": "2.00"
+            },
+            {
+              "value": "Away +0",
+              "odd": "1.80"
+            }
+          ]
+        },
+        {
+          "id": 82,
+          "name": "Home Team Total Cards",
+          "values": [
+            {
+              "value": "Over 1.5",
+              "odd": "1.67"
+            },
+            {
+              "value": "Under 1.5",
+              "odd": "2.10"
+            }
+          ]
+        },
+        {
+          "id": 83,
+          "name": "Away Team Total Cards",
+          "values": [
+            {
+              "value": "Over 1.5",
+              "odd": "1.62"
+            },
+            {
+              "value": "Under 1.5",
+              "odd": "2.20"
+            }
+          ]
+        },
+        {
+          "id": 340,
+          "name": "Shots.1x2",
+          "values": [
+            {
+              "value": "Home",
+              "odd": "2.20"
+            },
+            {
+              "value": "Draw",
+              "odd": "13.00"
+            },
+            {
+              "value": "Away",
+              "odd": "1.73"
+            }
+          ]
+        },
+        {
+          "id": 87,
+          "name": "Total ShotOnGoal",
+          "values": [
+            {
+              "value": "Over 7.5",
+              "odd": "1.80"
+            },
+            {
+              "value": "Under 7.5",
+              "odd": "1.91"
+            }
+          ]
+        },
+        {
+          "id": 215,
+          "name": "Player Singles",
+          "values": [
+            {
+              "value": "Mateus Mane - 0.5",
+              "odd": "1.18"
+            },
+            {
+              "value": "Mateus Mane - 1.5",
+              "odd": "1.80"
+            },
+            {
+              "value": "Pedro Lima - 2.5",
+              "odd": "19.00"
+            },
+            {
+              "value": "Mateus Mane - 2.5",
+              "odd": "3.40"
+            },
+            {
+              "value": "Mateus Mane - 3.5",
+              "odd": "7.00"
+            },
+            {
+              "value": "Mateus Mane - 4.5",
+              "odd": "15.00"
+            },
+            {
+              "value": "Mateus Mane - 5.5",
+              "odd": "21.00"
+            },
+            {
+              "value": "Granit Xhaka - 0.5",
+              "odd": "1.44"
+            },
+            {
+              "value": "Granit Xhaka - 1.5",
+              "odd": "3.00"
+            },
+            {
+              "value": "Granit Xhaka - 2.5",
+              "odd": "7.00"
+            },
+            {
+              "value": "Granit Xhaka - 3.5",
+              "odd": "19.00"
+            },
+            {
+              "value": "Daniel Ballard - 0.5",
+              "odd": "1.50"
+            },
+            {
+              "value": "Trai Hume - 0.5",
+              "odd": "1.36"
+            },
+            {
+              "value": "Daniel Ballard - 1.5",
+              "odd": "3.40"
+            },
+            {
+              "value": "Trai Hume - 1.5",
+              "odd": "2.62"
+            },
+            {
+              "value": "Daniel Ballard - 2.5",
+              "odd": "9.00"
+            },
+            {
+              "value": "Trai Hume - 2.5",
+              "odd": "6.00"
+            },
+            {
+              "value": "Omar Alderete - 0.5",
+              "odd": "1.57"
+            },
+            {
+              "value": "Omar Alderete - 1.5",
+              "odd": "3.50"
+            },
+            {
+              "value": "Daniel Ballard - 3.5",
+              "odd": "21.00"
+            },
+            {
+              "value": "Brian Brobbey - 0.5",
+              "odd": "1.03"
+            },
+            {
+              "value": "Brian Brobbey - 1.5",
+              "odd": "1.20"
+            },
+            {
+              "value": "Brian Brobbey - 2.5",
+              "odd": "1.62"
+            },
+            {
+              "value": "Brian Brobbey - 3.5",
+              "odd": "2.50"
+            },
+            {
+              "value": "Brian Brobbey - 4.5",
+              "odd": "4.33"
+            },
+            {
+              "value": "Brian Brobbey - 5.5",
+              "odd": "8.00"
+            },
+            {
+              "value": "Brian Brobbey - 6.5",
+              "odd": "15.00"
+            },
+            {
+              "value": "Omar Alderete - 2.5",
+              "odd": "10.00"
+            },
+            {
+              "value": "Joao Gomes - 0.5",
+              "odd": "1.36"
+            },
+            {
+              "value": "Joao Gomes - 1.5",
+              "odd": "2.62"
+            },
+            {
+              "value": "Joao Gomes - 2.5",
+              "odd": "6.00"
+            },
+            {
+              "value": "Joao Gomes - 3.5",
+              "odd": "15.00"
+            },
+            {
+              "value": "Yerson Mosquera - 0.5",
+              "odd": "1.67"
+            },
+            {
+              "value": "Yerson Mosquera - 1.5",
+              "odd": "3.75"
+            },
+            {
+              "value": "Yerson Mosquera - 2.5",
+              "odd": "11.00"
+            },
+            {
+              "value": "Toluwalase Arokodare - 0.5",
+              "odd": "1.05"
+            },
+            {
+              "value": "Toluwalase Arokodare - 1.5",
+              "odd": "1.28"
+            },
+            {
+              "value": "Toluwalase Arokodare - 2.5",
+              "odd": "1.80"
+            },
+            {
+              "value": "Toluwalase Arokodare - 3.5",
+              "odd": "3.00"
+            },
+            {
+              "value": "Toluwalase Arokodare - 4.5",
+              "odd": "5.50"
+            },
+            {
+              "value": "Toluwalase Arokodare - 5.5",
+              "odd": "11.00"
+            },
+            {
+              "value": "Toluwalase Arokodare - 6.5",
+              "odd": "21.00"
+            },
+            {
+              "value": "Yerson Mosquera - 3.5",
+              "odd": "21.00"
+            },
+            {
+              "value": "David Wolfe - 0.5",
+              "odd": "2.20"
+            },
+            {
+              "value": "David Wolfe - 1.5",
+              "odd": "6.50"
+            },
+            {
+              "value": "Santiago Bueno - 0.5",
+              "odd": "2.20"
+            },
+            {
+              "value": "Santiago Bueno - 1.5",
+              "odd": "7.00"
+            },
+            {
+              "value": "Santiago Bueno - 2.5",
+              "odd": "21.00"
+            },
+            {
+              "value": "Omar Alderete - 3.5",
+              "odd": "21.00"
+            },
+            {
+              "value": "Angel Gomes - 0.5",
+              "odd": "1.33"
+            },
+            {
+              "value": "Angel Gomes - 1.5",
+              "odd": "2.38"
+            },
+            {
+              "value": "Angel Gomes - 2.5",
+              "odd": "5.50"
+            },
+            {
+              "value": "Angel Gomes - 3.5",
+              "odd": "13.00"
+            },
+            {
+              "value": "Adam Armstrong - 0.5",
+              "odd": "1.07"
+            },
+            {
+              "value": "Adam Armstrong - 1.5",
+              "odd": "1.36"
+            },
+            {
+              "value": "Adam Armstrong - 2.5",
+              "odd": "2.00"
+            },
+            {
+              "value": "Adam Armstrong - 3.5",
+              "odd": "3.50"
+            },
+            {
+              "value": "Adam Armstrong - 4.5",
+              "odd": "7.00"
+            },
+            {
+              "value": "Adam Armstrong - 5.5",
+              "odd": "15.00"
+            },
+            {
+              "value": "Adam Armstrong - 6.5",
+              "odd": "21.00"
+            },
+            {
+              "value": "Chris Rigg - 0.5",
+              "odd": "1.20"
+            },
+            {
+              "value": "Dennis Cirkin - 0.5",
+              "odd": "1.83"
+            },
+            {
+              "value": "Eliezer Mayenda - 0.5",
+              "odd": "1.04"
+            },
+            {
+              "value": "Luke O'Nien - 0.5",
+              "odd": "1.83"
+            },
+            {
+              "value": "Chris Rigg - 1.5",
+              "odd": "1.83"
+            },
+            {
+              "value": "Dennis Cirkin - 1.5",
+              "odd": "5.00"
+            },
+            {
+              "value": "Eliezer Mayenda - 1.5",
+              "odd": "1.25"
+            },
+            {
+              "value": "Luke O'Nien - 1.5",
+              "odd": "5.00"
+            },
+            {
+              "value": "Romaine Mundle - 1.5",
+              "odd": "1.83"
+            },
+            {
+              "value": "Chris Rigg - 2.5",
+              "odd": "3.75"
+            },
+            {
+              "value": "Dennis Cirkin - 2.5",
+              "odd": "15.00"
+            },
+            {
+              "value": "Eliezer Mayenda - 2.5",
+              "odd": "1.73"
+            },
+            {
+              "value": "Luke O'Nien - 2.5",
+              "odd": "15.00"
+            },
+            {
+              "value": "Chris Rigg - 3.5",
+              "odd": "8.00"
+            },
+            {
+              "value": "Eliezer Mayenda - 3.5",
+              "odd": "2.62"
+            },
+            {
+              "value": "Chris Rigg - 4.5",
+              "odd": "19.00"
+            },
+            {
+              "value": "Eliezer Mayenda - 4.5",
+              "odd": "4.50"
+            },
+            {
+              "value": "Eliezer Mayenda - 5.5",
+              "odd": "10.00"
+            },
+            {
+              "value": "Eliezer Mayenda - 6.5",
+              "odd": "19.00"
+            },
+            {
+              "value": "Reinildo Mandava - 0.5",
+              "odd": "2.25"
+            },
+            {
+              "value": "Reinildo Mandava - 1.5",
+              "odd": "8.00"
+            },
+            {
+              "value": "Reinildo Mandava - 2.5",
+              "odd": "21.00"
+            },
+            {
+              "value": "Jackson Tchatchoua - 0.5",
+              "odd": "1.83"
+            },
+            {
+              "value": "Jackson Tchatchoua - 1.5",
+              "odd": "5.00"
+            },
+            {
+              "value": "Jackson Tchatchoua - 2.5",
+              "odd": "15.00"
+            },
+            {
+              "value": "Habib Diarra - 0.5",
+              "odd": "1.14"
+            },
+            {
+              "value": "Habib Diarra - 1.5",
+              "odd": "1.67"
+            },
+            {
+              "value": "Habib Diarra - 2.5",
+              "odd": "3.00"
+            },
+            {
+              "value": "Habib Diarra - 3.5",
+              "odd": "6.00"
+            },
+            {
+              "value": "Hee-Chan Hwang - 0.5",
+              "odd": "1.11"
+            },
+            {
+              "value": "Jeanricner Bellegarde - 0.5",
+              "odd": "1.40"
+            },
+            {
+              "value": "Toti Gomes - 0.5",
+              "odd": "2.25"
+            },
+            {
+              "value": "Hee-Chan Hwang - 1.5",
+              "odd": "1.53"
+            },
+            {
+              "value": "Jeanricner Bellegarde - 1.5",
+              "odd": "2.62"
+            },
+            {
+              "value": "Toti Gomes - 1.5",
+              "odd": "8.00"
+            },
+            {
+              "value": "Hee-Chan Hwang - 2.5",
+              "odd": "2.50"
+            },
+            {
+              "value": "Jeanricner Bellegarde - 2.5",
+              "odd": "6.50"
+            },
+            {
+              "value": "Hee-Chan Hwang - 3.5",
+              "odd": "4.50"
+            },
+            {
+              "value": "Jeanricner Bellegarde - 3.5",
+              "odd": "15.00"
+            },
+            {
+              "value": "David Wolfe - 2.5",
+              "odd": "21.00"
+            },
+            {
+              "value": "Bertrand Traore - 2.5",
+              "odd": "2.20"
+            },
+            {
+              "value": "Brian Brobbey - 7.5",
+              "odd": "21.00"
+            },
+            {
+              "value": "Jocelin Ta Bi - 1.5",
+              "odd": "2.38"
+            },
+            {
+              "value": "Habib Diarra - 4.5",
+              "odd": "13.00"
+            },
+            {
+              "value": "Lutsharel Geertruida - 0.5",
+              "odd": "1.83"
+            },
+            {
+              "value": "Lutsharel Geertruida - 1.5",
+              "odd": "5.00"
+            },
+            {
+              "value": "Lutsharel Geertruida - 2.5",
+              "odd": "15.00"
+            },
+            {
+              "value": "Ladislav Krejci - 0.5",
+              "odd": "1.67"
+            },
+            {
+              "value": "Ladislav Krejci - 1.5",
+              "odd": "4.00"
+            },
+            {
+              "value": "Ladislav Krejci - 2.5",
+              "odd": "11.00"
+            },
+            {
+              "value": "Ladislav Krejci - 3.5",
+              "odd": "21.00"
+            },
+            {
+              "value": "Hugo Bueno - 0.5",
+              "odd": "1.73"
+            },
+            {
+              "value": "Hugo Bueno - 1.5",
+              "odd": "4.33"
+            },
+            {
+              "value": "Hugo Bueno - 2.5",
+              "odd": "13.00"
+            },
+            {
+              "value": "Noah Sadiki - 0.5",
+              "odd": "1.50"
+            },
+            {
+              "value": "Noah Sadiki - 1.5",
+              "odd": "3.25"
+            },
+            {
+              "value": "Noah Sadiki - 2.5",
+              "odd": "8.00"
+            },
+            {
+              "value": "Noah Sadiki - 3.5",
+              "odd": "21.00"
+            },
+            {
+              "value": "Wilson Isidor - 0.5",
+              "odd": "1.03"
+            },
+            {
+              "value": "Wilson Isidor - 1.5",
+              "odd": "1.20"
+            },
+            {
+              "value": "Wilson Isidor - 2.5",
+              "odd": "1.62"
+            },
+            {
+              "value": "Wilson Isidor - 3.5",
+              "odd": "2.50"
+            },
+            {
+              "value": "Wilson Isidor - 4.5",
+              "odd": "4.33"
+            },
+            {
+              "value": "Wilson Isidor - 5.5",
+              "odd": "8.00"
+            },
+            {
+              "value": "Habib Diarra - 5.5",
+              "odd": "21.00"
+            },
+            {
+              "value": "Toti Gomes - 2.5",
+              "odd": "21.00"
+            },
+            {
+              "value": "Matt Doherty - 0.5",
+              "odd": "2.25"
+            },
+            {
+              "value": "Matt Doherty - 1.5",
+              "odd": "8.00"
+            },
+            {
+              "value": "Matt Doherty - 2.5",
+              "odd": "21.00"
+            },
+            {
+              "value": "Hee-Chan Hwang - 4.5",
+              "odd": "10.00"
+            },
+            {
+              "value": "Hee-Chan Hwang - 5.5",
+              "odd": "21.00"
+            },
+            {
+              "value": "Wilson Isidor - 6.5",
+              "odd": "15.00"
+            },
+            {
+              "value": "Chemsdine Talbi - 0.5",
+              "odd": "1.11"
+            },
+            {
+              "value": "Chemsdine Talbi - 1.5",
+              "odd": "1.53"
+            },
+            {
+              "value": "Chemsdine Talbi - 2.5",
+              "odd": "2.50"
+            },
+            {
+              "value": "Chemsdine Talbi - 3.5",
+              "odd": "4.50"
+            },
+            {
+              "value": "Chemsdine Talbi - 4.5",
+              "odd": "10.00"
+            },
+            {
+              "value": "Trai Hume - 3.5",
+              "odd": "15.00"
+            },
+            {
+              "value": "Chemsdine Talbi - 5.5",
+              "odd": "21.00"
+            },
+            {
+              "value": "Nordi Mukiele - 0.5",
+              "odd": "1.73"
+            },
+            {
+              "value": "Nordi Mukiele - 1.5",
+              "odd": "4.33"
+            },
+            {
+              "value": "Wilson Isidor - 7.5",
+              "odd": "21.00"
+            },
+            {
+              "value": "Nordi Mukiele - 2.5",
+              "odd": "13.00"
+            },
+            {
+              "value": "Enzo Le Fee - 1.5",
+              "odd": "1.53"
+            },
+            {
+              "value": "Enzo Le Fee - 0.5",
+              "odd": "1.11"
+            },
+            {
+              "value": "Enzo Le Fee - 2.5",
+              "odd": "2.50"
+            },
+            {
+              "value": "Enzo Le Fee - 3.5",
+              "odd": "4.50"
+            },
+            {
+              "value": "Enzo Le Fee - 4.5",
+              "odd": "10.00"
+            },
+            {
+              "value": "Enzo Le Fee - 5.5",
+              "odd": "21.00"
+            },
+            {
+              "value": "Rodrigo Gomes - 0.5",
+              "odd": "1.25"
+            },
+            {
+              "value": "Rodrigo Gomes - 1.5",
+              "odd": "2.00"
+            },
+            {
+              "value": "Rodrigo Gomes - 2.5",
+              "odd": "4.00"
+            },
+            {
+              "value": "Nilson Angulo - 1.5",
+              "odd": "1.62"
+            },
+            {
+              "value": "Rodrigo Gomes - 3.5",
+              "odd": "10.00"
+            },
+            {
+              "value": "Rodrigo Gomes - 4.5",
+              "odd": "21.00"
+            },
+            {
+              "value": "Andre Trindade - 0.5",
+              "odd": "1.73"
+            },
+            {
+              "value": "Andre Trindade - 1.5",
+              "odd": "4.33"
+            },
+            {
+              "value": "Pedro Lima - 0.5",
+              "odd": "2.10"
+            },
+            {
+              "value": "Tom Edozie - 0.5",
+              "odd": "1.33"
+            },
+            {
+              "value": "Pedro Lima - 1.5",
+              "odd": "6.50"
+            },
+            {
+              "value": "Tom Edozie - 1.5",
+              "odd": "2.38"
+            },
+            {
+              "value": "Andre Trindade - 2.5",
+              "odd": "13.00"
+            },
+            {
+              "value": "Tom Edozie - 2.5",
+              "odd": "5.50"
+            },
+            {
+              "value": "Tom Edozie - 3.5",
+              "odd": "13.00"
+            }
+          ]
+        },
+        {
+          "id": 213,
+          "name": "Player Triples",
+          "values": [
+            {
+              "value": "Andre Trindade - 3.5",
+              "odd": "3.00"
+            },
+            {
+              "value": "Santiago Bueno - 3.5",
+              "odd": "3.75"
+            },
+            {
+              "value": "Toti Gomes - 3.5",
+              "odd": "8.00"
+            },
+            {
+              "value": "Andre Trindade - 4.5",
+              "odd": "5.00"
+            },
+            {
+              "value": "Andre Trindade - 5.5",
+              "odd": "8.50"
+            },
+            {
+              "value": "Mateus Mane - 0.5",
+              "odd": "1.17"
+            },
+            {
+              "value": "Mateus Mane - 1.5",
+              "odd": "1.80"
+            },
+            {
+              "value": "Pedro Lima - 2.5",
+              "odd": "2.62"
+            },
+            {
+              "value": "Mateus Mane - 2.5",
+              "odd": "3.40"
+            },
+            {
+              "value": "Mateus Mane - 3.5",
+              "odd": "7.00"
+            },
+            {
+              "value": "Joao Gomes - 5.5",
+              "odd": "6.50"
+            },
+            {
+              "value": "Reinildo Mandava - 3.5",
+              "odd": "5.00"
+            },
+            {
+              "value": "Reinildo Mandava - 4.5",
+              "odd": "8.50"
+            },
+            {
+              "value": "Trai Hume - 4.5",
+              "odd": "8.00"
+            },
+            {
+              "value": "Hugo Bueno - 4.5",
+              "odd": "5.00"
+            },
+            {
+              "value": "Granit Xhaka - 0.5",
+              "odd": "1.17"
+            },
+            {
+              "value": "Granit Xhaka - 1.5",
+              "odd": "1.80"
+            },
+            {
+              "value": "Granit Xhaka - 2.5",
+              "odd": "3.50"
+            },
+            {
+              "value": "Granit Xhaka - 3.5",
+              "odd": "7.00"
+            },
+            {
+              "value": "Daniel Ballard - 0.5",
+              "odd": "1.25"
+            },
+            {
+              "value": "Trai Hume - 0.5",
+              "odd": "1.08"
+            },
+            {
+              "value": "Daniel Ballard - 1.5",
+              "odd": "2.10"
+            },
+            {
+              "value": "Trai Hume - 1.5",
+              "odd": "1.44"
+            },
+            {
+              "value": "Daniel Ballard - 2.5",
+              "odd": "4.33"
+            },
+            {
+              "value": "Trai Hume - 2.5",
+              "odd": "2.38"
+            },
+            {
+              "value": "Omar Alderete - 0.5",
+              "odd": "1.40"
+            },
+            {
+              "value": "Omar Alderete - 1.5",
+              "odd": "2.75"
+            },
+            {
+              "value": "Daniel Ballard - 3.5",
+              "odd": "8.50"
+            },
+            {
+              "value": "Brian Brobbey - 0.5",
+              "odd": "1.91"
+            },
+            {
+              "value": "Brian Brobbey - 1.5",
+              "odd": "5.50"
+            },
+            {
+              "value": "Omar Alderete - 2.5",
+              "odd": "6.50"
+            },
+            {
+              "value": "Joao Gomes - 1.5",
+              "odd": "1.17"
+            },
+            {
+              "value": "Joao Gomes - 2.5",
+              "odd": "1.50"
+            },
+            {
+              "value": "Joao Gomes - 3.5",
+              "odd": "2.25"
+            },
+            {
+              "value": "Pedro Lima - 3.5",
+              "odd": "5.00"
+            },
+            {
+              "value": "Nordi Mukiele - 3.5",
+              "odd": "3.50"
+            },
+            {
+              "value": "Yerson Mosquera - 0.5",
+              "odd": "1.06"
+            },
+            {
+              "value": "Yerson Mosquera - 1.5",
+              "odd": "1.33"
+            },
+            {
+              "value": "Yerson Mosquera - 2.5",
+              "odd": "2.00"
+            },
+            {
+              "value": "Toluwalase Arokodare - 0.5",
+              "odd": "1.91"
+            },
+            {
+              "value": "Toluwalase Arokodare - 1.5",
+              "odd": "5.00"
+            },
+            {
+              "value": "Yerson Mosquera - 3.5",
+              "odd": "3.50"
+            },
+            {
+              "value": "Yerson Mosquera - 4.5",
+              "odd": "6.50"
+            },
+            {
+              "value": "David Wolfe - 0.5",
+              "odd": "1.33"
+            },
+            {
+              "value": "David Wolfe - 1.5",
+              "odd": "2.50"
+            },
+            {
+              "value": "Nordi Mukiele - 4.5",
+              "odd": "6.50"
+            },
+            {
+              "value": "Santiago Bueno - 4.5",
+              "odd": "7.00"
+            },
+            {
+              "value": "Santiago Bueno - 0.5",
+              "odd": "1.07"
+            },
+            {
+              "value": "Santiago Bueno - 1.5",
+              "odd": "1.36"
+            },
+            {
+              "value": "Santiago Bueno - 2.5",
+              "odd": "2.10"
+            },
+            {
+              "value": "Angel Gomes - 0.5",
+              "odd": "1.22"
+            },
+            {
+              "value": "Angel Gomes - 1.5",
+              "odd": "2.00"
+            },
+            {
+              "value": "Angel Gomes - 2.5",
+              "odd": "4.00"
+            },
+            {
+              "value": "Angel Gomes - 3.5",
+              "odd": "8.00"
+            },
+            {
+              "value": "Adam Armstrong - 0.5",
+              "odd": "1.20"
+            },
+            {
+              "value": "Adam Armstrong - 1.5",
+              "odd": "1.83"
+            },
+            {
+              "value": "Adam Armstrong - 2.5",
+              "odd": "3.75"
+            },
+            {
+              "value": "Adam Armstrong - 3.5",
+              "odd": "7.50"
+            },
+            {
+              "value": "Chris Rigg - 0.5",
+              "odd": "1.20"
+            },
+            {
+              "value": "Dennis Cirkin - 0.5",
+              "odd": "1.08"
+            },
+            {
+              "value": "Eliezer Mayenda - 0.5",
+              "odd": "2.38"
+            },
+            {
+              "value": "Luke O'Nien - 0.5",
+              "odd": "1.25"
+            },
+            {
+              "value": "Chris Rigg - 1.5",
+              "odd": "1.83"
+            },
+            {
+              "value": "Dennis Cirkin - 1.5",
+              "odd": "1.44"
+            },
+            {
+              "value": "Eliezer Mayenda - 1.5",
+              "odd": "7.50"
+            },
+            {
+              "value": "Luke O'Nien - 1.5",
+              "odd": "2.10"
+            },
+            {
+              "value": "Chris Rigg - 2.5",
+              "odd": "3.75"
+            },
+            {
+              "value": "Dennis Cirkin - 2.5",
+              "odd": "2.38"
+            },
+            {
+              "value": "Luke O'Nien - 2.5",
+              "odd": "4.33"
+            },
+            {
+              "value": "Chris Rigg - 3.5",
+              "odd": "7.50"
+            },
+            {
+              "value": "Dennis Cirkin - 3.5",
+              "odd": "4.33"
+            },
+            {
+              "value": "Luke O'Nien - 3.5",
+              "odd": "8.50"
+            },
+            {
+              "value": "Dennis Cirkin - 4.5",
+              "odd": "8.00"
+            },
+            {
+              "value": "Reinildo Mandava - 0.5",
+              "odd": "1.11"
+            },
+            {
+              "value": "Reinildo Mandava - 1.5",
+              "odd": "1.53"
+            },
+            {
+              "value": "Reinildo Mandava - 2.5",
+              "odd": "2.62"
+            },
+            {
+              "value": "Jackson Tchatchoua - 0.5",
+              "odd": "1.22"
+            },
+            {
+              "value": "Jackson Tchatchoua - 1.5",
+              "odd": "2.00"
+            },
+            {
+              "value": "Jackson Tchatchoua - 2.5",
+              "odd": "4.00"
+            },
+            {
+              "value": "Jackson Tchatchoua - 3.5",
+              "odd": "8.00"
+            },
+            {
+              "value": "Habib Diarra - 0.5",
+              "odd": "1.40"
+            },
+            {
+              "value": "Habib Diarra - 1.5",
+              "odd": "2.75"
+            },
+            {
+              "value": "Habib Diarra - 2.5",
+              "odd": "6.50"
+            },
+            {
+              "value": "Hee-Chan Hwang - 0.5",
+              "odd": "1.53"
+            },
+            {
+              "value": "Jeanricner Bellegarde - 0.5",
+              "odd": "1.11"
+            },
+            {
+              "value": "Toti Gomes - 0.5",
+              "odd": "1.22"
+            },
+            {
+              "value": "Hee-Chan Hwang - 1.5",
+              "odd": "3.50"
+            },
+            {
+              "value": "Jeanricner Bellegarde - 1.5",
+              "odd": "1.57"
+            },
+            {
+              "value": "Toti Gomes - 1.5",
+              "odd": "2.00"
+            },
+            {
+              "value": "Hee-Chan Hwang - 2.5",
+              "odd": "8.00"
+            },
+            {
+              "value": "Jeanricner Bellegarde - 2.5",
+              "odd": "2.62"
+            },
+            {
+              "value": "Jeanricner Bellegarde - 3.5",
+              "odd": "5.00"
+            },
+            {
+              "value": "David Wolfe - 2.5",
+              "odd": "5.50"
+            },
+            {
+              "value": "Hugo Bueno - 5.5",
+              "odd": "8.50"
+            },
+            {
+              "value": "Lutsharel Geertruida - 0.5",
+              "odd": "1.12"
+            },
+            {
+              "value": "Lutsharel Geertruida - 1.5",
+              "odd": "1.62"
+            },
+            {
+              "value": "Lutsharel Geertruida - 2.5",
+              "odd": "2.75"
+            },
+            {
+              "value": "Ladislav Krejci - 0.5",
+              "odd": "1.17"
+            },
+            {
+              "value": "Ladislav Krejci - 1.5",
+              "odd": "1.80"
+            },
+            {
+              "value": "Ladislav Krejci - 2.5",
+              "odd": "3.40"
+            },
+            {
+              "value": "Ladislav Krejci - 3.5",
+              "odd": "7.00"
+            },
+            {
+              "value": "Hugo Bueno - 0.5",
+              "odd": "1.05"
+            },
+            {
+              "value": "Hugo Bueno - 1.5",
+              "odd": "1.28"
+            },
+            {
+              "value": "Hugo Bueno - 2.5",
+              "odd": "1.80"
+            },
+            {
+              "value": "Noah Sadiki - 0.5",
+              "odd": "1.20"
+            },
+            {
+              "value": "Noah Sadiki - 1.5",
+              "odd": "1.83"
+            },
+            {
+              "value": "Noah Sadiki - 2.5",
+              "odd": "3.75"
+            },
+            {
+              "value": "Noah Sadiki - 3.5",
+              "odd": "7.50"
+            },
+            {
+              "value": "Wilson Isidor - 0.5",
+              "odd": "1.80"
+            },
+            {
+              "value": "Wilson Isidor - 1.5",
+              "odd": "4.50"
+            },
+            {
+              "value": "Toti Gomes - 2.5",
+              "odd": "4.00"
+            },
+            {
+              "value": "Lutsharel Geertruida - 3.5",
+              "odd": "5.50"
+            },
+            {
+              "value": "Matt Doherty - 0.5",
+              "odd": "1.12"
+            },
+            {
+              "value": "Matt Doherty - 1.5",
+              "odd": "1.62"
+            },
+            {
+              "value": "Matt Doherty - 2.5",
+              "odd": "2.75"
+            },
+            {
+              "value": "Hugo Bueno - 3.5",
+              "odd": "3.00"
+            },
+            {
+              "value": "Matt Doherty - 3.5",
+              "odd": "5.50"
+            },
+            {
+              "value": "Chemsdine Talbi - 0.5",
+              "odd": "1.30"
+            },
+            {
+              "value": "Chemsdine Talbi - 1.5",
+              "odd": "2.38"
+            },
+            {
+              "value": "Chemsdine Talbi - 2.5",
+              "odd": "5.00"
+            },
+            {
+              "value": "Joao Gomes - 4.5",
+              "odd": "3.75"
+            },
+            {
+              "value": "Trai Hume - 3.5",
+              "odd": "4.33"
+            },
+            {
+              "value": "Nordi Mukiele - 0.5",
+              "odd": "1.06"
+            },
+            {
+              "value": "Nordi Mukiele - 1.5",
+              "odd": "1.36"
+            },
+            {
+              "value": "Nordi Mukiele - 2.5",
+              "odd": "2.00"
+            },
+            {
+              "value": "Enzo Le Fee - 1.5",
+              "odd": "1.28"
+            },
+            {
+              "value": "Enzo Le Fee - 0.5",
+              "odd": "1.05"
+            },
+            {
+              "value": "Enzo Le Fee - 2.5",
+              "odd": "1.83"
+            },
+            {
+              "value": "Enzo Le Fee - 3.5",
+              "odd": "3.25"
+            },
+            {
+              "value": "Enzo Le Fee - 4.5",
+              "odd": "5.50"
+            },
+            {
+              "value": "Rodrigo Gomes - 0.5",
+              "odd": "1.08"
+            },
+            {
+              "value": "Rodrigo Gomes - 1.5",
+              "odd": "1.40"
+            },
+            {
+              "value": "Rodrigo Gomes - 2.5",
+              "odd": "2.20"
+            },
+            {
+              "value": "Rodrigo Gomes - 3.5",
+              "odd": "4.00"
+            },
+            {
+              "value": "Rodrigo Gomes - 4.5",
+              "odd": "7.50"
+            },
+            {
+              "value": "Andre Trindade - 0.5",
+              "odd": "1.05"
+            },
+            {
+              "value": "Andre Trindade - 1.5",
+              "odd": "1.28"
+            },
+            {
+              "value": "Pedro Lima - 0.5",
+              "odd": "1.12"
+            },
+            {
+              "value": "Tom Edozie - 0.5",
+              "odd": "1.22"
+            },
+            {
+              "value": "Pedro Lima - 1.5",
+              "odd": "1.57"
+            },
+            {
+              "value": "Tom Edozie - 1.5",
+              "odd": "2.00"
+            },
+            {
+              "value": "Andre Trindade - 2.5",
+              "odd": "1.80"
+            },
+            {
+              "value": "Tom Edozie - 2.5",
+              "odd": "4.00"
+            },
+            {
+              "value": "Tom Edozie - 3.5",
+              "odd": "8.00"
+            }
+          ]
+        },
+        {
+          "id": 99,
+          "name": "To Score A Penalty",
+          "values": [
+            {
+              "value": "Home",
+              "odd": "10.00"
+            },
+            {
+              "value": "Away",
+              "odd": "8.00"
+            }
+          ]
+        },
+        {
+          "id": 100,
+          "name": "To Miss A Penalty",
+          "values": [
+            {
+              "value": "Home",
+              "odd": "29.00"
+            },
+            {
+              "value": "Away",
+              "odd": "23.00"
+            }
+          ]
+        },
+        {
+          "id": 212,
+          "name": "Player Assists",
+          "values": [
+            {
+              "value": "Angel Gomes",
+              "odd": "7.00"
+            },
+            {
+              "value": "Hugo Bueno",
+              "odd": "8.00"
+            },
+            {
+              "value": "David Wolfe",
+              "odd": "8.00"
+            },
+            {
+              "value": "Ladislav Krejci",
+              "odd": "12.00"
+            },
+            {
+              "value": "Daniel Ballard",
+              "odd": "9.00"
+            },
+            {
+              "value": "Trai Hume",
+              "odd": "7.50"
+            },
+            {
+              "value": "Brian Brobbey",
+              "odd": "7.50"
+            },
+            {
+              "value": "Habib Diarra",
+              "odd": "8.00"
+            },
+            {
+              "value": "Jackson Tchatchoua",
+              "odd": "7.50"
+            },
+            {
+              "value": "Yes",
+              "odd": "4.00"
+            },
+            {
+              "value": "No",
+              "odd": "1.22"
+            },
+            {
+              "value": "Jack Whittaker",
+              "odd": "6.50"
+            },
+            {
+              "value": "Jayden Jones",
+              "odd": "7.00"
+            },
+            {
+              "value": "Jenson Jones",
+              "odd": "12.00"
+            },
+            {
+              "value": "Eliezer Mayenda",
+              "odd": "8.50"
+            },
+            {
+              "value": "Wilson Isidor",
+              "odd": "8.50"
+            },
+            {
+              "value": "Romaine Mundle",
+              "odd": "7.00"
+            },
+            {
+              "value": "Chris Rigg",
+              "odd": "6.50"
+            },
+            {
+              "value": "Milan Aleksic",
+              "odd": "5.50"
+            },
+            {
+              "value": "Dennis Cirkin",
+              "odd": "9.00"
+            },
+            {
+              "value": "Luke O'Nien",
+              "odd": "15.00"
+            },
+            {
+              "value": "Nilson Angulo",
+              "odd": "7.00"
+            },
+            {
+              "value": "Toluwalase Arokodare",
+              "odd": "9.00"
+            },
+            {
+              "value": "Chemsdine Talbi",
+              "odd": "5.50"
+            },
+            {
+              "value": "Noah Sadiki",
+              "odd": "10.00"
+            },
+            {
+              "value": "Jeanricner Bellegarde",
+              "odd": "7.00"
+            },
+            {
+              "value": "Bertrand Traore",
+              "odd": "5.00"
+            },
+            {
+              "value": "Enzo Le Fee",
+              "odd": "5.00"
+            },
+            {
+              "value": "Reinildo Mandava",
+              "odd": "12.00"
+            },
+            {
+              "value": "Saheed Olagunju",
+              "odd": "12.00"
+            },
+            {
+              "value": "Jocelin Ta Bi",
+              "odd": "7.00"
+            },
+            {
+              "value": "Jerome Abbey",
+              "odd": "8.50"
+            },
+            {
+              "value": "Finn Geragusyan",
+              "odd": "9.00"
+            },
+            {
+              "value": "Pedro Lima",
+              "odd": "10.00"
+            },
+            {
+              "value": "Omar Alderete",
+              "odd": "15.00"
+            },
+            {
+              "value": "Santiago Bueno",
+              "odd": "17.00"
+            },
+            {
+              "value": "Yerson Mosquera",
+              "odd": "17.00"
+            },
+            {
+              "value": "Harrison Jones",
+              "odd": "6.50"
+            },
+            {
+              "value": "Lutsharel Geertruida",
+              "odd": "12.00"
+            },
+            {
+              "value": "Matt Doherty",
+              "odd": "9.00"
+            },
+            {
+              "value": "Joao Gomes",
+              "odd": "11.00"
+            },
+            {
+              "value": "Rodrigo Gomes",
+              "odd": "8.50"
+            },
+            {
+              "value": "Toti Gomes",
+              "odd": "11.00"
+            },
+            {
+              "value": "Adam Armstrong",
+              "odd": "7.00"
+            },
+            {
+              "value": "Hee-Chan Hwang",
+              "odd": "7.00"
+            },
+            {
+              "value": "Tom Edozie",
+              "odd": "9.00"
+            },
+            {
+              "value": "Ethan Sutherland",
+              "odd": "10.00"
+            },
+            {
+              "value": "Granit Xhaka",
+              "odd": "4.50"
+            },
+            {
+              "value": "Nordi Mukiele",
+              "odd": "7.00"
+            },
+            {
+              "value": "Andre Trindade",
+              "odd": "9.00"
+            },
+            {
+              "value": "Ahmed Abdullahi",
+              "odd": "8.50"
+            },
+            {
+              "value": "Mateus Mane",
+              "odd": "8.00"
+            }
+          ]
+        },
+        {
+          "id": 176,
+          "name": "ShotOnTarget 1x2",
+          "values": [
+            {
+              "value": "Home",
+              "odd": "2.25"
+            },
+            {
+              "value": "Draw",
+              "odd": "6.50"
+            },
+            {
+              "value": "Away",
+              "odd": "1.91"
+            }
+          ]
+        },
+        {
+          "id": 192,
+          "name": "Home Highest Scoring Half",
+          "values": [
+            {
+              "value": "Draw",
+              "odd": "2.05"
+            },
+            {
+              "value": "1st Half",
+              "odd": "3.75"
+            },
+            {
+              "value": "2nd Half",
+              "odd": "2.75"
+            }
+          ]
+        },
+        {
+          "id": 193,
+          "name": "Away Highest Scoring Half",
+          "values": [
+            {
+              "value": "Draw",
+              "odd": "2.50"
+            },
+            {
+              "value": "1st Half",
+              "odd": "3.25"
+            },
+            {
+              "value": "2nd Half",
+              "odd": "2.40"
+            }
+          ]
+        },
+        {
+          "id": 211,
+          "name": "Total Shots",
+          "values": [
+            {
+              "value": "Over",
+              "odd": "1.80"
+            },
+            {
+              "value": "Under",
+              "odd": "1.91"
+            }
+          ]
+        },
+        {
+          "id": 239,
+          "name": "Corners. European Handicap",
+          "values": [
+            {
+              "value": "Home +1",
+              "odd": "1.80"
+            },
+            {
+              "value": "Draw +1",
+              "odd": "8.00"
+            },
+            {
+              "value": "Away +1",
+              "odd": "2.30"
+            }
+          ]
+        },
+        {
+          "id": 266,
+          "name": "Player Fouls Committed",
+          "values": [
+            {
+              "value": "Andre Trindade - 3.5",
+              "odd": "13.00"
+            },
+            {
+              "value": "Santiago Bueno - 3.5",
+              "odd": "19.00"
+            },
+            {
+              "value": "Mateus Mane - 0.5",
+              "odd": "1.33"
+            },
+            {
+              "value": "Mateus Mane - 1.5",
+              "odd": "2.50"
+            },
+            {
+              "value": "Pedro Lima - 2.5",
+              "odd": "10.00"
+            },
+            {
+              "value": "Mateus Mane - 2.5",
+              "odd": "6.00"
+            },
+            {
+              "value": "Mateus Mane - 3.5",
+              "odd": "17.00"
+            },
+            {
+              "value": "Joao Gomes - 5.5",
+              "odd": "23.00"
+            },
+            {
+              "value": "Reinildo Mandava - 3.5",
+              "odd": "6.50"
+            },
+            {
+              "value": "Reinildo Mandava - 4.5",
+              "odd": "15.00"
+            },
+            {
+              "value": "Granit Xhaka - 0.5",
+              "odd": "1.62"
+            },
+            {
+              "value": "Granit Xhaka - 1.5",
+              "odd": "4.00"
+            },
+            {
+              "value": "Granit Xhaka - 2.5",
+              "odd": "13.00"
+            },
+            {
+              "value": "Daniel Ballard - 0.5",
+              "odd": "1.33"
+            },
+            {
+              "value": "Trai Hume - 0.5",
+              "odd": "1.40"
+            },
+            {
+              "value": "Daniel Ballard - 1.5",
+              "odd": "2.50"
+            },
+            {
+              "value": "Trai Hume - 1.5",
+              "odd": "2.75"
+            },
+            {
+              "value": "Daniel Ballard - 2.5",
+              "odd": "6.00"
+            },
+            {
+              "value": "Trai Hume - 2.5",
+              "odd": "7.00"
+            },
+            {
+              "value": "Omar Alderete - 0.5",
+              "odd": "1.50"
+            },
+            {
+              "value": "Omar Alderete - 1.5",
+              "odd": "3.25"
+            },
+            {
+              "value": "Daniel Ballard - 3.5",
+              "odd": "15.00"
+            },
+            {
+              "value": "Brian Brobbey - 0.5",
+              "odd": "1.28"
+            },
+            {
+              "value": "Brian Brobbey - 1.5",
+              "odd": "2.25"
+            },
+            {
+              "value": "Brian Brobbey - 2.5",
+              "odd": "5.00"
+            },
+            {
+              "value": "Brian Brobbey - 3.5",
+              "odd": "13.00"
+            },
+            {
+              "value": "Omar Alderete - 2.5",
+              "odd": "9.00"
+            },
+            {
+              "value": "Joao Gomes - 0.5",
+              "odd": "1.11"
+            },
+            {
+              "value": "Joao Gomes - 1.5",
+              "odd": "1.53"
+            },
+            {
+              "value": "Joao Gomes - 2.5",
+              "odd": "2.62"
+            },
+            {
+              "value": "Joao Gomes - 3.5",
+              "odd": "5.50"
+            },
+            {
+              "value": "Pedro Lima - 3.5",
+              "odd": "26.00"
+            },
+            {
+              "value": "Nordi Mukiele - 3.5",
+              "odd": "19.00"
+            },
+            {
+              "value": "Yerson Mosquera - 0.5",
+              "odd": "1.28"
+            },
+            {
+              "value": "Yerson Mosquera - 1.5",
+              "odd": "2.25"
+            },
+            {
+              "value": "Yerson Mosquera - 2.5",
+              "odd": "5.00"
+            },
+            {
+              "value": "Toluwalase Arokodare - 0.5",
+              "odd": "1.30"
+            },
+            {
+              "value": "Toluwalase Arokodare - 1.5",
+              "odd": "2.38"
+            },
+            {
+              "value": "Toluwalase Arokodare - 2.5",
+              "odd": "5.50"
+            },
+            {
+              "value": "Toluwalase Arokodare - 3.5",
+              "odd": "15.00"
+            },
+            {
+              "value": "Yerson Mosquera - 3.5",
+              "odd": "13.00"
+            },
+            {
+              "value": "David Wolfe - 0.5",
+              "odd": "1.80"
+            },
+            {
+              "value": "David Wolfe - 1.5",
+              "odd": "5.00"
+            },
+            {
+              "value": "Santiago Bueno - 0.5",
+              "odd": "1.36"
+            },
+            {
+              "value": "Santiago Bueno - 1.5",
+              "odd": "2.62"
+            },
+            {
+              "value": "Santiago Bueno - 2.5",
+              "odd": "6.50"
+            },
+            {
+              "value": "Omar Alderete - 3.5",
+              "odd": "23.00"
+            },
+            {
+              "value": "Angel Gomes - 0.5",
+              "odd": "1.20"
+            },
+            {
+              "value": "Angel Gomes - 1.5",
+              "odd": "1.91"
+            },
+            {
+              "value": "Angel Gomes - 2.5",
+              "odd": "3.75"
+            },
+            {
+              "value": "Angel Gomes - 3.5",
+              "odd": "9.00"
+            },
+            {
+              "value": "Angel Gomes - 4.5",
+              "odd": "21.00"
+            },
+            {
+              "value": "Adam Armstrong - 0.5",
+              "odd": "1.28"
+            },
+            {
+              "value": "Adam Armstrong - 1.5",
+              "odd": "2.25"
+            },
+            {
+              "value": "Adam Armstrong - 2.5",
+              "odd": "5.00"
+            },
+            {
+              "value": "Adam Armstrong - 3.5",
+              "odd": "13.00"
+            },
+            {
+              "value": "Chris Rigg - 0.5",
+              "odd": "1.50"
+            },
+            {
+              "value": "Dennis Cirkin - 0.5",
+              "odd": "1.12"
+            },
+            {
+              "value": "Eliezer Mayenda - 0.5",
+              "odd": "1.44"
+            },
+            {
+              "value": "Luke O'Nien - 0.5",
+              "odd": "1.50"
+            },
+            {
+              "value": "Chris Rigg - 1.5",
+              "odd": "3.25"
+            },
+            {
+              "value": "Dennis Cirkin - 1.5",
+              "odd": "1.62"
+            },
+            {
+              "value": "Eliezer Mayenda - 1.5",
+              "odd": "3.00"
+            },
+            {
+              "value": "Luke O'Nien - 1.5",
+              "odd": "3.25"
+            },
+            {
+              "value": "Chris Rigg - 2.5",
+              "odd": "9.00"
+            },
+            {
+              "value": "Dennis Cirkin - 2.5",
+              "odd": "2.75"
+            },
+            {
+              "value": "Eliezer Mayenda - 2.5",
+              "odd": "8.00"
+            },
+            {
+              "value": "Luke O'Nien - 2.5",
+              "odd": "9.00"
+            },
+            {
+              "value": "Chris Rigg - 3.5",
+              "odd": "23.00"
+            },
+            {
+              "value": "Dennis Cirkin - 3.5",
+              "odd": "6.00"
+            },
+            {
+              "value": "Eliezer Mayenda - 3.5",
+              "odd": "21.00"
+            },
+            {
+              "value": "Luke O'Nien - 3.5",
+              "odd": "23.00"
+            },
+            {
+              "value": "Dennis Cirkin - 4.5",
+              "odd": "13.00"
+            },
+            {
+              "value": "Reinildo Mandava - 0.5",
+              "odd": "1.14"
+            },
+            {
+              "value": "Reinildo Mandava - 1.5",
+              "odd": "1.73"
+            },
+            {
+              "value": "Reinildo Mandava - 2.5",
+              "odd": "3.25"
+            },
+            {
+              "value": "Jackson Tchatchoua - 0.5",
+              "odd": "1.73"
+            },
+            {
+              "value": "Jackson Tchatchoua - 1.5",
+              "odd": "4.33"
+            },
+            {
+              "value": "Jackson Tchatchoua - 2.5",
+              "odd": "13.00"
+            },
+            {
+              "value": "Habib Diarra - 0.5",
+              "odd": "1.28"
+            },
+            {
+              "value": "Habib Diarra - 1.5",
+              "odd": "2.25"
+            },
+            {
+              "value": "Habib Diarra - 2.5",
+              "odd": "5.00"
+            },
+            {
+              "value": "Habib Diarra - 3.5",
+              "odd": "13.00"
+            },
+            {
+              "value": "Hee-Chan Hwang - 0.5",
+              "odd": "1.17"
+            },
+            {
+              "value": "Jeanricner Bellegarde - 0.5",
+              "odd": "1.25"
+            },
+            {
+              "value": "Toti Gomes - 0.5",
+              "odd": "1.62"
+            },
+            {
+              "value": "Hee-Chan Hwang - 1.5",
+              "odd": "1.80"
+            },
+            {
+              "value": "Jeanricner Bellegarde - 1.5",
+              "odd": "2.20"
+            },
+            {
+              "value": "Toti Gomes - 1.5",
+              "odd": "4.00"
+            },
+            {
+              "value": "Hee-Chan Hwang - 2.5",
+              "odd": "3.40"
+            },
+            {
+              "value": "Jeanricner Bellegarde - 2.5",
+              "odd": "4.50"
+            },
+            {
+              "value": "Hee-Chan Hwang - 3.5",
+              "odd": "8.00"
+            },
+            {
+              "value": "Jeanricner Bellegarde - 3.5",
+              "odd": "11.00"
+            },
+            {
+              "value": "David Wolfe - 2.5",
+              "odd": "15.00"
+            },
+            {
+              "value": "Lutsharel Geertruida - 0.5",
+              "odd": "1.57"
+            },
+            {
+              "value": "Lutsharel Geertruida - 1.5",
+              "odd": "3.75"
+            },
+            {
+              "value": "Lutsharel Geertruida - 2.5",
+              "odd": "11.00"
+            },
+            {
+              "value": "Ladislav Krejci - 0.5",
+              "odd": "1.28"
+            },
+            {
+              "value": "Ladislav Krejci - 1.5",
+              "odd": "2.25"
+            },
+            {
+              "value": "Ladislav Krejci - 2.5",
+              "odd": "5.00"
+            },
+            {
+              "value": "Ladislav Krejci - 3.5",
+              "odd": "13.00"
+            },
+            {
+              "value": "Hugo Bueno - 0.5",
+              "odd": "1.62"
+            },
+            {
+              "value": "Hugo Bueno - 1.5",
+              "odd": "3.75"
+            },
+            {
+              "value": "Hugo Bueno - 2.5",
+              "odd": "11.00"
+            },
+            {
+              "value": "Noah Sadiki - 0.5",
+              "odd": "1.22"
+            },
+            {
+              "value": "Noah Sadiki - 1.5",
+              "odd": "2.00"
+            },
+            {
+              "value": "Noah Sadiki - 2.5",
+              "odd": "4.00"
+            },
+            {
+              "value": "Noah Sadiki - 3.5",
+              "odd": "10.00"
+            },
+            {
+              "value": "Wilson Isidor - 0.5",
+              "odd": "1.44"
+            },
+            {
+              "value": "Wilson Isidor - 1.5",
+              "odd": "3.00"
+            },
+            {
+              "value": "Wilson Isidor - 2.5",
+              "odd": "8.00"
+            },
+            {
+              "value": "Wilson Isidor - 3.5",
+              "odd": "21.00"
+            },
+            {
+              "value": "Toti Gomes - 2.5",
+              "odd": "11.00"
+            },
+            {
+              "value": "Matt Doherty - 0.5",
+              "odd": "1.33"
+            },
+            {
+              "value": "Matt Doherty - 1.5",
+              "odd": "2.50"
+            },
+            {
+              "value": "Matt Doherty - 2.5",
+              "odd": "6.00"
+            },
+            {
+              "value": "Hee-Chan Hwang - 4.5",
+              "odd": "17.00"
+            },
+            {
+              "value": "Matt Doherty - 3.5",
+              "odd": "17.00"
+            },
+            {
+              "value": "Jeanricner Bellegarde - 4.5",
+              "odd": "26.00"
+            },
+            {
+              "value": "Chemsdine Talbi - 0.5",
+              "odd": "2.10"
+            },
+            {
+              "value": "Chemsdine Talbi - 1.5",
+              "odd": "7.00"
+            },
+            {
+              "value": "Chemsdine Talbi - 2.5",
+              "odd": "23.00"
+            },
+            {
+              "value": "Joao Gomes - 4.5",
+              "odd": "11.00"
+            },
+            {
+              "value": "Trai Hume - 3.5",
+              "odd": "19.00"
+            },
+            {
+              "value": "Nordi Mukiele - 0.5",
+              "odd": "1.40"
+            },
+            {
+              "value": "Nordi Mukiele - 1.5",
+              "odd": "2.75"
+            },
+            {
+              "value": "Nordi Mukiele - 2.5",
+              "odd": "7.00"
+            },
+            {
+              "value": "Noah Sadiki - 4.5",
+              "odd": "23.00"
+            },
+            {
+              "value": "Enzo Le Fee - 1.5",
+              "odd": "2.75"
+            },
+            {
+              "value": "Enzo Le Fee - 0.5",
+              "odd": "1.40"
+            },
+            {
+              "value": "Enzo Le Fee - 2.5",
+              "odd": "7.00"
+            },
+            {
+              "value": "Enzo Le Fee - 3.5",
+              "odd": "19.00"
+            },
+            {
+              "value": "Dennis Cirkin - 5.5",
+              "odd": "26.00"
+            },
+            {
+              "value": "Rodrigo Gomes - 0.5",
+              "odd": "1.62"
+            },
+            {
+              "value": "Rodrigo Gomes - 1.5",
+              "odd": "4.00"
+            },
+            {
+              "value": "Rodrigo Gomes - 2.5",
+              "odd": "11.00"
+            },
+            {
+              "value": "Andre Trindade - 0.5",
+              "odd": "1.28"
+            },
+            {
+              "value": "Andre Trindade - 1.5",
+              "odd": "2.25"
+            },
+            {
+              "value": "Pedro Lima - 0.5",
+              "odd": "1.50"
+            },
+            {
+              "value": "Tom Edozie - 0.5",
+              "odd": "1.50"
+            },
+            {
+              "value": "Pedro Lima - 1.5",
+              "odd": "3.40"
+            },
+            {
+              "value": "Tom Edozie - 1.5",
+              "odd": "3.40"
+            },
+            {
+              "value": "Andre Trindade - 2.5",
+              "odd": "5.00"
+            },
+            {
+              "value": "Tom Edozie - 2.5",
+              "odd": "10.00"
+            },
+            {
+              "value": "Tom Edozie - 3.5",
+              "odd": "26.00"
+            }
+          ]
+        },
+        {
+          "id": 218,
+          "name": "Away Anytime Goal Scorer",
+          "values": [
+            {
+              "value": "Daniel Ballard",
+              "odd": "7.50"
+            },
+            {
+              "value": "Trai Hume",
+              "odd": "8.00"
+            },
+            {
+              "value": "Brian Brobbey",
+              "odd": "2.62"
+            },
+            {
+              "value": "Habib Diarra",
+              "odd": "4.50"
+            },
+            {
+              "value": "Jack Whittaker",
+              "odd": "7.00"
+            },
+            {
+              "value": "Jayden Jones",
+              "odd": "7.50"
+            },
+            {
+              "value": "Jenson Jones",
+              "odd": "9.00"
+            },
+            {
+              "value": "Eliezer Mayenda",
+              "odd": "3.20"
+            },
+            {
+              "value": "Wilson Isidor",
+              "odd": "2.62"
+            },
+            {
+              "value": "Romaine Mundle",
+              "odd": "5.00"
+            },
+            {
+              "value": "Chris Rigg",
+              "odd": "5.00"
+            },
+            {
+              "value": "Milan Aleksic",
+              "odd": "4.33"
+            },
+            {
+              "value": "Dennis Cirkin",
+              "odd": "11.00"
+            },
+            {
+              "value": "Luke O'Nien",
+              "odd": "11.00"
+            },
+            {
+              "value": "Nilson Angulo",
+              "odd": "4.33"
+            },
+            {
+              "value": "Chemsdine Talbi",
+              "odd": "4.00"
+            },
+            {
+              "value": "Noah Sadiki",
+              "odd": "9.00"
+            },
+            {
+              "value": "Bertrand Traore",
+              "odd": "4.00"
+            },
+            {
+              "value": "Enzo Le Fee",
+              "odd": "4.00"
+            },
+            {
+              "value": "Reinildo Mandava",
+              "odd": "13.00"
+            },
+            {
+              "value": "Jocelin Ta Bi",
+              "odd": "6.00"
+            },
+            {
+              "value": "Finn Geragusyan",
+              "odd": "3.25"
+            },
+            {
+              "value": "Omar Alderete",
+              "odd": "9.00"
+            },
+            {
+              "value": "Harrison Jones",
+              "odd": "5.00"
+            },
+            {
+              "value": "Lutsharel Geertruida",
+              "odd": "11.00"
+            },
+            {
+              "value": "Granit Xhaka",
+              "odd": "7.50"
+            },
+            {
+              "value": "Nordi Mukiele",
+              "odd": "11.00"
+            },
+            {
+              "value": "Ahmed Abdullahi",
+              "odd": "3.60"
+            }
+          ]
+        },
+        {
+          "id": 219,
+          "name": "Away First Goal Scorer",
+          "values": [
+            {
+              "value": "Daniel Ballard",
+              "odd": "19.00"
+            },
+            {
+              "value": "Trai Hume",
+              "odd": "21.00"
+            },
+            {
+              "value": "Brian Brobbey",
+              "odd": "6.00"
+            },
+            {
+              "value": "Habib Diarra",
+              "odd": "11.00"
+            },
+            {
+              "value": "Jack Whittaker",
+              "odd": "17.00"
+            },
+            {
+              "value": "Jayden Jones",
+              "odd": "19.00"
+            },
+            {
+              "value": "Jenson Jones",
+              "odd": "23.00"
+            },
+            {
+              "value": "Eliezer Mayenda",
+              "odd": "7.50"
+            },
+            {
+              "value": "Wilson Isidor",
+              "odd": "6.00"
+            },
+            {
+              "value": "Romaine Mundle",
+              "odd": "12.00"
+            },
+            {
+              "value": "Chris Rigg",
+              "odd": "13.00"
+            },
+            {
+              "value": "Milan Aleksic",
+              "odd": "10.00"
+            },
+            {
+              "value": "Dennis Cirkin",
+              "odd": "29.00"
+            },
+            {
+              "value": "Luke O'Nien",
+              "odd": "29.00"
+            },
+            {
+              "value": "Nilson Angulo",
+              "odd": "10.00"
+            },
+            {
+              "value": "Chemsdine Talbi",
+              "odd": "9.50"
+            },
+            {
+              "value": "Noah Sadiki",
+              "odd": "23.00"
+            },
+            {
+              "value": "Bertrand Traore",
+              "odd": "9.50"
+            },
+            {
+              "value": "Enzo Le Fee",
+              "odd": "9.50"
+            },
+            {
+              "value": "Reinildo Mandava",
+              "odd": "34.00"
+            },
+            {
+              "value": "Jocelin Ta Bi",
+              "odd": "15.00"
+            },
+            {
+              "value": "Finn Geragusyan",
+              "odd": "7.50"
+            },
+            {
+              "value": "Omar Alderete",
+              "odd": "23.00"
+            },
+            {
+              "value": "Harrison Jones",
+              "odd": "12.00"
+            },
+            {
+              "value": "Lutsharel Geertruida",
+              "odd": "29.00"
+            },
+            {
+              "value": "Granit Xhaka",
+              "odd": "19.00"
+            },
+            {
+              "value": "Nordi Mukiele",
+              "odd": "29.00"
+            },
+            {
+              "value": "Ahmed Abdullahi",
+              "odd": "8.50"
+            }
+          ]
+        },
+        {
+          "id": 226,
+          "name": "Away Last Goal Scorer",
+          "values": [
+            {
+              "value": "Daniel Ballard",
+              "odd": "19.00"
+            },
+            {
+              "value": "Trai Hume",
+              "odd": "21.00"
+            },
+            {
+              "value": "Brian Brobbey",
+              "odd": "6.00"
+            },
+            {
+              "value": "Habib Diarra",
+              "odd": "11.00"
+            },
+            {
+              "value": "Jack Whittaker",
+              "odd": "17.00"
+            },
+            {
+              "value": "Jayden Jones",
+              "odd": "19.00"
+            },
+            {
+              "value": "Jenson Jones",
+              "odd": "23.00"
+            },
+            {
+              "value": "Eliezer Mayenda",
+              "odd": "7.50"
+            },
+            {
+              "value": "Wilson Isidor",
+              "odd": "6.00"
+            },
+            {
+              "value": "Romaine Mundle",
+              "odd": "12.00"
+            },
+            {
+              "value": "Chris Rigg",
+              "odd": "13.00"
+            },
+            {
+              "value": "Milan Aleksic",
+              "odd": "10.00"
+            },
+            {
+              "value": "Dennis Cirkin",
+              "odd": "29.00"
+            },
+            {
+              "value": "Luke O'Nien",
+              "odd": "29.00"
+            },
+            {
+              "value": "Nilson Angulo",
+              "odd": "10.00"
+            },
+            {
+              "value": "Chemsdine Talbi",
+              "odd": "9.50"
+            },
+            {
+              "value": "Noah Sadiki",
+              "odd": "23.00"
+            },
+            {
+              "value": "Bertrand Traore",
+              "odd": "9.50"
+            },
+            {
+              "value": "Enzo Le Fee",
+              "odd": "9.50"
+            },
+            {
+              "value": "Reinildo Mandava",
+              "odd": "34.00"
+            },
+            {
+              "value": "Jocelin Ta Bi",
+              "odd": "15.00"
+            },
+            {
+              "value": "Finn Geragusyan",
+              "odd": "7.50"
+            },
+            {
+              "value": "Omar Alderete",
+              "odd": "23.00"
+            },
+            {
+              "value": "Harrison Jones",
+              "odd": "12.00"
+            },
+            {
+              "value": "Lutsharel Geertruida",
+              "odd": "29.00"
+            },
+            {
+              "value": "Granit Xhaka",
+              "odd": "19.00"
+            },
+            {
+              "value": "Nordi Mukiele",
+              "odd": "29.00"
+            },
+            {
+              "value": "Ahmed Abdullahi",
+              "odd": "8.50"
+            }
+          ]
+        },
+        {
+          "id": 240,
+          "name": "Home Player Shots",
+          "values": [
+            {
+              "value": "Mateus Mane - 0.5",
+              "odd": "1.18"
+            },
+            {
+              "value": "Mateus Mane - 1.5",
+              "odd": "1.80"
+            },
+            {
+              "value": "Pedro Lima - 2.5",
+              "odd": "19.00"
+            },
+            {
+              "value": "Mateus Mane - 2.5",
+              "odd": "3.40"
+            },
+            {
+              "value": "Mateus Mane - 3.5",
+              "odd": "7.00"
+            },
+            {
+              "value": "Mateus Mane - 4.5",
+              "odd": "15.00"
+            },
+            {
+              "value": "Mateus Mane - 5.5",
+              "odd": "21.00"
+            },
+            {
+              "value": "Joao Gomes - 0.5",
+              "odd": "1.36"
+            },
+            {
+              "value": "Joao Gomes - 1.5",
+              "odd": "2.62"
+            },
+            {
+              "value": "Joao Gomes - 2.5",
+              "odd": "6.00"
+            },
+            {
+              "value": "Joao Gomes - 3.5",
+              "odd": "15.00"
+            },
+            {
+              "value": "Yerson Mosquera - 0.5",
+              "odd": "1.67"
+            },
+            {
+              "value": "Yerson Mosquera - 1.5",
+              "odd": "3.75"
+            },
+            {
+              "value": "Yerson Mosquera - 2.5",
+              "odd": "11.00"
+            },
+            {
+              "value": "Toluwalase Arokodare - 0.5",
+              "odd": "1.05"
+            },
+            {
+              "value": "Toluwalase Arokodare - 1.5",
+              "odd": "1.28"
+            },
+            {
+              "value": "Toluwalase Arokodare - 2.5",
+              "odd": "1.80"
+            },
+            {
+              "value": "Toluwalase Arokodare - 3.5",
+              "odd": "3.00"
+            },
+            {
+              "value": "Toluwalase Arokodare - 4.5",
+              "odd": "5.50"
+            },
+            {
+              "value": "Toluwalase Arokodare - 5.5",
+              "odd": "11.00"
+            },
+            {
+              "value": "Toluwalase Arokodare - 6.5",
+              "odd": "21.00"
+            },
+            {
+              "value": "Yerson Mosquera - 3.5",
+              "odd": "21.00"
+            },
+            {
+              "value": "David Wolfe - 0.5",
+              "odd": "2.20"
+            },
+            {
+              "value": "David Wolfe - 1.5",
+              "odd": "6.50"
+            },
+            {
+              "value": "Santiago Bueno - 0.5",
+              "odd": "2.20"
+            },
+            {
+              "value": "Santiago Bueno - 1.5",
+              "odd": "7.00"
+            },
+            {
+              "value": "Santiago Bueno - 2.5",
+              "odd": "21.00"
+            },
+            {
+              "value": "Angel Gomes - 0.5",
+              "odd": "1.33"
+            },
+            {
+              "value": "Angel Gomes - 1.5",
+              "odd": "2.38"
+            },
+            {
+              "value": "Angel Gomes - 2.5",
+              "odd": "5.50"
+            },
+            {
+              "value": "Angel Gomes - 3.5",
+              "odd": "13.00"
+            },
+            {
+              "value": "Adam Armstrong - 0.5",
+              "odd": "1.07"
+            },
+            {
+              "value": "Adam Armstrong - 1.5",
+              "odd": "1.36"
+            },
+            {
+              "value": "Adam Armstrong - 2.5",
+              "odd": "2.00"
+            },
+            {
+              "value": "Adam Armstrong - 3.5",
+              "odd": "3.50"
+            },
+            {
+              "value": "Adam Armstrong - 4.5",
+              "odd": "7.00"
+            },
+            {
+              "value": "Adam Armstrong - 5.5",
+              "odd": "15.00"
+            },
+            {
+              "value": "Adam Armstrong - 6.5",
+              "odd": "21.00"
+            },
+            {
+              "value": "Jackson Tchatchoua - 0.5",
+              "odd": "1.83"
+            },
+            {
+              "value": "Jackson Tchatchoua - 1.5",
+              "odd": "5.00"
+            },
+            {
+              "value": "Jackson Tchatchoua - 2.5",
+              "odd": "15.00"
+            },
+            {
+              "value": "Hee-Chan Hwang - 0.5",
+              "odd": "1.11"
+            },
+            {
+              "value": "Jeanricner Bellegarde - 0.5",
+              "odd": "1.40"
+            },
+            {
+              "value": "Toti Gomes - 0.5",
+              "odd": "2.25"
+            },
+            {
+              "value": "Hee-Chan Hwang - 1.5",
+              "odd": "1.53"
+            },
+            {
+              "value": "Jeanricner Bellegarde - 1.5",
+              "odd": "2.62"
+            },
+            {
+              "value": "Toti Gomes - 1.5",
+              "odd": "8.00"
+            },
+            {
+              "value": "Hee-Chan Hwang - 2.5",
+              "odd": "2.50"
+            },
+            {
+              "value": "Jeanricner Bellegarde - 2.5",
+              "odd": "6.50"
+            },
+            {
+              "value": "Hee-Chan Hwang - 3.5",
+              "odd": "4.50"
+            },
+            {
+              "value": "Jeanricner Bellegarde - 3.5",
+              "odd": "15.00"
+            },
+            {
+              "value": "David Wolfe - 2.5",
+              "odd": "21.00"
+            },
+            {
+              "value": "Ladislav Krejci - 0.5",
+              "odd": "1.67"
+            },
+            {
+              "value": "Ladislav Krejci - 1.5",
+              "odd": "4.00"
+            },
+            {
+              "value": "Ladislav Krejci - 2.5",
+              "odd": "11.00"
+            },
+            {
+              "value": "Ladislav Krejci - 3.5",
+              "odd": "21.00"
+            },
+            {
+              "value": "Hugo Bueno - 0.5",
+              "odd": "1.73"
+            },
+            {
+              "value": "Hugo Bueno - 1.5",
+              "odd": "4.33"
+            },
+            {
+              "value": "Hugo Bueno - 2.5",
+              "odd": "13.00"
+            },
+            {
+              "value": "Toti Gomes - 2.5",
+              "odd": "21.00"
+            },
+            {
+              "value": "Matt Doherty - 0.5",
+              "odd": "2.25"
+            },
+            {
+              "value": "Matt Doherty - 1.5",
+              "odd": "8.00"
+            },
+            {
+              "value": "Matt Doherty - 2.5",
+              "odd": "21.00"
+            },
+            {
+              "value": "Hee-Chan Hwang - 4.5",
+              "odd": "10.00"
+            },
+            {
+              "value": "Hee-Chan Hwang - 5.5",
+              "odd": "21.00"
+            },
+            {
+              "value": "Rodrigo Gomes - 0.5",
+              "odd": "1.25"
+            },
+            {
+              "value": "Rodrigo Gomes - 1.5",
+              "odd": "2.00"
+            },
+            {
+              "value": "Rodrigo Gomes - 2.5",
+              "odd": "4.00"
+            },
+            {
+              "value": "Rodrigo Gomes - 3.5",
+              "odd": "10.00"
+            },
+            {
+              "value": "Rodrigo Gomes - 4.5",
+              "odd": "21.00"
+            },
+            {
+              "value": "Andre Trindade - 0.5",
+              "odd": "1.73"
+            },
+            {
+              "value": "Andre Trindade - 1.5",
+              "odd": "4.33"
+            },
+            {
+              "value": "Pedro Lima - 0.5",
+              "odd": "2.10"
+            },
+            {
+              "value": "Tom Edozie - 0.5",
+              "odd": "1.33"
+            },
+            {
+              "value": "Pedro Lima - 1.5",
+              "odd": "6.50"
+            },
+            {
+              "value": "Tom Edozie - 1.5",
+              "odd": "2.38"
+            },
+            {
+              "value": "Andre Trindade - 2.5",
+              "odd": "13.00"
+            },
+            {
+              "value": "Tom Edozie - 2.5",
+              "odd": "5.50"
+            },
+            {
+              "value": "Tom Edozie - 3.5",
+              "odd": "13.00"
+            }
+          ]
+        },
+        {
+          "id": 241,
+          "name": "Away Player Shots",
+          "values": [
+            {
+              "value": "Granit Xhaka - 0.5",
+              "odd": "1.44"
+            },
+            {
+              "value": "Granit Xhaka - 1.5",
+              "odd": "3.00"
+            },
+            {
+              "value": "Granit Xhaka - 2.5",
+              "odd": "7.00"
+            },
+            {
+              "value": "Granit Xhaka - 3.5",
+              "odd": "19.00"
+            },
+            {
+              "value": "Daniel Ballard - 0.5",
+              "odd": "1.50"
+            },
+            {
+              "value": "Trai Hume - 0.5",
+              "odd": "1.36"
+            },
+            {
+              "value": "Daniel Ballard - 1.5",
+              "odd": "3.40"
+            },
+            {
+              "value": "Trai Hume - 1.5",
+              "odd": "2.62"
+            },
+            {
+              "value": "Daniel Ballard - 2.5",
+              "odd": "9.00"
+            },
+            {
+              "value": "Trai Hume - 2.5",
+              "odd": "6.00"
+            },
+            {
+              "value": "Omar Alderete - 0.5",
+              "odd": "1.57"
+            },
+            {
+              "value": "Omar Alderete - 1.5",
+              "odd": "3.50"
+            },
+            {
+              "value": "Daniel Ballard - 3.5",
+              "odd": "21.00"
+            },
+            {
+              "value": "Brian Brobbey - 0.5",
+              "odd": "1.03"
+            },
+            {
+              "value": "Brian Brobbey - 1.5",
+              "odd": "1.20"
+            },
+            {
+              "value": "Brian Brobbey - 2.5",
+              "odd": "1.62"
+            },
+            {
+              "value": "Brian Brobbey - 3.5",
+              "odd": "2.50"
+            },
+            {
+              "value": "Brian Brobbey - 4.5",
+              "odd": "4.33"
+            },
+            {
+              "value": "Brian Brobbey - 5.5",
+              "odd": "8.00"
+            },
+            {
+              "value": "Brian Brobbey - 6.5",
+              "odd": "15.00"
+            },
+            {
+              "value": "Omar Alderete - 2.5",
+              "odd": "10.00"
+            },
+            {
+              "value": "Omar Alderete - 3.5",
+              "odd": "21.00"
+            },
+            {
+              "value": "Chris Rigg - 0.5",
+              "odd": "1.20"
+            },
+            {
+              "value": "Dennis Cirkin - 0.5",
+              "odd": "1.83"
+            },
+            {
+              "value": "Eliezer Mayenda - 0.5",
+              "odd": "1.04"
+            },
+            {
+              "value": "Luke O'Nien - 0.5",
+              "odd": "1.83"
+            },
+            {
+              "value": "Chris Rigg - 1.5",
+              "odd": "1.83"
+            },
+            {
+              "value": "Dennis Cirkin - 1.5",
+              "odd": "5.00"
+            },
+            {
+              "value": "Eliezer Mayenda - 1.5",
+              "odd": "1.25"
+            },
+            {
+              "value": "Luke O'Nien - 1.5",
+              "odd": "5.00"
+            },
+            {
+              "value": "Romaine Mundle - 1.5",
+              "odd": "1.83"
+            },
+            {
+              "value": "Chris Rigg - 2.5",
+              "odd": "3.75"
+            },
+            {
+              "value": "Dennis Cirkin - 2.5",
+              "odd": "15.00"
+            },
+            {
+              "value": "Eliezer Mayenda - 2.5",
+              "odd": "1.73"
+            },
+            {
+              "value": "Luke O'Nien - 2.5",
+              "odd": "15.00"
+            },
+            {
+              "value": "Chris Rigg - 3.5",
+              "odd": "8.00"
+            },
+            {
+              "value": "Eliezer Mayenda - 3.5",
+              "odd": "2.62"
+            },
+            {
+              "value": "Chris Rigg - 4.5",
+              "odd": "19.00"
+            },
+            {
+              "value": "Eliezer Mayenda - 4.5",
+              "odd": "4.50"
+            },
+            {
+              "value": "Eliezer Mayenda - 5.5",
+              "odd": "10.00"
+            },
+            {
+              "value": "Eliezer Mayenda - 6.5",
+              "odd": "19.00"
+            },
+            {
+              "value": "Reinildo Mandava - 0.5",
+              "odd": "2.25"
+            },
+            {
+              "value": "Reinildo Mandava - 1.5",
+              "odd": "8.00"
+            },
+            {
+              "value": "Reinildo Mandava - 2.5",
+              "odd": "21.00"
+            },
+            {
+              "value": "Habib Diarra - 0.5",
+              "odd": "1.14"
+            },
+            {
+              "value": "Habib Diarra - 1.5",
+              "odd": "1.67"
+            },
+            {
+              "value": "Habib Diarra - 2.5",
+              "odd": "3.00"
+            },
+            {
+              "value": "Habib Diarra - 3.5",
+              "odd": "6.00"
+            },
+            {
+              "value": "Bertrand Traore - 2.5",
+              "odd": "2.20"
+            },
+            {
+              "value": "Brian Brobbey - 7.5",
+              "odd": "21.00"
+            },
+            {
+              "value": "Jocelin Ta Bi - 1.5",
+              "odd": "2.38"
+            },
+            {
+              "value": "Habib Diarra - 4.5",
+              "odd": "13.00"
+            },
+            {
+              "value": "Lutsharel Geertruida - 0.5",
+              "odd": "1.83"
+            },
+            {
+              "value": "Lutsharel Geertruida - 1.5",
+              "odd": "5.00"
+            },
+            {
+              "value": "Lutsharel Geertruida - 2.5",
+              "odd": "15.00"
+            },
+            {
+              "value": "Noah Sadiki - 0.5",
+              "odd": "1.50"
+            },
+            {
+              "value": "Noah Sadiki - 1.5",
+              "odd": "3.25"
+            },
+            {
+              "value": "Noah Sadiki - 2.5",
+              "odd": "8.00"
+            },
+            {
+              "value": "Noah Sadiki - 3.5",
+              "odd": "21.00"
+            },
+            {
+              "value": "Wilson Isidor - 0.5",
+              "odd": "1.03"
+            },
+            {
+              "value": "Wilson Isidor - 1.5",
+              "odd": "1.20"
+            },
+            {
+              "value": "Wilson Isidor - 2.5",
+              "odd": "1.62"
+            },
+            {
+              "value": "Wilson Isidor - 3.5",
+              "odd": "2.50"
+            },
+            {
+              "value": "Wilson Isidor - 4.5",
+              "odd": "4.33"
+            },
+            {
+              "value": "Wilson Isidor - 5.5",
+              "odd": "8.00"
+            },
+            {
+              "value": "Habib Diarra - 5.5",
+              "odd": "21.00"
+            },
+            {
+              "value": "Wilson Isidor - 6.5",
+              "odd": "15.00"
+            },
+            {
+              "value": "Chemsdine Talbi - 0.5",
+              "odd": "1.11"
+            },
+            {
+              "value": "Chemsdine Talbi - 1.5",
+              "odd": "1.53"
+            },
+            {
+              "value": "Chemsdine Talbi - 2.5",
+              "odd": "2.50"
+            },
+            {
+              "value": "Chemsdine Talbi - 3.5",
+              "odd": "4.50"
+            },
+            {
+              "value": "Chemsdine Talbi - 4.5",
+              "odd": "10.00"
+            },
+            {
+              "value": "Trai Hume - 3.5",
+              "odd": "15.00"
+            },
+            {
+              "value": "Chemsdine Talbi - 5.5",
+              "odd": "21.00"
+            },
+            {
+              "value": "Nordi Mukiele - 0.5",
+              "odd": "1.73"
+            },
+            {
+              "value": "Nordi Mukiele - 1.5",
+              "odd": "4.33"
+            },
+            {
+              "value": "Wilson Isidor - 7.5",
+              "odd": "21.00"
+            },
+            {
+              "value": "Nordi Mukiele - 2.5",
+              "odd": "13.00"
+            },
+            {
+              "value": "Enzo Le Fee - 1.5",
+              "odd": "1.53"
+            },
+            {
+              "value": "Enzo Le Fee - 0.5",
+              "odd": "1.11"
+            },
+            {
+              "value": "Enzo Le Fee - 2.5",
+              "odd": "2.50"
+            },
+            {
+              "value": "Enzo Le Fee - 3.5",
+              "odd": "4.50"
+            },
+            {
+              "value": "Enzo Le Fee - 4.5",
+              "odd": "10.00"
+            },
+            {
+              "value": "Enzo Le Fee - 5.5",
+              "odd": "21.00"
+            },
+            {
+              "value": "Nilson Angulo - 1.5",
+              "odd": "1.62"
+            }
+          ]
+        },
+        {
+          "id": 242,
+          "name": "Player Shots On Target",
+          "values": [
+            {
+              "value": "Mateus Mane - 0.5",
+              "odd": "2.00"
+            },
+            {
+              "value": "Mateus Mane - 1.5",
+              "odd": "6.50"
+            },
+            {
+              "value": "Mateus Mane - 2.5",
+              "odd": "21.00"
+            },
+            {
+              "value": "Granit Xhaka - 0.5",
+              "odd": "2.75"
+            },
+            {
+              "value": "Granit Xhaka - 1.5",
+              "odd": "13.00"
+            },
+            {
+              "value": "Daniel Ballard - 0.5",
+              "odd": "3.25"
+            },
+            {
+              "value": "Trai Hume - 0.5",
+              "odd": "2.62"
+            },
+            {
+              "value": "Daniel Ballard - 1.5",
+              "odd": "15.00"
+            },
+            {
+              "value": "Trai Hume - 1.5",
+              "odd": "13.00"
+            },
+            {
+              "value": "Omar Alderete - 0.5",
+              "odd": "3.25"
+            },
+            {
+              "value": "Omar Alderete - 1.5",
+              "odd": "17.00"
+            },
+            {
+              "value": "Brian Brobbey - 0.5",
+              "odd": "1.40"
+            },
+            {
+              "value": "Brian Brobbey - 1.5",
+              "odd": "2.75"
+            },
+            {
+              "value": "Brian Brobbey - 2.5",
+              "odd": "7.00"
+            },
+            {
+              "value": "Brian Brobbey - 3.5",
+              "odd": "21.00"
+            },
+            {
+              "value": "Joao Gomes - 0.5",
+              "odd": "3.25"
+            },
+            {
+              "value": "Joao Gomes - 1.5",
+              "odd": "15.00"
+            },
+            {
+              "value": "Yerson Mosquera - 0.5",
+              "odd": "3.75"
+            },
+            {
+              "value": "Yerson Mosquera - 1.5",
+              "odd": "21.00"
+            },
+            {
+              "value": "Toluwalase Arokodare - 0.5",
+              "odd": "1.57"
+            },
+            {
+              "value": "Toluwalase Arokodare - 1.5",
+              "odd": "3.75"
+            },
+            {
+              "value": "Toluwalase Arokodare - 2.5",
+              "odd": "11.00"
+            },
+            {
+              "value": "David Wolfe - 0.5",
+              "odd": "6.00"
+            },
+            {
+              "value": "Santiago Bueno - 0.5",
+              "odd": "5.00"
+            },
+            {
+              "value": "Angel Gomes - 0.5",
+              "odd": "2.38"
+            },
+            {
+              "value": "Angel Gomes - 1.5",
+              "odd": "9.00"
+            },
+            {
+              "value": "Adam Armstrong - 0.5",
+              "odd": "1.57"
+            },
+            {
+              "value": "Adam Armstrong - 1.5",
+              "odd": "3.75"
+            },
+            {
+              "value": "Adam Armstrong - 2.5",
+              "odd": "11.00"
+            },
+            {
+              "value": "Chris Rigg - 0.5",
+              "odd": "2.10"
+            },
+            {
+              "value": "Dennis Cirkin - 0.5",
+              "odd": "3.75"
+            },
+            {
+              "value": "Eliezer Mayenda - 0.5",
+              "odd": "1.44"
+            },
+            {
+              "value": "Luke O'Nien - 0.5",
+              "odd": "3.75"
+            },
+            {
+              "value": "Romaine Mundle - 0.5",
+              "odd": "2.10"
+            },
+            {
+              "value": "Chris Rigg - 1.5",
+              "odd": "7.00"
+            },
+            {
+              "value": "Dennis Cirkin - 1.5",
+              "odd": "21.00"
+            },
+            {
+              "value": "Eliezer Mayenda - 1.5",
+              "odd": "3.25"
+            },
+            {
+              "value": "Luke O'Nien - 1.5",
+              "odd": "21.00"
+            },
+            {
+              "value": "Chris Rigg - 2.5",
+              "odd": "21.00"
+            },
+            {
+              "value": "Eliezer Mayenda - 2.5",
+              "odd": "9.00"
+            },
+            {
+              "value": "Eliezer Mayenda - 3.5",
+              "odd": "21.00"
+            },
+            {
+              "value": "Reinildo Mandava - 0.5",
+              "odd": "6.00"
+            },
+            {
+              "value": "Jackson Tchatchoua - 0.5",
+              "odd": "3.75"
+            },
+            {
+              "value": "Jackson Tchatchoua - 1.5",
+              "odd": "21.00"
+            },
+            {
+              "value": "Habib Diarra - 0.5",
+              "odd": "1.83"
+            },
+            {
+              "value": "Habib Diarra - 1.5",
+              "odd": "6.00"
+            },
+            {
+              "value": "Habib Diarra - 2.5",
+              "odd": "21.00"
+            },
+            {
+              "value": "Hee-Chan Hwang - 0.5",
+              "odd": "1.73"
+            },
+            {
+              "value": "Jeanricner Bellegarde - 0.5",
+              "odd": "2.62"
+            },
+            {
+              "value": "Toti Gomes - 0.5",
+              "odd": "6.00"
+            },
+            {
+              "value": "Hee-Chan Hwang - 1.5",
+              "odd": "4.50"
+            },
+            {
+              "value": "Jeanricner Bellegarde - 1.5",
+              "odd": "11.00"
+            },
+            {
+              "value": "Hee-Chan Hwang - 2.5",
+              "odd": "17.00"
+            },
+            {
+              "value": "Bertrand Traore - 0.5",
+              "odd": "1.62"
+            },
+            {
+              "value": "Jocelin Ta Bi - 0.5",
+              "odd": "2.50"
+            },
+            {
+              "value": "Lutsharel Geertruida - 0.5",
+              "odd": "3.75"
+            },
+            {
+              "value": "Lutsharel Geertruida - 1.5",
+              "odd": "21.00"
+            },
+            {
+              "value": "Ladislav Krejci - 0.5",
+              "odd": "3.50"
+            },
+            {
+              "value": "Ladislav Krejci - 1.5",
+              "odd": "19.00"
+            },
+            {
+              "value": "Hugo Bueno - 0.5",
+              "odd": "3.50"
+            },
+            {
+              "value": "Hugo Bueno - 1.5",
+              "odd": "19.00"
+            },
+            {
+              "value": "Noah Sadiki - 0.5",
+              "odd": "3.25"
+            },
+            {
+              "value": "Noah Sadiki - 1.5",
+              "odd": "17.00"
+            },
+            {
+              "value": "Wilson Isidor - 0.5",
+              "odd": "1.40"
+            },
+            {
+              "value": "Wilson Isidor - 1.5",
+              "odd": "2.75"
+            },
+            {
+              "value": "Wilson Isidor - 2.5",
+              "odd": "7.00"
+            },
+            {
+              "value": "Wilson Isidor - 3.5",
+              "odd": "21.00"
+            },
+            {
+              "value": "Matt Doherty - 0.5",
+              "odd": "6.00"
+            },
+            {
+              "value": "Chemsdine Talbi - 0.5",
+              "odd": "1.73"
+            },
+            {
+              "value": "Chemsdine Talbi - 1.5",
+              "odd": "4.50"
+            },
+            {
+              "value": "Chemsdine Talbi - 2.5",
+              "odd": "17.00"
+            },
+            {
+              "value": "Nordi Mukiele - 0.5",
+              "odd": "3.75"
+            },
+            {
+              "value": "Nordi Mukiele - 1.5",
+              "odd": "21.00"
+            },
+            {
+              "value": "Enzo Le Fee - 1.5",
+              "odd": "4.50"
+            },
+            {
+              "value": "Enzo Le Fee - 0.5",
+              "odd": "1.73"
+            },
+            {
+              "value": "Enzo Le Fee - 2.5",
+              "odd": "17.00"
+            },
+            {
+              "value": "Rodrigo Gomes - 0.5",
+              "odd": "2.25"
+            },
+            {
+              "value": "Rodrigo Gomes - 1.5",
+              "odd": "9.00"
+            },
+            {
+              "value": "Nilson Angulo - 0.5",
+              "odd": "1.83"
+            },
+            {
+              "value": "Andre Trindade - 0.5",
+              "odd": "3.50"
+            },
+            {
+              "value": "Andre Trindade - 1.5",
+              "odd": "19.00"
+            },
+            {
+              "value": "Pedro Lima - 0.5",
+              "odd": "5.50"
+            },
+            {
+              "value": "Tom Edozie - 0.5",
+              "odd": "2.50"
+            },
+            {
+              "value": "Tom Edozie - 1.5",
+              "odd": "10.00"
+            }
+          ]
+        },
+        {
+          "id": 228,
+          "name": "Home Goal Method Header",
+          "values": [
+            {
+              "value": "Angel Gomes",
+              "odd": "51.00"
+            },
+            {
+              "value": "Hugo Bueno",
+              "odd": "51.00"
+            },
+            {
+              "value": "David Wolfe",
+              "odd": "41.00"
+            },
+            {
+              "value": "Ladislav Krejci",
+              "odd": "12.00"
+            },
+            {
+              "value": "Jackson Tchatchoua",
+              "odd": "101.00"
+            },
+            {
+              "value": "Toluwalase Arokodare",
+              "odd": "8.50"
+            },
+            {
+              "value": "Jeanricner Bellegarde",
+              "odd": "29.00"
+            },
+            {
+              "value": "Saheed Olagunju",
+              "odd": "41.00"
+            },
+            {
+              "value": "Jerome Abbey",
+              "odd": "81.00"
+            },
+            {
+              "value": "Pedro Lima",
+              "odd": "67.00"
+            },
+            {
+              "value": "Santiago Bueno",
+              "odd": "23.00"
+            },
+            {
+              "value": "Yerson Mosquera",
+              "odd": "17.00"
+            },
+            {
+              "value": "Matt Doherty",
+              "odd": "34.00"
+            },
+            {
+              "value": "Joao Gomes",
+              "odd": "67.00"
+            },
+            {
+              "value": "Rodrigo Gomes",
+              "odd": "101.00"
+            },
+            {
+              "value": "Toti Gomes",
+              "odd": "23.00"
+            },
+            {
+              "value": "Adam Armstrong",
+              "odd": "26.00"
+            },
+            {
+              "value": "Hee-Chan Hwang",
+              "odd": "26.00"
+            },
+            {
+              "value": "Tom Edozie",
+              "odd": "34.00"
+            },
+            {
+              "value": "Ethan Sutherland",
+              "odd": "67.00"
+            },
+            {
+              "value": "Andre Trindade",
+              "odd": "126.00"
+            },
+            {
+              "value": "Mateus Mane",
+              "odd": "23.00"
+            }
+          ]
+        },
+        {
+          "id": 245,
+          "name": "Away Goal Method Header",
+          "values": [
+            {
+              "value": "Daniel Ballard",
+              "odd": "9.00"
+            },
+            {
+              "value": "Trai Hume",
+              "odd": "34.00"
+            },
+            {
+              "value": "Brian Brobbey",
+              "odd": "7.00"
+            },
+            {
+              "value": "Habib Diarra",
+              "odd": "26.00"
+            },
+            {
+              "value": "Jack Whittaker",
+              "odd": "41.00"
+            },
+            {
+              "value": "Jayden Jones",
+              "odd": "21.00"
+            },
+            {
+              "value": "Jenson Jones",
+              "odd": "67.00"
+            },
+            {
+              "value": "Eliezer Mayenda",
+              "odd": "17.00"
+            },
+            {
+              "value": "Wilson Isidor",
+              "odd": "17.00"
+            },
+            {
+              "value": "Romaine Mundle",
+              "odd": "41.00"
+            },
+            {
+              "value": "Chris Rigg",
+              "odd": "41.00"
+            },
+            {
+              "value": "Dennis Cirkin",
+              "odd": "34.00"
+            },
+            {
+              "value": "Luke O'Nien",
+              "odd": "29.00"
+            },
+            {
+              "value": "Nilson Angulo",
+              "odd": "26.00"
+            },
+            {
+              "value": "Chemsdine Talbi",
+              "odd": "34.00"
+            },
+            {
+              "value": "Noah Sadiki",
+              "odd": "81.00"
+            },
+            {
+              "value": "Bertrand Traore",
+              "odd": "41.00"
+            },
+            {
+              "value": "Enzo Le Fee",
+              "odd": "34.00"
+            },
+            {
+              "value": "Reinildo Mandava",
+              "odd": "21.00"
+            },
+            {
+              "value": "Jocelin Ta Bi",
+              "odd": "34.00"
+            },
+            {
+              "value": "Omar Alderete",
+              "odd": "13.00"
+            },
+            {
+              "value": "Harrison Jones",
+              "odd": "23.00"
+            },
+            {
+              "value": "Lutsharel Geertruida",
+              "odd": "23.00"
+            },
+            {
+              "value": "Granit Xhaka",
+              "odd": "67.00"
+            },
+            {
+              "value": "Nordi Mukiele",
+              "odd": "21.00"
+            },
+            {
+              "value": "Ahmed Abdullahi",
+              "odd": "15.00"
+            }
+          ]
+        },
+        {
+          "id": 229,
+          "name": "Goal Method Outside the Box",
+          "values": [
+            {
+              "value": "Angel Gomes",
+              "odd": "17.00"
+            },
+            {
+              "value": "Hugo Bueno",
+              "odd": "41.00"
+            },
+            {
+              "value": "David Wolfe",
+              "odd": "51.00"
+            },
+            {
+              "value": "Ladislav Krejci",
+              "odd": "51.00"
+            },
+            {
+              "value": "Daniel Ballard",
+              "odd": "67.00"
+            },
+            {
+              "value": "Trai Hume",
+              "odd": "23.00"
+            },
+            {
+              "value": "Brian Brobbey",
+              "odd": "29.00"
+            },
+            {
+              "value": "Habib Diarra",
+              "odd": "17.00"
+            },
+            {
+              "value": "Jackson Tchatchoua",
+              "odd": "51.00"
+            },
+            {
+              "value": "Jack Whittaker",
+              "odd": "26.00"
+            },
+            {
+              "value": "Jayden Jones",
+              "odd": "34.00"
+            },
+            {
+              "value": "Jenson Jones",
+              "odd": "21.00"
+            },
+            {
+              "value": "Eliezer Mayenda",
+              "odd": "29.00"
+            },
+            {
+              "value": "Wilson Isidor",
+              "odd": "21.00"
+            },
+            {
+              "value": "Romaine Mundle",
+              "odd": "15.00"
+            },
+            {
+              "value": "Chris Rigg",
+              "odd": "23.00"
+            },
+            {
+              "value": "Dennis Cirkin",
+              "odd": "41.00"
+            },
+            {
+              "value": "Luke O'Nien",
+              "odd": "51.00"
+            },
+            {
+              "value": "Nilson Angulo",
+              "odd": "10.00"
+            },
+            {
+              "value": "Toluwalase Arokodare",
+              "odd": "21.00"
+            },
+            {
+              "value": "Chemsdine Talbi",
+              "odd": "8.50"
+            },
+            {
+              "value": "Noah Sadiki",
+              "odd": "29.00"
+            },
+            {
+              "value": "Jeanricner Bellegarde",
+              "odd": "19.00"
+            },
+            {
+              "value": "Bertrand Traore",
+              "odd": "19.00"
+            },
+            {
+              "value": "Enzo Le Fee",
+              "odd": "7.50"
+            },
+            {
+              "value": "Reinildo Mandava",
+              "odd": "51.00"
+            },
+            {
+              "value": "Saheed Olagunju",
+              "odd": "41.00"
+            },
+            {
+              "value": "Jocelin Ta Bi",
+              "odd": "23.00"
+            },
+            {
+              "value": "Jerome Abbey",
+              "odd": "17.00"
+            },
+            {
+              "value": "Pedro Lima",
+              "odd": "67.00"
+            },
+            {
+              "value": "Omar Alderete",
+              "odd": "29.00"
+            },
+            {
+              "value": "Santiago Bueno",
+              "odd": "151.00"
+            },
+            {
+              "value": "Yerson Mosquera",
+              "odd": "126.00"
+            },
+            {
+              "value": "Harrison Jones",
+              "odd": "23.00"
+            },
+            {
+              "value": "Lutsharel Geertruida",
+              "odd": "67.00"
+            },
+            {
+              "value": "Matt Doherty",
+              "odd": "81.00"
+            },
+            {
+              "value": "Joao Gomes",
+              "odd": "17.00"
+            },
+            {
+              "value": "Rodrigo Gomes",
+              "odd": "15.00"
+            },
+            {
+              "value": "Toti Gomes",
+              "odd": "126.00"
+            },
+            {
+              "value": "Adam Armstrong",
+              "odd": "21.00"
+            },
+            {
+              "value": "Hee-Chan Hwang",
+              "odd": "19.00"
+            },
+            {
+              "value": "Tom Edozie",
+              "odd": "23.00"
+            },
+            {
+              "value": "Ethan Sutherland",
+              "odd": "23.00"
+            },
+            {
+              "value": "Granit Xhaka",
+              "odd": "13.00"
+            },
+            {
+              "value": "Nordi Mukiele",
+              "odd": "41.00"
+            },
+            {
+              "value": "Andre Trindade",
+              "odd": "41.00"
+            },
+            {
+              "value": "Ahmed Abdullahi",
+              "odd": "15.00"
+            },
+            {
+              "value": "Mateus Mane",
+              "odd": "15.00"
+            }
+          ]
+        },
+        {
+          "id": 231,
+          "name": "Home Anytime Goal Scorer",
+          "values": [
+            {
+              "value": "Angel Gomes",
+              "odd": "6.50"
+            },
+            {
+              "value": "Hugo Bueno",
+              "odd": "13.00"
+            },
+            {
+              "value": "David Wolfe",
+              "odd": "13.00"
+            },
+            {
+              "value": "Ladislav Krejci",
+              "odd": "9.00"
+            },
+            {
+              "value": "Jackson Tchatchoua",
+              "odd": "13.00"
+            },
+            {
+              "value": "Toluwalase Arokodare",
+              "odd": "3.50"
+            },
+            {
+              "value": "Jeanricner Bellegarde",
+              "odd": "6.50"
+            },
+            {
+              "value": "Saheed Olagunju",
+              "odd": "13.00"
+            },
+            {
+              "value": "Jerome Abbey",
+              "odd": "8.50"
+            },
+            {
+              "value": "Pedro Lima",
+              "odd": "15.00"
+            },
+            {
+              "value": "Santiago Bueno",
+              "odd": "15.00"
+            },
+            {
+              "value": "Yerson Mosquera",
+              "odd": "13.00"
+            },
+            {
+              "value": "Matt Doherty",
+              "odd": "13.00"
+            },
+            {
+              "value": "Joao Gomes",
+              "odd": "8.00"
+            },
+            {
+              "value": "Rodrigo Gomes",
+              "odd": "6.00"
+            },
+            {
+              "value": "Toti Gomes",
+              "odd": "13.00"
+            },
+            {
+              "value": "Adam Armstrong",
+              "odd": "3.50"
+            },
+            {
+              "value": "Hee-Chan Hwang",
+              "odd": "4.00"
+            },
+            {
+              "value": "Tom Edozie",
+              "odd": "6.00"
+            },
+            {
+              "value": "Ethan Sutherland",
+              "odd": "7.50"
+            },
+            {
+              "value": "Andre Trindade",
+              "odd": "13.00"
+            },
+            {
+              "value": "Mateus Mane",
+              "odd": "4.75"
+            }
+          ]
+        },
+        {
+          "id": 232,
+          "name": "Home First Goal Scorer",
+          "values": [
+            {
+              "value": "Angel Gomes",
+              "odd": "17.00"
+            },
+            {
+              "value": "Hugo Bueno",
+              "odd": "34.00"
+            },
+            {
+              "value": "David Wolfe",
+              "odd": "34.00"
+            },
+            {
+              "value": "Ladislav Krejci",
+              "odd": "23.00"
+            },
+            {
+              "value": "Jackson Tchatchoua",
+              "odd": "34.00"
+            },
+            {
+              "value": "Toluwalase Arokodare",
+              "odd": "8.50"
+            },
+            {
+              "value": "Jeanricner Bellegarde",
+              "odd": "17.00"
+            },
+            {
+              "value": "Saheed Olagunju",
+              "odd": "34.00"
+            },
+            {
+              "value": "Jerome Abbey",
+              "odd": "21.00"
+            },
+            {
+              "value": "Pedro Lima",
+              "odd": "41.00"
+            },
+            {
+              "value": "Santiago Bueno",
+              "odd": "41.00"
+            },
+            {
+              "value": "Yerson Mosquera",
+              "odd": "34.00"
+            },
+            {
+              "value": "Matt Doherty",
+              "odd": "34.00"
+            },
+            {
+              "value": "Joao Gomes",
+              "odd": "21.00"
+            },
+            {
+              "value": "Rodrigo Gomes",
+              "odd": "15.00"
+            },
+            {
+              "value": "Toti Gomes",
+              "odd": "34.00"
+            },
+            {
+              "value": "Adam Armstrong",
+              "odd": "8.50"
+            },
+            {
+              "value": "Hee-Chan Hwang",
+              "odd": "10.00"
+            },
+            {
+              "value": "Tom Edozie",
+              "odd": "15.00"
+            },
+            {
+              "value": "Ethan Sutherland",
+              "odd": "19.00"
+            },
+            {
+              "value": "Andre Trindade",
+              "odd": "34.00"
+            },
+            {
+              "value": "Mateus Mane",
+              "odd": "12.00"
+            }
+          ]
+        },
+        {
+          "id": 233,
+          "name": "Home Last Goal Scorer",
+          "values": [
+            {
+              "value": "Angel Gomes",
+              "odd": "17.00"
+            },
+            {
+              "value": "Hugo Bueno",
+              "odd": "34.00"
+            },
+            {
+              "value": "David Wolfe",
+              "odd": "34.00"
+            },
+            {
+              "value": "Ladislav Krejci",
+              "odd": "23.00"
+            },
+            {
+              "value": "Jackson Tchatchoua",
+              "odd": "34.00"
+            },
+            {
+              "value": "Toluwalase Arokodare",
+              "odd": "8.50"
+            },
+            {
+              "value": "Jeanricner Bellegarde",
+              "odd": "17.00"
+            },
+            {
+              "value": "Saheed Olagunju",
+              "odd": "34.00"
+            },
+            {
+              "value": "Jerome Abbey",
+              "odd": "21.00"
+            },
+            {
+              "value": "Pedro Lima",
+              "odd": "41.00"
+            },
+            {
+              "value": "Santiago Bueno",
+              "odd": "41.00"
+            },
+            {
+              "value": "Yerson Mosquera",
+              "odd": "34.00"
+            },
+            {
+              "value": "Matt Doherty",
+              "odd": "34.00"
+            },
+            {
+              "value": "Joao Gomes",
+              "odd": "21.00"
+            },
+            {
+              "value": "Rodrigo Gomes",
+              "odd": "15.00"
+            },
+            {
+              "value": "Toti Gomes",
+              "odd": "34.00"
+            },
+            {
+              "value": "Adam Armstrong",
+              "odd": "8.50"
+            },
+            {
+              "value": "Hee-Chan Hwang",
+              "odd": "10.00"
+            },
+            {
+              "value": "Tom Edozie",
+              "odd": "15.00"
+            },
+            {
+              "value": "Ethan Sutherland",
+              "odd": "19.00"
+            },
+            {
+              "value": "Andre Trindade",
+              "odd": "34.00"
+            },
+            {
+              "value": "Mateus Mane",
+              "odd": "12.00"
+            }
+          ]
+        },
+        {
+          "id": 256,
+          "name": "Away Player Assists",
+          "values": [
+            {
+              "value": "Daniel Ballard",
+              "odd": "9.00"
+            },
+            {
+              "value": "Trai Hume",
+              "odd": "7.50"
+            },
+            {
+              "value": "Brian Brobbey",
+              "odd": "7.50"
+            },
+            {
+              "value": "Habib Diarra",
+              "odd": "8.00"
+            },
+            {
+              "value": "Jack Whittaker",
+              "odd": "6.50"
+            },
+            {
+              "value": "Jayden Jones",
+              "odd": "7.00"
+            },
+            {
+              "value": "Jenson Jones",
+              "odd": "12.00"
+            },
+            {
+              "value": "Eliezer Mayenda",
+              "odd": "8.50"
+            },
+            {
+              "value": "Wilson Isidor",
+              "odd": "8.50"
+            },
+            {
+              "value": "Romaine Mundle",
+              "odd": "7.00"
+            },
+            {
+              "value": "Chris Rigg",
+              "odd": "6.50"
+            },
+            {
+              "value": "Milan Aleksic",
+              "odd": "5.50"
+            },
+            {
+              "value": "Dennis Cirkin",
+              "odd": "9.00"
+            },
+            {
+              "value": "Luke O'Nien",
+              "odd": "15.00"
+            },
+            {
+              "value": "Nilson Angulo",
+              "odd": "7.00"
+            },
+            {
+              "value": "Chemsdine Talbi",
+              "odd": "5.50"
+            },
+            {
+              "value": "Noah Sadiki",
+              "odd": "10.00"
+            },
+            {
+              "value": "Bertrand Traore",
+              "odd": "5.00"
+            },
+            {
+              "value": "Enzo Le Fee",
+              "odd": "5.00"
+            },
+            {
+              "value": "Reinildo Mandava",
+              "odd": "12.00"
+            },
+            {
+              "value": "Jocelin Ta Bi",
+              "odd": "7.00"
+            },
+            {
+              "value": "Finn Geragusyan",
+              "odd": "9.00"
+            },
+            {
+              "value": "Omar Alderete",
+              "odd": "15.00"
+            },
+            {
+              "value": "Harrison Jones",
+              "odd": "6.50"
+            },
+            {
+              "value": "Lutsharel Geertruida",
+              "odd": "12.00"
+            },
+            {
+              "value": "Granit Xhaka",
+              "odd": "4.50"
+            },
+            {
+              "value": "Nordi Mukiele",
+              "odd": "7.00"
+            },
+            {
+              "value": "Ahmed Abdullahi",
+              "odd": "8.50"
+            }
+          ]
+        },
+        {
+          "id": 267,
+          "name": "Goalkeeper Saves",
+          "values": [
+            {
+              "value": "Jose Sa - 0.5",
+              "odd": "1.05"
+            },
+            {
+              "value": "Robin Roefs - 1.5",
+              "odd": "1.30"
+            },
+            {
+              "value": "Robin Roefs - 2.5",
+              "odd": "1.91"
+            },
+            {
+              "value": "Robin Roefs - 3.5",
+              "odd": "3.40"
+            },
+            {
+              "value": "Robin Roefs - 4.5",
+              "odd": "6.50"
+            },
+            {
+              "value": "Robin Roefs - 0.5",
+              "odd": "1.05"
+            },
+            {
+              "value": "Jose Sa - 3.5",
+              "odd": "3.50"
+            },
+            {
+              "value": "Jose Sa - 1.5",
+              "odd": "1.30"
+            },
+            {
+              "value": "Jose Sa - 2.5",
+              "odd": "1.91"
+            },
+            {
+              "value": "Jose Sa - 4.5",
+              "odd": "7.00"
+            }
+          ]
+        },
+        {
+          "id": 269,
+          "name": "Home Player Shots On Target Total",
+          "values": [
+            {
+              "value": "Mateus Mane - 0.5",
+              "odd": "2.00"
+            },
+            {
+              "value": "Mateus Mane - 1.5",
+              "odd": "6.50"
+            },
+            {
+              "value": "Mateus Mane - 2.5",
+              "odd": "21.00"
+            },
+            {
+              "value": "Joao Gomes - 0.5",
+              "odd": "3.25"
+            },
+            {
+              "value": "Joao Gomes - 1.5",
+              "odd": "15.00"
+            },
+            {
+              "value": "Yerson Mosquera - 0.5",
+              "odd": "3.75"
+            },
+            {
+              "value": "Yerson Mosquera - 1.5",
+              "odd": "21.00"
+            },
+            {
+              "value": "Toluwalase Arokodare - 0.5",
+              "odd": "1.57"
+            },
+            {
+              "value": "Toluwalase Arokodare - 1.5",
+              "odd": "3.75"
+            },
+            {
+              "value": "Toluwalase Arokodare - 2.5",
+              "odd": "11.00"
+            },
+            {
+              "value": "David Wolfe - 0.5",
+              "odd": "6.00"
+            },
+            {
+              "value": "Santiago Bueno - 0.5",
+              "odd": "5.00"
+            },
+            {
+              "value": "Angel Gomes - 0.5",
+              "odd": "2.38"
+            },
+            {
+              "value": "Angel Gomes - 1.5",
+              "odd": "9.00"
+            },
+            {
+              "value": "Adam Armstrong - 0.5",
+              "odd": "1.57"
+            },
+            {
+              "value": "Adam Armstrong - 1.5",
+              "odd": "3.75"
+            },
+            {
+              "value": "Adam Armstrong - 2.5",
+              "odd": "11.00"
+            },
+            {
+              "value": "Jackson Tchatchoua - 0.5",
+              "odd": "3.75"
+            },
+            {
+              "value": "Jackson Tchatchoua - 1.5",
+              "odd": "21.00"
+            },
+            {
+              "value": "Hee-Chan Hwang - 0.5",
+              "odd": "1.73"
+            },
+            {
+              "value": "Jeanricner Bellegarde - 0.5",
+              "odd": "2.62"
+            },
+            {
+              "value": "Toti Gomes - 0.5",
+              "odd": "6.00"
+            },
+            {
+              "value": "Hee-Chan Hwang - 1.5",
+              "odd": "4.50"
+            },
+            {
+              "value": "Jeanricner Bellegarde - 1.5",
+              "odd": "11.00"
+            },
+            {
+              "value": "Hee-Chan Hwang - 2.5",
+              "odd": "17.00"
+            },
+            {
+              "value": "Ladislav Krejci - 0.5",
+              "odd": "3.50"
+            },
+            {
+              "value": "Ladislav Krejci - 1.5",
+              "odd": "19.00"
+            },
+            {
+              "value": "Hugo Bueno - 0.5",
+              "odd": "3.50"
+            },
+            {
+              "value": "Hugo Bueno - 1.5",
+              "odd": "19.00"
+            },
+            {
+              "value": "Matt Doherty - 0.5",
+              "odd": "6.00"
+            },
+            {
+              "value": "Rodrigo Gomes - 0.5",
+              "odd": "2.25"
+            },
+            {
+              "value": "Rodrigo Gomes - 1.5",
+              "odd": "9.00"
+            },
+            {
+              "value": "Andre Trindade - 0.5",
+              "odd": "3.50"
+            },
+            {
+              "value": "Andre Trindade - 1.5",
+              "odd": "19.00"
+            },
+            {
+              "value": "Pedro Lima - 0.5",
+              "odd": "5.50"
+            },
+            {
+              "value": "Tom Edozie - 0.5",
+              "odd": "2.50"
+            },
+            {
+              "value": "Tom Edozie - 1.5",
+              "odd": "10.00"
+            }
+          ]
+        },
+        {
+          "id": 275,
+          "name": "Away Player Shots On Target Total",
+          "values": [
+            {
+              "value": "Angel Gomes",
+              "odd": "51.00"
+            },
+            {
+              "value": "Hugo Bueno",
+              "odd": "51.00"
+            },
+            {
+              "value": "David Wolfe",
+              "odd": "41.00"
+            },
+            {
+              "value": "Ladislav Krejci",
+              "odd": "12.00"
+            },
+            {
+              "value": "Daniel Ballard",
+              "odd": "9.00"
+            },
+            {
+              "value": "Trai Hume",
+              "odd": "34.00"
+            },
+            {
+              "value": "Brian Brobbey",
+              "odd": "7.00"
+            },
+            {
+              "value": "Habib Diarra",
+              "odd": "26.00"
+            },
+            {
+              "value": "Jackson Tchatchoua",
+              "odd": "101.00"
+            },
+            {
+              "value": "Jack Whittaker",
+              "odd": "41.00"
+            },
+            {
+              "value": "Jayden Jones",
+              "odd": "21.00"
+            },
+            {
+              "value": "Jenson Jones",
+              "odd": "67.00"
+            },
+            {
+              "value": "Eliezer Mayenda",
+              "odd": "17.00"
+            },
+            {
+              "value": "Wilson Isidor",
+              "odd": "17.00"
+            },
+            {
+              "value": "Romaine Mundle",
+              "odd": "41.00"
+            },
+            {
+              "value": "Chris Rigg",
+              "odd": "41.00"
+            },
+            {
+              "value": "Dennis Cirkin",
+              "odd": "34.00"
+            },
+            {
+              "value": "Luke O'Nien",
+              "odd": "29.00"
+            },
+            {
+              "value": "Nilson Angulo",
+              "odd": "26.00"
+            },
+            {
+              "value": "Toluwalase Arokodare",
+              "odd": "8.50"
+            },
+            {
+              "value": "Chemsdine Talbi",
+              "odd": "34.00"
+            },
+            {
+              "value": "Noah Sadiki",
+              "odd": "81.00"
+            },
+            {
+              "value": "Jeanricner Bellegarde",
+              "odd": "29.00"
+            },
+            {
+              "value": "Bertrand Traore",
+              "odd": "41.00"
+            },
+            {
+              "value": "Enzo Le Fee",
+              "odd": "34.00"
+            },
+            {
+              "value": "Reinildo Mandava",
+              "odd": "21.00"
+            },
+            {
+              "value": "Saheed Olagunju",
+              "odd": "41.00"
+            },
+            {
+              "value": "Jocelin Ta Bi",
+              "odd": "34.00"
+            },
+            {
+              "value": "Jerome Abbey",
+              "odd": "81.00"
+            },
+            {
+              "value": "Pedro Lima",
+              "odd": "67.00"
+            },
+            {
+              "value": "Omar Alderete",
+              "odd": "13.00"
+            },
+            {
+              "value": "Santiago Bueno",
+              "odd": "23.00"
+            },
+            {
+              "value": "Yerson Mosquera",
+              "odd": "17.00"
+            },
+            {
+              "value": "Harrison Jones",
+              "odd": "23.00"
+            },
+            {
+              "value": "Lutsharel Geertruida",
+              "odd": "23.00"
+            },
+            {
+              "value": "Matt Doherty",
+              "odd": "34.00"
+            },
+            {
+              "value": "Joao Gomes",
+              "odd": "67.00"
+            },
+            {
+              "value": "Rodrigo Gomes",
+              "odd": "101.00"
+            },
+            {
+              "value": "Toti Gomes",
+              "odd": "23.00"
+            },
+            {
+              "value": "Adam Armstrong",
+              "odd": "26.00"
+            },
+            {
+              "value": "Hee-Chan Hwang",
+              "odd": "26.00"
+            },
+            {
+              "value": "Tom Edozie",
+              "odd": "34.00"
+            },
+            {
+              "value": "Ethan Sutherland",
+              "odd": "67.00"
+            },
+            {
+              "value": "Granit Xhaka",
+              "odd": "67.00"
+            },
+            {
+              "value": "Nordi Mukiele",
+              "odd": "21.00"
+            },
+            {
+              "value": "Andre Trindade",
+              "odd": "126.00"
+            },
+            {
+              "value": "Ahmed Abdullahi",
+              "odd": "15.00"
+            },
+            {
+              "value": "Mateus Mane",
+              "odd": "23.00"
+            }
+          ]
+        },
+        {
+          "id": 276,
+          "name": "Away Player Shots Total",
+          "values": [
+            {
+              "value": "Over",
+              "odd": "1.80"
+            },
+            {
+              "value": "Under",
+              "odd": "1.91"
+            }
+          ]
+        },
+        {
+          "id": 222,
+          "name": "To Win From Behind",
+          "values": [
+            {
+              "value": "Home",
+              "odd": "15.00"
+            },
+            {
+              "value": "Away",
+              "odd": "9.00"
+            }
+          ]
+        },
+        {
+          "id": 295,
+          "name": "Corners. Total (Range)",
+          "values": [
+            {
+              "value": "Under 6",
+              "odd": "9.00"
+            },
+            {
+              "value": "6 - 8",
+              "odd": "3.00"
+            },
+            {
+              "value": "9 - 11",
+              "odd": "2.62"
+            },
+            {
+              "value": "12 - 14",
+              "odd": "4.50"
+            },
+            {
+              "value": "Over 14",
+              "odd": "11.00"
+            }
+          ]
+        },
+        {
+          "id": 247,
+          "name": "Corners Race To",
+          "values": [
+            {
+              "value": "Home",
+              "odd": "4.33"
+            },
+            {
+              "value": "Away",
+              "odd": "3.50"
+            },
+            {
+              "value": "Draw",
+              "odd": "1.67"
+            }
+          ]
+        },
+        {
+          "id": 249,
+          "name": "Multicorners",
+          "values": [
+            {
+              "value": "Over 19.5",
+              "odd": "1.80"
+            },
+            {
+              "value": "Under 19.5",
+              "odd": "1.91"
+            }
+          ]
+        },
+        {
+          "id": 297,
+          "name": "Corners. total between 0 and 10m",
+          "values": [
+            {
+              "value": "Over",
+              "odd": "1.62"
+            },
+            {
+              "value": "Under",
+              "odd": "2.20"
+            }
+          ]
+        },
+        {
+          "id": 299,
+          "name": "Cards over/under between 0 and 10 m",
+          "values": [
+            {
+              "value": "Over",
+              "odd": "8.00"
+            },
+            {
+              "value": "Under",
+              "odd": "1.08"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

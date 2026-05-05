@@ -1,0 +1,12 @@
+{
+  "Goals Over/Under First Half": "ht_over_under_0.5",
+  "Goals Over/Under - First Half": "ht_over_under_0.5",
+  "1st Half Over/Under 0.5": "ht_over_under_0.5",
+  "First Half Winner": "ht_1x2",
+  "Asian Handicap First Half": "ht_asian_handicap",
+  "Both Teams Score - First Half": "ht_btts",
+  "Goals Over/Under": "ft_over_under",
+  "Asian Handicap": "ft_asian_handicap",
+  "Match Winner": "ft_1x2",
+  "Both Teams Score": "ft_btts"
+}

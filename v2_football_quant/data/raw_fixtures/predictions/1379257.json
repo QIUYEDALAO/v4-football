@@ -1,0 +1,1329 @@
+{
+  "predictions": {
+    "winner": {
+      "id": 52,
+      "name": "Crystal Palace",
+      "comment": "Win or draw"
+    },
+    "win_or_draw": true,
+    "under_over": null,
+    "goals": {
+      "home": "-1.5",
+      "away": "-2.5"
+    },
+    "advice": "Double chance : draw or Crystal Palace",
+    "percent": {
+      "home": "10%",
+      "draw": "45%",
+      "away": "45%"
+    }
+  },
+  "league": {
+    "id": 39,
+    "name": "Premier League",
+    "country": "England",
+    "logo": "https://media.api-sports.io/football/leagues/39.png",
+    "flag": "https://media.api-sports.io/flags/gb-eng.svg",
+    "season": 2025
+  },
+  "teams": {
+    "home": {
+      "id": 47,
+      "name": "Tottenham",
+      "logo": "https://media.api-sports.io/football/teams/47.png",
+      "last_5": {
+        "played": 5,
+        "form": "7%",
+        "att": "36%",
+        "def": "14%",
+        "goals": {
+          "for": {
+            "total": 5,
+            "average": "1.0"
+          },
+          "against": {
+            "total": 12,
+            "average": "2.4"
+          }
+        }
+      },
+      "league": {
+        "form": "WWLWDDWLWLDLLDWLLWDDLLDDLLLL",
+        "fixtures": {
+          "played": {
+            "home": 14,
+            "away": 14,
+            "total": 28
+          },
+          "wins": {
+            "home": 2,
+            "away": 5,
+            "total": 7
+          },
+          "draws": {
+            "home": 4,
+            "away": 4,
+            "total": 8
+          },
+          "loses": {
+            "home": 8,
+            "away": 5,
+            "total": 13
+          }
+        },
+        "goals": {
+          "for": {
+            "total": {
+              "home": 17,
+              "away": 21,
+              "total": 38
+            },
+            "average": {
+              "home": "1.2",
+              "away": "1.5",
+              "total": "1.4"
+            },
+            "minute": {
+              "0-15": {
+                "total": 3,
+                "percentage": "8.11%"
+              },
+              "16-30": {
+                "total": 4,
+                "percentage": "10.81%"
+              },
+              "31-45": {
+                "total": 8,
+                "percentage": "21.62%"
+              },
+              "46-60": {
+                "total": 7,
+                "percentage": "18.92%"
+              },
+              "61-75": {
+                "total": 6,
+                "percentage": "16.22%"
+              },
+              "76-90": {
+                "total": 9,
+                "percentage": "24.32%"
+              },
+              "91-105": {
+                "total": null,
+                "percentage": null
+              },
+              "106-120": {
+                "total": null,
+                "percentage": null
+              }
+            },
+            "under_over": {
+              "0.5": {
+                "over": 23,
+                "under": 5
+              },
+              "1.5": {
+                "over": 12,
+                "under": 16
+              },
+              "2.5": {
+                "over": 3,
+                "under": 25
+              },
+              "3.5": {
+                "over": 0,
+                "under": 28
+              },
+              "4.5": {
+                "over": 0,
+                "under": 28
+              }
+            }
+          },
+          "against": {
+            "total": {
+              "home": 22,
+              "away": 21,
+              "total": 43
+            },
+            "average": {
+              "home": "1.6",
+              "away": "1.5",
+              "total": "1.5"
+            },
+            "minute": {
+              "0-15": {
+                "total": 7,
+                "percentage": "15.91%"
+              },
+              "16-30": {
+                "total": 2,
+                "percentage": "4.55%"
+              },
+              "31-45": {
+                "total": 14,
+                "percentage": "31.82%"
+              },
+              "46-60": {
+                "total": 5,
+                "percentage": "11.36%"
+              },
+              "61-75": {
+                "total": 4,
+                "percentage": "9.09%"
+              },
+              "76-90": {
+                "total": 12,
+                "percentage": "27.27%"
+              },
+              "91-105": {
+                "total": null,
+                "percentage": null
+              },
+              "106-120": {
+                "total": null,
+                "percentage": null
+              }
+            },
+            "under_over": {
+              "0.5": {
+                "over": 21,
+                "under": 7
+              },
+              "1.5": {
+                "over": 16,
+                "under": 12
+              },
+              "2.5": {
+                "over": 4,
+                "under": 24
+              },
+              "3.5": {
+                "over": 2,
+                "under": 26
+              },
+              "4.5": {
+                "over": 0,
+                "under": 28
+              }
+            }
+          }
+        },
+        "biggest": {
+          "streak": {
+            "wins": 2,
+            "draws": 2,
+            "loses": 2
+          },
+          "wins": {
+            "home": "3-0",
+            "away": "0-3"
+          },
+          "loses": {
+            "home": "1-4",
+            "away": "4-1"
+          },
+          "goals": {
+            "for": {
+              "home": 3,
+              "away": 3
+            },
+            "against": {
+              "home": 4,
+              "away": 4
+            }
+          }
+        },
+        "clean_sheet": {
+          "home": 2,
+          "away": 5,
+          "total": 7
+        },
+        "failed_to_score": {
+          "home": 2,
+          "away": 3,
+          "total": 5
+        },
+        "penalty": {
+          "scored": {
+            "total": 0,
+            "percentage": "0%"
+          },
+          "missed": {
+            "total": 0,
+            "percentage": "0%"
+          },
+          "total": 0
+        },
+        "lineups": [
+          {
+            "formation": "4-2-3-1",
+            "played": 13
+          },
+          {
+            "formation": "4-3-3",
+            "played": 8
+          },
+          {
+            "formation": "3-4-2-1",
+            "played": 3
+          },
+          {
+            "formation": "4-2-2-2",
+            "played": 2
+          },
+          {
+            "formation": "3-5-2",
+            "played": 1
+          },
+          {
+            "formation": "4-4-2",
+            "played": 1
+          }
+        ],
+        "cards": {
+          "yellow": {
+            "0-15": {
+              "total": 3,
+              "percentage": "4.11%"
+            },
+            "16-30": {
+              "total": 8,
+              "percentage": "10.96%"
+            },
+            "31-45": {
+              "total": 11,
+              "percentage": "15.07%"
+            },
+            "46-60": {
+              "total": 13,
+              "percentage": "17.81%"
+            },
+            "61-75": {
+              "total": 19,
+              "percentage": "26.03%"
+            },
+            "76-90": {
+              "total": 10,
+              "percentage": "13.70%"
+            },
+            "91-105": {
+              "total": 9,
+              "percentage": "12.33%"
+            },
+            "106-120": {
+              "total": null,
+              "percentage": null
+            }
+          },
+          "red": {
+            "0-15": {
+              "total": null,
+              "percentage": null
+            },
+            "16-30": {
+              "total": 1,
+              "percentage": "33.33%"
+            },
+            "31-45": {
+              "total": 1,
+              "percentage": "33.33%"
+            },
+            "46-60": {
+              "total": null,
+              "percentage": null
+            },
+            "61-75": {
+              "total": null,
+              "percentage": null
+            },
+            "76-90": {
+              "total": null,
+              "percentage": null
+            },
+            "91-105": {
+              "total": 1,
+              "percentage": "33.33%"
+            },
+            "106-120": {
+              "total": null,
+              "percentage": null
+            }
+          }
+        }
+      }
+    },
+    "away": {
+      "id": 52,
+      "name": "Crystal Palace",
+      "logo": "https://media.api-sports.io/football/teams/52.png",
+      "last_5": {
+        "played": 5,
+        "form": "47%",
+        "att": "43%",
+        "def": "57%",
+        "goals": {
+          "for": {
+            "total": 6,
+            "average": "1.2"
+          },
+          "against": {
+            "total": 6,
+            "average": "1.2"
+          }
+        }
+      },
+      "league": {
+        "form": "DDWDWWLDLWDWLWWLLLDLDLLDWLWL",
+        "fixtures": {
+          "played": {
+            "home": 14,
+            "away": 14,
+            "total": 28
+          },
+          "wins": {
+            "home": 3,
+            "away": 6,
+            "total": 9
+          },
+          "draws": {
+            "home": 6,
+            "away": 2,
+            "total": 8
+          },
+          "loses": {
+            "home": 5,
+            "away": 6,
+            "total": 11
+          }
+        },
+        "goals": {
+          "for": {
+            "total": {
+              "home": 14,
+              "away": 16,
+              "total": 30
+            },
+            "average": {
+              "home": "1.0",
+              "away": "1.1",
+              "total": "1.1"
+            },
+            "minute": {
+              "0-15": {
+                "total": 2,
+                "percentage": "6.67%"
+              },
+              "16-30": {
+                "total": 5,
+                "percentage": "16.67%"
+              },
+              "31-45": {
+                "total": 9,
+                "percentage": "30.00%"
+              },
+              "46-60": {
+                "total": null,
+                "percentage": null
+              },
+              "61-75": {
+                "total": 7,
+                "percentage": "23.33%"
+              },
+              "76-90": {
+                "total": 7,
+                "percentage": "23.33%"
+              },
+              "91-105": {
+                "total": null,
+                "percentage": null
+              },
+              "106-120": {
+                "total": null,
+                "percentage": null
+              }
+            },
+            "under_over": {
+              "0.5": {
+                "over": 20,
+                "under": 8
+              },
+              "1.5": {
+                "over": 8,
+                "under": 20
+              },
+              "2.5": {
+                "over": 2,
+                "under": 26
+              },
+              "3.5": {
+                "over": 0,
+                "under": 28
+              },
+              "4.5": {
+                "over": 0,
+                "under": 28
+              }
+            }
+          },
+          "against": {
+            "total": {
+              "home": 18,
+              "away": 16,
+              "total": 34
+            },
+            "average": {
+              "home": "1.3",
+              "away": "1.1",
+              "total": "1.2"
+            },
+            "minute": {
+              "0-15": {
+                "total": 2,
+                "percentage": "5.88%"
+              },
+              "16-30": {
+                "total": null,
+                "percentage": null
+              },
+              "31-45": {
+                "total": 11,
+                "percentage": "32.35%"
+              },
+              "46-60": {
+                "total": 7,
+                "percentage": "20.59%"
+              },
+              "61-75": {
+                "total": 6,
+                "percentage": "17.65%"
+              },
+              "76-90": {
+                "total": 8,
+                "percentage": "23.53%"
+              },
+              "91-105": {
+                "total": null,
+                "percentage": null
+              },
+              "106-120": {
+                "total": null,
+                "percentage": null
+              }
+            },
+            "under_over": {
+              "0.5": {
+                "over": 18,
+                "under": 10
+              },
+              "1.5": {
+                "over": 10,
+                "under": 18
+              },
+              "2.5": {
+                "over": 5,
+                "under": 23
+              },
+              "3.5": {
+                "over": 1,
+                "under": 27
+              },
+              "4.5": {
+                "over": 0,
+                "under": 28
+              }
+            }
+          }
+        },
+        "biggest": {
+          "streak": {
+            "wins": 2,
+            "draws": 2,
+            "loses": 3
+          },
+          "wins": {
+            "home": "2-0",
+            "away": "0-3"
+          },
+          "loses": {
+            "home": "0-3",
+            "away": "4-1"
+          },
+          "goals": {
+            "for": {
+              "home": 3,
+              "away": 3
+            },
+            "against": {
+              "home": 3,
+              "away": 4
+            }
+          }
+        },
+        "clean_sheet": {
+          "home": 5,
+          "away": 5,
+          "total": 10
+        },
+        "failed_to_score": {
+          "home": 5,
+          "away": 3,
+          "total": 8
+        },
+        "penalty": {
+          "scored": {
+            "total": 5,
+            "percentage": "100.00%"
+          },
+          "missed": {
+            "total": 0,
+            "percentage": "0%"
+          },
+          "total": 5
+        },
+        "lineups": [
+          {
+            "formation": "3-4-2-1",
+            "played": 26
+          },
+          {
+            "formation": "3-4-3",
+            "played": 2
+          }
+        ],
+        "cards": {
+          "yellow": {
+            "0-15": {
+              "total": 5,
+              "percentage": "8.33%"
+            },
+            "16-30": {
+              "total": 4,
+              "percentage": "6.67%"
+            },
+            "31-45": {
+              "total": 11,
+              "percentage": "18.33%"
+            },
+            "46-60": {
+              "total": 12,
+              "percentage": "20.00%"
+            },
+            "61-75": {
+              "total": 11,
+              "percentage": "18.33%"
+            },
+            "76-90": {
+              "total": 11,
+              "percentage": "18.33%"
+            },
+            "91-105": {
+              "total": 6,
+              "percentage": "10.00%"
+            },
+            "106-120": {
+              "total": null,
+              "percentage": null
+            }
+          },
+          "red": {
+            "0-15": {
+              "total": null,
+              "percentage": null
+            },
+            "16-30": {
+              "total": null,
+              "percentage": null
+            },
+            "31-45": {
+              "total": null,
+              "percentage": null
+            },
+            "46-60": {
+              "total": 1,
+              "percentage": "50.00%"
+            },
+            "61-75": {
+              "total": 1,
+              "percentage": "50.00%"
+            },
+            "76-90": {
+              "total": null,
+              "percentage": null
+            },
+            "91-105": {
+              "total": null,
+              "percentage": null
+            },
+            "106-120": {
+              "total": null,
+              "percentage": null
+            }
+          }
+        }
+      }
+    }
+  },
+  "comparison": {
+    "form": {
+      "home": "13%",
+      "away": "88%"
+    },
+    "att": {
+      "home": "45%",
+      "away": "55%"
+    },
+    "def": {
+      "home": "33%",
+      "away": "67%"
+    },
+    "poisson_distribution": {
+      "home": "39%",
+      "away": "61%"
+    },
+    "h2h": {
+      "home": "60%",
+      "away": "40%"
+    },
+    "goals": {
+      "home": "55%",
+      "away": "45%"
+    },
+    "total": {
+      "home": "40.8%",
+      "away": "59.3%"
+    }
+  },
+  "h2h": [
+    {
+      "fixture": {
+        "id": 1379143,
+        "referee": "Jarred Gillett, Australia",
+        "timezone": "UTC",
+        "date": "2025-12-28T16:30:00+00:00",
+        "timestamp": 1766939400,
+        "periods": {
+          "first": 1766939400,
+          "second": 1766943000
+        },
+        "venue": {
+          "id": 525,
+          "name": "Selhurst Park",
+          "city": "London"
+        },
+        "status": {
+          "long": "Match Finished",
+          "short": "FT",
+          "elapsed": 90,
+          "extra": 8
+        }
+      },
+      "league": {
+        "id": 39,
+        "name": "Premier League",
+        "country": "England",
+        "logo": "https://media.api-sports.io/football/leagues/39.png",
+        "flag": "https://media.api-sports.io/flags/gb-eng.svg",
+        "season": 2025,
+        "round": "Regular Season - 18",
+        "standings": true
+      },
+      "teams": {
+        "home": {
+          "id": 52,
+          "name": "Crystal Palace",
+          "logo": "https://media.api-sports.io/football/teams/52.png",
+          "winner": false
+        },
+        "away": {
+          "id": 47,
+          "name": "Tottenham",
+          "logo": "https://media.api-sports.io/football/teams/47.png",
+          "winner": true
+        }
+      },
+      "goals": {
+        "home": 0,
+        "away": 1
+      },
+      "score": {
+        "halftime": {
+          "home": 0,
+          "away": 1
+        },
+        "fulltime": {
+          "home": 0,
+          "away": 1
+        },
+        "extratime": {
+          "home": null,
+          "away": null
+        },
+        "penalty": {
+          "home": null,
+          "away": null
+        }
+      }
+    },
+    {
+      "fixture": {
+        "id": 1208381,
+        "referee": "C. Kavanagh",
+        "timezone": "UTC",
+        "date": "2025-05-11T13:15:00+00:00",
+        "timestamp": 1746969300,
+        "periods": {
+          "first": 1746969300,
+          "second": 1746972900
+        },
+        "venue": {
+          "id": 593,
+          "name": "Tottenham Hotspur Stadium",
+          "city": "London"
+        },
+        "status": {
+          "long": "Match Finished",
+          "short": "FT",
+          "elapsed": 90,
+          "extra": 4
+        }
+      },
+      "league": {
+        "id": 39,
+        "name": "Premier League",
+        "country": "England",
+        "logo": "https://media.api-sports.io/football/leagues/39.png",
+        "flag": "https://media.api-sports.io/flags/gb-eng.svg",
+        "season": 2024,
+        "round": "Regular Season - 36",
+        "standings": true
+      },
+      "teams": {
+        "home": {
+          "id": 47,
+          "name": "Tottenham",
+          "logo": "https://media.api-sports.io/football/teams/47.png",
+          "winner": false
+        },
+        "away": {
+          "id": 52,
+          "name": "Crystal Palace",
+          "logo": "https://media.api-sports.io/football/teams/52.png",
+          "winner": true
+        }
+      },
+      "goals": {
+        "home": 0,
+        "away": 2
+      },
+      "score": {
+        "halftime": {
+          "home": 0,
+          "away": 1
+        },
+        "fulltime": {
+          "home": 0,
+          "away": 2
+        },
+        "extratime": {
+          "home": null,
+          "away": null
+        },
+        "penalty": {
+          "home": null,
+          "away": null
+        }
+      }
+    },
+    {
+      "fixture": {
+        "id": 1208108,
+        "referee": "D. Bond",
+        "timezone": "UTC",
+        "date": "2024-10-27T13:00:00+00:00",
+        "timestamp": 1730034000,
+        "periods": {
+          "first": 1730034000,
+          "second": 1730037600
+        },
+        "venue": {
+          "id": 525,
+          "name": "Selhurst Park",
+          "city": "London"
+        },
+        "status": {
+          "long": "Match Finished",
+          "short": "FT",
+          "elapsed": 90,
+          "extra": 8
+        }
+      },
+      "league": {
+        "id": 39,
+        "name": "Premier League",
+        "country": "England",
+        "logo": "https://media.api-sports.io/football/leagues/39.png",
+        "flag": "https://media.api-sports.io/flags/gb-eng.svg",
+        "season": 2024,
+        "round": "Regular Season - 9",
+        "standings": true
+      },
+      "teams": {
+        "home": {
+          "id": 52,
+          "name": "Crystal Palace",
+          "logo": "https://media.api-sports.io/football/teams/52.png",
+          "winner": true
+        },
+        "away": {
+          "id": 47,
+          "name": "Tottenham",
+          "logo": "https://media.api-sports.io/football/teams/47.png",
+          "winner": false
+        }
+      },
+      "goals": {
+        "home": 1,
+        "away": 0
+      },
+      "score": {
+        "halftime": {
+          "home": 1,
+          "away": 0
+        },
+        "fulltime": {
+          "home": 1,
+          "away": 0
+        },
+        "extratime": {
+          "home": null,
+          "away": null
+        },
+        "penalty": {
+          "home": null,
+          "away": null
+        }
+      }
+    },
+    {
+      "fixture": {
+        "id": 1035443,
+        "referee": "J. Brooks",
+        "timezone": "UTC",
+        "date": "2024-03-02T15:00:00+00:00",
+        "timestamp": 1709391600,
+        "periods": {
+          "first": 1709391600,
+          "second": 1709395200
+        },
+        "venue": {
+          "id": 593,
+          "name": "Tottenham Hotspur Stadium",
+          "city": "London"
+        },
+        "status": {
+          "long": "Match Finished",
+          "short": "FT",
+          "elapsed": 90,
+          "extra": null
+        }
+      },
+      "league": {
+        "id": 39,
+        "name": "Premier League",
+        "country": "England",
+        "logo": "https://media.api-sports.io/football/leagues/39.png",
+        "flag": "https://media.api-sports.io/flags/gb-eng.svg",
+        "season": 2023,
+        "round": "Regular Season - 27",
+        "standings": true
+      },
+      "teams": {
+        "home": {
+          "id": 47,
+          "name": "Tottenham",
+          "logo": "https://media.api-sports.io/football/teams/47.png",
+          "winner": true
+        },
+        "away": {
+          "id": 52,
+          "name": "Crystal Palace",
+          "logo": "https://media.api-sports.io/football/teams/52.png",
+          "winner": false
+        }
+      },
+      "goals": {
+        "home": 3,
+        "away": 1
+      },
+      "score": {
+        "halftime": {
+          "home": 0,
+          "away": 0
+        },
+        "fulltime": {
+          "home": 3,
+          "away": 1
+        },
+        "extratime": {
+          "home": null,
+          "away": null
+        },
+        "penalty": {
+          "home": null,
+          "away": null
+        }
+      }
+    },
+    {
+      "fixture": {
+        "id": 1035132,
+        "referee": "A. Madley",
+        "timezone": "UTC",
+        "date": "2023-10-27T19:00:00+00:00",
+        "timestamp": 1698433200,
+        "periods": {
+          "first": 1698433200,
+          "second": 1698436800
+        },
+        "venue": {
+          "id": 525,
+          "name": "Selhurst Park",
+          "city": "London"
+        },
+        "status": {
+          "long": "Match Finished",
+          "short": "FT",
+          "elapsed": 90,
+          "extra": null
+        }
+      },
+      "league": {
+        "id": 39,
+        "name": "Premier League",
+        "country": "England",
+        "logo": "https://media.api-sports.io/football/leagues/39.png",
+        "flag": "https://media.api-sports.io/flags/gb-eng.svg",
+        "season": 2023,
+        "round": "Regular Season - 10",
+        "standings": true
+      },
+      "teams": {
+        "home": {
+          "id": 52,
+          "name": "Crystal Palace",
+          "logo": "https://media.api-sports.io/football/teams/52.png",
+          "winner": false
+        },
+        "away": {
+          "id": 47,
+          "name": "Tottenham",
+          "logo": "https://media.api-sports.io/football/teams/47.png",
+          "winner": true
+        }
+      },
+      "goals": {
+        "home": 1,
+        "away": 2
+      },
+      "score": {
+        "halftime": {
+          "home": 0,
+          "away": 0
+        },
+        "fulltime": {
+          "home": 1,
+          "away": 2
+        },
+        "extratime": {
+          "home": null,
+          "away": null
+        },
+        "penalty": {
+          "home": null,
+          "away": null
+        }
+      }
+    },
+    {
+      "fixture": {
+        "id": 868293,
+        "referee": "D. England",
+        "timezone": "UTC",
+        "date": "2023-05-06T14:00:00+00:00",
+        "timestamp": 1683381600,
+        "periods": {
+          "first": 1683381600,
+          "second": 1683385200
+        },
+        "venue": {
+          "id": 593,
+          "name": "Tottenham Hotspur Stadium",
+          "city": "London"
+        },
+        "status": {
+          "long": "Match Finished",
+          "short": "FT",
+          "elapsed": 90,
+          "extra": null
+        }
+      },
+      "league": {
+        "id": 39,
+        "name": "Premier League",
+        "country": "England",
+        "logo": "https://media.api-sports.io/football/leagues/39.png",
+        "flag": "https://media.api-sports.io/flags/gb-eng.svg",
+        "season": 2022,
+        "round": "Regular Season - 35",
+        "standings": true
+      },
+      "teams": {
+        "home": {
+          "id": 47,
+          "name": "Tottenham",
+          "logo": "https://media.api-sports.io/football/teams/47.png",
+          "winner": true
+        },
+        "away": {
+          "id": 52,
+          "name": "Crystal Palace",
+          "logo": "https://media.api-sports.io/football/teams/52.png",
+          "winner": false
+        }
+      },
+      "goals": {
+        "home": 1,
+        "away": 0
+      },
+      "score": {
+        "halftime": {
+          "home": 1,
+          "away": 0
+        },
+        "fulltime": {
+          "home": 1,
+          "away": 0
+        },
+        "extratime": {
+          "home": null,
+          "away": null
+        },
+        "penalty": {
+          "home": null,
+          "away": null
+        }
+      }
+    },
+    {
+      "fixture": {
+        "id": 868130,
+        "referee": "M. Oliver",
+        "timezone": "UTC",
+        "date": "2023-01-04T20:00:00+00:00",
+        "timestamp": 1672862400,
+        "periods": {
+          "first": 1672862400,
+          "second": 1672866000
+        },
+        "venue": {
+          "id": 525,
+          "name": "Selhurst Park",
+          "city": "London"
+        },
+        "status": {
+          "long": "Match Finished",
+          "short": "FT",
+          "elapsed": 90,
+          "extra": null
+        }
+      },
+      "league": {
+        "id": 39,
+        "name": "Premier League",
+        "country": "England",
+        "logo": "https://media.api-sports.io/football/leagues/39.png",
+        "flag": "https://media.api-sports.io/flags/gb-eng.svg",
+        "season": 2022,
+        "round": "Regular Season - 19",
+        "standings": true
+      },
+      "teams": {
+        "home": {
+          "id": 52,
+          "name": "Crystal Palace",
+          "logo": "https://media.api-sports.io/football/teams/52.png",
+          "winner": false
+        },
+        "away": {
+          "id": 47,
+          "name": "Tottenham",
+          "logo": "https://media.api-sports.io/football/teams/47.png",
+          "winner": true
+        }
+      },
+      "goals": {
+        "home": 0,
+        "away": 4
+      },
+      "score": {
+        "halftime": {
+          "home": 0,
+          "away": 0
+        },
+        "fulltime": {
+          "home": 0,
+          "away": 4
+        },
+        "extratime": {
+          "home": null,
+          "away": null
+        },
+        "penalty": {
+          "home": null,
+          "away": null
+        }
+      }
+    },
+    {
+      "fixture": {
+        "id": 710743,
+        "referee": "J. Moss",
+        "timezone": "UTC",
+        "date": "2021-12-26T15:00:00+00:00",
+        "timestamp": 1640530800,
+        "periods": {
+          "first": 1640530800,
+          "second": 1640534400
+        },
+        "venue": {
+          "id": 593,
+          "name": "Tottenham Hotspur Stadium",
+          "city": "London"
+        },
+        "status": {
+          "long": "Match Finished",
+          "short": "FT",
+          "elapsed": 90,
+          "extra": null
+        }
+      },
+      "league": {
+        "id": 39,
+        "name": "Premier League",
+        "country": "England",
+        "logo": "https://media.api-sports.io/football/leagues/39.png",
+        "flag": "https://media.api-sports.io/flags/gb-eng.svg",
+        "season": 2021,
+        "round": "Regular Season - 19",
+        "standings": true
+      },
+      "teams": {
+        "home": {
+          "id": 47,
+          "name": "Tottenham",
+          "logo": "https://media.api-sports.io/football/teams/47.png",
+          "winner": true
+        },
+        "away": {
+          "id": 52,
+          "name": "Crystal Palace",
+          "logo": "https://media.api-sports.io/football/teams/52.png",
+          "winner": false
+        }
+      },
+      "goals": {
+        "home": 3,
+        "away": 0
+      },
+      "score": {
+        "halftime": {
+          "home": 2,
+          "away": 0
+        },
+        "fulltime": {
+          "home": 3,
+          "away": 0
+        },
+        "extratime": {
+          "home": null,
+          "away": null
+        },
+        "penalty": {
+          "home": null,
+          "away": null
+        }
+      }
+    },
+    {
+      "fixture": {
+        "id": 710589,
+        "referee": "J. Moss",
+        "timezone": "UTC",
+        "date": "2021-09-11T11:30:00+00:00",
+        "timestamp": 1631359800,
+        "periods": {
+          "first": 1631359800,
+          "second": 1631363400
+        },
+        "venue": {
+          "id": 525,
+          "name": "Selhurst Park",
+          "city": "London"
+        },
+        "status": {
+          "long": "Match Finished",
+          "short": "FT",
+          "elapsed": 90,
+          "extra": null
+        }
+      },
+      "league": {
+        "id": 39,
+        "name": "Premier League",
+        "country": "England",
+        "logo": "https://media.api-sports.io/football/leagues/39.png",
+        "flag": "https://media.api-sports.io/flags/gb-eng.svg",
+        "season": 2021,
+        "round": "Regular Season - 4",
+        "standings": true
+      },
+      "teams": {
+        "home": {
+          "id": 52,
+          "name": "Crystal Palace",
+          "logo": "https://media.api-sports.io/football/teams/52.png",
+          "winner": true
+        },
+        "away": {
+          "id": 47,
+          "name": "Tottenham",
+          "logo": "https://media.api-sports.io/football/teams/47.png",
+          "winner": false
+        }
+      },
+      "goals": {
+        "home": 3,
+        "away": 0
+      },
+      "score": {
+        "halftime": {
+          "home": 0,
+          "away": 0
+        },
+        "fulltime": {
+          "home": 3,
+          "away": 0
+        },
+        "extratime": {
+          "home": null,
+          "away": null
+        },
+        "penalty": {
+          "home": null,
+          "away": null
+        }
+      }
+    }
+  ]
+}
