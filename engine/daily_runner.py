@@ -391,10 +391,20 @@ def run_once():
             logger.success(f"  ✅ {fx['home']}vs{fx['away']}: 推{edge['outcome']} "
                   f"odds={edge['odds']:.2f} edge={edge['edge']*100:+.1f}%")
 
+    # 按 EV 排序，全部推荐（不限场次），同联赛最多2场
     recommendations.sort(key=lambda x: -x["edge"]["ev"])
+    # 同联赛去重：每天每联赛最多2场
+    lg_count = {}
+    final_recs = []
+    for rec in recommendations:
+        lg = rec["fixture"]["league_name"]
+        lg_count[lg] = lg_count.get(lg, 0) + 1
+        if lg_count[lg] <= 2:
+            final_recs.append(rec)
+    recommendations = final_recs
 
     logger.info(f"[6/7] 生成日报...")
-    report = generate_report(fixtures, recommendations[:3])
+    report = generate_report(fixtures, recommendations)
     report_path = REPORT_DIR / f"daily_{date.today().strftime('%Y%m%d')}.md"
     with open(report_path, "w") as f:
         f.write(report)
@@ -406,7 +416,7 @@ def run_once():
 
     # 保存
     pred_save = []
-    for rec in recommendations[:3]:
+    for rec in recommendations:
         fx = rec["fixture"]
         edge = rec["edge"]
         pred_save.append({
