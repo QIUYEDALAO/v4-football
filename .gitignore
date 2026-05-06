@@ -34,7 +34,8 @@ logs/
 *.bak
 *.tmp
 
-# 个人数据
+# 数据文件（不上传）
+v2_football_quant/data/
 memory/
 data/
 投注资金日报表.*
