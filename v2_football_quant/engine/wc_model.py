@@ -1,157 +1,226 @@
 """
-世界杯独立评分模型 v1.0 (MVP — 数据诚实版)
-=============================================
-仅使用可自动获取、可验证的 3 维度。
+V3 世界杯模型: Elo + 身价认知套利引擎
+======================================
+核心假设:
+1. Elo 分差 → 基准胜率 (唯一数学依据)
+2. 身价偏差 → 公众认知泡沫 (Perception Gap)
+3. 淘汰赛 + 保守主帅 → 平局概率上修
 
-核心公式：
-  raw_score = stage_weight * 0.40           ← 淘汰赛权重远大于小组赛
-            + att_signal * 0.35             ← 进攻信号 (Predictions API)
-            + def_weakness * 0.25           ← 防守漏洞 (Predictions API)
-            × cross_conf_bonus              ← 跨洲加成 (欧洲vs亚非)
-
-禁用维度：行程疲劳、核心缺阵 → 留给人工审核环节
-冻结日期：2026-05-05，世界杯前不再动
+零依赖 API-Football 近期数据，纯靠客观实力指标定价。
 """
 
 import json
+import math
+from pathlib import Path
+from datetime import datetime
+
+BASE_DIR = Path(__file__).resolve().parent
+DATA_DIR = BASE_DIR.parent / "data" / "deep"
+
+# 暂时导入估值数据 (后续整合到 JSON)
+import sys
+sys.path.insert(0, str(BASE_DIR / "data_sources"))
+from team_values import TEAM_MARKET_VALUES as VALUES, get_value_rank
+from elo_scraper import fetch_elo_ratings
+
+# 保守主帅 = 淘汰赛阶段平局概率加成 (人工标注)
+CONSERVATIVE_MANAGERS = {
+    "FR": 8, "EN": 7, "HR": 8, "DK": 7, "CH": 7,
+    "RS": 6, "PL": 6, "IR": 8, "DE": 5, "IT": 7, "PT": 6,
+}
+DEFAULT_CONSERVATIVE = 4
+
+# 淘汰赛平局修正系数
+KO_DRAW_BOOST = 0.08
 
 
-def stage_weight(stage: str) -> float:
-    return {
-        "group": 0.85,
-        "round16": 1.15,
-        "quarter": 1.20,
-        "semi": 1.25,
-        "final": 1.20,
-        "3rd_place": 1.30,
-    }.get(stage, 1.0)
+def load_wc_elo() -> dict:
+    """加载或抓取 W杯球队 Elo"""
+    path = DATA_DIR / "wc2026_elo.json"
+    if path.exists():
+        with open(path) as f:
+            data = json.load(f)
+        return {t["code"]: t for t in data.get("teams", [])}
+    ratings = fetch_elo_ratings()
+    # 过滤WC参赛队
+    from elo_scraper import WC2026_TEAMS
+    return {c: r for c, r in ratings.items() if c in WC2026_TEAMS}
 
 
-def zero_zero_threshold(stage: str) -> float:
-    """0-0防守触发阈值"""
-    return 0.40 if stage == "group" else 0.25
-
-
-def cross_conf_bonus(home_conf: str, away_conf: str) -> float:
-    """欧洲队 vs 亚洲/非洲队 → 上半场碾压概率高"""
-    eur = "UEFA" in (home_conf, away_conf)
-    other = any(c in (home_conf, away_conf) for c in ["AFC", "CAF", "OFC"])
-    return 1.15 if eur and other else 1.0
-
-
-def score_wc(fixture: dict, predictions: dict) -> dict:
+def elo_to_win_prob(elo_a: float, elo_b: float) -> tuple:
     """
-    世界杯单场评分。
+    Elo → 胜率转换 (标准 400 分差公式)
+    
+    返回: (home_win, draw, away_win) 概率三元组
+    """
+    diff = elo_a - elo_b
+    # 主队胜率 (含主场优势 ~100 Elo)
+    we = 1.0 / (math.pow(10, -diff / 400) + 1)
+    
+    # 平局概率估算 (基于 Elo 分差)
+    draw = max(0.15, 0.30 - abs(diff) / 1500)
+    
+    # 分配剩余概率
+    home_win = we * (1 - draw)
+    away_win = (1 - we) * (1 - draw)
+    
+    return round(home_win, 4), round(draw, 4), round(away_win, 4)
+
+
+def calc_perception_gap(home_code: str, away_code: str) -> float:
+    """
+    公众认知偏差指数 (Perception Gap)
+    
+    正值 = 散户过度看好主队 (主队名气 > 实力)
+    负值 = 散户过度看好客队
+    """
+    elo = load_wc_elo()
+    
+    elo_h = elo.get(home_code, {}).get("rating", 1500)
+    elo_a = elo.get(away_code, {}).get("rating", 1500)
+    val_h = VALUES.get(home_code, 1.0)
+    val_a = VALUES.get(away_code, 1.0)
+    
+    # Elo差 vs 身价差的比值 — 比值偏离1越大, 认知偏差越大
+    if val_a == 0:
+        return 0.0
+    
+    elo_ratio = elo_h / max(elo_a, 1)
+    val_ratio = val_h / max(val_a, 0.1)
+    
+    # 正值 = 人气溢价 (散户多买主队)
+    gap = round(val_ratio / max(elo_ratio, 0.5) - 1, 4)
+    return gap
+
+
+def calc_ft_draw_edge(
+    home_code: str, away_code: str, 
+    market_odds: dict = None,
+    stage: str = "group",
+) -> dict | None:
+    """
+    V3 全场平局分析 (世界杯专用)
     
     Args:
-        fixture: fixtures_list 条目 {home, away, round, htHome, htAway, ...}
-        predictions: predictions API 响应 dict
+        market_odds: {"H": 2.50, "D": 3.20, "A": 2.80} 或 None (理论值)
+        stage: "group" | "ko16" | "ko8" | "final"
     
     Returns:
-        {total_score, recommended, stage, ...}
+        Edge 分析结果, 或 None (无信号)
     """
-    # ——— 提取特征 ———
-    teams = predictions.get("teams", {}) or {}
-    home = teams.get("home", {}) or {}
-    away = teams.get("away", {}) or {}
-
-    att_h = float(str(home.get("last_5", {}).get("att", "50")).rstrip("%") or 50)
-    att_a = float(str(away.get("last_5", {}).get("att", "50")).rstrip("%") or 50)
-    def_h = float(str(home.get("last_5", {}).get("def", "50")).rstrip("%") or 50)
-    def_a = float(str(away.get("last_5", {}).get("def", "50")).rstrip("%") or 50)
-
-    att_signal = ((att_h + att_a) / 2) / 100
-    def_weakness = ((def_h + def_a) / 2) / 100
-
-    # ——— 赛制解析 ———
-    round_raw = fixture.get("round", "").lower()
-    if "round" in round_raw:
-        stage = "round16"
-    elif "quarter" in round_raw:
-        stage = "quarter"
-    elif "semi" in round_raw:
-        stage = "semi"
-    elif "final" in round_raw and "3rd" not in round_raw:
-        stage = "final"
-    elif "3rd" in round_raw:
-        stage = "3rd_place"
+    elo = load_wc_elo()
+    elo_h = elo.get(home_code, {}).get("rating", 1500)
+    elo_a = elo.get(away_code, {}).get("rating", 1500)
+    
+    # 1. Elo 基准概率
+    hw, draw_prob, aw = elo_to_win_prob(elo_h, elo_a)
+    
+    # 2. 淘汰赛平局加成
+    if stage != "group":
+        h_mgr = CONSERVATIVE_MANAGERS.get(home_code, DEFAULT_CONSERVATIVE)
+        a_mgr = CONSERVATIVE_MANAGERS.get(away_code, DEFAULT_CONSERVATIVE)
+        mgr_boost = (h_mgr + a_mgr) / 20 * KO_DRAW_BOOST
+        draw_prob = min(0.50, draw_prob + mgr_boost)
+    
+    # 3. Perception Gap — 公众情绪套利
+    gap = calc_perception_gap(home_code, away_code)
+    
+    # 4. Edge vs 市场
+    if market_odds and "D" in market_odds:
+        implied_prob = 1 / market_odds["D"]
+        edge = draw_prob - implied_prob
     else:
-        stage = "group"
-
-    sw = stage_weight(stage)
-    zz = zero_zero_threshold(stage)
-    cb = cross_conf_bonus("UEFA", "CONMEBOL")  # 简化：可后续接入 confederation API
-
-    # ——— 评分 ———
-    raw = (sw * 0.40 + att_signal * 0.35 + def_weakness * 0.25) * cb
-    total_score = round(raw * 100, 1)
-
-    # 0-0 防守
-    if att_signal < zz:
-        total_score = min(total_score, 40)
-
-    # 动态阈值
-    threshold = 62 if stage == "group" else 58
-    recommended = total_score >= threshold
-
-    # 实际赛果
-    ht_goals = (fixture.get("htHome", 0) or 0) + (fixture.get("htAway", 0) or 0)
-
-    return {
-        "fixture_id": fixture.get("id"),
-        "home": fixture.get("home", ""),
-        "away": fixture.get("away", ""),
+        edge = None  # 无市场赔率，仅输出理论概率
+    
+    result = {
+        "home": elo.get(home_code, {}).get("name", home_code),
+        "away": elo.get(away_code, {}).get("name", away_code),
+        "elo_h": elo_h, "elo_a": elo_a,
+        "draw_prob": round(draw_prob, 4),
         "stage": stage,
-        "total_score": total_score,
-        "threshold": threshold,
-        "recommended": recommended,
-        "stage_weight": sw,
-        "att_signal": round(att_signal * 100),
-        "def_weakness": round(def_weakness * 100),
-        "actual_ht_goals": ht_goals,
+        "perception_gap": gap,
+        "perception_gap_label": (
+            "🔥 散户重度做多主队" if gap > 0.5 else
+            "⚠️ 散户偏多主队" if gap > 0.2 else
+            "均衡" if abs(gap) < 0.2 else
+            "⚠️ 散户偏多客队"
+        ),
+    }
+    
+    if market_odds and "D" in market_odds:
+        result["market_odds"] = market_odds["D"]
+        result["edge"] = round(edge, 4)
+        result["action"] = "BUY DRAW" if edge > 0.05 else "PASS"
+    
+    return result
+
+
+def strategy_a_underdog_ah(home_code: str, away_code: str) -> dict | None:
+    """
+    策略 A: 受让亚盘套利
+    
+    当 Perception Gap 极高时 (散户疯狂买强队) → 买入弱队亚洲盘
+    """
+    gap = calc_perception_gap(home_code, away_code)
+    elo = load_wc_elo()
+    
+    home_name = elo.get(home_code, {}).get("name", home_code)
+    away_name = elo.get(away_code, {}).get("name", away_code)
+    elo_h = elo.get(home_code, {}).get("rating", 1500)
+    elo_a = elo.get(away_code, {}).get("rating", 1500)
+    
+    # 散户溢价方向判断
+    if gap > 0.5:  # 散户过度买主队
+        target = "away"
+        target_name = away_name
+        handicap = "+1.5" if abs(elo_h - elo_a) > 200 else "+1.25"
+    elif gap < -0.3:  # 散户过度买客队
+        target = "home"
+        target_name = home_name
+        handicap = "+1.5" if abs(elo_h - elo_a) > 200 else "+1.25"
+    else:
+        return None  # Gap不够大
+    
+    return {
+        "home": home_name, "away": away_name,
+        "perception_gap": gap,
+        "target": target, "target_name": target_name,
+        "handicap": handicap,
+        "action": f"BUY {target_name} AH {handicap}",
     }
 
 
-def batch_score(fixtures: list, predictions_map: dict) -> list[dict]:
-    results = []
-    for fx in fixtures:
-        pred = predictions_map.get(str(fx.get("id"))) or predictions_map.get(fx.get("id", 0))
-        if pred is None:
-            continue
-        results.append(score_wc(fx, pred))
-    return results
-
-
-# ===== 验证 =====
+# ==========================================
+# 🧪 测试
+# ==========================================
 if __name__ == "__main__":
-    import sys
-    from pathlib import Path
-
-    WC_DIR = Path(__file__).parent.parent / "data" / "worldcup"
-    RAW_DIR = Path(__file__).parent.parent / "data" / "raw_fixtures"
-
-    with open(WC_DIR / "fixtures_list.json") as f:
-        fixtures = json.load(f)
-
-    preds = {}
-    for fx in fixtures:
-        pp = RAW_DIR / "wc_predictions" / f"{fx['id']}.json"
-        if pp.exists():
-            with open(pp) as f:
-                preds[fx["id"]] = json.load(f)
-
-    results = batch_score(fixtures, preds)
-
-    rec = [r for r in results if r["recommended"]]
-    hit = [r for r in rec if r["actual_ht_goals"] > 0]
-
-    print(f"世界杯模型 v1.0 回测")
-    print(f"  总场次: {len(results)}")
-    print(f"  推荐: {len(rec)} 场")
-    print(f"  命中: {len(hit)}/{len(rec)} = {len(hit)/len(rec)*100:.1f}%" if rec else "N/A")
-
-    for stage in ["group", "round16", "quarter", "semi", "final", "3rd_place"]:
-        st = [r for r in rec if r["stage"] == stage]
-        ht = [r for r in st if r["actual_ht_goals"] > 0]
-        if st:
-            print(f"    {stage}: {len(ht)}/{len(st)} = {len(ht)/len(st)*100:.0f}%")
+    print("🧪 V3 W杯模型 沙盘推演\n")
+    
+    # 测试1: 小组赛
+    print("=== 测试1: 小组赛 英格兰 vs 日本 ===")
+    r = calc_ft_draw_edge("EN", "JP", stage="group")
+    print(f"  平局概率: {r['draw_prob']:.1%}")
+    print(f"  认知偏差: {r['perception_gap_label']} (gap={r['perception_gap']:.2f})")
+    
+    # 测试2: 淘汰赛 (保守主帅对决)
+    print("\n=== 测试2: 淘汰赛 法国 vs 克罗地亚 ===")
+    r2 = calc_ft_draw_edge("FR", "HR", stage="ko16")
+    print(f"  平局概率: {r2['draw_prob']:.1%}")
+    print(f"  阶段加成: {'是' if r2['draw_prob'] > 0.28 else '否'}")
+    
+    # 测试3: 策略A 亚盘套利
+    print("\n=== 测试3: 亚盘套利 英格兰 vs 日本 ===")
+    a = strategy_a_underdog_ah("EN", "JP")
+    if a:
+        print(f"  {a['action']}")
+        print(f"  Gap={a['perception_gap']:.2f}")
+    else:
+        print("  无信号 (Gap不足)")
+    
+    # 测试4: 巴西 vs 阿根廷
+    print("\n=== 测试4: 巴西 vs 阿根廷 ===")
+    r4 = calc_ft_draw_edge("BR", "AR", stage="final")
+    print(f"  平局概率: {r4['draw_prob']:.1%}")
+    print(f"  认知偏差: {r4['perception_gap_label']}")
+    
+    print("\n✅ V3 模型沙盘测试完成")
