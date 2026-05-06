@@ -157,12 +157,12 @@ def calc_ft_draw_edge(
 
 
 def strategy_a_underdog_ah(home_code: str, away_code: str,
-                            ah_market_odds: float = None) -> dict | None:
+                            market_odds: dict = None) -> dict | None:
     """
     策略 A: 受让亚盘套利（对数 Gap 版）
     
     Perception Gap 极高 → 买入弱队亚洲盘。
-    必须对比市场赔率，避免负EV盲买。
+    market_odds: {"ah_line": "+1.25", "ah_odds": 2.10}
     """
     gap = calc_perception_gap(home_code, away_code)
     elo = load_wc_elo()
@@ -171,6 +171,10 @@ def strategy_a_underdog_ah(home_code: str, away_code: str,
     away_name = elo.get(away_code, {}).get("name", away_code)
     elo_h = elo.get(home_code, {}).get("rating", 1500)
     elo_a = elo.get(away_code, {}).get("rating", 1500)
+    
+    odds = market_odds or {}
+    ah_line = odds.get("ah_line", "+1.25")
+    ah_odds = odds.get("ah_odds", 0.0)
     
     # 对数 Gap 统一阈值: abs(gap) > 0.8
     if gap > 0.8:
@@ -183,10 +187,10 @@ def strategy_a_underdog_ah(home_code: str, away_code: str,
         return None
     
     # 风控: 不能盲买！下盘赔率 < 1.85 → 庄家已消化泡沫
-    if ah_market_odds is not None and ah_market_odds < 1.85:
+    if ah_odds and ah_odds < 1.85:
         return {
             "action": "PASS",
-            "reason": f"AH odds {ah_market_odds} too low, no edge",
+            "reason": f"AH odds {ah_odds} too low, no edge",
             "perception_gap": gap,
         }
     
@@ -196,31 +200,30 @@ def strategy_a_underdog_ah(home_code: str, away_code: str,
         "target": target, "target_name": target_name,
         "handicap": handicap,
         "action": f"BUY {target_name} AH {handicap}",
-        "market_odds": ah_market_odds,
+        "market_odds": ah_odds,
     }
 
 
 # ==========================================
-# 🎯 V3 阶段防火墙 (Stage Firewall)
+# 🎯 V3 阶段防火墙 (Stage Firewall) — 统一 market_odds dict 接口
 # ==========================================
 
 def evaluate_wc_fixture(home_code: str, away_code: str, stage: str = "group",
-                        matchday: int = 1, market_odds: dict = None,
-                        ah_market_odds: float = None) -> dict | None:
+                        matchday: int = 1, market_odds: dict = None) -> dict | None:
     """
-    V3 世界杯终极路由：三段阶段隔离 + 市场赔率对抗
+    V3 世界杯终极路由。
     
-    回测依据（2022世界杯）:
-    - 前两轮 AH: 66.7%  (弱队摆大巴抢分)
-    - 第三轮: 强制平局 (默契局博弈论盲区)
-    - 淘汰赛: 平局狙击 (强队打穿,不碰AH)
+    统一接口: market_odds = {"ah_line": "+1.25", "ah_odds": 2.10, "draw_odds": 3.20}
+    策略路由器只需传 dict，不需要拆解参数。
     """
     KO_STAGES = ["ko16", "ko8", "qf", "sf", "semi", "final", "3rd"]
     
     if stage == "group":
         if matchday == 3:
-            return calc_ft_draw_edge(home_code, away_code, market_odds, "group")
-        return strategy_a_underdog_ah(home_code, away_code, ah_market_odds)
+            return {"home": home_code, "away": away_code,
+                    "action": "PASS",
+                    "reason": "小组赛第三轮，模型强制回避默契球博弈"}
+        return strategy_a_underdog_ah(home_code, away_code, market_odds)
     elif stage in KO_STAGES:
         return calc_ft_draw_edge(home_code, away_code, market_odds, stage)
     return None
