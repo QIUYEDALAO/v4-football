@@ -38,6 +38,33 @@
 - 样本外积累优先 → 几十场后才 --summary
 - 所有规则以代码为准，MEMORY 仅作记录
 
+## 🚀 V3/V4 多策略系统（2026-05-06 晚建成）
+
+### 架构
+- **Strategy Router** (`strategy_router.py`): 三路分发 V2(次级) / V3(W杯) / V4(五大)
+- 开闭原则: 新模型独立接入，不改 daily_runner
+
+### Phase 0-3 完成（17/30任务）
+- ✅ Phase 0: 基础设施（配置/映射/Git）
+- ✅ Phase 1: 策略路由框架
+- ✅ Phase 2A: API-Football深挖（Proxy xG + 战力折损引擎 + 核心球员权重库12队）
+- 🔒 Phase 2B: FotMob — Killed by Cloudflare Turnstile
+- ✅ Phase 3: V3世界杯引擎（Elo + Perception Gap + 亚盘套利 + 淘汰赛平局）
+- 🔒 Phase 4: V4 五大联赛 — Paused until Aug
+
+### 关键文件
+- `engine/strategy_router.py` — 路由分发器
+- `engine/wc_model.py` — W杯 Elo模型（测试通过: 英vs日 BUY Japan AH+1.25）
+- `engine/data_sources/elo_scraper.py` — Elo积分爬虫
+- `engine/data_sources/proxy_xg_engine.py` — 伪xG引擎
+- `engine/data_sources/apifootball_deep.py` — 伤停+首发+战力折损
+- `config/core_players_weight.json` — 12队核心球员权重
+
+### 三轮Code Review共修复9个Bug
+- R1: Stake丢失/NoneType/旧纸盘
+- R2: Kelly摧毁/平局误杀/收盘真空
+- R3: 双发请求缓存/死代码/密钥硬编码→环境变量
+
 ## 🏗️ 系统配置
 - 模型：deepseek-v4-flash（默认）/ v4-pro（重型）
 - 通道：QQ Bot (ON) | 微信 (已弃)
