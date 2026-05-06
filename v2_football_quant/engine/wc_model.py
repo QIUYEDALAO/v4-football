@@ -197,17 +197,20 @@ def strategy_a_underdog_ah(home_code: str, away_code: str) -> dict | None:
 def evaluate_wc_fixture(home_code: str, away_code: str, stage: str = "group",
                         market_odds: dict = None) -> dict | None:
     """
-    V3 世界杯终极路由：基于回测数据的阶段隔离策略
+    V3 世界杯终极路由：三段阶段隔离策略
     
     回测依据（2022世界杯）:
-    - 小组赛 AH: 8/12 = 66.7%  (弱队摆大巴抢分)
-    - 淘汰赛 AH: 2/9  = 22.2%  (强队打穿深盘)
-    - 淘汰赛 Draw: 4/10 = 40%  (顶级强队互啄)
+    - 小组赛前两轮 AH: 66.7%  (弱队摆大巴抢分)
+    - 小组赛第三轮: 强制平局 (默契局/博弈论盲区)
+    - 淘汰赛: 平局狙击 (强队打穿,不碰AH)
     """
     KO_STAGES = ["ko16", "ko8", "qf", "sf", "semi", "final", "3rd"]
     
     if stage == "group":
         return strategy_a_underdog_ah(home_code, away_code)
+    elif stage == "group_3":
+        # 第三轮默契局：只做平局，不做 AH
+        return calc_ft_draw_edge(home_code, away_code, market_odds, "group")
     elif stage in KO_STAGES:
         return calc_ft_draw_edge(home_code, away_code, market_odds, stage)
     return None
