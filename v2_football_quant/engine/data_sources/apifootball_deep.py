@@ -13,7 +13,9 @@ from pathlib import Path
 from datetime import datetime
 from typing import Optional
 
-API_KEY = "e5e315b1f9ba1ba51dc2124b35f07a01"
+import os
+
+API_KEY = os.getenv("APIFOOTBALL_KEY", "your-api-key-here")
 API_HOST = "https://v3.football.api-sports.io"
 BASE_DIR = Path(__file__).resolve().parent.parent.parent  # engine/data_sources/ → engine/ → root/
 
@@ -82,6 +84,7 @@ class LineupArbitrageEngine:
 
     def __init__(self, weights_path: str = None):
         self.weights_db = self._load_weights(weights_path)
+        self._lineup_cache = {}  # 内存缓存，一场比赛只拉一次
 
     def _load_weights(self, path: str = None) -> dict:
         path = path or str(BASE_DIR / "config" / "core_players_weight.json")
@@ -92,10 +95,14 @@ class LineupArbitrageEngine:
             return {}
 
     def fetch_fixture_lineup(self, fixture_id: int) -> dict:
-        """拉取赛前1小时首发阵容 (endpoint: /fixtures/lineups)"""
-        # /fixtures/lineups?fixture=X 格式
+        """拉取赛前1小时首发阵容 (带内存缓存)"""
+        if fixture_id in self._lineup_cache:
+            return self._lineup_cache[fixture_id]
+
         lineups_data = api_request(f"fixtures/lineups?fixture={fixture_id}")
-        return lineups_data.get("response", [])
+        data = lineups_data.get("response", [])
+        self._lineup_cache[fixture_id] = data
+        return data
 
     def calculate_dropoff_index(self, fixture_id: int, team_id: int) -> dict:
         """

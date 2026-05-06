@@ -287,9 +287,6 @@ def calc_edge(fx: dict) -> Optional[dict]:
             if best is None or candidate["ev"] > best["ev"]:
                 best = candidate
     
-    if best and best["outcome"] == "A" and best["odds"] > 4.0:
-        best = None
-
     return best
 
 
