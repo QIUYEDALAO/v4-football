@@ -174,10 +174,12 @@ def calc_spread(fx: dict) -> float:
     home = teams.get("home", {}) or {}
     away = teams.get("away", {}) or {}
 
-    att_h = float(str(home.get("last_5", {}).get("att", "0")).rstrip("%") or 0)
-    att_a = float(str(away.get("last_5", {}).get("att", "0")).rstrip("%") or 0)
-    def_h = float(str(home.get("last_5", {}).get("def", "0")).rstrip("%") or 0)
-    def_a = float(str(away.get("last_5", {}).get("def", "0")).rstrip("%") or 0)
+    last_5_h = home.get("last_5") or {}
+    last_5_a = away.get("last_5") or {}
+    att_h = float(str(last_5_h.get("att", "0")).rstrip("%") or 0)
+    att_a = float(str(last_5_a.get("att", "0")).rstrip("%") or 0)
+    def_h = float(str(last_5_h.get("def", "0")).rstrip("%") or 0)
+    def_a = float(str(last_5_a.get("def", "0")).rstrip("%") or 0)
 
     spread = (att_h - def_a) - (att_a - def_h)
     fx["att_def_spread"] = round(spread, 1)
@@ -437,6 +439,7 @@ def run_once():
             "implied_prob": edge["implied_prob"],
             "edge": edge["edge"],
             "ev": edge["ev"],
+            "stake": rec.get("stake", 0),
             "bookmaker": rec["bookmaker"],
         })
 

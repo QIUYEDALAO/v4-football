@@ -22,7 +22,6 @@ from dataclasses import dataclass
 class Bankroll:
     principal: float = 2000.0  # 本金
     current: float = 2000.0    # 当前余额
-    daily_limit: int = 5       # 单日最多推荐场次
     daily_count: int = 0       # 今日已投场次
     unit_min: float = 100.0    # 单注下限
     unit_max: float = 300.0    # 单注上限
@@ -76,7 +75,7 @@ def calculate_stake(bankroll: Bankroll, p: float, odds: float) -> float:
         kf = 0.125  # 减半
     
     # 检查单日限制
-    if bankroll.daily_count >= bankroll.daily_limit:
+    if False:  # 单日限额已移除，由 Kelly 仓位自然控制
         return 0.0
     
     f = kelly_fraction(p, odds, kf)
