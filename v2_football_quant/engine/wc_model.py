@@ -191,6 +191,29 @@ def strategy_a_underdog_ah(home_code: str, away_code: str) -> dict | None:
 
 
 # ==========================================
+# 🎯 V3 阶段防火墙 (Stage Firewall)
+# ==========================================
+
+def evaluate_wc_fixture(home_code: str, away_code: str, stage: str = "group",
+                        market_odds: dict = None) -> dict | None:
+    """
+    V3 世界杯终极路由：基于回测数据的阶段隔离策略
+    
+    回测依据（2022世界杯）:
+    - 小组赛 AH: 8/12 = 66.7%  (弱队摆大巴抢分)
+    - 淘汰赛 AH: 2/9  = 22.2%  (强队打穿深盘)
+    - 淘汰赛 Draw: 4/10 = 40%  (顶级强队互啄)
+    """
+    KO_STAGES = ["ko16", "ko8", "qf", "sf", "semi", "final", "3rd"]
+    
+    if stage == "group":
+        return strategy_a_underdog_ah(home_code, away_code)
+    elif stage in KO_STAGES:
+        return calc_ft_draw_edge(home_code, away_code, market_odds, stage)
+    return None
+
+
+# ==========================================
 # 🧪 测试
 # ==========================================
 if __name__ == "__main__":
