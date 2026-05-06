@@ -36,6 +36,7 @@ logs/
 
 # 数据文件（不上传）
 v2_football_quant/data/
+v2_football_quant/data/deep/
 memory/
 data/
 投注资金日报表.*
