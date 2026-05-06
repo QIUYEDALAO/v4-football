@@ -69,10 +69,13 @@ def elo_to_win_prob(elo_a: float, elo_b: float) -> tuple:
 
 def calc_perception_gap(home_code: str, away_code: str) -> float:
     """
-    公众认知偏差指数 (Perception Gap)
+    公众认知偏差指数 (Perception Gap) — 对数差值版
     
     正值 = 散户过度看好主队 (主队名气 > 实力)
     负值 = 散户过度看好客队
+    零值 = 实力与身价匹配（无套利空间）
+    
+    对数差优势：正负对称，统一阈值 abs(gap) > 0.8
     """
     elo = load_wc_elo()
     
@@ -81,16 +84,14 @@ def calc_perception_gap(home_code: str, away_code: str) -> float:
     val_h = VALUES.get(home_code, 1.0)
     val_a = VALUES.get(away_code, 1.0)
     
-    # Elo差 vs 身价差的比值 — 比值偏离1越大, 认知偏差越大
-    if val_a == 0:
+    if val_h <= 0 or val_a <= 0 or elo_h <= 0 or elo_a <= 0:
         return 0.0
     
-    elo_ratio = elo_h / max(elo_a, 1)
-    val_ratio = val_h / max(val_a, 0.1)
+    log_elo_ratio = math.log(elo_h / elo_a)
+    log_val_ratio = math.log(val_h / val_a)
     
-    # 正值 = 人气溢价 (散户多买主队)
-    gap = round(val_ratio / max(elo_ratio, 0.5) - 1, 4)
-    return gap
+    # 完美对称: 正→主队泡沫, 负→客队泡沫
+    return round(log_val_ratio - log_elo_ratio, 4)
 
 
 def calc_ft_draw_edge(
@@ -140,9 +141,9 @@ def calc_ft_draw_edge(
         "stage": stage,
         "perception_gap": gap,
         "perception_gap_label": (
-            "🔥 散户重度做多主队" if gap > 0.5 else
-            "⚠️ 散户偏多主队" if gap > 0.2 else
-            "均衡" if abs(gap) < 0.2 else
+            "🔥 散户重度做多主队" if gap > 0.8 else
+            "⚠️ 散户偏多主队" if gap > 0.3 else
+            "均衡" if abs(gap) < 0.3 else
             "⚠️ 散户偏多客队"
         ),
     }
@@ -155,11 +156,13 @@ def calc_ft_draw_edge(
     return result
 
 
-def strategy_a_underdog_ah(home_code: str, away_code: str) -> dict | None:
+def strategy_a_underdog_ah(home_code: str, away_code: str,
+                            ah_market_odds: float = None) -> dict | None:
     """
-    策略 A: 受让亚盘套利
+    策略 A: 受让亚盘套利（对数 Gap 版）
     
-    当 Perception Gap 极高时 (散户疯狂买强队) → 买入弱队亚洲盘
+    Perception Gap 极高 → 买入弱队亚洲盘。
+    必须对比市场赔率，避免负EV盲买。
     """
     gap = calc_perception_gap(home_code, away_code)
     elo = load_wc_elo()
@@ -169,17 +172,23 @@ def strategy_a_underdog_ah(home_code: str, away_code: str) -> dict | None:
     elo_h = elo.get(home_code, {}).get("rating", 1500)
     elo_a = elo.get(away_code, {}).get("rating", 1500)
     
-    # 散户溢价方向判断
-    if gap > 0.5:  # 散户过度买主队
-        target = "away"
-        target_name = away_name
+    # 对数 Gap 统一阈值: abs(gap) > 0.8
+    if gap > 0.8:
+        target, target_name = "away", away_name
         handicap = "+1.5" if abs(elo_h - elo_a) > 200 else "+1.25"
-    elif gap < -0.3:  # 散户过度买客队
-        target = "home"
-        target_name = home_name
+    elif gap < -0.8:
+        target, target_name = "home", home_name
         handicap = "+1.5" if abs(elo_h - elo_a) > 200 else "+1.25"
     else:
-        return None  # Gap不够大
+        return None
+    
+    # 风控: 不能盲买！下盘赔率 < 1.85 → 庄家已消化泡沫
+    if ah_market_odds is not None and ah_market_odds < 1.85:
+        return {
+            "action": "PASS",
+            "reason": f"AH odds {ah_market_odds} too low, no edge",
+            "perception_gap": gap,
+        }
     
     return {
         "home": home_name, "away": away_name,
@@ -187,6 +196,7 @@ def strategy_a_underdog_ah(home_code: str, away_code: str) -> dict | None:
         "target": target, "target_name": target_name,
         "handicap": handicap,
         "action": f"BUY {target_name} AH {handicap}",
+        "market_odds": ah_market_odds,
     }
 
 
@@ -195,22 +205,22 @@ def strategy_a_underdog_ah(home_code: str, away_code: str) -> dict | None:
 # ==========================================
 
 def evaluate_wc_fixture(home_code: str, away_code: str, stage: str = "group",
-                        market_odds: dict = None) -> dict | None:
+                        matchday: int = 1, market_odds: dict = None,
+                        ah_market_odds: float = None) -> dict | None:
     """
-    V3 世界杯终极路由：三段阶段隔离策略
+    V3 世界杯终极路由：三段阶段隔离 + 市场赔率对抗
     
     回测依据（2022世界杯）:
-    - 小组赛前两轮 AH: 66.7%  (弱队摆大巴抢分)
-    - 小组赛第三轮: 强制平局 (默契局/博弈论盲区)
+    - 前两轮 AH: 66.7%  (弱队摆大巴抢分)
+    - 第三轮: 强制平局 (默契局博弈论盲区)
     - 淘汰赛: 平局狙击 (强队打穿,不碰AH)
     """
     KO_STAGES = ["ko16", "ko8", "qf", "sf", "semi", "final", "3rd"]
     
     if stage == "group":
-        return strategy_a_underdog_ah(home_code, away_code)
-    elif stage == "group_3":
-        # 第三轮默契局：只做平局，不做 AH
-        return calc_ft_draw_edge(home_code, away_code, market_odds, "group")
+        if matchday == 3:
+            return calc_ft_draw_edge(home_code, away_code, market_odds, "group")
+        return strategy_a_underdog_ah(home_code, away_code, ah_market_odds)
     elif stage in KO_STAGES:
         return calc_ft_draw_edge(home_code, away_code, market_odds, stage)
     return None
