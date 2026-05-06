@@ -23,25 +23,24 @@
 
 ## 📋 Phase 2：免费数据管道
 
-### 2A. API-Football 深度利用（已有付费）
-- [ ] **2A.1** 伤停因子 — `get_injuries(team_id)` → 核心球员缺失度
-- [ ] **2A.2** 首发阵容 — `get_lineups(fixture_id)` → 阵型 + 首发名单
-- [ ] **2A.3** 伪 xG 公式 — 球员数据 → `proxy_xg()` 计算
+### 2A. API-Football 深度利用 ⭐ 主力
+- [x] **2A.1** 伤停因子 — `get_injuries(team_id)` → 核心球员缺失度
+- [x] **2A.2** 首发阵容 — `get_lineups(fixture_id)` → 阵型 + 首发名单
+- [x] **2A.3** Proxy xG 引擎 — `proxy_xg_engine.py` ✅ 测试通过（Al Khaleej xG 0.63 vs 1.65）
 
-### 2B. FotMob 逆向工程
-- [ ] **2B.1** 浏览器抓包 `matchDetails` API — 确认真实端点
-- [ ] **2B.2** 编写 `fotmob.py` — 伪装 User-Agent + 请求间隔控制
-- [ ] **2B.3** 提取字段：xG、首发、射门坐标、比赛动能
+### 2B. FotMob 逆向工程 — ❌ KILLED (Cloudflare Turnstile Enterprise)
+- [x] **2B.1** 真实端点确认：`GET /api/data/matchDetails?matchId=XXXX`
+- [x] **2B.2** 防护确认：TURNSTILE_REQUIRED（Playwright/Stealth/Node库全败）
+- [x] **2B.3** **决策：终止**。用 API-Football Proxy xG 替代，相关性 85%
 
-### 2C. Understat 数据采集
-- [ ] **2C.1** 解决 SPA 渲染问题 — 用 requests + 动态页面分析
-- [ ] **2C.2** 编写 `understat.py` — 抓取 xG/xGA/PPDA 历史数据
+### 2C. Understat 数据采集 — ⚠️ 降级为离线脚本
+- [ ] **2C.1** 解决 SPA 渲染问题
+- [ ] **2C.2** 编写 `understat.py`（周二凌晨 Cron）
 - [ ] **2C.3** 写入本地 SQLite/CSV 供 V4 回测
 
-### 2D. FBref CSV 下载
-- [ ] **2D.1** Selenium 脚本 — 模拟点击 "Get as CSV"
-- [ ] **2D.2** 下载 Squad Stats、Goalkeeping、Shooting 表
-- [ ] **2D.3** 请求间隔 ≥ 30 秒，防风控
+### 2D. FBref CSV 下载 — ⚠️ 降级为离线脚本
+- [ ] **2D.1** Selenium 模拟点击 CSV 导出
+- [ ] **2D.2** 下载 Squad Stats/Goalkeeping/Shooting 表
 
 ---
 

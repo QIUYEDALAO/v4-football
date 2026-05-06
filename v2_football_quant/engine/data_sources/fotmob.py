@@ -1,105 +1,131 @@
 """
-V4 进阶数据源: FotMob 逆向爬虫
-功能: 零成本获取五大联赛的高阶 xG、首发阵容、射门坐标和动能图
+方案二：Cookie 注入法 绕过 FotMob Turnstile
+=============================================
+原理: 从真实浏览器复制 cf_clearance cookie → requests 直接调 API。
+一次手动解决 Turnstile，之后 cookie 可复用数小时。
 """
-import requests
+
 import json
-import time
+import requests
+from pathlib import Path
+
+DATA_DIR = Path(__file__).resolve().parent.parent.parent / "data" / "deep"
+COOKIE_FILE = Path.home() / ".config" / "fotmob_cookie.txt"
 
 
-class FotMobScraper:
-    def __init__(self):
-        self.headers = {
-            "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36",
-            "Accept": "application/json",
-            "Accept-Language": "en-US,en;q=0.9",
-            "Origin": "https://www.fotmob.com",
-            "Referer": "https://www.fotmob.com/"
-        }
-        self.base_url = "https://www.fotmob.com/api"
+def load_cookie() -> str | None:
+    """从文件读取已保存的 cf_clearance cookie"""
+    if COOKIE_FILE.exists():
+        return COOKIE_FILE.read_text().strip()
+    return None
 
-    def get_match_details(self, fotmob_match_id: int) -> dict:
-        """逆向请求核心端点，获取单场比赛的全维度 JSON 数据"""
-        url = f"{self.base_url}/matchDetails?matchId={fotmob_match_id}"
 
-        try:
-            time.sleep(1.5)
-            response = requests.get(url, headers=self.headers, timeout=10)
+def save_cookie(cookie_value: str):
+    """保存 cookie 供后续使用"""
+    COOKIE_FILE.parent.mkdir(parents=True, exist_ok=True)
+    COOKIE_FILE.write_text(cookie_value)
+    print(f"💾 Cookie 已保存至 {COOKIE_FILE}")
 
-            if response.status_code == 200:
-                return response.json()
-            elif response.status_code == 403:
-                print(f"🚨 触发风控 403! 比赛 {fotmob_match_id}")
-                return None
-            else:
-                print(f"⚠️ 状态码 {response.status_code}")
-                # 看看是不是返回了 HTML 而不是 JSON
-                if response.headers.get("Content-Type", "").startswith("text/html"):
-                    print("  → 返回的是 HTML(SPA)，API 可能改版")
-                return None
 
-        except Exception as e:
-            print(f"❌ 网络崩溃: {e}")
+def get_match_details(match_id: int, cookie: str = None) -> dict | None:
+    """
+    用 cf_clearance cookie 请求 FotMob API。
+
+    Args:
+        match_id: FotMob 比赛 ID（数字，如 4193853）
+        cookie: 从浏览器复制的 cf_clearance 值。如果为 None，尝试从文件加载。
+    """
+    if cookie is None:
+        cookie = load_cookie()
+    
+    if not cookie:
+        print("❌ 无 cookie。请先获取。")
+        return None
+
+    session = requests.Session()
+    session.cookies.set("cf_clearance", cookie, domain=".fotmob.com")
+    session.headers.update({
+        "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 Chrome/131.0.0.0 Safari/537.36",
+        "Accept": "application/json",
+        "Origin": "https://www.fotmob.com",
+        "Referer": "https://www.fotmob.com/",
+    })
+
+    url = f"https://www.fotmob.com/api/data/matchDetails?matchId={match_id}"
+    resp = session.get(url, timeout=15)
+
+    if resp.status_code == 200:
+        return resp.json()
+    elif resp.status_code == 403:
+        error = resp.json() if resp.text else {}
+        if error.get("code") == "TURNSTILE_REQUIRED":
+            print("🔒 Cookie 已过期，需要重新获取。")
             return None
-
-    def extract_xg_and_lineups(self, match_data: dict) -> dict:
-        """从庞大的 JSON 中精准剥离我们需要的量化因子"""
-        if not match_data:
-            return None
-
-        result = {
-            "home_xg": 0.0,
-            "away_xg": 0.0,
-            "home_lineup": [],
-            "away_lineup": []
-        }
-
-        try:
-            stats_list = match_data.get("content", {}).get("stats", {}).get("Periods", {}).get("All", {}).get("stats", [])
-            for stat_group in stats_list:
-                for stat in stat_group.get("stats", []):
-                    if stat.get("title") == "Expected goals (xG)":
-                        result["home_xg"] = float(stat.get("stats", [0, 0])[0])
-                        result["away_xg"] = float(stat.get("stats", [0, 0])[1])
-                        break
-        except Exception:
-            pass
-
-        try:
-            lineup_data = match_data.get("content", {}).get("lineup", {}).get("lineup", [])
-            if len(lineup_data) == 2:
-                for row in lineup_data[0].get("players", []):
-                    for player in row:
-                        result["home_lineup"].append(player.get("name", {}).get("fullName"))
-                for row in lineup_data[1].get("players", []):
-                    for player in row:
-                        result["away_lineup"].append(player.get("name", {}).get("fullName"))
-        except Exception:
-            pass
-
-        return result
+        print(f"⚠️  403: {error}")
+        return None
+    else:
+        print(f"⚠️  HTTP {resp.status_code}")
+        return None
 
 
+def extract_features(data: dict) -> dict:
+    """剥离量化因子"""
+    g = data.get("general", {})
+    c = data.get("content", {})
+    result = {
+        "home": g.get("homeTeam", {}).get("name"),
+        "away": g.get("awayTeam", {}).get("name"),
+        "date": g.get("matchTimeUTCDate"),
+        "home_xg": 0.0, "away_xg": 0.0,
+        "home_lineup": [], "away_lineup": [],
+    }
+    stats = c.get("stats", {}).get("Periods", {}).get("All", {}).get("stats", [])
+    for group in stats:
+        for s in group.get("stats", []):
+            if "expected" in s.get("key", ""):
+                vals = s.get("stats", [0, 0])
+                result["home_xg"] = float(vals[0] or 0)
+                result["away_xg"] = float(vals[1] or 0)
+    lu = c.get("lineup", {}).get("lineup", [])
+    if len(lu) == 2:
+        for i, team in enumerate(lu):
+            names = []
+            for row in team.get("players", []):
+                for p in row:
+                    names.append(p.get("name", {}).get("fullName", "?"))
+            (result["home_lineup"] if i == 0 else result["away_lineup"]).extend(names)
+    return result
+
+
+# ==========================================
+# 🧪 测试
+# ==========================================
 if __name__ == "__main__":
-    scraper = FotMobScraper()
+    cookie = load_cookie()
 
-    # 测试最近一场五大联赛比赛
-    test_ids = [4193853, 4193504, 5375542]
+    if not cookie:
+        print("=" * 50)
+        print("📋 获取 cf_clearance cookie 步骤:")
+        print("1. 用浏览器打开 https://www.fotmob.com")
+        print("2. 等页面加载（会自动解 Turnstile）")
+        print("3. F12 → Application → Cookies → fotmob.com")
+        print("4. 复制 cf_clearance 的值")
+        print("5. 运行: python fotmob.py --cookie '粘贴的值'")
+        print("=" * 50)
+        print("\n或者直接粘贴 cookie 到终端:")
+        import sys
+        cookie = input("Cookie: ").strip()
+        if cookie:
+            save_cookie(cookie)
 
-    for mid in test_ids:
-        print(f"🚀 测试 matchId={mid}...")
-        raw = scraper.get_match_details(mid)
-        if raw and "general" in raw:
-            g = raw["general"]
-            print(f"  ✅ {g.get('homeTeam',{}).get('name')} vs {g.get('awayTeam',{}).get('name')}")
-            extracted = scraper.extract_xg_and_lineups(raw)
-            print(f"  xG: H={extracted['home_xg']} A={extracted['away_xg']}")
-            print(f"  首发: H={len(extracted['home_lineup'])}人 A={len(extracted['away_lineup'])}人")
-            break
-        elif raw:
-            print(f"  ⚠️ 有数据但无 general: keys={list(raw.keys())[:5]}")
-        else:
-            print(f"  ❌ 失败")
-        time.sleep(2)
-
-    print("\n🏁 测试完成")
+    if cookie:
+        data = get_match_details(4193853, cookie)
+        if data:
+            f = extract_features(data)
+            print(f"\n✅ {f['home']} vs {f['away']}")
+            print(f"  xG: H={f['home_xg']} A={f['away_xg']}")
+            print(f"  首发: H={len(f['home_lineup'])} A={len(f['away_lineup'])}")
+            DATA_DIR.mkdir(parents=True, exist_ok=True)
+            with open(DATA_DIR / "fotmob_sample.json", "w") as fp:
+                json.dump(data, fp, indent=2, ensure_ascii=False)
+            print(f"  💾 data/deep/fotmob_sample.json")
