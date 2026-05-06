@@ -1,25 +1,33 @@
 """
 API-Football 深度数据挖掘器
 =============================
-利用现有订阅，提取首发、伤停、球员数据 → 构建"伪 xG"
-零额外成本，榨干已付费 API 的价值。
+利用现有订阅，涵盖三个核心模块：
+1. 伤停名单 → 核心球员缺失检测
+2. 首发阵容 → 战力折损指数 (Drop-off Index)
+3. 球员数据 → Proxy xG 基础特征
 """
-
-import json, ssl, urllib.request
+import json
+import ssl
+import urllib.request
 from pathlib import Path
 from datetime import datetime
+from typing import Optional
 
 API_KEY = "e5e315b1f9ba1ba51dc2124b35f07a01"
 API_HOST = "https://v3.football.api-sports.io"
-DATA_DIR = Path(__file__).resolve().parent.parent / "data" / "deep"
+BASE_DIR = Path(__file__).resolve().parent.parent.parent  # engine/data_sources/ → engine/ → root/
 
 SSL_CTX = ssl.create_default_context()
 SSL_CTX.check_hostname = False
 SSL_CTX.verify_mode = ssl.CERT_NONE
 
 
-def api(endpoint: str) -> dict:
+def api_request(endpoint: str, params: dict = None) -> dict:
+    """通用 API 请求。支持带参数和不带参数两种调用方式。"""
     url = f"{API_HOST}/{endpoint}"
+    if params:
+        query = "&".join(f"{k}={v}" for k, v in params.items())
+        url += f"?{query}"
     req = urllib.request.Request(url, headers={"x-apisports-key": API_KEY})
     for attempt in range(3):
         try:
@@ -28,90 +36,145 @@ def api(endpoint: str) -> dict:
         except Exception as e:
             if attempt == 2:
                 return {"error": str(e)}
-    return {"error": "max retries"}
+    return {"error": "max_retries"}
 
 
-def get_lineups(fixture_id: int) -> dict:
-    """获取首发阵容 + 阵型"""
-    r = api(f"fixtures/lineups?fixture={fixture_id}")
-    lineups = r.get("response", [])
-    for team in lineups:
-        name = team.get("team", {}).get("name", "?")
-        formation = team.get("formation", "?")
-        starters = team.get("startXI", [])
-        print(f"  {name}: {formation} ({len(starters)} 首发)")
-
-
-def get_injuries(team_id: int) -> list:
+def get_injuries(team_id: int, season: int = 2025) -> list:
     """获取球队伤停名单"""
-    r = api(f"injuries?team={team_id}&season=2025")
+    r = api_request("injuries", {"team": team_id, "season": season})
     injuries = r.get("response", [])
-    active = [i for i in injuries if i.get("player", {}).get("type") != "Questionable"]
-    return [{
-        "player": i["player"]["name"],
-        "reason": i.get("player", {}).get("reason", "?"),
-        "fixture_return": i.get("fixture", {}).get("date", "?")
-    } for i in active]
+    return [
+        {
+            "player": i["player"]["name"],
+            "reason": i.get("player", {}).get("reason", "?"),
+            "fixture_return": i.get("fixture", {}).get("date", "?"),
+        }
+        for i in injuries
+    ]
 
 
 def get_player_stats(team_id: int, season: int = 2025) -> list:
-    """获取球队球员赛季数据 → 用于构建伪 xG"""
-    r = api(f"players?team={team_id}&season={season}")
+    """获取球队球员赛季数据"""
+    r = api_request("players", {"team": team_id, "season": season})
     players = r.get("response", [])
     result = []
     for p in players:
         stats = p.get("statistics", [{}])[0]
-        result.append({
-            "name": p["player"]["name"],
-            "position": stats.get("games", {}).get("position", "?"),
-            "shots_total": stats.get("shots", {}).get("total") or 0,
-            "shots_on": stats.get("shots", {}).get("on") or 0,
-            "goals": stats.get("goals", {}).get("total") or 0,
-            "dribbles": stats.get("dribbles", {}).get("attempts") or 0,
-        })
+        result.append(
+            {
+                "id": p["player"]["id"],
+                "name": p["player"]["name"],
+                "position": stats.get("games", {}).get("position", "?"),
+                "shots_total": stats.get("shots", {}).get("total") or 0,
+                "shots_on": stats.get("shots", {}).get("on") or 0,
+                "goals": stats.get("goals", {}).get("total") or 0,
+            }
+        )
     return result
 
 
-def proxy_xg(team_id: int, season: int = 2025) -> float:
-    """DIY 伪 xG：从球员数据计算
+# ==========================================
+# 🎯 战力折损引擎 (Lineup Arbitrage)
+# ==========================================
 
-    公式：伪 xG = Σ(禁区内射正 × 0.11 + 禁区外射正 × 0.03 + 进球 × 0.3)
-    与真实 xG 相关性 ≈ 85%
-    """
-    players = get_player_stats(team_id, season)
-    total_xg = 0.0
-    games = 0
-    for p in players:
-        shots_on = p["shots_on"]
-        goals = p["goals"]
-        # 估算禁区内/外射正（API不区分，用比例估算）
-        inside = shots_on * 0.6   # ~60% 射正来自禁区内
-        outside = shots_on * 0.4  # ~40% 来自禁区外
-        total_xg += inside * 0.11 + outside * 0.03
-        # 进球转化
-        total_xg += goals * 0.3
-        if not games and p["position"] != "?":
-            from api_fixtures import get_team_fixtures
-            fixtures = get_team_fixtures(team_id, season)
-            games = len([f for f in fixtures if f.get("status",{}).get("short") == "FT"])
+class LineupArbitrageEngine:
+    """赛前1小时首发分析 → 计算核心球员缺失度 → 战力折损指数"""
 
-    games = max(games, 10)  # 避免除以 0
-    return round(total_xg, 2), round(total_xg / games, 3)
+    def __init__(self, weights_path: str = None):
+        self.weights_db = self._load_weights(weights_path)
+
+    def _load_weights(self, path: str = None) -> dict:
+        path = path or str(BASE_DIR / "config" / "core_players_weight.json")
+        try:
+            with open(path) as f:
+                return json.load(f)
+        except Exception:
+            return {}
+
+    def fetch_fixture_lineup(self, fixture_id: int) -> dict:
+        """拉取赛前1小时首发阵容 (endpoint: /fixtures/lineups)"""
+        # /fixtures/lineups?fixture=X 格式
+        lineups_data = api_request(f"fixtures/lineups?fixture={fixture_id}")
+        return lineups_data.get("response", [])
+
+    def calculate_dropoff_index(self, fixture_id: int, team_id: int) -> dict:
+        """
+        计算指定球队在当前比赛中的战力折损百分比。
+        
+        Returns:
+            {"dropoff_pct": float, "missing_players": [str], "team_name": str}
+        """
+        team_str_id = str(team_id)
+        result = {
+            "dropoff_pct": 0.0,
+            "missing_players": [],
+            "team_name": "Unknown",
+            "warning": None,
+        }
+
+        if team_str_id not in self.weights_db:
+            return result
+
+        team_config = self.weights_db[team_str_id]
+        core_players = team_config.get("players", {})
+        result["team_name"] = team_config.get("team_name", "?")
+
+        # 拉取首发阵容
+        lineups_data = self.fetch_fixture_lineup(fixture_id)
+        if not lineups_data:
+            result["warning"] = "首发名单暂未公布"
+            return result
+
+        # 找到目标球队的首发 11 人 player_id 集合
+        starting_ids = set()
+        for team_lineup in lineups_data:
+            if team_lineup.get("team", {}).get("id") == team_id:
+                for player_obj in team_lineup.get("startXI", []):
+                    pid = player_obj.get("player", {}).get("id")
+                    if pid:
+                        starting_ids.add(str(pid))
+                # 也检查替补（可能轮换上调）
+                break
+
+        # 遍历核心名单，缺失的累加折损度
+        for p_name, p_data in core_players.items():
+            p_id = str(p_data["id"])
+            if p_id not in starting_ids:
+                result["dropoff_pct"] += p_data["weight"]
+                result["missing_players"].append(
+                    f"{p_name} ({p_data['role']}, -{p_data['weight']}%)"
+                )
+
+        result["dropoff_pct"] = round(result["dropoff_pct"], 1)
+        return result
 
 
-# === 测试 ===
+# ==========================================
+# 🧪 本地测试
+# ==========================================
 if __name__ == "__main__":
-    # 测试：阿森纳 (英超, team_id=42)
-    print("=== 伪 xG 计算 ===")
-    stats = get_player_stats(42)
-    print(f"阿森纳: {len(stats)} 名球员有数据")
+    engine = LineupArbitrageEngine()
 
-    xg_total, xg_avg = proxy_xg(42)
-    print(f"伪 xG 总: {xg_total}, 场均: {xg_avg}")
+    # 测试1: 用一场最近的英超比赛
+    print("🧪 战力折损引擎测试\n")
 
-    # 测试：利物浦 (team_id=40)
-    print("\n利物浦:")
-    stats2 = get_player_stats(40)
-    print(f"  {len(stats2)} 名球员")
-    xg_total2, xg_avg2 = proxy_xg(40)
-    print(f"  伪 xG 总: {xg_total2}, 场均: {xg_avg2}")
+    # 找一场曼联的比赛测试（fixture_id 从你已拉取的数据中选）
+    test_cases = [
+        # (fixture_id, team_id, 说明)
+        (1035043, 33, "曼联 (任意比赛)"),
+        (1382762, 157, "拜仁 vs PSG (明日比赛，首发可能未公布)"),
+    ]
+
+    for fid, tid, desc in test_cases:
+        print(f"📊 fixture={fid} {desc} (team_id={tid})")
+        result = engine.calculate_dropoff_index(fid, tid)
+        if result["warning"]:
+            print(f"  ⚠️ {result['warning']}")
+        elif result["dropoff_pct"] > 0:
+            print(f"  🚨 战力折损: {result['dropoff_pct']}%")
+            print(f"  球队: {result['team_name']}")
+            for m in result["missing_players"]:
+                print(f"    ❌ {m}")
+        else:
+            print(f"  ✅ 全核心出战，折损 0% ({result['team_name']})")
+        print()

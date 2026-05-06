@@ -1,0 +1,120 @@
+{
+  "_meta": {
+    "description": "五大联赛核心球员权重库。weight = 该球员占全队100%战斗力的百分比。仅包含缺阵即影响盘口的绝对核心。",
+    "last_updated": "2026-05-06",
+    "note": "API-Football player IDs 待逐一验证，当前为测试数据"
+  },
+  "33": {
+    "team_name": "Manchester United",
+    "players": {
+      "Bruno Fernandes": {"id": 1485, "weight": 15, "role": "Playmaker"},
+      "Marcus Rashford": {"id": 909, "weight": 10, "role": "Attacker"},
+      "Lisandro Martinez": {"id": 2480, "weight": 8, "role": "Defender"},
+      "Andre Onana": {"id": 2937, "weight": 5, "role": "Goalkeeper"},
+      "Kobbie Mainoo": {"id": 2921, "weight": 7, "role": "Midfielder"}
+    }
+  },
+  "47": {
+    "team_name": "Tottenham",
+    "players": {
+      "Son Heung-Min": {"id": 186, "weight": 15, "role": "Attacker"},
+      "James Maddison": {"id": 2845, "weight": 12, "role": "Playmaker"},
+      "Cristian Romero": {"id": 2597, "weight": 8, "role": "Defender"},
+      "Guglielmo Vicario": {"id": 2615, "weight": 5, "role": "Goalkeeper"}
+    }
+  },
+  "42": {
+    "team_name": "Arsenal",
+    "players": {
+      "Bukayo Saka": {"id": 1460, "weight": 15, "role": "Attacker"},
+      "Martin Odegaard": {"id": 675, "weight": 14, "role": "Playmaker"},
+      "Declan Rice": {"id": 546, "weight": 10, "role": "Midfielder"},
+      "William Saliba": {"id": 1637, "weight": 9, "role": "Defender"},
+      "Gabriel Magalhaes": {"id": 1638, "weight": 7, "role": "Defender"}
+    }
+  },
+  "50": {
+    "team_name": "Manchester City",
+    "players": {
+      "Erling Haaland": {"id": 727, "weight": 18, "role": "Attacker"},
+      "Kevin De Bruyne": {"id": 613, "weight": 15, "role": "Playmaker"},
+      "Rodri": {"id": 627, "weight": 14, "role": "Midfielder"},
+      "Ruben Dias": {"id": 1613, "weight": 8, "role": "Defender"},
+      "Ederson": {"id": 606, "weight": 5, "role": "Goalkeeper"}
+    }
+  },
+  "40": {
+    "team_name": "Liverpool",
+    "players": {
+      "Mohamed Salah": {"id": 306, "weight": 18, "role": "Attacker"},
+      "Virgil van Dijk": {"id": 183, "weight": 12, "role": "Defender"},
+      "Alisson": {"id": 278, "weight": 7, "role": "Goalkeeper"},
+      "Trent Alexander-Arnold": {"id": 285, "weight": 9, "role": "Defender"},
+      "Dominik Szoboszlai": {"id": 1738, "weight": 8, "role": "Midfielder"}
+    }
+  },
+  "49": {
+    "team_name": "Chelsea",
+    "players": {
+      "Cole Palmer": {"id": 1891, "weight": 16, "role": "Attacker"},
+      "Enzo Fernandez": {"id": 499, "weight": 9, "role": "Midfielder"},
+      "Moises Caicedo": {"id": 518, "weight": 8, "role": "Midfielder"},
+      "Reece James": {"id": 553, "weight": 7, "role": "Defender"}
+    }
+  },
+  "85": {
+    "team_name": "Paris Saint Germain",
+    "players": {
+      "Kylian Mbappe": {"id": 439, "weight": 20, "role": "Attacker"},
+      "Ousmane Dembele": {"id": 386, "weight": 10, "role": "Attacker"},
+      "Achraf Hakimi": {"id": 231, "weight": 7, "role": "Defender"},
+      "Gianluigi Donnarumma": {"id": 625, "weight": 6, "role": "Goalkeeper"}
+    }
+  },
+  "157": {
+    "team_name": "Bayern Munich",
+    "players": {
+      "Harry Kane": {"id": 188, "weight": 20, "role": "Attacker"},
+      "Jamal Musiala": {"id": 1508, "weight": 12, "role": "Playmaker"},
+      "Joshua Kimmich": {"id": 212, "weight": 10, "role": "Midfielder"},
+      "Alphonso Davies": {"id": 736, "weight": 6, "role": "Defender"}
+    }
+  },
+  "529": {
+    "team_name": "Barcelona",
+    "players": {
+      "Robert Lewandowski": {"id": 229, "weight": 15, "role": "Attacker"},
+      "Pedri": {"id": 1198, "weight": 10, "role": "Midfielder"},
+      "Lamine Yamal": {"id": 3196, "weight": 12, "role": "Attacker"},
+      "Marc-Andre ter Stegen": {"id": 182, "weight": 6, "role": "Goalkeeper"}
+    }
+  },
+  "541": {
+    "team_name": "Real Madrid",
+    "players": {
+      "Vinicius Junior": {"id": 1000, "weight": 15, "role": "Attacker"},
+      "Jude Bellingham": {"id": 1920, "weight": 14, "role": "Midfielder"},
+      "Kylian Mbappe": {"id": 439, "weight": 20, "role": "Attacker"},
+      "Antonio Rudiger": {"id": 212, "weight": 7, "role": "Defender"},
+      "Thibaut Courtois": {"id": 189, "weight": 7, "role": "Goalkeeper"}
+    }
+  },
+  "489": {
+    "team_name": "AC Milan",
+    "players": {
+      "Rafael Leao": {"id": 739, "weight": 14, "role": "Attacker"},
+      "Theo Hernandez": {"id": 433, "weight": 10, "role": "Defender"},
+      "Mike Maignan": {"id": 432, "weight": 8, "role": "Goalkeeper"},
+      "Christian Pulisic": {"id": 71, "weight": 8, "role": "Attacker"}
+    }
+  },
+  "505": {
+    "team_name": "Inter",
+    "players": {
+      "Lautaro Martinez": {"id": 216, "weight": 14, "role": "Attacker"},
+      "Nicolo Barella": {"id": 93, "weight": 10, "role": "Midfielder"},
+      "Hakan Calhanoglu": {"id": 383, "weight": 9, "role": "Midfielder"},
+      "Alessandro Bastoni": {"id": 269, "weight": 7, "role": "Defender"}
+    }
+  }
+}
