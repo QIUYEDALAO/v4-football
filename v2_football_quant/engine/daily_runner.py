@@ -264,7 +264,7 @@ def calc_edge(fx: dict) -> Optional[dict]:
     fair = {"H": row["fair_H"], "D": row["fair_D"], "A": row["fair_A"]}
 
     best = None
-    for outcome in ["H", "D", "A"]:
+    for outcome in ["D"]:  # 首周只推 Draw，直接在循环中过滤，不误杀
         market_odds = odds.get(outcome)
         if not market_odds or market_odds < 1.70 or market_odds > 4.50:
             continue
@@ -286,10 +286,6 @@ def calc_edge(fx: dict) -> Optional[dict]:
             }
             if best is None or candidate["ev"] > best["ev"]:
                 best = candidate
-
-    # 首周策略：只推 Draw（档4/5/8），H/A 只观察
-    if best and best["outcome"] != "D":
-        return None  # 首周不推 H/A
     
     if best and best["outcome"] == "A" and best["odds"] > 4.0:
         best = None

@@ -23,8 +23,7 @@ class Bankroll:
     principal: float = 2000.0  # 本金
     current: float = 2000.0    # 当前余额
     daily_count: int = 0       # 今日已投场次
-    unit_min: float = 100.0    # 单注下限
-    unit_max: float = 300.0    # 单注上限
+    unit_max: float = 300.0    # 单注上限（绝对安全帽）
     stop_loss_pct: float = 0.4  # 熔断：回撤 > 40% 全停
     max_drawdown_pct: float = 0.25  # 软熔断：回撤 > 25% 减半注
     
@@ -81,8 +80,12 @@ def calculate_stake(bankroll: Bankroll, p: float, odds: float) -> float:
     f = kelly_fraction(p, odds, kf)
     stake_raw = bankroll.current * f
     
-    # 限制在 [100, 300]
-    stake = max(bankroll.unit_min, min(bankroll.unit_max, stake_raw))
+    # 低价值过滤：stake < 10 则不投，避免噪音交易
+    if stake_raw < 10.0:
+        return 0.0
+    
+    # 纯正 Kelly：只设上限安全帽，不设下限逼空
+    stake = min(bankroll.unit_max, stake_raw)
     
     return round(stake, 2)
 
