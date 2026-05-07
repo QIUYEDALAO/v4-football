@@ -54,40 +54,44 @@ def kelly_fraction(p: float, odds: float, kelly_factor: float = 0.25) -> float:
     return f_star * kelly_factor
 
 
-def calculate_stake(bankroll: Bankroll, p: float, odds: float) -> float:
+def calculate_stake(bankroll: Bankroll, p: float, odds: float) -> dict:
     """
-    计算单注金额。
+    计算单注金额 (返回决策字典)。
     
     规则：
     1. 用 1/4 Kelly 算理论仓位
-    2. 限制在 [100, 300] 区间
-    3. 单日场次上限 = 5
+    2. 只设上限安全帽 (300)，绝不设下限逼空
+    3. Kelly 算得 < 100 → SKIP_LOW_KELLY（宁可不下，绝不超配）
     4. 回撤 > 25% 减半，回撤 > 40% 熔断
+    
+    Returns:
+        {"action": "BET"|"SKIP_*", "stake": float, "reason": str}
     """
     # 检查熔断
     drawdown = (bankroll.peak - bankroll.current) / bankroll.peak
     if drawdown > bankroll.stop_loss_pct:
-        return 0.0  # 熔断，停投
+        return {"action": "SKIP_MELTDOWN", "stake": 0, "reason": f"回撤 {drawdown*100:.1f}% > {bankroll.stop_loss_pct*100:.0f}% 熔断"}
     
     kf = 0.25  # 1/4 Kelly
     if drawdown > bankroll.max_drawdown_pct:
         kf = 0.125  # 减半
     
-    # 检查单日限制
-    if False:  # 单日限额已移除，由 Kelly 仓位自然控制
-        return 0.0
-    
     f = kelly_fraction(p, odds, kf)
     stake_raw = bankroll.current * f
     
-    # 低价值过滤：stake < 10 则不投，避免噪音交易
+    # 极低价值过滤：stake < 10 则不投，避免噪音交易
     if stake_raw < 10.0:
-        return 0.0
+        return {"action": "SKIP_NOISE", "stake": 0, "reason": f"Kelly 仓位 {stake_raw:.1f} < 10，噪音跳过"}
     
-    # 纯正 Kelly：只设上限安全帽，不设下限逼空
-    stake = min(bankroll.unit_max, stake_raw)
+    # 纯粹 Kelly：只设上限安全帽，不设下限
+    # 🔴 关键修改：绝不用 clamp 把 35 块强行抬到 100 块
+    raw_stake = min(bankroll.unit_max, stake_raw)
     
-    return round(stake, 2)
+    if raw_stake < 100:
+        return {"action": "SKIP_LOW_KELLY", "stake": 0, 
+                "reason": f"Kelly建议 {raw_stake:.0f} < {100} 下限，放弃此单（宁可不下绝不超配）"}
+    
+    return {"action": "BET", "stake": round(raw_stake, 2), "reason": "Kelly 正常"}
 
 
 def update_bankroll(bankroll: Bankroll, stake: float, won: bool, odds: float):

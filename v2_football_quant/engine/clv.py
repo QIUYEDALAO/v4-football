@@ -95,36 +95,65 @@ def ev(placed_odds: float, fair_prob: float) -> Optional[float]:
     return placed_odds * fair_prob - 1.0
 
 
-def true_clv(placed_odds: float, closing_odds_hda: dict) -> Optional[float]:
+def clv_triple(placed_odds: float, outcome: str, closing_odds_hda: dict) -> dict:
     """
-    Vig-Free (去水) CLV 计算
+    🚨 三层 CLV 重构 (专家建议二) — 剥离"抽水幻觉"
+    =========================================================
     
-    专家建议：Pinnacle 收盘赔率含抽水，需去除后再算真实CLV。
+    第一层 raw_clv:
+        我们战胜了市场表象吗？
+        (placed_odds / raw_closing_odds) - 1
+        例: 3.19 / 3.20 - 1 = -0.31%  → 收盘价和我们基本一致
     
-    Args:
-        placed_odds: 投注时的 decimal odds (如 3.05)
-        closing_odds_hda: 收盘时 H/D/A 三向赔率 {"H": 2.23, "D": 2.90, "A": 6.23}
+    第二层 fair_line_clv:
+        去水后的公平概率漂移。
+        步骤: 先算margin, 去水得fair_prob, 再与买入价对比
+    
+    第三层 ev_vs_close:
+        最严苛的 True CLV → 完整扣除收盘Vig后的真实价值
+        等同于旧的 true_clv()
     
     Returns:
-        Vig-Free CLV 百分比
+        {raw_clv, fair_line_clv, ev_vs_close, margin, raw_close, fair_close}
     """
-    if not closing_odds_hda:
-        return None
+    if not closing_odds_hda or not all(k in closing_odds_hda for k in ("H", "D", "A")):
+        return {"raw_clv": None, "fair_line_clv": None, "ev_vs_close": None, 
+                "margin": None, "raw_close": None, "fair_close": None}
     
-    # 计算隐含概率总和（庄家抽水）
-    implied_sum = sum(1.0 / o for o in closing_odds_hda.values() if o > 0)
+    raw_close = closing_odds_hda[outcome]
     
-    # 找到投注方向的收盘赔率
-    # 假设默认是 D（Draw）方向
-    closing_d = closing_odds_hda.get("D", closing_odds_hda.get("draw", 0))
-    if closing_d <= 0:
-        return None
+    # ── 第一层: Raw CLV ──
+    raw_clv = (placed_odds / raw_close) - 1.0 if raw_close > 0 else None
     
-    # 去水后的真实收盘赔率
-    true_closing = closing_d * implied_sum
+    # ── 第二层: Fair Line CLV ──
+    inv_h = 1.0 / closing_odds_hda["H"]
+    inv_d = 1.0 / closing_odds_hda["D"]
+    inv_a = 1.0 / closing_odds_hda["A"]
+    margin = inv_h + inv_d + inv_a
     
-    # Vig-Free CLV
-    return (placed_odds / true_closing) - 1.0
+    true_prob = (1.0 / raw_close) / margin
+    fair_close = 1.0 / true_prob
+    fair_line_clv = (placed_odds / fair_close) - 1.0
+    
+    # ── 第三层: EV vs Close (最严苛) ──
+    ev_vs_close = fair_line_clv  # 等同于旧 true_clv
+    
+    return {
+        "raw_clv": round(raw_clv, 4) if raw_clv is not None else None,
+        "fair_line_clv": round(fair_line_clv, 4),
+        "ev_vs_close": round(ev_vs_close, 4),
+        "margin": round(margin, 4),
+        "raw_close": raw_close,
+        "fair_close": round(fair_close, 4),
+    }
+
+
+def true_clv(placed_odds: float, closing_odds_hda: dict) -> Optional[float]:
+    """
+    向后兼容别名: 等同于 ev_vs_close (第三层严苛 CLV)
+    """
+    triple = clv_triple(placed_odds, "D", closing_odds_hda)
+    return triple.get("ev_vs_close")
 
 
 def clv_verdict(clv_value: float) -> str:

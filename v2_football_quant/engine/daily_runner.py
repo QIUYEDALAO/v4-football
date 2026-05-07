@@ -399,6 +399,35 @@ def run_once():
             final_recs.append(rec)
     recommendations = final_recs
 
+    # ── 🌎 全量候选池快照 (基准防线 · 专家建议三) ──
+    universe = []
+    today_str = date.today().strftime('%Y%m%d')
+    for fx in fixtures:
+        odds = fx.get("_ht_1x2", {})
+        row = fx.get("decile_info", {})
+        if odds and "D" in odds:
+            model_prob = 1 / row["fair_D"] if row.get("fair_D") else 0
+            implied_prob = 1 / odds["D"] if odds.get("D") else 0
+            universe.append({
+                "fixture_id": fx["id"],
+                "home": fx["home"],
+                "away": fx["away"],
+                "league": fx.get("league_name", ""),
+                "time_bj": fx.get("time_bj", ""),
+                "decile": row.get("decile", 0),
+                "att_def_spread": fx.get("att_def_spread", 0),
+                "odds_H": odds.get("H"),
+                "odds_D": odds.get("D"),
+                "odds_A": odds.get("A"),
+                "fair_D": row.get("fair_D"),
+                "model_prob_D": round(model_prob, 4) if model_prob else None,
+                "implied_prob_D": round(implied_prob, 4) if implied_prob else None,
+            })
+    univ_path = REPORT_DIR / f"universe_candidates_{today_str}.json"
+    with open(univ_path, "w") as f:
+        json.dump(universe, f, ensure_ascii=False, indent=2)
+    logger.info(f"\n🌎 全量候选池: {len(universe)} 场 → {univ_path}")
+
     logger.info(f"[6/7] 生成日报...")
     report = generate_report(fixtures, recommendations)
     report_path = REPORT_DIR / f"daily_{date.today().strftime('%Y%m%d')}.md"
@@ -410,11 +439,31 @@ def run_once():
     print()
     print(report)
 
-    # 保存
+    # 保存 (🔍 信号审计日志 · 黑盒→白盒 · 专家建议一+四)
     pred_save = []
     for rec in recommendations:
         fx = rec["fixture"]
         edge = rec["edge"]
+        offered_odds = edge["odds"]
+        model_prob = edge["model_prob"]
+        implied_prob = edge["implied_prob"]
+        break_even_prob = 1.0 / offered_odds if offered_odds > 0 else 0
+        fair_odds_val = 1.0 / model_prob if model_prob > 0 else 0
+        
+        # 判定 action
+        stake_info = rec.get("stake", 0)
+        if isinstance(stake_info, dict):
+            action = stake_info.get("action", "BET")
+            stake_val = stake_info.get("stake", 0)
+        else:
+            # 向后兼容 (旧的 float stake)
+            action = "PASS" if (isinstance(stake_info, (int, float)) and stake_info <= 0) else "BET"
+            stake_val = stake_info if isinstance(stake_info, (int, float)) else 0
+        
+        # 负 EV 自动阻断
+        if edge["ev"] < 0 and action == "BET":
+            action = "BLOCKED_NEG_EV"
+        
         pred_save.append({
             "fixture_id": fx["id"],
             "date": date.today().isoformat(),
@@ -425,15 +474,15 @@ def run_once():
             "att_def_spread": fx.get("att_def_spread", 0),
             "decile": rec["decile"],
             "outcome": edge["outcome"],
-            "fair_odds": edge["fair_odds"] if "fair_odds" in edge else {
-                "H": edge["fair_H"], "D": edge["fair_D"], "A": edge["fair_A"],
-            },
-            "placed_odds": edge["odds"],
-            "model_prob": edge["model_prob"],
-            "implied_prob": edge["implied_prob"],
+            "fair_odds": {"H": edge.get("fair_H"), "D": edge.get("fair_D"), "A": edge.get("fair_A")},
+            "placed_odds": offered_odds,
+            "model_prob": model_prob,
+            "implied_prob": implied_prob,
+            "break_even_prob": round(break_even_prob, 4),
             "edge": edge["edge"],
             "ev": edge["ev"],
-            "stake": rec.get("stake", 0),
+            "stake": stake_val,
+            "action": action,
             "bookmaker": rec["bookmaker"],
         })
 

@@ -251,8 +251,10 @@ def verify_date(date_str: str) -> dict:
         odds_resp = api(f"odds?fixture={fid}")
         closing_ht_1x2 = extract_pinnacle_ht_1x2(odds_resp)
 
-        # --- Step 3: CLV 计算 ---
-        true_clv, fair_close = calculate_true_clv(placed_odds, bet_outcome, closing_ht_1x2)
+        # --- Step 3: 三层 CLV 重构 ---
+        from clv import clv_triple
+        triple = clv_triple(placed_odds, bet_outcome, closing_ht_1x2)
+        true_clv = triple.get("ev_vs_close", 0)
         clv_list.append(true_clv)
 
         # --- Step 2: PnL 结算 ---
@@ -275,8 +277,14 @@ def verify_date(date_str: str) -> dict:
             "is_hit": is_hit,
             "pnl": round(pnl, 2),
             "closing_ht_1x2": closing_ht_1x2,
-            "fair_closing_odds": round(fair_close, 4),
-            "true_clv": round(true_clv, 4),
+            # ── 三层 CLV 审计 ──
+            "raw_clv": triple.get("raw_clv"),
+            "fair_line_clv": triple.get("fair_line_clv"),
+            "ev_vs_close": triple.get("ev_vs_close"),
+            "clv_margin": triple.get("margin"),
+            "raw_closing_odds": triple.get("raw_close"),
+            "fair_closing_odds": triple.get("fair_close"),
+            "true_clv": round(true_clv, 4),  # 向后兼容
             "ht_has_goal": (ht_home + ht_away) > 0,
         }
         results.append(r)
