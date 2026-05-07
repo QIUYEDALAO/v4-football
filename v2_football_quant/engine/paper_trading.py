@@ -573,6 +573,39 @@ def full_summary(window_size: int = 10):
         if v["bets"] > 0:
             print(f"{k:<24} | {v['bets']:<4} | {v['roi_pct']:>6.2f}% | {v['avg_true_clv_pct']:>7.2f}%")
 
+    # ── Router 激活状态预演 ──
+    print(f"\n🔁 【Strategy Router 激活状态预演 (enable_active_routing=False)】")
+    print("-" * 65)
+    for jump_key, v in by_bin_jump_out.items():
+        bets = v["bets"]
+        clv = v["avg_true_clv_pct"]
+        roi = v["roi_pct"]
+        if "->" in jump_key:
+            try:
+                parts = jump_key.replace("[", "").replace("]", "").split(" -> ")
+                orig_b, adj_b = int(parts[0]), int(parts[1])
+                jump_size = abs(orig_b - adj_b)
+
+                if jump_size == 1:
+                    title = f"🌟 黄金跳变 {jump_key} & boost=True"
+                    if bets >= 20 and clv > 0:
+                        status = "✅ 铁律满足 (将激活提权/加杠杆)"
+                    else:
+                        status = "⚠️ 样本不足/无Edge，仅列为观察区"
+                elif jump_size >= 2:
+                    title = f"☠️ 毒药崩塌 {jump_key} (Blacklist 区)"
+                    if bets >= 20 and clv < -2.0:
+                        status = "✅ 铁律满足 (将激活 Router 斩杀)"
+                    else:
+                        status = "⚠️ 样本不足/未亏透，暂不斩杀"
+                else:
+                    continue
+
+                print(f"{title}")
+                print(f" 样本: {bets:<3} 场 | ROI {roi:>6.2f}% | True CLV {clv:>6.2f}% → {status}\n")
+            except Exception:
+                pass
+
     if health_flags:
         print(f"\n🚨 【系统健康度报警】")
         for flag in health_flags:

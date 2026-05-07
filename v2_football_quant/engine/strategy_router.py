@@ -13,8 +13,32 @@ class StrategyRouter:
     当前状态：静默潜伏期 (DRY-RUN)。
     激活条件：等待 paper_trading 仪表盘积累满 N >= 20 的有效样本。
     """
-    def __init__(self, enable_active_routing=False):
+    def __init__(self, enable_active_routing=False, summary_stats=None):
         self.enable_active_routing = enable_active_routing
+        self.summary_stats = summary_stats or {}  # 🌟 接收来自 paper_trading 的统计数据
+
+    def _check_iron_rule(self, pattern_key: str, required_type: str) -> bool:
+        """
+        🛡️ 铁律审判器：不满足 N>=20 或 CLV 方向不符绝不放行
+        required_type: "boost" (要求CLV>0) 或 "toxic" (要求CLV明显为负)
+        """
+        stats = self.summary_stats.get(pattern_key, {})
+        bets = stats.get("bets", 0)
+        clv = stats.get("avg_true_clv_pct", 0.0)
+
+        if bets < 20:
+            logger.warning(f"BLOCK_ROUTER_ACTIVATION: insufficient data for pattern {pattern_key} (N={bets} < 20)")
+            return False
+
+        if required_type == "boost" and clv <= 0:
+            logger.warning(f"BLOCK_ROUTER_ACTIVATION: negative CLV for pattern {pattern_key} (CLV={clv}%)")
+            return False
+
+        if required_type == "toxic" and clv > -2.0:  # 没亏透，不算毒药
+            logger.warning(f"BLOCK_ROUTER_ACTIVATION: CLV not toxic enough for {pattern_key} (CLV={clv}%)")
+            return False
+
+        return True
 
     def process_candidates(self, candidates: list[dict]) -> list[dict]:
         """
@@ -30,17 +54,24 @@ class StrategyRouter:
                 orig_priority = signal.get("priority", 50)
 
                 if strategy_id == "V2_HT_DRAW":
-                    # 规则 1: 黄金跳变加权 ([5] -> [4] 悄悄死一个核心)
-                    if signal.get("attrition_boost_candidate") and signal.get("bin_jump_size", 0) == 1:
-                        signal["priority"] = orig_priority + 30
-                        signal["max_risk_units"] = 1.2
-                        signal["router_note"] = "BOOST_ACTIVATED: 触发黄金伤停跳变区"
+                    # 获取当前这单的特征 (例如 "[5] -> [4]")
+                    jump_str = f"[{signal.get('orig_bin')}] -> [{signal.get('adj_bin')}]"
 
-                    # 规则 2: 毒药崩塌跳变拦截 ([5] -> [3] 核心大面积报销)
+                    # 规则 1: 黄金跳变加权 (要求：符合 Boost 候选 + 铁律审判通过)
+                    if signal.get("attrition_boost_candidate") and signal.get("bin_jump_size", 0) == 1:
+                        if self._check_iron_rule(jump_str, "boost"):
+                            signal["priority"] = orig_priority + 30
+                            signal["max_risk_units"] = 1.2
+                            signal["router_note"] = f"BOOST_ACTIVATED: 触发黄金伤停 {jump_str}"
+                        else:
+                            signal["router_note"] = f"ROUTER_BLOCKED: {jump_str} 铁律未满足，降级为被动路由"
+
+                    # 规则 2: 毒药崩塌跳变拦截
                     elif signal.get("attrition_flag") and signal.get("bin_jump_size", 0) >= 2:
-                        signal["action"] = "SKIP_TOXIC_JUMP"
-                        signal["skip_reason"] = "Router 阻断: 档位跳变过大，警惕庄家深坑"
-                        signal["priority"] = 0
+                        if self._check_iron_rule(jump_str, "toxic"):
+                            signal["action"] = "SKIP_TOXIC_JUMP"
+                            signal["skip_reason"] = f"Router 阻断: {jump_str} 毒药区，警惕庄家深坑"
+                            signal["priority"] = 0
 
             routed_signals.append(signal)
 
