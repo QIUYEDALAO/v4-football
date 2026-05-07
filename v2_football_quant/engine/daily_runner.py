@@ -22,6 +22,7 @@ import sys
 BASE_DIR = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(BASE_DIR))
 from config.secrets import API_KEY, API_HOST
+from bankroll import Bankroll, calculate_stake
 DATA_DIR = BASE_DIR / "data" / "raw_fixtures"
 REPORT_DIR = BASE_DIR / "data" / "daily_reports"
 REPORT_DIR.mkdir(exist_ok=True)
@@ -228,33 +229,6 @@ def fetch_ht_1x2(fixture_id: int) -> Optional[dict]:
     return None
 
 
-# ===== Step 5: Kelly 仓位 =====
-def calc_stake(model_prob: float, odds: float, decile: int, bankroll: float = 2000,
-               fraction: float = 1/6) -> float:
-    """
-    1/6 Kelly + 首周保守策略
-    - Draw (档4/5/8): 标准 1/6 Kelly
-    - H/A: 1/8 Kelly（观察期）
-    - 硬顶 150
-    """
-    if odds <= 1:
-        return 0
-    b = odds - 1
-    p = model_prob
-    f_star = (b * p - (1 - p)) / b
-    
-    if f_star <= 0:
-        return 0
-    
-    # H/A 方向观察期：降低仓位
-    kf = fraction
-    raw = f_star * kf
-    stake = bankroll * max(0, raw)
-    
-    # 硬顶
-    return round(min(stake, 150), 2)
-
-
 # ===== Step 6: Edge 计算 =====
 def calc_edge(fx: dict) -> Optional[dict]:
     odds = fx.get("_ht_1x2")
@@ -354,6 +328,9 @@ def run_once():
 
     fixtures = fetch_details(fixtures)
 
+    # 💰 实例化真实资金池 (P0 修复: 打通 bankroll.py 经脉)
+    br = Bankroll()
+
     logger.info(f"[3/7] 计算 att_def_spread + decile 映射...")
     for fx in fixtures:
         calc_spread(fx)
@@ -382,7 +359,7 @@ def run_once():
                 },
                 "decile": row["decile"],
                 "bookmaker": fx.get("_ht_1x2", {}).get("bookmaker", "?"),
-                "stake": calc_stake(edge["model_prob"], edge["odds"], row["decile"]),
+                "stake": calculate_stake(br, edge["model_prob"], edge["odds"]),
             })
             logger.success(f"  ✅ {fx['home']}vs{fx['away']}: 推{edge['outcome']} "
                   f"odds={edge['odds']:.2f} edge={edge['edge']*100:+.1f}%")
@@ -450,15 +427,10 @@ def run_once():
         break_even_prob = 1.0 / offered_odds if offered_odds > 0 else 0
         fair_odds_val = 1.0 / model_prob if model_prob > 0 else 0
         
-        # 判定 action
-        stake_info = rec.get("stake", 0)
-        if isinstance(stake_info, dict):
-            action = stake_info.get("action", "BET")
-            stake_val = stake_info.get("stake", 0)
-        else:
-            # 向后兼容 (旧的 float stake)
-            action = "PASS" if (isinstance(stake_info, (int, float)) and stake_info <= 0) else "BET"
-            stake_val = stake_info if isinstance(stake_info, (int, float)) else 0
+        # 判定 action (P0 修复: 100% dict，不再需要向后兼容)
+        stake_info = rec["stake"]
+        action = stake_info.get("action", "BET")
+        stake_val = stake_info.get("stake", 0)
         
         # 负 EV 自动阻断
         if edge["ev"] < 0 and action == "BET":

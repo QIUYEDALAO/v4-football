@@ -72,9 +72,9 @@ def calculate_stake(bankroll: Bankroll, p: float, odds: float) -> dict:
     if drawdown > bankroll.stop_loss_pct:
         return {"action": "SKIP_MELTDOWN", "stake": 0, "reason": f"回撤 {drawdown*100:.1f}% > {bankroll.stop_loss_pct*100:.0f}% 熔断"}
     
-    kf = 0.25  # 1/4 Kelly
+    kf = 0.166  # 1/6 Kelly (HT 平局高方差, 保守)
     if drawdown > bankroll.max_drawdown_pct:
-        kf = 0.125  # 减半
+        kf = 0.083  # 减半 (~1/12 Kelly)
     
     f = kelly_fraction(p, odds, kf)
     stake_raw = bankroll.current * f
