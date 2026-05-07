@@ -4,9 +4,10 @@
 解决 Python urllib TLS 指纹被 API-Football 防火墙封杀的 403 问题。
 
 策略:
-  1. 先尝试 Python urllib + certifi
-  2. 403 或 SSL 错误 → 自动回退 subprocess + curl
+  1. 先尝试 Python urllib + certifi (重试 1 次)
+  2. 403 或 5xx → 自动回退 subprocess + curl
   3. curl 经过 macOS 原生 TLS 栈，不会被封
+  4. [GUARD] 日志记录所有 fallback 和 hard fail
 
 用法:
   from engine.net_utils import api_get
@@ -16,10 +17,13 @@
 import json
 import ssl
 import time
+import logging
 import subprocess
 import urllib.request
 import urllib.error
 from typing import Optional
+
+logger = logging.getLogger(__name__)
 
 
 def _get_api_key() -> str:
@@ -74,29 +78,32 @@ def _curl_get(endpoint: str, api_key: str, api_host: str = "https://v3.football.
 
 def api_get(endpoint: str, api_key: str = None, api_host: str = "https://v3.football.api-sports.io",
             retries: int = 3) -> Optional[dict]:
-    """智能 API 请求: urllib 优先, 403 自动回退 curl"""
+    """智能 API 请求: urllib 优先 (重试1次), 403/5xx 自动回退 curl"""
     if not api_key:
-        try:
-            from config.secrets import API_KEY
-            api_key = API_KEY
-        except Exception:
+        api_key = _get_api_key()
+        if not api_key:
             return None
 
-    for attempt in range(retries):
-        # 先试 urllib
+    # ── 阶段 1: urllib (主路径, 重试) ──
+    urllib_fail_reason = None
+    for attempt in range(2):  # urllib 最多2次
         result = _urllib_get(endpoint, api_key, api_host)
         if result is not None:
-            return result
+            return result  # ✅ 成功
+        if attempt < 1:
+            time.sleep(1.5)  # 重试前等待
+    urllib_fail_reason = "403_or_5xx"
 
-        # urllib 被 403 → 回退 curl
-        if attempt == 0:
-            pass  # 第一次就触发回退
+    # ── 阶段 2: curl 兜底 ──
+    logger.warning(f"[GUARD] API_FALLBACK | code=HTTP_403_URLLIB → fallback=curl | path=/{endpoint[:60]}")
 
+    for attempt in range(retries):
         result = _curl_get(endpoint, api_key, api_host)
         if result is not None:
-            return result
-
+            return result  # ✅ curl 救回来了
         if attempt < retries - 1:
             time.sleep(2 ** attempt)
 
+    # ── 阶段 3: 双路全灭 ──
+    logger.error(f"[GUARD] API_HARD_FAIL | path=/{endpoint[:80]} | reason='{urllib_fail_reason} + curl_fail'")
     return None
