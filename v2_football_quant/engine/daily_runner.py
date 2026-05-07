@@ -41,6 +41,28 @@ with open(BASE_DIR / "config" / "leagues_whitelist.json") as f:
 with open(BASE_DIR / "engine" / "fair_odds_matrix.json") as f:
     FAIR_MATRIX = json.load(f)
 
+# 🌟 五大联赛专项矩阵 (双轨制)
+MATRIX_TOP5 = None
+MATRIX_CONFIG = {}
+MATRIX_CONFIG_PATH = BASE_DIR / "config" / "matrix_config.json"
+if MATRIX_CONFIG_PATH.exists():
+    with open(MATRIX_CONFIG_PATH) as f:
+        MATRIX_CONFIG = json.load(f)
+    top5_path = BASE_DIR / "data_pipeline" / "data" / MATRIX_CONFIG.get("matrix_routing", {}).get("top5_special", "")
+    if top5_path.exists():
+        with open(top5_path) as f:
+            MATRIX_TOP5 = json.load(f)
+        logger.info(f"🧬 五大联赛专项矩阵已加载 ({len(MATRIX_TOP5)} 档)")
+
+TOP5_IDS = set(MATRIX_CONFIG.get("top5_league_ids", [39, 140, 135, 78, 61]))
+
+
+def get_matrix_for_league(league_id):
+    """双轨制: 五大联赛用专项矩阵, 其余用默认"""
+    if MATRIX_TOP5 and league_id in TOP5_IDS:
+        return MATRIX_TOP5
+    return FAIR_MATRIX
+
 
 def api(endpoint: str) -> Optional[dict]:
     url = f"{API_HOST}/{endpoint}"
@@ -56,15 +78,15 @@ def api(endpoint: str) -> Optional[dict]:
                 return None
 
 
-def map_to_decile(att_def_spread: float) -> dict:
-    """将 att_def_spread 映射到 Fair Odds Matrix 的档位"""
-    for row in FAIR_MATRIX:
+def map_to_decile(att_def_spread: float, league_id: int = None) -> dict:
+    """将 att_def_spread 映射到 Fair Odds Matrix 的档位 (支持双轨制)"""
+    matrix = get_matrix_for_league(league_id) if league_id else FAIR_MATRIX
+    for row in matrix:
         if row["spread_lo"] <= att_def_spread < row["spread_hi"]:
             return row
-    # 超出范围 → 最极端档
-    if att_def_spread < FAIR_MATRIX[0]["spread_lo"]:
-        return FAIR_MATRIX[0]
-    return FAIR_MATRIX[-1]
+    if att_def_spread < matrix[0]["spread_lo"]:
+        return matrix[0]
+    return matrix[-1]
 
 
 # ===== Step 1: 赛程拉取 =====
@@ -185,7 +207,7 @@ def calc_spread(fx: dict) -> float:
 
     spread = (att_h - def_a) - (att_a - def_h)
     fx["att_def_spread"] = round(spread, 1)
-    fx["decile_info"] = map_to_decile(spread)
+    fx["decile_info"] = map_to_decile(spread, fx.get("league"))
     return spread
 
 
@@ -372,7 +394,7 @@ def run_once(run_tag="DEFAULT"):
 
         if delta_home > 0 or delta_away > 0:
             adj_spread = round(base_spread - delta_home + delta_away, 1)
-            adj_decile_info = map_to_decile(adj_spread)
+            adj_decile_info = map_to_decile(adj_spread, fx.get("league"))
             adj_bin = adj_decile_info["decile"]
             jump_size = abs(orig_bin - adj_bin)
 

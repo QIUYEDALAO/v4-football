@@ -1,0 +1,8 @@
+{
+  "matrix_routing": {
+    "default": "fair_odds_matrix.json",
+    "top5_special": "fair_odds_matrix_top5_v2.json"
+  },
+  "top5_league_ids": [39, 140, 135, 78, 61],
+  "note": "39=英超 140=西甲 135=意甲 78=德甲 61=法甲。top5_special 使用 football-data.co.uk 时间衰减校准矩阵。"
+}
