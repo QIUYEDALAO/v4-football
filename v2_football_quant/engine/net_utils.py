@@ -15,6 +15,7 @@
 """
 
 import json
+import os
 import ssl
 import time
 import logging
@@ -48,16 +49,19 @@ def _urllib_get(endpoint: str, api_key: str, api_host: str = "https://v3.footbal
     url = f"{api_host}/{endpoint}"
     req = urllib.request.Request(url, headers={
         "x-apisports-key": api_key,
-        "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36"
+        "User-Agent": "V2-Football-Quant/1.0"
     })
     try:
         with urllib.request.urlopen(req, context=_SSL_CTX, timeout=15) as resp:
             return json.loads(resp.read())
     except urllib.error.HTTPError as e:
         if e.code == 403:
-            return None  # 触发 curl 回退
-        raise
-    except Exception:
+            logger.warning(f"[GUARD] API_URLLIB_403 | url={url} code=403")
+            return None
+        logger.error(f"[GUARD] API_URLLIB_HTTPERROR | url={url} code={e.code}")
+        return None
+    except Exception as e:
+        logger.error(f"[GUARD] API_URLLIB_EXCEPTION | url={url} err={e}")
         return None
 
 
@@ -66,22 +70,32 @@ def _curl_get(endpoint: str, api_key: str, api_host: str = "https://v3.football.
     url = f"{api_host}/{endpoint}"
     try:
         result = subprocess.run(
-            ["curl", "-s", "--max-time", "15", "-H", f"x-apisports-key: {api_key}", url],
+            ["curl", "-s", "--max-time", "15",
+             "-H", f"x-apisports-key: {api_key}",
+             "-H", "User-Agent: V2-Football-Quant/1.0", url],
             capture_output=True, text=True, timeout=20
         )
         if result.returncode != 0:
+            logger.error(f"[GUARD] API_CURL_RETERR | url={url} code={result.returncode} stderr={result.stderr[:200]}")
             return None
-        return json.loads(result.stdout)
-    except Exception:
+        try:
+            return json.loads(result.stdout)
+        except json.JSONDecodeError as e:
+            logger.error(f"[GUARD] API_CURL_JSONERR | url={url} err={e} raw={result.stdout[:200]}")
+            return None
+    except Exception as e:
+        logger.error(f"[GUARD] API_CURL_EXCEPTION | url={url} err={e}")
         return None
 
 
-def api_get(endpoint: str, api_key: str = None, api_host: str = "https://v3.football.api-sports.io",
+def api_get(endpoint: str, api_key: Optional[str] = None,
+            api_host: str = "https://v3.football.api-sports.io",
             retries: int = 3) -> Optional[dict]:
     """智能 API 请求: urllib 优先 (重试1次), 403/5xx 自动回退 curl"""
     if not api_key:
         api_key = _get_api_key()
         if not api_key:
+            logger.error("[GUARD] API_NO_KEY | 无法获取 API Key")
             return None
 
     # ── 阶段 1: urllib (主路径, 重试) ──
