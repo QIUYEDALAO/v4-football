@@ -23,6 +23,7 @@ sys.path.insert(0, str(BASE_DIR))
 from config.secrets import API_KEY, API_HOST
 from bankroll import Bankroll, calculate_stake
 from engine.data_sources.apifootball_deep import InjuryAttritionEngine
+from engine import net_utils
 DATA_DIR = BASE_DIR / "data" / "raw_fixtures"
 REPORT_DIR = BASE_DIR / "data" / "daily_reports"
 REPORT_DIR.mkdir(exist_ok=True)
@@ -65,17 +66,7 @@ def get_matrix_for_league(league_id):
 
 
 def api(endpoint: str) -> Optional[dict]:
-    url = f"{API_HOST}/{endpoint}"
-    req = urllib.request.Request(url, headers={"x-apisports-key": API_KEY})
-    for attempt in range(3):
-        try:
-            with urllib.request.urlopen(req, context=SSL_CTX, timeout=15) as resp:
-                return json.loads(resp.read())
-        except Exception:
-            if attempt < 2:
-                time.sleep(2 ** attempt)
-            else:
-                return None
+    return net_utils.api_get(endpoint, API_KEY, API_HOST)
 
 
 def map_to_decile(att_def_spread: float, league_id: int = None) -> dict:

@@ -13,9 +13,7 @@ V2 时间机器 — 离线回测注入器 (加速器2)
 
 import json
 import ssl
-import certifi
 import time
-import urllib.request
 import sys
 from pathlib import Path
 from datetime import date, datetime, timedelta
@@ -29,9 +27,8 @@ from engine.daily_runner import calc_spread, fetch_ht_1x2, calc_edge, map_to_dec
 from engine.data_sources.apifootball_deep import InjuryAttritionEngine
 from engine.paper_trading import extract_pinnacle_ht_1x2, parse_ht_result, settle_trade
 from engine.clv import clv_triple
+from engine.net_utils import api_get
 from logger import logger
-
-SSL_CTX = ssl.create_default_context(cafile=certifi.where())
 
 PAPER_DIR = BASE_DIR / "data" / "paper_trading"
 PAPER_DIR.mkdir(exist_ok=True)
@@ -42,16 +39,7 @@ with open(BASE_DIR / "config" / "leagues_whitelist.json") as f:
 
 
 def api(endpoint: str) -> Optional[dict]:
-    url = f"{API_HOST}/{endpoint}"
-    req = urllib.request.Request(url, headers={"x-apisports-key": API_KEY})
-    for attempt in range(3):
-        try:
-            with urllib.request.urlopen(req, context=SSL_CTX, timeout=15) as resp:
-                return json.loads(resp.read())
-        except Exception:
-            if attempt < 2:
-                time.sleep(2 ** attempt)
-    return None
+    return api_get(endpoint, API_KEY, API_HOST)
 
 
 def fetch_fixtures_in_range(start: str, end: str) -> list:

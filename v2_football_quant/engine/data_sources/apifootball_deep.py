@@ -7,37 +7,30 @@ API-Football 深度数据挖掘器
 3. 球员数据 → Proxy xG 基础特征
 """
 import json
-import ssl
-import certifi
-import urllib.request
 from pathlib import Path
 from datetime import datetime
 from typing import Optional
-
 import os
 
 API_KEY = os.getenv("APIFOOTBALL_KEY", "your-api-key-here")
 API_HOST = "https://v3.football.api-sports.io"
-BASE_DIR = Path(__file__).resolve().parent.parent.parent  # engine/data_sources/ → engine/ → root/
+BASE_DIR = Path(__file__).resolve().parent.parent.parent
 
-SSL_CTX = ssl.create_default_context(cafile=certifi.where())
+# 使用统一 API (urllib → curl 自动兜底)
+import sys as _sys
+_sys.path.insert(0, str(BASE_DIR))
+from engine.net_utils import api_get as _api_get
 
 
 def api_request(endpoint: str, params: dict = None) -> dict:
-    """通用 API 请求。支持带参数和不带参数两种调用方式。"""
-    url = f"{API_HOST}/{endpoint}"
+    """通用 API 请求 (curl 兜底, 永不被封)"""
+    query_str = ""
     if params:
-        query = "&".join(f"{k}={v}" for k, v in params.items())
-        url += f"?{query}"
-    req = urllib.request.Request(url, headers={"x-apisports-key": API_KEY})
-    for attempt in range(3):
-        try:
-            with urllib.request.urlopen(req, timeout=10, context=SSL_CTX) as resp:
-                return json.loads(resp.read().decode())
-        except Exception as e:
-            if attempt == 2:
-                return {"error": str(e)}
-    return {"error": "max_retries"}
+        query_str = "?" + "&".join(f"{k}={v}" for k, v in params.items())
+    result = _api_get(endpoint + query_str, API_KEY, API_HOST)
+    if result is None:
+        return {"error": "api_failed"}
+    return result
 
 
 def get_injuries(team_id: int, season: int = 2025) -> list:
