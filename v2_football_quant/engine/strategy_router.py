@@ -1,13 +1,60 @@
-"""
-V2-V4 多策略路由中心 (Strategy Router)
-负责将每天扫描到的比赛，根据赛事级别、数据可用性，分发到最匹配的量化定价模型。
-"""
-from logger import logger
+import logging
+
+logger = logging.getLogger(__name__)
+
+# ==========================================
+# 🌐 Strategy Router Phase 3 蓝图
+# ==========================================
+
+class StrategyRouter:
+    """
+    多策略集团军路由中心 (Phase 3 Blueprint)
+
+    当前状态：静默潜伏期 (DRY-RUN)。
+    激活条件：等待 paper_trading 仪表盘积累满 N >= 20 的有效样本。
+    """
+    def __init__(self, enable_active_routing=False):
+        self.enable_active_routing = enable_active_routing
+
+    def process_candidates(self, candidates: list[dict]) -> list[dict]:
+        """
+        接收所有引擎（V2, V3, V4）的候选订单，进行冲突解决、提权与降维。
+        """
+        routed_signals = []
+
+        for rec in candidates:
+            signal = rec.copy()
+
+            if self.enable_active_routing:
+                strategy_id = signal.get("strategy_id", "UNKNOWN")
+                orig_priority = signal.get("priority", 50)
+
+                if strategy_id == "V2_HT_DRAW":
+                    # 规则 1: 黄金跳变加权 ([5] -> [4] 悄悄死一个核心)
+                    if signal.get("attrition_boost_candidate") and signal.get("bin_jump_size", 0) == 1:
+                        signal["priority"] = orig_priority + 30
+                        signal["max_risk_units"] = 1.2
+                        signal["router_note"] = "BOOST_ACTIVATED: 触发黄金伤停跳变区"
+
+                    # 规则 2: 毒药崩塌跳变拦截 ([5] -> [3] 核心大面积报销)
+                    elif signal.get("attrition_flag") and signal.get("bin_jump_size", 0) >= 2:
+                        signal["action"] = "SKIP_TOXIC_JUMP"
+                        signal["skip_reason"] = "Router 阻断: 档位跳变过大，警惕庄家深坑"
+                        signal["priority"] = 0
+
+            routed_signals.append(signal)
+
+        return routed_signals
+
+
+# ==========================================
+# 联赛路由分发器 (已有)
+# ==========================================
 
 # ---------------------------------------------------------
 # 常量定义：联赛分组字典 (API-Football IDs)
 # ---------------------------------------------------------
-WORLD_CUP_ID = [1]  # 世界杯的 API-Football ID 通常是 1（实盘前需二次确认）
+WORLD_CUP_ID = [1]
 
 TOP_5_LEAGUES = [
     39,   # 英超 Premier League
