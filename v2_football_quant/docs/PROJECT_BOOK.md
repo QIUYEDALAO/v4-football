@@ -1,16 +1,22 @@
-# ⚽ V2 Football Quant — 项目书 v2.1
-> HT 1X2 分档模型 · 纸盘验证第3天 · 2026-05-07 · P0 五件套已部署
+# ⚽ V2 Football Quant — 项目书 v2.2
+> HT 1X2 分档模型 · 纸盘验证第3天 · 2026-05-07 · P0 五件套 + 幽灵代码抢险 + 资金升级
 
 | 指标 | 值 |
 |:---|---|
 | 状态 | 纸盘验证 (5/6 – 5/12) |
-| 本金 | 2,000 |
-| 注码 | 100 – 300 (Kelly 不足100 → SKIP_LOW_KELLY) |
-| Kelly | 1/4 (不再强行 clamp 抬高) |
-| CLV | 三层分解: raw_clv / fair_line / ev_vs_close |
+| 本金 | **20,000** |
+| 注码 | 100 – 1,000 (Kelly < 100 → SKIP_LOW_KELLY) |
+| Kelly | **1/4** (绝对红线) |
+| 软熔断 | 回撤 >15% → 1/8 Kelly |
+| 硬熔断 | 回撤 >30% → 强制停机 |
+| CLV | **三层分解**: raw_clv / fair_line / ev_vs_close |
+| 全量候选池 | 每天 08:00 快照归档 |
+| 信号审计 | break_even_prob + action 字段 |
 | 主模型 | deepseek-v4-pro |
 | Cron | 每天 08:00 BJT |
-| 最新 Commit | 8918c5b — P0 五件套 |
+| 最新 Commit | `21aa661` — 资金升级完毕 |
+
+> **累计 3 场纸盘**: 命中 2/3 (66.7%) · 平均 CLV -7.57% · 结论: 3场=噪音, 不修V2
 
 ---
 
@@ -50,6 +56,8 @@ V2 Football Quant 是一个基于 API-Football Pro 数据驱动的足球半场�
 | 2026-05-06 PM | V3/V4 多策略系统建成 · Strategy Router 三路分发 |
 | 2026-05-07 | 工程交付: API Key 统一 · CLV 结算闭环 · 项目书生成 |
 | 2026-05-07 PM | **P0 五件套部署**: Kelly毒药拆除 · 三层CLV · 全量候选池 · 信号审计 · 密钥清理 |
+| 2026-05-07 17:14 | **🚨 幽灵代码抢险**: daily_runner 旧 calc_stake() 未删除, bankroll 接口未打通, SKIP_LOW_KELLY 不生效 |
+| 2026-05-07 19:52 | **💰 资金升级**: 本金 20000 · 单注上限 1000 · 1/4 Kelly 攻击阵型 |
 
 ---
 
@@ -418,6 +426,8 @@ daily_runner.py · paper_trading.py · fetcher.py · odds_monitor.py
 | 3 | **基准防线** | 每天 08:00 快照全量候选池 → universe_candidates_YYMMDD.json | daily_runner.py |
 | 4 | **信号审计** | pred_save 新增 break_even_prob + action 字段 | daily_runner.py |
 | 5 | **密钥清理** | 移除 fallback 明文，强制环境变量，git rm --cached | secrets.py |
+| — | **🚨 幽灵代码抢险** | 旧 calc_stake() 未删除, 打通 bankroll 接口 | daily_runner.py |
+| — | **💰 资金升级** | 本金 2000→20000, 单注 300→1000, Kelly 1/4 | bankroll.py |
 
 ### 8.2 定时任务
 
@@ -457,15 +467,15 @@ branch: main
 
 ### 9.1 银行配置
 
-| 参数 | 值 |
-|:---|---|
-| 本金 | 2,000 |
-| 单注上限 | 300 (绝对安全帽) |
-| 单注下限 | 100 |
-| Kelly 系数 | 1/4 (保守) |
-| 硬熔断 | 回撤 > 40% → 全停 |
-| 软熔断 | 回撤 > 25% → 减半注 |
-| 低价值跳过 | Edge < 10 · 不投 |
+| 参数 | 值 | 说明 |
+|:---|---:|:---|
+| 本金 | **20,000** | 🚀 原始资本 |
+| 单注上限 | **1,000** | 占总本金 5% |
+| Kelly 系数 | **1/4** (红线) | 攻击阵型, 绝不更高 |
+| 软熔断降级 | **1/8 Kelly** | 回撤 > 15% (亏3,000) 减半注 |
+| 硬熔断 | **停投** | 回撤 > 30% (亏6,000) 强制停机检修 |
+| 低价值跳过 | SKIP_LOW_KELLY | Kelly < 100 → 放弃, 宁可不下绝不超配 |
+| 噪音过滤 | SKIP_NOISE | Kelly < 10 → 噪音跳过 |
 
 ### 9.2 Kelly 公式
 
@@ -603,8 +613,8 @@ node tools/jiebao-scraper-v38.js
 ### C. 生成信息
 
 ```
-生成时间: 2026-05-07 17:09 BJT
-版本: v2.1 (P0 五件套部署)
+生成时间: 2026-05-07 22:07 BJT
+版本: v2.2 (P0 五件套 + 幽灵代码抢险 + 资金升级 20000/1/4/1000)
 基于: V2 纸盘第3天 (5/7) 数据
-最新 commit: 8918c5b — P0 五件套
+最新 commit: 21aa661 — 资金升级完毕
 ```
