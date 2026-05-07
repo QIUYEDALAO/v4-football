@@ -13,8 +13,12 @@ import urllib.request
 import ssl
 import time
 from datetime import datetime
+from pathlib import Path
 
-API_KEY = "你的API-KEY请替换"
+import sys
+BASE_DIR = Path(__file__).resolve().parent.parent
+sys.path.insert(0, str(BASE_DIR))
+from config.secrets import API_KEY
 API_HOST = "v3.football.api-sports.io"
 DB_PATH = os.path.join(os.path.dirname(__file__), "..", "db", "v2_football.db")
 

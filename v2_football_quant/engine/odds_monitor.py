@@ -13,10 +13,12 @@ import urllib.request
 from pathlib import Path
 from datetime import datetime
 
-API_KEY = "你的API-KEY请替换"
-API_HOST = "https://v3.football.api-sports.io"
-ALERT_LOG = Path(__file__).parent.parent / "data" / "alert_log.json"
-ODDS_SNAP_DIR = Path(__file__).parent.parent / "data" / "odds_snapshots"
+import sys
+BASE_DIR = Path(__file__).resolve().parent.parent
+sys.path.insert(0, str(BASE_DIR))
+from config.secrets import API_KEY, API_HOST
+ALERT_LOG = BASE_DIR / "data" / "alert_log.json"
+ODDS_SNAP_DIR = BASE_DIR / "data" / "odds_snapshots"
 
 SSL_CTX = ssl.create_default_context()
 SSL_CTX.check_hostname = False

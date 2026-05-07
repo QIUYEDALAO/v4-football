@@ -27,9 +27,11 @@ from typing import Optional
 import urllib.request
 
 # ===== 配置 =====
-API_KEY = "你的API-KEY请替换"
-API_HOST = "https://v3.football.api-sports.io"
-DATA_DIR = Path(__file__).parent.parent / "data" / "raw_fixtures"
+import sys
+BASE_DIR = Path(__file__).resolve().parent.parent
+sys.path.insert(0, str(BASE_DIR))
+from config.secrets import API_KEY, API_HOST
+DATA_DIR = BASE_DIR / "data" / "raw_fixtures"
 SLEEP_MS = 1500  # 1.5秒/次 → 40次/分钟（留余量）
 MAX_RETRIES = 3
 RETRY_BASE_MS = 2000

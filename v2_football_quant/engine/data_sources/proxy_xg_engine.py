@@ -10,8 +10,11 @@ V4 Proxy xG Engine（伪预期进球计算器）
 import json, ssl, urllib.request
 from typing import Optional
 
-API_KEY = "e5e315b1f9ba1ba51dc2124b35f07a01"
-API_HOST = "https://v3.football.api-sports.io"
+import sys
+from pathlib import Path
+BASE_DIR = Path(__file__).resolve().parent.parent.parent
+sys.path.insert(0, str(BASE_DIR))
+from config.secrets import API_KEY, API_HOST
 
 SSL_CTX = ssl.create_default_context()
 SSL_CTX.check_hostname = False

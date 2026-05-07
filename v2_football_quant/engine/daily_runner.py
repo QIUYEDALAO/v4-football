@@ -18,9 +18,10 @@ from datetime import datetime, date, timedelta
 from typing import Optional
 from logger import logger, log_event
 
-API_KEY = "你的API-KEY请替换"
-API_HOST = "https://v3.football.api-sports.io"
+import sys
 BASE_DIR = Path(__file__).resolve().parent.parent
+sys.path.insert(0, str(BASE_DIR))
+from config.secrets import API_KEY, API_HOST
 DATA_DIR = BASE_DIR / "data" / "raw_fixtures"
 REPORT_DIR = BASE_DIR / "data" / "daily_reports"
 REPORT_DIR.mkdir(exist_ok=True)

@@ -23,10 +23,10 @@ from typing import Optional, Dict, Tuple, List
 
 from logger import logger
 
-API_KEY = "你的API-KEY请替换"
-API_HOST = "https://v3.football.api-sports.io"
-
-BASE_DIR = Path("/Users/chenguoqing/.openclaw/workspace/v2_football_quant")
+import sys
+BASE_DIR = Path(__file__).resolve().parent.parent
+sys.path.insert(0, str(BASE_DIR))
+from config.secrets import API_KEY, API_HOST
 REPORT_DIR = BASE_DIR / "data" / "daily_reports"
 REPORT_DIR.mkdir(exist_ok=True)
 LOG_DIR = BASE_DIR / "data" / "paper_trading"
