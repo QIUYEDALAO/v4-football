@@ -20,14 +20,14 @@ from dataclasses import dataclass
 
 @dataclass
 class Bankroll:
-    principal: float = 2000.0  # 本金
-    current: float = 2000.0    # 当前余额
-    daily_count: int = 0       # 今日已投场次
-    unit_max: float = 300.0    # 单注上限（绝对安全帽）
-    stop_loss_pct: float = 0.4  # 熔断：回撤 > 40% 全停
-    max_drawdown_pct: float = 0.25  # 软熔断：回撤 > 25% 减半注
+    principal: float = 20000.0  # 本金
+    current: float = 20000.0    # 当前余额
+    daily_count: int = 0        # 今日已投场次
+    unit_max: float = 1000.0    # 单注安全帽 (5%本金)
+    stop_loss_pct: float = 0.3   # 硬熔断: -30% → 亏6000强制停机
+    max_drawdown_pct: float = 0.15  # 软熔断: -15% → 亏3000减半注
     
-    peak: float = 2000.0       # 历史最高余额
+    peak: float = 20000.0       # 历史最高余额
 
 
 def kelly_fraction(p: float, odds: float, kelly_factor: float = 0.25) -> float:
@@ -72,9 +72,9 @@ def calculate_stake(bankroll: Bankroll, p: float, odds: float) -> dict:
     if drawdown > bankroll.stop_loss_pct:
         return {"action": "SKIP_MELTDOWN", "stake": 0, "reason": f"回撤 {drawdown*100:.1f}% > {bankroll.stop_loss_pct*100:.0f}% 熔断"}
     
-    kf = 0.166  # 1/6 Kelly (HT 平局高方差, 保守)
+    kf = 0.25  # 1/4 Kelly (攻击阵型, 绝对红线)
     if drawdown > bankroll.max_drawdown_pct:
-        kf = 0.083  # 减半 (~1/12 Kelly)
+        kf = 0.125  # 软熔断降级 1/8 Kelly
     
     f = kelly_fraction(p, odds, kf)
     stake_raw = bankroll.current * f
