@@ -595,11 +595,33 @@ def run_once(run_tag="DEFAULT"):
         f.write(report)
     logger.info(f"  → {report_path}")
     
-    # ── 保存全量死因追踪 (包含所有SKIP记录) ──
+    # ── 保存全量死因追踪 (三频合并, 复合主键去重) ──
     scan_path = REPORT_DIR / f"full_scan_{date.today().strftime('%Y%m%d')}.json"
+    existing_full = []
+    existing_scan_keys = set()
+    if scan_path.exists():
+        try:
+            with open(scan_path) as f:
+                existing_data = json.load(f)
+                existing_full = existing_data.get("candidates", [])
+                # 🌟 复合主键: fixture_id + scan_tag, 三频快照互不吞食
+                existing_scan_keys = {
+                    f"{p['fixture_id']}_{p.get('scan_tag', 'DEFAULT')}"
+                    for p in existing_full if isinstance(p, dict)
+                }
+                # 累计漏斗统计
+                if isinstance(existing_data.get("stats"), dict):
+                    for k in stats:
+                        stats[k] = stats.get(k, 0) + existing_data["stats"].get(k, 0)
+        except Exception:
+            pass
+    merged_full = existing_full + [
+        p for p in all_candidates
+        if f"{p['fixture_id']}_{p.get('scan_tag', 'DEFAULT')}" not in existing_scan_keys
+    ]
     with open(scan_path, "w") as f:
-        json.dump({"date": date.today().isoformat(), "stats": stats, "candidates": all_candidates}, f, ensure_ascii=False, indent=2)
-    logger.info(f"📋 全量死因追踪: {len(all_candidates)} 场 → {scan_path}")
+        json.dump({"date": date.today().isoformat(), "stats": stats, "candidates": merged_full}, f, ensure_ascii=False, indent=2)
+    logger.info(f"📋 全量死因追踪: {len(merged_full)} 场 (新增 {len(all_candidates)}) → {scan_path}")
 
     logger.info(f"[7/7] 输出日报 + 保存预测")
     print()
