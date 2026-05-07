@@ -446,6 +446,10 @@ def run_once():
             "bin_jump_size": fx.get("bin_jump_size", 0),
             "attrition_boost_candidate": fx.get("attrition_boost_candidate", False),
             "attrition_details": fx.get("attrition_details", []),
+            # 🌟 Strategy Router 数据契约 (Phase 3)
+            "strategy_id": "V2_HT_DRAW",
+            "priority": 50,
+            "max_risk_units": 1,
         }
         
         market_odds = fx.get("_ht_1x2", {})
@@ -602,6 +606,10 @@ def run_once():
             "stake_info": rec.get("stake_info", {}),
             "action": rec["action"],
             "bookmaker": rec.get("bookmaker", "?"),
+            # Strategy Router 契约
+            "strategy_id": rec.get("strategy_id", "V2_HT_DRAW"),
+            "attrition_flag": rec.get("attrition_flag", False),
+            "attrition_boost_candidate": rec.get("attrition_boost_candidate", False),
         })
 
     pred_path = REPORT_DIR / f"predictions_{date.today().strftime('%Y%m%d')}.json"
