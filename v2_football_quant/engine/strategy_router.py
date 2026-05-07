@@ -27,15 +27,15 @@ class StrategyRouter:
         clv = stats.get("avg_true_clv_pct", 0.0)
 
         if bets < 20:
-            logger.warning(f"BLOCK_ROUTER_ACTIVATION: insufficient data for pattern {pattern_key} (N={bets} < 20)")
+            logger.warning(f"[GUARD] ROUTER_BLOCKED | code=N_TOO_SMALL | detail=pattern {pattern_key} N={bets} < 20")
             return False
 
         if required_type == "boost" and clv <= 0:
-            logger.warning(f"BLOCK_ROUTER_ACTIVATION: negative CLV for pattern {pattern_key} (CLV={clv}%)")
+            logger.warning(f"[GUARD] ROUTER_BLOCKED | code=CLV_NEGATIVE | detail=pattern {pattern_key} CLV={clv}%")
             return False
 
         if required_type == "toxic" and clv > -2.0:  # 没亏透，不算毒药
-            logger.warning(f"BLOCK_ROUTER_ACTIVATION: CLV not toxic enough for {pattern_key} (CLV={clv}%)")
+            logger.warning(f"[GUARD] ROUTER_BLOCKED | code=CLV_NOT_TOXIC | detail=pattern {pattern_key} CLV={clv}% > -2%")
             return False
 
         return True

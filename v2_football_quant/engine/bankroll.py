@@ -17,6 +17,9 @@ Kelly公式：f* = (bp - q) / b
 
 import math
 from dataclasses import dataclass
+import logging
+
+logger = logging.getLogger(__name__)
 
 @dataclass
 class Bankroll:
@@ -78,6 +81,7 @@ def calculate_stake(bankroll: Bankroll, p: float, odds: float) -> dict:
     # 获取 Kelly 系数 (阶梯熔断)
     kf = _kelly_factor_for_drawdown(drawdown)
     if kf == 0.0:
+        logger.critical(f"[GUARD] SYSTEM_MELTDOWN | code=MDD_EXCEEDED | detail=drawdown {drawdown*100:.1f}% > 30%")
         return {
             "action": "SKIP_MELTDOWN", "stake": 0, "reason": "回撤>30%触发硬熔断",
             "raw_kelly": 0.0, "effective_kelly": 0.0, "kelly_factor_used": 0.0
@@ -100,6 +104,7 @@ def calculate_stake(bankroll: Bankroll, p: float, odds: float) -> dict:
     min_unit = getattr(bankroll, "unit_min", 100.0)
 
     if final_stake < min_unit:
+        logger.info(f"[GUARD] STAKE_BLOCKED | code=LOW_KELLY | detail=Kelly {final_stake:.1f} < min_unit {min_unit}")
         return {
             "action": "SKIP_LOW_KELLY", "stake": 0,
             "reason": f"计算仓位 {round(final_stake, 2)} < 底注 {min_unit}",

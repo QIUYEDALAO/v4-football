@@ -43,26 +43,26 @@ class LiveBridgeGateway:
         # 1. 样本底线 (N >= 50)
         bets = paper_summary.get("total_bets", 0)
         if bets < 50:
-            logger.warning(f"🚫 准入失败: 纸盘总样本不足 (当前 {bets} < 要求 50)")
+            logger.warning(f"[GUARD] BRIDGE_BLOCKED | code=PAPER_N_INSUFFICIENT | detail=total_bets={bets} < 50")
             return False
 
         # 2. 全局护城河 (过去 50 场 avg_true_clv >= 1%)
         last50 = paper_summary.get("last_50_stats", {})
         clv_last50 = last50.get("avg_true_clv_pct", 0.0)
         if clv_last50 < 1.0:
-            logger.warning(f"🚫 准入失败: 近50场 True CLV 未达标 (当前 {clv_last50}% < 要求 1.0%)")
+            logger.warning(f"[GUARD] BRIDGE_BLOCKED | code=PAPER_CLV_WEAK | detail=last50 avg_true_clv={clv_last50}% < 1.0%")
             return False
 
         # 3. 资金曲线定力 (MDD <= 12%)
         mdd = paper_summary.get("mdd_pct", 100.0)
         if mdd > 12.0:
-            logger.warning(f"🚫 准入失败: 最大回撤超标 (当前 {mdd}% > 红线 12.0%)")
+            logger.warning(f"[GUARD] BRIDGE_BLOCKED | code=PAPER_MDD_HIGH | detail=MDD={mdd}% > 12%")
             return False
 
         # 4. 核心发力证明 (黄金区必须证明有效)
         golden = router_summary.get("[5] -> [4]", {})
         if golden.get("bets", 0) < 20 or golden.get("avg_true_clv_pct", 0.0) <= 0:
-            logger.warning(f"🚫 准入失败: 黄金跳变区特征未被验证为正向 Alpha。")
+            logger.warning(f"[GUARD] BRIDGE_BLOCKED | code=GOLDEN_ZONE_UNPROVEN | detail=黄金跳变区 N={golden.get('bets',0)} CLV={golden.get('avg_true_clv_pct',0)}%")
             return False
 
         logger.info("✅ 准入审查通过！系统具备进入 SANDBOX 模式资格。")
@@ -106,7 +106,7 @@ class LiveBridgeGateway:
         bets = last_window.get("bets", 0)
 
         if bets >= 20 and clv < 0.0:
-            logger.critical(f"🚨 KILL_SWITCH_TRIGGERED: 实盘 Rolling 20 场的 True CLV ({clv}%) 跌穿 0%!")
+            logger.critical(f"[GUARD] KILL_SWITCH_TRIGGERED | code=LIVE_CLV_NEG | detail=rolling20 avg_true_clv={clv}%")
             logger.critical("🚨 系统判定遇到了严重滑点或微观结构巨变。强制回退至 PAPER 模式！")
             self.mode = LiveMode.PAPER
             return True
