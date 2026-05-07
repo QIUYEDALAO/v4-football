@@ -76,7 +76,75 @@ def get_player_stats(team_id: int, season: int = 2025) -> list:
 
 
 # ==========================================
-# 🎯 战力折损引擎 (Lineup Arbitrage)
+# 🚑 早盘伤停折损引擎 (08:00 Crude Attrition)
+# ==========================================
+
+class InjuryAttritionEngine:
+    """赛前早盘分析 → 基于 injuries 接口计算绝对核心伤缺带来的 Spread 折损"""
+
+    def __init__(self, weights_path: str = None):
+        path = weights_path or str(BASE_DIR / "config" / "core_players_weight.json")
+        try:
+            with open(path) as f:
+                self.weights_db = json.load(f)
+        except Exception:
+            self.weights_db = {}
+        self._injury_cache = {}
+
+    def fetch_fixture_injuries(self, fixture_id: int) -> list:
+        """拉取该场比赛的所有伤病/停赛名单"""
+        if fixture_id in self._injury_cache:
+            return self._injury_cache[fixture_id]
+
+        resp = api_request("injuries", {"fixture": fixture_id})
+        data = resp.get("response", [])
+        self._injury_cache[fixture_id] = data
+        return data
+
+    def calculate_attrition(self, fixture_id: int, home_id: int, away_id: int) -> dict:
+        """
+        计算主客队的战力折损 Delta。
+        Returns: {"delta_home": float, "delta_away": float, "details": list}
+        """
+        result = {"delta_home": 0.0, "delta_away": 0.0, "details": []}
+
+        home_str, away_str = str(home_id), str(away_id)
+        # 如果两队都不在配置表里，直接跳过，节省网络请求
+        if home_str not in self.weights_db and away_str not in self.weights_db:
+            return result
+
+        injuries = self.fetch_fixture_injuries(fixture_id)
+        if not injuries:
+            return result
+
+        for inj in injuries:
+            team_id = str(inj.get("team", {}).get("id"))
+            player_name = inj.get("player", {}).get("name", "")
+
+            if team_id not in self.weights_db:
+                continue
+
+            core_players = self.weights_db[team_id].get("players", {})
+
+            # 名字匹配 (包含匹配，防止 API 缩写不一致)
+            for core_name, core_data in core_players.items():
+                if core_name.lower() in player_name.lower() or player_name.lower() in core_name.lower():
+                    weight = core_data["weight"]
+                    if team_id == home_str:
+                        result["delta_home"] += weight
+                        result["details"].append(f"{core_name} (-{weight})")
+                    elif team_id == away_str:
+                        result["delta_away"] += weight
+                        result["details"].append(f"{core_name} (-{weight})")
+                    break  # 匹配到一个就跳出
+
+        result["delta_home"] = round(result["delta_home"], 1)
+        result["delta_away"] = round(result["delta_away"], 1)
+        return result
+
+
+# ==========================================
+# 🎯 战力折损引擎 (Lineup Arbitrage · V4 T-60min)
 # ==========================================
 
 class LineupArbitrageEngine:

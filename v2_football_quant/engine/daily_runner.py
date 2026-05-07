@@ -23,6 +23,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(BASE_DIR))
 from config.secrets import API_KEY, API_HOST
 from bankroll import Bankroll, calculate_stake
+from engine.data_sources.apifootball_deep import InjuryAttritionEngine
 DATA_DIR = BASE_DIR / "data" / "raw_fixtures"
 REPORT_DIR = BASE_DIR / "data" / "daily_reports"
 REPORT_DIR.mkdir(exist_ok=True)
@@ -338,10 +339,36 @@ def run_once():
 
     # 💰 实例化真实资金池 (P0 修复: 打通 bankroll.py 经脉)
     br = Bankroll()
+    # 🚑 早盘伤停折损引擎 (Phase 2)
+    injury_engine = InjuryAttritionEngine()
 
-    logger.info(f"[3/7] 计算 att_def_spread + decile 映射...")
+    logger.info(f"[3/7] 计算 att_def_spread + 伤停折损修正...")
     for fx in fixtures:
-        calc_spread(fx)
+        # 1. 算基础攻防差
+        base_spread = calc_spread(fx)
+        
+        # 2. 算伤停折损 (早盘补丁)
+        attrition = injury_engine.calculate_attrition(fx["id"], fx["homeId"], fx["awayId"])
+        delta_home = attrition["delta_home"]
+        delta_away = attrition["delta_away"]
+        
+        # 3. 如果有大哥伤停，进行物理学修正
+        if delta_home > 0 or delta_away > 0:
+            # 主队伤了，主队变弱(-)，客队伤了，主队相对变强(+)
+            adj_spread = base_spread - delta_home + delta_away
+            adj_spread = round(adj_spread, 1)
+            
+            # 覆盖原始数据，并重新映射档位
+            fx["att_def_spread"] = adj_spread
+            fx["decile_info"] = map_to_decile(adj_spread)
+            
+            # 记录在案，留给 JSON 审计
+            fx["attrition_details"] = attrition["details"]
+            fx["base_spread"] = base_spread
+            
+            logger.info(f"  🚑 伤停修正! {fx['home']} vs {fx['away']} | Base: {base_spread} -> Adj: {adj_spread}")
+            for d in attrition["details"]:
+                logger.info(f"     └─ 缺阵: {d}")
 
     logger.info(f"[4/7] 拉取 HT 1X2 赔率...")
     for fx in fixtures:
@@ -393,7 +420,11 @@ def run_once():
             "stake_info": None,
             "action": None,
             "skip_code": None,
-            "skip_reason": None
+            "skip_reason": None,
+            # 伤停折损审计
+            "base_spread": fx.get("base_spread"),
+            "adj_spread": fx.get("att_def_spread") if fx.get("base_spread") != fx.get("att_def_spread") else None,
+            "attrition_details": fx.get("attrition_details", []),
         }
         
         market_odds = fx.get("_ht_1x2", {})
