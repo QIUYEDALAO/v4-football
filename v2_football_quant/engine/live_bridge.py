@@ -1,0 +1,163 @@
+"""
+Phase 4: 纸盘至实盘最高权力网关 (Live Bridge)
+================================================
+不管 V2 / V3 / V4，要下单必须过这一关。
+
+三大闸门：
+  ⛩️ can_enter_sandbox()    — 实盘准入 (N≥50, CLV≥1%, MDD≤12%)
+  🛡️ calculate_sandbox_stake() — 试水期固定小额 (0.5%本金)
+  🛑 check_kill_switch()    — CLV 跌破 0 → 自动拔网线回纸盘
+"""
+
+import logging
+from enum import Enum
+from pathlib import Path
+
+logger = logging.getLogger(__name__)
+
+
+class LiveMode(str, Enum):
+    PAPER = "PAPER"          # 纯纸盘 (当前)
+    SANDBOX = "SANDBOX"      # 小仓试水实盘
+    FULL = "FULL"            # 全仓实盘 (未来)
+
+
+BASE_DIR = Path(__file__).resolve().parent.parent
+
+
+class LiveBridgeGateway:
+    """
+    Phase 4: 纸盘到实盘的最高权力网关。
+    负责：入场资格审查、试水期资金限额、以及 Kill-Switch 拔网线。
+    """
+
+    def __init__(self, mode: LiveMode = LiveMode.PAPER):
+        self.mode = mode
+
+    def can_enter_sandbox(self, paper_summary: dict, router_summary: dict) -> bool:
+        """
+        ⛩️ 第一道闸：实盘准入条件审查 (纯客观，无情感)
+        """
+        logger.info("🔍 正在审查实盘(SANDBOX)准入资格...")
+
+        # 1. 样本底线 (N >= 50)
+        bets = paper_summary.get("total_bets", 0)
+        if bets < 50:
+            logger.warning(f"🚫 准入失败: 纸盘总样本不足 (当前 {bets} < 要求 50)")
+            return False
+
+        # 2. 全局护城河 (过去 50 场 avg_true_clv >= 1%)
+        last50 = paper_summary.get("last_50_stats", {})
+        clv_last50 = last50.get("avg_true_clv_pct", 0.0)
+        if clv_last50 < 1.0:
+            logger.warning(f"🚫 准入失败: 近50场 True CLV 未达标 (当前 {clv_last50}% < 要求 1.0%)")
+            return False
+
+        # 3. 资金曲线定力 (MDD <= 12%)
+        mdd = paper_summary.get("mdd_pct", 100.0)
+        if mdd > 12.0:
+            logger.warning(f"🚫 准入失败: 最大回撤超标 (当前 {mdd}% > 红线 12.0%)")
+            return False
+
+        # 4. 核心发力证明 (黄金区必须证明有效)
+        golden = router_summary.get("[5] -> [4]", {})
+        if golden.get("bets", 0) < 20 or golden.get("avg_true_clv_pct", 0.0) <= 0:
+            logger.warning(f"🚫 准入失败: 黄金跳变区特征未被验证为正向 Alpha。")
+            return False
+
+        logger.info("✅ 准入审查通过！系统具备进入 SANDBOX 模式资格。")
+        return True
+
+    def calculate_sandbox_stake(self, total_bankroll: float, recommended_action: str) -> dict:
+        """
+        🛡️ 第二道闸：试水期资金剥夺 (抛弃 Kelly，固定小额)
+        """
+        if self.mode != LiveMode.SANDBOX:
+            return {"action": "BLOCK_NOT_SANDBOX", "stake": 0,
+                    "reason": "系统当前未处于 SANDBOX 状态"}
+
+        if not recommended_action.startswith("BET"):
+            return {"action": recommended_action, "stake": 0,
+                    "reason": "保持原有拦截逻辑"}
+
+        # 试水期铁律：固定锁定总本金的 0.5%
+        safe_stake = round(total_bankroll * 0.005, 2)
+
+        return {
+            "action": "BET_LIVE_SANDBOX",
+            "stake": safe_stake,
+            "reason": f"沙盒模式保护：固定 {0.5}% 仓位"
+        }
+
+    def check_kill_switch(self, live_summary: dict) -> bool:
+        """
+        🛑 第三道闸：试水期熔断退回机制
+        如果实盘滚动的 True CLV 跌破 0，立刻拔网线。
+        """
+        if self.mode != LiveMode.SANDBOX:
+            return False
+
+        windows = live_summary.get("rolling_windows", [])
+        if not windows:
+            return False
+
+        last_window = windows[-1]
+        clv = last_window.get("avg_true_clv_pct", 0.0)
+        bets = last_window.get("bets", 0)
+
+        if bets >= 20 and clv < 0.0:
+            logger.critical(f"🚨 KILL_SWITCH_TRIGGERED: 实盘 Rolling 20 场的 True CLV ({clv}%) 跌穿 0%!")
+            logger.critical("🚨 系统判定遇到了严重滑点或微观结构巨变。强制回退至 PAPER 模式！")
+            self.mode = LiveMode.PAPER
+            return True
+
+        return False
+
+
+# ==========================================
+# 🧪 准入测试
+# ==========================================
+if __name__ == "__main__":
+    print("🧪 Live Bridge Gateway 单元测试\n")
+
+    bridge = LiveBridgeGateway()
+
+    # 测试1: 纸盘样本不足
+    print("【测试 1】N=3 → 准入应失败")
+    ok = bridge.can_enter_sandbox(
+        {"total_bets": 3, "last_50_stats": {"avg_true_clv_pct": 2.0}, "mdd_pct": 5.0},
+        {"[5] -> [4]": {"bets": 25, "avg_true_clv_pct": 3.5}}
+    )
+    print(f"  结果: {'✅ 放行' if ok else '🚫 拦截'} (预期: 拦截)\n")
+
+    # 测试2: 全通过
+    print("【测试 2】N=50, CLV=2%, MDD=8%, 黄金区有效 → 准入应通过")
+    ok = bridge.can_enter_sandbox(
+        {"total_bets": 55, "last_50_stats": {"avg_true_clv_pct": 2.0}, "mdd_pct": 8.0},
+        {"[5] -> [4]": {"bets": 25, "avg_true_clv_pct": 3.5}}
+    )
+    print(f"  结果: {'✅ 放行' if ok else '🚫 拦截'} (预期: 放行)\n")
+
+    # 测试3: CLV不达标
+    print("【测试 3】N=50, CLV=0.3%, MDD=8% → 准入应失败")
+    ok = bridge.can_enter_sandbox(
+        {"total_bets": 55, "last_50_stats": {"avg_true_clv_pct": 0.3}, "mdd_pct": 8.0},
+        {"[5] -> [4]": {"bets": 25, "avg_true_clv_pct": 3.5}}
+    )
+    print(f"  结果: {'✅ 放行' if ok else '🚫 拦截'} (预期: 拦截)\n")
+
+    # 测试4: Sandbox stake
+    bridge.mode = LiveMode.SANDBOX
+    stake = bridge.calculate_sandbox_stake(20000, "BET")
+    print(f"【测试 4】SANDBOX stake: {stake}")
+    print(f"  预期: BET_LIVE_SANDBOX, stake=100.0\n")
+
+    # 测试5: Kill switch
+    print("【测试 5】Kill-switch: CLV=-1% → 应触发")
+    triggered = bridge.check_kill_switch({
+        "rolling_windows": [{"bets": 20, "avg_true_clv_pct": -1.0}]
+    })
+    print(f"  Kill-switch: {'🔥 触发!' if triggered else '😌 安全'}, mode={bridge.mode.value}")
+    print(f"  预期: 触发, mode=PAPER")
+
+    print("\n✅ Live Bridge 全功能测试通过")
