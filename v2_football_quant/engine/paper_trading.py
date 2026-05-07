@@ -370,6 +370,12 @@ def full_summary(window_size: int = 10):
     by_league = defaultdict(_create_bucket)
     by_bin = defaultdict(_create_bucket)
     by_day = defaultdict(_create_bucket)
+
+    # 🌟 A/B 测试容器
+    by_attrition = {
+        "With Attrition (有战力折损)": _create_bucket(),
+        "Without Attrition (无伤停影响)": _create_bucket()
+    }
     by_clv_bucket = defaultdict(lambda: {"bets": 0, "hits": 0, "pnl": 0.0})
 
     # 归一化日期字段
@@ -407,6 +413,11 @@ def full_summary(window_size: int = 10):
         _fill(by_league[league])
         _fill(by_bin[str(bin_id)])
         _fill(by_day[day_key])
+
+        # 🌟 填充 A/B 测试容器
+        has_attrition = r.get("attrition_flag", False)
+        attrition_key = "With Attrition (有战力折损)" if has_attrition else "Without Attrition (无伤停影响)"
+        _fill(by_attrition[attrition_key])
 
         # CLV 桶
         if true_clv > 0.05: bucket = "CLV > +5%"
@@ -481,6 +492,8 @@ def full_summary(window_size: int = 10):
     # 简单健康报警
     health_flags = []
 
+    by_attrition_out = _finalize_group(by_attrition)
+
     if rolling:
         last = rolling[-1]
         if last["avg_true_clv_pct"] < -2.0:
@@ -527,6 +540,12 @@ def full_summary(window_size: int = 10):
     for b_id, v in sorted(by_bin_out.items(), key=lambda x: str(x[0])):
         print(f"Decile {b_id:<7} | {v['bets']:<4} | {v['hit_rate_pct']:>4.1f}% | {v['roi_pct']:>6.2f}% | {v['avg_true_clv_pct']:>7.2f}%")
 
+    print(f"\n⚖️ 【因子 A/B 测试：伤停折损 (Attrition) 效用分析】")
+    print(f"{'影响状态':<32} | {'样本':<4} | {'胜率':>5} | {'ROI':>7} | {'True CLV':>8}")
+    print("-" * 65)
+    for a_key, v in by_attrition_out.items():
+        print(f"{a_key:<32} | {v['bets']:<4} | {v['hit_rate_pct']:>4.1f}% | {v['roi_pct']:>6.2f}% | {v['avg_true_clv_pct']:>7.2f}%")
+
     if health_flags:
         print(f"\n🚨 【系统健康度报警】")
         for flag in health_flags:
@@ -545,6 +564,7 @@ def full_summary(window_size: int = 10):
             "avg_fair_line_clv_pct": round(avg_fair_line_clv * 100, 2),
         },
         "by_league": by_league_out, "by_bin": by_bin_out,
+        "by_attrition": by_attrition_out,
         "daily_timeseries": daily_timeseries, "rolling_windows": rolling,
         "health_flags": health_flags
     }
