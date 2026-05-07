@@ -14,7 +14,7 @@ V2 每日自动运行脚本 v2.0 (HT 1X2)
 import json, ssl, time, os, math, certifi, sys, argparse
 import urllib.request
 from pathlib import Path
-from datetime import datetime, date, timedelta
+from datetime import datetime, date, timedelta, timezone
 from typing import Optional
 from logger import logger, log_event
 
@@ -460,7 +460,8 @@ def run_once(run_tag="DEFAULT"):
             "max_risk_units": 1,
             # 🌟 时序雷达字段
             "scan_tag": run_tag,
-            "scan_time": datetime.now().isoformat(),
+            "scan_time_utc": datetime.now(timezone.utc).isoformat(),
+            "scan_time_local": datetime.now().isoformat(),
         }
         
         market_odds = fx.get("_ht_1x2", {})
@@ -521,7 +522,8 @@ def run_once(run_tag="DEFAULT"):
         # ── 🌟 首次触发去重锁 (Time-Series Signal Lock) ──
         if fx["id"] in already_selected:
             base_rec.update({"action": "ALREADY_SELECTED", "skip_code": "DUPLICATE",
-                           "skip_reason": f"今日 [{run_tag}] 前已被锁定"})
+                           "skip_reason": f"今日 [{run_tag}] 前已被锁定",
+                           "strategy_note": "multi_scan_duplicate"})
             all_candidates.append(base_rec)
             continue
 
@@ -649,7 +651,7 @@ def run_once(run_tag="DEFAULT"):
 
     # 🌟 写入状态机，把锁定的比赛传给下一个 Cron
     with open(state_file, "w") as f:
-        json.dump(list(already_selected), f)
+        json.dump(sorted(list(already_selected)), f)
     logger.info(f"🔒 状态机: {len(already_selected)} 场比赛已锁定 → {state_file}")
 
     # 昨日验证
