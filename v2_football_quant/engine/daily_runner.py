@@ -342,18 +342,16 @@ def run_once():
     # 🚑 早盘伤停折损引擎 (Phase 2)
     injury_engine = InjuryAttritionEngine()
 
-    logger.info(f"[3/7] 计算 att_def_spread + 伤停折损修正 (Phase 2.1 档位跳变埋点)...")
+    logger.info(f"[3/7] 计算 att_def_spread + 伤停折损修正 (Phase 2.2)...")
     for fx in fixtures:
-        # 1. 算基础攻防差
         base_spread = calc_spread(fx)
-        orig_bin = fx["decile_info"]["decile"]  # 记录原始档位
-        
-        # 2. 算伤停折损 (早盘补丁)
+        orig_bin = fx["decile_info"]["decile"]
+
         attrition = injury_engine.calculate_attrition(fx["id"], fx["homeId"], fx["awayId"])
         delta_home = attrition["delta_home"]
         delta_away = attrition["delta_away"]
-        
-        # 默认初始化 A/B 字段
+
+        # 初始化
         fx["attrition_flag"] = False
         fx["delta_home"] = delta_home
         fx["delta_away"] = delta_away
@@ -361,25 +359,28 @@ def run_once():
         fx["adj_spread"] = base_spread
         fx["orig_bin"] = orig_bin
         fx["adj_bin"] = orig_bin
-        
-        # 3. 如果有大哥伤停，进行物理学修正
+        fx["bin_jump_size"] = 0
+        fx["attrition_boost_candidate"] = False  # 🌟 Boost 地基
+
         if delta_home > 0 or delta_away > 0:
-            # 主队伤了，主队变弱(-)，客队伤了，主队相对变强(+)
             adj_spread = round(base_spread - delta_home + delta_away, 1)
             adj_decile_info = map_to_decile(adj_spread)
             adj_bin = adj_decile_info["decile"]
-            
-            # 覆盖核心定价数据
+            jump_size = abs(orig_bin - adj_bin)
+
             fx["att_def_spread"] = adj_spread
             fx["decile_info"] = adj_decile_info
-            
-            # 记录 A/B 验证字段
             fx["attrition_flag"] = True
             fx["adj_spread"] = adj_spread
             fx["adj_bin"] = adj_bin
+            fx["bin_jump_size"] = jump_size
             fx["attrition_details"] = attrition["details"]
-            
-            logger.info(f"  🚑 伤停修正! {fx['home']} vs {fx['away']} | Spread: {base_spread} -> {adj_spread} | 档位跳变: [{orig_bin}] -> [{adj_bin}]")
+
+            # 🌟 触发 Boost: 有伤停且引起实质性档位跳变
+            if jump_size >= 1:
+                fx["attrition_boost_candidate"] = True
+
+            logger.info(f"  🚑 伤停修正! {fx['home']} vs {fx['away']} | 档位: [{orig_bin}]->[{adj_bin}] | Boost: {fx['attrition_boost_candidate']}")
             for d in attrition["details"]:
                 logger.info(f"     └─ 缺阵: {d}")
 
@@ -440,8 +441,10 @@ def run_once():
             "delta_away": fx.get("delta_away", 0),
             "base_spread": fx.get("base_spread"),
             "adj_spread": fx.get("adj_spread"),
-            "orig_bin": fx.get("orig_bin", row["decile"]),
+            "origin_bin": fx.get("orig_bin", row["decile"]),
             "adj_bin": fx.get("adj_bin", row["decile"]),
+            "bin_jump_size": fx.get("bin_jump_size", 0),
+            "attrition_boost_candidate": fx.get("attrition_boost_candidate", False),
             "attrition_details": fx.get("attrition_details", []),
         }
         

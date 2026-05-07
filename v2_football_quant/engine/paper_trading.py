@@ -376,6 +376,8 @@ def full_summary(window_size: int = 10):
         "With Attrition (有战力折损)": _create_bucket(),
         "Without Attrition (无伤停影响)": _create_bucket()
     }
+    by_attr_bin = defaultdict(_create_bucket)   # 🌟 交叉视角：Attrition x Bin
+    by_bin_jump = defaultdict(_create_bucket)    # 🌟 档位跳变矩阵
     by_clv_bucket = defaultdict(lambda: {"bets": 0, "hits": 0, "pnl": 0.0})
 
     # 归一化日期字段
@@ -416,8 +418,17 @@ def full_summary(window_size: int = 10):
 
         # 🌟 填充 A/B 测试容器
         has_attrition = r.get("attrition_flag", False)
-        attrition_key = "With Attrition (有战力折损)" if has_attrition else "Without Attrition (无伤停影响)"
-        _fill(by_attrition[attrition_key])
+        attr_key = "With Attrition (有战力折损)" if has_attrition else "Without Attrition (无伤停影响)"
+        _fill(by_attrition[attr_key])
+
+        # 🌟 填充交叉视角 (Attrition + Bin)
+        orig_bin = r.get("orig_bin", bin_id)
+        _fill(by_attr_bin[f"{'有伤停' if has_attrition else '无伤停'} | 档位 {bin_id}"])
+
+        # 🌟 填充档位跳变矩阵 (只统计发生了伤停修正的)
+        if has_attrition:
+            jump_str = f"[{orig_bin}] -> [{bin_id}]"
+            _fill(by_bin_jump[jump_str])
 
         # CLV 桶
         if true_clv > 0.05: bucket = "CLV > +5%"
@@ -493,6 +504,8 @@ def full_summary(window_size: int = 10):
     health_flags = []
 
     by_attrition_out = _finalize_group(by_attrition)
+    by_attr_bin_out = _finalize_group(by_attr_bin)
+    by_bin_jump_out = _finalize_group(by_bin_jump)
 
     if rolling:
         last = rolling[-1]
@@ -546,6 +559,20 @@ def full_summary(window_size: int = 10):
     for a_key, v in by_attrition_out.items():
         print(f"{a_key:<32} | {v['bets']:<4} | {v['hit_rate_pct']:>4.1f}% | {v['roi_pct']:>6.2f}% | {v['avg_true_clv_pct']:>7.2f}%")
 
+    print(f"\n🔬 【伤停 x 档位：深度交叉审计】")
+    print(f"{'组合状态':<24} | {'样本':<4} | {'ROI':>7} | {'True CLV':>8}")
+    print("-" * 55)
+    for k, v in sorted(by_attr_bin_out.items(), key=lambda x: x[1]['avg_true_clv_pct'], reverse=True):
+        if v["bets"] > 0:
+            print(f"{k:<24} | {v['bets']:<4} | {v['roi_pct']:>6.2f}% | {v['avg_true_clv_pct']:>7.2f}%")
+
+    print(f"\n🔀 【档位跳变矩阵】")
+    print(f"{'跳变路径 (Orig->Adj)':<24} | {'样本':<4} | {'ROI':>7} | {'True CLV':>8}")
+    print("-" * 55)
+    for k, v in sorted(by_bin_jump_out.items(), key=lambda x: x[1]['bets'], reverse=True):
+        if v["bets"] > 0:
+            print(f"{k:<24} | {v['bets']:<4} | {v['roi_pct']:>6.2f}% | {v['avg_true_clv_pct']:>7.2f}%")
+
     if health_flags:
         print(f"\n🚨 【系统健康度报警】")
         for flag in health_flags:
@@ -565,6 +592,8 @@ def full_summary(window_size: int = 10):
         },
         "by_league": by_league_out, "by_bin": by_bin_out,
         "by_attrition": by_attrition_out,
+        "by_attr_bin": by_attr_bin_out,
+        "by_bin_jump": by_bin_jump_out,
         "daily_timeseries": daily_timeseries, "rolling_windows": rolling,
         "health_flags": health_flags
     }
