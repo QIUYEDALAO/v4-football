@@ -634,6 +634,20 @@ def full_summary(window_size: int = 10):
     print(f" [5] GUARD审计      : grep '[GUARD]' *.log → 全链路防线日志追踪")
     print("=" * 60)
 
+    # ── 🌍 V3 大赛引擎专属仪表盘 ──
+    v3_bets = [r for r in all_results if r.get("strategy_id") == "V3_PERCEPTION_GAP_SNIPER"]
+    if v3_bets:
+        print(f"\n🌍 【V3 大赛引擎专属仪表盘】")
+        print("=" * 60)
+        v3_profit = sum(float(b.get("pnl", 0)) for b in v3_bets)
+        v3_hits = sum(1 for b in v3_bets if b.get("is_hit"))
+        print(f"总捕获: {len(v3_bets)} 场 | 命中: {v3_hits} | 净利: {v3_profit:+.1f}u")
+        extreme = [b for b in v3_bets if b.get("perception_gap", 0) >= 1.0]
+        if extreme:
+            ex_profit = sum(float(b.get("pnl", 0)) for b in extreme)
+            print(f"🔥 极度泡沫区 (Gap>=1.0): N={len(extreme)}, 净利: {ex_profit:+.1f}u")
+        print("=" * 60)
+
     print("=" * 60 + "\n")
 
     return {

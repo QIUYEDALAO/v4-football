@@ -73,6 +73,20 @@ class StrategyRouter:
                             signal["skip_reason"] = f"Router 阻断: {jump_str} 毒药区，警惕庄家深坑"
                             signal["priority"] = 0
 
+                # ── V3 认知泡沫狙击手 (大赛引擎) ──
+                elif strategy_id == "V3_PERCEPTION_GAP_SNIPER":
+                    is_world_cup_window = False  # 线上常态关闭, 大赛期间手动开启
+                    if not is_world_cup_window:
+                        signal["action"] = "SKIP_OFF_SEASON"
+                        signal["skip_reason"] = "Router 阻断: 当前非世界杯/欧洲杯窗口"
+                        signal["priority"] = 0
+                    else:
+                        requested_leverage = signal.get("leverage_boost", 1.0)
+                        if requested_leverage > 1.0:
+                            signal["leverage_boost"] = 1.0
+                            signal["router_note"] = f"[GUARD] 强制压制杠杆 {requested_leverage} -> 1.0"
+                        signal["priority"] = 99  # 国家队大肉，最高优先级
+
             routed_signals.append(signal)
 
         return routed_signals
