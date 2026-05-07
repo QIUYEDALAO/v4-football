@@ -331,83 +331,222 @@ def verify_date(date_str: str) -> dict:
 
 
 # ═══════════════════════════════════════════════════════════
-# 全量汇总
+# 全量汇总 (Phase 1 Task 3: 多维归因仪表盘)
 # ═══════════════════════════════════════════════════════════
 
-def full_summary():
-    """汇总所有纸盘验证数据"""
+def full_summary(window_size: int = 10):
+    """多维归因仪表盘式汇总所有纸盘验证数据 (Phase 1 Task 3)"""
     logs = sorted(LOG_DIR.glob("verified_*.json"))
     if not logs:
         return {"error": "无验证日志"}
 
     all_results = []
     for log_path in logs:
-        with open(log_path) as f:
-            data = json.load(f)
-        all_results.extend(data.get("results", []))
+        with open(log_path, "r", encoding="utf-8") as f:
+            try:
+                data = json.load(f)
+                all_results.extend(data.get("results", data if isinstance(data, list) else []))
+            except json.JSONDecodeError:
+                logger.error(f"读取 {log_path} 失败: JSON 格式错误")
+                continue
 
     if not all_results:
         return {"error": "无结果数据"}
 
     total_bets = len(all_results)
-    hits = sum(1 for r in all_results if r.get("is_hit"))
-    total_pnl = sum(r.get("pnl", 0) for r in all_results)
-    total_staked = sum(r.get("stake", 0) for r in all_results)
+    hits = sum(1 for r in all_results if r.get("is_hit") or r.get("pnl", 0) > 0)
+    total_pnl = sum(float(r.get("pnl", 0.0)) for r in all_results)
+    total_staked = sum(float(r.get("stake", 0.0)) for r in all_results)
 
-    # 按联赛分组
-    by_league = defaultdict(lambda: {"bets": 0, "hits": 0, "pnl": 0.0, "clv": []})
-    for r in all_results:
-        lg = r.get("league", "Unknown")
-        by_league[lg]["bets"] += 1
-        if r.get("is_hit"):
-            by_league[lg]["hits"] += 1
-        by_league[lg]["pnl"] += r.get("pnl", 0)
-        by_league[lg]["clv"].append(r.get("true_clv", 0))
+    # ---- 全局汇总 ----
+    avg_true_clv = (sum(float(r.get("true_clv", 0.0)) for r in all_results) / total_bets if total_bets else 0.0)
+    avg_raw_clv = (sum(float(r.get("raw_clv", r.get("true_clv", 0.0))) for r in all_results) / total_bets if total_bets else 0.0)
+    avg_fair_line_clv = (sum(float(r.get("fair_line_clv", r.get("true_clv", 0.0))) for r in all_results) / total_bets if total_bets else 0.0)
 
-    # 按CLV分组
-    by_clv = defaultdict(lambda: {"bets": 0, "hits": 0, "pnl": 0.0})
+    # ---- 核心分桶容器 ----
+    def _create_bucket():
+        return {"bets": 0, "hits": 0, "pnl": 0.0, "staked": 0.0, "clv_true": [], "clv_raw": [], "clv_fair": []}
+
+    by_league = defaultdict(_create_bucket)
+    by_bin = defaultdict(_create_bucket)
+    by_day = defaultdict(_create_bucket)
+    by_clv_bucket = defaultdict(lambda: {"bets": 0, "hits": 0, "pnl": 0.0})
+
+    # 归一化日期字段
+    def _get_date(r):
+        d = r.get("date") or r.get("verified_at") or r.get("kickoff") or r.get("kickoff_time")
+        if isinstance(d, str) and "T" in d:
+            return d.split("T", 1)[0]
+        if isinstance(d, str) and " " in d:
+            return d.split(" ", 1)[0]
+        return d or "UNKNOWN"
+
+    # 主循环：分桶填充
     for r in all_results:
-        clv = r.get("true_clv", 0)
-        if clv > 0.05:
-            bucket = "CLV > +5%"
-        elif clv > 0:
-            bucket = "CLV 0~+5%"
-        elif clv > -0.05:
-            bucket = "CLV -5%~0"
-        else:
-            bucket = "CLV < -5%"
-        by_clv[bucket]["bets"] += 1
-        if r.get("is_hit"):
-            by_clv[bucket]["hits"] += 1
-        by_clv[bucket]["pnl"] += r.get("pnl", 0)
+        league = r.get("league", r.get("league_name", "Unknown"))
+        bin_id = r.get("bin_id", r.get("decile", "Unknown"))
+
+        true_clv = float(r.get("true_clv", r.get("ev_vs_close", 0.0)))
+        raw_clv = float(r.get("raw_clv", true_clv))
+        fair_clv = float(r.get("fair_line_clv", true_clv))
+
+        stake = float(r.get("stake", 0.0))
+        pnl = float(r.get("pnl", 0.0))
+        is_hit = bool(r.get("is_hit") or pnl > 0)
+        day_key = _get_date(r)
+
+        def _fill(bucket_obj):
+            bucket_obj["bets"] += 1
+            bucket_obj["hits"] += int(is_hit)
+            bucket_obj["pnl"] += pnl
+            bucket_obj["staked"] += stake
+            bucket_obj["clv_true"].append(true_clv)
+            bucket_obj["clv_raw"].append(raw_clv)
+            bucket_obj["clv_fair"].append(fair_clv)
+
+        _fill(by_league[league])
+        _fill(by_bin[str(bin_id)])
+        _fill(by_day[day_key])
+
+        # CLV 桶
+        if true_clv > 0.05: bucket = "CLV > +5%"
+        elif true_clv > 0: bucket = "CLV 0~+5%"
+        elif true_clv > -0.05: bucket = "CLV -5%~0"
+        else: bucket = "CLV < -5%"
+
+        cb = by_clv_bucket[bucket]
+        cb["bets"] += 1
+        cb["hits"] += int(is_hit)
+        cb["pnl"] += pnl
+
+    # 辅助：把分桶 dict 收敛成干净结构
+    def _finalize_group(g):
+        out = {}
+        for key, v in g.items():
+            bets = max(v["bets"], 1)
+            staked = max(v["staked"], 1.0)
+            out[key] = {
+                "bets": v["bets"],
+                "hits": v["hits"],
+                "hit_rate_pct": round(v["hits"] / bets * 100, 1),
+                "pnl": round(v["pnl"], 2),
+                "staked": round(v["staked"], 2),
+                "roi_pct": round(v["pnl"] / staked * 100, 2),
+                "avg_true_clv_pct": round((sum(v["clv_true"]) / bets) * 100, 2),
+                "avg_raw_clv_pct": round((sum(v["clv_raw"]) / bets) * 100, 2),
+                "avg_fair_line_clv_pct": round((sum(v["clv_fair"]) / bets) * 100, 2),
+            }
+        return out
+
+    by_league_out = _finalize_group(by_league)
+    by_bin_out = _finalize_group(by_bin)
+
+    # 每日时序
+    daily_timeseries = []
+    for day in sorted(by_day.keys()):
+        v = by_day[day]
+        bets = max(v["bets"], 1)
+        staked = max(v["staked"], 1.0)
+        daily_timeseries.append({
+            "date": day,
+            "bets": v["bets"], "hits": v["hits"],
+            "hit_rate_pct": round(v["hits"] / bets * 100, 1),
+            "pnl": round(v["pnl"], 2), "staked": round(v["staked"], 2),
+            "roi_pct": round(v["pnl"] / staked * 100, 2),
+            "avg_true_clv_pct": round((sum(v["clv_true"]) / bets) * 100, 2),
+            "avg_raw_clv_pct": round((sum(v["clv_raw"]) / bets) * 100, 2),
+            "avg_fair_line_clv_pct": round((sum(v["clv_fair"]) / bets) * 100, 2),
+        })
+
+    # Rolling_10（按结算顺序）
+    def _sort_key(r):
+        return (_get_date(r), r.get("fixture_id", 0))
+
+    sorted_results = sorted(all_results, key=_sort_key)
+    rolling = []
+    if len(sorted_results) >= window_size:
+        for i in range(window_size, len(sorted_results) + 1):
+            chunk = sorted_results[i - window_size:i]
+            pnl_sum = sum(float(x.get("pnl", 0.0)) for x in chunk)
+            stake_sum = sum(float(x.get("stake", 0.0)) for x in chunk) or 1.0
+            clv_avg = sum(float(x.get("true_clv", x.get("ev_vs_close", 0.0))) for x in chunk) / window_size
+            rolling.append({
+                "from": _get_date(chunk[0]),
+                "to": _get_date(chunk[-1]),
+                "bets": window_size,
+                "roi_pct": round(pnl_sum / stake_sum * 100, 2),
+                "avg_true_clv_pct": round(clv_avg * 100, 2),
+            })
+
+    # 简单健康报警
+    health_flags = []
+
+    if rolling:
+        last = rolling[-1]
+        if last["avg_true_clv_pct"] < -2.0:
+            health_flags.append({
+                "code": "ROLLING_CLV_NEG", "level": "warning",
+                "detail": f"最近 {window_size} 场 True CLV ({last['avg_true_clv_pct']}%) 跌破 -2% 警戒线!"
+            })
+
+    for lg, v in by_league_out.items():
+        if v["bets"] >= 10 and v["avg_true_clv_pct"] < -3.0:
+            health_flags.append({
+                "code": "LEAGUE_BLACKLIST", "level": "danger",
+                "detail": f"毒药联赛预警: {lg} (样本 {v['bets']}, CLV {v['avg_true_clv_pct']}%)"
+            })
+
+    for b, v in by_bin_out.items():
+        if v["bets"] >= 10 and v["avg_true_clv_pct"] < -3.0:
+            health_flags.append({
+                "code": "BIN_SUSPECT", "level": "danger",
+                "detail": f"档位失效预警: 档位 {b} (样本 {v['bets']}, CLV {v['avg_true_clv_pct']}%)"
+            })
+
+    # ================= 终端炫酷打印 =================
+    print("\n" + "=" * 60)
+    print(f" 📈 V2 多维归因诊断仪表盘 | 总样本: {total_bets} 场")
+    print("=" * 60)
+
+    print(f"\n💰 【全局资金表现】")
+    print(f"总流水: {total_staked:.2f} | 净盈亏: {total_pnl:+.2f} | ROI: {round(total_pnl/max(total_staked,1)*100,2)}%")
+    print(f"平均 Raw CLV : {avg_raw_clv*100:+.2f}% (战胜表象)")
+    print(f"平均 Fair CLV: {avg_fair_line_clv*100:+.2f}% (市场漂移)")
+    print(f"平均 True CLV: {avg_true_clv*100:+.2f}% (核心护城河)")
+
+    print(f"\n🏆 【联赛分桶审计 (按下注量排序)】")
+    print(f"{'联赛名称':<22} | {'样本':<4} | {'ROI':>7} | {'True CLV':>8}")
+    print("-" * 55)
+    for lg, v in sorted(by_league_out.items(), key=lambda x: x[1]['bets'], reverse=True):
+        mark = " ☠️" if v["bets"] >= 5 and v["avg_true_clv_pct"] < -3.0 else ""
+        print(f"{lg[:20]:<22} | {v['bets']:<4} | {v['roi_pct']:>6.2f}% | {v['avg_true_clv_pct']:>7.2f}%{mark}")
+
+    print(f"\n📊 【模型档位 (Bin) 归因】")
+    print(f"{'档位 (Decile)':<14} | {'样本':<4} | {'胜率':>5} | {'ROI':>7} | {'True CLV':>8}")
+    print("-" * 55)
+    for b_id, v in sorted(by_bin_out.items(), key=lambda x: str(x[0])):
+        print(f"Decile {b_id:<7} | {v['bets']:<4} | {v['hit_rate_pct']:>4.1f}% | {v['roi_pct']:>6.2f}% | {v['avg_true_clv_pct']:>7.2f}%")
+
+    if health_flags:
+        print(f"\n🚨 【系统健康度报警】")
+        for flag in health_flags:
+            print(f"[{flag['level'].upper()}] {flag['detail']}")
+    else:
+        print(f"\n✅ 【系统健康度】: 运转良好，无负向警报。")
+
+    print("=" * 60 + "\n")
 
     return {
-        "total_days": len(logs),
-        "total_bets": total_bets,
-        "hits": hits,
-        "hit_rate_pct": round(hits / total_bets * 100, 1),
-        "total_staked": round(total_staked, 2),
-        "total_pnl": round(total_pnl, 2),
-        "roi_pct": round(total_pnl / total_staked * 100, 2) if total_staked else 0,
-        "avg_clv_pct": round(
-            sum(r.get("true_clv", 0) for r in all_results) / total_bets * 100, 2
-        ) if total_bets else 0,
-        "by_league": {
-            lg: {
-                "bets": d["bets"],
-                "hits": d["hits"],
-                "hit_rate": round(d["hits"] / d["bets"] * 100, 1),
-                "pnl": round(d["pnl"], 2),
-                "avg_clv": round(sum(d["clv"]) / len(d["clv"]) * 100, 2) if d["clv"] else 0,
-            }
-            for lg, d in sorted(by_league.items(), key=lambda x: -x[1]["bets"])
+        "summary": {
+            "total_bets": total_bets, "hits": hits,
+            "roi_pct": round(total_pnl / max(total_staked, 1) * 100, 2),
+            "avg_true_clv_pct": round(avg_true_clv * 100, 2),
+            "avg_raw_clv_pct": round(avg_raw_clv * 100, 2),
+            "avg_fair_line_clv_pct": round(avg_fair_line_clv * 100, 2),
         },
-        "by_clv_bucket": {
-            b: {"bets": d["bets"], "hits": d["hits"],
-                "hit_rate": round(d["hits"] / d["bets"] * 100, 1) if d["bets"] else 0,
-                "pnl": round(d["pnl"], 2)}
-            for b, d in sorted(by_clv.items())
-        },
+        "by_league": by_league_out, "by_bin": by_bin_out,
+        "daily_timeseries": daily_timeseries, "rolling_windows": rolling,
+        "health_flags": health_flags
     }
 
 
@@ -523,20 +662,8 @@ if __name__ == "__main__":
 
     elif "--summary" in sys.argv:
         s = full_summary()
-        if "error" in s:
-            print(f"⚠️ {s['error']}")
-        else:
-            print(f"\n📊 纸盘总汇: {s['total_days']}天 {s['total_bets']}场")
-            print(f"命中率: {s['hit_rate_pct']}% | PnL: {s['total_pnl']:+.2f}u")
-            print(f"ROI: {s['roi_pct']:+.2f}% | 平均CLV: {s['avg_clv_pct']:+.2f}%")
-            if s.get("by_clv_bucket"):
-                print(f"\n按CLV分桶:")
-                for b, d in s["by_clv_bucket"].items():
-                    print(f"  {b}: {d['bets']}场 | {d['hits']}中({d['hit_rate']}%) | PnL{d['pnl']:+.2f}")
-            if s.get("by_league"):
-                print(f"\n按联赛:")
-                for lg, d in list(s["by_league"].items())[:10]:
-                    print(f"  {lg}: {d['bets']}场 | {d['hit_rate']}% | PnL{d['pnl']:+.2f} | CLV{d['avg_clv']:+.2f}%")
+        if not s or "error" not in s:
+            pass  # full_summary 内部已打印炫酷报表
 
     else:
         print("用法:")
