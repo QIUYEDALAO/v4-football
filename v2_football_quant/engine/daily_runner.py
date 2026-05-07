@@ -266,51 +266,59 @@ def calc_edge(fx: dict) -> Optional[dict]:
 
 
 # ===== Step 6: 日报生成 =====
-def generate_report(fixtures: list[dict], recs: list[dict]) -> str:
+def generate_report(fixtures: list[dict], bets: list[dict], stats: dict) -> str:
     td = date.today().strftime("%Y-%m-%d")
     now = datetime.now().strftime("%H:%M")
 
     lines = [
         f"## ⚽ V2 每日推荐 (HT 1X2) | {td} {now}",
         "",
-        f"📊 今日比赛: {len(fixtures)} 场 (白名单) · 推荐: {len(recs)} 场",
+        f"📊 今日扫描: {stats['total_scanned']} 场 (白名单) · 推荐: {len(bets)} 场",
         "",
-        "模型: att_def_spread 10档分位定价 · 投注方向: HT 1X2",
+        f"🔍 漏斗: 总{stats['total_fixtures']}场 → 扫描{stats['total_scanned']} "
+        f"→ 无盘口{stats['skip_no_market']} → 无Edge{stats['skip_no_edge']} "
+        f"→ 负EV{stats['skip_neg_ev']} → 熔断{stats['skip_meltdown']} "
+        f"→ 低Kelly{stats['skip_low_kelly']} → ✅{stats['bet_placed']}",
+        "",
+        "模型: att_def_spread 10档分位定价 · 投注方向: HT 1X2 · 全量死因追踪",
         "",
         "---",
         "",
     ]
 
-    if not recs:
-        lines.append("> ⚠️ 今日无满足 edge > 5% 的推荐")
+    if not bets:
+        lines.append("> ⚠️ 今日无满足条件的推荐")
         return "\n".join(lines)
 
-    for i, rec in enumerate(recs, 1):
-        fx = rec["fixture"]
-        edge = rec["edge"]
-        label = {"H": "半场主胜", "D": "半场平局", "A": "半场客胜"}[edge["outcome"]]
-
-        lines.append(f"### {i}. {fx['home']} vs {fx['away']} → 推 **{label}**")
+    for i, rec in enumerate(bets, 1):
+        mprobs = rec["model_probs"]
+        odds_D = rec["offered_odds_D"]
+        
+        lines.append(f"### {i}. {rec['home']} vs {rec['away']} → 推 **半场平局**")
         lines.append("")
         lines.append(f"| 维度 | 数据 |")
         lines.append(f"|------|------|")
-        lines.append(f"| ⏰ 时间 | {fx.get('time_bj', '?')} |")
-        lines.append(f"| 🏟 联赛 | {fx['league_name']} |")
-        lines.append(f"| 📐 att_def_spread | {fx.get('att_def_spread', '?')} (档{rec['decile']}) |")
-        lines.append(f"| 🎯 公平赔率 | H={edge['fair_H']:.2f} D={edge['fair_D']:.2f} A={edge['fair_A']:.2f} |")
-        lines.append(f"| 💰 {rec['bookmaker']} {label} | **{edge['odds']:.2f}** |")
-        lines.append(f"| 📊 模型概率 | {edge['model_prob']*100:.1f}% |")
-        lines.append(f"| 🏦 隐含概率 | {edge['implied_prob']*100:.1f}% |")
-        lines.append(f"| 🎲 Edge | **{edge['edge']*100:+.1f}%** |")
-        lines.append(f"| 📈 EV | **{edge['ev']*100:+.1f}%** |")
+        lines.append(f"| ⏰ 时间 | {rec.get('time_bj', '?')} |")
+        lines.append(f"| 🏟 联赛 | {rec['league_name']} |")
+        lines.append(f"| 📐 att_def_spread | {rec.get('att_def_spread', '?')} (档{rec['decile']}) |")
+        lines.append(f"| 🎯 公平概率 | H={mprobs['H']:.3f} D={mprobs['D']:.3f} A={mprobs['A']:.3f} |")
+        lines.append(f"| 🏦 市场概率 | H={rec['market_probs']['H']:.3f} D={rec['market_probs']['D']:.3f} A={rec['market_probs']['A']:.3f} |")
+        lines.append(f"| 💰 {rec.get('bookmaker', '?')} 半场平 | **{odds_D:.2f}** |")
+        lines.append(f"| 📊 保本概率 | {rec['break_even_prob']:.3f} |")
+        lines.append(f"| 🎲 Edge | **{rec['edge_pp']*100:+.1f}%** |")
+        lines.append(f"| 📈 EV | **{rec['ev_pct']*100:+.1f}%** |")
+        si = rec.get("stake_info", {})
+        if si:
+            lines.append(f"| 💵 注码 | {si.get('stake', 0)} (Kelly {si.get('kelly_factor_used', 0)*4:.0f}/4) |")
         lines.append("")
         lines.append("---")
         lines.append("")
 
     lines.append("")
-    lines.append(f"> 🤖 V2 v2.0 · HT 1X2 分档模型 · Edge > 5% 触发")
+    lines.append(f"> 🤖 V2 v2.1 · HT 1X2 分档模型 · 全量死因追踪")
     lines.append(f"> ⚠️ 纸盘模式 — 仅记录，不下单")
     lines.append(f"> 💡 模型基于 2322 场历史 att_def_spread 分位概率")
+    lines.append(f"> 🛡️ Kelly 1/4 · 软熔断15% · 硬熔断30% · 本金20000")
 
     return "\n".join(lines)
 
@@ -343,38 +351,136 @@ def run_once():
             print(f"  {fx['home']}vs{fx['away']}: H={odds.get('H','?')} D={odds.get('D','?')} A={odds.get('A','?')}")
         time.sleep(SLEEP_MS)
 
-    logger.info(f"[5/7] Edge 计算...")
-    recommendations = []
+    logger.info(f"[5/7] Edge 计算 + 风控拦截 (上帝视角·全景死因追踪)...")
+    
+    # ── 漏斗统计容器 ──
+    stats = {
+        "total_fixtures": len(fixtures),
+        "total_scanned": 0,
+        "skip_no_market": 0,
+        "skip_no_edge": 0,
+        "skip_neg_ev": 0,
+        "skip_meltdown": 0,
+        "skip_low_kelly": 0,
+        "bet_placed": 0
+    }
+    
+    all_candidates = []  # 全量追踪：每场都有记录 (含SKIP死因)
+    bets = []            # 仅 BET 的用于推荐+预测
+    
     for fx in fixtures:
-        edge = calc_edge(fx)
-        if edge:
-            row = fx["decile_info"]
-            recommendations.append({
-                "fixture": fx,
-                "edge": {
-                    **edge,
-                    "fair_H": row["fair_H"],
-                    "fair_D": row["fair_D"],
-                    "fair_A": row["fair_A"],
-                },
-                "decile": row["decile"],
-                "bookmaker": fx.get("_ht_1x2", {}).get("bookmaker", "?"),
-                "stake": calculate_stake(br, edge["model_prob"], edge["odds"]),
-            })
-            logger.success(f"  ✅ {fx['home']}vs{fx['away']}: 推{edge['outcome']} "
-                  f"odds={edge['odds']:.2f} edge={edge['edge']*100:+.1f}%")
-
-    # 按 EV 排序，全部推荐（不限场次），同联赛最多2场
-    recommendations.sort(key=lambda x: -x["edge"]["ev"])
-    # 同联赛去重：每天每联赛最多2场
+        row = fx.get("decile_info")
+        if not row:
+            continue
+        stats["total_scanned"] += 1
+        
+        # ── 基础骨架：保证任何阶段 SKIP 都有完整记录 ──
+        base_rec = {
+            "fixture_id": fx["id"],
+            "home": fx["home"],
+            "away": fx["away"],
+            "league_name": fx["league_name"],
+            "league_id": fx["league"],
+            "time_bj": fx.get("time_bj", ""),
+            "att_def_spread": fx.get("att_def_spread", 0),
+            "decile": row["decile"],
+            "model_probs": {"H": row["fair_H"], "D": row["fair_D"], "A": row["fair_A"]},
+            "market_probs": None,
+            "offered_odds_D": None,
+            "break_even_prob": None,
+            "edge_pp": None,
+            "ev_pct": None,
+            "stake_info": None,
+            "action": None,
+            "skip_code": None,
+            "skip_reason": None
+        }
+        
+        market_odds = fx.get("_ht_1x2", {})
+        odds_D = market_odds.get("D")
+        odds_H = market_odds.get("H")
+        odds_A = market_odds.get("A")
+        bookmaker = market_odds.get("bookmaker", "?")
+        
+        if not odds_D or not odds_H or not odds_A:
+            stats["skip_no_market"] += 1
+            base_rec.update({"action": "SKIP", "skip_code": "NO_MARKET", "skip_reason": "HT 1X2盘口未开"})
+            all_candidates.append(base_rec)
+            continue
+        
+        market_probs = {"H": round(1/odds_H, 4), "D": round(1/odds_D, 4), "A": round(1/odds_A, 4)}
+        prob_D = row["fair_D"]
+        edge_pp = round(prob_D - market_probs["D"], 4)
+        ev_pct = round(prob_D * odds_D - 1, 4)
+        break_even = round(1 / odds_D, 4)
+        
+        base_rec.update({
+            "market_probs": market_probs,
+            "offered_odds_D": odds_D,
+            "break_even_prob": break_even,
+            "edge_pp": edge_pp,
+            "ev_pct": ev_pct,
+            "bookmaker": bookmaker
+        })
+        
+        if edge_pp <= 0:
+            stats["skip_no_edge"] += 1
+            base_rec.update({"action": "SKIP", "skip_code": "NO_EDGE", "skip_reason": f"Edge {edge_pp} <= 0"})
+            all_candidates.append(base_rec)
+            continue
+        
+        if ev_pct < 0:
+            stats["skip_neg_ev"] += 1
+            base_rec.update({"action": "SKIP", "skip_code": "NEG_EV", "skip_reason": f"EV {ev_pct} < 0"})
+            all_candidates.append(base_rec)
+            continue
+        
+        # ── 资金风控测算 ──
+        stake_info = calculate_stake(br, prob_D, odds_D)
+        base_rec["stake_info"] = stake_info
+        
+        action = stake_info["action"]
+        if action.startswith("SKIP"):
+            code = action.replace("SKIP_", "")
+            if code == "MELTDOWN":
+                stats["skip_meltdown"] += 1
+            else:
+                stats["skip_low_kelly"] += 1
+            base_rec.update({"action": "SKIP", "skip_code": code, "skip_reason": stake_info.get("reason")})
+            all_candidates.append(base_rec)
+            # 熔断/低 Kelly 也有盘口数据，值得记录但不算推荐
+            continue
+        
+        # ── 通过！计入推荐 ──
+        stats["bet_placed"] += 1
+        base_rec.update({"action": "BET", "skip_code": None, "skip_reason": None})
+        all_candidates.append(base_rec)
+        bets.append(base_rec)
+        logger.success(f"  ✅ {fx['home']}vs{fx['away']}: 推D odds={odds_D:.2f} edge={edge_pp*100:+.1f}% ev={ev_pct*100:+.1f}%")
+    
+    # ── 同联赛去重：每天每联赛最多2场 ──
+    bets.sort(key=lambda x: -(x["ev_pct"] or 0))
     lg_count = {}
-    final_recs = []
-    for rec in recommendations:
-        lg = rec["fixture"]["league_name"]
+    final_bets = []
+    for r in bets:
+        lg = r["league_name"]
         lg_count[lg] = lg_count.get(lg, 0) + 1
         if lg_count[lg] <= 2:
-            final_recs.append(rec)
-    recommendations = final_recs
+            final_bets.append(r)
+    bets = final_bets
+    
+    # ── 漏斗日报 ──
+    logger.info("="*40)
+    logger.info("📊 V2 今日漏斗扫描日报")
+    logger.info(f"📦 原始赛程总数: {stats['total_fixtures']}")
+    logger.info(f"🔍 进模型分档场次: {stats['total_scanned']}")
+    logger.info(f"❌ 过滤 (盘口未开): {stats['skip_no_market']}")
+    logger.info(f"❌ 过滤 (无数学Edge): {stats['skip_no_edge']}")
+    logger.info(f"❌ 过滤 (负期望EV): {stats['skip_neg_ev']}")
+    logger.info(f"🛑 过滤 (硬熔断): {stats['skip_meltdown']}")
+    logger.info(f"🛡️ 过滤 (低Kelly/资金红线): {stats['skip_low_kelly']}")
+    logger.info(f"✅ 最终符合下注: {stats['bet_placed']}")
+    logger.info("="*40)
 
     # ── 🌎 全量候选池快照 (基准防线 · 专家建议三) ──
     universe = []
@@ -405,57 +511,45 @@ def run_once():
         json.dump(universe, f, ensure_ascii=False, indent=2)
     logger.info(f"\n🌎 全量候选池: {len(universe)} 场 → {univ_path}")
 
-    logger.info(f"[6/7] 生成日报...")
-    report = generate_report(fixtures, recommendations)
+    logger.info(f"[6/7] 生成日报 + 保存全量死因追踪...")
+    report = generate_report(fixtures, bets, stats)
     report_path = REPORT_DIR / f"daily_{date.today().strftime('%Y%m%d')}.md"
     with open(report_path, "w") as f:
         f.write(report)
     logger.info(f"  → {report_path}")
+    
+    # ── 保存全量死因追踪 (包含所有SKIP记录) ──
+    scan_path = REPORT_DIR / f"full_scan_{date.today().strftime('%Y%m%d')}.json"
+    with open(scan_path, "w") as f:
+        json.dump({"date": date.today().isoformat(), "stats": stats, "candidates": all_candidates}, f, ensure_ascii=False, indent=2)
+    logger.info(f"📋 全量死因追踪: {len(all_candidates)} 场 → {scan_path}")
 
-    logger.info(f"[7/7] 保存预测 + 输出")
+    logger.info(f"[7/7] 输出日报 + 保存预测")
     print()
     print(report)
 
-    # 保存 (🔍 信号审计日志 · 黑盒→白盒 · 专家建议一+四)
+    # 保存预测 (🔍 仅 BET 记录 → paper_trading.py 结算用)
     pred_save = []
-    for rec in recommendations:
-        fx = rec["fixture"]
-        edge = rec["edge"]
-        offered_odds = edge["odds"]
-        model_prob = edge["model_prob"]
-        implied_prob = edge["implied_prob"]
-        break_even_prob = 1.0 / offered_odds if offered_odds > 0 else 0
-        fair_odds_val = 1.0 / model_prob if model_prob > 0 else 0
-        
-        # 判定 action (P0 修复: 100% dict，不再需要向后兼容)
-        stake_info = rec["stake"]
-        action = stake_info.get("action", "BET")
-        stake_val = stake_info.get("stake", 0)
-        
-        # 负 EV 自动阻断
-        if edge["ev"] < 0 and action == "BET":
-            action = "BLOCKED_NEG_EV"
-        
+    for rec in bets:
         pred_save.append({
-            "fixture_id": fx["id"],
+            "fixture_id": rec["fixture_id"],
             "date": date.today().isoformat(),
-            "home": fx["home"],
-            "away": fx["away"],
-            "league": fx["league_name"],
-            "time_bj": fx.get("time_bj", ""),
-            "att_def_spread": fx.get("att_def_spread", 0),
+            "home": rec["home"],
+            "away": rec["away"],
+            "league": rec["league_name"],
+            "time_bj": rec.get("time_bj", ""),
+            "att_def_spread": rec.get("att_def_spread", 0),
             "decile": rec["decile"],
-            "outcome": edge["outcome"],
-            "fair_odds": {"H": edge.get("fair_H"), "D": edge.get("fair_D"), "A": edge.get("fair_A")},
-            "placed_odds": offered_odds,
-            "model_prob": model_prob,
-            "implied_prob": implied_prob,
-            "break_even_prob": round(break_even_prob, 4),
-            "edge": edge["edge"],
-            "ev": edge["ev"],
-            "stake": stake_val,
-            "action": action,
-            "bookmaker": rec["bookmaker"],
+            "outcome": "D",
+            "model_probs": rec["model_probs"],
+            "market_probs": rec["market_probs"],
+            "placed_odds": rec["offered_odds_D"],
+            "break_even_prob": rec["break_even_prob"],
+            "edge_pp": rec["edge_pp"],
+            "ev_pct": rec["ev_pct"],
+            "stake_info": rec.get("stake_info", {}),
+            "action": rec["action"],
+            "bookmaker": rec.get("bookmaker", "?"),
         })
 
     pred_path = REPORT_DIR / f"predictions_{date.today().strftime('%Y%m%d')}.json"

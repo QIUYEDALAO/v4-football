@@ -24,6 +24,7 @@ class Bankroll:
     current: float = 20000.0    # 当前余额
     daily_count: int = 0        # 今日已投场次
     unit_max: float = 1000.0    # 单注安全帽 (5%本金)
+    unit_min: float = 100.0     # 单注底注 (动态底限, Kelly不足则跳过)
     stop_loss_pct: float = 0.3   # 硬熔断: -30% → 亏6000强制停机
     max_drawdown_pct: float = 0.15  # 软熔断: -15% → 亏3000减半注
     
@@ -54,44 +55,61 @@ def kelly_fraction(p: float, odds: float, kelly_factor: float = 0.25) -> float:
     return f_star * kelly_factor
 
 
+def _kelly_factor_for_drawdown(drawdown: float) -> float:
+    """阶梯式 Kelly 熔断函数 (为未来多档位扩展留好后路)"""
+    if drawdown > 0.30:
+        return 0.0   # 30% 硬熔断停机
+    if drawdown > 0.15:
+        return 0.125 # 15% 软熔断降级 (1/8)
+    # 预留未来中间档位: if drawdown > 0.10: return 0.1667
+    return 0.25       # 正常 1/4 Kelly
+
+
 def calculate_stake(bankroll: Bankroll, p: float, odds: float) -> dict:
     """
-    计算单注金额 (返回决策字典)。
-    
-    规则：
-    1. 用 1/4 Kelly 算理论仓位
-    2. 只设上限安全帽 (300)，绝不设下限逼空
-    3. Kelly 算得 < 100 → SKIP_LOW_KELLY（宁可不下，绝不超配）
-    4. 回撤 > 25% 减半，回撤 > 40% 熔断
+    计算下注金额，强制返回 Kelly 思考元数据 (Task 1)
     
     Returns:
-        {"action": "BET"|"SKIP_*", "stake": float, "reason": str}
+        {"action": "BET"|"SKIP_*", "stake": float, "reason": str,
+         "raw_kelly": float, "effective_kelly": float, "kelly_factor_used": float}
     """
-    # 检查熔断
     drawdown = (bankroll.peak - bankroll.current) / bankroll.peak
-    if drawdown > bankroll.stop_loss_pct:
-        return {"action": "SKIP_MELTDOWN", "stake": 0, "reason": f"回撤 {drawdown*100:.1f}% > {bankroll.stop_loss_pct*100:.0f}% 熔断"}
-    
-    kf = 0.25  # 1/4 Kelly (攻击阵型, 绝对红线)
-    if drawdown > bankroll.max_drawdown_pct:
-        kf = 0.125  # 软熔断降级 1/8 Kelly
-    
-    f = kelly_fraction(p, odds, kf)
-    stake_raw = bankroll.current * f
-    
-    # 极低价值过滤：stake < 10 则不投，避免噪音交易
-    if stake_raw < 10.0:
-        return {"action": "SKIP_NOISE", "stake": 0, "reason": f"Kelly 仓位 {stake_raw:.1f} < 10，噪音跳过"}
-    
-    # 纯粹 Kelly：只设上限安全帽，不设下限
-    # 🔴 关键修改：绝不用 clamp 把 35 块强行抬到 100 块
-    raw_stake = min(bankroll.unit_max, stake_raw)
-    
-    if raw_stake < 100:
-        return {"action": "SKIP_LOW_KELLY", "stake": 0, 
-                "reason": f"Kelly建议 {raw_stake:.0f} < {100} 下限，放弃此单（宁可不下绝不超配）"}
-    
-    return {"action": "BET", "stake": round(raw_stake, 2), "reason": "Kelly 正常"}
+
+    # 获取 Kelly 系数 (阶梯熔断)
+    kf = _kelly_factor_for_drawdown(drawdown)
+    if kf == 0.0:
+        return {
+            "action": "SKIP_MELTDOWN", "stake": 0, "reason": "回撤>30%触发硬熔断",
+            "raw_kelly": 0.0, "effective_kelly": 0.0, "kelly_factor_used": 0.0
+        }
+
+    # 计算原始 Kelly
+    f_star = ((odds - 1) * p - (1 - p)) / (odds - 1) if odds > 1 else 0.0
+    raw_k = round(max(0.0, f_star), 4)  # 过滤负数，报表更干净
+
+    if f_star <= 0:
+        return {
+            "action": "SKIP_NO_EDGE", "stake": 0, "reason": "数学 Edge 极弱或为负",
+            "raw_kelly": raw_k, "effective_kelly": 0.0, "kelly_factor_used": kf
+        }
+
+    stake_raw = bankroll.current * f_star * kf
+    final_stake = min(bankroll.unit_max, stake_raw)
+
+    # 动态获取底注限制，告别硬编码 100
+    min_unit = getattr(bankroll, "unit_min", 100.0)
+
+    if final_stake < min_unit:
+        return {
+            "action": "SKIP_LOW_KELLY", "stake": 0,
+            "reason": f"计算仓位 {round(final_stake, 2)} < 底注 {min_unit}",
+            "raw_kelly": raw_k, "effective_kelly": round(f_star * kf, 4), "kelly_factor_used": kf
+        }
+
+    return {
+        "action": "BET", "stake": round(final_stake, 2), "reason": "PASS",
+        "raw_kelly": raw_k, "effective_kelly": round(f_star * kf, 4), "kelly_factor_used": kf
+    }
 
 
 def update_bankroll(bankroll: Bankroll, stake: float, won: bool, odds: float):
