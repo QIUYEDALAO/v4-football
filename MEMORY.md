@@ -4,6 +4,12 @@
 
 > **赔率涨跌不改变已成交的 PnL，只影响 CLV 的符号，而 CLV 的符号才是 Alpha 存在的证据。**
 
+### 三层 CLV 审计标准 (P0 部署)
+- **raw_clv**: (买入价/收盘原始价)-1 — 战胜市场表象了吗？
+- **fair_line_clv**: 去水公平概率漂移 — 扣除vig后的真实移动
+- **ev_vs_close**: 最严苛标准（等同旧True CLV）
+- 先看 raw_clv，再去抠 EV 细节。拜仁实测 raw=-0.31%（几乎持平），之前的 -7.57% 恐慌一半是抽水幻觉。
+
 ## ⚽ V2 量化系统（当前主力）
 
 ### 项目定位
@@ -14,20 +20,37 @@
 
 ### 当前阶段：纸盘验证（5/6 - 5/12）
 - 8:00 Cron `V2每日扫描` 自动扫描 → QQ Bot 推送
-- 次日 paper_trading.py 自动结算
+- 次日 paper_trading.py 自动结算（含三层CLV: raw/fair_line/ev_vs_close）
+- 每天同时保存全量候选池快照 universe_candidates_YYMMDD.json
 - 纸盘验收：7天 ≥25场 | CLV>0 | ROI≥3% | MDD≤12%
 - 5/5 首场结算：Al Khaleej vs Al Hilal HT 1-1 ✅ | PnL +86.1u | CLV -8.43%
 - 5/6 推荐2场：拜仁vs巴黎(HT Draw Edge+11.2%) + 阿联酋超(Edge+5%)
+  - 结算: 1/2 命中, 平均 CLV -7.23% (raw_clv拜仁 -0.31% 几乎持平收盘)
 
 ### 架构红线（信号与执行分离）
 - 纸盘期：8:00 快照 → 假设瞬间成交 → 次日 CLV 结算
 - 实盘期：daily_runner 降级为观察池 → odds_monitor 赛前30min轮询 → T-15min临场决策
 - **绝不把 8:00 快照直接接下单 API**
 
-### 代码冻结（2026-05-06 17:40）
-- 6个致命 Bug 已修（Stake丢失/NoneType/Kelly摧毁/平局误杀/旧纸盘/收盘真空）
-- 关键文件：bankroll.py（纯Kelly）、daily_runner.py（防崩溃）、paper_trading.py（V2 CLV）
-- 银行：2000本金 | Kelly 1/6 | 单注上限300 | 低价值<10不投
+### 最新Bankroll配置（2026-05-07 19:52 锁定）
+- 本金：**20,000** | Kelly **1/4** (红线) | 单注上限 **1,000**
+- 硬熔断：**-30%** (亏6,000强制停机) | 软熔断：**-15%** (亏3,000减半1/8 Kelly)
+- Kelly < 100 → **SKIP_LOW_KELLY**（宁可不下绝不超配）
+- `calculate_stake()` 返回 dict `{action, stake, reason, raw_kelly, effective_kelly, kelly_factor_used}`
+- `_kelly_factor_for_drawdown()`: 阶梯熔断函数 (0→25% > 15%→12.5% > 30%→0)
+
+### P0 五件套已部署（2026-05-07 PM）
+1. ✅ **Kelly毒药拆除**: 废除clamp抬高，Kelly<100→SKIP
+2. ✅ **三层CLV**: clv_triple(raw/fair_line/ev_vs_close)，剥离抽水幻觉
+3. ✅ **全量候选池**: universe_candidates快照，归因分析基础
+4. ✅ **信号审计日志**: break_even_prob+action字段，负EV自动阻断
+5. ✅ **密钥清理**: 环境变量注入，移除fallback明文
+
+### Phase 1 上帝视角部署（2026-05-07 22:30）
+1. ✅ **Kelly元数据**: raw_kelly/effective_kelly/kelly_factor_used 注入每笔决策
+2. ✅ **全景死因追踪**: full_scan_YYYYMMDD.json 记录所有扫描场次(含SKIP死因)
+3. ✅ **漏斗日报**: 总场次→无盘口→无Edge→负EV→熔断→低Kelly→BET 转化率
+4. 🔄 **多维归因仪表盘**: paper_trading.py --summary 待重构 (Task 3)
 
 ### P0 剩余
 - ❌ 评分引擎权重校准（H2H 20%→60%）
@@ -69,4 +92,8 @@
 - 模型：deepseek-v4-flash（默认）/ v4-pro（重型）
 - 通道：QQ Bot (ON) | 微信 (已弃)
 - 记忆：memory-core + memory-wiki（后台编译）
-- 投注资金表：workspace/投注资金日报表.html
+- 银行：20,000本金 | Kelly 1/4 | 单注上限1,000
+- Cron：每天 08:00 BJT V2每日扫描 → QQ Bot推送
+- 结算：次日三层CLV自动结算 + 全量候选池快照
+- 项目书：v2.1 (docs/PROJECT_BOOK.md)
+- GitHub: whoerixxz/v2-football-quant (7 commits today)
