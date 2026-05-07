@@ -17,9 +17,10 @@ logger = logging.getLogger(__name__)
 
 
 class LiveMode(str, Enum):
-    PAPER = "PAPER"          # 纯纸盘 (当前)
-    SANDBOX = "SANDBOX"      # 小仓试水实盘
-    FULL = "FULL"            # 全仓实盘 (未来)
+    PAPER = "PAPER"                # 纯纸盘 (当前)
+    MICRO_SANDBOX = "MICRO_SANDBOX" # 微型沙盒侦察兵 (N≥40, CLV≥1.5%, 0.25%注码)
+    SANDBOX = "SANDBOX"             # 小仓试水实盘 (N≥50, CLV≥1%, 0.5%注码)
+    FULL = "FULL"                   # 全仓实盘 (未来)
 
 
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -33,6 +34,59 @@ class LiveBridgeGateway:
 
     def __init__(self, mode: LiveMode = LiveMode.PAPER):
         self.mode = mode
+
+    def can_enter_micro_sandbox(self, paper_summary: dict, router_summary: dict) -> bool:
+        """
+        🔬 微型沙盒准入 (N≥40, CLV≥1.5%): 用更厚Edge弥补样本不足
+        """
+        logger.info("🔍 正在审查 MICRO_SANDBOX 侦察兵准入资格...")
+
+        bets = paper_summary.get("total_bets", 0)
+        if bets < 40:
+            logger.warning(f"[GUARD] BRIDGE_BLOCKED | code=MICRO_N_INSUFFICIENT | detail=N={bets} < 40")
+            return False
+
+        last40 = paper_summary.get("last_40_stats", paper_summary.get("last_50_stats", {}))
+        clv = last40.get("avg_true_clv_pct", 0.0)
+        if clv < 1.5:
+            logger.warning(f"[GUARD] BRIDGE_BLOCKED | code=MICRO_CLV_WEAK | detail=avg_true_clv={clv}% < 1.5%")
+            return False
+
+        logger.info("✅ MICRO_SANDBOX 侦察兵准入通过！")
+        return True
+
+    def calculate_micro_sandbox_stake(self, total_bankroll: float) -> dict:
+        """
+        🔬 微型沙盒注码: 0.25% (20000→50块), 纯数据采集费
+        """
+        if self.mode != LiveMode.MICRO_SANDBOX:
+            return {"action": "BLOCK_NOT_MICRO", "stake": 0, "reason": "非 MICRO_SANDBOX 状态"}
+
+        safe_stake = round(total_bankroll * 0.0025, 2)
+        return {
+            "action": "BET_LIVE_MICRO",
+            "stake": safe_stake,
+            "reason": f"侦察兵模式: 固定 {0.25}% 仓位 (纯数据采集费)"
+        }
+
+    def check_micro_kill_switch(self, live_summary: dict) -> bool:
+        """
+        🔬 Hair-trigger Kill Switch: rolling_10 CLV ≤ 0 → 立刻熔断
+        """
+        if self.mode != LiveMode.MICRO_SANDBOX:
+            return False
+
+        windows = live_summary.get("rolling_windows", [])
+        if not windows or len(windows) < 1:
+            return False
+
+        # Hair-trigger: 只看最近10场
+        last_clv = windows[-1].get("avg_true_clv_pct", 0.0)
+        if last_clv <= 0.0:
+            logger.critical(f"[GUARD] MICRO_KILL_SWITCH | code=LIVE_CLV_NEG | detail=rolling10 CLV={last_clv}%")
+            self.mode = LiveMode.PAPER
+            return True
+        return False
 
     def can_enter_sandbox(self, paper_summary: dict, router_summary: dict) -> bool:
         """
