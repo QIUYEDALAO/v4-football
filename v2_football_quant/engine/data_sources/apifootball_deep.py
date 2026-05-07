@@ -8,6 +8,7 @@ API-Football 深度数据挖掘器
 """
 import json
 import ssl
+import certifi
 import urllib.request
 from pathlib import Path
 from datetime import datetime
@@ -19,9 +20,7 @@ API_KEY = os.getenv("APIFOOTBALL_KEY", "your-api-key-here")
 API_HOST = "https://v3.football.api-sports.io"
 BASE_DIR = Path(__file__).resolve().parent.parent.parent  # engine/data_sources/ → engine/ → root/
 
-SSL_CTX = ssl.create_default_context()
-SSL_CTX.check_hostname = False
-SSL_CTX.verify_mode = ssl.CERT_NONE
+SSL_CTX = ssl.create_default_context(cafile=certifi.where())
 
 
 def api_request(endpoint: str, params: dict = None) -> dict:

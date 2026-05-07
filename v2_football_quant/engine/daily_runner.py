@@ -11,14 +11,13 @@ V2 每日自动运行脚本 v2.0 (HT 1X2)
   python3 daily_runner.py --watch   # 持续运行（定时器）
 """
 
-import json, ssl, time, os, math
+import json, ssl, time, os, math, certifi, sys, argparse
 import urllib.request
 from pathlib import Path
 from datetime import datetime, date, timedelta
 from typing import Optional
 from logger import logger, log_event
 
-import sys
 BASE_DIR = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(BASE_DIR))
 from config.secrets import API_KEY, API_HOST
@@ -27,10 +26,10 @@ from engine.data_sources.apifootball_deep import InjuryAttritionEngine
 DATA_DIR = BASE_DIR / "data" / "raw_fixtures"
 REPORT_DIR = BASE_DIR / "data" / "daily_reports"
 REPORT_DIR.mkdir(exist_ok=True)
+STATE_DIR = BASE_DIR / "data" / "state"
+STATE_DIR.mkdir(exist_ok=True)
 
-SSL_CTX = ssl.create_default_context()
-SSL_CTX.check_hostname = False
-SSL_CTX.verify_mode = ssl.CERT_NONE
+SSL_CTX = ssl.create_default_context(cafile=certifi.where())
 
 SLEEP_MS = 1.5
 
@@ -324,11 +323,20 @@ def generate_report(fixtures: list[dict], bets: list[dict], stats: dict) -> str:
     return "\n".join(lines)
 
 
-def run_once():
+def run_once(run_tag="DEFAULT"):
     print("=" * 60)
-    print(f"V2 Daily Runner v2.0 (HT 1X2)")
+    print(f"V2 Daily Runner v2.1 (HT 1X2) | TAG: {run_tag}")
     print(f"启动: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
     print("=" * 60)
+
+    # 🌟 读取今日已锁定比赛 (防止三频重复下单)
+    today_str = date.today().strftime("%Y%m%d")
+    state_file = STATE_DIR / f"selected_fixtures_{today_str}.json"
+    already_selected = set()
+    if state_file.exists():
+        with open(state_file, "r") as f:
+            already_selected = set(json.load(f))
+        logger.info(f"💾 状态机: 今日已有 {len(already_selected)} 场被锁定")
 
     fixtures = fetch_today_fixtures()
     if not fixtures:
@@ -450,6 +458,9 @@ def run_once():
             "strategy_id": "V2_HT_DRAW",
             "priority": 50,
             "max_risk_units": 1,
+            # 🌟 时序雷达字段
+            "scan_tag": run_tag,
+            "scan_time": datetime.now().isoformat(),
         }
         
         market_odds = fx.get("_ht_1x2", {})
@@ -507,11 +518,19 @@ def run_once():
             # 熔断/低 Kelly 也有盘口数据，值得记录但不算推荐
             continue
         
+        # ── 🌟 首次触发去重锁 (Time-Series Signal Lock) ──
+        if fx["id"] in already_selected:
+            base_rec.update({"action": "ALREADY_SELECTED", "skip_code": "DUPLICATE",
+                           "skip_reason": f"今日 [{run_tag}] 前已被锁定"})
+            all_candidates.append(base_rec)
+            continue
+
         # ── 通过！计入推荐 ──
         stats["bet_placed"] += 1
         base_rec.update({"action": "BET", "skip_code": None, "skip_reason": None})
         all_candidates.append(base_rec)
         bets.append(base_rec)
+        already_selected.add(fx["id"])  # 🌟 锁定该场比赛
         logger.success(f"  ✅ {fx['home']}vs{fx['away']}: 推D odds={odds_D:.2f} edge={edge_pp*100:+.1f}% ev={ev_pct*100:+.1f}%")
     
     # ── 同联赛去重：每天每联赛最多2场 ──
@@ -628,6 +647,11 @@ def run_once():
         json.dump(merged, f, ensure_ascii=False, indent=2)
     logger.info(f"\n预测数据: {pred_path}")
 
+    # 🌟 写入状态机，把锁定的比赛传给下一个 Cron
+    with open(state_file, "w") as f:
+        json.dump(list(already_selected), f)
+    logger.info(f"🔒 状态机: {len(already_selected)} 场比赛已锁定 → {state_file}")
+
     # 昨日验证
     yesterday = (date.today() - timedelta(days=1)).strftime("%Y-%m-%d")
     try:
@@ -643,13 +667,17 @@ def run_once():
 
 
 if __name__ == "__main__":
-    import sys
-    if "--watch" in sys.argv:
-        print("持续监控模式...")
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--run_tag", type=str, default="MANUAL", help="运行时段标识 AM0800/NOON1200/PM1600")
+    parser.add_argument("--watch", action="store_true")
+    args = parser.parse_args()
+
+    if args.watch:
+        print("持续监控模式 (不再推荐，请使用 Cron)")
         import schedule as sched
-        sched.every().day.at("08:00").do(run_once)
+        sched.every().day.at("08:00").do(run_once, run_tag="AM0800")
         while True:
             sched.run_pending()
             time.sleep(60)
     else:
-        run_once()
+        run_once(run_tag=args.run_tag)

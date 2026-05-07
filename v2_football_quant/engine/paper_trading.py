@@ -14,6 +14,7 @@ V2 纸盘验证与结算模块 (HT 1X2 架构)
 
 import json
 import ssl
+import certifi
 import time
 import urllib.request
 from pathlib import Path
@@ -32,9 +33,7 @@ REPORT_DIR.mkdir(exist_ok=True)
 LOG_DIR = BASE_DIR / "data" / "paper_trading"
 LOG_DIR.mkdir(exist_ok=True)
 
-SSL_CTX = ssl.create_default_context()
-SSL_CTX.check_hostname = False
-SSL_CTX.verify_mode = ssl.CERT_NONE
+SSL_CTX = ssl.create_default_context(cafile=certifi.where())
 
 
 # ═══════════════════════════════════════════════════════════

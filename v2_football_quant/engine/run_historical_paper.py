@@ -13,6 +13,7 @@ V2 时间机器 — 离线回测注入器 (加速器2)
 
 import json
 import ssl
+import certifi
 import time
 import urllib.request
 import sys
@@ -30,9 +31,7 @@ from engine.paper_trading import extract_pinnacle_ht_1x2, parse_ht_result, settl
 from engine.clv import clv_triple
 from logger import logger
 
-SSL_CTX = ssl.create_default_context()
-SSL_CTX.check_hostname = False
-SSL_CTX.verify_mode = ssl.CERT_NONE
+SSL_CTX = ssl.create_default_context(cafile=certifi.where())
 
 PAPER_DIR = BASE_DIR / "data" / "paper_trading"
 PAPER_DIR.mkdir(exist_ok=True)
