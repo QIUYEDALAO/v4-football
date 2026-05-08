@@ -19,7 +19,7 @@ import time
 import urllib.request
 from pathlib import Path
 from datetime import date, datetime
-from collections import defaultdict
+from collections import defaultdict, Counter
 from typing import Optional, Dict, Tuple, List
 
 from logger import logger
@@ -530,12 +530,12 @@ def full_summary(window_size: int = 10):
     print(f"平均 Fair CLV: {avg_fair_line_clv*100:+.2f}% (市场漂移)")
     print(f"平均 True CLV: {avg_true_clv*100:+.2f}% (核心护城河)")
 
-    # 🌟 数据分段提示: Edge 修正在 commit 7ca6abf (2026-05-08)
-    pre_fix = [r for r in all_results if _get_date(r) < "2026-05-08"]
-    post_fix = [r for r in all_results if _get_date(r) >= "2026-05-08"]
-    if post_fix:
-        p_post = sum(float(r.get("pnl", 0)) for r in post_fix)
-        print(f"\n📝 数据版本: 修正前 {len(pre_fix)} 场 (Edge虚高) | 修正后 {len(post_fix)} 场 (commit 7ca6abf)")
+    # 🌟 数据分段: Edge 修正在 commit 7ca6abf (2026-05-08)
+    # 用文件名推断日期 (verified_20260505.json → 2026-05-05)
+    pre_fix_count = sum(1 for lp in logs if lp.stem.replace('verified_','').replace('backtest_','')[:8] < '20260508')
+    post_fix_count = len(logs) - pre_fix_count
+    if pre_fix_count > 0:
+        print(f"\n📝 数据版本: 修正前 {pre_fix_count} 天 (Edge虚高) | 修正后 {post_fix_count} 天 (commit 7ca6abf)")
 
     print(f"\n🏆 【联赛分桶审计 (按下注量排序)】")
     print(f"{'联赛名称':<22} | {'样本':<4} | {'ROI':>7} | {'True CLV':>8}")
@@ -654,6 +654,55 @@ def full_summary(window_size: int = 10):
             ex_profit = sum(float(b.get("pnl", 0)) for b in extreme)
             print(f"🔥 极度泡沫区 (Gap>=1.0): N={len(extreme)}, 净利: {ex_profit:+.1f}u")
         print("=" * 60)
+
+    # ── ⏱ 联赛时序形态审计 (Timing Alpha) ──
+    try:
+        from datetime import date as dt
+        today_fs = BASE_DIR / "data" / "daily_reports" / f"full_scan_{dt.today().strftime('%Y%m%d')}.json"
+        if today_fs.exists():
+            with open(today_fs) as f:
+                scan = json.load(f)
+            candidates = scan.get("candidates", [])
+            # Aggregate by league
+            lg_patterns = defaultdict(lambda: Counter())
+            _by_fid = {}
+            for c in candidates:
+                fid = c["fixture_id"]
+                if fid not in _by_fid: _by_fid[fid] = {}
+                _by_fid[fid][c.get("scan_tag", "?")] = c
+            
+            for fid, tags in _by_fid.items():
+                if all(t in tags for t in ["AM0800", "NOON1200", "PM1600"]):
+                    am = tags["AM0800"]
+                    d8 = am.get("offered_odds_D")
+                    d12 = tags["NOON1200"].get("offered_odds_D")
+                    d16 = tags["PM1600"].get("offered_odds_D")
+                    if not all([d8, d12, d16]): continue
+                    lg = am.get("league_name", "Unknown")
+                    delta_1 = d12 - d8; delta_2 = d16 - d12; total_d = d16 - d8
+                    if abs(total_d) <= 0.02 and abs(delta_1) <= 0.02: pat = "FLAT"
+                    elif delta_1 * delta_2 < 0 and abs(d16 - d8) <= 0.02: pat = "REVERT"
+                    elif delta_1 * delta_2 > 0 and abs(delta_2) >= abs(delta_1) and abs(total_d) > 0.02: pat = "ACCEL"
+                    elif abs(total_d) > 0.02: pat = "MOMEN"
+                    else: pat = "OTHER"
+                    lg_patterns[lg][pat] += 1
+
+            if lg_patterns:
+                print(f"\n⏱ 【V2.1 联赛时序形态审计 (Timing Alpha)】")
+                print("=" * 60)
+                for lg, cnts in sorted(by_league.items(), key=lambda x: -sum(x[1].values())):
+                    total = sum(cnts.values())
+                    if total < 2: continue
+                    f_pct = cnts.get("FLAT",0)/total*100
+                    am_pct = (cnts.get("ACCEL",0)+cnts.get("MOMEN",0))/total*100
+                    r_pct = cnts.get("REVERT",0)/total*100
+                    if am_pct >= 60: tag = "⚠️ 延迟开火候选"
+                    elif f_pct >= 60: tag = "✅ 早盘锁仓安全"
+                    else: tag = "🔄 混合震荡待定"
+                    print(f"{lg:<14} N={total:<3} FLAT {f_pct:.0f}% | ACC+MOM {am_pct:.0f}% | REV {r_pct:.0f}% → {tag}")
+                print("=" * 60)
+    except Exception as e:
+        import sys; print(f'⏱ Timing panel error: {e}', file=sys.stderr)
 
     print("=" * 60 + "\n")
 

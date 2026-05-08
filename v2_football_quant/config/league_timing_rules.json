@@ -1,27 +1,53 @@
 {
-  "version": "1.0_DRAFT",
-  "enabled": false,
-  "note": "等 ACCELERATE 模式积累 N≥20 后改 enabled=true。在此之前 V2 统一 08:00 发车。",
+  "version": "2.0_TIMING_ALPHA",
+  "global_enabled": true,
+  "note": "global_enabled=常开, 但每条规则仍有独立的 enabled+activation_requirements 双重保险",
   "rules": {
     "意乙": {
+      "enabled": false,
       "preferred_scan_tag": "PM1600",
-      "reason": "ACCELERATE pattern dominates (>60%), early lock leads to CLV decay."
+      "activation_requirements": {
+        "min_samples": 20,
+        "min_accel_momen_ratio": 0.6,
+        "clv_improvement_required": true
+      },
+      "reason": "意乙欧洲资金主导，需等待 16:00 填平洼地"
     },
     "乌克超": {
+      "enabled": false,
       "preferred_scan_tag": "PM1600",
-      "reason": "High institutional volume at European open."
+      "activation_requirements": {
+        "min_samples": 15,
+        "min_accel_momen_ratio": 0.5
+      },
+      "reason": "High institutional volume at European open"
     },
     "爱超": {
-      "preferred_scan_tag": "NOON1200",
-      "reason": "MOMENTUM pattern, noon capture optimal."
+      "enabled": false,
+      "preferred_scan_tag": "PM1600",
+      "activation_requirements": {
+        "min_samples": 15,
+        "min_accel_momen_ratio": 0.5
+      },
+      "reason": "MOMENTUM pattern dominant"
     },
     "冰岛超": {
+      "enabled": false,
       "preferred_scan_tag": "AM0800",
-      "reason": "FLAT pattern dominates (>85%), early lock captures true edge."
+      "activation_requirements": {
+        "min_samples": 15,
+        "min_flat_ratio": 0.7
+      },
+      "reason": "冰岛超低流动性，08:00 锁仓安全"
     },
     "芬超": {
+      "enabled": false,
       "preferred_scan_tag": "AM0800",
-      "reason": "FLAT pattern dominates, no European money impact."
+      "activation_requirements": {
+        "min_samples": 10,
+        "min_flat_ratio": 0.6
+      },
+      "reason": "FLAT pattern dominates, no European money impact"
     }
   }
 }

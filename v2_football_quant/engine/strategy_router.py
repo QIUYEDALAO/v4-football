@@ -91,9 +91,9 @@ class StrategyRouter:
 
         return routed_signals
 
-    def process_v2_timing(self, signal: dict, run_tag: str) -> dict:
+    def process_v2_timing(self, signal: dict, run_tag: str, league_stats: dict = None) -> dict:
         """
-        V2 时序拦截器 (⚡ 潜伏期 · enabled=false · 等数据验证后激活)
+        V2 时序拦截器 (双重保险: enabled + activation_requirements)
         """
         try:
             import json
@@ -104,18 +104,32 @@ class StrategyRouter:
         except Exception:
             return signal
 
-        if not timing_rules.get("enabled", False):
+        if not timing_rules.get("global_enabled", False):
             return signal
 
         league = signal.get("league_name", "")
         league_rule = timing_rules.get("rules", {}).get(league)
 
-        if league_rule:
-            preferred_tag = league_rule["preferred_scan_tag"]
-            if preferred_tag == "PM1600" and run_tag in ["AM0800", "NOON1200"]:
-                signal["action"] = "OBSERVE_UNTIL_PM"
-                signal["skip_reason"] = f"Timing Guard: 等待 {preferred_tag} 欧洲资金确认"
-                signal["priority"] = 0
+        if not league_rule or not league_rule.get("enabled", False):
+            return signal
+
+        # 🛡️ 铁律审判：检查是否满足激活条件
+        reqs = league_rule.get("activation_requirements", {})
+        league_stats = league_stats or {}
+        current_samples = league_stats.get("total_time_patterns", 0)
+
+        if current_samples < reqs.get("min_samples", 20):
+            signal["action"] = "ROUTER_BLOCKED"
+            signal["skip_reason"] = f"[GUARD] 延迟开火被拒：样本数 {current_samples} < {reqs.get('min_samples')}"
+            signal["priority"] = 0
+            return signal
+
+        # 通过铁律 → 执行真正的延迟拦截
+        preferred_tag = league_rule.get("preferred_scan_tag")
+        if preferred_tag == "PM1600" and run_tag in ["AM0800", "NOON1200"]:
+            signal["action"] = "OBSERVE_UNTIL_PM"
+            signal["skip_reason"] = f"[TIMING] 等待 {preferred_tag} 发车"
+            signal["priority"] = 0
 
         return signal
 

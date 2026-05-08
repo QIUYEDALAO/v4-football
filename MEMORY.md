@@ -93,7 +93,36 @@
 - 通道：QQ Bot (ON) | 微信 (已弃)
 - 记忆：memory-core + memory-wiki（后台编译）
 - 银行：20,000本金 | Kelly 1/4 | 单注上限1,000
-- Cron：每天 08:00 BJT V2每日扫描 → QQ Bot推送
+- Cron：每天 08:00/12:00/16:00 BJT 三频扫描 → QQ Bot推送
 - 结算：次日三层CLV自动结算 + 全量候选池快照
-- 项目书：v2.1 (docs/PROJECT_BOOK.md)
-- GitHub: whoerixxz/v2-football-quant (7 commits today)
+- 项目书：v2.2 (docs/PROJECT_BOOK.md)
+- GitHub: whoerixxz/v2-football-quant (16 commits today)
+
+### 四层防线闭环
+1. **bankroll.py** — Kelly仓位·阶梯熔断·SKIP_LOW_KELLY
+2. **strategy_router.py** — N≥20铁律·黄金跳变提权·毒药崩塌斩杀
+3. **live_bridge.py** — 准入审查·试水0.5%·Kill-Switch拔网线
+4. **paper_trading.py** — 8面板仪表盘·CLV三层·每周审判日
+
+### V3 世界杯引擎 (2026-05-08 建成)
+- 88场四届大赛数据 (WC2018/2022, EC2020/2024)
+- Perception Gap = log(身价比) - log(Elo比)
+- 极度泡沫区(Gap>1.0): 下盘不败33.3%, 平赔4-6x, EV正
+- Router: V3_PERCEPTION_GAP_SNIPER 赛季隔离 (非大赛季 SKIP_OFF_SEASON)
+- 开枪红线: v3_thresholds.json (小组赛R1-R2, Gap>0.15, 买入受让方)
+
+### 五大联赛双轨制
+- fair_odds_matrix_top5_v2.json: 7,230场时间衰减校准
+- 五大联赛档5 P(D)=45.2% vs 通用42.6%
+- matrix_config.json 双轨切换 (五大→专项矩阵, 其余→通用)
+
+### SSL证书修复
+- engine/net_utils.py: urllib优先, 403自动回退subprocess+curl
+- 全引擎统一 UA: V2-Football-Quant/1.0
+- GUARD审计: grep '[GUARD] API_' *.log
+
+### 三频时序雷达
+- --run_tag AM0800/NOON1200/PM1600
+- 复合主键 (fixture_id + scan_tag) 合并
+- full_scan 三条快照互不吞食
+- Time-Series Signal Lock 首次触发锁定
