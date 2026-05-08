@@ -69,6 +69,54 @@ class LiveBridgeGateway:
             "reason": f"侦察兵模式: 固定 {0.25}% 仓位 (纯数据采集费)"
         }
 
+    def can_v3_enter_micro_sandbox(self, v3_paper_summary: dict) -> bool:
+        """
+        ⛩️ V3 大赛引擎专属准入闸门 (仅限 MD2 阶段触发)
+        """
+        logger.info("🔍 正在审查 V3 引擎(WC2026) MICRO_SANDBOX 准入资格...")
+
+        md1_stats = v3_paper_summary.get("MD1_stats", {})
+        bets = md1_stats.get("bets", 0)
+        clv = md1_stats.get("avg_true_clv_pct", 0.0)
+
+        if bets < 10:
+            logger.warning(f"[GUARD] V3_BRIDGE_BLOCKED | code=V3_N_TOO_SMALL | detail=MD1 纸盘样本 {bets} < 要求 10")
+            return False
+
+        if clv < 0.0:
+            logger.warning(f"[GUARD] V3_BRIDGE_BLOCKED | code=V3_CLV_NEG | detail=MD1 纸盘 CLV {clv}% < 要求 0%")
+            return False
+
+        logger.info("✅ V3 准入审查通过！授权激活 MD2 MICRO_SANDBOX 侦察兵模式。")
+        return True
+
+    def calculate_v3_micro_stake(self, total_bankroll: float) -> dict:
+        """
+        🛡️ V3 专属注码剥夺：固定 0.25% 本金 (20000 -> 50)
+        """
+        safe_stake = round(total_bankroll * 0.0025, 2)
+        return {
+            "action": "BET_LIVE_MICRO_SANDBOX",
+            "stake": safe_stake,
+            "reason": f"V3 极小仓保护：固定 0.25% 本金"
+        }
+
+    def check_v3_kill_switch(self, v3_live_summary: dict) -> bool:
+        """
+        🛑 V3 极速熔断：Rolling 10 实盘 CLV < 0 立刻拔网线
+        """
+        windows = v3_live_summary.get("rolling_windows_10", [])
+        if not windows:
+            return False
+
+        last_window = windows[-1]
+        clv = last_window.get("avg_true_clv_pct", 0.0)
+
+        if last_window.get("bets", 0) >= 10 and clv < 0.0:
+            logger.critical(f"🚨 [GUARD] V3_KILL_SWITCH | code=V3_LIVE_CLV_NEG | detail=Rolling 10 CLV {clv}% 跌穿 0")
+            return True
+        return False
+
     def check_micro_kill_switch(self, live_summary: dict) -> bool:
         """
         🔬 Hair-trigger Kill Switch: rolling_10 CLV ≤ 0 → 立刻熔断

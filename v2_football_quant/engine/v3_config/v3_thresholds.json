@@ -1,0 +1,47 @@
+{
+  "engine_name": "V3_PERCEPTION_GAP_SNIPER",
+  "version": "1.1_WC2026_PROD",
+  "activated": false,
+  "note": "WC2026 开幕前一周将 activated 改为 true。MD1=纯纸盘校准, MD2=极小仓侦察兵, MD3=强制熔断退场。",
+  "rules": {
+    "group_stage_round_1": {
+      "description": "MD1 纯纸盘校准：测试环境偏移与市场 Price-in 程度",
+      "target_stage": ["GROUP_STAGE_ROUND_1"],
+      "execution": {
+        "action": "PAPER_ONLY",
+        "reason": "MD1_CALIBRATION_PHASE"
+      }
+    },
+    "group_stage_round_2": {
+      "description": "MD2 微型沙盒试水：条件触发制侦察兵",
+      "target_stage": ["GROUP_STAGE_ROUND_2"],
+      "conditions": {
+        "min_perception_gap": 1.00,
+        "favorite_psch_max": 1.45
+      },
+      "execution": {
+        "action": "BET_OPPOSITE",
+        "live_mode": "MICRO_SANDBOX",
+        "max_stake_pct": 0.0025,
+        "daily_limit": 1,
+        "leverage_boost": 1.0
+      }
+    },
+    "group_stage_round_3": {
+      "description": "MD3 小组赛末轮避险：默契球与战意污染期",
+      "target_stage": ["GROUP_STAGE_ROUND_3"],
+      "execution": {
+        "action": "SKIP_ALL",
+        "reason": "MD3_MUTUAL_DRAW_FIREWALL"
+      }
+    },
+    "knockout_stage": {
+      "description": "淘汰赛避险：常规感知偏差失效区",
+      "target_stage": ["KNOCKOUTS"],
+      "execution": {
+        "action": "SKIP_ALL",
+        "reason": "KNOCKOUT_DYNAMICS_UNSUPPORTED"
+      }
+    }
+  }
+}
