@@ -1,0 +1,27 @@
+{
+  "version": "1.0_DRAFT",
+  "enabled": false,
+  "note": "等 ACCELERATE 模式积累 N≥20 后改 enabled=true。在此之前 V2 统一 08:00 发车。",
+  "rules": {
+    "意乙": {
+      "preferred_scan_tag": "PM1600",
+      "reason": "ACCELERATE pattern dominates (>60%), early lock leads to CLV decay."
+    },
+    "乌克超": {
+      "preferred_scan_tag": "PM1600",
+      "reason": "High institutional volume at European open."
+    },
+    "爱超": {
+      "preferred_scan_tag": "NOON1200",
+      "reason": "MOMENTUM pattern, noon capture optimal."
+    },
+    "冰岛超": {
+      "preferred_scan_tag": "AM0800",
+      "reason": "FLAT pattern dominates (>85%), early lock captures true edge."
+    },
+    "芬超": {
+      "preferred_scan_tag": "AM0800",
+      "reason": "FLAT pattern dominates, no European money impact."
+    }
+  }
+}

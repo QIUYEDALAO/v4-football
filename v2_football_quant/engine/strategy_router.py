@@ -91,6 +91,34 @@ class StrategyRouter:
 
         return routed_signals
 
+    def process_v2_timing(self, signal: dict, run_tag: str) -> dict:
+        """
+        V2 时序拦截器 (⚡ 潜伏期 · enabled=false · 等数据验证后激活)
+        """
+        try:
+            import json
+            from pathlib import Path
+            config_path = Path(__file__).resolve().parent.parent / "config" / "league_timing_rules.json"
+            with open(config_path) as f:
+                timing_rules = json.load(f)
+        except Exception:
+            return signal
+
+        if not timing_rules.get("enabled", False):
+            return signal
+
+        league = signal.get("league_name", "")
+        league_rule = timing_rules.get("rules", {}).get(league)
+
+        if league_rule:
+            preferred_tag = league_rule["preferred_scan_tag"]
+            if preferred_tag == "PM1600" and run_tag in ["AM0800", "NOON1200"]:
+                signal["action"] = "OBSERVE_UNTIL_PM"
+                signal["skip_reason"] = f"Timing Guard: 等待 {preferred_tag} 欧洲资金确认"
+                signal["priority"] = 0
+
+        return signal
+
 
 # ==========================================
 # 联赛路由分发器 (已有)
