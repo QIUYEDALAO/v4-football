@@ -530,6 +530,13 @@ def full_summary(window_size: int = 10):
     print(f"平均 Fair CLV: {avg_fair_line_clv*100:+.2f}% (市场漂移)")
     print(f"平均 True CLV: {avg_true_clv*100:+.2f}% (核心护城河)")
 
+    # 🌟 数据分段提示: Edge 修正在 commit 7ca6abf (2026-05-08)
+    pre_fix = [r for r in all_results if _get_date(r) < "2026-05-08"]
+    post_fix = [r for r in all_results if _get_date(r) >= "2026-05-08"]
+    if post_fix:
+        p_post = sum(float(r.get("pnl", 0)) for r in post_fix)
+        print(f"\n📝 数据版本: 修正前 {len(pre_fix)} 场 (Edge虚高) | 修正后 {len(post_fix)} 场 (commit 7ca6abf)")
+
     print(f"\n🏆 【联赛分桶审计 (按下注量排序)】")
     print(f"{'联赛名称':<22} | {'样本':<4} | {'ROI':>7} | {'True CLV':>8}")
     print("-" * 55)
