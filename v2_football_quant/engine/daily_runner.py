@@ -477,7 +477,7 @@ def run_once(run_tag="DEFAULT"):
             "scan_time_local": datetime.now().isoformat(),
         }
         
-        market_odds = fx.get("_ht_1x2", {})
+        market_odds = fx.get("_ht_1x2") or {}
         odds_D = market_odds.get("D")
         odds_H = market_odds.get("H")
         odds_A = market_odds.get("A")
@@ -490,7 +490,7 @@ def run_once(run_tag="DEFAULT"):
             continue
         
         market_probs = {"H": round(1/odds_H, 4), "D": round(1/odds_D, 4), "A": round(1/odds_A, 4)}
-        prob_D = row["fair_D"]
+        prob_D = 1 / row["fair_D"] if row.get("fair_D") else 0  # fair_D 存的是赔率, 需转概率
         edge_pp = round(prob_D - market_probs["D"], 4)
         ev_pct = round(prob_D * odds_D - 1, 4)
         break_even = round(1 / odds_D, 4)
