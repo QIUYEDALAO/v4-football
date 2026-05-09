@@ -689,18 +689,7 @@ def run_once(run_tag="DEFAULT"):
         json.dump(sorted(list(already_selected)), f)
     logger.info(f"🔒 状态机: {len(already_selected)} 场比赛已锁定 → {state_file}")
 
-    # 昨日验证
-    yesterday = (date.today() - timedelta(days=1)).strftime("%Y-%m-%d")
-    try:
-        import sys; sys.path.insert(0, str(BASE_DIR / "engine"))
-        from paper_trading import verify_date as pt_verify
-        result = pt_verify(yesterday)
-        if "error" not in result and result.get("total_completed", 0) > 0:
-            logger.info(f"\n📊 昨日 ({yesterday}) 验证: "
-                  f"{result['hits']}/{result['total_completed']} 命中, "
-                  f"ROI {result['roi_pct']:+.1f}%")
-    except Exception as e:
-        logger.warning(f"\n⚠️ 昨日验证跳过: {e}")
+    # 结算已分离至独立 Cron: python3 engine/paper_trading.py --verify-yesterday
 
 
 if __name__ == "__main__":

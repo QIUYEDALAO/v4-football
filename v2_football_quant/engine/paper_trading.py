@@ -16,9 +16,10 @@ import json
 import ssl
 import certifi
 import time
+import argparse
 import urllib.request
 from pathlib import Path
-from datetime import date, datetime
+from datetime import date, datetime, timedelta
 from collections import defaultdict, Counter
 from typing import Optional, Dict, Tuple, List
 
@@ -815,16 +816,18 @@ def test_clv():
 # ═══════════════════════════════════════════════════════════
 
 if __name__ == "__main__":
-    import sys
+    parser = argparse.ArgumentParser(description="V2 纸盘结算与复盘系统")
+    parser.add_argument("--verify", type=str, help="验证指定日期 (YYYY-MM-DD)")
+    parser.add_argument("--verify-yesterday", action="store_true", help="验证昨天的比赛")
+    parser.add_argument("--summary", action="store_true", help="打印全量汇总面板")
+    parser.add_argument("--test-clv", action="store_true", help="单元测试 CLV 计算")
+    args = parser.parse_args()
 
-    if "--test-clv" in sys.argv:
+    if args.test_clv:
         test_clv()
-
-    elif "--verify" in sys.argv:
-        idx = sys.argv.index("--verify")
-        dt = sys.argv[idx + 1] if idx + 1 < len(sys.argv) else date.today().isoformat()
-        print(f"🔍 验证 {dt} 的预测...")
-        result = verify_date(dt)
+    elif args.verify:
+        print(f"🔍 验证 {args.verify} 的预测...")
+        result = verify_date(args.verify)
         if "error" in result:
             print(f"  ⚠️ {result['error']}")
         else:
@@ -832,14 +835,20 @@ if __name__ == "__main__":
                   f"ROI {result['roi_pct']:+.2f}% | CLV {result['avg_clv_pct']:+.2f}%")
             if result["pending"] > 0:
                 print(f"  ⏳ {result['pending']} 场等待完赛")
-
-    elif "--summary" in sys.argv:
+    elif args.verify_yesterday:
+        yesterday = (date.today() - timedelta(days=1)).strftime("%Y-%m-%d")
+        print(f"⏱ 结算昨日 ({yesterday}) 的预测...")
+        result = verify_date(yesterday)
+        if "error" in result:
+            print(f"  ⚠️ {result['error']}")
+        else:
+            print(f"  ✅ {result['hits']}/{result['total_completed']} 命中 | "
+                  f"ROI {result['roi_pct']:+.2f}% | CLV {result['avg_clv_pct']:+.2f}%")
+            if result.get("pending", 0) > 0:
+                print(f"  ⏳ {result['pending']} 场等待完赛")
+    elif args.summary:
         s = full_summary()
         if not s or "error" not in s:
-            pass  # full_summary 内部已打印炫酷报表
-
+            pass
     else:
-        print("用法:")
-        print("  python3 paper_trading.py --test-clv          # 单元测试 CLV 计算")
-        print("  python3 paper_trading.py --verify 2026-05-05 # 验证指定日期")
-        print("  python3 paper_trading.py --summary           # 全量汇总")
+        parser.print_help()
