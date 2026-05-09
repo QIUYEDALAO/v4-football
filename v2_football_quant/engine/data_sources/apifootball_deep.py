@@ -110,8 +110,23 @@ class InjuryAttritionEngine:
             return result
 
         for inj in injuries:
-            team_id = str(inj.get("team", {}).get("id"))
-            player_name = inj.get("player", {}).get("name", "")
+            # 安全提取 team_id：team 可能是 dict/None/str
+            team_raw = inj.get("team") if isinstance(inj, dict) else None
+            if isinstance(team_raw, dict):
+                team_id = str(team_raw.get("id", ""))
+            elif isinstance(team_raw, str):
+                team_id = team_raw
+            else:
+                continue
+
+            # 安全提取 player_name
+            player_raw = inj.get("player") if isinstance(inj, dict) else None
+            if isinstance(player_raw, dict):
+                player_name = (player_raw.get("name") or "").strip()
+            elif isinstance(player_raw, str):
+                player_name = player_raw
+            else:
+                player_name = ""
 
             if team_id not in self.weights_db:
                 continue
@@ -119,6 +134,8 @@ class InjuryAttritionEngine:
             core_players = self.weights_db[team_id].get("players", {})
 
             # 名字匹配 (包含匹配，防止 API 缩写不一致)
+            if not player_name:
+                continue
             for core_name, core_data in core_players.items():
                 if core_name.lower() in player_name.lower() or player_name.lower() in core_name.lower():
                     weight = core_data["weight"]
