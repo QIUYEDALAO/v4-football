@@ -191,12 +191,21 @@ def calc_spread(fx: dict) -> float:
 
     last_5_h = home.get("last_5") or {}
     last_5_a = away.get("last_5") or {}
-    att_h = float(str(last_5_h.get("att", "0")).rstrip("%") or 0)
-    att_a = float(str(last_5_a.get("att", "0")).rstrip("%") or 0)
-    def_h = float(str(last_5_h.get("def", "0")).rstrip("%") or 0)
-    def_a = float(str(last_5_a.get("def", "0")).rstrip("%") or 0)
+    # 概率百分比 → 小数 (att: 67% → 0.67)
+    att_h = float(str(last_5_h.get("att", "0")).rstrip("%") or 0) / 100
+    att_a = float(str(last_5_a.get("att", "0")).rstrip("%") or 0) / 100
+    def_h = float(str(last_5_h.get("def", "0")).rstrip("%") or 0) / 100
+    def_a = float(str(last_5_a.get("def", "0")).rstrip("%") or 0) / 100
 
     spread = (att_h - def_a) - (att_a - def_h)
+    
+    # 🛡️ 防暴击 Sanity Check (物理极限 ±30)
+    if abs(spread) > 30.0:
+        logger.warning(f"🚨 [GUARD] DIRTY_SPREAD | fixture={fx.get('id')} spread={spread:.1f} | att_h={att_h:.3f} att_a={att_a:.3f} def_h={def_h:.3f} def_a={def_a:.3f}")
+        fx["att_def_spread"] = 0.0
+        fx["decile_info"] = map_to_decile(0.0, fx.get("league"))  # 降级为均衡档
+        return 0.0
+    
     fx["att_def_spread"] = round(spread, 1)
     fx["decile_info"] = map_to_decile(spread, fx.get("league"))
     return spread
