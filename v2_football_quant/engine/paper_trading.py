@@ -642,6 +642,63 @@ def full_summary(window_size: int = 10):
     print(f" [5] GUARD审计      : grep '[GUARD]' *.log → 全链路防线日志追踪")
     print("=" * 60)
 
+    # ── 🔬 V2 负收益溯源审计 (Autopsy) ──
+    if total_bets >= 10:
+        # 维度一：按联赛
+        lig_clv = defaultdict(lambda: {"n": 0, "clv": 0.0, "hits": 0})
+        for r in all_results:
+            lg = r.get("league", "Unknown")
+            lig_clv[lg]["n"] += 1
+            lig_clv[lg]["clv"] += float(r.get("true_clv", 0))
+            if r.get("is_hit"): lig_clv[lg]["hits"] += 1
+
+        print(f"\n🔬 【V2 负收益深度解剖报告 (Autopsy)】")
+        print("=" * 65)
+
+        # 联赛切片 (CLV最差的排前面)
+        print(f"\n▶️ 维度一：按联赛 (CLV 升序 → 毒瘤排最前)")
+        print(f"{'联赛':<16} {'N':>3} {'命中率':>5} {'Avg CLV':>8}")
+        print("-" * 40)
+        for lg, v in sorted(lig_clv.items(), key=lambda x: x[1]['clv']/max(x[1]['n'],1)):
+            if v['n'] >= 3:
+                avg_clv = v['clv'] / v['n'] * 100
+                hit_rate = v['hits'] / v['n'] * 100
+                mark = ' ☠️' if avg_clv < -5 else ''
+                print(f"{lg[:14]:<16} {v['n']:>3} {hit_rate:>4.0f}% {avg_clv:>+7.2f}%{mark}")
+
+        # 维度二：按档位
+        bin_clv = defaultdict(lambda: {"n": 0, "clv": 0.0})
+        for r in all_results:
+            b = r.get("decile", r.get("bin_id", "?"))
+            bin_clv[str(b)]["n"] += 1
+            bin_clv[str(b)]["clv"] += float(r.get("true_clv", 0))
+
+        print(f"\n▶️ 维度二：按档位 (诊断 Fair Odds Matrix)")
+        print(f"{'档位':<8} {'N':>3} {'Avg CLV':>8}")
+        print("-" * 25)
+        for b, v in sorted(bin_clv.items()):
+            if v['n'] >= 2:
+                avg_clv = v['clv'] / v['n'] * 100
+                print(f"Decile {b:<3} {v['n']:>3} {avg_clv:>+7.2f}%")
+
+        # 维度三：按时序形态 (如果有时序数据)
+        pattern_clv = defaultdict(lambda: {"n": 0, "clv": 0.0})
+        for r in all_results:
+            tp = r.get("time_pattern", r.get("scan_tag", "?"))
+            pattern_clv[str(tp)]["n"] += 1
+            pattern_clv[str(tp)]["clv"] += float(r.get("true_clv", 0))
+
+        if any(v['n'] >= 3 for v in pattern_clv.values()):
+            print(f"\n▶️ 维度三：按时序形态 (早盘锁仓折损率)")
+            print(f"{'形态':<16} {'N':>3} {'Avg CLV':>8}")
+            print("-" * 30)
+            for tp, v in sorted(pattern_clv.items()):
+                if v['n'] >= 2:
+                    avg_clv = v['clv'] / v['n'] * 100
+                    print(f"{tp[:14]:<16} {v['n']:>3} {avg_clv:>+7.2f}%")
+
+        print("=" * 65)
+
     # ── 🌍 V3 大赛引擎专属仪表盘 ──
     v3_bets = [r for r in all_results if r.get("strategy_id") == "V3_PERCEPTION_GAP_SNIPER"]
     if v3_bets:

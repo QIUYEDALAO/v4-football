@@ -15,7 +15,8 @@ class StrategyRouter:
     """
     def __init__(self, enable_active_routing=False, summary_stats=None):
         self.enable_active_routing = enable_active_routing
-        self.summary_stats = summary_stats or {}  # 🌟 接收来自 paper_trading 的统计数据
+        self.summary_stats = summary_stats or {}
+        self.v2_icu_freeze = True  # 🚨 V2 ICU 冻结: 连续负 CLV → 仅采集不下单  # 🌟 接收来自 paper_trading 的统计数据
 
     def _check_iron_rule(self, pattern_key: str, required_type: str) -> bool:
         """
@@ -54,6 +55,15 @@ class StrategyRouter:
                 orig_priority = signal.get("priority", 50)
 
                 if strategy_id == "V2_HT_DRAW":
+                    # 🚨 V2 ICU 冻结: 连续负 CLV → 仅采集数据，禁止实盘
+                    if self.v2_icu_freeze:
+                        signal["action"] = "OBSERVE_ONLY"
+                        signal["skip_reason"] = "[ICU] V2 策略处于负 CLV 观察期，禁止实盘资金注入"
+                        signal["priority"] = 0
+                        signal["leverage_boost"] = 0.0
+                        routed_signals.append(signal)
+                        continue
+
                     # 获取当前这单的特征 (例如 "[5] -> [4]")
                     jump_str = f"[{signal.get('orig_bin')}] -> [{signal.get('adj_bin')}]"
 
