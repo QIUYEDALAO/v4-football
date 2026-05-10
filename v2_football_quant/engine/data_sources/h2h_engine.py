@@ -1,7 +1,7 @@
 """
 V4 H2H 引擎 — 基于 API-Football 历史交锋的大球评估
 ======================================================
-核心因子: 近10场历史交锋上半场有进球率 ≥ 80% + 全场0-0 ≤ 2场
+核心因子: 近10场历史交锋上半场有进球率 ≥ 70% + 全场0-0 ≤ 2场
 
 用法:
   from engine.data_sources.h2h_engine import evaluate_h2h_edge
@@ -59,11 +59,11 @@ def evaluate_h2h_edge(home_id: int, away_id: int, api_client) -> dict:
     n = len(recent)
     ht_rate = ht_goal_count / n
 
-    # 规则 2 & 3: V38 铁律
-    if ht_rate >= 0.8 and ft_zero_count <= 2:
+    # 规则 2 & 3: 放宽至70%蓄水
+    if ht_rate >= 0.7 and ft_zero_count <= 2:
         return {
             "valid": True,
-            "strategy_id": "V4_OU_H2H",
+            "strategy_id": "V4_FACTOR_EXPLORE",
             "market_type": "FT_OU_2_5",
             "metrics": {
                 "h2h_total": total_h2h,

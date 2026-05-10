@@ -147,7 +147,7 @@ def run_v4_scan(run_tag="V4_DEFAULT"):
         # 组装信号 → Router 断路器
         signal = {
             "fixture_id": fx["id"],
-            "strategy_id": "V4_OU_H2H",
+            "strategy_id": "V4_FACTOR_EXPLORE",
             "league_name": fx["league_name"],
             "home": fx["home"],
             "away": fx["away"],
@@ -168,12 +168,15 @@ def run_v4_scan(run_tag="V4_DEFAULT"):
             "home": fx["home"],
             "away": fx["away"],
             "league": fx["league_name"],
-            "strategy_id": "V4_EXPLORE_H2H",
+            "strategy_id": "V4_FACTOR_EXPLORE",
             "market": result["market_type"],
             "placed_odds": float(ou_odds) if ou_odds else None,
+            "factors": {
+                "h2h_ht_goal_rate": result["metrics"]["ht_goal_rate"],
+                "h2h_sample_size": result["metrics"]["h2h_analyzed"],
+            },
             "metrics": result["metrics"],
-            "action": processed.get("action", "SKIP"),
-            "skip_reason": processed.get("skip_reason", ""),
+            "action": "OBSERVE_ONLY",
             "weight_in_model": 0.20,
             "paper_trade_only": True,
         })
