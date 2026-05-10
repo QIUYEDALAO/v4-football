@@ -126,15 +126,46 @@ class StrategyRouter:
                 signal["skip_reason"] = f"[GUARD] V4 勘探期 (N={v4_paper}/100)，禁止实盘"
                 return signal
 
-        # ── V3 世界杯核武网关 ──
+        # ── 🚀 V3 世界杯核武网关 (三段式 + 动态加仓) ──
         if strategy_id == "V3_WC_BUBBLE":
-            if not self.config.get("is_world_cup_window", False):
-                signal["action"] = "ROUTER_BLOCKED"
-                signal["skip_reason"] = "[GUARD] 非世界杯窗口，V3 引擎静默"
+            wc_stage = signal.get("wc_stage", "UNKNOWN")
+            gap = signal.get("gap", 0.0)
+
+            # 1. 拦截非 MD2 阶段
+            if wc_stage != "MD2":
+                signal["action"] = "OBSERVE_ONLY" if wc_stage == "MD1" else "ROUTER_BLOCKED"
                 signal["max_risk_units"] = 0.0
+                signal["skip_reason"] = f"[GUARD] 当前阶段 {wc_stage}，非开火窗口。"
                 return signal
 
-        return signal  # 放行 (由后续流程继续处理)
+            # 2. 中度泡沫区 (0.7-1.0): 扩大纸盘雷达
+            if 0.7 <= gap < 1.0:
+                signal["action"] = "OBSERVE_ONLY"
+                signal["max_risk_units"] = 0.0
+                signal["skip_reason"] = f"[GUARD] 中度泡沫区 (Gap={gap:.2f})，开启纸盘数据收集。"
+                return signal
+
+            # 3. 极端泡沫区 (Gap >= 1.0): 进入击杀程序
+            if gap >= 1.0:
+                rolling_clv = engine_stats.get("md2_rolling_10_clv", 0.0)
+
+                if rolling_clv > 0:
+                    signal["action"] = "EXECUTE"
+                    signal["max_risk_units"] = 0.50
+                    signal["skip_reason"] = f"[GUARD] 极端泡沫锁定! CLV验证为正 (+{rolling_clv*100:.1f}%), 触发0.5%加强火力。"
+                else:
+                    signal["action"] = "EXECUTE"
+                    signal["max_risk_units"] = 0.25
+                    signal["skip_reason"] = f"[GUARD] 极端泡沫锁定。当前CLV未达标, 维持0.25%基础侦察火力。"
+                return signal
+
+            # 4. 其他不满足条件的 MD2 比赛，直接忽略
+            signal["action"] = "SKIP"
+            signal["max_risk_units"] = 0.0
+            signal["skip_reason"] = f"[GUARD] 泡沫深度不足 (Gap={gap:.2f})。"
+            return signal
+
+        return signal  # 非 V2/V4/V3 信号，正常放行
 
     def process_v2_timing(self, signal: dict, run_tag: str, league_stats: dict = None) -> dict:
         """
