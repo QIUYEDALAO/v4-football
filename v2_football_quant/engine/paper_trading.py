@@ -245,7 +245,7 @@ def verify_date(date_str: str) -> dict:
         # --- Step 3: 三层 CLV 重构 ---
         from clv import clv_triple
         triple = clv_triple(placed_odds, bet_outcome, closing_ht_1x2)
-        true_clv = triple.get("ev_vs_close", 0)
+        true_clv = triple.get("ev_vs_close", 0) or 0.0
         clv_list.append(true_clv)
 
         # --- Step 2: PnL 结算 ---
@@ -275,7 +275,7 @@ def verify_date(date_str: str) -> dict:
             "clv_margin": triple.get("margin"),
             "raw_closing_odds": triple.get("raw_close"),
             "fair_closing_odds": triple.get("fair_close"),
-            "true_clv": round(true_clv, 4),  # 向后兼容
+            "true_clv": round(true_clv or 0.0, 4),  # 向后兼容
             "ht_has_goal": (ht_home + ht_away) > 0,
         }
         results.append(r)
@@ -283,11 +283,11 @@ def verify_date(date_str: str) -> dict:
         logger.info(
             f"[{fid}] {home} v {away} | "
             f"HT:{ht_str} | 投:{bet_outcome} | 赛:{actual_outcome} | "
-            f"PnL:{pnl:+.2f} | CLV:{true_clv*100:+.2f}%"
+            f"PnL:{pnl:+.2f} | CLV:{(true_clv or 0.0)*100:+.2f}%"
             f"{' ✅' if is_hit else ' ❌'}"
         )
 
-        time.sleep(1.0)  # API 限频
+        time.sleep(0.5)  # 加速
 
     # --- 汇总 ---
     avg_clv = sum(clv_list) / len(clv_list) if clv_list else 0.0
@@ -350,9 +350,9 @@ def full_summary(window_size: int = 10):
     total_staked = sum(float(r.get("stake", 0.0)) for r in all_results)
 
     # ---- 全局汇总 ----
-    avg_true_clv = (sum(float(r.get("true_clv", 0.0)) for r in all_results) / total_bets if total_bets else 0.0)
-    avg_raw_clv = (sum(float(r.get("raw_clv", r.get("true_clv", 0.0))) for r in all_results) / total_bets if total_bets else 0.0)
-    avg_fair_line_clv = (sum(float(r.get("fair_line_clv", r.get("true_clv", 0.0))) for r in all_results) / total_bets if total_bets else 0.0)
+    avg_true_clv = (sum(float(r.get("true_clv") or 0) for r in all_results) / total_bets if total_bets else 0.0)
+    avg_raw_clv = (sum(float(r.get("raw_clv") or r.get("true_clv") or 0) for r in all_results) / total_bets if total_bets else 0.0)
+    avg_fair_line_clv = (sum(float(r.get("fair_line_clv") or r.get("true_clv") or 0) for r in all_results) / total_bets if total_bets else 0.0)
 
     # ---- 核心分桶容器 ----
     def _create_bucket():
@@ -385,9 +385,9 @@ def full_summary(window_size: int = 10):
         league = r.get("league", r.get("league_name", "Unknown"))
         bin_id = r.get("bin_id", r.get("decile", "Unknown"))
 
-        true_clv = float(r.get("true_clv", r.get("ev_vs_close", 0.0)))
-        raw_clv = float(r.get("raw_clv", true_clv))
-        fair_clv = float(r.get("fair_line_clv", true_clv))
+        true_clv = float(r.get("true_clv") or r.get("ev_vs_close") or 0)
+        raw_clv = float(r.get("raw_clv") or true_clv)
+        fair_clv = float(r.get("fair_line_clv") or true_clv)
 
         stake = float(r.get("stake", 0.0))
         pnl = float(r.get("pnl", 0.0))
@@ -642,61 +642,79 @@ def full_summary(window_size: int = 10):
     print(f" [5] GUARD审计      : grep '[GUARD]' *.log → 全链路防线日志追踪")
     print("=" * 60)
 
-    # ── 🔬 V2 负收益溯源审计 (Autopsy) ──
+    # ── 🔬 V2 负收益溯源审计 (Autopsy 2.0) ──
     if total_bets >= 10:
-        # 维度一：按联赛
-        lig_clv = defaultdict(lambda: {"n": 0, "clv": 0.0, "hits": 0})
+        lig_clv = defaultdict(lambda: {"n": 0, "clv": 0.0})
+        bin_clv = defaultdict(lambda: {"n": 0, "clv": 0.0})
+        att_clv = defaultdict(lambda: {"n": 0, "clv": 0.0})
+
         for r in all_results:
             lg = r.get("league", "Unknown")
             lig_clv[lg]["n"] += 1
             lig_clv[lg]["clv"] += float(r.get("true_clv", 0))
-            if r.get("is_hit"): lig_clv[lg]["hits"] += 1
 
-        print(f"\n🔬 【V2 负收益深度解剖报告 (Autopsy)】")
+            b = str(r.get("decile", r.get("bin_id", "?")))
+            bin_clv[b]["n"] += 1
+            bin_clv[b]["clv"] += float(r.get("true_clv", 0))
+
+            has_att = bool(r.get("attrition_flag", r.get("has_attrition", False)))
+            att_key = "有伤停折损" if has_att else "无伤停影响"
+            att_clv[att_key]["n"] += 1
+            att_clv[att_key]["clv"] += float(r.get("true_clv", 0))
+
+        print(f"\n🔬 【V2 负收益深度解剖报告 (Autopsy 2.0)】")
         print("=" * 65)
 
-        # 联赛切片 (CLV最差的排前面)
-        print(f"\n▶️ 维度一：按联赛 (CLV 升序 → 毒瘤排最前)")
-        print(f"{'联赛':<16} {'N':>3} {'命中率':>5} {'Avg CLV':>8}")
-        print("-" * 40)
+        # 🔪 切片1：联赛剥离
+        print(f"\n▶️ 维度一：联赛切片 (N≥3 才显示)")
+        print(f"{'联赛':<18} {'N':>3} {' Avg CLV':>8} {'判定'}")
+        print("-" * 45)
+        blacklist_candidates = []
         for lg, v in sorted(lig_clv.items(), key=lambda x: x[1]['clv']/max(x[1]['n'],1)):
             if v['n'] >= 3:
-                avg_clv = v['clv'] / v['n'] * 100
-                hit_rate = v['hits'] / v['n'] * 100
-                mark = ' ☠️' if avg_clv < -5 else ''
-                print(f"{lg[:14]:<16} {v['n']:>3} {hit_rate:>4.0f}% {avg_clv:>+7.2f}%{mark}")
+                avg = v['clv'] / v['n'] * 100
+                if avg < -5.0 and v['n'] >= 5:
+                    tag = '🚨 黑名单候选'
+                    blacklist_candidates.append(lg)
+                elif avg < 0:
+                    tag = '⚠️ 持续观察'
+                else:
+                    tag = '✅ 正向'
+                print(f"{lg[:16]:<18} {v['n']:>3} {avg:>+7.2f}% {tag}")
 
-        # 维度二：按档位
-        bin_clv = defaultdict(lambda: {"n": 0, "clv": 0.0})
-        for r in all_results:
-            b = r.get("decile", r.get("bin_id", "?"))
-            bin_clv[str(b)]["n"] += 1
-            bin_clv[str(b)]["clv"] += float(r.get("true_clv", 0))
-
-        print(f"\n▶️ 维度二：按档位 (诊断 Fair Odds Matrix)")
+        # 🔪 切片2：档位剥离
+        print(f"\n▶️ 维度二：矩阵档位切片")
         print(f"{'档位':<8} {'N':>3} {'Avg CLV':>8}")
         print("-" * 25)
+        trash_bins = []
         for b, v in sorted(bin_clv.items()):
-            if v['n'] >= 2:
-                avg_clv = v['clv'] / v['n'] * 100
-                print(f"Decile {b:<3} {v['n']:>3} {avg_clv:>+7.2f}%")
+            if b != "?" and v['n'] >= 2:
+                avg = v['clv'] / v['n'] * 100
+                if avg < -5.0:
+                    trash_bins.append(b)
+                    print(f"Dec {b:<3} {v['n']:>3} {avg:>+7.2f}% 🗑️")
+                else:
+                    print(f"Dec {b:<3} {v['n']:>3} {avg:>+7.2f}%")
 
-        # 维度三：按时序形态 (如果有时序数据)
-        pattern_clv = defaultdict(lambda: {"n": 0, "clv": 0.0})
-        for r in all_results:
-            tp = r.get("time_pattern", r.get("scan_tag", "?"))
-            pattern_clv[str(tp)]["n"] += 1
-            pattern_clv[str(tp)]["clv"] += float(r.get("true_clv", 0))
+        # 🔪 切片3：伤停A/B
+        print(f"\n▶️ 维度三：伤停折损因子 A/B")
+        for k in ["有伤停折损", "无伤停影响"]:
+            v = att_clv[k]
+            if v['n'] > 0:
+                avg = v['clv'] / v['n'] * 100
+                mark = '🔥 正向Alpha' if avg > 0 else '❌ 无效'
+                print(f"  {k:<10} N={v['n']:>3} CLV={avg:>+6.2f}% {mark}")
 
-        if any(v['n'] >= 3 for v in pattern_clv.values()):
-            print(f"\n▶️ 维度三：按时序形态 (早盘锁仓折损率)")
-            print(f"{'形态':<16} {'N':>3} {'Avg CLV':>8}")
-            print("-" * 30)
-            for tp, v in sorted(pattern_clv.items()):
-                if v['n'] >= 2:
-                    avg_clv = v['clv'] / v['n'] * 100
-                    print(f"{tp[:14]:<16} {v['n']:>3} {avg_clv:>+7.2f}%")
-
+        # 判决
+        print(f"\n{'='*65}")
+        print(f"🛑 ICU 判决:")
+        if blacklist_candidates:
+            print(f"  黑名单联赛: {', '.join(blacklist_candidates)}")
+        if trash_bins:
+            print(f"  垃圾档位: {', '.join(trash_bins)}")
+        avg_all = sum(float(r.get('true_clv') or 0) for r in all_results) / total_bets * 100
+        if avg_all < 0:
+            print(f"  全体CLV={avg_all:+.2f}% → V2 维持 ICU 观察, 0 实盘敞口")
         print("=" * 65)
 
     # ── 🌍 V3 大赛引擎专属仪表盘 ──
