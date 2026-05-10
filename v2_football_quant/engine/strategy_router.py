@@ -13,9 +13,10 @@ class StrategyRouter:
     当前状态：静默潜伏期 (DRY-RUN)。
     激活条件：等待 paper_trading 仪表盘积累满 N >= 20 的有效样本。
     """
-    def __init__(self, enable_active_routing=False, summary_stats=None):
+    def __init__(self, enable_active_routing=False, summary_stats=None, config=None):
         self.enable_active_routing = enable_active_routing
         self.summary_stats = summary_stats or {}
+        self.config = config or {}
         self.v2_icu_freeze = True  # 🚨 V2 ICU 冻结: 连续负 CLV → 仅采集不下单  # 🌟 接收来自 paper_trading 的统计数据
 
     def _check_iron_rule(self, pattern_key: str, required_type: str) -> bool:
@@ -100,6 +101,40 @@ class StrategyRouter:
             routed_signals.append(signal)
 
         return routed_signals
+
+    def process_signals(self, signal: dict, engine_stats: dict = None) -> dict:
+        """
+        🛡️ 物理级断路器: V2/V4/V3 统一安检口
+        """
+        engine_stats = engine_stats or {}
+        strategy_id = signal.get("strategy_id", "UNKNOWN")
+
+        # ── V2 物理断路器 (长期负EV, 绝对禁止实盘) ──
+        if strategy_id == "V2_HT_DRAW":
+            signal["action"] = "OBSERVE_ONLY"
+            signal["max_risk_units"] = 0.0
+            signal["leverage_boost"] = 0.0
+            signal["skip_reason"] = "[GUARD] V2 处于长期负 CLV 观察期，物理断开实盘资金池"
+            return signal
+
+        # ── V4 勘探线断路器 (纸盘 N<100 前严禁实盘) ──
+        if strategy_id == "V4_OU_H2H":
+            v4_paper = engine_stats.get("v4_paper_trades", 0)
+            if v4_paper < 100:
+                signal["action"] = "OBSERVE_ONLY"
+                signal["max_risk_units"] = 0.0
+                signal["skip_reason"] = f"[GUARD] V4 勘探期 (N={v4_paper}/100)，禁止实盘"
+                return signal
+
+        # ── V3 世界杯核武网关 ──
+        if strategy_id == "V3_WC_BUBBLE":
+            if not self.config.get("is_world_cup_window", False):
+                signal["action"] = "ROUTER_BLOCKED"
+                signal["skip_reason"] = "[GUARD] 非世界杯窗口，V3 引擎静默"
+                signal["max_risk_units"] = 0.0
+                return signal
+
+        return signal  # 放行 (由后续流程继续处理)
 
     def process_v2_timing(self, signal: dict, run_tag: str, league_stats: dict = None) -> dict:
         """
