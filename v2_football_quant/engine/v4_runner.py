@@ -168,12 +168,14 @@ def run_v4_scan(run_tag="V4_DEFAULT"):
             "home": fx["home"],
             "away": fx["away"],
             "league": fx["league_name"],
-            "strategy_id": "V4_OU_H2H",
+            "strategy_id": "V4_EXPLORE_H2H",
             "market": result["market_type"],
             "placed_odds": float(ou_odds) if ou_odds else None,
             "metrics": result["metrics"],
             "action": processed.get("action", "SKIP"),
             "skip_reason": processed.get("skip_reason", ""),
+            "weight_in_model": 0.20,
+            "paper_trade_only": True,
         })
 
     # 保存

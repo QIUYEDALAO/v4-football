@@ -118,7 +118,7 @@ class StrategyRouter:
             return signal
 
         # ── V4 勘探线断路器 (纸盘 N<100 前严禁实盘) ──
-        if strategy_id == "V4_OU_H2H":
+        if "V4" in strategy_id or strategy_id == "V4_OU_H2H":
             v4_paper = engine_stats.get("v4_paper_trades", 0)
             if v4_paper < 100:
                 signal["action"] = "OBSERVE_ONLY"

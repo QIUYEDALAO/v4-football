@@ -717,6 +717,37 @@ def full_summary(window_size: int = 10):
             print(f"  全体CLV={avg_all:+.2f}% → V2 维持 ICU 观察, 0 实盘敞口")
         print("=" * 65)
 
+    # ── 🔬 V4 勘探线审计 ──
+    v4_results = [r for r in all_results if "V4" in str(r.get("strategy_id", ""))]
+    if v4_results:
+        v4_lig = defaultdict(lambda: {"n": 0, "clv": 0.0, "hits": 0})
+        v4_mkt = defaultdict(lambda: {"n": 0, "clv": 0.0, "hits": 0})
+        for r in v4_results:
+            lg = r.get("league", "Unknown")
+            v4_lig[lg]["n"] += 1
+            v4_lig[lg]["clv"] += float(r.get("true_clv") or 0)
+            if r.get("is_hit"): v4_lig[lg]["hits"] += 1
+            mkt = r.get("market", "?")
+            v4_mkt[mkt]["n"] += 1
+            v4_mkt[mkt]["clv"] += float(r.get("true_clv") or 0)
+            if r.get("is_hit"): v4_mkt[mkt]["hits"] += 1
+
+        print(f"\n🔬 【V4 勘探线 — H2H 大球审计】")
+        print("=" * 60)
+        print(f"总计: {len(v4_results)} 场 | 全部 OBSERVE_ONLY")
+        print(f"\n▶️ 按联赛:")
+        for lg, v in sorted(v4_lig.items(), key=lambda x: -x[1]['n']):
+            avg_clv = v['clv'] / v['n'] * 100 if v['n'] else 0
+            hit_rate = v['hits'] / v['n'] * 100 if v['n'] else 0
+            mark = '✅' if avg_clv > 0 else '❌'
+            print(f"  {lg:<17} N={v['n']:>2} Hit={hit_rate:.0f}% CLV={avg_clv:+.1f}% {mark}")
+        if len(v4_mkt) > 1:
+            print(f"\n▶️ 按市场:")
+            for mkt, v in sorted(v4_mkt.items()):
+                avg_clv = v['clv'] / v['n'] * 100 if v['n'] else 0
+                print(f"  {mkt:<17} N={v['n']:>2} Hit={v['hits']/v['n']*100:.0f}% CLV={avg_clv:+.1f}%")
+        print("=" * 60)
+
     # ── 🌍 V3 大赛引擎专属仪表盘 ──
     v3_bets = [r for r in all_results if r.get("strategy_id") == "V3_PERCEPTION_GAP_SNIPER"]
     if v3_bets:
