@@ -32,7 +32,7 @@ STATE_DIR.mkdir(exist_ok=True)
 
 SSL_CTX = ssl.create_default_context(cafile=certifi.where())
 
-SLEEP_MS = 1.5
+SLEEP_MS = 0.3  # Pro版 7500/天, 0.3s足够安全
 
 # 加载白名单 + Fair Odds Matrix
 with open(BASE_DIR / "config" / "leagues_whitelist.json") as f:

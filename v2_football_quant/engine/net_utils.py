@@ -105,7 +105,7 @@ def api_get(endpoint: str, api_key: Optional[str] = None,
         if result is not None:
             return result  # ✅ 成功
         if attempt < 1:
-            time.sleep(1.5)  # 重试前等待
+            time.sleep(0.5)  # 重试前等待
     urllib_fail_reason = "403_or_5xx"
 
     # ── 阶段 2: curl 兜底 ──
