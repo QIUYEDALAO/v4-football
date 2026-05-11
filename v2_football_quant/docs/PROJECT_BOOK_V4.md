@@ -1,376 +1,261 @@
-# ⚽ V4 因子勘探引擎 — 功能与运行逻辑完整报告 v1.1
+# 🔭 V4 球探报告系统 — 项目书 v2.0
 
-> 生成时间：2026-05-10  
-> 代码仓库：`v2_football_quant/`  
-> 核心文件：`h2h_engine.py` · `v4_runner.py` · `strategy_router.py` · `paper_trading.py`
-
----
-
-## 一、项目定位
-
-V4 不是独立武器，而是 **V2 HT 1X2 引擎的侦察兵和瞄准镜**。
-
-```
-V2（主力）        → 赛前静态盘口套利（HT 1X2 平局错杀）
-V3（大赛）        → 世界杯 Elo + Perception Gap 狙击
-V4（侦察兵）      → 低门槛蓄水 → CLV 审判 → 达标的联赛×市场组合注入 V2
-V5（待建）        → 接收 V4 滚球雷达池 → In-Play 时间衰减狙击
-```
-
-核心哲学：**放宽门槛疯狂蓄水 → Pandas 冷血切片 → 选中的组合升级为 V2 辅助因子。** V4 从"一票否决/一票通过"的暴君，降级为提供弹药的参谋。
+> 版本：v2.0  
+> 日期：2026-05-11  
+> 状态：**纯球探情报模式** — 不与任何策略/交易耦合  
+> 定位：足球比赛多维战术画像引擎
 
 ---
 
-## 二、系统架构全景
+## 一、项目重定义
+
+### 1.1 V4 是什么
+
+**V4 是一个纯足球情报系统**。每天自动扫描白名单联赛的赛前数据，产出"教练笔记"式的战术画像卡片。
 
 ```
-┌──────────────────────────────────────────────────────────┐
-│                    v4_runner.py                           │
-│  日频扫描器 · 每天独立运行 · 不与 daily_runner 冲突       │
-├──────────────────────────────────────────────────────────┤
-│                                                          │
-│  1. fetch_today_fixtures()                                │
-│     └── 白名单联赛 ∩ 12h内开赛 (前置漏斗)                 │
-│                                                          │
-│  2. evaluate_h2h_edge() × 逐场                            │
-│     ├── 🔪 锁1: 2020年时间窗口                            │
-│     ├── 规则: HT有球率 ≥ 70% + 0-0 ≤ 2                  │
-│     ├── ⏱ 进球时间分桶 (time_bins)                       │
-│     └── 🔪 锁2: (主近5 + 客近5) / 2 ≥ 70%                │
-│                                                          │
-│  3. 盘口获取 (三层优先级)                                  │
-│     ├── 🟢 Priority 1: HT Over 1.0 ≥ 1.60 → optimal     │
-│     ├── 🟡 Priority 2: HT Over 0.5 ≥ 1.25 → degraded    │
-│     └── 🎯 探测 ≥1.5线 → V4_HT_LIVE_STANDBY 滚球池     │
-│                                                          │
-│  4. StrategyRouter.process_signals()                     │
-│     └── 🚧 V4 物理断路器: startswith("V4") → OBSERVE    │
-│                                                          │
-│  5. 输出分流                                              │
-│     ├── predictions_v4_YYYYMMDD.json  → 赛前收录         │
-│     └── live_watchlist_YYYYMMDD.json  → 滚球雷达池       │
-│                                                          │
-└──────────────────────────────────────────────────────────┘
+V4 ≠ 策略
+V4 ≠ 量化因子
+V4 ≠ 交易信号
+
+V4 = 情报卡片 = 赛前看一眼就知道这场是怎么回事
 ```
 
-### 文件职责矩阵
+### 1.2 为什么彻底解绑
 
-| 文件 | 职责 | 关键函数 |
-|:---|:---|:---|
-| `engine/data_sources/h2h_engine.py` | H2H 多维画像引擎 | `evaluate_h2h_edge()` |
-| `engine/v4_runner.py` | V4 日频扫描器 | `run_v4_scan()` |
-| `engine/strategy_router.py` | 多策略路由总控 | `process_signals()` — V4 物理断路器 |
-| `engine/paper_trading.py` | 结算 + Pandas 多维审计 | `v4_factor_audit()` + A/B 面板 |
-| `engine/bankroll.py` | 仓位管理 | Kelly 1/4 + 阶梯熔断 |
-| `engine/live_bridge.py` | 纸盘→实盘网关 | 三级准入 + Kill-Switch |
+| 之前 (v1.x) | 现在 (v2.0) |
+|:---|:---|
+| 挂在 strategy_router 下做因子 | 独立运行，不经过路由 |
+| 输出 `action` / `strategy_id` / `weight` | 零交易字段 |
+| 接受 CLV 审判台审计 | 只看画像，不论输赢 |
+| 目标是"升级为 V2 辅助因子" | 目标是"让人一眼看懂比赛" |
+
+**决策逻辑**：V4 的 H2H 上半场进球画像对"投注决策"帮助有限（西汉姆联 90% → 上半场 0-0 已经验证），但它作为"赛前情报速览"的价值极高。
 
 ---
 
-## 三、三重硬锁详解
+## 二、核心画像维度
 
-### 🔪 锁1：2020 年时间红线
-
-```python
-H2H_YEAR_CUTOFF = 2020  # 固定锚点，不滑动
-cutoff = datetime(2020, 1, 1, tzinfo=timezone.utc)
-```
-
-**逻辑**：只取 2020 年及之后的交锋记录。2020 年前的足球生态（疫情前战术、范佩西时代阵容）与当下完全无关。
-
-**不达标准则**：2020 年以来 H2H < 3 场 → 直接抛弃。
-
-**效果**：费耶诺德 vs 阿尔克马尔（34场总H2H，但仅部分在2020+）不会被2010年数据污染。
-
-### 🔪 锁2：近期动能门
-
-```python
-recent_form_avg = (home_recent_ht_over + away_recent_ht_over) / 2
-if recent_form_avg < 0.7: REJECT
-```
-
-**逻辑**：历史基因必须由近期动能激活。H2H 再漂亮，近期两队都不进球就是纸上富贵。
-
-**数据源**：API-Football `fixtures?team={id}&last=5&status=FT`，各查 5 场完赛记录。
-
-### 🔪 锁3：盘口锚定 + 降级采集
+每份球探报告包含五个维度：
 
 ```
-Priority 1: HT Over 1.0 ≥ 1.60  →  optimal（不进=走水保本）
-Priority 2: HT Over 0.5 ≥ 1.25  →  degraded（降级采集，标记原因）
-探测层:   HT Over ≥ 1.5          →  V4_HT_LIVE_STANDBY（赛前买不起，潜伏等降）
+🏟  联赛
+⏰  开球时间
+🔥  主队 vs 客队
+─────────────────────────────
+📋 【历史基因】  H2H HT有球率 + 进球时间分桶
+⚡ 【近期动能】  主客队近5场HT状态
+⚖️ 【庄家阵地】  全量HT大小球盘口线 (Pinnacle)
+🚑 【战力完整度】 伤病/停赛情况
+💡 【情报总结】  一句话战术提醒
 ```
-
-**核心原则**：
-- 绝对不碰 .25 或 .75 的半边盘口（进1.25个球的概率算不出来）
-- HT Over 1.0 是完美容错线：进0=输全，进1=走水保本，进2=赢全
-- HT Over 0.5 降级时放宽底线到 1.25（而非 1.60），记录真实低水位供 CLV 审判
 
 ---
 
-## 四、双轨输出结构
+## 三、系统架构
 
-### 4.1 赛前收录信号
+### 3.1 数据采集管线
+
+```
+v4_runner.py (日频扫描器 · 纯数据采集)
+     │
+     ├── fetch_today_fixtures()
+     │   └── 白名单联赛 ∩ 12h内开赛
+     │
+     ├── evaluate_h2h_edge() × 逐场
+     │   ├── 2020年时间窗口过滤
+     │   ├── HT有球率 + 0-0计数
+     │   ├── ⏱ 进球时间分桶 (0-15/16-30/31-45)
+     │   ├── 🔪 近期动能门: (主近5+客近5)/2 ≥ 70%
+     │   └── 🚑 伤病侦查 (API-Football injuries)
+     │
+     ├── 盘口捕获: Pinnacle HT 大小球全量线
+     │   └── 0.5 / 1.0 / 1.5 / 2.0 ... 全部记录
+     │
+     └── 输出分流
+         ├── scout_v4_YYYYMMDD.json  → 球探快照
+         └── live_watchlist_YYYYMMDD.json → 滚球雷达池
+```
+
+### 3.2 输出结构
 
 ```json
 {
-  "fixture_id": 1379328,
-  "strategy_id": "V4_FACTOR_EXPLORE",
-  "market": "HT_OU",
-  "line": 1.0,
-  "placed_odds": 1.68,
-  "placed_opp_odds": 2.20,
-  "line_quality": "optimal",
-  "strategy_note": null,
+  "fixture_id": 1379320,
+  "home": "Burnley",
+  "away": "Aston Villa",
+  "league": "英超",
+  "kickoff": "2026-05-10T23:30:00+08:00",
   "factors": {
-    "h2h_ht_goal_rate": 0.90,
-    "h2h_sample_size": 10,
-    "h2h_total": 32,
-    "h2h_3y_count": 14,
-    "h2h_expired": 18,
-    "ft_0_0_count": 1,
-    "time_bins": {"0_15": 0.30, "16_30": 0.30, "31_45": 0.60},
-    "home_recent_ht_over": 0.60,
-    "away_recent_ht_over": 1.00,
+    "h2h_ht_goal_rate": 0.778,
+    "h2h_sample_size": 9,
+    "h2h_3y_count": 9,
+    "h2h_expired": 3,
+    "time_bins": {"0_15": 0.333, "16_30": 0.444, "31_45": 0.444},
+    "home_recent_ht_over": 0.80,
+    "away_recent_ht_over": 0.80,
     "recent_form_avg": 0.80
   },
-  "action": "OBSERVE_ONLY",
-  "weight_in_model": 0.20,
-  "paper_trade_only": true
+  "ht_ou_lines": [
+    {"line": "0.5", "over": 1.38, "under": 3.06},
+    {"line": "1.0", "over": 1.76, "under": 2.11},
+    {"line": "1.5", "over": 2.45, "under": 1.55}
+  ],
+  "injury": {
+    "home": {"status": "healthy", "missing": []},
+    "away": {"status": "healthy", "missing": []}
+  }
 }
 ```
 
-### 4.2 滚球雷达信号
+### 3.3 文件架构
+
+```
+engine/
+├── v4_runner.py          ← 球探扫描器 (日频)
+├── v4_scout_report.py    ← 情报卡片生成器
+├── v4_report.py          ← 兼容旧格式报表
+├── data_sources/
+│   └── h2h_engine.py     ← H2H 多维画像引擎
+│
+data/daily_reports/
+├── scout_v4_YYYYMMDD.json       ← 球探快照
+└── live_watchlist_YYYYMMDD.json ← 滚球雷达池
+```
+
+---
+
+## 四、情报卡片格式
+
+```
+============================================================
+🏟  英超
+⏰  05-10 23:30
+🔥  Burnley vs Aston Villa
+============================================================
+
+📋 【历史基因 (H2H)】
+   近 9 场交锋 HT 有球率: 77.8% ████████░░
+   2020+ 场次: 9 场 (过期 3 场)
+   0-0 场次: 2 场
+   进球时间热区:
+     0-15分  33.3% ███░░░░░░░
+     16-30分 44.4% ████░░░░░░
+     31-45分 44.4% ████░░░░░░
+
+⚡ 【近期动能 (近5场)】
+   Burnley: HT有球率 80.0% ████████░░
+   Aston Villa: HT有球率 80.0% ████████░░
+   综合动能: 80.0% ✅ 达标
+
+⚖️ 【庄家盘口阵地 (HT 大小球)】
+   大 0.5  @ 1.38  ｜  小 0.5  @ 3.06
+   大 1.0  @ 1.76  ｜  小 1.0  @ 2.11
+   大 1.5  @ 2.45  ｜  小 1.5  @ 1.55
+
+🚑 【战力完整度】
+   Burnley: ✅ 全员健康
+   Aston Villa: ✅ 全员健康
+
+💡 【情报总结】
+   ✅ 典型 HT 有球局；两队近期状态火热
+============================================================
+```
+
+---
+
+## 五、三重过滤门
+
+| # | 门 | 条件 | 不通过 |
+|:---:|:---|:---|:---|
+| 🔪1 | 时间红线 | 2020年起 H2H ≥ 3 场 | 样本不足，直接抛弃 |
+| 🔪2 | 近期动能 | (主近5+客近5)/2 ≥ 70% | 历史基因未被近期动能激活 |
+| 规则 | HT有球率 | ≥ 70% + 全场0-0 ≤ 2 | 未达标 |
+
+---
+
+## 六、滚球雷达分流
+
+当庄家开出 HT Over ≥ 1.5 的盘口时，这场比赛不会出现在赛前收录中，而是转入 **live_watchlist** 池：
 
 ```json
 {
-  "fixture_id": 1387992,
-  "strategy_id": "V4_HT_LIVE_STANDBY",
-  "action": "OBSERVE_ONLY",
-  "market": "HT_OU",
-  "current_line": 1.5,
-  "current_odds": 1.93,
-  "current_under": 1.88,
-  "target_line": 1.0,
-  "entry_window": "15-25 min",
+  "fixture_id": 1391161,
+  "home": "Barcelona",
+  "away": "Real Madrid",
+  "league": "西甲",
+  "ht_ou_lines": [
+    {"line": "1.5", "over": 1.84, "under": 1.88}
+  ],
   "time_bin_hotspot": "31_45分钟",
-  "skip_reason": "早盘线过高(开1.5)，等待时间衰减至1.0后狙击",
   "factors": { ... }
 }
 ```
 
----
-
-## 五、四层防线中的 V4 位置
-
-### 物理级断路器（永不解除）
-
-```python
-# strategy_router.py: process_signals()
-if strategy_id.startswith("V4"):
-    signal["action"] = "OBSERVE_ONLY"
-    signal["max_risk_units"] = 0.0
-    signal["leverage_boost"] = 0.0
-    signal["skip_reason"] = "[GUARD] V4 为子因子引擎，严禁直接触碰实盘资金。"
-    return signal
-```
-
-**含义**：任何带有 `V4` 前缀的信号，无论外层配置如何，风险强制归零。V4 只能做数据采集，只能通过 V2 间接影响实盘。
+**含义**：庄家极度看好进球 → 赛前盘口高开 → 不适合直打 → 等滚球盘口衰减后狙击。
 
 ---
 
-## 六、Pandas 多维切片审计系统
+## 七、运行管线
 
-### 触发方式
+### CLI 命令
+
 ```bash
-python3 engine/paper_trading.py --v4-audit
-```
-
-### 四大审计维度
-
-**维度一：联赛 × 盘口 交叉审计**
-```
-League (联赛)      Market    N     Hit%   AvgCLV   Verdict
-荷甲              HT_OU_0.5 32/28  81%   +1.82%   🟢 TIER_1_CORE
-英超              HT_OU_1.0 45/40  68%   -0.52%   🟡 AUX_FILTER
-法甲              HT_OU_0.5 32/28  72%   -0.85%   🟠 NOISY
-西甲              HT_OU_0.5 15/12  58%   -3.20%   🔴 DROP_ZONE
-意甲              HT_OU_0.5 12/8   75%   +1.10%   ⚪ INCUBATING
-```
-
-**维度二：仅联赛汇总** — 各联赛的样本量、平均HT率、覆盖盘口数
-
-**维度三：HT有球率分布画像** — 70-79% / 80-89% / 90-100% 分桶
-
-**维度四：A/B 策略分流审计**
-```
-[实验组 A] 早盘直打 HT Over 1.0: N场 → 赛前即满足，直接收录
-[实验组 B] 潜伏等降 HT Over 1.0: N场 → 赛前大1.5+，等15-25分钟衰减
-```
-预期：实验组 B 的 MDD 远低于 A（进1球=走水保本，顶级进攻球队极少0-0）
-
-### Tier 分级规则（CLV 唯一真神）
-
-| Tier | 条件 | 行动 |
-|:---|:---|:---|
-| 🟢 **TIER_1_CORE** | N≥30, CLV≥+1.0% | 嵌入 V2 评分引擎，权重 0.6-0.8 |
-| 🟡 **AUX_FILTER** | N≥30, CLV 0%~1.0% | 辅助过滤层，权重 0.2-0.3 |
-| 🟠 **NOISY** | N≥30, Hit%≥70% 但 CLV<0% | **高命中率陷阱，严禁上车** |
-| 🔴 **DROP_ZONE** | N≥30, CLV<-2.0% | 暂停该市场 |
-| ⚪ **INCUBATING** | N<30 | 继续蓄水 |
-
-### V2 ∩ V4 叠加增益 A/B 面板（在 `--summary` 中自动输出）
-
-```
-🔬 V2 引擎叠加 V4 过滤效能审计 (A/B Test)
-
- [基准] V2 原始决策集:
-   👉 N=150 | CLV: -2.50% | MDD: -2700 | 状态: ❌ 负期望 (ICU)
-
- [实验] V2 决策集 ∩ V4 过滤 (H2H HT≥70%):
-   👉 N=45  | CLV: +1.20% | MDD: -360  | 状态: 🔥 提取出纯净 Alpha！
-```
-
-若实验组 CLV 持平或低于基准 → V4 参谋提供的是假情报 → 废弃。
-
----
-
-## 七、与 V2 的协同升级路径
-
-### 当前 (v1.0)：平行勘探
-```
-V2 daily_runner → 独立产出推荐 → QQ Bot 推送
-V4 v4_runner    → 独立纸盘记录 → 静默蓄水
-                     (互不干扰)
-```
-
-### 未来 (v2.0)：权重融合
-```
-V2 scoring 引擎 = {
-    h2h_ht_goal_rate: 0.20,      ← 原始
-    V4_TIER1_factor:  0.20,      ← 🆕 TIER_1_CORE 联赛×市场
-    recent_form:      0.20,
-    league_factor:    0.20,
-    head_to_head:     0.20,
-}
-```
-
-### V4 对 V2 推荐的实际增强
-```
-🔥🔥 阿贾克斯 vs 费耶诺德 | HT Draw @3.05
-    ├── V2 综合评分: 82/100
-    ├── V4 辅助信号: ✅ HT有球率 85% (🇳🇱荷甲 TIER_1: 81%命中)
-    └── 双重确认 → 提升信心等级
-```
-
----
-
-## 八、运行管线
-
-### 日频扫描
-```bash
+# 日频扫描
 python3 engine/v4_runner.py
-python3 engine/v4_runner.py --run_tag=AM0800   # 早盘
-python3 engine/v4_runner.py --run_tag=PM1600   # 傍晚
+
+# 情报卡片
+python3 engine/v4_scout_report.py --date 2026-05-11
+python3 engine/v4_scout_report.py --date 2026-05-11 --league 英超
+python3 engine/v4_scout_report.py --date 2026-05-11 --fixture_id 1379320
 ```
 
-### 因子体检
-```bash
-# N≥30 场后运行
-python3 engine/paper_trading.py --v4-audit
-```
+### Cron 调度
 
-### 完整 A/B 审计
-```bash
-python3 engine/paper_trading.py --summary
-# 自动输出 V2∩V4 叠加增益面板 + 四层防线体检单
 ```
-
-### Cron 调度（建议）
-```
-08:00 BJT → V2每日扫描 (daily_runner --AM0800)
-08:05 BJT → V4勘探线扫描 (v4_runner --AM0800)
-09:00 BJT → V2每日结算 (paper_trading --verify-yesterday)
-12:00 BJT → V2影子扫描-午间
-16:00 BJT → V2影子扫描-傍晚
-16:05 BJT → V4勘探线扫描 (v4_runner --PM1600)
+08:05 BJT → V4 球探扫描 (v4_runner.py --AM0800)
+16:05 BJT → V4 球探扫描 (v4_runner.py --PM1600)
 ```
 
 ---
 
-## 九、状态机与数据流
+## 八、与 V2/V3 的关系
 
 ```
-┌──────────┐    ┌──────────────┐    ┌─────────────────┐
-│ API奥运  │ →  │ h2h_engine   │ →  │ 三重锁过滤      │
-│ 7500次/天│    │ 多维画像     │    │ 2020窗+动能+盘口│
-└──────────┘    └──────────────┘    └───────┬─────────┘
-                                            │
-                          ┌─────────────────┼─────────────────┐
-                          ▼                 ▼                  ▼
-                    ┌──────────┐    ┌────────────┐    ┌──────────────┐
-                    │ optimal  │    │ degraded   │    │ live_standby │
-                    │ HT 1.0   │    │ HT 0.5     │    │ wait 1.5↓1.0 │
-                    │ ≥1.60    │    │ ≥1.25      │    │ 15-25 min    │
-                    └────┬─────┘    └─────┬──────┘    └──────┬───────┘
-                         │               │                   │
-                         └───────┬───────┘                   │
-                                 ▼                           ▼
-                    ┌──────────────────┐        ┌──────────────────┐
-                    │ predictions_v4   │        │ live_watchlist   │
-                    │ _YYYYMMDD.json   │        │ _YYYYMMDD.json   │
-                    └────────┬─────────┘        └──────────────────┘
-                             │
-                             ▼
-                    ┌──────────────────┐
-                    │ paper_trading    │
-                    │ --v4-audit       │
-                    │ Pandas groupby   │
-                    │ Tier 分级        │
-                    └────────┬─────────┘
-                             │
-                    ┌────────┴─────────┐
-                    ▼                  ▼
-             ┌────────────┐   ┌──────────────┐
-             │ TIER_1 →   │   │ DROP/NOISY → │
-             │ 注入 V2     │   │ 废弃/暂停     │
-             └────────────┘   └──────────────┘
+V2 (daily_runner)     → 赛前 HT 1X2 盘口套利 → QQ Bot 推送推荐
+V3 (wc_model)         → 世界杯 Elo + Perception Gap 狙击
+V4 (v4_runner)        → 纯球探情报卡片 → 不产生交易信号
+V5 (待建)             → 接收 live_watchlist → In-Play 狙击
 ```
 
----
-
-## 十、技术栈
-
-| 组件 | 技术 | 文件 |
-|:---|:---|:---|
-| 数据源 | API-Football Pro (7500次/天) | `config/secrets.py` |
-| H2H 引擎 | Python 3 + urllib | `engine/data_sources/h2h_engine.py` |
-| 日频扫描 | v4_runner.py (独立进程) | `engine/v4_runner.py` |
-| 策略路由 | StrategyRouter.process_signals() | `engine/strategy_router.py` |
-| 多维审计 | Pandas 2.3.3 groupby | `engine/paper_trading.py --v4-audit` |
-| A/B 测试 | V2∩V4 叠加增益面板 | `engine/paper_trading.py --summary` |
-| 网络层 | urllib + certifi SSL | `engine/net_utils.py` |
-| 存储 | JSON | `data/daily_reports/` |
-| 仓位 | Kelly 1/4 + 阶梯熔断 | `engine/bankroll.py` |
-| 实盘网关 | 三级准入 + Kill-Switch | `engine/live_bridge.py` |
+**V4 对其他系统无任何依赖，也无任何影响。** 它是一个完全独立的平行系统。
 
 ---
 
-## 十一、关键设计决策
+## 九、技术栈
 
-| # | 决策 | 日期 | 理由 |
-|:---:|:---|:---|:---|
-| 1 | market FT_OU_2.5 → HT_OU_0.5 → HT_OU_1.0 | 05-10 | 因子是 HT 有球，盘口必须对齐；1.0 是完美容错线 |
-| 2 | 时间窗：3年滑动 → 2020 固定锚 | 05-10 | 疫情前足球生态完全不同，固定锚点不漂移 |
-| 3 | 门槛 80% → 70% | 05-10 | V4 定位是"蓄水"而非"精准"，宽进严出 |
-| 4 | V4 降级为"参谋"角色 | 05-10 | 单因子模型不应一票否决 V2 的多维决策 |
-| 5 | Pandas groupby 替代手工审计 | 05-10 | 自动化多维切片 → Tier 分级 → 冷血客观 |
-| 6 | V4 物理断路器焊死 | 05-10 | startswith("V4") → max_risk_units=0，永不解除 |
-| 7 | CLV 唯一真神 + NOISY 陷阱层 | 05-10 | Hit% ≥70% 但 CLV<0 → 庄家早已洞察，严禁上车 |
-| 8 | 滚球雷达 V4_HT_LIVE_STANDBY | 05-10 | 赛前高开不能买 → 不扔 → 存进冰柜等时间衰减 |
-| 9 | HT 0.5 降级采集底线 1.25 | 05-10 | 1.60 在 0.5 线上是庄家钓鱼盘，1.25 才是真实防线 |
+| 组件 | 技术 |
+|:---|:---|
+| 数据源 | API-Football Pro (7500次/天) |
+| H2H 引擎 | Python 3 + urllib |
+| 盘口捕获 | Pinnacle 半场大小球全量 |
+| 伤病 | API-Football injuries |
+| 卡片生成 | Python 终端输出 (带热力条) |
+| 存储 | JSON |
 
 ---
 
-> 📌 **核心记忆点**：V4 = 2020锚点时间窗 → 低门槛蓄水(70%) → 三重锁过滤 → Pandas 冷血切片 → CLV 真神审判 → TIER_1_CORE 注入 V2 评分引擎。
->
-> **V4 不是武器，是 V2 的瞄准镜。NDR (No Direct Risk) — 永不触碰实盘资金。**
+## 十、关键设计决策
+
+| # | 决策 | 理由 |
+|:---:|:---|:---|
+| 1 | 2020固定锚点时间窗 | 疫情前足球生态完全不同 |
+| 2 | 彻底解绑交易体系 | V4 不做投注决策，只做情报 |
+| 3 | 不做 .25/.75 半边盘口 | 进1.25个球概率不可计算 |
+| 4 | 多线盘口全量采集 | 让用户自己判断哪条线合适 |
+| 5 | 滚球雷达分流 | 高开比赛不扔，存进冰柜 |
+| 6 | 情报总结自动生成 | 基于时间热区 + 动能 + 盘口 |
+
+---
+
+> 📌 **核心一句话**：V4 是赛前情报速览系统。不看 CLV，不算 Edge，不下注。看一眼卡片就知道这场比赛的进攻画像。
