@@ -11,21 +11,27 @@ V4 球探扫描器 (纯情报模式 — 不与任何策略/交易耦合)
   python3 engine/v4_runner.py --run_tag=AM0800
 """
 
+from __future__ import annotations
+
+import argparse
 import json, ssl, certifi, time, sys
 import urllib.request
 from pathlib import Path
 from datetime import datetime, date, timedelta
-from collections import defaultdict
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(BASE_DIR))
 
 from config.secrets import API_KEY, API_HOST
 from engine.data_sources.h2h_engine import evaluate_h2h_edge
-from logger import logger
+from engine.data_sources.lineup_strength import LineupStrengthAnalyzer
+try:
+    from logger import logger
+except ModuleNotFoundError:
+    from engine.logger import logger
 
 REPORT_DIR = BASE_DIR / "data" / "daily_reports"
-REPORT_DIR.mkdir(exist_ok=True)
+REPORT_DIR.mkdir(parents=True, exist_ok=True)
 
 # SSL
 ctx = ssl.create_default_context(cafile=certifi.where())
@@ -98,7 +104,7 @@ def fetch_today_fixtures():
 
 
 def _capture_ht_ou_lines(odds_resp: dict) -> list:
-    """从 Pinnacle 半场大小球中捕获所有可用盘口线（全量，不挑）"""
+    """从 Pinnacle 半场大小球中捕获所有可用盘口线（含 0.75/1.25）。"""
     lines = []
     if not odds_resp or not odds_resp.get("response"):
         return lines
@@ -118,8 +124,6 @@ def _capture_ht_ou_lines(odds_resp: dict) -> list:
                 import re
                 nums = re.findall(r'[\d.]+', val_str)
                 line_num = nums[0] if nums else val_str
-                if ".25" in line_num or ".75" in line_num:
-                    continue
                 entry = line_map.setdefault(line_num, {"over": None, "under": None})
                 if "over" in val_str.lower():
                     entry["over"] = odd_val
@@ -141,6 +145,21 @@ def _capture_ht_ou_lines(odds_resp: dict) -> list:
                 })
             return lines
     return lines
+
+
+def _best_pre_live_line(ht_ou_lines: list) -> dict | None:
+    """选择最适合走地观察的赛前半场大球线。"""
+    valid = []
+    for ln in ht_ou_lines:
+        try:
+            line = float(str(ln.get("line", "")).replace("Over ", "").replace("Under ", ""))
+        except (TypeError, ValueError):
+            continue
+        valid.append({**ln, "line_float": line})
+    if not valid:
+        return None
+    valid.sort(key=lambda x: x["line_float"], reverse=True)
+    return valid[0]
 
 
 def _query_injury_health(api_client, team_id: int, team_name: str) -> dict:
@@ -169,8 +188,9 @@ def _query_injury_health(api_client, team_id: int, team_name: str) -> dict:
         return {"status": "unknown", "missing": []}
 
 
-def run_v4_scan(run_tag="V4_DEFAULT"):
+def run_v4_scan(run_tag="V4_DEFAULT", with_lineups=False):
     logger.info(f"🔭 V4 球探扫描 | {run_tag} | {datetime.now().strftime('%H:%M')}")
+    lineup_analyzer = LineupStrengthAnalyzer(api_get) if with_lineups else None
 
     fixtures = fetch_today_fixtures()
     logger.info(f"📥 前置漏斗: {len(fixtures)} 场白名单 + 12h内")
@@ -216,11 +236,14 @@ def run_v4_scan(run_tag="V4_DEFAULT"):
         tb = factors.get("time_bins", {})
         best_bin = max(tb, key=tb.get) if tb else "31_45"
 
-        # ── 🎯 滚球雷达：探测高开比赛 ──
-        has_high_line = any(
-            float(str(ln["line"]).replace("Over ","").replace("Under ","")) >= 1.5
-            for ln in ht_ou_lines
-        )
+        # ── 🎯 滚球雷达：探测高开比赛 (>=1.25 才是走地回调候选) ──
+        best_line = _best_pre_live_line(ht_ou_lines)
+        has_high_line = bool(best_line and best_line["line_float"] >= 1.25)
+        lineup_gate = None
+        if has_high_line and lineup_analyzer:
+            lineup_gate = lineup_analyzer.analyze_fixture(fx)
+            time.sleep(0.5)
+
         if has_high_line:
             live_watchlist.append({
                 "fixture_id": fx["id"],
@@ -228,9 +251,13 @@ def run_v4_scan(run_tag="V4_DEFAULT"):
                 "home": fx["home"],
                 "away": fx["away"],
                 "league": fx["league_name"],
+                "pre_live_target": "WAIT_0_10_NO_GOAL_THEN_BUY_PULLBACK",
+                "pre_ht_line": best_line,
                 "ht_ou_lines": ht_ou_lines,
                 "time_bin_hotspot": f"{best_bin}分钟",
                 "factors": factors,
+                "lineup_gate": lineup_gate,
+                "lineup_action": lineup_gate.get("lineup_action") if lineup_gate else "NOT_CHECKED",
             })
 
         # ── 球探快照（纯数据，零交易字段）──
@@ -247,6 +274,7 @@ def run_v4_scan(run_tag="V4_DEFAULT"):
                 "home": home_health,
                 "away": away_health,
             },
+            "lineup_gate": lineup_gate,
         })
         stats["scouted"] += 1
 
@@ -269,4 +297,12 @@ def run_v4_scan(run_tag="V4_DEFAULT"):
 
 
 if __name__ == "__main__":
-    run_v4_scan()
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--run_tag", default="V4_DEFAULT")
+    parser.add_argument(
+        "--with-lineups",
+        action="store_true",
+        help="开赛前30分钟使用首发名单做 KEEP_WATCH/BOOST/DROP 阵容闸门",
+    )
+    args = parser.parse_args()
+    run_v4_scan(run_tag=args.run_tag, with_lineups=args.with_lineups)
