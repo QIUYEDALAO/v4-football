@@ -23,8 +23,13 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(BASE_DIR))
 
 from config.secrets import API_KEY, API_HOST
+from engine.data_sources.api_coverage import evaluate_fixture_coverage
 from engine.data_sources.h2h_engine import evaluate_h2h_edge
+from engine.data_sources.league_baseline import baseline_for_fixture
 from engine.data_sources.lineup_strength import LineupStrengthAnalyzer
+from engine.data_sources.motivation import evaluate_match_motivation
+from engine.data_sources.schedule_pressure import evaluate_match_schedule_pressure
+from engine.data_sources.season_phase import season_phase_for_fixture
 try:
     from logger import logger
 except ModuleNotFoundError:
@@ -58,8 +63,12 @@ def api_get(endpoint: str):
     return None
 
 
-def fetch_today_fixtures():
-    """拉取白名单联赛 + 今日/明日开赛的比赛"""
+def fetch_today_fixtures(lookahead_hours: float | None = None):
+    """拉取白名单联赛 + 今日/明日未开赛比赛。
+
+    lookahead_hours 仅作为可选收窄条件；默认不再硬卡 12h。
+    V4 走地策略需要先建全天观察池，再在 T-30 / 开赛后做二次闸门。
+    """
     td = date.today()
     nd = td + timedelta(days=1)
     all_fixtures = []
@@ -78,8 +87,10 @@ def fetch_today_fixtures():
             except:
                 ko_dt = datetime.fromisoformat(kickoff.split("+")[0] + "+00:00")
 
-            if abs((ko_dt - datetime.now(ko_dt.tzinfo)).total_seconds()) > 43200:
-                continue
+            if lookahead_hours is not None:
+                hours_to_kickoff = (ko_dt - datetime.now(ko_dt.tzinfo)).total_seconds() / 3600
+                if hours_to_kickoff < 0 or hours_to_kickoff > lookahead_hours:
+                    continue
 
             all_fixtures.append({
                 "id": f["fixture"]["id"],
@@ -188,12 +199,13 @@ def _query_injury_health(api_client, team_id: int, team_name: str) -> dict:
         return {"status": "unknown", "missing": []}
 
 
-def run_v4_scan(run_tag="V4_DEFAULT", with_lineups=False):
+def run_v4_scan(run_tag="V4_DEFAULT", with_lineups=False, lookahead_hours=None):
     logger.info(f"🔭 V4 球探扫描 | {run_tag} | {datetime.now().strftime('%H:%M')}")
     lineup_analyzer = LineupStrengthAnalyzer(api_get) if with_lineups else None
 
-    fixtures = fetch_today_fixtures()
-    logger.info(f"📥 前置漏斗: {len(fixtures)} 场白名单 + 12h内")
+    fixtures = fetch_today_fixtures(lookahead_hours=lookahead_hours)
+    window_label = f"{lookahead_hours:g}h内" if lookahead_hours is not None else "今日+明日全部"
+    logger.info(f"📥 前置漏斗: {len(fixtures)} 场白名单 + {window_label}")
 
     if not fixtures:
         logger.info("无符合条件的比赛")
@@ -225,6 +237,35 @@ def run_v4_scan(run_tag="V4_DEFAULT", with_lineups=False):
         ht_ou_lines = _capture_ht_ou_lines(odds_resp) if odds_resp else []
         time.sleep(0.5)
 
+        # ── API-Football 数据覆盖闸门 ──
+        data_coverage = evaluate_fixture_coverage(
+            fx,
+            api_get,
+            h2h_result=result,
+            pre_odds_resp=odds_resp,
+            ht_ou_lines=ht_ou_lines,
+        )
+        time.sleep(0.2)
+
+        # ── 联赛 HT/SH/FT 环境基准 ──
+        league_baseline = baseline_for_fixture(fx, api_get)
+        league_adjustment = league_baseline.get("adjustment", {})
+        time.sleep(0.2)
+
+        # ── 赛季阶段：初期/中期/末期/最后三轮 ──
+        season_phase = season_phase_for_fixture(fx, api_get)
+        phase_adjustment = season_phase.get("adjustment", {})
+        time.sleep(0.2)
+
+        # ── 排名与战意过滤 ──
+        motivation = evaluate_match_motivation(fx, api_get, season_phase=season_phase)
+        motivation_gate = motivation.get("gate", {})
+        time.sleep(0.2)
+
+        # ── 未来三场赛程压力 ──
+        schedule_pressure = evaluate_match_schedule_pressure(fx, api_get)
+        time.sleep(0.2)
+
         # ── 伤病侦查 ──
         home_health = _query_injury_health(api_get, fx["homeId"], fx["home"])
         time.sleep(0.3)
@@ -234,11 +275,22 @@ def run_v4_scan(run_tag="V4_DEFAULT", with_lineups=False):
         # ── 提取因子 ──
         factors = result.get("factors", {})
         tb = factors.get("time_bins", {})
-        best_bin = max(tb, key=tb.get) if tb else "31_45"
+        sh_tb = factors.get("second_half_bins", {})
+        combined_bins = {**tb, **sh_tb}
+        best_bin = max(combined_bins, key=combined_bins.get) if combined_bins else "31_45"
 
         # ── 🎯 滚球雷达：探测高开比赛 (>=1.25 才是走地回调候选) ──
         best_line = _best_pre_live_line(ht_ou_lines)
-        has_high_line = bool(best_line and best_line["line_float"] >= 1.25)
+        market_focus = result.get("market_focus")
+        has_high_line = bool(
+            market_focus == "HT_LIVE_OVER"
+            and data_coverage.get("data_gate_action") == "ALLOW_V4_LIVE"
+            and league_adjustment.get("action") != "WATCH_ONLY"
+            and motivation_gate.get("action") != "WATCH_ONLY"
+            and schedule_pressure.get("action") != "WATCH_CAUTION"
+            and best_line
+            and best_line["line_float"] >= 1.25
+        )
         lineup_gate = None
         if has_high_line and lineup_analyzer:
             lineup_gate = lineup_analyzer.analyze_fixture(fx)
@@ -251,11 +303,21 @@ def run_v4_scan(run_tag="V4_DEFAULT", with_lineups=False):
                 "home": fx["home"],
                 "away": fx["away"],
                 "league": fx["league_name"],
+                "market_focus": market_focus,
+                "market_type": result.get("market_type", "HT_OU"),
+                "market_scores": result.get("market_scores", {}),
+                "best_focus_by_score": result.get("best_focus_by_score"),
+                "best_score": result.get("best_score"),
                 "pre_live_target": "WAIT_0_10_NO_GOAL_THEN_BUY_PULLBACK",
                 "pre_ht_line": best_line,
                 "ht_ou_lines": ht_ou_lines,
                 "time_bin_hotspot": f"{best_bin}分钟",
                 "factors": factors,
+                "data_coverage": data_coverage,
+                "league_baseline": league_baseline,
+                "season_phase": season_phase,
+                "motivation": motivation,
+                "schedule_pressure": schedule_pressure,
                 "lineup_gate": lineup_gate,
                 "lineup_action": lineup_gate.get("lineup_action") if lineup_gate else "NOT_CHECKED",
             })
@@ -268,8 +330,18 @@ def run_v4_scan(run_tag="V4_DEFAULT", with_lineups=False):
             "home": fx["home"],
             "away": fx["away"],
             "league": fx["league_name"],
+            "market_focus": result.get("market_focus", "HT_LIVE_OVER"),
+            "market_type": result.get("market_type", "HT_OU"),
+            "market_scores": result.get("market_scores", {}),
+            "best_focus_by_score": result.get("best_focus_by_score"),
+            "best_score": result.get("best_score"),
             "factors": factors,
             "ht_ou_lines": ht_ou_lines,
+            "data_coverage": data_coverage,
+            "league_baseline": league_baseline,
+            "season_phase": season_phase,
+            "motivation": motivation,
+            "schedule_pressure": schedule_pressure,
             "injury": {
                 "home": home_health,
                 "away": away_health,
@@ -295,6 +367,13 @@ def run_v4_scan(run_tag="V4_DEFAULT", with_lineups=False):
             json.dump(live_watchlist, f, ensure_ascii=False, indent=2)
         logger.info(f"  🎯 滚球雷达池: {live_path} ({len(live_watchlist)} 场)")
 
+    try:
+        from engine.v4_dashboard import render_dashboard
+        dashboard_path = render_dashboard(today_str)
+        logger.info(f"  🖥 交互仪表盘: {dashboard_path}")
+    except Exception as e:
+        logger.warning(f"  ⚠️ 仪表盘生成失败: {e}")
+
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
@@ -304,5 +383,15 @@ if __name__ == "__main__":
         action="store_true",
         help="开赛前30分钟使用首发名单做 KEEP_WATCH/BOOST/DROP 阵容闸门",
     )
+    parser.add_argument(
+        "--lookahead-hours",
+        type=float,
+        default=None,
+        help="可选：只扫描未来 N 小时比赛。默认不限制，扫描今天+明天所有白名单未开赛比赛",
+    )
     args = parser.parse_args()
-    run_v4_scan(run_tag=args.run_tag, with_lineups=args.with_lineups)
+    run_v4_scan(
+        run_tag=args.run_tag,
+        with_lineups=args.with_lineups,
+        lookahead_hours=args.lookahead_hours,
+    )

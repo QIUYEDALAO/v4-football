@@ -23,13 +23,20 @@ from datetime import date, datetime, timedelta
 from collections import defaultdict, Counter
 from typing import Optional, Dict, Tuple, List
 
-from logger import logger
-
 import sys
 BASE_DIR = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(BASE_DIR))
-from config.secrets import API_KEY, API_HOST
+try:
+    from logger import logger
+except ModuleNotFoundError:
+    from engine.logger import logger
+try:
+    from config.secrets import API_KEY, API_HOST
+except Exception:
+    API_KEY = ""
+    API_HOST = "https://v3.football.api-sports.io"
 from engine import net_utils
+from engine.asian_over_settlement import settle_asian_total
 REPORT_DIR = BASE_DIR / "data" / "daily_reports"
 REPORT_DIR.mkdir(exist_ok=True)
 LOG_DIR = BASE_DIR / "data" / "paper_trading"
@@ -318,6 +325,127 @@ def verify_date(date_str: str) -> dict:
                 f"ROI:{roi_pct:+.1f}% | CLV:{avg_clv*100:+.2f}% | "
                 f"→ 已存 {log_path}")
 
+    return summary
+
+
+# ═══════════════════════════════════════════════════════════
+# V4 走地亚洲盘结算
+# ═══════════════════════════════════════════════════════════
+
+def _date_key(date_str: str) -> str:
+    return date_str.replace("-", "")
+
+
+def _load_json(path: Path, default):
+    if not path.exists():
+        return default
+    with open(path, encoding="utf-8") as f:
+        return json.load(f)
+
+
+def _settle_v4_live_entry(entry: dict, fixture_item: dict, default_stake: float = 1.0) -> Optional[dict]:
+    status = fixture_item.get("fixture", {}).get("status", {}).get("short")
+    if status not in ("FT", "AET", "PEN", "WO"):
+        return None
+
+    ht = fixture_item.get("score", {}).get("halftime", {}) or {}
+    ht_home = ht.get("home") if ht.get("home") is not None else 0
+    ht_away = ht.get("away") if ht.get("away") is not None else 0
+    ht_goals = int(ht_home or 0) + int(ht_away or 0)
+
+    line = float(entry.get("entry_line"))
+    odds = float(entry.get("entry_over_odds"))
+    stake = float(entry.get("stake", default_stake) or default_stake)
+    settlement = settle_asian_total(
+        goals=ht_goals,
+        line=line,
+        odds=odds,
+        stake=stake,
+        side="OVER",
+    )
+
+    return {
+        "fixture_id": entry.get("fixture_id"),
+        "home": entry.get("home"),
+        "away": entry.get("away"),
+        "league": entry.get("league"),
+        "strategy_id": entry.get("strategy_id", "V4_HT_LIVE_PULLBACK"),
+        "entry_minute": entry.get("entry_minute"),
+        "entry_score": entry.get("entry_score"),
+        "entry_line": line,
+        "entry_over_odds": odds,
+        "entry_bookmaker": entry.get("entry_bookmaker"),
+        "stake": stake,
+        "ht_score": f"{ht_home}-{ht_away}",
+        "ht_goals": ht_goals,
+        "settlement": settlement.to_dict(),
+        "is_hit": settlement.pnl > 0,
+        "is_loss": settlement.pnl < 0,
+        "is_push": settlement.pnl == 0,
+        "pnl": round(settlement.pnl, 4),
+        "roi_pct": round(settlement.pnl / stake * 100, 2) if stake else 0.0,
+        "raw_entry": entry,
+    }
+
+
+def verify_v4_live_date(date_str: str, api_client=api, default_stake: float = 1.0) -> dict:
+    key = _date_key(date_str)
+    entry_path = LOG_DIR / f"v4_live_entries_{key}.json"
+    entries = _load_json(entry_path, [])
+    if not entries:
+        return {"error": f"V4走地纸盘文件不存在或为空: {entry_path}"}
+
+    results = []
+    pending = []
+    total_pnl = 0.0
+    total_staked = 0.0
+
+    for entry in entries:
+        fid = entry.get("fixture_id")
+        resp = api_client(f"fixtures?id={fid}")
+        rows = resp.get("response", []) if resp else []
+        if not rows:
+            pending.append({"fixture_id": fid, "reason": "API_EMPTY"})
+            continue
+        settled = _settle_v4_live_entry(entry, rows[0], default_stake=default_stake)
+        if settled is None:
+            status = rows[0].get("fixture", {}).get("status", {}).get("short")
+            pending.append({"fixture_id": fid, "reason": f"NOT_FINISHED:{status}"})
+            continue
+        results.append(settled)
+        total_pnl += float(settled.get("pnl", 0))
+        total_staked += float(settled.get("stake", 0))
+        time.sleep(0.3)
+
+    completed = len(results)
+    wins = sum(1 for r in results if r.get("pnl", 0) > 0)
+    pushes = sum(1 for r in results if r.get("pnl", 0) == 0)
+    losses = sum(1 for r in results if r.get("pnl", 0) < 0)
+    summary = {
+        "date": key,
+        "verified_at": datetime.now().isoformat(),
+        "strategy_id": "V4_HT_LIVE_PULLBACK",
+        "total_entries": len(entries),
+        "completed": completed,
+        "pending": len(pending),
+        "wins": wins,
+        "pushes": pushes,
+        "losses": losses,
+        "hit_rate_pct": round(wins / completed * 100, 1) if completed else 0.0,
+        "total_staked": round(total_staked, 4),
+        "total_pnl": round(total_pnl, 4),
+        "roi_pct": round(total_pnl / total_staked * 100, 2) if total_staked else 0.0,
+        "results": results,
+        "pending_items": pending,
+    }
+
+    out_path = LOG_DIR / f"v4_live_verified_{key}.json"
+    with open(out_path, "w", encoding="utf-8") as f:
+        json.dump(summary, f, ensure_ascii=False, indent=2)
+    logger.info(
+        f"V4走地结算完成: {key} | W/P/L={wins}/{pushes}/{losses} | "
+        f"ROI:{summary['roi_pct']:+.2f}% → {out_path}"
+    )
     return summary
 
 
@@ -1201,6 +1329,9 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="V2 纸盘结算与复盘系统")
     parser.add_argument("--verify", type=str, help="验证指定日期 (YYYY-MM-DD)")
     parser.add_argument("--verify-yesterday", action="store_true", help="验证昨天的比赛")
+    parser.add_argument("--verify-v4-live", type=str, help="验证指定日期的 V4 走地纸盘 (YYYY-MM-DD 或 YYYYMMDD)")
+    parser.add_argument("--verify-v4-live-yesterday", action="store_true", help="验证昨天的 V4 走地纸盘")
+    parser.add_argument("--v4-stake", type=float, default=1.0, help="V4 每笔默认 stake")
     parser.add_argument("--summary", action="store_true", help="打印全量汇总面板")
     parser.add_argument("--test-clv", action="store_true", help="单元测试 CLV 计算")
     args = parser.parse_args()
@@ -1217,6 +1348,14 @@ if __name__ == "__main__":
                   f"ROI {result['roi_pct']:+.2f}% | CLV {result['avg_clv_pct']:+.2f}%")
             if result["pending"] > 0:
                 print(f"  ⏳ {result['pending']} 场等待完赛")
+    elif args.verify_v4_live:
+        print(f"🔍 验证 {args.verify_v4_live} 的 V4 走地纸盘...")
+        result = verify_v4_live_date(args.verify_v4_live, default_stake=args.v4_stake)
+        if "error" in result:
+            print(f"  ⚠️ {result['error']}")
+        else:
+            print(f"  ✅ W/P/L {result['wins']}/{result['pushes']}/{result['losses']} | "
+                  f"ROI {result['roi_pct']:+.2f}% | Pending {result['pending']}")
     elif args.verify_yesterday:
         yesterday = (date.today() - timedelta(days=1)).strftime("%Y-%m-%d")
         print(f"⏱ 结算昨日 ({yesterday}) 的预测...")
@@ -1228,6 +1367,15 @@ if __name__ == "__main__":
                   f"ROI {result['roi_pct']:+.2f}% | CLV {result['avg_clv_pct']:+.2f}%")
             if result.get("pending", 0) > 0:
                 print(f"  ⏳ {result['pending']} 场等待完赛")
+    elif args.verify_v4_live_yesterday:
+        yesterday = (date.today() - timedelta(days=1)).strftime("%Y-%m-%d")
+        print(f"⏱ 结算昨日 ({yesterday}) 的 V4 走地纸盘...")
+        result = verify_v4_live_date(yesterday, default_stake=args.v4_stake)
+        if "error" in result:
+            print(f"  ⚠️ {result['error']}")
+        else:
+            print(f"  ✅ W/P/L {result['wins']}/{result['pushes']}/{result['losses']} | "
+                  f"ROI {result['roi_pct']:+.2f}% | Pending {result['pending']}")
     elif args.summary:
         s = full_summary()
         if not s or "error" not in s:

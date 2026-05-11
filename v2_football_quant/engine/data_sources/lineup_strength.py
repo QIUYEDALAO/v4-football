@@ -23,8 +23,11 @@ RECENT_MATCHES = 10
 MIN_HISTORY_LINEUPS = 4
 
 
-ATTACK_POS = {"F", "M"}
-DEFENSE_POS = {"G", "D", "M"}
+ATTACK_POS = {"F"}
+MID_POS = {"M"}
+DEFENSE_POS = {"G", "D"}
+ATTACK_UNIT_POS = {"F", "M"}
+DEFENSE_UNIT_POS = {"G", "D", "M"}
 
 
 @dataclass
@@ -210,16 +213,38 @@ class LineupStrengthAnalyzer:
             present = sum(max(p.importance, 0.01) for p in bucket if p.player_id in actual_ids)
             return round(present / total, 3)
 
-        attack_available = _availability(ATTACK_POS)
-        defense_available = _availability(DEFENSE_POS)
+        attack_core_available = _availability(ATTACK_POS)
+        midfield_available = _availability(MID_POS)
+        defense_core_available = _availability(DEFENSE_POS)
+        attack_available = _availability(ATTACK_UNIT_POS)
+        defense_available = _availability(DEFENSE_UNIT_POS)
         defense_instability = round(1.0 - defense_available, 3)
 
+        attack_core = [p for p in core_profiles if p.pos in ATTACK_POS]
+        midfield_core = [p for p in core_profiles if p.pos in MID_POS]
+        defense_core = [p for p in core_profiles if p.pos in DEFENSE_POS]
         missing_attackers = [p.__dict__ for p in missing_core if p.pos in ATTACK_POS]
+        missing_midfielders = [p.__dict__ for p in missing_core if p.pos in MID_POS]
         missing_defenders = [p.__dict__ for p in missing_core if p.pos in DEFENSE_POS]
+
+        attack_signal = (
+            "ATTACK_FULL"
+            if attack_core_available >= 0.80
+            else "ATTACK_OK"
+            if attack_available >= 0.70
+            else "ATTACK_WEAK"
+        )
+        defense_signal = (
+            "DEFENSE_STABLE"
+            if defense_instability < 0.20
+            else "DEFENSE_GAP"
+            if defense_instability < 0.40
+            else "DEFENSE_HEAVY_GAP"
+        )
 
         if rotation_count >= 5:
             signal = "DROP_HEAVY_ROTATION"
-        elif attack_available < 0.50:
+        elif attack_available < 0.50 or attack_core_available < 0.45:
             signal = "DROP_ATTACK_WEAK"
         elif attack_available >= 0.75 and defense_instability >= 0.30:
             signal = "BOOST_OVER"
@@ -233,11 +258,23 @@ class LineupStrengthAnalyzer:
             "formation": current_lineup.get("formation") if current_lineup else None,
             "core_present": len(present_core),
             "rotation_count": rotation_count,
-            "attack_core_available": attack_available,
-            "defense_core_available": defense_available,
+            "attack_core_count": len(attack_core),
+            "attack_core_present": len([p for p in attack_core if p.player_id in actual_ids]),
+            "midfield_core_count": len(midfield_core),
+            "midfield_core_present": len([p for p in midfield_core if p.player_id in actual_ids]),
+            "defense_core_count": len(defense_core),
+            "defense_core_present": len([p for p in defense_core if p.player_id in actual_ids]),
+            "attack_core_available": attack_core_available,
+            "midfield_available": midfield_available,
+            "defense_core_available": defense_core_available,
+            "attack_unit_available": attack_available,
+            "defense_unit_available": defense_available,
             "defense_instability": defense_instability,
             "missing_key_attackers": missing_attackers,
+            "missing_key_midfielders": missing_midfielders,
             "missing_key_defenders": missing_defenders,
+            "attack_signal": attack_signal,
+            "defense_signal": defense_signal,
             "lineup_signal": signal,
             "warning": None,
         }
@@ -259,12 +296,12 @@ class LineupStrengthAnalyzer:
             action = "DROP"
             reason = "首发攻击端不足或大轮换"
         elif "BOOST_OVER" in signals and min(
-            home.get("attack_core_available", 0),
-            away.get("attack_core_available", 0),
+            home.get("attack_unit_available", 0),
+            away.get("attack_unit_available", 0),
         ) >= 0.55:
             action = "BOOST"
             reason = "攻击端可用且存在防线缺口，走地大球优先级提升"
-        elif min(home.get("attack_core_available", 0), away.get("attack_core_available", 0)) >= 0.65:
+        elif min(home.get("attack_unit_available", 0), away.get("attack_unit_available", 0)) >= 0.65:
             action = "KEEP_WATCH"
             reason = "双方攻击核心可用，继续等待走地买点"
         else:
