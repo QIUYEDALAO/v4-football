@@ -1,0 +1,9 @@
+{
+  "release_tag": "V4.6",
+  "frozen_at": "2026-05-12T05:27:10.348554",
+  "model_version": "V4.6_RULE_REPLAY_EV",
+  "rule_version": "V4_HT_LIVE_PULLBACK_EV_NET",
+  "feature_version": "V4_FEATURE_SET_P0_P8",
+  "settlement_version": "V4_SETTLEMENT_AH_v1",
+  "notes": "freeze baseline after dashboard health panel"
+}

@@ -48,6 +48,7 @@ from engine.ht_goal_hazard_model import estimate_ht_goal_probs
 from engine.league_hierarchical_threshold import league_threshold
 from engine.risk_guard import evaluate_risk_guard
 from engine.line_decay_model import estimate_best_entry_window
+from engine.v4_versioning import get_v4_versions
 
 REPORT_DIR = BASE_DIR / "data" / "daily_reports"
 MONITOR_DIR = BASE_DIR / "data" / "live_monitor"
@@ -327,7 +328,8 @@ def evaluate_watch_item(item: dict, date_key: str, api_client: Callable[[str], O
     }
 
 
-def _to_decision_log_row(result: dict, model_version: str = "V4.0_RULE", rule_version: str = "V4_HT_LIVE_PULLBACK") -> dict:
+def _to_decision_log_row(result: dict, model_version: str | None = None, rule_version: str | None = None) -> dict:
+    versions = get_v4_versions()
     state = result.get("state") or {}
     tempo = result.get("tempo") or {}
     line = result.get("entry_line")
@@ -345,8 +347,11 @@ def _to_decision_log_row(result: dict, model_version: str = "V4.0_RULE", rule_ve
         "lineup_status": result.get("lineup_action"),
         "red_card_status": state.get("raw_status", {}).get("red"),
         "injury_status": "NOT_CHECKED",
-        "model_version": model_version,
-        "rule_version": rule_version,
+        "model_version": model_version or versions.get("model_version"),
+        "rule_version": rule_version or versions.get("rule_version"),
+        "feature_version": versions.get("feature_version"),
+        "settlement_version": versions.get("settlement_version"),
+        "release_tag": versions.get("release_tag"),
         "decision": result.get("action"),
         "decision_reason": result.get("reason"),
         "ev_gross": result.get("ev_gross"),
@@ -428,6 +433,15 @@ def run_once(date_str: str, api_client: Callable[[str], Optional[dict]] = api_ge
     watchlist = _load_json(watch_path, [])
     if not watchlist:
         return {"error": f"无滚球雷达文件或文件为空: {watch_path}"}
+    # 高优先级联赛先处理：priority_boost 越高越靠前
+    watchlist = sorted(
+        watchlist,
+        key=lambda x: (
+            -int(x.get("priority_boost", 0) or 0),
+            -float((x.get("best_score") or 0)),
+            str(x.get("kickoff") or ""),
+        ),
+    )
 
     statuses = []
     entries = []
@@ -491,6 +505,7 @@ def run_once(date_str: str, api_client: Callable[[str], Optional[dict]] = api_ge
     return {
         "date": key,
         "watchlist_count": len(watchlist),
+        "watchlist_sorted_by_priority": True,
         "buy_count": len(entries),
         "status_path": str(status_path),
         "entry_path": str(entry_path) if entries else None,

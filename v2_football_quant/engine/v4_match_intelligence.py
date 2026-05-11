@@ -97,7 +97,13 @@ def explain_match(record: dict) -> dict:
     )
     ft_open = best_focus == "FULLTIME_OVER" or ft_score >= max(ht_score, sh_score)
     data_weak = data_action in ("WATCH_ONLY", "SKIP_DATA_WEAK")
-    price_expensive = _float((record.get("pre_ht_line") or {}).get("line") or record.get("pre_ht_line_float")) >= 1.75
+    pre_ht_line = record.get("pre_ht_line")
+    pre_ht_line_val = None
+    if isinstance(pre_ht_line, dict):
+        pre_ht_line_val = pre_ht_line.get("line")
+    elif isinstance(pre_ht_line, (int, float, str)):
+        pre_ht_line_val = pre_ht_line
+    price_expensive = _float(pre_ht_line_val or record.get("pre_ht_line_float")) >= 1.75
     dull_trap = ht_score >= 50 and pullback_fit == "WEAK" and late_11_45 < 0.50 and not early_flash
 
     if early_flash:

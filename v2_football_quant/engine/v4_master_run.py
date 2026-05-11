@@ -30,7 +30,7 @@ def _run(cmd: list[str]) -> dict:
     }
 
 
-def build_steps(date_key: str, phase: str) -> list[list[str]]:
+def build_steps(date_key: str, phase: str, offline: bool = False) -> list[list[str]]:
     py = sys.executable
     all_steps = {
         "scan": [py, str(ENGINE_DIR / "v4_runner.py"), "--run_tag", "MASTER", "--lookahead-hours", "24"],
@@ -44,7 +44,10 @@ def build_steps(date_key: str, phase: str) -> list[list[str]]:
         "wf_report": [py, str(ENGINE_DIR / "walk_forward_backtest.py"), "--save"],
         "context_report": [py, str(ENGINE_DIR / "context_marginal_report.py"), "--save"],
     }
-    if phase == "full":
+    if offline:
+        # 离线模式：不触发API调用，专注本地样本评估与报告
+        order = ["daily_review", "calibration", "sh_eval", "wf_report", "context_report"]
+    elif phase == "full":
         order = ["scan", "ht_live", "ht_verify", "sh_live", "sh_verify", "daily_review", "calibration", "sh_eval", "wf_report", "context_report"]
     elif phase == "prematch":
         order = ["scan", "daily_review"]
@@ -59,9 +62,9 @@ def build_steps(date_key: str, phase: str) -> list[list[str]]:
     return [all_steps[k] for k in order]
 
 
-def run_master(date_str: str, phase: str) -> dict:
+def run_master(date_str: str, phase: str, offline: bool = False) -> dict:
     key = _date_key(date_str)
-    steps = build_steps(key, phase)
+    steps = build_steps(key, phase, offline=offline)
     results = []
     for cmd in steps:
         res = _run(cmd)
@@ -72,6 +75,7 @@ def run_master(date_str: str, phase: str) -> dict:
     out = {
         "date": key,
         "phase": phase,
+        "offline": offline,
         "ok": ok,
         "executed_steps": len(results),
         "results": results,
@@ -93,11 +97,11 @@ def main():
         choices=["full", "prematch", "ht", "sh", "reports"],
         help="执行阶段",
     )
+    parser.add_argument("--offline", action="store_true", help="仅执行本地评估/报告，不跑API调用任务")
     args = parser.parse_args()
-    result = run_master(args.date, args.phase)
+    result = run_master(args.date, args.phase, offline=args.offline)
     print(json.dumps({k: v for k, v in result.items() if k != "results"}, ensure_ascii=False, indent=2))
 
 
 if __name__ == "__main__":
     main()
-

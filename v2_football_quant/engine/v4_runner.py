@@ -39,6 +39,7 @@ except ModuleNotFoundError:
 
 REPORT_DIR = BASE_DIR / "data" / "daily_reports"
 REPORT_DIR.mkdir(parents=True, exist_ok=True)
+LEAGUE_TIER_REPORT = REPORT_DIR / "v4_league_replay_tiers.json"
 
 # SSL
 ctx = ssl.create_default_context(cafile=certifi.where())
@@ -48,6 +49,22 @@ with open(BASE_DIR / "config" / "leagues_whitelist.json") as f:
     LEAGUE_CN = json.load(f)["leagueId"]
 
 WL_SET = set(str(k) for k in LEAGUE_CN.keys())
+
+
+def _load_league_status_map() -> dict[str, dict]:
+    if not LEAGUE_TIER_REPORT.exists():
+        return {}
+    try:
+        with open(LEAGUE_TIER_REPORT, encoding="utf-8") as f:
+            data = json.load(f)
+        out = {}
+        for row in data.get("leagues", []) if isinstance(data, dict) else []:
+            code = str(row.get("league_code") or "")
+            if code:
+                out[code] = row
+        return out
+    except Exception:
+        return {}
 
 
 def api_get(endpoint: str):
@@ -208,6 +225,7 @@ def run_v4_scan(run_tag="V4_DEFAULT", with_lineups=False, lookahead_hours=None):
     fixtures = fetch_today_fixtures(lookahead_hours=lookahead_hours)
     today_key = date.today().strftime("%Y%m%d")
     universe_out = universe_path(today_key)
+    league_status_map = _load_league_status_map()
     window_label = f"{lookahead_hours:g}h内" if lookahead_hours is not None else "今日+明日全部"
     logger.info(f"📥 前置漏斗: {len(fixtures)} 场白名单 + {window_label}")
 
@@ -223,6 +241,32 @@ def run_v4_scan(run_tag="V4_DEFAULT", with_lineups=False, lookahead_hours=None):
     for i, fx in enumerate(fixtures):
         if (i + 1) % 20 == 0:
             logger.info(f"  H2H 查询: {i+1}/{len(fixtures)}")
+
+        lg_policy = league_status_map.get(str(fx["league"]), {})
+        lg_status = str(lg_policy.get("status") or "UNKNOWN")
+        if lg_status == "DISABLED":
+            append_jsonl(universe_out, {
+                "fixture_id": fx["id"],
+                "date": date.today().isoformat(),
+                "league_id": fx["league"],
+                "league_name": fx["league_name"],
+                "country": None,
+                "home_team": fx["home"],
+                "away_team": fx["away"],
+                "kickoff_time": fx["kickoff"],
+                "prematch_ht_line": None,
+                "prematch_over_odds": None,
+                "prematch_under_odds": None,
+                "api_coverage_level": "UNKNOWN",
+                "is_candidate": False,
+                "candidate_score": None,
+                "filter_result": "SKIP",
+                "filter_reason": "LEAGUE_DISABLED_BY_REPLAY_TIER",
+                "league_replay_status": lg_status,
+                "run_tag": run_tag,
+                "logged_at": datetime.now().isoformat(),
+            })
+            continue
 
         result = evaluate_h2h_edge(fx["homeId"], fx["awayId"], api_get)
         time.sleep(0.5)
@@ -320,12 +364,19 @@ def run_v4_scan(run_tag="V4_DEFAULT", with_lineups=False, lookahead_hours=None):
             and best_line
             and best_line["line_float"] >= 1.25
         )
+        if lg_status == "WATCH_ONLY":
+            has_high_line = False
         lineup_gate = None
         if has_high_line and lineup_analyzer:
             lineup_gate = lineup_analyzer.analyze_fixture(fx)
             time.sleep(0.5)
 
         if has_high_line:
+            priority_boost = 0
+            if lg_status == "AUTO_TRADE":
+                priority_boost = 5
+            elif lg_status == "PAPER_ONLY":
+                priority_boost = 2
             live_watchlist.append({
                 "fixture_id": fx["id"],
                 "date": date.today().isoformat(),
@@ -349,6 +400,8 @@ def run_v4_scan(run_tag="V4_DEFAULT", with_lineups=False, lookahead_hours=None):
                 "schedule_pressure": schedule_pressure,
                 "lineup_gate": lineup_gate,
                 "lineup_action": lineup_gate.get("lineup_action") if lineup_gate else "NOT_CHECKED",
+                "league_replay_status": lg_status,
+                "priority_boost": priority_boost,
             })
 
         append_jsonl(universe_out, {
@@ -375,6 +428,7 @@ def run_v4_scan(run_tag="V4_DEFAULT", with_lineups=False, lookahead_hours=None):
                 f"schedule={schedule_pressure.get('action')}|best_line={best_line['line_float'] if best_line else 'NONE'}|"
                 f"focus={market_focus}"
             ),
+            "league_replay_status": lg_status,
             "run_tag": run_tag,
             "logged_at": datetime.now().isoformat(),
         })

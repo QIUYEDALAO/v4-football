@@ -35,6 +35,12 @@
 ## 一键总控
 - [x] 总控脚本 `engine/v4_master_run.py`
 
+## 版本冻结
+- [x] 发布清单 `config/v4_release_manifest.json`
+- [x] 版本读取 `engine/v4_versioning.py`
+- [x] 冻结脚本 `engine/v4_release_freeze.py`
+- [x] 决策日志自动写入 release/model/rule/feature/settlement version
+
 ### 常用命令
 - `python3 engine/v4_master_run.py --date 20260512 --phase full`
 - `python3 engine/v4_master_run.py --date 20260512 --phase prematch`

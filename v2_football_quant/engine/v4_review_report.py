@@ -20,12 +20,14 @@ from engine.live_odds_snapshot import summarize_fixture_timeline
 from engine.v4_strategy_eval import evaluate as evaluate_v4_results, load_v4_results
 from engine.v4_sh_strategy_eval import evaluate as evaluate_sh_results, load_rows as load_sh_rows
 from engine.walk_forward_backtest import run_walk_forward
+from engine.league_replay_tiers import build_report as build_league_tiers
 
 REPORT_DIR = BASE_DIR / "data" / "daily_reports"
 MONITOR_DIR = BASE_DIR / "data" / "live_monitor"
 PAPER_DIR = BASE_DIR / "data" / "paper_trading"
 EXEC_DIR = BASE_DIR / "data" / "execution"
 RESEARCH_DIR = BASE_DIR / "data" / "research"
+CONFIG_DIR = BASE_DIR / "config"
 
 
 def _date_key(date_str: str) -> str:
@@ -68,6 +70,86 @@ def _pct(x) -> str:
         return "-"
 
 
+def _parse_pct_value(text: str) -> float:
+    s = str(text).strip().replace("%", "")
+    try:
+        return float(s)
+    except Exception:
+        return 0.0
+
+
+def _load_kill_criteria_thresholds() -> dict:
+    path = CONFIG_DIR / "kill_criteria.yaml"
+    if not path.exists():
+        return {}
+    # 轻量解析（仅提取当前用到的字段，避免额外依赖）
+    after_100 = None
+    after_300 = None
+    rej_rate = None
+    with open(path, encoding="utf-8") as f:
+        for ln in f:
+            t = ln.strip()
+            if t.startswith("if_slippage_adjusted_roi_below:"):
+                val = t.split(":", 1)[1].strip()
+                if after_100 is None:
+                    after_100 = _parse_pct_value(val)
+                else:
+                    after_300 = _parse_pct_value(val)
+            elif t.startswith("if_rejection_rate_above:"):
+                val = t.split(":", 1)[1].strip()
+                rej_rate = _parse_pct_value(val)
+    return {
+        "after_100_roi_below_pct": after_100 if after_100 is not None else -3.0,
+        "after_300_roi_below_pct": after_300 if after_300 is not None else 0.0,
+        "rejection_rate_above_pct": rej_rate if rej_rate is not None else 30.0,
+    }
+
+
+def _build_health_panel(review_core: dict) -> dict:
+    se = review_core.get("strategy_eval", {}) or {}
+    rt = review_core.get("roi_triplet", {}) or {}
+    lt = review_core.get("league_tiers", {}) or {}
+    th = _load_kill_criteria_thresholds()
+
+    sample = int(se.get("sample_size", 0) or 0)
+    min_sample = int(se.get("min_sample", 50) or 50)
+    conservative_roi = float(rt.get("conservative_fill_roi_pct", 0.0) or 0.0)
+    slippage_roi = float(rt.get("slippage_adjusted_roi_pct", 0.0) or 0.0)
+    exec_n = int(rt.get("execution_samples", 0) or 0)
+
+    # 联赛状态建议统计
+    league_rows = lt.get("leagues", []) if isinstance(lt, dict) else []
+    league_status_counts = Counter((x.get("status") or "UNKNOWN") for x in league_rows)
+
+    kill_flags = []
+    if sample >= 100 and slippage_roi < float(th.get("after_100_roi_below_pct", -3.0)):
+        kill_flags.append("AFTER_100_TRIGGER: pause_and_review")
+    if sample >= 300 and slippage_roi < float(th.get("after_300_roi_below_pct", 0.0)):
+        kill_flags.append("AFTER_300_TRIGGER: disable_real_money")
+
+    health = "GREEN"
+    if kill_flags:
+        health = "RED"
+    elif sample < min_sample or conservative_roi <= 0:
+        health = "YELLOW"
+
+    return {
+        "health_status": health,
+        "sample_progress": {
+            "sample_size": sample,
+            "min_sample": min_sample,
+            "progress_pct": round(sample / min_sample * 100, 1) if min_sample else 0.0,
+        },
+        "execution_quality": {
+            "conservative_fill_roi_pct": conservative_roi,
+            "slippage_adjusted_roi_pct": slippage_roi,
+            "execution_samples": exec_n,
+        },
+        "league_switch_suggestion": dict(league_status_counts),
+        "kill_criteria_flags": kill_flags,
+    }
+
+
 def build_review(date_str: str) -> dict:
     key = _date_key(date_str)
     scout = _load_json(REPORT_DIR / f"scout_v4_{key}.json", [])
@@ -80,6 +162,7 @@ def build_review(date_str: str) -> dict:
     strategy_eval = evaluate_v4_results(load_v4_results())
     sh_strategy_eval = evaluate_sh_results(load_sh_rows())
     walk_forward = run_walk_forward()
+    league_tiers = build_league_tiers()
     candidates_path = RESEARCH_DIR / "strategy_candidates.jsonl"
     candidate_count = 0
     if candidates_path.exists():
@@ -120,7 +203,7 @@ def build_review(date_str: str) -> dict:
         "execution_samples": len(execution_rows),
     }
 
-    return {
+    review = {
         "date": key,
         "generated_at": datetime.now().isoformat(),
         "scout_count": len(scout) if isinstance(scout, list) else 0,
@@ -159,8 +242,11 @@ def build_review(date_str: str) -> dict:
             "count": candidate_count,
             "path": str(candidates_path),
         },
+        "league_tiers": league_tiers,
         "entries": entry_summaries,
     }
+    review["health_panel"] = _build_health_panel(review)
+    return review
 
 
 def render_markdown(review: dict) -> str:
@@ -231,12 +317,38 @@ def render_markdown(review: dict) -> str:
             f"({sp.get('start', '-')}-{sp.get('end', '-')})"
         )
     sc = review.get("strategy_candidates", {})
+    lt = review.get("league_tiers", {}) or {}
+    top_leagues = (lt.get("leagues") or [])[:8]
     lines.extend([
         "",
         "## Strategy Candidates",
         f"- 记录数: {sc.get('count', 0)}",
         f"- 文件: {sc.get('path', '-')}",
+        "",
+        "## 联赛分层",
+        f"- 样本: {lt.get('sample_size', 0)} | 联赛数: {lt.get('league_count', 0)}",
     ])
+    for lg in top_leagues:
+        lines.append(
+            f"- {lg.get('league_code')} {lg.get('league_name')} | {lg.get('tier')} {lg.get('status')} | "
+            f"n={lg.get('sample_size')} ROI={_pct(lg.get('roi_pct', 0))}"
+        )
+    hp = review.get("health_panel", {}) or {}
+    sp = hp.get("sample_progress", {}) or {}
+    ex = hp.get("execution_quality", {}) or {}
+    lines.extend([
+        "",
+        "## 策略健康",
+        f"- 状态: {hp.get('health_status', 'UNKNOWN')}",
+        f"- 样本进度: {sp.get('sample_size', 0)}/{sp.get('min_sample', 0)} ({_pct(sp.get('progress_pct', 0))})",
+        f"- Conservative ROI: {_pct(ex.get('conservative_fill_roi_pct', 0))} | Slippage ROI: {_pct(ex.get('slippage_adjusted_roi_pct', 0))}",
+        f"- 联赛开关建议: {hp.get('league_switch_suggestion', {})}",
+    ])
+    flags = hp.get("kill_criteria_flags", []) or []
+    if flags:
+        lines.append(f"- Kill Flags: {'; '.join(flags)}")
+    else:
+        lines.append("- Kill Flags: 无触发")
     lines.extend([
         "",
         "## 入场明细",

@@ -362,6 +362,7 @@ def render_dashboard(date_str: str) -> Path:
     watchlist = _load_json(REPORT_DIR / f"live_watchlist_{key}.json", [])
     live_status = _load_json(BASE_DIR / "data" / "live_monitor" / f"v4_live_status_{key}.json", {})
     live_entries = _load_json(BASE_DIR / "data" / "paper_trading" / f"v4_live_entries_{key}.json", [])
+    review = _load_json(REPORT_DIR / f"v4_review_{key}.json", {})
     if not scout:
         raise FileNotFoundError(f"没有可渲染的 V4 情报数据: {scout_path}")
     rows = _enrich_records(
@@ -374,6 +375,18 @@ def render_dashboard(date_str: str) -> Path:
     counts = {"S": 0, "A": 0, "B": 0}
     for r in rows:
         counts[r["tier"]] += 1
+
+    hp = (review.get("health_panel", {}) if isinstance(review, dict) else {}) or {}
+    sp = hp.get("sample_progress", {}) if isinstance(hp, dict) else {}
+    ex = hp.get("execution_quality", {}) if isinstance(hp, dict) else {}
+    flags = hp.get("kill_criteria_flags", []) if isinstance(hp, dict) else []
+    health_status = str(hp.get("health_status", "UNKNOWN"))
+    health_class = "health-yellow"
+    if health_status == "GREEN":
+        health_class = "health-green"
+    elif health_status == "RED":
+        health_class = "health-red"
+    flags_text = "；".join(flags) if flags else "无触发"
 
     data_json = _rows_json(rows)
     title = f"V4 情报仪表盘 | {date_str}"
@@ -426,6 +439,16 @@ def render_dashboard(date_str: str) -> Path:
     .detail {{ font-size:13px; line-height:1.55; }}
     .audit {{ margin-top:12px; border-top:1px solid var(--line); padding-top:10px; }}
     .audit summary {{ cursor:pointer; color:var(--accent); font-size:13px; font-weight:700; }}
+    .health-panel {{ margin-top:12px; border:1px solid var(--line); border-radius:8px; padding:10px 12px; background:#fff; }}
+    .health-head {{ display:flex; align-items:center; gap:10px; flex-wrap:wrap; margin-bottom:8px; }}
+    .health-dot {{ width:10px; height:10px; border-radius:999px; display:inline-block; }}
+    .health-green .health-dot {{ background:#16a34a; }}
+    .health-yellow .health-dot {{ background:#ca8a04; }}
+    .health-red .health-dot {{ background:#dc2626; }}
+    .health-grid {{ display:grid; grid-template-columns:repeat(4,minmax(120px,1fr)); gap:8px; }}
+    .health-item {{ border:1px solid var(--line); border-radius:8px; padding:8px; }}
+    .health-item small {{ display:block; color:var(--muted); font-size:11px; }}
+    .health-item b {{ font-size:14px; }}
     .quick {{ display:grid; grid-template-columns:1.4fr repeat(3, .75fr); gap:8px; margin-top:10px; }}
     .quick .metric:first-child b {{ font-size:14px; }}
     .table-view {{ width:100%; border-collapse:collapse; background:var(--panel); border:1px solid var(--line); border-radius:8px; overflow:hidden; }}
@@ -446,6 +469,19 @@ def render_dashboard(date_str: str) -> Path:
         <span class="pill"><b id="visibleCount">0</b> / {len(rows)} 场</span>
         <span class="pill">滚球雷达 {len(watchlist)} 场</span>
         <span class="pill">S:{counts["S"]} A:{counts["A"]} B:{counts["B"]}</span>
+      </div>
+      <div class="health-panel {health_class}">
+        <div class="health-head">
+          <span class="health-dot"></span>
+          <b>策略健康：{html.escape(health_status)}</b>
+          <span class="pill">Kill Flags: {html.escape(flags_text)}</span>
+        </div>
+        <div class="health-grid">
+          <div class="health-item"><small>样本进度</small><b>{sp.get("sample_size", 0)}/{sp.get("min_sample", 0)}</b></div>
+          <div class="health-item"><small>样本完成率</small><b>{sp.get("progress_pct", 0)}%</b></div>
+          <div class="health-item"><small>Conservative ROI</small><b>{ex.get("conservative_fill_roi_pct", 0)}%</b></div>
+          <div class="health-item"><small>Slippage ROI</small><b>{ex.get("slippage_adjusted_roi_pct", 0)}%</b></div>
+        </div>
       </div>
       <div class="filters">
         <input id="q" placeholder="搜索球队 / 联赛">
