@@ -27,6 +27,7 @@ RECENT_HT_FORM_MIN = 0.70
 RECENT_ATTACK_DEFENSE_MIN = 0.65
 RECENT_TIMING_PRESSURE_MIN = 0.50
 H2H_BAD_FLOOR_MIN = 0.50
+HT_LIVE_SCORE_MIN = 0.50
 
 
 def _clamp_score(value: float) -> float:
@@ -453,9 +454,13 @@ def evaluate_h2h_edge(home_id: int, away_id: int, api_client) -> dict:
         recent_late_fh_pressure >= RECENT_TIMING_PRESSURE_MIN
         and not recent_early_only_flag
     )
+    ht_score_floor_pass = score_pack["scores"].get("HT_LIVE_OVER", 0) >= HT_LIVE_SCORE_MIN * 100
+    ht_is_best_focus = score_pack["best_focus_by_score"] == "HT_LIVE_OVER"
     ht_candidate = (
         recent_strength_pass
         and recent_timing_pass
+        and ht_score_floor_pass
+        and ht_is_best_focus
         and not h2h_bad_signal
     )
     sh_candidate = sh_rate >= 0.7 and avg_sh_goals >= 0.8 and recent_sh_avg >= 0.7
@@ -480,6 +485,7 @@ def evaluate_h2h_edge(home_id: int, away_id: int, api_client) -> dict:
             "reason": (
                 f"未达标 (近期HT={recent_form_avg:.0%}, 近期攻防={ht_attack_vs_defense:.0%}, "
                 f"近期10-45压力={recent_late_fh_pressure:.0%}, H2H={ht_goal_count}/{n}={ht_rate:.0%}, "
+                f"HT分={score_pack['scores'].get('HT_LIVE_OVER', 0):.1f}, 最强方向={score_pack['best_focus_by_score']}, "
                 f"SH={sh_rate:.0%}/近期{recent_sh_avg:.0%}, FT2+={ft_over_1_5_rate:.0%})"
             )
         }
@@ -511,6 +517,9 @@ def evaluate_h2h_edge(home_id: int, away_id: int, api_client) -> dict:
             "ht_gate_model": "RECENT_FIRST_H2H_REFERENCE",
             "recent_strength_pass": recent_strength_pass,
             "recent_timing_pass": recent_timing_pass,
+            "ht_score_floor_pass": ht_score_floor_pass,
+            "ht_live_score_min": HT_LIVE_SCORE_MIN,
+            "ht_is_best_focus": ht_is_best_focus,
             "h2h_sh_goal_rate": round(sh_rate, 3),
             "h2h_ft_over_1_5_rate": round(ft_over_1_5_rate, 3),
             "h2h_avg_ht_goals": avg_ht_goals,

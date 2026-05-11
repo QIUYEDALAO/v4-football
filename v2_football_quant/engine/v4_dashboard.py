@@ -29,6 +29,24 @@ except Exception:
     def fuzzy_match(name: str) -> str:
         return name
 
+try:
+    from engine.v4_match_intelligence import explain_match
+except Exception:
+    def explain_match(record: dict) -> dict:
+        return {
+            "match_type": ["NO_CLEAR_EDGE"],
+            "primary_direction": "SKIP",
+            "trade_action": "跳过：只记录情报",
+            "confidence": 0,
+            "profile": "画像：解释器不可用",
+            "summary": "结论：不作为交易候选",
+            "why": [],
+            "wait_for": [],
+            "avoid_if": [],
+            "execution_status": "球探观察",
+            "is_live_radar": False,
+        }
+
 
 MARKET_LABELS = {
     "HT_LIVE_OVER": "上半场走地",
@@ -207,12 +225,18 @@ def _rows_json(rows: list[dict]) -> str:
         away_sched = schedule_pressure.get("away", {}) or {}
         live_status = r.get("live_status") or {}
         live_entry = r.get("live_entry") or {}
+        scores = r.get("market_scores") or f.get("market_scores") or {}
+        market_focus = r.get("market_focus") or "HT_LIVE_OVER"
+        intelligence = explain_match(r)
+        is_live_radar = bool(intelligence.get("is_live_radar"))
+        execution_status = intelligence.get("execution_status", "球探观察")
+        trade_action = intelligence.get("trade_action", "跳过：只记录情报")
+        decision_summary = f"{intelligence.get('profile', '')}。{intelligence.get('summary', '')}"
+        match_profile = intelligence.get("profile", "")
         home = r.get("home") or ""
         away = r.get("away") or ""
         home_cn = fuzzy_match(home)
         away_cn = fuzzy_match(away)
-        market_focus = r.get("market_focus") or "HT_LIVE_OVER"
-        scores = r.get("market_scores") or f.get("market_scores") or {}
         compact.append({
             "fixture_id": r.get("fixture_id"),
             "home": home_cn,
@@ -223,7 +247,18 @@ def _rows_json(rows: list[dict]) -> str:
             "time": _ko_time(r.get("kickoff", "")),
             "hotness": r.get("hotness_score"),
             "tier": r.get("tier"),
-            "is_watch": r.get("is_watch"),
+            "is_watch": is_live_radar,
+            "executionStatus": execution_status,
+            "tradeAction": trade_action,
+            "decisionSummary": decision_summary,
+            "matchProfile": match_profile,
+            "intelligence": intelligence,
+            "matchTypes": " / ".join(intelligence.get("match_type", [])),
+            "primaryDirection": intelligence.get("primary_direction", "-"),
+            "confidence": intelligence.get("confidence", 0),
+            "whyText": "；".join(intelligence.get("why", [])),
+            "waitForText": "；".join(intelligence.get("wait_for", [])),
+            "avoidIfText": "；".join(intelligence.get("avoid_if", [])),
             "liveAction": live_status.get("action", "-"),
             "liveReason": live_status.get("reason", "-"),
             "liveScore": (live_status.get("state") or {}).get("score", "-"),
@@ -385,9 +420,14 @@ def render_dashboard(date_str: str) -> Path:
     .metric {{ border:1px solid var(--line); border-radius:8px; padding:9px; }}
     .metric label {{ display:block; color:var(--muted); font-size:12px; margin-bottom:4px; }}
     .metric b {{ font-size:16px; }}
+    .verdict {{ margin-top:10px; padding:10px 12px; border-radius:8px; background:#f8fafc; border:1px solid var(--line); font-weight:700; color:#111827; }}
     .section {{ margin-top:12px; border-top:1px solid var(--line); padding-top:11px; }}
     .section-title {{ color:var(--muted); font-size:12px; margin-bottom:6px; }}
     .detail {{ font-size:13px; line-height:1.55; }}
+    .audit {{ margin-top:12px; border-top:1px solid var(--line); padding-top:10px; }}
+    .audit summary {{ cursor:pointer; color:var(--accent); font-size:13px; font-weight:700; }}
+    .quick {{ display:grid; grid-template-columns:1.4fr repeat(3, .75fr); gap:8px; margin-top:10px; }}
+    .quick .metric:first-child b {{ font-size:14px; }}
     .table-view {{ width:100%; border-collapse:collapse; background:var(--panel); border:1px solid var(--line); border-radius:8px; overflow:hidden; }}
     th, td {{ text-align:left; padding:10px; border-bottom:1px solid var(--line); font-size:13px; }}
     th {{ color:var(--muted); background:#f9fafb; cursor:pointer; user-select:none; }}
@@ -409,6 +449,8 @@ def render_dashboard(date_str: str) -> Path:
       </div>
       <div class="filters">
         <input id="q" placeholder="搜索球队 / 联赛">
+        <select id="exec"><option value="radar">只看滚球雷达</option><option value="">全部含观察</option><option value="observe">只看观察</option></select>
+        <select id="focus"><option value="">全部结论</option><option value="HT">上半场候选</option><option value="SH">下半场观察</option><option value="FT">全场观察</option><option value="SKIP">跳过/观察不入场</option></select>
         <select id="tier"><option value="">全部等级</option><option>S</option><option>A</option><option>B</option></select>
         <select id="watch"><option value="">全部</option><option value="1">只看滚球雷达</option></select>
         <select id="market"><option value="">全部方向</option><option value="HT_LIVE_OVER">上半场走地</option><option value="SECOND_HALF_OVER">下半场参考</option><option value="FULLTIME_OVER">全场参考</option></select>
@@ -427,7 +469,7 @@ def render_dashboard(date_str: str) -> Path:
   </main>
   <script>
     const rows = {data_json};
-    const state = {{ q:'', tier:'', watch:'', market:'', line:'', view:'cards', sort:'hotness' }};
+    const state = {{ q:'', exec:'radar', focus:'', tier:'', watch:'', market:'', line:'', view:'cards', sort:'hotness' }};
     const el = id => document.getElementById(id);
 
     function clsFor(row) {{
@@ -445,7 +487,10 @@ def render_dashboard(date_str: str) -> Path:
           <div class="score">${{row.hotness}}<small>${{row.tier}}级</small></div>
         </div>
         <div class="tags">
-          ${{row.is_watch ? '<span class="tag watch">滚球雷达</span>' : ''}}
+          <span class="tag ${{row.is_watch ? 'watch' : 'warn'}}">${{row.executionStatus}}</span>
+          <span class="tag">类型 ${{row.matchTypes}}</span>
+          <span class="tag">方向 ${{row.primaryDirection}}</span>
+          <span class="tag">信心 ${{row.confidence}}</span>
           ${{row.liveAction !== '-' ? `<span class="tag">${{row.liveAction}}</span>` : ''}}
           <span class="tag ${{row.marketFocus === 'HT_LIVE_OVER' ? 'watch' : 'good'}}">${{row.marketLabel}}</span>
           <span class="tag">评分最强 ${{row.bestFocusByScore || '-'}}</span>
@@ -453,45 +498,50 @@ def render_dashboard(date_str: str) -> Path:
           <span class="tag">热区 ${{row.hotspot || '-'}}</span>
           <span class="tag">${{row.lineupAction}}</span>
         </div>
-        <div class="metrics">
-          <div class="metric"><label>H2H HT率</label><b>${{row.h2hText}}</b><div class="meta">${{row.h2hCountText}} · ${{row.htStrictPass ? '入池通过' : '未入池'}}</div></div>
-          <div class="metric"><label>场均HT球</label><b>${{row.avgGoals}}</b></div>
-          <div class="metric"><label>近期动能</label><b>${{row.momentumText}}</b></div>
+        <div class="verdict">${{row.decisionSummary}}</div>
+        <div class="metrics quick">
+          <div class="metric"><label>建议动作</label><b>${{row.tradeAction}}</b></div>
+          <div class="metric"><label>HT分</label><b>${{row.htScore.toFixed(1)}}</b></div>
+          <div class="metric"><label>SH分</label><b>${{row.shScore.toFixed(1)}}</b></div>
+          <div class="metric"><label>FT分</label><b>${{row.ftScore.toFixed(1)}}</b></div>
         </div>
-        <div class="scores">
-          <div class="scorebox"><label>HT走地分</label><b>${{row.htScore.toFixed(1)}}</b></div>
-          <div class="scorebox"><label>SH参考分</label><b>${{row.shScore.toFixed(1)}}</b></div>
-          <div class="scorebox"><label>FT参考分</label><b>${{row.ftScore.toFixed(1)}}</b></div>
+        <div class="section"><div class="section-title">智能解释</div>
+          <div class="detail"><b>为什么：</b>${{row.whyText || '-'}}<br><b>等待：</b>${{row.waitForText || '-'}}<br><b>避开：</b>${{row.avoidIfText || '-'}}</div>
         </div>
-        <div class="section"><div class="section-title">上半场进球时间分布</div>
-          <div class="detail">0-10: ${{row.bins['0-10']}} · 11-30: ${{row.bins['11-30']}} · 11-45: ${{row.bins['11-45']}} · 16-45: ${{row.bins['16-45']}}<br>回调适配: ${{row.pullbackFit}} · 近期时间适配: ${{row.recentTimingFit}} · 11-45压力: ${{row.lateFhPressure}} ${{row.earlyOnlyFlag ? '· 开场闪击型' : ''}}</div>
-        </div>
-        <div class="section"><div class="section-title">API数据覆盖</div>
-          <div class="detail">${{row.dataCoverageLevel}} · ${{row.dataGateAction}} · ${{row.htGateModel || '-'}}</div>
-        </div>
-        <div class="section"><div class="section-title">联赛基准</div>
-          <div class="detail">HT环境 ${{row.leagueHtEnv}} · HT ${{row.leagueHtRate}} · SH ${{row.leagueShRate}} · FT2+ ${{row.leagueFtRate}} · 样本 ${{row.leagueSample}} · 调整 ${{row.leagueAdjustment}}</div>
-        </div>
-        <div class="section"><div class="section-title">赛季阶段</div>
-          <div class="detail">${{row.seasonPhase}} · 进度 ${{row.seasonProgress}} · ${{row.seasonCompleted}}/${{row.seasonTotal}} · 剩余约 ${{row.remainingRounds}} 轮 · 调整 ${{row.phaseAdjustment}}</div>
-        </div>
-        <div class="section"><div class="section-title">排名战意</div>
-          <div class="detail">${{row.motivationGate}} · 分数 ${{row.motivationScore}} · ${{row.motivationReason}}<br>${{row.home}} #${{row.homeRank}}: ${{row.homeMotTags}} · ${{row.away}} #${{row.awayRank}}: ${{row.awayMotTags}}</div>
-        </div>
-        <div class="section"><div class="section-title">赛程压力</div>
-          <div class="detail">${{row.scheduleLevel}} · ${{row.scheduleAction}} · ${{row.scheduleReason}}<br>${{row.home}}：${{row.homeSchedule}} · ${{row.away}}：${{row.awaySchedule}}</div>
-        </div>
-        <div class="section"><div class="section-title">走地状态</div>
-          <div class="detail">${{row.liveAction}} · ${{row.liveReason}}<br>分钟 ${{row.liveMinute}} · 比分 ${{row.liveScore}} · 入场 大${{row.entryLine}} @${{row.entryOdds}}</div>
-        </div>
-        <div class="section"><div class="section-title">近期HT攻防动能</div>
-          <div class="detail">${{row.home}}：进球 ${{row.homeHtScored}} / 失球 ${{row.homeHtConceded}} · ${{row.away}}：进球 ${{row.awayHtScored}} / 失球 ${{row.awayHtConceded}}<br>主攻客防 ${{row.homeAttackVsAwayDefense}} · 客攻主防 ${{row.awayAttackVsHomeDefense}} · 最强组合 ${{row.htAttackVsDefense}}</div>
-        </div>
-        <div class="section"><div class="section-title">下半场 / 全场参考</div>
-          <div class="detail">SH有球: ${{row.shText}} · 场均SH球: ${{row.avgShGoals}} · FT 2+球: ${{row.ftOverText}}<br>46-60: ${{row.binsSecond['46-60']}} · 61-75: ${{row.binsSecond['61-75']}} · 76-90: ${{row.binsSecond['76-90']}}</div>
-        </div>
-        <div class="section"><div class="section-title">大球盘口线</div><div class="detail">${{row.linesText}}</div></div>
-        <div class="section"><div class="section-title">伤停 / 首发闸门</div><div class="detail">${{row.injuryText}}<br>${{row.lineupText}}</div></div>
+        <details class="audit"><summary>查看完整数据</summary>
+          <div class="section"><div class="section-title">H2H / 近期</div>
+            <div class="detail">H2H HT率 ${{row.h2hText}} (${{row.h2hCountText}}) · 场均HT球 ${{row.avgGoals}} · 近期动能 ${{row.momentumText}}</div>
+          </div>
+          <div class="section"><div class="section-title">上半场进球时间分布</div>
+            <div class="detail">0-10: ${{row.bins['0-10']}} · 11-30: ${{row.bins['11-30']}} · 11-45: ${{row.bins['11-45']}} · 16-45: ${{row.bins['16-45']}}<br>回调适配: ${{row.pullbackFit}} · 近期时间适配: ${{row.recentTimingFit}} · 11-45压力: ${{row.lateFhPressure}} ${{row.earlyOnlyFlag ? '· 开场闪击型' : ''}}</div>
+          </div>
+          <div class="section"><div class="section-title">API数据覆盖</div>
+            <div class="detail">${{row.dataCoverageLevel}} · ${{row.dataGateAction}} · ${{row.htGateModel || '-'}}</div>
+          </div>
+          <div class="section"><div class="section-title">联赛基准</div>
+            <div class="detail">HT环境 ${{row.leagueHtEnv}} · HT ${{row.leagueHtRate}} · SH ${{row.leagueShRate}} · FT2+ ${{row.leagueFtRate}} · 样本 ${{row.leagueSample}} · 调整 ${{row.leagueAdjustment}}</div>
+          </div>
+          <div class="section"><div class="section-title">赛季阶段</div>
+            <div class="detail">${{row.seasonPhase}} · 进度 ${{row.seasonProgress}} · ${{row.seasonCompleted}}/${{row.seasonTotal}} · 剩余约 ${{row.remainingRounds}} 轮 · 调整 ${{row.phaseAdjustment}}</div>
+          </div>
+          <div class="section"><div class="section-title">排名战意</div>
+            <div class="detail">${{row.motivationGate}} · 分数 ${{row.motivationScore}} · ${{row.motivationReason}}<br>${{row.home}} #${{row.homeRank}}: ${{row.homeMotTags}} · ${{row.away}} #${{row.awayRank}}: ${{row.awayMotTags}}</div>
+          </div>
+          <div class="section"><div class="section-title">赛程压力</div>
+            <div class="detail">${{row.scheduleLevel}} · ${{row.scheduleAction}} · ${{row.scheduleReason}}<br>${{row.home}}：${{row.homeSchedule}} · ${{row.away}}：${{row.awaySchedule}}</div>
+          </div>
+          <div class="section"><div class="section-title">走地状态</div>
+            <div class="detail">${{row.liveAction}} · ${{row.liveReason}}<br>分钟 ${{row.liveMinute}} · 比分 ${{row.liveScore}} · 入场 大${{row.entryLine}} @${{row.entryOdds}}</div>
+          </div>
+          <div class="section"><div class="section-title">近期HT攻防动能</div>
+            <div class="detail">${{row.home}}：进球 ${{row.homeHtScored}} / 失球 ${{row.homeHtConceded}} · ${{row.away}}：进球 ${{row.awayHtScored}} / 失球 ${{row.awayHtConceded}}<br>主攻客防 ${{row.homeAttackVsAwayDefense}} · 客攻主防 ${{row.awayAttackVsHomeDefense}} · 最强组合 ${{row.htAttackVsDefense}}</div>
+          </div>
+          <div class="section"><div class="section-title">下半场 / 全场参考</div>
+            <div class="detail">SH有球: ${{row.shText}} · 场均SH球: ${{row.avgShGoals}} · FT 2+球: ${{row.ftOverText}}<br>46-60: ${{row.binsSecond['46-60']}} · 61-75: ${{row.binsSecond['61-75']}} · 76-90: ${{row.binsSecond['76-90']}}</div>
+          </div>
+          <div class="section"><div class="section-title">大球盘口线</div><div class="detail">${{row.linesText}}</div></div>
+          <div class="section"><div class="section-title">伤停 / 首发闸门</div><div class="detail">${{row.injuryText}}<br>${{row.lineupText}}</div></div>
+        </details>
       </article>`;
     }}
     function tableRow(row) {{
@@ -501,6 +551,12 @@ def render_dashboard(date_str: str) -> Path:
       let out = rows.filter(r => {{
         const hay = `${{r.home}} ${{r.away}} ${{r.homeEn}} ${{r.awayEn}} ${{r.league}}`.toLowerCase();
         if (state.q && !hay.includes(state.q.toLowerCase())) return false;
+        if (state.exec === 'radar' && !r.is_watch) return false;
+        if (state.exec === 'observe' && r.is_watch) return false;
+        if (state.focus === 'HT' && !(r.is_watch || r.marketFocus === 'HT_LIVE_OVER')) return false;
+        if (state.focus === 'SH' && r.marketFocus !== 'SECOND_HALF_OVER') return false;
+        if (state.focus === 'FT' && r.marketFocus !== 'FULLTIME_OVER') return false;
+        if (state.focus === 'SKIP' && !['观察不入场','球探观察'].includes(r.executionStatus)) return false;
         if (state.tier && r.tier !== state.tier) return false;
         if (state.watch && !r.is_watch) return false;
         if (state.market && r.marketFocus !== state.market) return false;
@@ -523,7 +579,7 @@ def render_dashboard(date_str: str) -> Path:
       el('cards').innerHTML = out.map(card).join('');
       el('table').querySelector('tbody').innerHTML = out.map(tableRow).join('');
     }}
-    ['q','tier','watch','market','line','view','sort'].forEach(id => {{
+    ['q','exec','focus','tier','watch','market','line','view','sort'].forEach(id => {{
       el(id).addEventListener('input', e => {{ state[id] = e.target.value; render(); }});
     }});
     render();

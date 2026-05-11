@@ -1,0 +1,21 @@
+global_strategy:
+  after_100_bets:
+    if_slippage_adjusted_roi_below: -3%
+    action: pause_and_review
+  after_300_bets:
+    if_slippage_adjusted_roi_below: 0%
+    action: disable_real_money
+
+league_level:
+  after_80_bets:
+    if_calibration_error_above: 8%
+    action: paper_only
+
+line_level:
+  after_100_bets:
+    if_roi_below_global_by: 5%
+    action: lower_priority
+
+execution_level:
+  if_rejection_rate_above: 30%
+  action: reduce_capacity

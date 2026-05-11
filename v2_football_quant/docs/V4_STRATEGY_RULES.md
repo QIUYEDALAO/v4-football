@@ -50,6 +50,8 @@ V4 不再把 H2H 8/10 当成唯一硬门槛。新的判断顺序是：
 | 近期 10-45 分钟压力 | >= 50%，且不能是纯 0-10 闪击型 |
 | H2H 参考 | 不作为唯一硬门槛，但若样本 >= 4 且 HT率 < 50% 则视为风险 |
 | H2H 强信号 | 样本 >= 8 且 HT率 >= 75% 时加分 |
+| HT 走地分 | >= 50，低分只做观察，不进入 HT 主策略 |
+| 三方向一致性 | 评分最强方向必须是 HT_LIVE_OVER |
 | 赛前半场大球盘口 | >= 大 1.25 |
 | API 数据覆盖 | FULL / GOOD 才允许进入自动滚球监控 |
 
@@ -191,16 +193,25 @@ Over 水位异常过高
 - [x] 任务 17：样本满 50 场后做第一次策略评估
 - [x] 任务 18：维护中文队名缺失收集
 - [x] 任务 19：半场结束后自动回填 V4 走地命中结果
+- [x] 任务 20：半场后下半场大球评估器
+- [x] 任务 21：新增 V4 规则型智能解释器
+- [x] 任务 22：输出比赛类型标签 EARLY_FLASH / HT_PULLBACK / SH_SURGE / FT_OPEN_GAME 等
+- [x] 任务 23：输出 primary_direction / trade_action / confidence
+- [x] 任务 24：输出 why / wait_for / avoid_if 三段解释
+- [x] 任务 25：dashboard 默认显示智能解释器结论
+- [x] 任务 26：复盘时统计每种比赛类型的命中率和 ROI
+- [x] 任务 27：P0-全量比赛池日志（`data/universe/fixtures_universe_YYYYMMDD.jsonl`）
+- [x] 任务 28：P0-决策日志（`data/decision_logs/v4_decision_log_YYYYMMDD.jsonl`）
 
 ## 十、执行顺序
 
 优先顺序：
 
 ```text
-任务 1 → 任务 19 已完成
+任务 1 → 任务 26 已完成
 ```
 
-当前清单已完成，下一步进入真实纸盘运行、样本累积和复盘调参。
+当前清单已完成，下一步进入真实纸盘运行、样本累积和按标签复盘调参。
 
 ## 十一、三方向评分说明
 
@@ -776,7 +787,117 @@ ROI
 python3 engine/v4_strategy_eval.py --save
 ```
 
-## 二十八、中文队名缺失收集
+## 二十八、半场后下半场大球评估
+
+任务 20 已完成，脚本：
+
+```text
+engine/second_half_evaluator.py
+```
+
+触发时间：
+
+```text
+半场结束后 1-5 分钟开始轮询
+```
+
+输入：
+
+```text
+data/daily_reports/scout_v4_YYYYMMDD.json
+fixtures?id=
+fixtures/statistics?fixture=
+fixtures/events?fixture=
+odds/live?fixture=
+```
+
+核心判断：
+
+```text
+只处理 SECOND_HALF_OVER 候选
+读取半场比分
+统计上半场射门 / 射正 / 角球 / 危险进攻
+检查红牌和伤退
+抓取 Second Half / 下半场实时大小球盘口
+优先寻找 SH Over 1.0 或 0.75 的合理水位
+```
+
+动作输出：
+
+| 动作 | 含义 |
+|:---|:---|
+| SH_BUY_NOW | 半场场面、比分结构、盘口均支持下半场大球 |
+| SH_WATCH | 条件接近，需要人工复核 |
+| SH_WATCH_PRICE | 下半场盘口未到合理水位 |
+| SH_WAIT_HALFTIME | 还没到半场 |
+| SH_SKIP_TEMPO | 上半场沉闷或有红牌 |
+| SH_SKIP_CONTEXT | 半场比分结构不支持 |
+| SH_SKIP_DATA_WEAK | API 数据覆盖过弱 |
+
+输出：
+
+```text
+data/live_monitor/v4_second_half_status_YYYYMMDD.json
+data/paper_trading/v4_second_half_entries_YYYYMMDD.json
+```
+
+运行：
+
+```text
+python3 engine/second_half_evaluator.py --date 20260512 --once
+python3 engine/second_half_evaluator.py --date 20260512 --watch --interval 300
+```
+
+## 二十九、V4 智能比赛解释器
+
+任务 21-25 已完成，模块：
+
+```text
+engine/v4_match_intelligence.py
+```
+
+定位：
+
+```text
+把底层因子转成交易员可读的比赛标签、主方向、建议动作和解释。
+第一阶段使用规则型解释器，不做黑盒模型。
+```
+
+输出字段：
+
+| 字段 | 含义 |
+|:---|:---|
+| match_type | 比赛类型标签 |
+| primary_direction | 主方向：HT / SH / FT / EARLY_HT / SKIP |
+| trade_action | 当前建议动作 |
+| confidence | 解释器信心分 |
+| profile | 比赛画像 |
+| summary | 一句话结论 |
+| why | 为什么这么判断 |
+| wait_for | 等待什么条件 |
+| avoid_if | 什么情况避开 |
+
+当前标签：
+
+```text
+EARLY_FLASH        上半场早段闪击型
+HT_PULLBACK        上半场回调型
+SH_SURGE           下半场爆发型
+FT_OPEN_GAME       全场开放局
+PRICE_TOO_EXPENSIVE 方向对但盘口太贵
+DATA_TOO_WEAK      API覆盖不足
+DULL_TRAP          数据看着不差但场面/时间结构不支持
+NO_CLEAR_EDGE      方向不集中
+```
+
+关键解释纪律：
+
+```text
+回调适配 WEAK 不等于上半场不会进。
+它只代表 0-10 分钟无球后，继续等降盘买入的质量差。
+```
+
+## 三十、中文队名缺失收集
 
 任务 18 已完成，脚本：
 

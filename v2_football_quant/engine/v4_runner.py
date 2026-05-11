@@ -30,6 +30,8 @@ from engine.data_sources.lineup_strength import LineupStrengthAnalyzer
 from engine.data_sources.motivation import evaluate_match_motivation
 from engine.data_sources.schedule_pressure import evaluate_match_schedule_pressure
 from engine.data_sources.season_phase import season_phase_for_fixture
+from engine.v4_data_logger import append_jsonl, universe_path
+from engine.context_enrichment import fetch_fixture_context
 try:
     from logger import logger
 except ModuleNotFoundError:
@@ -204,6 +206,8 @@ def run_v4_scan(run_tag="V4_DEFAULT", with_lineups=False, lookahead_hours=None):
     lineup_analyzer = LineupStrengthAnalyzer(api_get) if with_lineups else None
 
     fixtures = fetch_today_fixtures(lookahead_hours=lookahead_hours)
+    today_key = date.today().strftime("%Y%m%d")
+    universe_out = universe_path(today_key)
     window_label = f"{lookahead_hours:g}h内" if lookahead_hours is not None else "今日+明日全部"
     logger.info(f"📥 前置漏斗: {len(fixtures)} 场白名单 + {window_label}")
 
@@ -222,8 +226,30 @@ def run_v4_scan(run_tag="V4_DEFAULT", with_lineups=False, lookahead_hours=None):
 
         result = evaluate_h2h_edge(fx["homeId"], fx["awayId"], api_get)
         time.sleep(0.5)
+        h2h_valid = bool(result.get("valid"))
+        h2h_reason = result.get("reason", "")
 
         if not result["valid"]:
+            append_jsonl(universe_out, {
+                "fixture_id": fx["id"],
+                "date": date.today().isoformat(),
+                "league_id": fx["league"],
+                "league_name": fx["league_name"],
+                "country": None,
+                "home_team": fx["home"],
+                "away_team": fx["away"],
+                "kickoff_time": fx["kickoff"],
+                "prematch_ht_line": None,
+                "prematch_over_odds": None,
+                "prematch_under_odds": None,
+                "api_coverage_level": "UNKNOWN",
+                "is_candidate": False,
+                "candidate_score": None,
+                "filter_result": "SKIP",
+                "filter_reason": f"H2H_{h2h_reason or 'INVALID'}",
+                "run_tag": run_tag,
+                "logged_at": datetime.now().isoformat(),
+            })
             if "API_ERROR" in result.get("reason", ""):
                 stats["api_error"] += 1
             elif "样本量" in result.get("reason", ""):
@@ -271,6 +297,9 @@ def run_v4_scan(run_tag="V4_DEFAULT", with_lineups=False, lookahead_hours=None):
         time.sleep(0.3)
         away_health = _query_injury_health(api_get, fx["awayId"], fx["away"])
         time.sleep(0.3)
+        # ── P8 观测层：天气/场地/裁判（先记录，不入模） ──
+        context_obs = fetch_fixture_context(fx["id"], api_get)
+        time.sleep(0.2)
 
         # ── 提取因子 ──
         factors = result.get("factors", {})
@@ -322,6 +351,34 @@ def run_v4_scan(run_tag="V4_DEFAULT", with_lineups=False, lookahead_hours=None):
                 "lineup_action": lineup_gate.get("lineup_action") if lineup_gate else "NOT_CHECKED",
             })
 
+        append_jsonl(universe_out, {
+            "fixture_id": fx["id"],
+            "date": date.today().isoformat(),
+            "league_id": fx["league"],
+            "league_name": fx["league_name"],
+            "country": None,
+            "home_team": fx["home"],
+            "away_team": fx["away"],
+            "kickoff_time": fx["kickoff"],
+            "prematch_ht_line": best_line["line_float"] if best_line else None,
+            "prematch_over_odds": best_line.get("over") if best_line else None,
+            "prematch_under_odds": best_line.get("under") if best_line else None,
+            "api_coverage_level": data_coverage.get("coverage_level", "UNKNOWN"),
+            "is_candidate": has_high_line,
+            "candidate_score": result.get("best_score"),
+            "filter_result": "PASS" if has_high_line else "SKIP",
+            "filter_reason": (
+                "PASS_LIVE_WATCHLIST"
+                if has_high_line else
+                f"NO_CANDIDATE|h2h_valid={h2h_valid}|data_gate={data_coverage.get('data_gate_action')}|"
+                f"league={league_adjustment.get('action')}|motivation={motivation_gate.get('action')}|"
+                f"schedule={schedule_pressure.get('action')}|best_line={best_line['line_float'] if best_line else 'NONE'}|"
+                f"focus={market_focus}"
+            ),
+            "run_tag": run_tag,
+            "logged_at": datetime.now().isoformat(),
+        })
+
         # ── 球探快照（纯数据，零交易字段）──
         scout_reports.append({
             "fixture_id": fx["id"],
@@ -346,6 +403,7 @@ def run_v4_scan(run_tag="V4_DEFAULT", with_lineups=False, lookahead_hours=None):
                 "home": home_health,
                 "away": away_health,
             },
+            "context_observation": context_obs,
             "lineup_gate": lineup_gate,
         })
         stats["scouted"] += 1
@@ -360,6 +418,7 @@ def run_v4_scan(run_tag="V4_DEFAULT", with_lineups=False, lookahead_hours=None):
     logger.info(f"  总数: {stats['total']} → H2H不足: {stats['no_h2h']} → 未达标: {stats['below_threshold']} → API错误: {stats['api_error']} → 无盘口: {stats.get('no_odds',0)} → 🔭球探报告: {stats['scouted']}")
     logger.info(f"  保存: {out_path} ({len(scout_reports)} 条)")
     logger.info(f"  🎯 滚球雷达: {len(live_watchlist)} 场")
+    logger.info(f"  🧾 Universe日志: {universe_out}")
 
     if live_watchlist:
         live_path = REPORT_DIR / f"live_watchlist_{today_str}.json"

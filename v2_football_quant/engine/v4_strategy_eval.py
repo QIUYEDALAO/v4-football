@@ -40,11 +40,62 @@ def load_v4_results() -> list[dict]:
     return rows
 
 
+def _entry_meta(row: dict) -> dict:
+    raw = row.get("raw_entry") or {}
+    intel = raw.get("intelligence") or row.get("intelligence") or {}
+    match_type = raw.get("match_type") or row.get("match_type") or intel.get("match_type") or ["UNKNOWN"]
+    if isinstance(match_type, str):
+        match_type = [match_type]
+    if not isinstance(match_type, list) or not match_type:
+        match_type = ["UNKNOWN"]
+    return {
+        "match_type": [str(x) for x in match_type],
+        "primary_direction": raw.get("primary_direction") or row.get("primary_direction") or intel.get("primary_direction") or "UNKNOWN",
+        "confidence": raw.get("confidence") or row.get("confidence") or intel.get("confidence"),
+        "strategy_id": row.get("strategy_id") or raw.get("strategy_id") or "UNKNOWN",
+    }
+
+
 def _bucket_line(line) -> str:
     try:
         return f"Over {float(line):.2f}".rstrip("0").rstrip(".")
     except Exception:
         return "UNKNOWN"
+
+
+def _bucket_confidence(value) -> str:
+    try:
+        v = float(value)
+    except Exception:
+        return "UNKNOWN"
+    if v >= 80:
+        return "80+"
+    if v >= 65:
+        return "65-79"
+    if v >= 50:
+        return "50-64"
+    return "<50"
+
+
+def _bucket_summary(bucket: dict, min_sample: int = MIN_SAMPLE) -> dict:
+    n = bucket["n"]
+    stake = bucket["stake"]
+    pnl = bucket["pnl"]
+    wins = bucket["wins"]
+    pushes = bucket["pushes"]
+    losses = bucket["losses"]
+    return {
+        "n": n,
+        "sample_status": "READY" if n >= min_sample else "SAMPLE_TOO_SMALL",
+        "min_sample": min_sample,
+        "wins": wins,
+        "pushes": pushes,
+        "losses": losses,
+        "hit_rate_pct": round(wins / n * 100, 2) if n else 0.0,
+        "staked": round(stake, 4),
+        "pnl": round(pnl, 4),
+        "roi_pct": round(pnl / stake * 100, 2) if stake else 0.0,
+    }
 
 
 def evaluate(rows: list[dict]) -> dict:
@@ -55,6 +106,20 @@ def evaluate(rows: list[dict]) -> dict:
     pushes = sum(1 for x in rows if float(x.get("pnl", 0) or 0) == 0)
     losses = sum(1 for x in rows if float(x.get("pnl", 0) or 0) < 0)
     by_line = defaultdict(lambda: {"n": 0, "pnl": 0.0, "stake": 0.0, "wins": 0})
+    bucket_factory = lambda: {"n": 0, "pnl": 0.0, "stake": 0.0, "wins": 0, "pushes": 0, "losses": 0}
+    by_match_type = defaultdict(bucket_factory)
+    by_primary_direction = defaultdict(bucket_factory)
+    by_confidence = defaultdict(bucket_factory)
+
+    def add_bucket(store, key, pnl, stake):
+        b = store[key]
+        b["n"] += 1
+        b["pnl"] += pnl
+        b["stake"] += stake
+        b["wins"] += int(pnl > 0)
+        b["pushes"] += int(pnl == 0)
+        b["losses"] += int(pnl < 0)
+
     for row in rows:
         key = _bucket_line(row.get("entry_line"))
         b = by_line[key]
@@ -64,6 +129,11 @@ def evaluate(rows: list[dict]) -> dict:
         b["pnl"] += pnl
         b["stake"] += stake
         b["wins"] += int(pnl > 0)
+        meta = _entry_meta(row)
+        for tag in meta["match_type"]:
+            add_bucket(by_match_type, tag, pnl, stake)
+        add_bucket(by_primary_direction, meta["primary_direction"], pnl, stake)
+        add_bucket(by_confidence, _bucket_confidence(meta["confidence"]), pnl, stake)
 
     return {
         "generated_at": datetime.now().isoformat(),
@@ -86,6 +156,18 @@ def evaluate(rows: list[dict]) -> dict:
                 "roi_pct": round(v["pnl"] / v["stake"] * 100, 2) if v["stake"] else 0.0,
             }
             for k, v in sorted(by_line.items())
+        },
+        "by_match_type": {
+            k: _bucket_summary(v)
+            for k, v in sorted(by_match_type.items())
+        },
+        "by_primary_direction": {
+            k: _bucket_summary(v)
+            for k, v in sorted(by_primary_direction.items())
+        },
+        "by_confidence": {
+            k: _bucket_summary(v)
+            for k, v in sorted(by_confidence.items())
         },
         "decision": (
             "EVALUATE"

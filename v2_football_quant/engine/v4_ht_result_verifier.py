@@ -244,6 +244,13 @@ def main():
         result = verify_ht_date(args.date, default_stake=args.stake)
         print(json.dumps({k: v for k, v in result.items() if k != "results"}, ensure_ascii=False, indent=2))
 
+    # ── 自动刷新仪表盘 ──
+    try:
+        from engine.v4_dashboard import render_dashboard
+        render_dashboard(args.date)
+    except Exception:
+        pass
+
 
 if __name__ == "__main__":
     main()
