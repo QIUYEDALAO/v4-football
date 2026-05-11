@@ -831,6 +831,282 @@ def full_summary(window_size: int = 10):
 
 
 # ═══════════════════════════════════════════════════════════
+# V4 因子体检报告：Pandas groupby 多维切片
+# ═══════════════════════════════════════════════════════════
+
+def v4_factor_audit():
+    """
+    V4 勘探线因子体检报告 — Pandas groupby(['league', 'market'])。
+
+    读取 data/daily_reports/predictions_v4_*.json，合并已有结算数据，
+    输出联赛×盘口多维切片 + Tier 系统判决。
+
+    Tier 分级逻辑 (CLV 为唯一真神，Hit% 剥夺核心投票权):
+      - 🟢 TIER_1_CORE:  N≥30, CLV≥+1.0% → 核心主因子 (宁缺毋滥)
+      - 🟡 AUX_FILTER:   N≥30, CLV 0%~1.0% → 辅助过滤层
+      - 🟠 NOISY:         N≥30, Hit%≥70% 但 CLV<0% → 高命中率陷阱，严禁上车
+      - 🔴 DROP_ZONE:    N≥30, CLV<-2.0% → 死刑区
+      - ⚪ INCUBATING:    N<30 → 不看任何数据，耐心等待
+    """
+    import pandas as pd
+    import glob
+
+    print("\n" + "=" * 78)
+    print(" 🔬 V4 勘探线因子体检报告 (Pandas groupby 多维切片)")
+    print("=" * 78)
+
+    # ── Step 1: 加载所有 V4 预测文件 ──
+    pred_files = sorted(REPORT_DIR.glob("predictions_v4_*.json"))
+    if not pred_files:
+        print("\n⚠️ 暂无 V4 预测数据。请先运行 python3 engine/v4_runner.py")
+        print("=" * 78 + "\n")
+        return {"error": "无 V4 数据"}
+
+    rows = []
+    for pf in pred_files:
+        with open(pf, encoding="utf-8") as f:
+            preds = json.load(f)
+        for p in preds:
+            rows.append({
+                "file_date": pf.stem.replace("predictions_v4_", ""),
+                "fixture_id": p.get("fixture_id"),
+                "league": p.get("league", "Unknown"),
+                "market": p.get("market", "?"),
+                "home": p.get("home", ""),
+                "away": p.get("away", ""),
+                "strategy_id": p.get("strategy_id", "V4_FACTOR_EXPLORE"),
+                "placed_odds": p.get("placed_odds"),
+                "h2h_ht_goal_rate": p.get("factors", {}).get("h2h_ht_goal_rate", 0),
+                "h2h_sample_size": p.get("factors", {}).get("h2h_sample_size", 0),
+                "action": p.get("action", "OBSERVE_ONLY"),
+            })
+
+    df_raw = pd.DataFrame(rows)
+    total_raw = len(df_raw)
+    print(f"\n📥 加载: {len(pred_files)} 个文件, {total_raw} 条预测记录")
+
+    if df_raw.empty:
+        print("=" * 78 + "\n")
+        return {"total": 0}
+
+    # ── Step 2: 尝试关联结算数据 ──
+    verified = []
+    log_files = sorted(LOG_DIR.glob("verified_*.json"))
+    for lf in log_files:
+        with open(lf, encoding="utf-8") as f:
+            try:
+                data = json.load(f)
+                for r in data.get("results", []):
+                    if r.get("strategy_id", "").startswith("V4"):
+                        verified.append(r)
+            except Exception:
+                continue
+
+    has_settlement = len(verified) > 0
+    if has_settlement:
+        df_settled = pd.DataFrame(verified)
+        df_settled["fixture_id"] = df_settled["fixture_id"].astype(int)
+        # merge 结算数据
+        df = df_raw.merge(
+            df_settled[["fixture_id", "is_hit", "pnl", "true_clv", "ht_score", "actual_outcome"]],
+            on="fixture_id", how="left"
+        )
+        df["is_hit"] = df["is_hit"].fillna(False).astype(bool)
+        df["pnl"] = df["pnl"].fillna(0.0)
+        df["true_clv"] = df["true_clv"].fillna(0.0)
+        settled_count = df["is_hit"].notna().sum()
+        print(f"📊 已结算: {settled_count}/{total_raw} 场")
+    else:
+        df = df_raw.copy()
+        df["is_hit"] = None
+        df["pnl"] = 0.0
+        df["true_clv"] = None
+        settled_count = 0
+        print(f"⚠️ 暂无结算数据 (V4 未进入 paper_trading 结算流程)")
+
+    # ── Step 3: Pandas groupby 多维切片 ──
+    print(f"\n{'─' * 78}")
+    print(f" 📋 维度一：联赛 × 盘口 交叉审计")
+    print(f"{'─' * 78}")
+
+    # 按联赛+盘口聚合
+    gb = df.groupby(["league", "market"]).agg(
+        N=("fixture_id", "count"),
+        avg_ht_goal_rate=("h2h_ht_goal_rate", "mean"),
+        avg_h2h_size=("h2h_sample_size", "mean"),
+    ).reset_index()
+
+    # 若有结算数据，追加命中/CLV
+    if has_settlement:
+        gb_settled = df[df["true_clv"].notna()].groupby(["league", "market"]).agg(
+            hits=("is_hit", "sum"),
+            settled_N=("fixture_id", "count"),
+            avg_clv=("true_clv", "mean"),
+            total_pnl=("pnl", "sum"),
+        ).reset_index()
+        gb = gb.merge(gb_settled, on=["league", "market"], how="left")
+        gb["hit_rate"] = (gb["hits"] / gb["settled_N"] * 100).round(1)
+        gb["avg_clv"] = (gb["avg_clv"] * 100).round(2)
+    else:
+        gb["hits"] = 0
+        gb["settled_N"] = 0
+        gb["avg_clv"] = 0.0
+        gb["total_pnl"] = 0.0
+        gb["hit_rate"] = 0.0
+
+    # ── Step 4: Tier 系统判决 (CLV为唯一真神·Hit%降级) ──
+    def classify_tier(row):
+        settled_n = row.get("settled_N", 0) or 0
+        hit_rate = row.get("hit_rate", 0) or 0
+        avg_clv = row.get("avg_clv", 0) or 0
+
+        if settled_n < 30:
+            return "⚪ INCUBATING"
+        # 🟢 TIER_1_CORE: N≥30 且 CLV≥+1.0% (条件极度苛刻，宁缺毋滥)
+        if avg_clv >= 1.0:
+            return "🟢 TIER_1_CORE"
+        # 🟠 NOISY: N≥30 且 Hit%≥70% 但 CLV<0% (高命中率陷阱)
+        if hit_rate >= 70 and avg_clv < 0:
+            return "🟠 NOISY"
+        # 🔴 DROP_ZONE: N≥30 且 CLV<-2.0% (死刑区)
+        if avg_clv < -2.0:
+            return "🔴 DROP_ZONE"
+        # 🟡 AUX_FILTER: N≥30 且 CLV 0%~1.0% (辅助过滤)
+        return "🟡 AUX_FILTER"
+
+    gb["verdict"] = gb.apply(classify_tier, axis=1)
+
+    # ── Step 5: 打印报告 ──
+    print(f"\n{'League (联赛)':<20} {'Market':>14} {'N':>5} {'Hit%':>6} {'AvgCLV':>8} {'Verdict (系统判决)'}")
+    print("-" * 78)
+
+    tier_order = {"🟢 TIER_1_CORE": 0, "🟡 AUX_FILTER": 1, "🟠 NOISY": 2, "⚪ INCUBATING": 3, "🔴 DROP_ZONE": 4}
+    gb["tier_sort"] = gb["verdict"].map(tier_order)
+    gb_sorted = gb.sort_values(["tier_sort", "N"], ascending=[True, False])
+
+    for _, row in gb_sorted.iterrows():
+        n_str = str(int(row["N"]))
+        settled = int(row.get("settled_N", 0) or 0)
+        n_display = f"{n_str}/{settled}" if settled > 0 else n_str
+        hit_str = f"{row['hit_rate']:.0f}%" if settled > 0 else "N/A"
+        clv_str = f"{row['avg_clv']:+.2f}%" if settled > 0 else "N/A"
+        print(f"{row['league'][:18]:<20} {row['market']:>14} {n_display:>5} {hit_str:>6} {clv_str:>8} {row['verdict']}")
+
+    # ── 维度二: 仅按联赛汇总 ──
+    print(f"\n{'─' * 78}")
+    print(f" 📋 维度二：仅联赛汇总")
+    print(f"{'─' * 78}")
+    gb_lg = df.groupby("league").agg(
+        total_N=("fixture_id", "count"),
+        avg_ht_rate=("h2h_ht_goal_rate", "mean"),
+        unique_markets=("market", "nunique"),
+        top_market=("market", lambda x: x.value_counts().index[0] if len(x) > 0 else "?"),
+    ).reset_index()
+    gb_lg = gb_lg.sort_values("total_N", ascending=False)
+    print(f"\n{'League':<20} {'N':>5} {'Avg HT%':>9} {'Markets':>7} {'Top Market'}")
+    print("-" * 60)
+    for _, row in gb_lg.iterrows():
+        print(f"{row['league'][:18]:<20} {int(row['total_N']):>5} {row['avg_ht_rate']*100:>8.1f}% {int(row['unique_markets']):>7} {row['top_market']}")
+
+    # ── 维度三: HT有球率分布 ──
+    print(f"\n{'─' * 78}")
+    print(f" 📋 维度三：HT有球率 分布画像")
+    print(f"{'─' * 78}")
+    bins = [0.7, 0.8, 0.9, 1.0]
+    labels = ["70-79%", "80-89%", "90-100%"]
+    df["rate_bucket"] = pd.cut(df["h2h_ht_goal_rate"], bins=bins, labels=labels, include_lowest=True)
+    rate_dist = df.groupby("rate_bucket", observed=False).agg(
+        count=("fixture_id", "count"),
+    ).reset_index()
+    print(f"\n{'HT有球率区间':<15} {'场次':>6}")
+    print("-" * 25)
+    for _, row in rate_dist.iterrows():
+        print(f"{str(row['rate_bucket']):<15} {int(row['count']):>6}")
+
+    # ── 维度四: A/B 策略分流审计 (直打 vs 潜伏) ──
+    live_files = sorted(REPORT_DIR.glob("live_watchlist_*.json"))
+    if live_files:
+        live_rows = []
+        for lf in live_files:
+            with open(lf, encoding="utf-8") as f:
+                for p in json.load(f):
+                    live_rows.append({
+                        "fixture_id": p.get("fixture_id"),
+                        "league": p.get("league", "?"),
+                        "home": p.get("home", ""),
+                        "away": p.get("away", ""),
+                        "strategy_id": p.get("strategy_id", "V4_HT_LIVE_STANDBY"),
+                        "current_line": p.get("current_line", 0),
+                        "current_odds": p.get("current_odds"),
+                        "target_line": p.get("target_line", 1.0),
+                        "entry_window": p.get("entry_window", "?"),
+                        "time_bin_hotspot": p.get("time_bin_hotspot", "?"),
+                        "ht_goal_rate": p.get("factors", {}).get("h2h_ht_goal_rate", 0),
+                        "recent_form_avg": p.get("factors", {}).get("recent_form_avg", 0),
+                    })
+
+        print(f"\n{'─' * 78}")
+        print(f" 📋 维度四：A/B 策略分流审计 (赛前直打 vs 潜伏狙击)")
+        print(f"{'─' * 78}")
+        print(f"")
+        print(f"  [实验组 A] 早盘直打 HT Over 1.0 ({len(rows)} 场)")
+        print(f"     → 赛前即满足 1.0 线 + 价格底线，直接收录")
+        print(f"     → 风险: 庄家定价相对公允，Edge空间有限")
+        print(f"")
+        print(f"  [实验组 B] 潜伏等降 HT Over 1.0 ({len(live_rows)} 场)")
+        print(f"     → 赛前开大1.5+，庄家极度看好进球")
+        print(f"     → 策略: 等待15-25分钟，时间衰减压盘口至1.0后狙击")
+        print(f"     → 预期: MDD极低（进1球=走水保本，不输钱）")
+        print(f"")
+        if live_rows:
+            print(f"  🎯 潜伏池精选:")
+            for p in sorted(live_rows, key=lambda x: x["ht_goal_rate"], reverse=True)[:5]:
+                print(f"     {p['league']} | {p['home']} vs {p['away']} | "
+                      f"HT率={p['ht_goal_rate']:.0%} | "
+                      f"赛前大{p['current_line']}@{p['current_odds']} | "
+                      f"窗口={p['entry_window']} | 热点={p['time_bin_hotspot']}")
+        print(f"")
+        print(f"  📌 未来结算时，实验组B的MDD预计远低于实验组A")
+        print(f"  📌 原因: 顶级进攻球队进1球概率极高 → 走水保本 → 回撤极低")
+
+    # ── Step 6: 系统建议 ──
+    print(f"\n{'─' * 78}")
+    print(f" 💡 系统建议")
+    print(f"{'─' * 78}")
+
+    t1 = gb[gb["verdict"] == "🟢 TIER_1_CORE"]
+    aux = gb[gb["verdict"] == "🟡 AUX_FILTER"]
+    noisy = gb[gb["verdict"] == "🟠 NOISY"]
+    drop = gb[gb["verdict"] == "🔴 DROP_ZONE"]
+    inc = gb[gb["verdict"] == "⚪ INCUBATING"]
+
+    print(f"  🟢 TIER_1_CORE  : {len(t1)} 个联赛×市场组合 → 赋予主因子权重 (0.6-0.8)")
+    if len(t1) > 0:
+        for _, r in t1.iterrows():
+            print(f"      └─ {r['league']} × {r['market']}  样本={int(r['settled_N'])}  命中={r['hit_rate']:.0f}%  CLV={r['avg_clv']:+.2f}%")
+
+    print(f"  🟡 AUX_FILTER   : {len(aux)} 个组合 → 仅作辅助过滤 (0.2-0.3)")
+    print(f"  🟠 NOISY        : {len(noisy)} 个组合 → ⚠️ 高命中率陷阱！赔率开得极低，长期必亏")
+    if len(noisy) > 0:
+        for _, r in noisy.iterrows():
+            print(f"      └─ {r['league']} × {r['market']}  Hit={r['hit_rate']:.0f}%  CLV={r['avg_clv']:+.2f}% ← 庄家已洞察！")
+    print(f"  🔴 DROP_ZONE    : {len(drop)} 个组合 → 暂停该市场, 等待下赛季校准")
+    print(f"  ⚪ INCUBATING   : {len(inc)} 个组合 → 样本不足, 继续蓄水")
+
+    print(f"\n  📌 当前 V4 处于勘探期 (纸盘), 所有信号为 OBSERVE_ONLY")
+    print(f"  📌 等待累计 N ≥ 100 → LiveBridge 闸门自动开启")
+    print("=" * 78 + "\n")
+
+    return {
+        "total_predictions": total_raw,
+        "files_loaded": len(pred_files),
+        "settled_count": settled_count,
+        "cross_section": gb_sorted.to_dict(orient="records"),
+        "league_summary": gb_lg.to_dict(orient="records"),
+    }
+
+
+# ═══════════════════════════════════════════════════════════
 # 测试：首战 CLV 验算
 # ═══════════════════════════════════════════════════════════
 

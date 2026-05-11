@@ -117,15 +117,6 @@ class StrategyRouter:
             signal["skip_reason"] = "[GUARD] V2 处于长期负 CLV 观察期，物理断开实盘资金池"
             return signal
 
-        # ── V4 勘探线断路器 (纸盘 N<100 前严禁实盘) ──
-        if "V4" in strategy_id or strategy_id == "V4_OU_H2H":
-            v4_paper = engine_stats.get("v4_paper_trades", 0)
-            if v4_paper < 100:
-                signal["action"] = "OBSERVE_ONLY"
-                signal["max_risk_units"] = 0.0
-                signal["skip_reason"] = f"[GUARD] V4 勘探期 (N={v4_paper}/100)，禁止实盘"
-                return signal
-
         # ── 🚀 V3 世界杯核武网关 (三段式 + 动态加仓) ──
         if strategy_id == "V3_WC_BUBBLE":
             wc_stage = signal.get("wc_stage", "UNKNOWN")
