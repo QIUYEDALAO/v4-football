@@ -116,6 +116,26 @@ def _cov_rank(level: str) -> int:
     return 0
 
 
+def _has_ht_lines_075_10_125(row: dict) -> bool:
+    lines = row.get("ht_ou_lines") or []
+    got = set()
+    for item in lines:
+        v = item.get("line") if isinstance(item, dict) else None
+        try:
+            got.add(float(v))
+        except Exception:
+            continue
+    return all(x in got for x in (0.75, 1.0, 1.25))
+
+
+def _ht_live_score(row: dict) -> float:
+    scores = row.get("market_scores") or {}
+    try:
+        return float(scores.get("HT_LIVE_OVER") or 0.0)
+    except Exception:
+        return 0.0
+
+
 def _tier_cost(profile: dict, tier: str) -> int:
     t = tier_conf(profile, tier)
     if tier == "C_slice":
@@ -183,8 +203,11 @@ def build_tasks(
 ) -> dict:
     key = _date_key(date_str)
     profile = load_profile(profile_name)
-    watch = _load_json(REPORT_DIR / f"live_watchlist_{key}.json", [])
     scout = _load_json(REPORT_DIR / f"scout_v4_{key}.json", [])
+    watch = _load_json(REPORT_DIR / f"live_watchlist_{key}.json", [])
+    # Fallback: when live_watchlist is absent, use scout for strict extraction.
+    if not isinstance(watch, list) or not watch:
+        watch = scout if isinstance(scout, list) else []
     universe, universe_keys = _load_universe_window_auto(
         key,
         lookahead_days=lookahead_days,
@@ -195,12 +218,31 @@ def build_tasks(
     a_rows = []
     a_strict = []
     a_relaxed = []
+    strict_from_v1 = 0
+    strict_from_v2 = 0
     for x in watch:
         cov = str(((x.get("data_coverage") or {}).get("coverage_level") or "")).upper()
+        # v1 strict: old definition
         if x.get("market_focus") == "HT_LIVE_OVER" and cov in ("GOOD", "FULL"):
             row = {"a_source": "strict", **x}
             a_rows.append(row)
             a_strict.append(row)
+            strict_from_v1 += 1
+            continue
+
+        # v2 strict: for capture infrastructure, allow BASIC coverage when
+        # HT live score is strong and HT key lines are present.
+        ht_score = _ht_live_score(x)
+        if cov in ("BASIC", "GOOD", "FULL") and ht_score >= 55 and _has_ht_lines_075_10_125(x):
+            row = {
+                "a_source": "strict",
+                "strict_rule": "v2_ht_score_and_key_lines",
+                "strict_ht_score": ht_score,
+                **x,
+            }
+            a_rows.append(row)
+            a_strict.append(row)
+            strict_from_v2 += 1
 
     # Relaxed A channel for data collection: keep strict execution logic elsewhere.
     strict_ids = {int(x.get("fixture_id")) for x in a_rows if x.get("fixture_id")}
@@ -362,6 +404,8 @@ def build_tasks(
         "a_channel_breakdown": {
             "strict_candidates": len(a_strict),
             "relaxed_candidates": len(a_relaxed),
+            "strict_v1_candidates": strict_from_v1,
+            "strict_v2_candidates": strict_from_v2,
         },
         "generated_at": datetime.now().isoformat(),
         "lookahead_days": lookahead_days,
