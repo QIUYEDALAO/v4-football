@@ -55,6 +55,8 @@ def build_audit(date_str: str) -> dict:
 
     raw_by_fixture = defaultdict(int)
     live_ok_fixtures = set()
+    raw_ok_rows = 0
+    raw_ok_snapshots = set()
     for r in raw_rows:
         fid = r.get("fixture_id")
         if not fid:
@@ -62,13 +64,21 @@ def build_audit(date_str: str) -> dict:
         raw_by_fixture[int(fid)] += 1
         if r.get("capture_status") == "OK":
             live_ok_fixtures.add(int(fid))
+            raw_ok_rows += 1
+            snap = r.get("snapshot_utc")
+            if snap:
+                raw_ok_snapshots.add((int(fid), str(snap)))
 
     norm_by_fixture = defaultdict(int)
     lines_counter = Counter()
+    norm_snapshots = set()
     for r in norm_rows:
         fid = r.get("fixture_id")
         if fid:
             norm_by_fixture[int(fid)] += 1
+            snap = r.get("snapshot_utc")
+            if snap:
+                norm_snapshots.add((int(fid), str(snap)))
         try:
             lines_counter[str(float(r.get("line")))] += 1
         except Exception:
@@ -108,6 +118,9 @@ def build_audit(date_str: str) -> dict:
         "expected_snapshots_per_fixture_0_20": expected_per_fixture,
         "avg_snapshot_completeness_pct": avg_completeness,
         "fixtures_with_ht_ou_normalized": len([1 for fid in live_ok_fixtures if norm_by_fixture.get(fid, 0) > 0]),
+        "raw_ok_rows": raw_ok_rows,
+        "normalized_rows_per_ok_snapshot": round(len(norm_rows) / raw_ok_rows, 4) if raw_ok_rows else 0.0,
+        "ok_snapshot_with_normalized_pct": round(len(raw_ok_snapshots & norm_snapshots) / len(raw_ok_snapshots) * 100, 2) if raw_ok_snapshots else 0.0,
         "fixtures_without_ht_ou": only_ft_like,
         "normalized_rows": len(norm_rows),
         "missing_rows": len(miss_rows),

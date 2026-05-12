@@ -35,35 +35,28 @@ def repair_universe_gaps(date_str: str, profile: str = "may_sprint") -> dict:
     repaired = []
     skipped = []
 
-    # Best-effort repair: run v4 scan once for "today" when today's universe file is missing.
-    # v4_runner currently does not support --date backfill for historical keys.
-    today_key = datetime.now().strftime("%Y%m%d")
-    if today_key in missing:
-        has_key = bool(os.environ.get("APIFOOTBALL_KEY"))
-        if has_key:
-            cmd = [
-                "python3",
-                "engine/v4_runner.py",
-                "--scan-mode",
-                "fast",
-                "--lookahead-hours",
-                "24",
-                "--recent-prewarm",
-                "off",
-            ]
-            proc = subprocess.run(cmd, cwd=str(BASE_DIR), capture_output=True, text=True)
-            attempts.append({"key": today_key, "cmd": cmd, "returncode": proc.returncode})
-            if proc.returncode == 0:
-                repaired.append(today_key)
-            else:
-                skipped.append({"key": today_key, "reason": "runner_failed", "stderr_tail": proc.stderr[-300:]})
-        else:
-            skipped.append({"key": today_key, "reason": "missing_APIFOOTBALL_KEY"})
-
+    # Best-effort repair: backfill each missing day by v4_runner --date.
+    has_key = bool(os.environ.get("APIFOOTBALL_KEY"))
     for k in missing:
-        if k == today_key:
+        if not has_key:
+            skipped.append({"key": k, "reason": "missing_APIFOOTBALL_KEY"})
             continue
-        skipped.append({"key": k, "reason": "runner_no_date_backfill_support"})
+        cmd = [
+            "python3",
+            "engine/v4_runner.py",
+            "--date",
+            k,
+            "--scan-mode",
+            "fast",
+            "--recent-prewarm",
+            "off",
+        ]
+        proc = subprocess.run(cmd, cwd=str(BASE_DIR), capture_output=True, text=True)
+        attempts.append({"key": k, "cmd": cmd, "returncode": proc.returncode})
+        if proc.returncode == 0:
+            repaired.append(k)
+        else:
+            skipped.append({"key": k, "reason": "runner_failed", "stderr_tail": proc.stderr[-300:]})
 
     out = {
         "date": key,

@@ -46,6 +46,7 @@ except ModuleNotFoundError:
 REPORT_DIR = BASE_DIR / "data" / "daily_reports"
 REPORT_DIR.mkdir(parents=True, exist_ok=True)
 LEAGUE_TIER_REPORT = REPORT_DIR / "v4_league_replay_tiers.json"
+CANDIDATE_RULES_PATH = BASE_DIR / "config" / "v4_candidate_rules.yaml"
 
 # SSL
 ctx = ssl.create_default_context(cafile=certifi.where())
@@ -56,6 +57,13 @@ with open(BASE_DIR / "config" / "leagues_whitelist.json") as f:
 
 WL_SET = set(str(k) for k in LEAGUE_CN.keys())
 SCAN_PROFILE_STABLE_FULL_24H = "stable_full_24h"
+
+
+def _load_candidate_rules() -> dict:
+    if not CANDIDATE_RULES_PATH.exists():
+        return {}
+    with open(CANDIDATE_RULES_PATH, encoding="utf-8") as f:
+        return json.load(f)
 
 
 def _load_league_status_map() -> dict[str, dict]:
@@ -118,13 +126,17 @@ def _cached_api_client(base_client):
     return _get
 
 
-def fetch_today_fixtures(lookahead_hours: float | None = None, api_client=api_get):
+def fetch_today_fixtures(
+    lookahead_hours: float | None = None,
+    api_client=api_get,
+    scan_base_date: date | None = None,
+):
     """拉取白名单联赛 + 今日/明日未开赛比赛。
 
     lookahead_hours 仅作为可选收窄条件；默认不再硬卡 12h。
     V4 走地策略需要先建全天观察池，再在 T-30 / 开赛后做二次闸门。
     """
-    td = date.today()
+    td = scan_base_date or date.today()
     nd = td + timedelta(days=1)
     all_fixtures = []
 
@@ -135,14 +147,17 @@ def fetch_today_fixtures(lookahead_hours: float | None = None, api_client=api_ge
             lg_id = str(f["league"]["id"])
             if lg_id not in WL_SET: continue
             status = f["fixture"]["status"]["short"]
-            if status not in ("NS", "TBD"): continue
+            # Backfill mode (historical date) should keep all statuses,
+            # otherwise universe files for past days become empty.
+            if td >= date.today() and status not in ("NS", "TBD"):
+                continue
             kickoff = f["fixture"]["date"]
             try:
                 ko_dt = datetime.fromisoformat(kickoff.replace("Z", "+00:00"))
             except:
                 ko_dt = datetime.fromisoformat(kickoff.split("+")[0] + "+00:00")
 
-            if lookahead_hours is not None:
+            if lookahead_hours is not None and td >= date.today():
                 hours_to_kickoff = (ko_dt - datetime.now(ko_dt.tzinfo)).total_seconds() / 3600
                 if hours_to_kickoff < 0 or hours_to_kickoff > lookahead_hours:
                     continue
@@ -260,15 +275,26 @@ def run_v4_scan(
     lookahead_hours=None,
     scan_mode: str = "fast",
     recent_prewarm: str = "on",
+    scan_date: str | None = None,
 ):
     t0 = time.perf_counter()
     logger.info(f"🔭 V4 球探扫描 | {run_tag} | {datetime.now().strftime('%H:%M')}")
     api_client = _cached_api_client(api_get)
     lineup_analyzer = LineupStrengthAnalyzer(api_client) if with_lineups else None
 
-    fixtures = fetch_today_fixtures(lookahead_hours=lookahead_hours, api_client=api_client)
-    today_key = date.today().strftime("%Y%m%d")
+    if scan_date:
+        scan_dt = datetime.strptime(scan_date.replace("-", ""), "%Y%m%d").date()
+    else:
+        scan_dt = date.today()
+    fixtures = fetch_today_fixtures(
+        lookahead_hours=lookahead_hours,
+        api_client=api_client,
+        scan_base_date=scan_dt,
+    )
+    today_key = scan_dt.strftime("%Y%m%d")
     universe_out = universe_path(today_key)
+    if universe_out.exists():
+        universe_out.unlink()
     league_status_map = _load_league_status_map()
     window_label = f"{lookahead_hours:g}h内" if lookahead_hours is not None else "今日+明日全部"
     logger.info(f"📥 前置漏斗: {len(fixtures)} 场白名单 + {window_label}")
@@ -305,6 +331,18 @@ def run_v4_scan(
     # 只统计“预热之后扫描阶段”的缓存命中率，避免被预热miss污染
     reset_recent_profile_cache_stats()
 
+    rules = _load_candidate_rules()
+    strict_rule = (rules or {}).get("A_strict_v3_pullback") or {}
+    strict_min_cov = str(strict_rule.get("coverage_min", "BASIC")).upper()
+    strict_focus = str(strict_rule.get("market_focus", "HT_LIVE_OVER"))
+    strict_min_ht_score = float(strict_rule.get("min_ht_live_score", 55.0))
+    strict_min_prematch_line = float(strict_rule.get("min_prematch_ht_line", 1.25))
+    strict_pullback_fit = {str(x).upper() for x in (strict_rule.get("allowed_pullback_fit") or ["STRONG", "OK"])}
+    strict_early_only_required = bool(strict_rule.get("early_only_required", False))
+    strict_min_pressure = float(strict_rule.get("min_pressure_11_45", 0.5))
+
+    cov_rank = {"UNKNOWN": 1, "BASIC": 2, "GOOD": 3, "FULL": 4}
+
     for i, fx in enumerate(fixtures):
         if (i + 1) % 20 == 0:
             logger.info(f"  H2H 查询: {i+1}/{len(fixtures)}")
@@ -314,7 +352,7 @@ def run_v4_scan(
         if lg_status == "DISABLED":
             append_jsonl(universe_out, {
                 "fixture_id": fx["id"],
-                "date": date.today().isoformat(),
+                "date": scan_dt.isoformat(),
                 "league_id": fx["league"],
                 "league_name": fx["league_name"],
                 "country": None,
@@ -347,7 +385,7 @@ def run_v4_scan(
         if not result["valid"]:
             append_jsonl(universe_out, {
                 "fixture_id": fx["id"],
-                "date": date.today().isoformat(),
+                "date": scan_dt.isoformat(),
                 "league_id": fx["league"],
                 "league_name": fx["league_name"],
                 "country": None,
@@ -420,14 +458,26 @@ def run_v4_scan(
         best_bin = max(combined_bins, key=combined_bins.get) if combined_bins else "31_45"
 
         # ── 🎯 滚球雷达：探测高开比赛 (>=1.25 才是走地回调候选) ──
+        ht_score = float((result.get("market_scores") or {}).get("HT_LIVE_OVER") or 0.0)
+        pre_line_value = best_line["line_float"] if best_line else None
+        pullback_fit = str((factors.get("pullback_fit") or "WEAK")).upper()
+        early_only_flag = bool(factors.get("early_only_flag", False))
+        pressure_11_45 = float((factors.get("time_bins") or {}).get("11_45") or 0.0)
+        cov_level = str(data_coverage.get("coverage_level", "UNKNOWN")).upper()
+        cov_pass = cov_rank.get(cov_level, 0) >= cov_rank.get(strict_min_cov, 0)
+
         has_high_line = bool(
-            market_focus == "HT_LIVE_OVER"
-            and data_coverage.get("data_gate_action") == "ALLOW_V4_LIVE"
+            cov_pass
+            and ht_score >= strict_min_ht_score
+            and str(strict_focus) == "HT_LIVE_OVER"
+            and pre_line_value is not None
+            and pre_line_value >= strict_min_prematch_line
+            and pullback_fit in strict_pullback_fit
+            and early_only_flag == strict_early_only_required
+            and pressure_11_45 >= strict_min_pressure
             and league_adjustment.get("action") != "WATCH_ONLY"
             and motivation_gate.get("action") != "WATCH_ONLY"
             and schedule_pressure.get("action") != "WATCH_CAUTION"
-            and best_line
-            and best_line["line_float"] >= 1.25
         )
         if lg_status == "WATCH_ONLY":
             has_high_line = False
@@ -443,11 +493,11 @@ def run_v4_scan(
                 priority_boost = 2
             live_watchlist.append({
                 "fixture_id": fx["id"],
-                "date": date.today().isoformat(),
+                "date": scan_dt.isoformat(),
                 "home": fx["home"],
                 "away": fx["away"],
                 "league": fx["league_name"],
-                "market_focus": market_focus,
+                "market_focus": "HT_LIVE_OVER",
                 "market_type": result.get("market_type", "HT_OU"),
                 "market_scores": result.get("market_scores", {}),
                 "best_focus_by_score": result.get("best_focus_by_score"),
@@ -466,11 +516,20 @@ def run_v4_scan(
                 "lineup_action": lineup_gate.get("lineup_action") if lineup_gate else "NOT_CHECKED",
                 "league_replay_status": lg_status,
                 "priority_boost": priority_boost,
+                "strict_rule": "strict_v3_pullback",
+                "strict_diagnostics": {
+                    "ht_score": ht_score,
+                    "pre_line": pre_line_value,
+                    "pullback_fit": pullback_fit,
+                    "early_only_flag": early_only_flag,
+                    "pressure_11_45": pressure_11_45,
+                    "coverage_level": cov_level,
+                },
             })
 
         append_jsonl(universe_out, {
             "fixture_id": fx["id"],
-            "date": date.today().isoformat(),
+            "date": scan_dt.isoformat(),
             "league_id": fx["league"],
             "league_name": fx["league_name"],
             "country": None,
@@ -490,7 +549,8 @@ def run_v4_scan(
                 f"NO_CANDIDATE|h2h_valid={h2h_valid}|data_gate={data_coverage.get('data_gate_action')}|"
                 f"league={league_adjustment.get('action')}|motivation={motivation_gate.get('action')}|"
                 f"schedule={schedule_pressure.get('action')}|best_line={best_line['line_float'] if best_line else 'NONE'}|"
-                f"focus={market_focus}"
+                f"focus={market_focus}|ht_score={ht_score}|pullback_fit={pullback_fit}|"
+                f"early_only={early_only_flag}|pressure_11_45={pressure_11_45}"
             ),
             "league_replay_status": lg_status,
             "run_tag": run_tag,
@@ -500,7 +560,7 @@ def run_v4_scan(
         # ── 球探快照（纯数据，零交易字段）──
         scout_reports.append({
             "fixture_id": fx["id"],
-            "date": date.today().isoformat(),
+            "date": scan_dt.isoformat(),
             "kickoff": fx["kickoff"],
             "home": fx["home"],
             "away": fx["away"],
@@ -527,7 +587,7 @@ def run_v4_scan(
         stats["scouted"] += 1
 
     # 保存
-    today_str = date.today().strftime("%Y%m%d")
+    today_str = scan_dt.strftime("%Y%m%d")
     out_path = REPORT_DIR / f"scout_v4_{today_str}.json"
     with open(out_path, "w", encoding="utf-8") as f:
         json.dump(scout_reports, f, ensure_ascii=False, indent=2)
@@ -554,7 +614,7 @@ def run_v4_scan(
     elapsed = round(time.perf_counter() - t0, 2)
     api_stats = getattr(api_client, "_stats", {})
     perf = {
-        "date": date.today().isoformat(),
+        "date": scan_dt.isoformat(),
         "run_tag": run_tag,
         "scan_mode": scan_mode,
         "scan_profile": SCAN_PROFILE_STABLE_FULL_24H,
@@ -607,6 +667,11 @@ if __name__ == "__main__":
         default="off",
         help="recent画像是否在扫描前预热（40场规模默认off更快）",
     )
+    parser.add_argument(
+        "--date",
+        default=None,
+        help="可选：扫描基准日期 YYYYMMDD（用于回填universe文件）",
+    )
     args = parser.parse_args()
     run_v4_scan(
         run_tag=args.run_tag,
@@ -614,4 +679,5 @@ if __name__ == "__main__":
         lookahead_hours=args.lookahead_hours,
         scan_mode=args.scan_mode,
         recent_prewarm=args.recent_prewarm,
+        scan_date=args.date,
     )

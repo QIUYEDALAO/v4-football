@@ -4,7 +4,7 @@ import argparse
 import json
 import sys
 import time
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from typing import Callable, Optional
 
@@ -343,7 +343,11 @@ class V4LiveOddsCollector:
                     odd = _as_float(val.get("odd") or val.get("odds") or val.get("price"))
                     if odd is None:
                         continue
-                    line = extract_line(label) or extract_line(market_name)
+                    if bool(val.get("suspended")):
+                        continue
+                    # API-Football live odds provide canonical line in "handicap";
+                    # this is more reliable than parsing labels like "Over"/"Under".
+                    line = _as_float(val.get("handicap")) or extract_line(label) or extract_line(market_name)
                     if line is None:
                         continue
                     line = normalize_line(line)
@@ -643,9 +647,18 @@ class V4LiveOddsCollector:
             time.sleep(self.interval)
 
 
+def _session_date(now: datetime = None) -> str:
+    """午夜 00:00-05:59 回退到前一天，避免跨日时找不到任务文件。"""
+    if now is None:
+        now = datetime.now()
+    if now.hour < 6:
+        now = now - timedelta(days=1)
+    return now.strftime("%Y%m%d")
+
+
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument("--date", default=datetime.now().strftime("%Y%m%d"), help="YYYYMMDD 或 YYYY-MM-DD")
+    parser.add_argument("--date", default=_session_date(), help="YYYYMMDD 或 YYYY-MM-DD")
     parser.add_argument("--watch", action="store_true", help="循环采集")
     parser.add_argument("--once", action="store_true", help="只采集一轮")
     parser.add_argument("--interval", type=int, default=30, help="轮询间隔秒")

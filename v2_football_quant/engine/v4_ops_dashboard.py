@@ -43,9 +43,10 @@ def _date_key(date_str: str) -> str:
 def render(date_str: str) -> Path:
     key = _date_key(date_str)
     status = build_status(key)
-    month = key[:6]
+    resolved_key = str(status.get("resolved_date") or key)
+    month = resolved_key[:6]
     progress = build_progress(month)
-    alerts = run_alerts(key)
+    alerts = run_alerts(resolved_key)
     alert_rows = []
     for a in alerts.get("alerts", []):
         rule = str(a.get("rule") or "")
@@ -71,11 +72,15 @@ def render(date_str: str) -> Path:
 <html><head><meta charset='utf-8'><title>V4 运维监控塔 {key}</title>
 <style>body{{font-family:Arial;padding:20px}} .kpi{{display:inline-block;margin-right:20px}} table{{border-collapse:collapse}} td,th{{border:1px solid #ccc;padding:6px}}</style>
 </head><body>
-<h1>V4 运维监控塔 - {key}</h1>
+<h1>V4 运维监控塔 - {resolved_key}</h1>
+<div class='kpi'>请求日期: {status.get('requested_date')}</div>
+<div class='kpi'>回退启用: {status.get('date_fallback_used')}</div>
 <div class='kpi'>API用量: {status.get('api_used')}/{status.get('api_limit')}</div>
 <div class='kpi'>429错误: {status.get('http_429')}</div>
 <div class='kpi'>原始快照(Raw): {status.get('raw_rows')}</div>
 <div class='kpi'>标准化快照(Normalized): {status.get('normalized_rows')}</div>
+<div class='kpi'>OK快照命中率: {status.get('ok_snapshot_with_normalized_pct', 0)}%</div>
+<div class='kpi'>每个OK快照标准化行数: {status.get('normalized_rows_per_ok_snapshot', 0)}</div>
 <div class='kpi'>卡住任务(STALE): {status.get('stale_jobs')}</div>
 <div class='kpi'>重复启动拦截: {status.get('duplicate_cron_starts', 0)}</div>
 <h2>任务状态</h2>

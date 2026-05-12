@@ -57,6 +57,34 @@ def _read_jsonl(path: Path) -> list[dict]:
     return out
 
 
+def _available_keys() -> list[str]:
+    keys = set()
+    for p in MONITOR_DIR.glob("v4_capture_tasks_*.json"):
+        k = p.stem.split("_")[-1]
+        if len(k) == 8 and k.isdigit():
+            keys.add(k)
+    for p in SNAP_DIR.glob("*"):
+        if p.is_dir() and len(p.name) == 8 and p.name.isdigit():
+            keys.add(p.name)
+    return sorted(keys)
+
+
+def _resolve_key(requested_key: str) -> tuple[str, bool]:
+    # Midnight safety: if today's files are empty/not started, auto fall back
+    # to latest available date to keep ops dashboard useful.
+    task_exists = (MONITOR_DIR / f"v4_capture_tasks_{requested_key}.json").exists()
+    snap_exists = (SNAP_DIR / requested_key).exists()
+    if task_exists or snap_exists:
+        return requested_key, False
+    keys = _available_keys()
+    if not keys:
+        return requested_key, False
+    latest = keys[-1]
+    if latest != requested_key:
+        return latest, True
+    return requested_key, False
+
+
 def _load_stale_thresholds() -> dict:
     rules = _load_json(OPS_RULES_PATH, {})
     heartbeat = (rules or {}).get("heartbeat") or {}
@@ -81,6 +109,8 @@ def _sec_ago(ts: str) -> int | None:
 
 def build_status(date_str: str) -> dict:
     key = _date_key(date_str)
+    resolved_key, fallback_used = _resolve_key(key)
+    key = resolved_key
     task = _load_json(MONITOR_DIR / f"v4_capture_tasks_{key}.json", {})
     api = _load_json(BASE_DIR / "data" / "capture_audit" / f"v4_api_budget_audit_{key}.json", {})
     cap = _load_json(BASE_DIR / "data" / "capture_audit" / f"v4_live_capture_audit_{key}.json", {})
@@ -100,15 +130,45 @@ def build_status(date_str: str) -> dict:
             stale_count += 1
         jobs.append({"job_name": name, "status": status, "last_heartbeat_sec_ago": ago, "threshold_sec": threshold})
 
+    # Fallback: if heartbeat files are missing, use latest job_runs as status source.
+    if not jobs:
+        run_index = JOB_RUNS_DIR / f"job_runs_{key}.jsonl"
+        run_rows = _read_jsonl(run_index)
+        latest_by_job = {}
+        for r in run_rows:
+            name = str(r.get("job_name") or "")
+            if not name:
+                continue
+            ts = str(r.get("ended_at") or r.get("started_at") or "")
+            prev = latest_by_job.get(name)
+            if prev is None or ts > str(prev.get("ended_at") or prev.get("started_at") or ""):
+                latest_by_job[name] = r
+        for name, r in sorted(latest_by_job.items()):
+            status = str(r.get("status") or "UNKNOWN")
+            jobs.append({
+                "job_name": name,
+                "status": status,
+                "last_heartbeat_sec_ago": None,
+                "threshold_sec": stale_thresholds.get(name, 300),
+            })
+
     entered_monitoring = int(cap.get("entered_monitoring", 0) or 0)
     fixtures_with_ht_ou = int(cap.get("fixtures_with_ht_ou_normalized", 0) or 0)
     ht_ou_identified_pct = round(fixtures_with_ht_ou / entered_monitoring * 100, 2) if entered_monitoring else 0.0
 
     raw_rows_path = SNAP_DIR / key / "live_odds_raw.jsonl"
     raw_rows = _read_jsonl(raw_rows_path)
+    tier_map_by_fixture = {}
+    for t in task.get("tasks", []) if isinstance(task, dict) else []:
+        fid = int(t.get("fixture_id") or 0)
+        if fid:
+            tier_map_by_fixture[fid] = str(t.get("tier") or "")
     by_tier_rows = {"A_candidate": 0, "B_shadow": 0, "C_slice": 0}
     for r in raw_rows:
         tier = str(r.get("capture_tier") or "")
+        if not tier:
+            fid = int(r.get("fixture_id") or 0)
+            tier = tier_map_by_fixture.get(fid, "")
         if tier in by_tier_rows:
             by_tier_rows[tier] += 1
 
@@ -138,6 +198,9 @@ def build_status(date_str: str) -> dict:
 
     out = {
         "date": key,
+        "requested_date": _date_key(date_str),
+        "resolved_date": key,
+        "date_fallback_used": fallback_used,
         "generated_at": datetime.now().isoformat(),
         "jobs": jobs,
         "stale_jobs": stale_count,
@@ -156,6 +219,8 @@ def build_status(date_str: str) -> dict:
         "universe_files_missing": task.get("universe_files_missing", []),
         "excluded_reason_counts": task.get("excluded_reason_counts", {}),
         "ht_ou_identified_pct": ht_ou_identified_pct,
+        "normalized_rows_per_ok_snapshot": float(cap.get("normalized_rows_per_ok_snapshot", 0.0) or 0.0),
+        "ok_snapshot_with_normalized_pct": float(cap.get("ok_snapshot_with_normalized_pct", 0.0) or 0.0),
         "duplicate_cron_starts": duplicate_starts,
         "task_progress": task_progress,
     }
