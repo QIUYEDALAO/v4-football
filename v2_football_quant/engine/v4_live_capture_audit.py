@@ -10,6 +10,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 REPORT_DIR = BASE_DIR / "data" / "daily_reports"
 SNAP_DIR = BASE_DIR / "data" / "live_odds_snapshots"
 AUDIT_DIR = BASE_DIR / "data" / "capture_audit"
+MONITOR_DIR = BASE_DIR / "data" / "live_monitor"
 
 
 def _date_key(date_str: str) -> str:
@@ -43,6 +44,9 @@ def build_audit(date_str: str) -> dict:
     key = _date_key(date_str)
     watchlist = _load_json(REPORT_DIR / f"live_watchlist_{key}.json", [])
     watch_ids = {int(x.get("fixture_id")) for x in watchlist if x.get("fixture_id")}
+    task_file = MONITOR_DIR / f"v4_capture_tasks_{key}.json"
+    tasks_obj = _load_json(task_file, {})
+    tasks = tasks_obj.get("tasks", []) if isinstance(tasks_obj, dict) else []
 
     day_dir = SNAP_DIR / key
     raw_rows = _load_jsonl(day_dir / "live_odds_raw.jsonl")
@@ -88,6 +92,12 @@ def build_audit(date_str: str) -> dict:
         if norm_by_fixture.get(fid, 0) == 0 and raw_by_fixture.get(fid, 0) > 0:
             only_ft_like += 1
 
+    a_tasks = [x for x in tasks if x.get("tier") == "A_candidate"]
+    a_source_counts = Counter(str(x.get("a_source") or "unknown") for x in a_tasks)
+    a_fixture_ids = {int(x.get("fixture_id")) for x in a_tasks if x.get("fixture_id")}
+    a_live_covered = len(a_fixture_ids & live_ok_fixtures)
+    a_coverage_pct = round(a_live_covered / len(a_fixture_ids) * 100, 2) if a_fixture_ids else 0.0
+
     out = {
         "date": key,
         "generated_at": datetime.now().isoformat(),
@@ -103,6 +113,14 @@ def build_audit(date_str: str) -> dict:
         "missing_rows": len(miss_rows),
         "line_distribution": dict(lines_counter),
         "missing_reason_top": miss_counter.most_common(10),
+        "a_candidate_stats": {
+            "a_task_count": len(a_tasks),
+            "a_source_breakdown": dict(a_source_counts),
+            "a_fixture_count": len(a_fixture_ids),
+            "a_live_covered": a_live_covered,
+            "a_live_coverage_pct": a_coverage_pct,
+        },
+        "task_file": str(task_file),
         "raw_path": str(day_dir / "live_odds_raw.jsonl"),
         "normalized_path": str(day_dir / "live_odds_normalized.jsonl"),
         "missing_path": str(day_dir / "live_market_missing.jsonl"),

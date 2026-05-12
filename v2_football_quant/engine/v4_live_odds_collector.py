@@ -152,6 +152,7 @@ class V4LiveOddsCollector:
         self.exec_path = EXEC_DIR / f"live_execution_sim_{self.date_key}.jsonl"
         self.api_call_log_path = EXEC_DIR / f"api_call_log_{self.date_key}.jsonl"
         self.state_path = MONITOR_DIR / f"v4_capture_runtime_state_{self.date_key}.json"
+        self.error_path = self.day_dir / "live_capture_errors.jsonl"
 
     def load_watchlist(self) -> list[dict]:
         if self.task_file:
@@ -194,11 +195,28 @@ class V4LiveOddsCollector:
             "http_status": http_status,
         })
 
+    def _log_capture_error(self, fixture_id: int, endpoint_type: str, error_reason: str, retry_count: int) -> None:
+        _append_jsonl(self.error_path, {
+            "ts": datetime.now(timezone.utc).isoformat(),
+            "date": self.date_key,
+            "fixture_id": fixture_id,
+            "capture_tier": self.capture_tier,
+            "endpoint_type": endpoint_type,
+            "error_reason": error_reason,
+            "retry_count": retry_count,
+        })
+
     def _api_call(self, endpoint: str, endpoint_type: str) -> Optional[dict]:
-        resp = self.api_get(endpoint)
-        ok = isinstance(resp, dict)
-        self._log_api_call(endpoint, endpoint_type, ok=ok)
-        return resp
+        max_retries = 2
+        for i in range(max_retries + 1):
+            resp = self.api_get(endpoint)
+            ok = isinstance(resp, dict)
+            self._log_api_call(endpoint, endpoint_type, ok=ok)
+            if ok:
+                return resp
+            if i < max_retries:
+                time.sleep(0.2 * (i + 1))
+        return None
 
     def fetch_fixture_state(self, fixture_id: int) -> dict:
         item = api_fetch_fixture_state(fixture_id, lambda ep: self._api_call(ep, "fixture_state"))
@@ -437,11 +455,28 @@ class V4LiveOddsCollector:
         captured = 0
         missing = 0
         skipped = 0
+        paused = 0
         now_utc = datetime.now(timezone.utc).replace(microsecond=0).isoformat().replace("+00:00", "Z")
 
         for fx in fixtures:
             fixture_id = int(fx.get("fixture_id"))
             fstate = runtime["fixtures"].setdefault(str(fixture_id), {})
+            consecutive_failures = int(fstate.get("consecutive_failures", 0))
+            if consecutive_failures >= 5:
+                paused += 1
+                raw_row = {
+                    "snapshot_utc": now_utc,
+                    "fixture_id": fixture_id,
+                    "capture_status": "PAUSED",
+                    "skip_reason": "CONSECUTIVE_FAILURES",
+                    "state": fstate.get("last_state") or {"fixture_id": fixture_id, "state": "UNKNOWN"},
+                    "statistics": fstate.get("last_stats") or {},
+                    "events": fstate.get("last_events") or {},
+                    "raw_odds": {},
+                }
+                if self.raw_save:
+                    self.write_raw_snapshot(raw_row)
+                continue
             now_ts = int(time.time())
 
             need_state = now_ts - int(fstate.get("state_ts", 0)) >= (60 if effective_tier == "B_shadow_degraded" else self.state_interval_sec)
@@ -460,6 +495,19 @@ class V4LiveOddsCollector:
                     allow = False
                     reason = "NOT_SLICE_MINUTE"
             raw_odds = self.fetch_live_odds(fixture_id) if (allow and need_odds) else {}
+            api_failed = False
+            if need_state and state.get("state") == "API_EMPTY":
+                api_failed = True
+                self._log_capture_error(fixture_id, "fixture_state", "API_EMPTY", retry_count=2)
+            if need_stats and not stats:
+                api_failed = True
+                self._log_capture_error(fixture_id, "statistics", "API_EMPTY", retry_count=2)
+            if need_events and not events:
+                api_failed = True
+                self._log_capture_error(fixture_id, "events", "API_EMPTY", retry_count=2)
+            if allow and need_odds and not raw_odds:
+                api_failed = True
+                self._log_capture_error(fixture_id, "odds_live", "API_EMPTY", retry_count=2)
             raw_row = {
                 "snapshot_utc": now_utc,
                 "fixture_id": fixture_id,
@@ -475,6 +523,8 @@ class V4LiveOddsCollector:
 
             if not allow:
                 skipped += 1
+                if api_failed:
+                    fstate["consecutive_failures"] = consecutive_failures + 1
                 continue
 
             normalized_rows, misses = self.normalize_ht_ou_market(raw_odds)
@@ -545,6 +595,11 @@ class V4LiveOddsCollector:
                 }
                 self.write_missing_market(miss_row)
 
+            if api_failed:
+                fstate["consecutive_failures"] = consecutive_failures + 1
+            else:
+                fstate["consecutive_failures"] = 0
+
             time.sleep(0.05)
             if need_state:
                 fstate["state_ts"] = now_ts
@@ -567,9 +622,11 @@ class V4LiveOddsCollector:
             "captured_rows": captured,
             "missing_rows": missing,
             "skipped_fixtures": skipped,
+            "paused_fixtures": paused,
             "raw_path": str(self.raw_path),
             "normalized_path": str(self.norm_path),
             "missing_path": str(self.missing_path),
+            "error_path": str(self.error_path),
             "execution_path": str(self.exec_path),
             "api_call_log_path": str(self.api_call_log_path),
             "budget_used": self._budget_usage(),

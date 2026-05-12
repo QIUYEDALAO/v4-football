@@ -5,6 +5,8 @@ import json
 from collections import Counter, defaultdict
 from datetime import datetime
 from pathlib import Path
+from urllib.parse import parse_qs, urlsplit
+from typing import Optional
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 EXEC_DIR = BASE_DIR / "data" / "execution"
@@ -39,6 +41,22 @@ def _load_jsonl(path: Path) -> list[dict]:
     return rows
 
 
+def _extract_fixture_id(endpoint: str) -> Optional[int]:
+    text = str(endpoint or "")
+    if not text:
+        return None
+    try:
+        query = text.split("?", 1)[1] if "?" in text else ""
+        qs = parse_qs(query)
+        for key in ("fixture", "id"):
+            vals = qs.get(key)
+            if vals and vals[0]:
+                return int(vals[0])
+    except Exception:
+        return None
+    return None
+
+
 def build_audit(date_str: str, hard_limit: int = 75000) -> dict:
     key = _date_key(date_str)
     log_path = EXEC_DIR / f"api_call_log_{key}.jsonl"
@@ -48,12 +66,30 @@ def build_audit(date_str: str, hard_limit: int = 75000) -> dict:
     by_tier = Counter()
     by_ep = Counter()
     by_minute = defaultdict(int)
+    a_source_calls = Counter()
+    a_source_by_endpoint = defaultdict(Counter)
     fail = 0
     e429 = 0
+    tasks = task_meta.get("tasks", []) if isinstance(task_meta, dict) else []
+    a_source_map = {}
+    for t in tasks:
+        if t.get("tier") != "A_candidate":
+            continue
+        try:
+            fid = int(t.get("fixture_id"))
+        except Exception:
+            continue
+        a_source_map[fid] = str(t.get("a_source") or "unknown")
 
     for r in rows:
         by_tier[str(r.get("capture_tier") or "UNKNOWN")] += 1
         by_ep[str(r.get("endpoint_type") or "unknown")] += 1
+        if str(r.get("capture_tier")) == "A_candidate":
+            fid = _extract_fixture_id(str(r.get("endpoint") or ""))
+            src = a_source_map.get(fid, "unknown")
+            ep = str(r.get("endpoint_type") or "unknown")
+            a_source_calls[src] += 1
+            a_source_by_endpoint[src][ep] += 1
         ts = str(r.get("ts") or "")
         mm = ts[:16]
         by_minute[mm] += 1
@@ -75,6 +111,8 @@ def build_audit(date_str: str, hard_limit: int = 75000) -> dict:
         "peak_requests_per_minute": peak_per_min,
         "calls_by_tier": dict(by_tier),
         "calls_by_endpoint": dict(by_ep),
+        "a_source_calls": dict(a_source_calls),
+        "a_source_calls_by_endpoint": {k: dict(v) for k, v in a_source_by_endpoint.items()},
         "failed_requests": fail,
         "http_429_count": e429,
         "scheduler_tier_counts": (task_meta.get("tier_counts") or {}),
