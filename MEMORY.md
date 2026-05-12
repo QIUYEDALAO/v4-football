@@ -10,7 +10,34 @@
 - **ev_vs_close**: 最严苛标准（等同旧True CLV）
 - 先看 raw_clv，再去抠 EV 细节。拜仁实测 raw=-0.31%（几乎持平），之前的 -7.57% 恐慌一半是抽水幻觉。
 
-## ⚽ V2 量化系统（当前主力）
+## 🔭 V4 走地系统（2026-05-13 凌晨上线）
+
+### 定位
+- 纯球探情报系统 → 赛中走地回调策略 `V4_HT_LIVE_PULLBACK`
+- 不与 V2 交易耦合，独立数据采集+独立仪表盘
+- 65 模块 / ~17K 行 Python，全流水线闭环
+
+### 核心策略
+- **不入场规则**: 不在赛前预测进球，在赛中等待盘口犯错
+- **三层采集**: A_candidate (入池候选) / B_shadow (选择偏差) / C_slice (衰减校准)
+- **EV 决策链**: hazard_model → line_decay → asian_ev → execution_cost → risk_guard
+- **进场窗口**: 0-10分钟 0-0 → 等盘口降到大1.0/0.75 → PAPER_BUY_NOW
+- **三方向隔离**: HT_LIVE_OVER / SECOND_HALF_OVER / FULLTIME_OVER 互不污染
+
+### 关键设计决策
+- strict_v3_pullback: 赛前只要求大1.25线，0.75/1.0/1.25 线型是赛中触发条件
+- SH_NOISY guard: 下半场只看 EV 不看命中率（防高命中低赔率陷阱）
+- B_shadow 分层: near_miss + random_baseline
+- 仪表盘默认 ops 窗口 (12:00→次日12:00) + 时间排序
+- 天气模块已就位 (OpenWeatherMap 50城坐标)
+- Cron: 17 个作业，采集每 2 分钟，走地监控每 10 分钟
+
+### 当前状态 (5/13)
+- Universe: 10 天历史 (B_shadow 池来源)
+- 5/13 凌晨: 7,582 API 调用 (10%), 0 次 429
+- 标准化: 495 行, 全量线型 0.5-1.75
+- 半场入场: 0 条 (走地监控运行中，等待 HT_LIVE_OVER 候选进入窗口)
+- 专家建议: 不要推翻 HT 策略，先补 B_shadow + 诊断
 
 ### 项目定位
 - 数据源：API-Football Pro (Key: e5e315b1f9ba1ba51dc2124b35f07a01)

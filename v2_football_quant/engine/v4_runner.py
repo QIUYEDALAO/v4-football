@@ -147,10 +147,20 @@ def fetch_today_fixtures(
             lg_id = str(f["league"]["id"])
             if lg_id not in WL_SET: continue
             status = f["fixture"]["status"]["short"]
-            # Backfill mode (historical date) should keep all statuses,
-            # otherwise universe files for past days become empty.
-            if td >= date.today() and status not in ("NS", "TBD"):
-                continue
+            # Backfill mode (historical date) should keep all statuses.
+            # Real-time mode:
+            # - base day(td): keep not-finished matches so started fixtures stay visible on dashboard.
+            # - next day(nd): keep pre-match only.
+            if td >= date.today():
+                is_base_day = (day == td.strftime("%Y-%m-%d"))
+                terminal_status = {"FT", "AET", "PEN", "CANC", "ABD", "AWD", "WO", "PST"}
+                prematch_status = {"NS", "TBD"}
+                if is_base_day:
+                    if status in terminal_status:
+                        continue
+                else:
+                    if status not in prematch_status:
+                        continue
             kickoff = f["fixture"]["date"]
             try:
                 ko_dt = datetime.fromisoformat(kickoff.replace("Z", "+00:00"))

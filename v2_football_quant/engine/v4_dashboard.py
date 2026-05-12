@@ -15,8 +15,9 @@ import html
 import json
 import subprocess
 import sys
-from datetime import datetime
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
+from zoneinfo import ZoneInfo
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(BASE_DIR))
@@ -54,9 +55,30 @@ MARKET_LABELS = {
     "FULLTIME_OVER": "全场大球参考",
 }
 
+LOCAL_TZ = ZoneInfo("Asia/Shanghai")
+UTC = timezone.utc
+
 
 def _date_key(date_str: str) -> str:
     return date_str.replace("-", "")
+
+
+def _ops_window(date_key: str) -> tuple[datetime, datetime] | None:
+    """
+    运营日窗口：
+    D日 12:00:00（含） -> D+1日 12:00:00（不含）
+    例如：20260514 表示 05-14 12:00 到 05-15 11:59:59。
+    """
+    if not date_key or len(date_key) != 8:
+        return None
+    try:
+        start = datetime.strptime(date_key, "%Y%m%d").replace(
+            hour=12, minute=0, second=0, microsecond=0, tzinfo=LOCAL_TZ
+        )
+        end = start + timedelta(days=1)
+        return start, end
+    except Exception:
+        return None
 
 
 def _load_json(path: Path, default):
@@ -88,22 +110,65 @@ def _over_odds_float(line_row: dict) -> float:
     return _float(line_row.get("over"), 0.0)
 
 
-def _ko_time(kickoff: str) -> str:
+def _parse_kickoff_local(kickoff: str) -> datetime | None:
     if not kickoff:
-        return ""
+        return None
     try:
-        return datetime.fromisoformat(kickoff.replace("Z", "+00:00")).strftime("%H:%M")
+        dt = datetime.fromisoformat(kickoff.replace("Z", "+00:00"))
+        if dt.tzinfo is None:
+            dt = dt.replace(tzinfo=UTC)
+        return dt.astimezone(LOCAL_TZ)
     except Exception:
-        return kickoff[-8:-3] if len(kickoff) >= 5 else kickoff
+        return None
+
+
+def _ko_time(kickoff: str) -> str:
+    dt = _parse_kickoff_local(kickoff)
+    if dt is not None:
+        return dt.strftime("%H:%M")
+    return kickoff[-8:-3] if len(kickoff) >= 5 else kickoff
+
+
+def _ko_time_label(kickoff: str) -> str:
+    dt = _parse_kickoff_local(kickoff)
+    if dt is not None:
+        return dt.strftime("%m-%d %H:%M")
+    return kickoff or ""
+
+
+def _ko_local_date_key(kickoff: str) -> str:
+    dt = _parse_kickoff_local(kickoff)
+    if dt is not None:
+        return dt.strftime("%Y%m%d")
+    return ""
+
+
+def _in_session_window(kickoff: str, date_key: str) -> bool:
+    return True  # 不做日期过滤，全部显示
+
+
+def _in_ops_window(kickoff: str, date_key: str) -> bool:
+    """
+    可选运营日窗口：
+    D日12:00 -> D+1日11:59。
+    """
+    if not date_key:
+        return True
+    ko = _parse_kickoff_local(kickoff)
+    if ko is None:
+        return True
+    window = _ops_window(date_key)
+    if window is None:
+        return True
+    start, end = window
+    return start <= ko < end
 
 
 def _kickoff_sort_value(kickoff: str) -> int:
-    if not kickoff:
+    ko = _parse_kickoff_local(kickoff)
+    if ko is None:
         return 32503680000  # year 3000, put unknown kickoff at end
-    try:
-        return int(datetime.fromisoformat(kickoff.replace("Z", "+00:00")).timestamp())
-    except Exception:
-        return 32503680000
+    return int(ko.timestamp())
 
 
 def calculate_hotness(factors: dict) -> float:
@@ -203,13 +268,28 @@ def _lineup_text(lineup_gate: dict | None) -> str:
     return f"{action} · {reason}{suffix}"
 
 
-def _enrich_records(scout: list[dict], watchlist: list[dict], live_status: dict | list | None = None, entries: list[dict] | None = None) -> list[dict]:
+def _enrich_records(
+    scout: list[dict],
+    watchlist: list[dict],
+    live_status: dict | list | None = None,
+    entries: list[dict] | None = None,
+    date_key: str = "",
+    window_mode: str = "natural",
+) -> list[dict]:
     watch_by_id = {str(x.get("fixture_id")): x for x in watchlist}
     status_rows = live_status.get("statuses", []) if isinstance(live_status, dict) else (live_status or [])
     status_by_id = {str(x.get("fixture_id")): x for x in status_rows}
     entry_by_id = {str(x.get("fixture_id")): x for x in (entries or [])}
     rows = []
     for rec in scout:
+        ko = str(rec.get("kickoff", "") or "")
+        if date_key:
+            if window_mode == "ops":
+                ok = _in_ops_window(ko, date_key)
+            else:
+                ok = _in_session_window(ko, date_key)
+            if not ok:
+                continue
         f = rec.get("factors", {}) or {}
         lines = rec.get("ht_ou_lines", []) or []
         score = calculate_hotness(f)
@@ -288,6 +368,7 @@ def _rows_json(rows: list[dict]) -> str:
             "awayEn": away,
             "league": r.get("league"),
             "time": _ko_time(r.get("kickoff", "")),
+            "timeLabel": _ko_time_label(r.get("kickoff", "")),
             "kickoffSort": _kickoff_sort_value(r.get("kickoff", "")),
             "hotness": r.get("hotness_score"),
             "tier": r.get("tier"),
@@ -408,7 +489,7 @@ def _rows_json(rows: list[dict]) -> str:
     return json.dumps(compact, ensure_ascii=False)
 
 
-def render_dashboard(date_str: str) -> Path:
+def render_dashboard(date_str: str, window_mode: str = "ops") -> Path:
     key = _date_key(date_str)
     scout_path = REPORT_DIR / f"scout_v4_{key}.json"
     scout = _load_json(scout_path, [])
@@ -423,6 +504,8 @@ def render_dashboard(date_str: str) -> Path:
         watchlist if isinstance(watchlist, list) else [],
         live_status,
         live_entries if isinstance(live_entries, list) else [],
+        key,
+        window_mode,
     )
 
     counts = {"S": 0, "A": 0, "B": 0}
@@ -443,6 +526,7 @@ def render_dashboard(date_str: str) -> Path:
 
     data_json = _rows_json(rows)
     title = f"V4 作战仪表盘 | {date_str}"
+    mode_text = "北京时间自然日 00:00-23:59" if window_mode != "ops" else "运营日 12:00-次日11:59"
     html_doc = f"""<!doctype html>
 <html lang="zh-CN">
 <head>
@@ -525,7 +609,7 @@ def render_dashboard(date_str: str) -> Path:
         <span class="pill"><b id="visibleCount">0</b> / {len(rows)} 场</span>
         <span class="pill">滚球雷达 {len(watchlist)} 场</span>
         <span class="pill">S:{counts["S"]} A:{counts["A"]} B:{counts["B"]}</span>
-        <span class="pill">默认显示：全部比赛</span>
+        <span class="pill">时间口径：{html.escape(mode_text)}</span>
       </div>
       <div class="health-panel {health_class}">
         <div class="health-head">
@@ -587,7 +671,7 @@ def render_dashboard(date_str: str) -> Path:
         <div class="card-top">
           <div>
             <div class="match">${{row.home}} vs ${{row.away}}</div>
-            <div class="meta">${{row.league}} · ${{row.time || '--:--'}} · #${{row.fixture_id}} · ${{row.liveMinute || '-'}}' ${{row.liveScore || '-'}}</div>
+            <div class="meta">${{row.league}} · ${{row.timeLabel || row.time || '--:--'}} · #${{row.fixture_id}} · ${{row.liveMinute || '-'}}' ${{row.liveScore || '-'}}</div>
           </div>
           <div class="score">${{row.hotness}}<small>${{t}}</small></div>
         </div>
@@ -642,7 +726,12 @@ def render_dashboard(date_str: str) -> Path:
     function filtered() {{
       let out = rows.slice();
       out.sort((a,b) => {{
-        if (state.sort === 'time') return Number(a.kickoffSort || 0) - Number(b.kickoffSort || 0);
+        if (state.sort === 'time') {{
+          const ka = Number(a.kickoffSort || 32503680000);
+          const kb = Number(b.kickoffSort || 32503680000);
+          if (ka !== kb) return ka - kb;
+          return Number(a.fixture_id || 0) - Number(b.fixture_id || 0);
+        }}
         return Number(b.hotness) - Number(a.hotness);
       }});
       return out;
@@ -650,7 +739,7 @@ def render_dashboard(date_str: str) -> Path:
     function listRow(row) {{
       const action = actionOf(row);
       return `<div class="list-row">
-        <div class="list-time">${{row.time || '--:--'}}</div>
+        <div class="list-time">${{row.timeLabel || row.time || '--:--'}}</div>
         <div>
           <div class="list-match">${{row.home}} vs ${{row.away}}</div>
           <div class="list-league">${{row.league}} · #${{row.fixture_id}}</div>
@@ -677,8 +766,12 @@ def render_dashboard(date_str: str) -> Path:
 </html>
 """
     DASHBOARD_DIR.mkdir(parents=True, exist_ok=True)
-    out_path = DASHBOARD_DIR / f"v4_dashboard_{key}.html"
+    suffix = "_ops" if window_mode == "ops" else ""
+    out_path = DASHBOARD_DIR / f"v4_dashboard_{key}{suffix}.html"
     with open(out_path, "w", encoding="utf-8") as f:
+        f.write(html_doc)
+    latest_path = DASHBOARD_DIR / "v4_dashboard_latest.html"
+    with open(latest_path, "w", encoding="utf-8") as f:
         f.write(html_doc)
     return out_path
 
@@ -686,9 +779,10 @@ def render_dashboard(date_str: str) -> Path:
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--date", required=True, help="YYYYMMDD 或 YYYY-MM-DD")
+    parser.add_argument("--window-mode", choices=["natural", "ops"], default="natural", help="日期窗口：natural=自然日(默认)，ops=运营日(12:00-次日11:59)")
     parser.add_argument("--open", action="store_true", help="生成后用系统浏览器打开")
     args = parser.parse_args()
-    out_path = render_dashboard(args.date)
+    out_path = render_dashboard(args.date, args.window_mode)
     print(f"V4 dashboard saved: {out_path}")
     if args.open:
         subprocess.run(["open", str(out_path)], check=False)
