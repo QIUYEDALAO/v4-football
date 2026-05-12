@@ -140,7 +140,7 @@ risk_guard.py            → 校验风险（联赛COLD/赛程压力/赛季末中
 | `v4_sh_strategy_eval.py` | SH独立评估 |
 | `v4_calibration_report.py` | EV分桶校准报告 |
 
-### 3.5 P0 数据闭环（7个）
+### 3.5 P0 数据闭环（8个）
 
 | 模块/目录 | 功能 |
 |:---|:---|
@@ -166,7 +166,7 @@ risk_guard.py            → 校验风险（联赛COLD/赛程压力/赛季末中
 
 ### 3.7 基础与工具（25+个）
 
-`bankroll.py`, `clv.py`, `daily_runner.py`, `strategy_router.py`, `scoring_engine_v0.py`, `aligner.py`, `fetcher.py`, `net_utils.py`, `team_cn_map.py`, `context_enrichment.py`, `context_marginal_report.py`, `fd_history_to_candidates.py`, `league_hierarchical_threshold.py`, `league_replay_tiers.py`, `live_bridge.py`, `risk_guard.py`, `strategy_candidates_tracker.py`, `v4_versioning.py`, `wc_model.py`, 等
+`bankroll.py`, `clv.py`, `daily_runner.py`, `strategy_router.py`, `scoring_engine_v0.py`, `aligner.py`, `fetcher.py`, `net_utils.py`, `team_cn_map.py`, `context_enrichment.py`, `context_marginal_report.py`, `fd_history_to_candidates.py`, `league_hierarchical_threshold.py`, `league_replay_tiers.py`, `live_bridge.py`, `strategy_candidates_tracker.py`, `v4_versioning.py`, `wc_model.py`, 等
 
 ---
 
@@ -193,7 +193,7 @@ risk_guard.py            → 校验风险（联赛COLD/赛程压力/赛季末中
 | 战意 | 保级/争冠/欧战/升级/中游安全区 |
 | 赛程压力 | 未来7/10天比赛密度 |
 | 首发阵容 | 攻击/中场/防守核心完整度 |
-| 赔率 | 赛前Pinnacle半场大小球全量线+赛中走地快照 |
+| 赔率 | 赛前主流公司（含Pinnacle可用时）半场大小球线 + 赛中走地快照（以 API-Football bookmaker 覆盖为准） |
 | 赛中节奏 | 射门/射正/角球/危险进攻/红牌 |
 
 ### 4.3 关键规则
@@ -218,8 +218,12 @@ risk_guard.py            → 校验风险（联赛COLD/赛程压力/赛季末中
 ### 5.2 候选池门槛
 
 - HT走地评分 ≥ 50，且为最强方向
+- 近期HT攻防动能 ≥ 70%
 - 半场大球盘口 ≥ 大1.25
 - API数据覆盖 ≥ GOOD
+- 回调适配 ∈ {STRONG, OK}
+- `early_only_flag = false`
+- 11-45分钟压力 ≥ 阈值
 
 ### 5.3 EV 联合决策链
 
@@ -258,7 +262,26 @@ risk_guard.py            → 校验风险（联赛COLD/赛程压力/赛季末中
 | **SKIP** | 不满足进场条件 |
 | **RISK_BLOCKED** | 风险守卫拦截 |
 
-### 5.5 legacy rule 边界
+### 5.5 动作优先级（强约束）
+
+1. 已进球 / 红牌 / 比赛异常 → `SKIP`
+2. `risk_guard = BLOCK` → `RISK_BLOCKED`
+3. 当前盘口未达到目标线 → `WAIT_LINE`
+4. 节奏数据不足或偏弱 → `WAIT_TEMPO`
+5. `EV_net >= min_ev_threshold` 且执行质量合格 → `PAPER_BUY_NOW`
+6. 盘口/节奏合格但 EV 不足 → `PAPER_ONLY`
+7. 15分钟窗口关闭 → `SKIP_WINDOW_CLOSED`
+
+### 5.6 默认 EV 阈值（初始）
+
+- A+：`EV_net ≥ 3.0%`，且 `P(EV_net > 0) ≥ 70%`
+- A：`EV_net ≥ 1.5%`，且 `P(EV_net > 0) ≥ 65%`
+- B：`0 < EV_net < 1.5%`，仅 `PAPER_ONLY`
+- C/D：`SKIP` 或 `WATCH`
+
+说明：`min_ev_threshold` 后续由 `league_hierarchical_threshold.py` 结合联赛样本量、执行质量、校准误差动态调整。
+
+### 5.7 legacy rule 边界
 
 旧规则引擎（"盘口降到大1.0+水位合理+节奏OK→BUY_NOW"）仅作为**基线对照组**保存在 `data/shadow_backtest/` 中，不参与最终入场决策。v3.2.1 只以 EV_net > min_ev_threshold 作为唯一入场标准。
 
@@ -283,16 +306,59 @@ risk_guard.py            → 校验风险（联赛COLD/赛程压力/赛季末中
 | 有效评估 | 300场 | 判断策略正期望 |
 | 分联赛优化 | 500+场 | 独立阈值调整 |
 
-### 6.3 Kill Criteria
+### 6.3 Kill Criteria（机器可读）
 
 ```yaml
-# config/kill_criteria.yaml
-triggers:
-  - sharpe_ratio < -1.0 over last_50_trades
-  - consecutive_losses >= 8
-  - ev_net_mean < -0.03 over last_100_trades
-  - walk_forward_calibration_fails >= 2
+strategy_kill:
+  sharpe_ratio:
+    window_trades: 50
+    threshold: -1.0
+    action: pause
+  consecutive_losses:
+    threshold: 8
+    action: pause_today
+  ev_net_mean:
+    window_trades: 100
+    threshold: -0.03
+    action: downgrade_to_paper_only
+  walk_forward_calibration:
+    max_fail_count: 2
+    action: review_required
+
+daily_risk:
+  max_daily_loss_pct_bankroll: 2.0
+  action: stop_today
+
+exposure:
+  max_single_bet_pct_bankroll: 0.5
+  max_same_league_window_pct_bankroll: 1.5
+  max_same_time_bucket_pct_bankroll: 3.0
 ```
+
+### 6.4 核心评估指标（策略/执行/模型）
+
+策略指标：
+- HT命中率
+- 亚洲盘 W/P/L/Push
+- gross ROI
+- 分盘口线 ROI
+- 分分钟 ROI
+- 分联赛 ROI
+
+执行指标：
+- raw_paper_roi
+- slippage_adjusted_roi
+- conservative_fill_roi
+- fill_rate
+- avg_slippage
+- latency_seconds
+- market_freeze_count
+
+模型指标：
+- EV_net 分桶校准
+- `P(EV_net > 0)` 校准
+- legacy rule vs EV chain 对照
+- walk-forward holdout ROI
 
 ---
 
