@@ -31,6 +31,10 @@ class MatchIntelligence:
     avoid_if: list[str]
     execution_status: str
     is_live_radar: bool
+    action_code: str
+    risk_level: str
+    ev_label: str
+    execution_label: str
 
     def to_dict(self) -> dict:
         return {
@@ -45,6 +49,10 @@ class MatchIntelligence:
             "avoid_if": self.avoid_if,
             "execution_status": self.execution_status,
             "is_live_radar": self.is_live_radar,
+            "action_code": self.action_code,
+            "risk_level": self.risk_level,
+            "ev_label": self.ev_label,
+            "execution_label": self.execution_label,
         }
 
 
@@ -142,6 +150,7 @@ def explain_match(record: dict) -> dict:
     primary_direction = "SKIP"
     execution_status = "观察不入场"
     trade_action = "跳过：只记录情报"
+    action_code = "SKIP"
     profile = "画像：方向不够集中"
     summary = "结论：不作为交易候选"
 
@@ -149,6 +158,7 @@ def explain_match(record: dict) -> dict:
         primary_direction = "HT"
         execution_status = "滚球雷达"
         trade_action = "上半场：0-15分钟等降盘，满足节奏再进"
+        action_code = "WAIT_LINE"
         profile = "画像：上半场回调型"
         summary = "结论：上半场走地候选"
         wait_for = ["0-10分钟无进球", "盘口降到大1.0或大0.75", "赛中节奏不沉闷"]
@@ -156,6 +166,7 @@ def explain_match(record: dict) -> dict:
         primary_direction = "SH"
         execution_status = "下半场观察"
         trade_action = "上半场：只防闪击；下半场：半场后再评估" if early_flash else "上半场：跳过；下半场：半场后再评估"
+        action_code = "PAPER_ONLY"
         profile = "画像：下半场倾向更强，且上半场早段有闪击风险" if early_flash else "画像：下半场倾向更强"
         summary = "结论：不做上半场回调，半场后看下半场盘口"
         wait_for = ["半场比分0-0/1-0/0-1/1-1", "上半场射门和危险进攻不沉闷", "SH Over 0.75/1.0合理水位"]
@@ -163,6 +174,7 @@ def explain_match(record: dict) -> dict:
         primary_direction = "EARLY_HT"
         execution_status = "早段闪击观察"
         trade_action = "上半场：只防闪击，不做0-10后回调追入"
+        action_code = "SKIP"
         profile = "画像：上半场早段有球风险高，但不是回调型"
         summary = "结论：回调适配WEAK不代表上半场不进，只代表等待降盘买点差"
         wait_for = ["赛前盘口是否已过热", "开场前是否有更低风险表达"]
@@ -170,18 +182,33 @@ def explain_match(record: dict) -> dict:
         primary_direction = "FT"
         execution_status = "全场观察"
         trade_action = "上半场：跳过；全场：只做参考"
+        action_code = "PAPER_ONLY"
         profile = "画像：全场开放局，不等于下半场单边优势"
         summary = "结论：不强行分时进场"
         wait_for = ["盘口价格回到合理区间", "场面持续开放"]
 
+    # 节奏弱时直接等待节奏，不给可进场信号
+    if "节奏不沉闷" in " ".join(wait_for) and late_11_45 < 0.55 and action_code == "WAIT_LINE":
+        action_code = "WAIT_TEMPO"
+
     if data_action == "WATCH_ONLY":
         avoid_if.append("API覆盖不足导致实时统计/盘口缺失")
+        action_code = "PAPER_ONLY"
     if schedule_action == "WATCH_CAUTION":
         avoid_if.append("赛程压力高")
+        if action_code in ("WAIT_LINE", "WAIT_TEMPO"):
+            action_code = "PAPER_ONLY"
     if motivation_gate.get("action") == "WATCH_ONLY":
         avoid_if.append("战意不清晰")
+        action_code = "PAPER_ONLY"
     if pullback_fit == "WEAK" and primary_direction == "HT":
         avoid_if.append("0-10无球后继续追入")
+    rg = record.get("risk_guard") or {}
+    if isinstance(rg, dict) and (rg.get("allow") is False):
+        action_code = "RISK_BLOCKED"
+        avoid_if.append(f"风控拦截: {rg.get('reason', 'RISK_GUARD')}")
+        trade_action = "风控拦截：不允许进场"
+        execution_status = "风控拦截"
 
     confidence = 40
     confidence += min(max(ht_score, sh_score, ft_score), 90) * 0.35
@@ -191,6 +218,31 @@ def explain_match(record: dict) -> dict:
     confidence -= 12 if data_weak else 0
     confidence -= 8 if schedule_action == "WATCH_CAUTION" else 0
     confidence = int(max(0, min(round(confidence), 95)))
+    if action_code == "WAIT_LINE" and confidence < 72:
+        action_code = "WAIT_CONFIDENCE"
+    if action_code == "WAIT_LINE" and confidence >= 72 and pullback_fit in ("OK", "STRONG"):
+        action_code = "PAPER_BUY_NOW"
+    if "红牌" in " ".join(avoid_if):
+        pass
+    risk_level = "MID"
+    if action_code in ("SKIP", "RISK_BLOCKED"):
+        risk_level = "HIGH"
+    elif action_code == "PAPER_BUY_NOW":
+        risk_level = "MID" if schedule_action == "WATCH_CAUTION" else "LOW"
+    elif action_code == "PAPER_ONLY":
+        risk_level = "MID"
+    ev_label = "EV观察"
+    if confidence >= 75:
+        ev_label = "EV强"
+    elif confidence >= 60:
+        ev_label = "EV合格"
+    execution_label = "可成交"
+    if action_code in ("WAIT_LINE", "WAIT_TEMPO", "WAIT_CONFIDENCE"):
+        execution_label = "等待条件"
+    elif action_code in ("PAPER_ONLY", "SKIP"):
+        execution_label = "仅观察"
+    elif action_code == "RISK_BLOCKED":
+        execution_label = "风控拦截"
 
     return MatchIntelligence(
         match_type=match_type,
@@ -204,4 +256,8 @@ def explain_match(record: dict) -> dict:
         avoid_if=avoid_if[:5],
         execution_status=execution_status,
         is_live_radar=is_live_radar,
+        action_code=action_code,
+        risk_level=risk_level,
+        ev_label=ev_label,
+        execution_label=execution_label,
     ).to_dict()

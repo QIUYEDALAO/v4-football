@@ -231,6 +231,12 @@ def _rows_json(rows: list[dict]) -> str:
         is_live_radar = bool(intelligence.get("is_live_radar"))
         execution_status = intelligence.get("execution_status", "球探观察")
         trade_action = intelligence.get("trade_action", "跳过：只记录情报")
+        action_code = intelligence.get("action_code", "SKIP")
+        risk_level = intelligence.get("risk_level", "MID")
+        live_action = live_status.get("action", "-")
+        if live_action == "SKIP_RISK_GUARD":
+            action_code = "RISK_BLOCKED"
+            risk_level = "HIGH"
         decision_summary = f"{intelligence.get('profile', '')}。{intelligence.get('summary', '')}"
         match_profile = intelligence.get("profile", "")
         home = r.get("home") or ""
@@ -250,6 +256,10 @@ def _rows_json(rows: list[dict]) -> str:
             "is_watch": is_live_radar,
             "executionStatus": execution_status,
             "tradeAction": trade_action,
+            "actionCode": action_code,
+            "riskLevel": risk_level,
+            "evLabel": intelligence.get("ev_label", "EV观察"),
+            "executionLabel": intelligence.get("execution_label", "仅观察"),
             "decisionSummary": decision_summary,
             "matchProfile": match_profile,
             "intelligence": intelligence,
@@ -257,8 +267,10 @@ def _rows_json(rows: list[dict]) -> str:
             "primaryDirection": intelligence.get("primary_direction", "-"),
             "confidence": intelligence.get("confidence", 0),
             "whyText": "；".join(intelligence.get("why", [])),
+            "whyTop": intelligence.get("why", [])[:3],
             "waitForText": "；".join(intelligence.get("wait_for", [])),
             "avoidIfText": "；".join(intelligence.get("avoid_if", [])),
+            "riskTop": intelligence.get("avoid_if", [])[:2],
             "liveAction": live_status.get("action", "-"),
             "liveReason": live_status.get("reason", "-"),
             "liveScore": (live_status.get("state") or {}).get("score", "-"),
@@ -363,6 +375,7 @@ def render_dashboard(date_str: str) -> Path:
     live_status = _load_json(BASE_DIR / "data" / "live_monitor" / f"v4_live_status_{key}.json", {})
     live_entries = _load_json(BASE_DIR / "data" / "paper_trading" / f"v4_live_entries_{key}.json", [])
     review = _load_json(REPORT_DIR / f"v4_review_{key}.json", {})
+    calibration = _load_json(REPORT_DIR / "v4_calibration_report.json", {})
     if not scout:
         raise FileNotFoundError(f"没有可渲染的 V4 情报数据: {scout_path}")
     rows = _enrich_records(
@@ -389,7 +402,9 @@ def render_dashboard(date_str: str) -> Path:
     flags_text = "；".join(flags) if flags else "无触发"
 
     data_json = _rows_json(rows)
-    title = f"V4 情报仪表盘 | {date_str}"
+    review_json = json.dumps(review if isinstance(review, dict) else {}, ensure_ascii=False)
+    calibration_json = json.dumps(calibration if isinstance(calibration, dict) else {}, ensure_ascii=False)
+    title = f"V4 作战仪表盘 | {date_str}"
     html_doc = f"""<!doctype html>
 <html lang="zh-CN">
 <head>
@@ -463,12 +478,13 @@ def render_dashboard(date_str: str) -> Path:
 <body>
   <header>
     <div class="wrap">
-      <h1>🔭 V4 情报仪表盘</h1>
+      <h1>V4 HT LIVE PULLBACK — 今日作战台</h1>
       <div class="summary">
         <span class="pill">{html.escape(date_str)}</span>
         <span class="pill"><b id="visibleCount">0</b> / {len(rows)} 场</span>
         <span class="pill">滚球雷达 {len(watchlist)} 场</span>
         <span class="pill">S:{counts["S"]} A:{counts["A"]} B:{counts["B"]}</span>
+        <span class="pill">模式：临场作战（默认）</span>
       </div>
       <div class="health-panel {health_class}">
         <div class="health-head">
@@ -485,11 +501,11 @@ def render_dashboard(date_str: str) -> Path:
       </div>
       <div class="filters">
         <input id="q" placeholder="搜索球队 / 联赛">
-        <select id="exec"><option value="radar">只看滚球雷达</option><option value="">全部含观察</option><option value="observe">只看观察</option></select>
-        <select id="focus"><option value="">全部结论</option><option value="HT">上半场候选</option><option value="SH">下半场观察</option><option value="FT">全场观察</option><option value="SKIP">跳过/观察不入场</option></select>
-        <select id="tier"><option value="">全部等级</option><option>S</option><option>A</option><option>B</option></select>
-        <select id="watch"><option value="">全部</option><option value="1">只看滚球雷达</option></select>
-        <select id="market"><option value="">全部方向</option><option value="HT_LIVE_OVER">上半场走地</option><option value="SECOND_HALF_OVER">下半场参考</option><option value="FULLTIME_OVER">全场参考</option></select>
+        <select id="mode"><option value="ops">临场作战</option><option value="review">复盘</option><option value="research">研究</option></select>
+        <select id="strategy"><option value="HT">HT 主策略</option><option value="SH">SH 观察</option><option value="ALL">全部</option></select>
+        <select id="action"><option value="">全部动作</option><option value="PAPER_BUY_NOW">可进场</option><option value="WAIT_LINE">等待降盘</option><option value="WAIT_TEMPO">等待节奏</option><option value="WAIT_CONFIDENCE">等待置信</option><option value="PAPER_ONLY">仅观察</option><option value="SKIP">已跳过</option><option value="RISK_BLOCKED">风控拦截</option></select>
+        <select id="tier"><option value="">全部等级</option><option>A+</option><option>A</option><option>B</option><option>C</option></select>
+        <select id="watch"><option value="1">仅主信号(默认)</option><option value="">全部</option></select>
         <select id="line"><option value="">全部盘口</option><option value="1.25">≥1.25</option><option value="1.5">≥1.5</option></select>
         <select id="view"><option value="cards">卡片</option><option value="table">表格</option></select>
         <select id="sort"><option value="hotness">热度排序</option><option value="time">时间排序</option><option value="line">盘口排序</option></select>
@@ -497,16 +513,88 @@ def render_dashboard(date_str: str) -> Path:
     </div>
   </header>
   <main>
+    <div id="opsSummary" class="summary" style="margin:0 0 12px 0;">
+      <span class="pill">监控 <b id="sumTotal">0</b> 场</span>
+      <span class="pill">A+ <b id="sumAPlus">0</b></span>
+      <span class="pill">A <b id="sumA">0</b></span>
+      <span class="pill">等待 <b id="sumWait">0</b></span>
+      <span class="pill">跳过 <b id="sumSkip">0</b></span>
+    </div>
+    <h3 id="secBuy">🔥 可进场</h3>
+    <div id="cardsBuy" class="grid"></div>
+    <h3 id="secWait">⏳ 等待触发</h3>
+    <div id="cardsWait" class="grid"></div>
+    <h3 id="secRisk">⚠️ 风险观察</h3>
+    <div id="cardsRisk" class="grid"></div>
+    <h3 id="secSkip">❌ 已跳过</h3>
+    <div id="cardsSkip" class="grid"></div>
     <div id="cards" class="grid"></div>
+    <div id="reviewPanel" class="card hidden" style="margin-bottom:12px;">
+      <div class="match">复盘摘要</div>
+      <div class="meta">今日动作分布与EV标签分布（用于复盘，不用于临场决策）</div>
+      <div class="metrics" style="margin-top:10px;">
+        <div class="metric"><label>PAPER_BUY_NOW</label><b id="rvBuy">0</b></div>
+        <div class="metric"><label>PAPER_ONLY</label><b id="rvPaper">0</b></div>
+        <div class="metric"><label>SKIP/RISK</label><b id="rvSkip">0</b></div>
+        <div class="metric"><label>EV强</label><b id="rvEvStrong">0</b></div>
+        <div class="metric"><label>EV合格</label><b id="rvEvOk">0</b></div>
+        <div class="metric"><label>EV观察</label><b id="rvEvWatch">0</b></div>
+      </div>
+      <div class="section">
+        <div class="section-title">legacy vs EV</div>
+        <div class="detail" id="rvLegacyEv">暂无复盘数据（先运行 v4_review_report.py）</div>
+        <div class="detail" id="rvLegacyDelta" style="margin-top:6px; font-weight:700;">—</div>
+      </div>
+      <div class="section">
+        <div class="section-title">跳过后影子表现</div>
+        <div class="detail" id="rvShadow">暂无 shadow backtest 数据</div>
+      </div>
+      <div class="section">
+        <div class="section-title">EV 分桶校准</div>
+        <div class="detail" id="rvCalibrationText">暂无校准数据（先运行 v4_calibration_report.py --save）</div>
+        <table id="rvCalibrationTable" class="table-view hidden" style="margin-top:8px;">
+          <thead><tr><th>EV桶</th><th>样本</th><th>预测命中</th><th>实际命中</th><th>偏差</th></tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </div>
+    <div id="researchPanel" class="card hidden" style="margin-bottom:12px;">
+      <div class="match">研究摘要</div>
+      <div class="meta">研究模式显示全量样本，参数详情请展开单场卡片“查看完整数据”</div>
+      <div class="metrics" style="margin-top:10px;">
+        <div class="metric"><label>样本总数</label><b id="rsTotal">0</b></div>
+        <div class="metric"><label>HT方向</label><b id="rsHT">0</b></div>
+        <div class="metric"><label>SH方向</label><b id="rsSH">0</b></div>
+      </div>
+      <div class="section">
+        <div class="section-title">Walk-forward 摘要</div>
+        <div class="detail" id="rsWalkForwardText">暂无 walk-forward 数据</div>
+      </div>
+    </div>
     <table id="table" class="table-view hidden"><thead><tr>
-      <th data-sort="hotness">🔥</th><th>比赛</th><th>联赛</th><th>时间</th><th>方向</th><th>HT率</th><th>SH率</th><th>盘口</th><th>阵容</th>
+      <th data-sort="hotness">🔥</th><th>比赛</th><th>时间</th><th>动作</th><th>盘口</th><th>EV等级</th><th>风险</th>
     </tr></thead><tbody></tbody></table>
     <div id="empty" class="empty hidden">没有符合过滤条件的比赛</div>
   </main>
   <script>
     const rows = {data_json};
-    const state = {{ q:'', exec:'radar', focus:'', tier:'', watch:'', market:'', line:'', view:'cards', sort:'hotness' }};
+    const state = {{ q:'', mode:'ops', strategy:'HT', action:'', tier:'', watch:'1', line:'', view:'cards', sort:'hotness' }};
+    const reviewData = {review_json};
+    const calibrationData = {calibration_json};
     const el = id => document.getElementById(id);
+    function actionOf(row) {{ return row.actionCode || 'SKIP'; }}
+    function tierOf(row) {{
+      if (row.hotness >= 85) return 'A+';
+      if (row.hotness >= 70) return 'A';
+      if (row.hotness >= 55) return 'B';
+      return 'C';
+    }}
+    function actionColor(action) {{
+      if (action === 'PAPER_BUY_NOW') return 'good';
+      if (action === 'WAIT_LINE' || action === 'WAIT_TEMPO') return 'warn';
+      if (action === 'RISK_BLOCKED') return 'watch';
+      return '';
+    }}
 
     function clsFor(row) {{
       if (row.tier === 'S') return 'good';
@@ -514,36 +602,28 @@ def render_dashboard(date_str: str) -> Path:
       return 'warn';
     }}
     function card(row) {{
+      const action = actionOf(row);
+      const t = tierOf(row);
       return `<article class="card">
         <div class="card-top">
           <div>
             <div class="match">${{row.home}} vs ${{row.away}}</div>
-            <div class="meta">${{row.league}} · ${{row.time || '--:--'}} · #${{row.fixture_id}}</div>
+            <div class="meta">${{row.league}} · ${{row.time || '--:--'}} · #${{row.fixture_id}} · ${{row.liveMinute || '-'}}' ${{row.liveScore || '-'}}</div>
           </div>
-          <div class="score">${{row.hotness}}<small>${{row.tier}}级</small></div>
+          <div class="score">${{row.hotness}}<small>${{t}}</small></div>
         </div>
         <div class="tags">
-          <span class="tag ${{row.is_watch ? 'watch' : 'warn'}}">${{row.executionStatus}}</span>
-          <span class="tag">类型 ${{row.matchTypes}}</span>
-          <span class="tag">方向 ${{row.primaryDirection}}</span>
-          <span class="tag">信心 ${{row.confidence}}</span>
-          ${{row.liveAction !== '-' ? `<span class="tag">${{row.liveAction}}</span>` : ''}}
-          <span class="tag ${{row.marketFocus === 'HT_LIVE_OVER' ? 'watch' : 'good'}}">${{row.marketLabel}}</span>
-          <span class="tag">评分最强 ${{row.bestFocusByScore || '-'}}</span>
-          <span class="tag ${{clsFor(row)}}">大${{row.line || '?'}} @${{row.overOdds || '-'}}</span>
-          <span class="tag">热区 ${{row.hotspot || '-'}}</span>
-          <span class="tag">${{row.lineupAction}}</span>
+          <span class="tag ${{actionColor(action)}}">${{action}}</span>
+          <span class="tag">${{t}}</span>
+          <span class="tag">大${{row.line || '?'}} @${{row.overOdds || '-'}}</span>
+          <span class="tag">${{row.evLabel || 'EV观察'}}</span>
+          <span class="tag">${{row.executionLabel || '仅观察'}}</span>
+          <span class="tag">窗口 ${{
+            row.liveMinute && Number(row.liveMinute) >= 10 ? "now" : "10-13"
+          }}</span>
         </div>
-        <div class="verdict">${{row.decisionSummary}}</div>
-        <div class="metrics quick">
-          <div class="metric"><label>建议动作</label><b>${{row.tradeAction}}</b></div>
-          <div class="metric"><label>HT分</label><b>${{row.htScore.toFixed(1)}}</b></div>
-          <div class="metric"><label>SH分</label><b>${{row.shScore.toFixed(1)}}</b></div>
-          <div class="metric"><label>FT分</label><b>${{row.ftScore.toFixed(1)}}</b></div>
-        </div>
-        <div class="section"><div class="section-title">智能解释</div>
-          <div class="detail"><b>为什么：</b>${{row.whyText || '-'}}<br><b>等待：</b>${{row.waitForText || '-'}}<br><b>避开：</b>${{row.avoidIfText || '-'}}</div>
-        </div>
+        <div class="verdict">${{action}} · ${{row.marketLabel}}</div>
+        <div class="detail"><b>主因：</b>${{(row.whyText || '-').split('；').slice(0,3).join(' / ')}}<br><b>风险：</b>${{(row.avoidIfText || '-').split('；').slice(0,2).join(' / ')}}</div>
         <details class="audit"><summary>查看完整数据</summary>
           <div class="section"><div class="section-title">H2H / 近期</div>
             <div class="detail">H2H HT率 ${{row.h2hText}} (${{row.h2hCountText}}) · 场均HT球 ${{row.avgGoals}} · 近期动能 ${{row.momentumText}}</div>
@@ -581,21 +661,17 @@ def render_dashboard(date_str: str) -> Path:
       </article>`;
     }}
     function tableRow(row) {{
-      return `<tr><td>${{row.hotness}}</td><td>${{row.home}} vs ${{row.away}}</td><td>${{row.league}}</td><td>${{row.time}}</td><td>${{row.marketLabel}}</td><td>${{row.h2hText}}</td><td>${{row.shText}}</td><td>大${{row.line || '?'}} @${{row.overOdds || '-'}}</td><td>${{row.lineupAction}}</td></tr>`;
+      return `<tr><td>${{row.hotness}}</td><td>${{row.home}} vs ${{row.away}}</td><td>${{row.time}}</td><td>${{actionOf(row)}}</td><td>大${{row.line || '?'}} @${{row.overOdds || '-'}}</td><td>${{row.evLabel || 'EV观察'}}</td><td>${{row.riskLevel || '-'}}</td></tr>`;
     }}
     function filtered() {{
       let out = rows.filter(r => {{
         const hay = `${{r.home}} ${{r.away}} ${{r.homeEn}} ${{r.awayEn}} ${{r.league}}`.toLowerCase();
         if (state.q && !hay.includes(state.q.toLowerCase())) return false;
-        if (state.exec === 'radar' && !r.is_watch) return false;
-        if (state.exec === 'observe' && r.is_watch) return false;
-        if (state.focus === 'HT' && !(r.is_watch || r.marketFocus === 'HT_LIVE_OVER')) return false;
-        if (state.focus === 'SH' && r.marketFocus !== 'SECOND_HALF_OVER') return false;
-        if (state.focus === 'FT' && r.marketFocus !== 'FULLTIME_OVER') return false;
-        if (state.focus === 'SKIP' && !['观察不入场','球探观察'].includes(r.executionStatus)) return false;
-        if (state.tier && r.tier !== state.tier) return false;
+        if (state.strategy === 'HT' && r.marketFocus !== 'HT_LIVE_OVER') return false;
+        if (state.strategy === 'SH' && r.marketFocus !== 'SECOND_HALF_OVER') return false;
+        if (state.action && actionOf(r) !== state.action) return false;
+        if (state.tier && tierOf(r) !== state.tier) return false;
         if (state.watch && !r.is_watch) return false;
-        if (state.market && r.marketFocus !== state.market) return false;
         if (state.line && Number(r.lineFloat) < Number(state.line)) return false;
         return true;
       }});
@@ -607,15 +683,96 @@ def render_dashboard(date_str: str) -> Path:
       return out;
     }}
     function render() {{
-      const out = filtered();
+      let out = filtered();
+      if (state.mode === 'review') {{
+        out = out.filter(r => ['PAPER_BUY_NOW','PAPER_ONLY','SKIP','RISK_BLOCKED'].includes(actionOf(r)));
+      }} else if (state.mode === 'research') {{
+        // 全量保留
+      }} else {{
+        out = out.filter(r => ['PAPER_BUY_NOW','WAIT_LINE','WAIT_TEMPO','WAIT_CONFIDENCE','PAPER_ONLY','SKIP','RISK_BLOCKED'].includes(actionOf(r)));
+      }}
       el('visibleCount').textContent = out.length;
+      const buy = out.filter(r => actionOf(r) === 'PAPER_BUY_NOW');
+      const wait = out.filter(r => ['WAIT_LINE','WAIT_TEMPO','WAIT_CONFIDENCE'].includes(actionOf(r)));
+      const risk = out.filter(r => ['PAPER_ONLY','RISK_BLOCKED'].includes(actionOf(r)));
+      const skip = out.filter(r => actionOf(r) === 'SKIP');
+      const evStrong = out.filter(r => (r.evLabel || '') === 'EV强').length;
+      const evOk = out.filter(r => (r.evLabel || '') === 'EV合格').length;
+      const evWatch = out.filter(r => (r.evLabel || '') === 'EV观察').length;
+      el('sumTotal').textContent = out.length;
+      el('sumAPlus').textContent = out.filter(r => tierOf(r)==='A+').length;
+      el('sumA').textContent = out.filter(r => tierOf(r)==='A').length;
+      el('sumWait').textContent = wait.length;
+      el('sumSkip').textContent = skip.length;
       el('cards').classList.toggle('hidden', state.view !== 'cards');
       el('table').classList.toggle('hidden', state.view !== 'table');
       el('empty').classList.toggle('hidden', out.length > 0);
       el('cards').innerHTML = out.map(card).join('');
+      el('cardsBuy').innerHTML = buy.map(card).join('');
+      el('cardsWait').innerHTML = wait.map(card).join('');
+      el('cardsRisk').innerHTML = risk.map(card).join('');
+      el('cardsSkip').innerHTML = skip.map(card).join('');
       el('table').querySelector('tbody').innerHTML = out.map(tableRow).join('');
+      const ops = state.mode === 'ops' && state.view === 'cards';
+      const review = state.mode === 'review' && state.view === 'cards';
+      const research = state.mode === 'research' && state.view === 'cards';
+      ['opsSummary','secBuy','cardsBuy','secWait','cardsWait','secRisk','cardsRisk','secSkip','cardsSkip'].forEach(id => {{
+        el(id).classList.toggle('hidden', !ops);
+      }});
+      el('reviewPanel').classList.toggle('hidden', !review);
+      el('researchPanel').classList.toggle('hidden', !research);
+      el('rvBuy').textContent = buy.length;
+      el('rvPaper').textContent = risk.length;
+      el('rvSkip').textContent = skip.length;
+      el('rvEvStrong').textContent = evStrong;
+      el('rvEvOk').textContent = evOk;
+      el('rvEvWatch').textContent = evWatch;
+      const rt = (reviewData && reviewData.roi_triplet) || {{}};
+      const rawRoi = Number(rt.raw_paper_roi_pct || 0).toFixed(2);
+      const slipRoi = Number(rt.slippage_adjusted_roi_pct || 0).toFixed(2);
+      const consRoi = Number(rt.conservative_fill_roi_pct || 0).toFixed(2);
+      const execN = Number(rt.execution_samples || 0);
+      const lg = (reviewData && reviewData.legacy_summary) || {{}};
+      const legacyRoi = Number(lg.legacy_proxy_roi_pct || 0);
+      const delta = Number(consRoi) - legacyRoi;
+      if (reviewData && Object.keys(reviewData).length) {{
+        el('rvLegacyEv').textContent = `EV三层ROI：Raw ${{rawRoi}}% / Slippage ${{slipRoi}}% / Conservative ${{consRoi}}%（执行样本 ${{execN}}）`;
+        const deltaText = `EV-Conservative vs Legacy 代理 ROI：${{delta >= 0 ? '+' : ''}}${{delta.toFixed(2)}}%`;
+        el('rvLegacyDelta').textContent = deltaText;
+        el('rvLegacyDelta').style.color = delta > 0 ? '#15803d' : (delta < 0 ? '#b91c1c' : '#92400e');
+      }}
+      const shadow = (reviewData && reviewData.shadow_summary) || null;
+      if (shadow) {{
+        const wc = Number(shadow.would_enter_count || 0);
+        const sr = Number(shadow.skip_realized_roi_pct || 0).toFixed(2);
+        el('rvShadow').textContent = `影子样本 ${{wc}} 场，跳过后模拟ROI ${{sr}}%`;
+      }}
+      const ctbl = (calibrationData && calibrationData.calibration_table) || [];
+      const cN = Number((calibrationData && calibrationData.sample_size) || 0);
+      if (ctbl.length > 0) {{
+        el('rvCalibrationText').textContent = `校准样本 ${{cN}} 场`;
+        el('rvCalibrationTable').classList.remove('hidden');
+        el('rvCalibrationTable').querySelector('tbody').innerHTML = ctbl.map(x =>
+          `<tr><td>${{x.bucket}}</td><td>${{x.samples}}</td><td>${{x.predicted_hit_rate_pct}}%</td><td>${{x.actual_hit_rate_pct}}%</td><td>${{x.bias_pct}}%</td></tr>`
+        ).join('');
+      }} else {{
+        el('rvCalibrationTable').classList.add('hidden');
+      }}
+      el('rsTotal').textContent = out.length;
+      el('rsHT').textContent = out.filter(r => r.marketFocus === 'HT_LIVE_OVER').length;
+      el('rsSH').textContent = out.filter(r => r.marketFocus === 'SECOND_HALF_OVER').length;
+      const wf = (reviewData && reviewData.walk_forward) || {{}};
+      const splits = wf.splits || {{}};
+      const valid = splits.valid || {{}};
+      const fwd = splits.forward_sim || {{}};
+      const live = splits.paper_live || {{}};
+      if (wf && Object.keys(wf).length) {{
+        el('rsWalkForwardText').textContent =
+          `样本 ${{wf.sample_size || 0}} | valid ROI ${{valid.roi_pct ?? '-'}}% | forward ROI ${{fwd.roi_pct ?? '-'}}% | paper_live ROI ${{live.roi_pct ?? '-'}}%`;
+      }}
+      el('cards').classList.toggle('hidden', state.view !== 'cards' || ops);
     }}
-    ['q','exec','focus','tier','watch','market','line','view','sort'].forEach(id => {{
+    ['q','mode','strategy','action','tier','watch','line','view','sort'].forEach(id => {{
       el(id).addEventListener('input', e => {{ state[id] = e.target.value; render(); }});
     }});
     render();

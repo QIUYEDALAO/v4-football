@@ -270,7 +270,7 @@ def _query_recent_goal_profile(api_client, team_id: int, last_n: int = 5, includ
 
 def warm_recent_goal_profiles(
     api_client,
-    team_ids,  # type: ignore
+    team_ids: list[int] | set[int] | tuple[int, ...],
     *,
     last_n: int = 5,
     include_events: bool = False,

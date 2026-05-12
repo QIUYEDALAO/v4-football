@@ -28,6 +28,7 @@ PAPER_DIR = BASE_DIR / "data" / "paper_trading"
 EXEC_DIR = BASE_DIR / "data" / "execution"
 RESEARCH_DIR = BASE_DIR / "data" / "research"
 CONFIG_DIR = BASE_DIR / "config"
+DATA_DIR = BASE_DIR / "data"
 
 
 def _date_key(date_str: str) -> str:
@@ -150,6 +151,50 @@ def _build_health_panel(review_core: dict) -> dict:
     }
 
 
+def _build_legacy_summary(key: str, strategy_eval: dict, shadow_rows: list[dict]) -> dict:
+    """legacy vs EV 对照摘要（先用可用数据近似，避免字段缺失）。"""
+    decision_rows = _load_jsonl(DATA_DIR / "decision_logs" / f"v4_decision_log_{key}.jsonl")
+    action_counts = Counter((x.get("decision") or "UNKNOWN") for x in decision_rows)
+    legacy_proxy_sample = sum(action_counts.values())
+    ev_sample = int(strategy_eval.get("sample_size", 0) or 0)
+    ev_roi = float(strategy_eval.get("roi_pct", 0.0) or 0.0)
+    legacy_rows = [r for r in shadow_rows if r.get("would_enter_by_old_rule")]
+    legacy_n = len(legacy_rows)
+    legacy_pnl = sum(float(r.get("paper_pnl", 0.0) or 0.0) for r in legacy_rows)
+    legacy_roi = (legacy_pnl / legacy_n * 100.0) if legacy_n > 0 else 0.0
+    return {
+        "legacy_proxy_sample": legacy_n if legacy_n > 0 else legacy_proxy_sample,
+        "legacy_proxy_roi_pct": round(legacy_roi, 2) if legacy_n > 0 else 0.0,
+        "legacy_proxy_pnl_sum": round(legacy_pnl, 4),
+        "ev_sample": ev_sample,
+        "ev_roi_pct": round(ev_roi, 2),
+        "decision_counts": dict(action_counts),
+        "note": "legacy_proxy 基于 shadow_backtest 的 old_rule 入场样本",
+    }
+
+
+def _build_shadow_summary(rows: list[dict]) -> dict:
+    if not rows:
+        return {
+            "would_enter_count": 0,
+            "skip_realized_roi_pct": 0.0,
+            "paper_pnl_sum": 0.0,
+            "note": "NO_SHADOW_DATA",
+        }
+    pnl_sum = 0.0
+    count = 0
+    for r in rows:
+        if r.get("would_enter_by_ev_rule") or r.get("would_enter_by_old_rule"):
+            count += 1
+            pnl_sum += float(r.get("paper_pnl", 0.0) or 0.0)
+    roi = (pnl_sum / count * 100.0) if count > 0 else 0.0
+    return {
+        "would_enter_count": count,
+        "skip_realized_roi_pct": round(roi, 2),
+        "paper_pnl_sum": round(pnl_sum, 4),
+    }
+
+
 def build_review(date_str: str) -> dict:
     key = _date_key(date_str)
     scout = _load_json(REPORT_DIR / f"scout_v4_{key}.json", [])
@@ -203,6 +248,8 @@ def build_review(date_str: str) -> dict:
         "execution_samples": len(execution_rows),
     }
 
+    shadow_rows = _load_jsonl(DATA_DIR / "shadow_backtest" / f"shadow_entry_{key}.jsonl")
+
     review = {
         "date": key,
         "generated_at": datetime.now().isoformat(),
@@ -245,6 +292,8 @@ def build_review(date_str: str) -> dict:
         "league_tiers": league_tiers,
         "entries": entry_summaries,
     }
+    review["legacy_summary"] = _build_legacy_summary(key, strategy_eval, shadow_rows)
+    review["shadow_summary"] = _build_shadow_summary(shadow_rows)
     review["health_panel"] = _build_health_panel(review)
     return review
 
@@ -276,6 +325,24 @@ def render_markdown(review: dict) -> str:
         f"- Slippage Adjusted ROI: {_pct(rt.get('slippage_adjusted_roi_pct', 0))}",
         f"- Conservative Fill ROI: {_pct(rt.get('conservative_fill_roi_pct', 0))}",
         f"- 滑点成本: {rt.get('slippage_cost', 0)} | 执行样本: {rt.get('execution_samples', 0)}",
+        "",
+        "## legacy vs EV",
+    ])
+    lg = review.get("legacy_summary", {}) or {}
+    lines.extend([
+        f"- legacy样本(代理): {lg.get('legacy_proxy_sample', 0)}",
+        f"- legacy ROI(代理): {lg.get('legacy_proxy_roi_pct', '-')}",
+        f"- EV样本: {lg.get('ev_sample', 0)}",
+        f"- EV ROI: {_pct(lg.get('ev_roi_pct', 0))}",
+        f"- 备注: {lg.get('note', '-')}",
+        "",
+        "## 跳过后影子表现",
+    ])
+    shd = review.get("shadow_summary", {}) or {}
+    lines.extend([
+        f"- 影子样本: {shd.get('would_enter_count', 0)}",
+        f"- 跳过后模拟ROI: {_pct(shd.get('skip_realized_roi_pct', 0))}",
+        f"- 影子PnL合计: {shd.get('paper_pnl_sum', 0)}",
         "",
         "## 智能标签样本",
     ])
