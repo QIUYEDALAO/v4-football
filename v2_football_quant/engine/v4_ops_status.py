@@ -8,6 +8,7 @@ from pathlib import Path
 BASE_DIR = Path(__file__).resolve().parent.parent
 OPS_DIR = BASE_DIR / "data" / "ops"
 HEARTBEATS_DIR = OPS_DIR / "heartbeats"
+JOB_RUNS_DIR = OPS_DIR / "job_runs"
 EXEC_DIR = BASE_DIR / "data" / "execution"
 SNAP_DIR = BASE_DIR / "data" / "live_odds_snapshots"
 MONITOR_DIR = BASE_DIR / "data" / "live_monitor"
@@ -38,6 +39,22 @@ def _count_jsonl(path: Path) -> int:
         return 0
     with open(path, encoding="utf-8") as f:
         return sum(1 for _ in f)
+
+
+def _read_jsonl(path: Path) -> list[dict]:
+    if not path.exists():
+        return []
+    out = []
+    with open(path, encoding="utf-8") as f:
+        for line in f:
+            line = line.strip()
+            if not line:
+                continue
+            try:
+                out.append(json.loads(line))
+            except Exception:
+                continue
+    return out
 
 
 def _load_stale_thresholds() -> dict:
@@ -87,6 +104,38 @@ def build_status(date_str: str) -> dict:
     fixtures_with_ht_ou = int(cap.get("fixtures_with_ht_ou_normalized", 0) or 0)
     ht_ou_identified_pct = round(fixtures_with_ht_ou / entered_monitoring * 100, 2) if entered_monitoring else 0.0
 
+    raw_rows_path = SNAP_DIR / key / "live_odds_raw.jsonl"
+    raw_rows = _read_jsonl(raw_rows_path)
+    by_tier_rows = {"A_candidate": 0, "B_shadow": 0, "C_slice": 0}
+    for r in raw_rows:
+        tier = str(r.get("capture_tier") or "")
+        if tier in by_tier_rows:
+            by_tier_rows[tier] += 1
+
+    task_counts = task.get("tier_counts", {}) if isinstance(task, dict) else {}
+    task_progress = []
+    for tier in ("A_candidate", "B_shadow", "C_slice"):
+        planned = int(task_counts.get(tier, 0) or 0)
+        # First stage target is 41 snapshots in 0-20m.
+        expected_rows = planned * 41
+        actual_rows = int(by_tier_rows.get(tier, 0))
+        pct = round(actual_rows / expected_rows * 100, 2) if expected_rows else 0.0
+        task_progress.append({
+            "tier": tier,
+            "planned_tasks": planned,
+            "expected_rows": expected_rows,
+            "actual_rows": actual_rows,
+            "progress_pct": pct,
+            "failed_tasks": 0,
+        })
+
+    run_index = JOB_RUNS_DIR / f"job_runs_{key}.jsonl"
+    run_rows = _read_jsonl(run_index)
+    duplicate_starts = 0
+    for r in run_rows:
+        if str(r.get("status")) == "BLOCKED" and str(r.get("error")) == "LOCK_EXISTS":
+            duplicate_starts += 1
+
     out = {
         "date": key,
         "generated_at": datetime.now().isoformat(),
@@ -95,7 +144,7 @@ def build_status(date_str: str) -> dict:
         "api_used": api.get("daily_calls_used", 0),
         "api_limit": api.get("hard_limit", 75000),
         "http_429": api.get("http_429_count", 0),
-        "raw_rows": _count_jsonl(SNAP_DIR / key / "live_odds_raw.jsonl"),
+        "raw_rows": len(raw_rows),
         "normalized_rows": _count_jsonl(SNAP_DIR / key / "live_odds_normalized.jsonl"),
         "missing_rows": _count_jsonl(SNAP_DIR / key / "live_market_missing.jsonl"),
         "tier_counts": task.get("tier_counts", {}),
@@ -107,6 +156,8 @@ def build_status(date_str: str) -> dict:
         "universe_files_missing": task.get("universe_files_missing", []),
         "excluded_reason_counts": task.get("excluded_reason_counts", {}),
         "ht_ou_identified_pct": ht_ou_identified_pct,
+        "duplicate_cron_starts": duplicate_starts,
+        "task_progress": task_progress,
     }
     return out
 

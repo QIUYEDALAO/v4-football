@@ -10,6 +10,8 @@ ALERT_DIR = BASE_DIR / "data" / "ops" / "alerts"
 CAP_AUDIT_DIR = BASE_DIR / "data" / "capture_audit"
 MONITOR_DIR = BASE_DIR / "data" / "live_monitor"
 OPS_RULES_PATH = BASE_DIR / "config" / "ops_alert_rules.yaml"
+SNAP_ROOT = BASE_DIR / "data" / "live_odds_snapshots"
+JOB_RUNS_DIR = BASE_DIR / "data" / "ops" / "job_runs"
 
 
 def _date_key(date_str: str) -> str:
@@ -60,6 +62,21 @@ def run_alerts(date_str: str) -> dict:
     if int(api.get("http_429_count", 0)) >= http_429_warn:
         alerts.append({"level": "WARN", "rule": "http_429", "msg": f"429={api.get('http_429_count')}"})
 
+    # Cron duplicate starts: LOCK_EXISTS means repeated trigger while previous run not finished.
+    runs_path = JOB_RUNS_DIR / f"job_runs_{key}.jsonl"
+    dup_count = 0
+    if runs_path.exists():
+        with open(runs_path, encoding="utf-8") as f:
+            for line in f:
+                try:
+                    row = json.loads(line)
+                except Exception:
+                    continue
+                if str(row.get("status")) == "BLOCKED" and str(row.get("error")) == "LOCK_EXISTS":
+                    dup_count += 1
+    if dup_count > 0:
+        alerts.append({"level": "WARN", "rule": "cron_duplicate_start", "msg": f"LOCK_EXISTS blocked runs={dup_count}"})
+
     a_stats = cap.get("a_candidate_stats", {})
     min_a_strict = int(volume_rules.get("min_a_strict", 1))
     min_b_shadow = int(volume_rules.get("min_b_shadow", 80))
@@ -92,6 +109,11 @@ def run_alerts(date_str: str) -> dict:
     if ht_ou_pct < ht_ou_min:
         alerts.append({"level": "WARN", "rule": "ht_ou_identified_low", "msg": f"HT O/U identified {ht_ou_pct:.2f}% < {ht_ou_min:.2f}%"})
 
+    raw_completion_min = float(quality_rules.get("raw_snapshot_completion_pct_min", 80))
+    raw_completion = float(cap.get("avg_snapshot_completeness_pct", 0.0) or 0.0)
+    if raw_completion < raw_completion_min:
+        alerts.append({"level": "WARN", "rule": "raw_snapshot_completion_low", "msg": f"Raw completion {raw_completion:.2f}% < {raw_completion_min:.2f}%"})
+
     line_dist = cap.get("line_distribution", {}) if isinstance(cap, dict) else {}
     asian_hits = int(line_dist.get("0.75", 0)) + int(line_dist.get("1.0", 0)) + int(line_dist.get("1.25", 0))
     normalized_rows = int(cap.get("normalized_rows", 0) or 0)
@@ -99,6 +121,39 @@ def run_alerts(date_str: str) -> dict:
     asian_min = float(quality_rules.get("asian_line_coverage_pct_min", 20))
     if asian_pct < asian_min:
         alerts.append({"level": "WARN", "rule": "asian_line_coverage_low", "msg": f"Asian line coverage {asian_pct:.2f}% < {asian_min:.2f}%"})
+
+    unknown_max = float(quality_rules.get("missing_reason_unknown_pct_max", 10))
+    missing_rows = int(cap.get("missing_rows", 0) or 0)
+    unknown_n = 0
+    for item in cap.get("missing_reason_top", []) or []:
+        if isinstance(item, list) and len(item) == 2 and str(item[0]).upper() == "UNKNOWN":
+            unknown_n = int(item[1] or 0)
+            break
+    unknown_pct = (unknown_n / missing_rows * 100.0) if missing_rows else 0.0
+    if unknown_pct > unknown_max:
+        alerts.append({"level": "WARN", "rule": "missing_reason_unknown_high", "msg": f"UNKNOWN missing reason {unknown_pct:.2f}% > {unknown_max:.2f}%"})
+
+    zero_norm_minutes = int(quality_rules.get("normalized_zero_minutes", 30))
+    day_dir = SNAP_ROOT / key
+    raw_path = day_dir / "live_odds_raw.jsonl"
+    norm_path = day_dir / "live_odds_normalized.jsonl"
+    if raw_path.exists():
+        raw_mtime = raw_path.stat().st_mtime
+        norm_mtime = norm_path.stat().st_mtime if norm_path.exists() else 0.0
+        raw_rows = 0
+        norm_rows = 0
+        with open(raw_path, encoding="utf-8") as f:
+            raw_rows = sum(1 for _ in f)
+        if norm_path.exists():
+            with open(norm_path, encoding="utf-8") as f:
+                norm_rows = sum(1 for _ in f)
+        if raw_rows > 0 and norm_rows == 0:
+            minutes = int((datetime.now().timestamp() - raw_mtime) / 60)
+            if minutes >= zero_norm_minutes:
+                alerts.append({"level": "WARN", "rule": "normalized_zero_minutes", "msg": f"normalized rows still 0 for ~{minutes} minutes"})
+        elif raw_rows > 0 and norm_rows > 0 and raw_mtime - norm_mtime >= zero_norm_minutes * 60:
+            minutes = int((raw_mtime - norm_mtime) / 60)
+            alerts.append({"level": "WARN", "rule": "normalized_stale_minutes", "msg": f"normalized not updated for ~{minutes} minutes while raw updates"})
 
     if int((cap.get("watchlist_candidates") or 0)) == 0:
         alerts.append({"level": "INFO", "rule": "watchlist_empty", "msg": "watchlist empty"})

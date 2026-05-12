@@ -31,6 +31,11 @@ def render(date_str: str) -> Path:
     rows = []
     for j in status.get("jobs", []):
         rows.append(f"<tr><td>{j['job_name']}</td><td>{j['status']}</td><td>{j.get('last_heartbeat_sec_ago')}</td></tr>")
+    progress_rows = []
+    for p in status.get("task_progress", []):
+        progress_rows.append(
+            f"<tr><td>{p.get('tier')}</td><td>{p.get('planned_tasks')}</td><td>{p.get('actual_rows')} / {p.get('expected_rows')}</td><td>{p.get('progress_pct')}%</td><td>{p.get('failed_tasks')}</td></tr>"
+        )
 
     html = f"""<!doctype html>
 <html><head><meta charset='utf-8'><title>V4 Ops Dashboard {key}</title>
@@ -42,8 +47,11 @@ def render(date_str: str) -> Path:
 <div class='kpi'>Raw: {status.get('raw_rows')}</div>
 <div class='kpi'>Normalized: {status.get('normalized_rows')}</div>
 <div class='kpi'>Stale jobs: {status.get('stale_jobs')}</div>
+<div class='kpi'>Dup starts: {status.get('duplicate_cron_starts', 0)}</div>
 <h2>Tasks</h2>
 <table><tr><th>Job</th><th>Status</th><th>Heartbeat(s)</th></tr>{''.join(rows)}</table>
+<h2>Tier Progress</h2>
+<table><tr><th>Tier</th><th>Planned</th><th>Rows</th><th>Progress</th><th>Failed</th></tr>{''.join(progress_rows)}</table>
 <h2>A/B/C</h2>
 <pre>{json.dumps(status.get('tier_counts', {}), ensure_ascii=False, indent=2)}</pre>
 <h2>Universe Filter</h2>

@@ -14,8 +14,11 @@
     "http_429_warn": 1
   },
   "capture_quality": {
+    "raw_snapshot_completion_pct_min": 80,
+    "normalized_zero_minutes": 30,
     "ht_ou_identified_pct_min": 30,
-    "asian_line_coverage_pct_min": 20
+    "asian_line_coverage_pct_min": 20,
+    "missing_reason_unknown_pct_max": 10
   },
   "task_volume": {
     "min_a_strict": 1,
