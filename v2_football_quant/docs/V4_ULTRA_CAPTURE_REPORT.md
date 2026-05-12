@@ -8,7 +8,7 @@
 
 ## 一、系统定位
 
-走地盘口采集系统（Ultra Capture Mode）是 V4 的数据基础设施层。目标：**用 API-Football 75,000 次/天的预算，对白名单联赛所有比赛进行分层走地盘口快照，60 天内自校准 line_decay_model 的衰减曲线。**
+走地盘口采集系统（Ultra Capture Mode）是 V4 的数据基础设施层。目标：**用 API-Football 75,000 次/天的预算，对白名单联赛所有比赛进行分层走地盘口快照，5月31日前自校准 line_decay_model 的衰减曲线。**
 
 此前依赖外部数据源（OpticOdds $200+/月），现在可以通过高频自采集替代。
 
@@ -240,7 +240,7 @@ python3 engine/v4_live_capture_audit.py --date 20260512
 | A 来源 | relaxed=12, strict=0 |
 | 预算使用 | 660/75,000 (<1%) |
 | 快照积累 | 采集中 |
-| 目标 | 60天自校准 line_decay_model |
+| 目标 | 18天(5月31日前)自校准 line_decay_model |
 
 ---
 
@@ -248,5 +248,5 @@ python3 engine/v4_live_capture_audit.py --date 20260512
 
 1. **连续跑 7 天**：universe 堆到 7 天+，B_shadow 池从 7 涨到 100+
 2. **采集器稳定**：确保 Cron 在 match window 内不中断
-3. **2-3 周后**：首次 line_decay_model 自校准
+3. **7天后**：首次 line_decay_model 自校准
 4. **月底达标**：A 样本 50+, B 影子 200+, 0.75-1.25 线覆盖率 >80%
