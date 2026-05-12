@@ -90,28 +90,38 @@ def evaluate_fixture_coverage(
         "standings": _nested_bool(coverage, ("standings",)),
     }
 
-    score = 0
-    score += 2 if has_recent_profile else 0
-    score += 1 if has_h2h else 0
-    score += 2 if has_pre_odds else 0
-    score += 1 if supported["events"] else 0
-    score += 1 if supported["lineups"] else 0
-    score += 1 if supported["statistics"] else 0
-    score += 1 if supported["odds"] else 0
-    score += 1 if supported["injuries"] else 0
+    # Split "data observability" from "market tradability":
+    # - coverage_level: 能否稳定拿到比分/事件/统计/阵容等结构化数据
+    # - data_gate_action: 是否具备交易所需盘口条件（含赛前盘口）
+    data_score = 0
+    data_score += 2 if has_recent_profile else 0
+    data_score += 1 if has_h2h else 0
+    data_score += 1 if supported["events"] else 0
+    data_score += 1 if supported["lineups"] else 0
+    data_score += 1 if supported["statistics"] else 0
+    data_score += 1 if supported["injuries"] else 0
 
-    if score >= 8 and has_pre_odds and has_recent_profile:
+    market_score = 0
+    market_score += 2 if has_pre_odds else 0
+    market_score += 1 if supported["odds"] else 0
+
+    score = data_score + market_score
+
+    if data_score >= 6:
         level = "FULL"
-        action = "ALLOW_V4_LIVE"
-    elif score >= 6 and has_pre_odds and has_recent_profile:
+    elif data_score >= 4:
         level = "GOOD"
-        action = "ALLOW_V4_LIVE"
-    elif score >= 4 and has_pre_odds:
+    elif data_score >= 2:
         level = "BASIC"
-        action = "WATCH_ONLY"
     else:
         level = "WEAK"
+
+    if level == "WEAK":
         action = "SKIP_DATA_WEAK"
+    elif has_pre_odds:
+        action = "ALLOW_V4_LIVE"
+    else:
+        action = "WATCH_MARKET_MISSING"
 
     missing = []
     if not has_recent_profile:
@@ -130,6 +140,8 @@ def evaluate_fixture_coverage(
         "coverage_level": level,
         "data_gate_action": action,
         "score": score,
+        "data_score": data_score,
+        "market_score": market_score,
         "has_h2h": has_h2h,
         "has_recent_profile": has_recent_profile,
         "has_pre_odds": has_pre_odds,

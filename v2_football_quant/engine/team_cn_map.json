@@ -484,9 +484,19 @@
     "Union Santa Fe": "圣菲联合",
     "Universitario de Vinto": "宾托大学",
     "Volos NFC": "沃洛斯",
-    "Wadi Degla": "瓦迪德格拉"
+    "Wadi Degla": "瓦迪德格拉",
+    "Asteras Tripolis": "阿斯特拉斯特里波利斯",
+    "Panserraikos": "潘塞拉伊科斯",
+    "Dukla Praha": "杜克拉布拉格",
+    "Veres Rivne": "维雷斯里夫内",
+    "Kryvbas KR": "克里夫巴斯",
+    "Panetolikos": "帕纳托利科斯",
+    "Larisa": "拉里萨",
+    "Khorfakkan": "豪尔费坎",
+    "Al Wahda FC": "瓦赫达",
+    "Al-Wasl FC": "瓦斯尔"
   },
   "unknown": [],
-  "updated_at": "2026-05-13T02:16:50.788265",
+  "updated_at": "2026-05-13T02:33:23.857777",
   "note": "unknown 为待人工补充的英文队名；请把确认后的映射补到 exact。"
 }

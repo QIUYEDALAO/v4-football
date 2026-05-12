@@ -105,6 +105,7 @@ def explain_match(record: dict) -> dict:
     )
     ft_open = best_focus == "FULLTIME_OVER" or ft_score >= max(ht_score, sh_score)
     data_weak = data_action in ("WATCH_ONLY", "SKIP_DATA_WEAK")
+    market_missing = data_action == "WATCH_MARKET_MISSING"
     pre_ht_line = record.get("pre_ht_line")
     pre_ht_line_val = None
     if isinstance(pre_ht_line, dict):
@@ -132,6 +133,9 @@ def explain_match(record: dict) -> dict:
     if data_weak:
         match_type.append("DATA_TOO_WEAK")
         why.append(f"API覆盖为 {data_coverage.get('coverage_level', '-')} / {data_action}")
+    elif market_missing:
+        match_type.append("MARKET_MISSING")
+        why.append(f"统计可用，但盘口端待赛中确认：{data_coverage.get('coverage_level', '-')} / {data_action}")
     if dull_trap:
         match_type.append("DULL_TRAP")
         why.append("分数不低但10分钟后回调质量差")
@@ -194,6 +198,10 @@ def explain_match(record: dict) -> dict:
     if data_action == "WATCH_ONLY":
         avoid_if.append("API覆盖不足导致实时统计/盘口缺失")
         action_code = "PAPER_ONLY"
+    elif data_action == "WATCH_MARKET_MISSING":
+        avoid_if.append("盘口端暂缺/延迟，待赛中盘口恢复")
+        if action_code in ("WAIT_LINE", "WAIT_TEMPO", "WAIT_CONFIDENCE", "PAPER_BUY_NOW"):
+            action_code = "PAPER_ONLY"
     if schedule_action == "WATCH_CAUTION":
         avoid_if.append("赛程压力高")
         if action_code in ("WAIT_LINE", "WAIT_TEMPO"):

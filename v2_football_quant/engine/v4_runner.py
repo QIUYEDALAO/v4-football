@@ -422,16 +422,18 @@ def run_v4_scan(
         best_line = _best_pre_live_line(ht_ou_lines)
         prelim_candidate = bool(market_focus == "HT_LIVE_OVER" and best_line and best_line["line_float"] >= 1.25)
 
+        # 覆盖率评估始终执行（轻量+有缓存），避免 fast 模式出现“假 BASIC/WATCH_ONLY”。
+        data_coverage = evaluate_fixture_coverage(
+            fx,
+            api_client,
+            h2h_result=result,
+            pre_odds_resp=odds_resp,
+            ht_ou_lines=ht_ou_lines,
+        )
+
         # ── 重模块：full模式全部跑；fast模式仅对预候选跑 ──
         run_heavy = (scan_mode == "full") or prelim_candidate
         if run_heavy:
-            data_coverage = evaluate_fixture_coverage(
-                fx,
-                api_client,
-                h2h_result=result,
-                pre_odds_resp=odds_resp,
-                ht_ou_lines=ht_ou_lines,
-            )
             league_baseline = baseline_for_fixture(fx, api_client)
             season_phase = season_phase_for_fixture(fx, api_client)
             motivation = evaluate_match_motivation(fx, api_client, season_phase=season_phase)
@@ -440,7 +442,6 @@ def run_v4_scan(
             away_health = _query_injury_health(api_client, fx["awayId"], fx["away"])
             context_obs = fetch_fixture_context(fx["id"], api_client)
         else:
-            data_coverage = {"coverage_level": "BASIC", "data_gate_action": "WATCH_ONLY"}
             league_baseline = {"adjustment": {"action": "KEEP"}}
             season_phase = {"adjustment": {"action": "KEEP"}}
             motivation = {"gate": {"action": "KEEP", "reason": "FAST_MODE_PRECHECK"}}
