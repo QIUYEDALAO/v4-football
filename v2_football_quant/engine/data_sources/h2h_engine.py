@@ -12,6 +12,8 @@ V4 比赛画像引擎 — H2H + 近期状态综合评估
   result = evaluate_h2h_edge(home_id, away_id, api_func)
 """
 
+from __future__ import annotations
+
 import time
 import logging
 from datetime import datetime, timezone, timedelta

@@ -1,0 +1,130 @@
+from __future__ import annotations
+
+import argparse
+import json
+from collections import Counter, defaultdict
+from datetime import datetime
+from pathlib import Path
+
+BASE_DIR = Path(__file__).resolve().parent.parent
+REPORT_DIR = BASE_DIR / "data" / "daily_reports"
+SNAP_DIR = BASE_DIR / "data" / "live_odds_snapshots"
+AUDIT_DIR = BASE_DIR / "data" / "capture_audit"
+
+
+def _date_key(date_str: str) -> str:
+    return date_str.replace("-", "")
+
+
+def _load_json(path: Path, default):
+    if not path.exists():
+        return default
+    with open(path, encoding="utf-8") as f:
+        return json.load(f)
+
+
+def _load_jsonl(path: Path) -> list[dict]:
+    if not path.exists():
+        return []
+    rows = []
+    with open(path, encoding="utf-8") as f:
+        for line in f:
+            line = line.strip()
+            if not line:
+                continue
+            try:
+                rows.append(json.loads(line))
+            except Exception:
+                continue
+    return rows
+
+
+def build_audit(date_str: str) -> dict:
+    key = _date_key(date_str)
+    watchlist = _load_json(REPORT_DIR / f"live_watchlist_{key}.json", [])
+    watch_ids = {int(x.get("fixture_id")) for x in watchlist if x.get("fixture_id")}
+
+    day_dir = SNAP_DIR / key
+    raw_rows = _load_jsonl(day_dir / "live_odds_raw.jsonl")
+    norm_rows = _load_jsonl(day_dir / "live_odds_normalized.jsonl")
+    miss_rows = _load_jsonl(day_dir / "live_market_missing.jsonl")
+
+    raw_by_fixture = defaultdict(int)
+    live_ok_fixtures = set()
+    for r in raw_rows:
+        fid = r.get("fixture_id")
+        if not fid:
+            continue
+        raw_by_fixture[int(fid)] += 1
+        if r.get("capture_status") == "OK":
+            live_ok_fixtures.add(int(fid))
+
+    norm_by_fixture = defaultdict(int)
+    lines_counter = Counter()
+    for r in norm_rows:
+        fid = r.get("fixture_id")
+        if fid:
+            norm_by_fixture[int(fid)] += 1
+        try:
+            lines_counter[str(float(r.get("line")))] += 1
+        except Exception:
+            pass
+
+    miss_counter = Counter((r.get("missing_reason") or "UNKNOWN") for r in miss_rows)
+
+    monitored = len(live_ok_fixtures)
+    watch_count = len(watch_ids)
+    monitor_coverage = round(monitored / watch_count * 100, 2) if watch_count else 0.0
+
+    expected_per_fixture = 41
+    completeness = []
+    for fid in sorted(live_ok_fixtures):
+        got = raw_by_fixture.get(fid, 0)
+        completeness.append(got / expected_per_fixture * 100)
+    avg_completeness = round(sum(completeness) / len(completeness), 2) if completeness else 0.0
+
+    only_ft_like = 0
+    for fid in live_ok_fixtures:
+        if norm_by_fixture.get(fid, 0) == 0 and raw_by_fixture.get(fid, 0) > 0:
+            only_ft_like += 1
+
+    out = {
+        "date": key,
+        "generated_at": datetime.now().isoformat(),
+        "watchlist_candidates": watch_count,
+        "entered_monitoring": monitored,
+        "monitor_coverage_pct": monitor_coverage,
+        "avg_raw_snapshots_per_monitored_fixture": round(sum(raw_by_fixture[fid] for fid in live_ok_fixtures) / monitored, 2) if monitored else 0.0,
+        "expected_snapshots_per_fixture_0_20": expected_per_fixture,
+        "avg_snapshot_completeness_pct": avg_completeness,
+        "fixtures_with_ht_ou_normalized": len([1 for fid in live_ok_fixtures if norm_by_fixture.get(fid, 0) > 0]),
+        "fixtures_without_ht_ou": only_ft_like,
+        "normalized_rows": len(norm_rows),
+        "missing_rows": len(miss_rows),
+        "line_distribution": dict(lines_counter),
+        "missing_reason_top": miss_counter.most_common(10),
+        "raw_path": str(day_dir / "live_odds_raw.jsonl"),
+        "normalized_path": str(day_dir / "live_odds_normalized.jsonl"),
+        "missing_path": str(day_dir / "live_market_missing.jsonl"),
+    }
+
+    AUDIT_DIR.mkdir(parents=True, exist_ok=True)
+    out_path = AUDIT_DIR / f"v4_live_capture_audit_{key}.json"
+    with open(out_path, "w", encoding="utf-8") as f:
+        json.dump(out, f, ensure_ascii=False, indent=2)
+
+    out["audit_path"] = str(out_path)
+    return out
+
+
+def main():
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--date", default=datetime.now().strftime("%Y%m%d"), help="YYYYMMDD 或 YYYY-MM-DD")
+    args = parser.parse_args()
+
+    result = build_audit(args.date)
+    print(json.dumps(result, ensure_ascii=False, indent=2))
+
+
+if __name__ == "__main__":
+    main()

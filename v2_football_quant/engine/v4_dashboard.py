@@ -202,7 +202,7 @@ def _enrich_records(scout: list[dict], watchlist: list[dict], live_status: dict 
             "lineup_gate": rec.get("lineup_gate") or (watch or {}).get("lineup_gate"),
         }
         rows.append(row)
-    return sorted(rows, key=lambda x: (-x["hotness_score"], x.get("kickoff", "")))
+    return sorted(rows, key=lambda x: x.get("kickoff", ""))
 
 
 def _rows_json(rows: list[dict]) -> str:
@@ -508,7 +508,7 @@ def render_dashboard(date_str: str) -> Path:
         <select id="watch"><option value="1">仅主信号(默认)</option><option value="">全部</option></select>
         <select id="line"><option value="">全部盘口</option><option value="1.25">≥1.25</option><option value="1.5">≥1.5</option></select>
         <select id="view"><option value="cards">卡片</option><option value="table">表格</option></select>
-        <select id="sort"><option value="hotness">热度排序</option><option value="time">时间排序</option><option value="line">盘口排序</option></select>
+        <select id="sort"><option value="time">时间排序</option><option value="hotness">热度排序</option><option value="line">盘口排序</option></select>
       </div>
     </div>
   </header>

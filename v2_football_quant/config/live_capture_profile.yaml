@@ -1,0 +1,78 @@
+{
+  "profiles": {
+    "ultra": {
+      "daily_budget": {
+        "hard_limit": 75000,
+        "soft_limit": 65000,
+        "reserve": 10000
+      },
+      "rate_limit": {
+        "max_requests_per_minute": 350
+      },
+      "scheduler": {
+        "max_a": 80,
+        "max_b": 300,
+        "max_c": 500
+      },
+      "tiers": {
+        "A_candidate": {
+          "odds_interval_sec": 10,
+          "state_interval_sec": 10,
+          "events_interval_sec": 15,
+          "stats_interval_sec": 30,
+          "from_minute": 0,
+          "to_minute": 20
+        },
+        "B_shadow": {
+          "odds_interval_sec": 30,
+          "state_interval_sec": 30,
+          "events_interval_sec": 30,
+          "stats_interval_sec": 60,
+          "from_minute": 0,
+          "to_minute": 20
+        },
+        "C_slice": {
+          "capture_minutes": [0, 5, 8, 10, 12, 15, 20, 45],
+          "endpoints": ["odds_live", "fixture_state", "events"]
+        }
+      }
+    },
+    "may_sprint": {
+      "daily_budget": {
+        "hard_limit": 75000,
+        "soft_limit": 65000,
+        "reserve": 10000
+      },
+      "rate_limit": {
+        "max_requests_per_minute": 350
+      },
+      "scheduler": {
+        "max_a": 120,
+        "max_b": 450,
+        "max_c": 180
+      },
+      "tiers": {
+        "A_candidate": {
+          "odds_interval_sec": 10,
+          "state_interval_sec": 10,
+          "events_interval_sec": 15,
+          "stats_interval_sec": 30,
+          "from_minute": 0,
+          "to_minute": 20
+        },
+        "B_shadow": {
+          "odds_interval_sec": 25,
+          "state_interval_sec": 25,
+          "events_interval_sec": 30,
+          "stats_interval_sec": 60,
+          "from_minute": 0,
+          "to_minute": 20
+        },
+        "C_slice": {
+          "capture_minutes": [8, 10, 12, 15, 20, 45],
+          "endpoints": ["odds_live", "fixture_state", "events"]
+        }
+      }
+    }
+  }
+}
