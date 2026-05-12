@@ -18,6 +18,7 @@ from datetime import datetime, timezone, timedelta
 from typing import Optional
 
 logger = logging.getLogger("V4_H2H_Engine")
+_RECENT_PROFILE_CACHE: dict[tuple[int, int, bool], dict] = {}
 
 H2H_YEAR_CUTOFF = 2020
 H2H_REFERENCE_MIN_SAMPLES = 4
@@ -28,6 +29,9 @@ RECENT_ATTACK_DEFENSE_MIN = 0.65
 RECENT_TIMING_PRESSURE_MIN = 0.50
 H2H_BAD_FLOOR_MIN = 0.50
 HT_LIVE_SCORE_MIN = 0.50
+# 性能开关：recent画像默认不再逐场拉 fixtures/events（保留 recent=5 样本深度）
+# 进球时间分布仍由 H2H 主样本提供，避免 full 扫描在 valid 场次上超时。
+RECENT_PROFILE_INCLUDE_EVENTS = False
 
 
 def _clamp_score(value: float) -> float:
@@ -143,8 +147,11 @@ def _parse_goal_events(api_client, fixture_id: int) -> dict:
     return bins
 
 
-def _query_recent_goal_profile(api_client, team_id: int, last_n: int = 5) -> dict:
+def _query_recent_goal_profile(api_client, team_id: int, last_n: int = 5, include_events: bool = True) -> dict:
     """查询某队最近 N 场完赛的上下半场进球画像。"""
+    cache_key = (int(team_id), int(last_n), bool(include_events))
+    if cache_key in _RECENT_PROFILE_CACHE:
+        return _RECENT_PROFILE_CACHE[cache_key]
     empty = {
         "ht_over": 0.0, "ht_avg": 0.0, "ht_scored": 0.0, "ht_conceded": 0.0,
         "ht_goals_for_avg": 0.0, "ht_goals_against_avg": 0.0,
@@ -160,9 +167,11 @@ def _query_recent_goal_profile(api_client, team_id: int, last_n: int = 5) -> dic
     try:
         resp = api_client(f"fixtures?team={team_id}&last={last_n}&status=FT")
         if not resp or "response" not in resp:
+            _RECENT_PROFILE_CACHE[cache_key] = empty
             return empty
         matches = resp["response"]
         if not matches:
+            _RECENT_PROFILE_CACHE[cache_key] = empty
             return empty
         ht_over = 0
         ht_scored = 0
@@ -213,7 +222,7 @@ def _query_recent_goal_profile(api_client, team_id: int, last_n: int = 5) -> dic
                 sh_over += 1
             if ft_goals >= 2:
                 ft_over_1_5 += 1
-            if fixture_id:
+            if include_events and fixture_id:
                 bins = _parse_goal_events(api_client, fixture_id)
                 for key in time_bin_counts:
                     if bins.get(key):
@@ -221,7 +230,6 @@ def _query_recent_goal_profile(api_client, team_id: int, last_n: int = 5) -> dic
                 for key in second_half_counts:
                     if bins.get(key):
                         second_half_counts[key] += 1
-                time.sleep(0.05)
         n = len(matches)
         time_bins = {k: round(v / n, 3) for k, v in time_bin_counts.items()}
         second_half_bins = {k: round(v / n, 3) for k, v in second_half_counts.items()}
@@ -234,7 +242,7 @@ def _query_recent_goal_profile(api_client, team_id: int, last_n: int = 5) -> dic
             time_bins.get("0_10", 0) >= 0.5
             and time_bins.get("11_45", 0) < 0.5
         )
-        return {
+        result = {
             "ht_over": round(ht_over / n, 3),
             "ht_avg": round(total_ht_goals / n, 2),
             "ht_scored": round(ht_scored / n, 3),
@@ -249,11 +257,15 @@ def _query_recent_goal_profile(api_client, team_id: int, last_n: int = 5) -> dic
             "late_fh_pressure": late_fh_pressure,
             "early_only_flag": early_only_flag,
         }
+        _RECENT_PROFILE_CACHE[cache_key] = result
+        return result
     except Exception:
         return empty
+    _RECENT_PROFILE_CACHE[cache_key] = empty
+    return empty
 
 
-def evaluate_h2h_edge(home_id: int, away_id: int, api_client) -> dict:
+def evaluate_h2h_edge(home_id: int, away_id: int, api_client, mode: str = "full") -> dict:
     endpoint = f"fixtures/headtohead?h2h={home_id}-{away_id}"
     resp = api_client(endpoint)
 
@@ -277,7 +289,9 @@ def evaluate_h2h_edge(home_id: int, away_id: int, api_client) -> dict:
     recent_3y = [m for m in matches if _match_timestamp(m) >= cutoff]
     n_3y = len(recent_3y)
 
-    recent = sorted(recent_3y, key=lambda x: _match_timestamp(x), reverse=True)[:10]
+    fast_mode = False
+    recent_limit = 10
+    recent = sorted(recent_3y, key=lambda x: _match_timestamp(x), reverse=True)[:recent_limit]
     n = len(recent)
 
     ht_goal_count = 0
@@ -351,7 +365,6 @@ def evaluate_h2h_edge(home_id: int, away_id: int, api_client) -> dict:
             if bins["76_90"]: second_half_bins["76_90"] += 1
         except Exception:
             pass
-        time.sleep(0.15)
 
     for k in time_bins:
         time_bins[k] = round(time_bins[k] / h2h_denominator, 3)
@@ -376,10 +389,19 @@ def evaluate_h2h_edge(home_id: int, away_id: int, api_client) -> dict:
     )
 
     # 近期战绩（含场均进球）
-    home_recent = _query_recent_goal_profile(api_client, home_id, last_n=5)
-    time.sleep(0.3)
-    away_recent = _query_recent_goal_profile(api_client, away_id, last_n=5)
-    time.sleep(0.3)
+    recent_last_n = 5
+    home_recent = _query_recent_goal_profile(
+        api_client,
+        home_id,
+        last_n=recent_last_n,
+        include_events=(not fast_mode and RECENT_PROFILE_INCLUDE_EVENTS),
+    )
+    away_recent = _query_recent_goal_profile(
+        api_client,
+        away_id,
+        last_n=recent_last_n,
+        include_events=(not fast_mode and RECENT_PROFILE_INCLUDE_EVENTS),
+    )
 
     recent_form_avg = (home_recent["ht_over"] + away_recent["ht_over"]) / 2
     recent_sh_avg = (home_recent["sh_over"] + away_recent["sh_over"]) / 2
@@ -409,6 +431,11 @@ def evaluate_h2h_edge(home_id: int, away_id: int, api_client) -> dict:
         (home_recent["late_fh_pressure"] + away_recent["late_fh_pressure"]) / 2,
         3,
     )
+    # recent不拉events时，时间分布回退到H2H时间分布，避免“全0”误伤解释层
+    if not RECENT_PROFILE_INCLUDE_EVENTS:
+        recent_time_bins = dict(time_bins)
+        recent_second_half_bins = dict(second_half_bins)
+        recent_late_fh_pressure = late_fh_pressure
     recent_early_only_flag = (
         recent_time_bins.get("0_10", 0) >= 0.5
         and recent_time_bins.get("11_45", 0) < 0.5

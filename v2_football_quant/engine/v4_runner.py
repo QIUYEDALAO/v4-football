@@ -82,7 +82,20 @@ def api_get(endpoint: str):
     return None
 
 
-def fetch_today_fixtures(lookahead_hours: float | None = None):
+def _cached_api_client(base_client):
+    cache: dict[str, dict | None] = {}
+
+    def _get(endpoint: str):
+        if endpoint in cache:
+            return cache[endpoint]
+        resp = base_client(endpoint)
+        cache[endpoint] = resp
+        return resp
+
+    return _get
+
+
+def fetch_today_fixtures(lookahead_hours: float | None = None, api_client=api_get):
     """拉取白名单联赛 + 今日/明日未开赛比赛。
 
     lookahead_hours 仅作为可选收窄条件；默认不再硬卡 12h。
@@ -93,7 +106,7 @@ def fetch_today_fixtures(lookahead_hours: float | None = None):
     all_fixtures = []
 
     for day in [td.strftime("%Y-%m-%d"), nd.strftime("%Y-%m-%d")]:
-        resp = api_get(f"fixtures?date={day}&timezone=Asia/Shanghai")
+        resp = api_client(f"fixtures?date={day}&timezone=Asia/Shanghai")
         if not resp: continue
         for f in resp.get("response", []):
             lg_id = str(f["league"]["id"])
@@ -121,7 +134,7 @@ def fetch_today_fixtures(lookahead_hours: float | None = None):
                 "league_name": LEAGUE_CN.get(lg_id, f["league"]["name"]),
                 "kickoff": kickoff,
             })
-        time.sleep(0.5)
+        time.sleep(0.1)
 
     seen = set()
     unique = []
@@ -218,11 +231,12 @@ def _query_injury_health(api_client, team_id: int, team_name: str) -> dict:
         return {"status": "unknown", "missing": []}
 
 
-def run_v4_scan(run_tag="V4_DEFAULT", with_lineups=False, lookahead_hours=None):
+def run_v4_scan(run_tag="V4_DEFAULT", with_lineups=False, lookahead_hours=None, scan_mode: str = "fast"):
     logger.info(f"🔭 V4 球探扫描 | {run_tag} | {datetime.now().strftime('%H:%M')}")
-    lineup_analyzer = LineupStrengthAnalyzer(api_get) if with_lineups else None
+    api_client = _cached_api_client(api_get)
+    lineup_analyzer = LineupStrengthAnalyzer(api_client) if with_lineups else None
 
-    fixtures = fetch_today_fixtures(lookahead_hours=lookahead_hours)
+    fixtures = fetch_today_fixtures(lookahead_hours=lookahead_hours, api_client=api_client)
     today_key = date.today().strftime("%Y%m%d")
     universe_out = universe_path(today_key)
     league_status_map = _load_league_status_map()
@@ -268,8 +282,11 @@ def run_v4_scan(run_tag="V4_DEFAULT", with_lineups=False, lookahead_hours=None):
             })
             continue
 
-        result = evaluate_h2h_edge(fx["homeId"], fx["awayId"], api_get)
-        time.sleep(0.5)
+        result = evaluate_h2h_edge(
+            fx["homeId"],
+            fx["awayId"],
+            api_client,
+        )
         h2h_valid = bool(result.get("valid"))
         h2h_reason = result.get("reason", "")
 
@@ -303,58 +320,51 @@ def run_v4_scan(run_tag="V4_DEFAULT", with_lineups=False, lookahead_hours=None):
             continue
 
         # ── 庄家盘口阵地：捕获所有 HT OU 线 ──
-        odds_resp = api_get(f"odds?fixture={fx['id']}")
+        odds_resp = api_client(f"odds?fixture={fx['id']}")
         ht_ou_lines = _capture_ht_ou_lines(odds_resp) if odds_resp else []
-        time.sleep(0.5)
 
-        # ── API-Football 数据覆盖闸门 ──
-        data_coverage = evaluate_fixture_coverage(
-            fx,
-            api_get,
-            h2h_result=result,
-            pre_odds_resp=odds_resp,
-            ht_ou_lines=ht_ou_lines,
-        )
-        time.sleep(0.2)
+        # fast模式：先做轻量前筛，避免每场都触发 5-6 个重模块
+        factors = result.get("factors", {})
+        market_focus = result.get("market_focus")
+        best_line = _best_pre_live_line(ht_ou_lines)
+        prelim_candidate = bool(market_focus == "HT_LIVE_OVER" and best_line and best_line["line_float"] >= 1.25)
 
-        # ── 联赛 HT/SH/FT 环境基准 ──
-        league_baseline = baseline_for_fixture(fx, api_get)
+        # ── 重模块：full模式全部跑；fast模式仅对预候选跑 ──
+        run_heavy = (scan_mode == "full") or prelim_candidate
+        if run_heavy:
+            data_coverage = evaluate_fixture_coverage(
+                fx,
+                api_client,
+                h2h_result=result,
+                pre_odds_resp=odds_resp,
+                ht_ou_lines=ht_ou_lines,
+            )
+            league_baseline = baseline_for_fixture(fx, api_client)
+            season_phase = season_phase_for_fixture(fx, api_client)
+            motivation = evaluate_match_motivation(fx, api_client, season_phase=season_phase)
+            schedule_pressure = evaluate_match_schedule_pressure(fx, api_client)
+            home_health = _query_injury_health(api_client, fx["homeId"], fx["home"])
+            away_health = _query_injury_health(api_client, fx["awayId"], fx["away"])
+            context_obs = fetch_fixture_context(fx["id"], api_client)
+        else:
+            data_coverage = {"coverage_level": "BASIC", "data_gate_action": "WATCH_ONLY"}
+            league_baseline = {"adjustment": {"action": "KEEP"}}
+            season_phase = {"adjustment": {"action": "KEEP"}}
+            motivation = {"gate": {"action": "KEEP", "reason": "FAST_MODE_PRECHECK"}}
+            schedule_pressure = {"action": "KEEP", "reason": "FAST_MODE_PRECHECK"}
+            home_health = {"status": "unknown", "missing": []}
+            away_health = {"status": "unknown", "missing": []}
+            context_obs = {"weather": {"status": "SKIPPED_FAST_MODE"}, "pitch": {"status": "SKIPPED_FAST_MODE"}, "referee": {"status": "SKIPPED_FAST_MODE"}}
         league_adjustment = league_baseline.get("adjustment", {})
-        time.sleep(0.2)
-
-        # ── 赛季阶段：初期/中期/末期/最后三轮 ──
-        season_phase = season_phase_for_fixture(fx, api_get)
-        phase_adjustment = season_phase.get("adjustment", {})
-        time.sleep(0.2)
-
-        # ── 排名与战意过滤 ──
-        motivation = evaluate_match_motivation(fx, api_get, season_phase=season_phase)
-        motivation_gate = motivation.get("gate", {})
-        time.sleep(0.2)
-
-        # ── 未来三场赛程压力 ──
-        schedule_pressure = evaluate_match_schedule_pressure(fx, api_get)
-        time.sleep(0.2)
-
-        # ── 伤病侦查 ──
-        home_health = _query_injury_health(api_get, fx["homeId"], fx["home"])
-        time.sleep(0.3)
-        away_health = _query_injury_health(api_get, fx["awayId"], fx["away"])
-        time.sleep(0.3)
-        # ── P8 观测层：天气/场地/裁判（先记录，不入模） ──
-        context_obs = fetch_fixture_context(fx["id"], api_get)
-        time.sleep(0.2)
+        motivation_gate = (motivation.get("gate") or {})
 
         # ── 提取因子 ──
-        factors = result.get("factors", {})
         tb = factors.get("time_bins", {})
         sh_tb = factors.get("second_half_bins", {})
         combined_bins = {**tb, **sh_tb}
         best_bin = max(combined_bins, key=combined_bins.get) if combined_bins else "31_45"
 
         # ── 🎯 滚球雷达：探测高开比赛 (>=1.25 才是走地回调候选) ──
-        best_line = _best_pre_live_line(ht_ou_lines)
-        market_focus = result.get("market_focus")
         has_high_line = bool(
             market_focus == "HT_LIVE_OVER"
             and data_coverage.get("data_gate_action") == "ALLOW_V4_LIVE"
@@ -369,7 +379,6 @@ def run_v4_scan(run_tag="V4_DEFAULT", with_lineups=False, lookahead_hours=None):
         lineup_gate = None
         if has_high_line and lineup_analyzer:
             lineup_gate = lineup_analyzer.analyze_fixture(fx)
-            time.sleep(0.5)
 
         if has_high_line:
             priority_boost = 0
@@ -502,9 +511,16 @@ if __name__ == "__main__":
         default=None,
         help="可选：只扫描未来 N 小时比赛。默认不限制，扫描今天+明天所有白名单未开赛比赛",
     )
+    parser.add_argument(
+        "--scan-mode",
+        choices=["fast", "full"],
+        default="fast",
+        help="fast: 先轻筛再跑重模块（推荐）；full: 每场全量引擎",
+    )
     args = parser.parse_args()
     run_v4_scan(
         run_tag=args.run_tag,
         with_lineups=args.with_lineups,
         lookahead_hours=args.lookahead_hours,
+        scan_mode=args.scan_mode,
     )
