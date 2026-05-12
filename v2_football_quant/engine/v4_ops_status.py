@@ -11,8 +11,9 @@ HEARTBEATS_DIR = OPS_DIR / "heartbeats"
 EXEC_DIR = BASE_DIR / "data" / "execution"
 SNAP_DIR = BASE_DIR / "data" / "live_odds_snapshots"
 MONITOR_DIR = BASE_DIR / "data" / "live_monitor"
+OPS_RULES_PATH = BASE_DIR / "config" / "ops_alert_rules.yaml"
 
-STALE_THRESHOLDS = {
+DEFAULT_STALE_THRESHOLDS = {
     "A_candidate_capture": 90,
     "B_shadow_capture": 150,
     "C_slice_capture": 360,
@@ -39,6 +40,20 @@ def _count_jsonl(path: Path) -> int:
         return sum(1 for _ in f)
 
 
+def _load_stale_thresholds() -> dict:
+    rules = _load_json(OPS_RULES_PATH, {})
+    heartbeat = (rules or {}).get("heartbeat") or {}
+    merged = dict(DEFAULT_STALE_THRESHOLDS)
+    for key in list(merged.keys()):
+        conf_key = f"{key}_stale_sec"
+        if conf_key in heartbeat:
+            try:
+                merged[key] = int(heartbeat[conf_key])
+            except Exception:
+                pass
+    return merged
+
+
 def _sec_ago(ts: str) -> int | None:
     try:
         t = datetime.fromisoformat(ts)
@@ -53,6 +68,7 @@ def build_status(date_str: str) -> dict:
     api = _load_json(BASE_DIR / "data" / "capture_audit" / f"v4_api_budget_audit_{key}.json", {})
     cap = _load_json(BASE_DIR / "data" / "capture_audit" / f"v4_live_capture_audit_{key}.json", {})
 
+    stale_thresholds = _load_stale_thresholds()
     jobs = []
     stale_count = 0
     for hb_file in sorted(HEARTBEATS_DIR.glob("*.json")):
@@ -61,7 +77,7 @@ def build_status(date_str: str) -> dict:
         status = hb.get("status") or "UNKNOWN"
         ts = hb.get("ts")
         ago = _sec_ago(ts) if ts else None
-        threshold = STALE_THRESHOLDS.get(name, 300)
+        threshold = stale_thresholds.get(name, 300)
         if status == "RUNNING" and ago is not None and ago > threshold:
             status = "STALE"
             stale_count += 1
@@ -84,6 +100,9 @@ def build_status(date_str: str) -> dict:
         "missing_rows": _count_jsonl(SNAP_DIR / key / "live_market_missing.jsonl"),
         "tier_counts": task.get("tier_counts", {}),
         "a_breakdown": task.get("a_channel_breakdown", {}),
+        "universe_total": int(task.get("universe_total", 0) or 0),
+        "eligible_live_total": int(task.get("eligible_live_total", 0) or 0),
+        "excluded_reason_counts": task.get("excluded_reason_counts", {}),
         "ht_ou_identified_pct": ht_ou_identified_pct,
     }
     return out

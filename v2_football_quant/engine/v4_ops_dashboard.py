@@ -46,6 +46,8 @@ def render(date_str: str) -> Path:
 <table><tr><th>Job</th><th>Status</th><th>Heartbeat(s)</th></tr>{''.join(rows)}</table>
 <h2>A/B/C</h2>
 <pre>{json.dumps(status.get('tier_counts', {}), ensure_ascii=False, indent=2)}</pre>
+<h2>Universe Filter</h2>
+<pre>{json.dumps({"universe_total": status.get("universe_total", 0), "eligible_live_total": status.get("eligible_live_total", 0), "excluded_reason_counts": status.get("excluded_reason_counts", {})}, ensure_ascii=False, indent=2)}</pre>
 <h2>Alerts</h2>
 <pre>{json.dumps(alerts, ensure_ascii=False, indent=2)}</pre>
 <h2>Validation Progress ({month})</h2>

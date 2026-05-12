@@ -5,6 +5,7 @@ import json
 import sys
 from datetime import datetime, timedelta
 from pathlib import Path
+from collections import Counter
 from typing import Optional
 
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -236,16 +237,29 @@ def build_tasks(
     end_time = now + timedelta(days=max(0, int(lookahead_days)))
 
     best_by_fixture: dict[int, dict] = {}
+    excluded_reason_counts = Counter()
+    universe_total = len(universe)
     for x in universe:
         fid = int(x.get("fixture_id") or 0)
-        if not fid or fid in a_ids:
+        if not fid:
+            excluded_reason_counts["missing_fixture_id"] += 1
+            continue
+        if fid in a_ids:
+            excluded_reason_counts["already_in_A"] += 1
             continue
         kickoff = _dt(str(x.get("kickoff_time") or ""))
         if kickoff is not None:
             if kickoff.tzinfo is None:
                 kickoff = kickoff.replace(tzinfo=now.tzinfo)
-            if kickoff < now or kickoff > end_time:
+            if kickoff < now:
+                excluded_reason_counts["kickoff_already_started"] += 1
                 continue
+            if kickoff > end_time:
+                excluded_reason_counts["kickoff_outside_window"] += 1
+                continue
+        else:
+            excluded_reason_counts["missing_kickoff"] += 1
+            continue
         cov = str(x.get("api_coverage_level") or "UNKNOWN").upper()
         rec = {
             "fixture_id": fid,
@@ -270,7 +284,9 @@ def build_tasks(
         rec_cov = _cov_rank(cov)
         if rec_cov > prev_cov or (rec_cov == prev_cov and rec_score > prev_score):
             best_by_fixture[fid] = rec
+        excluded_reason_counts["duplicate_fixture_kept_best"] += 1
 
+    eligible_live_total = len(best_by_fixture)
     for rec in best_by_fixture.values():
         cov = str(((rec.get("data_coverage") or {}).get("coverage_level") or "")).upper()
         if cov in ("GOOD", "FULL", "BASIC"):
@@ -350,8 +366,11 @@ def build_tasks(
         "generated_at": datetime.now().isoformat(),
         "lookahead_days": lookahead_days,
         "lookback_days": lookback_days,
+        "universe_total": universe_total,
+        "eligible_live_total": eligible_live_total,
         "universe_count": len(universe),
         "universe_files_used": universe_keys,
+        "excluded_reason_counts": dict(excluded_reason_counts),
         "scheduler_limits": {"max_a": eff_max_a, "max_b": eff_max_b, "max_c": eff_max_c},
         "minimum_targets": {"min_b": int(min_b), "min_c": int(min_c)},
         "estimated_cost_per_match": {"A_candidate": a_cost, "B_shadow": b_cost, "C_slice": c_cost},

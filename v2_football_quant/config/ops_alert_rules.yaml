@@ -1,0 +1,28 @@
+{
+  "heartbeat": {
+    "A_candidate_capture_stale_sec": 90,
+    "B_shadow_capture_stale_sec": 150,
+    "C_slice_capture_stale_sec": 360,
+    "v4_budget_audit_stale_sec": 2400,
+    "v4_capture_audit_stale_sec": 2400
+  },
+  "api_budget": {
+    "soft_limit_pct": 85,
+    "hard_limit_pct": 95,
+    "rpm_warn": 320,
+    "rpm_critical": 380,
+    "http_429_warn": 1
+  },
+  "capture_quality": {
+    "ht_ou_identified_pct_min": 30,
+    "asian_line_coverage_pct_min": 20
+  },
+  "task_volume": {
+    "min_a_strict": 1,
+    "min_b_shadow": 80,
+    "min_c_slice": 50
+  },
+  "monthly_validation": {
+    "behind_days_warn": 2
+  }
+}
