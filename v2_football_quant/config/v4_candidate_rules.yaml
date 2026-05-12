@@ -1,0 +1,32 @@
+{
+  "A_strict_v3_pullback": {
+    "coverage_min": "BASIC",
+    "market_focus": "HT_LIVE_OVER",
+    "min_ht_live_score": 55.0,
+    "min_prematch_ht_line": 1.25,
+    "allowed_pullback_fit": ["STRONG", "OK"],
+    "early_only_required": false,
+    "min_pressure_11_45": 0.5,
+    "require_pullback_line_prematch": false
+  },
+  "A_relaxed": {
+    "min_best_score": 70.0,
+    "coverage_min": "BASIC"
+  },
+  "B_shadow": {
+    "min_daily": 80,
+    "target_daily": 120,
+    "sampling": {
+      "near_miss_pct": 50,
+      "random_baseline_pct": 30,
+      "league_balanced_pct": 20
+    }
+  },
+  "live_trigger": {
+    "minute_window": [8, 15],
+    "required_score": "0-0",
+    "target_lines": [0.75, 1.0, 1.25],
+    "require_market_open": true,
+    "require_no_red_card": true
+  }
+}

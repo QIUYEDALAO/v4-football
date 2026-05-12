@@ -1,0 +1,22 @@
+{
+  "SH_strategy": {
+    "status": "PAPER_OBSERVE_ONLY",
+    "forbid_signal_from_base_rate_only": true,
+    "required_for_SH_PAPER_ONLY": {
+      "require_market_prob": true,
+      "require_ev_net_positive": true,
+      "require_execution_quality": true,
+      "require_risk_guard_pass": true
+    },
+    "noisy_flags": {
+      "ev_bucket_not_monotonic": true,
+      "conservative_fill_roi_non_positive": true,
+      "triggered_by_base_rate_only": true
+    },
+    "thresholds": {
+      "min_model_prob": 0.5,
+      "min_ev_net": 0.0,
+      "min_conservative_ev": 0.0
+    }
+  }
+}

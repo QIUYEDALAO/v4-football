@@ -53,6 +53,8 @@ def _entry_meta(row: dict) -> dict:
         "primary_direction": raw.get("primary_direction") or row.get("primary_direction") or intel.get("primary_direction") or "UNKNOWN",
         "confidence": raw.get("confidence") or row.get("confidence") or intel.get("confidence"),
         "strategy_id": row.get("strategy_id") or raw.get("strategy_id") or "UNKNOWN",
+        "a_source": raw.get("a_source") or row.get("a_source") or "UNKNOWN",
+        "capture_tier": raw.get("capture_tier") or row.get("capture_tier") or "UNKNOWN",
     }
 
 
@@ -110,6 +112,7 @@ def evaluate(rows: list[dict]) -> dict:
     by_match_type = defaultdict(bucket_factory)
     by_primary_direction = defaultdict(bucket_factory)
     by_confidence = defaultdict(bucket_factory)
+    by_cohort = defaultdict(bucket_factory)
 
     def add_bucket(store, key, pnl, stake):
         b = store[key]
@@ -134,6 +137,16 @@ def evaluate(rows: list[dict]) -> dict:
             add_bucket(by_match_type, tag, pnl, stake)
         add_bucket(by_primary_direction, meta["primary_direction"], pnl, stake)
         add_bucket(by_confidence, _bucket_confidence(meta["confidence"]), pnl, stake)
+        cohort = "OTHER"
+        a_src = str(meta.get("a_source") or "").lower()
+        tier = str(meta.get("capture_tier") or "").lower()
+        if a_src == "strict":
+            cohort = "A_strict"
+        elif a_src == "relaxed":
+            cohort = "A_relaxed"
+        elif tier == "b_shadow":
+            cohort = "B_shadow"
+        add_bucket(by_cohort, cohort, pnl, stake)
 
     return {
         "generated_at": datetime.now().isoformat(),
@@ -168,6 +181,10 @@ def evaluate(rows: list[dict]) -> dict:
         "by_confidence": {
             k: _bucket_summary(v)
             for k, v in sorted(by_confidence.items())
+        },
+        "by_cohort": {
+            k: _bucket_summary(v)
+            for k, v in sorted(by_cohort.items())
         },
         "decision": (
             "EVALUATE"

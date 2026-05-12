@@ -13,6 +13,25 @@ OPS_RULES_PATH = BASE_DIR / "config" / "ops_alert_rules.yaml"
 SNAP_ROOT = BASE_DIR / "data" / "live_odds_snapshots"
 JOB_RUNS_DIR = BASE_DIR / "data" / "ops" / "job_runs"
 
+ALERT_RULE_CN = {
+    "budget_soft": "API用量接近软上限",
+    "budget_hard": "API用量接近硬上限",
+    "rpm_warn": "每分钟请求速率预警",
+    "rpm_critical": "每分钟请求速率严重超限",
+    "http_429": "出现429限流错误",
+    "cron_duplicate_start": "Cron重复触发（已被锁拦截）",
+    "a_strict_zero": "A严格样本为0",
+    "b_shadow_low": "B影子样本不足",
+    "c_slice_low": "C切片样本不足",
+    "ht_ou_identified_low": "HT O/U识别率过低",
+    "raw_snapshot_completion_low": "原始快照完整率过低",
+    "asian_line_coverage_low": "0.75/1.0/1.25亚洲线覆盖率过低",
+    "missing_reason_unknown_high": "缺失原因UNKNOWN占比过高",
+    "normalized_zero_minutes": "标准化数据连续为空",
+    "normalized_stale_minutes": "标准化数据更新滞后",
+    "watchlist_empty": "今日watchlist为空",
+}
+
 
 def _date_key(date_str: str) -> str:
     return date_str.replace("-", "")
@@ -165,9 +184,18 @@ def run_alerts(date_str: str) -> dict:
         "alerts": alerts,
     }
     out_path = ALERT_DIR / f"ops_alerts_{key}.jsonl"
+    alerts_cn = []
     for a in alerts:
-        _append_jsonl(out_path, {"date": key, "ts": datetime.now().isoformat(), **a})
+        row = {
+            "date": key,
+            "ts": datetime.now().isoformat(),
+            **a,
+            "rule_cn": ALERT_RULE_CN.get(str(a.get("rule") or ""), "未定义规则说明"),
+        }
+        _append_jsonl(out_path, row)
+        alerts_cn.append(row)
     out["alerts_path"] = str(out_path)
+    out["alerts_cn"] = alerts_cn
     return out
 
 

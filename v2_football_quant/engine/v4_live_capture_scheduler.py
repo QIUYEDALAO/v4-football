@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import random
 import sys
 from datetime import datetime, timedelta
 from pathlib import Path
@@ -16,6 +17,7 @@ from engine.live_capture_profile import load_profile, tier_conf
 REPORT_DIR = BASE_DIR / "data" / "daily_reports"
 MONITOR_DIR = BASE_DIR / "data" / "live_monitor"
 UNIVERSE_DIR = BASE_DIR / "data" / "universe"
+CANDIDATE_RULES_PATH = BASE_DIR / "config" / "v4_candidate_rules.yaml"
 
 
 def _date_key(date_str: str) -> str:
@@ -31,6 +33,10 @@ def _load_json(path: Path, default):
         return default
     with open(path, encoding="utf-8") as f:
         return json.load(f)
+
+
+def _coverage_pass(level: str, min_level: str) -> bool:
+    return _cov_rank(level) >= _cov_rank(min_level)
 
 
 def _load_jsonl(path: Path) -> list[dict]:
@@ -193,6 +199,26 @@ def _take_remaining_budget(
     return picked, budget_left
 
 
+def _pick_league_balanced(rows: list[dict], n: int) -> list[dict]:
+    if n <= 0:
+        return []
+    by_league: dict[str, list[dict]] = {}
+    for r in rows:
+        lg = str(r.get("league") or "UNKNOWN")
+        by_league.setdefault(lg, []).append(r)
+    out = []
+    leagues = sorted(by_league.keys())
+    idx = 0
+    while len(out) < n and leagues:
+        lg = leagues[idx % len(leagues)]
+        bucket = by_league.get(lg) or []
+        if bucket:
+            out.append(bucket.pop(0))
+        leagues = [x for x in leagues if by_league.get(x)]
+        idx += 1
+    return out
+
+
 def build_tasks(
     date_str: str,
     profile_name: str,
@@ -209,6 +235,11 @@ def build_tasks(
 ) -> dict:
     key = _date_key(date_str)
     profile = load_profile(profile_name)
+    rules = _load_json(CANDIDATE_RULES_PATH, {})
+    strict_rule = (rules or {}).get("A_strict_v3_pullback") or {}
+    relaxed_rule = (rules or {}).get("A_relaxed") or {}
+    b_shadow_rule = (rules or {}).get("B_shadow") or {}
+
     scout = _load_json(REPORT_DIR / f"scout_v4_{key}.json", [])
     watch = _load_json(REPORT_DIR / f"live_watchlist_{key}.json", [])
     # Fallback: when live_watchlist is absent, use scout for strict extraction.
@@ -225,50 +256,70 @@ def build_tasks(
     a_strict = []
     a_relaxed = []
     strict_from_v1 = 0
-    strict_from_v2 = 0
+    strict_from_v3 = 0
     sched = profile.get("scheduler") or {}
-    strict_v2_conf = sched.get("strict_v2") or {}
-    strict_v2_enabled = bool(strict_v2_conf.get("enabled", True))
-    strict_v2_min_ht = float(strict_v2_conf.get("min_ht_live_score", 55.0))
-    strict_v2_cov = {
-        str(x).upper() for x in (strict_v2_conf.get("allow_coverage_levels") or ["BASIC", "GOOD", "FULL"])
-    }
-    strict_v2_lines = [float(x) for x in (strict_v2_conf.get("require_key_lines") or [0.75, 1.0, 1.25])]
+    strict_cov_min = str(strict_rule.get("coverage_min", "BASIC")).upper()
+    strict_focus = str(strict_rule.get("market_focus", "HT_LIVE_OVER"))
+    strict_min_ht_score = float(strict_rule.get("min_ht_live_score", 55.0))
+    strict_min_prematch_line = float(strict_rule.get("min_prematch_ht_line", 1.25))
+    strict_pullback_allowed = {str(x).upper() for x in (strict_rule.get("allowed_pullback_fit") or ["STRONG", "OK"])}
+    strict_early_only_required = bool(strict_rule.get("early_only_required", False))
+    strict_min_pressure = float(strict_rule.get("min_pressure_11_45", 0.5))
     for x in watch:
         cov = str(((x.get("data_coverage") or {}).get("coverage_level") or "")).upper()
-        # v1 strict: old definition
-        if x.get("market_focus") == "HT_LIVE_OVER" and cov in ("GOOD", "FULL"):
-            row = {"a_source": "strict", **x}
-            a_rows.append(row)
-            a_strict.append(row)
-            strict_from_v1 += 1
-            continue
-
-        # v2 strict: for capture infrastructure, allow BASIC coverage when
-        # HT live score is strong and HT key lines are present.
         ht_score = _ht_live_score(x)
-        if strict_v2_enabled and cov in strict_v2_cov and ht_score >= strict_v2_min_ht and _has_required_ht_lines(x, strict_v2_lines):
+        pre_lines = x.get("ht_ou_lines") or []
+        pre_line_max = None
+        try:
+            pre_line_max = max(float((ln or {}).get("line")) for ln in pre_lines if isinstance(ln, dict) and (ln or {}).get("line") is not None)
+        except Exception:
+            pre_line_max = None
+        factors = x.get("factors") or {}
+        pullback_fit = str(factors.get("pullback_fit") or "WEAK").upper()
+        early_only = bool(factors.get("early_only_flag", False))
+        pressure = 0.0
+        try:
+            time_bins = factors.get("time_bins") or {}
+            pressure = float(time_bins.get("11_45") or 0.0)
+        except Exception:
+            pressure = 0.0
+
+        if (
+            _coverage_pass(cov, strict_cov_min)
+            and str(x.get("market_focus")) == strict_focus
+            and ht_score >= strict_min_ht_score
+            and pre_line_max is not None
+            and pre_line_max >= strict_min_prematch_line
+            and pullback_fit in strict_pullback_allowed
+            and (early_only == strict_early_only_required)
+            and pressure >= strict_min_pressure
+        ):
             row = {
                 "a_source": "strict",
-                "strict_rule": "v2_ht_score_and_key_lines",
+                "strict_rule": "strict_v3_pullback",
                 "strict_ht_score": ht_score,
+                "strict_prematch_ht_line_max": pre_line_max,
+                "strict_pullback_fit": pullback_fit,
+                "strict_pressure_11_45": pressure,
                 **x,
             }
             a_rows.append(row)
             a_strict.append(row)
-            strict_from_v2 += 1
+            strict_from_v3 += 1
 
     # Relaxed A channel for data collection: keep strict execution logic elsewhere.
     strict_ids = {int(x.get("fixture_id")) for x in a_rows if x.get("fixture_id")}
+    relaxed_min_best_score = float(relaxed_rule.get("min_best_score", 70.0))
+    relaxed_cov_min = str(relaxed_rule.get("coverage_min", "BASIC")).upper()
     for x in scout:
         fid = int(x.get("fixture_id") or 0)
         if not fid or fid in strict_ids:
             continue
         cov = str(((x.get("data_coverage") or {}).get("coverage_level") or "")).upper()
         score = float(x.get("best_score") or 0.0)
-        if score < 70:
+        if score < relaxed_min_best_score:
             continue
-        if cov not in ("GOOD", "FULL", "BASIC"):
+        if not _coverage_pass(cov, relaxed_cov_min):
             continue
         row = {
             "a_source": "relaxed",
@@ -344,11 +395,13 @@ def build_tasks(
 
     eligible_live_total = len(best_by_fixture)
     for rec in best_by_fixture.values():
-        cov = str(((rec.get("data_coverage") or {}).get("coverage_level") or "")).upper()
-        if cov in ("GOOD", "FULL", "BASIC"):
-            b_rows.append(rec)
-        else:
-            c_rows.append(rec)
+        # B_shadow is the primary anti-selection-bias channel.
+        # Do not require HT candidate quality gates here.
+        b_rows.append(rec)
+
+    # C_slice keeps lower-priority population for sparse key-minute samples.
+    # Prefer lower-score fixtures to avoid cannibalizing B shadow signal.
+    c_rows = sorted(b_rows, key=lambda x: float(x.get("best_score") or 0.0))[: max(1, len(b_rows) // 2)]
 
     # prioritize by score so sprint mode captures most informative samples first
     a_rows.sort(key=lambda x: float(x.get("best_score") or 0), reverse=True)
@@ -361,6 +414,31 @@ def build_tasks(
     )
     c_rows.sort(key=lambda x: float(x.get("best_score") or 0), reverse=True)
 
+    # Build B_shadow stratified pools: near_miss / random / league_balanced.
+    scout_by_fixture = {
+        int(x.get("fixture_id")): x
+        for x in scout
+        if isinstance(x, dict) and x.get("fixture_id")
+    }
+    near_miss_pool = []
+    random_pool = []
+    for row in b_rows:
+        fid = int(row.get("fixture_id") or 0)
+        s = scout_by_fixture.get(fid) or {}
+        ms = s.get("market_scores") or {}
+        ht_score = float(ms.get("HT_LIVE_OVER") or 0.0)
+        best_score = float(s.get("best_score") or row.get("best_score") or 0.0)
+        if ht_score >= 45 or best_score >= 60:
+            near_miss_pool.append({**row, "b_shadow_bucket": "B1_near_miss"})
+        else:
+            random_pool.append({**row, "b_shadow_bucket": "B2_random_baseline"})
+    rng = random.Random(int(key))
+    rng.shuffle(random_pool)
+    league_balanced_pool = [
+        {**x, "b_shadow_bucket": "B3_league_balanced"}
+        for x in _pick_league_balanced(list(b_rows), len(b_rows))
+    ]
+
     day_budget = profile.get("daily_budget") or {}
     reserve = int(day_budget.get("reserve", 10000))
     usable_budget = max(0, int(budget) - reserve)
@@ -371,10 +449,64 @@ def build_tasks(
     b_cost = _tier_cost(profile, "B_shadow")
     c_cost = _tier_cost(profile, "C_slice")
 
-    # budget allocation: A first, then B, then C
+    # budget allocation: A first + B/C guaranteed floor, then remaining by priority.
     tasks_a, left = _take_with_budget(a_rows, "A_candidate", a_cost, usable_budget, max(0, eff_max_a))
-    tasks_b, left = _take_with_budget(b_rows, "B_shadow", b_cost, left, max(0, eff_max_b))
-    tasks_c, left = _take_with_budget(c_rows, "C_slice", c_cost, left, max(0, eff_max_c))
+    tasks_b = []
+    tasks_c = []
+    b_ids = set()
+    c_ids = set()
+
+    b_sampling = (b_shadow_rule.get("sampling") or {})
+    b_min_daily = int(max(min_b, b_shadow_rule.get("min_daily", 80)))
+    b_target_daily = int(max(b_min_daily, b_shadow_rule.get("target_daily", 120)))
+    near_ratio = float(b_sampling.get("near_miss_pct", 50)) / 100.0
+    rand_ratio = float(b_sampling.get("random_baseline_pct", 30)) / 100.0
+    league_ratio = float(b_sampling.get("league_balanced_pct", 20)) / 100.0
+
+    target_near = int(round(b_target_daily * near_ratio))
+    target_rand = int(round(b_target_daily * rand_ratio))
+    target_league = max(0, b_target_daily - target_near - target_rand)
+
+    for pool, target in (
+        (near_miss_pool, target_near),
+        (random_pool, target_rand),
+        (league_balanced_pool, target_league),
+    ):
+        picked, left = _take_with_budget(pool, "B_shadow", b_cost, left, target)
+        for p in picked:
+            fid = int(p.get("fixture_id") or 0)
+            if fid and fid not in b_ids:
+                tasks_b.append(p)
+                b_ids.add(fid)
+
+    # ensure B floor
+    if len(tasks_b) < b_min_daily:
+        remain_pool = [x for x in b_rows if int(x.get("fixture_id") or 0) not in b_ids]
+        extra_b, left = _take_with_budget(remain_pool, "B_shadow", b_cost, left, b_min_daily - len(tasks_b))
+        for p in extra_b:
+            fid = int(p.get("fixture_id") or 0)
+            if fid and fid not in b_ids:
+                tasks_b.append(p)
+                b_ids.add(fid)
+
+    # C floor before C target expansion
+    c_min_daily = int(max(min_c, 80))
+    tasks_c, left = _take_with_budget(c_rows, "C_slice", c_cost, left, max(0, c_min_daily))
+    c_ids.update(int(x.get("fixture_id") or 0) for x in tasks_c if x.get("fixture_id"))
+
+    # expand B/C up to max limits
+    if len(tasks_b) < max(0, eff_max_b):
+        remain_pool = [x for x in b_rows if int(x.get("fixture_id") or 0) not in b_ids]
+        extra_b, left = _take_with_budget(remain_pool, "B_shadow", b_cost, left, max(0, eff_max_b - len(tasks_b)))
+        tasks_b.extend(extra_b)
+        b_ids.update(int(x.get("fixture_id") or 0) for x in extra_b if x.get("fixture_id"))
+
+    if len(tasks_c) < max(0, eff_max_c):
+        remain_pool = [x for x in c_rows if int(x.get("fixture_id") or 0) not in c_ids]
+        extra_c, left = _take_with_budget(remain_pool, "C_slice", c_cost, left, max(0, eff_max_c - len(tasks_c)))
+        tasks_c.extend(extra_c)
+        c_ids.update(int(x.get("fixture_id") or 0) for x in extra_c if x.get("fixture_id"))
+
     picked_ids = {int(x.get("fixture_id") or 0) for x in (tasks_a + tasks_b + tasks_c)}
 
     # Guarantee minimum B/C coverage when possible.
@@ -418,7 +550,7 @@ def build_tasks(
             "strict_candidates": len(a_strict),
             "relaxed_candidates": len(a_relaxed),
             "strict_v1_candidates": strict_from_v1,
-            "strict_v2_candidates": strict_from_v2,
+            "strict_v3_candidates": strict_from_v3,
         },
         "generated_at": datetime.now().isoformat(),
         "lookahead_days": lookahead_days,
@@ -433,11 +565,14 @@ def build_tasks(
         "scheduler_limits": {"max_a": eff_max_a, "max_b": eff_max_b, "max_c": eff_max_c},
         "strict_rule_config": {
             "v1": {"market_focus": "HT_LIVE_OVER", "coverage_levels": ["GOOD", "FULL"]},
-            "v2": {
-                "enabled": strict_v2_enabled,
-                "min_ht_live_score": strict_v2_min_ht,
-                "allow_coverage_levels": sorted(strict_v2_cov),
-                "require_key_lines": strict_v2_lines,
+            "v3_pullback": {
+                "coverage_min": strict_cov_min,
+                "market_focus": strict_focus,
+                "min_ht_live_score": strict_min_ht_score,
+                "min_prematch_ht_line": strict_min_prematch_line,
+                "allowed_pullback_fit": sorted(strict_pullback_allowed),
+                "early_only_required": strict_early_only_required,
+                "min_pressure_11_45": strict_min_pressure,
             },
         },
         "minimum_targets": {"min_b": int(min_b), "min_c": int(min_c)},

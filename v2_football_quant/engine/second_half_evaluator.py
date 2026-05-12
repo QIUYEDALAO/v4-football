@@ -32,10 +32,12 @@ except ModuleNotFoundError:
 
 from engine import net_utils
 from engine.v4_match_intelligence import explain_match
+from engine.execution_cost_model import estimate_execution_cost
 
 REPORT_DIR = BASE_DIR / "data" / "daily_reports"
 MONITOR_DIR = BASE_DIR / "data" / "live_monitor"
 PAPER_DIR = BASE_DIR / "data" / "paper_trading"
+SH_GUARD_PATH = BASE_DIR / "config" / "sh_noisy_guard.yaml"
 
 READY_STATUSES = {"HT", "2H"}
 FINAL_STATUSES = {"FT", "AET", "PEN", "WO"}
@@ -44,6 +46,17 @@ ODDS_RANGES = {
     1.0: (1.65, 2.10),
     0.75: (1.55, 1.95),
 }
+
+
+def _load_guard() -> dict:
+    if not SH_GUARD_PATH.exists():
+        return {}
+    with open(SH_GUARD_PATH, encoding="utf-8") as f:
+        return json.load(f)
+
+
+SH_GUARD = _load_guard()
+SH_CFG = (SH_GUARD or {}).get("SH_strategy") or {}
 
 
 def _date_key(date_str: str) -> str:
@@ -255,6 +268,14 @@ def choose_sh_entry_line(lines: list[dict]) -> Optional[dict]:
     return None
 
 
+def _estimate_sh_model_prob(pressure_score: float, context_signal: str) -> float:
+    # Lightweight proxy until SH model calibration is available.
+    base = 0.45 + min(max(pressure_score, 0.0), 100.0) / 200.0
+    if context_signal in ("HT_0_0", "HT_ONE_GOAL"):
+        base += 0.03
+    return max(0.05, min(0.9, base))
+
+
 def evaluate_first_half_pressure(stats: dict, events: dict) -> dict:
     totals = stats.get("totals", {})
     if events.get("red_cards", 0) > 0:
@@ -366,8 +387,44 @@ def evaluate_sh_item(item: dict, date_key: str, api_client: Callable[[str], Opti
             "raw_live_odds": raw_resp,
         }
 
-    action = "SH_BUY_NOW" if pressure.get("action") == "ALLOW" and context.get("action") == "ALLOW" else "SH_WATCH"
-    reason = "半场场面和盘口支持下半场大球" if action == "SH_BUY_NOW" else "条件接近，建议人工复核"
+    pressure_score = float(pressure.get("score") or 0.0)
+    model_prob = _estimate_sh_model_prob(pressure_score, str(context.get("signal") or ""))
+    market_prob = 1.0 / float(entry["over_odds"]) if float(entry["over_odds"]) > 1.0 else 0.0
+    edge = model_prob - market_prob
+    ex = estimate_execution_cost(
+        displayed_odds=float(entry["over_odds"]),
+        ev_gross=edge,
+        odds_alive_seconds=3.0,
+        latency_seconds=1.5,
+        market_freeze=False,
+    )
+    min_model_prob = float(((SH_CFG.get("thresholds") or {}).get("min_model_prob", 0.5)))
+    min_ev_net = float(((SH_CFG.get("thresholds") or {}).get("min_ev_net", 0.0)))
+    min_conservative_ev = float(((SH_CFG.get("thresholds") or {}).get("min_conservative_ev", 0.0)))
+
+    noisy_reasons = []
+    if bool(SH_CFG.get("forbid_signal_from_base_rate_only", True)) and pressure.get("action") != "ALLOW":
+        noisy_reasons.append("pressure_not_allow")
+    if model_prob < min_model_prob:
+        noisy_reasons.append("model_prob_low")
+    if ex.ev_net <= min_ev_net:
+        noisy_reasons.append("ev_net_non_positive")
+    if ex.conservative_ev <= min_conservative_ev:
+        noisy_reasons.append("conservative_ev_non_positive")
+
+    if noisy_reasons:
+        action = "SH_NOISY"
+        reason = "SH高命中不代表EV，当前为NOISY观察"
+    elif ex.ev_net > 0 and ex.conservative_ev > 0 and pressure.get("action") == "ALLOW" and context.get("action") == "ALLOW":
+        action = "SH_PAPER_ONLY"
+        reason = "SH仅纸盘：市场概率与模型概率存在正向EV"
+    elif ex.ev_net > 0:
+        action = "SH_EV_CANDIDATE"
+        reason = "SH存在正向EV候选，待更多约束通过"
+    else:
+        action = "SH_BLOCKED"
+        reason = "SH风险或执行质量不达标"
+
     return {
         **base,
         "action": action,
@@ -380,6 +437,13 @@ def evaluate_sh_item(item: dict, date_key: str, api_client: Callable[[str], Opti
         "entry_line": entry["line"],
         "entry_over_odds": entry["over_odds"],
         "entry_bookmaker": entry.get("bookmaker"),
+        "model_prob": round(model_prob, 4),
+        "market_prob": round(market_prob, 4),
+        "edge": round(edge, 6),
+        "ev_net": round(ex.ev_net, 6),
+        "conservative_ev": round(ex.conservative_ev, 6),
+        "execution_model": ex.to_dict(),
+        "sh_noisy_reasons": noisy_reasons,
         "live_lines": lines,
         "raw_live_odds": raw_resp,
     }
@@ -391,7 +455,7 @@ def _merge_entries(path: Path, new_rows: list[dict]) -> list[dict]:
     merged = list(existing)
     for row in new_rows:
         fid = str(row.get("fixture_id"))
-        if row.get("action") == "SH_BUY_NOW" and fid not in seen:
+        if row.get("action") == "SH_PAPER_ONLY" and fid not in seen:
             merged.append(row)
             seen.add(fid)
     return merged
@@ -439,7 +503,7 @@ def evaluate_single_fixture(
     result = evaluate_sh_item(item, key, api_client)
     status_path = MONITOR_DIR / f"v4_second_half_single_{key}_{fixture_id}.json"
     _save_json(status_path, result)
-    if result.get("action") == "SH_BUY_NOW":
+    if result.get("action") == "SH_PAPER_ONLY":
         entry_path = PAPER_DIR / f"v4_second_half_entries_{key}.json"
         _save_json(entry_path, _merge_entries(entry_path, [result]))
     return {"date": key, "fixture_id": fixture_id, "status_path": str(status_path), "result": result}
@@ -458,7 +522,7 @@ def run_once(date_str: str, api_client: Callable[[str], Optional[dict]] = api_ge
     for item in candidates:
         result = evaluate_sh_item(item, key, api_client)
         statuses.append(result)
-        if result.get("action") == "SH_BUY_NOW":
+        if result.get("action") == "SH_PAPER_ONLY":
             entries.append(result)
         logger.info(f"[V4_SH] {result.get('fixture_id')} {result.get('action')} | {result.get('reason')}")
         time.sleep(0.3)

@@ -54,8 +54,9 @@ REPORT_DIR = BASE_DIR / "data" / "daily_reports"
 MONITOR_DIR = BASE_DIR / "data" / "live_monitor"
 PAPER_DIR = BASE_DIR / "data" / "paper_trading"
 SNAP_DIR = BASE_DIR / "data" / "live_odds_snapshots"
+CANDIDATE_RULES_PATH = BASE_DIR / "config" / "v4_candidate_rules.yaml"
 
-TARGET_LINES = (1.0, 0.75)
+TARGET_LINES = (1.25, 1.0, 0.75)
 ODDS_RANGES = {
     1.0: (1.65, 2.05),
     0.75: (1.60, 1.90),
@@ -64,6 +65,22 @@ ENTRY_MINUTE_FROM = 8
 ENTRY_MINUTE_TO = 15
 MIN_EV_NET = 0.0
 MIN_CONSERVATIVE_EV = 0.0
+
+
+def _load_candidate_rules() -> dict:
+    if not CANDIDATE_RULES_PATH.exists():
+        return {}
+    with open(CANDIDATE_RULES_PATH, encoding="utf-8") as f:
+        return json.load(f)
+
+
+_RULES = _load_candidate_rules()
+_LIVE_TRIGGER = (_RULES or {}).get("live_trigger") or {}
+if isinstance(_LIVE_TRIGGER.get("minute_window"), list) and len(_LIVE_TRIGGER.get("minute_window")) == 2:
+    ENTRY_MINUTE_FROM = int(_LIVE_TRIGGER["minute_window"][0])
+    ENTRY_MINUTE_TO = int(_LIVE_TRIGGER["minute_window"][1])
+if isinstance(_LIVE_TRIGGER.get("target_lines"), list) and _LIVE_TRIGGER.get("target_lines"):
+    TARGET_LINES = tuple(sorted([float(x) for x in _LIVE_TRIGGER["target_lines"]], reverse=True))
 
 
 def _date_key(date_str: str) -> str:
