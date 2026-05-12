@@ -20,7 +20,9 @@
   "task_volume": {
     "min_a_strict": 1,
     "min_b_shadow": 80,
-    "min_c_slice": 50
+    "min_c_slice": 50,
+    "min_b_shadow_ratio_of_eligible": 0.4,
+    "min_c_slice_ratio_of_eligible": 0.2
   },
   "monthly_validation": {
     "behind_days_warn": 2

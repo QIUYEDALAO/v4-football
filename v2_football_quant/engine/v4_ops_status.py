@@ -102,6 +102,9 @@ def build_status(date_str: str) -> dict:
         "a_breakdown": task.get("a_channel_breakdown", {}),
         "universe_total": int(task.get("universe_total", 0) or 0),
         "eligible_live_total": int(task.get("eligible_live_total", 0) or 0),
+        "universe_files_used": task.get("universe_files_used", []),
+        "universe_files_expected": task.get("universe_files_expected", []),
+        "universe_files_missing": task.get("universe_files_missing", []),
         "excluded_reason_counts": task.get("excluded_reason_counts", {}),
         "ht_ou_identified_pct": ht_ou_identified_pct,
     }

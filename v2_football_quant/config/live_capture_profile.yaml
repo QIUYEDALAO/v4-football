@@ -12,7 +12,13 @@
       "scheduler": {
         "max_a": 80,
         "max_b": 300,
-        "max_c": 500
+        "max_c": 500,
+        "strict_v2": {
+          "enabled": true,
+          "min_ht_live_score": 55.0,
+          "allow_coverage_levels": ["BASIC", "GOOD", "FULL"],
+          "require_key_lines": [0.75, 1.0, 1.25]
+        }
       },
       "tiers": {
         "A_candidate": {
@@ -49,7 +55,13 @@
       "scheduler": {
         "max_a": 120,
         "max_b": 450,
-        "max_c": 180
+        "max_c": 180,
+        "strict_v2": {
+          "enabled": true,
+          "min_ht_live_score": 55.0,
+          "allow_coverage_levels": ["BASIC", "GOOD", "FULL"],
+          "require_key_lines": [0.75, 1.0, 1.25]
+        }
       },
       "tiers": {
         "A_candidate": {

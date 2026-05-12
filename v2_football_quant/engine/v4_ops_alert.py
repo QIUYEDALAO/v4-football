@@ -64,17 +64,26 @@ def run_alerts(date_str: str) -> dict:
     min_a_strict = int(volume_rules.get("min_a_strict", 1))
     min_b_shadow = int(volume_rules.get("min_b_shadow", 80))
     min_c_slice = int(volume_rules.get("min_c_slice", 50))
+    min_b_ratio = float(volume_rules.get("min_b_shadow_ratio_of_eligible", 0.0))
+    min_c_ratio = float(volume_rules.get("min_c_slice_ratio_of_eligible", 0.0))
     strict_count = int(a_stats.get("a_source_breakdown", {}).get("strict", 0))
     if strict_count < min_a_strict:
         alerts.append({"level": "WARN", "rule": "a_strict_zero", "msg": "A_strict still zero"})
 
     tier_counts = task.get("tier_counts", {}) if isinstance(task, dict) else {}
+    eligible_live_total = int(task.get("eligible_live_total", 0) or 0)
     b_shadow = int(tier_counts.get("B_shadow", 0))
     c_slice = int(tier_counts.get("C_slice", 0))
-    if b_shadow < min_b_shadow:
-        alerts.append({"level": "WARN", "rule": "b_shadow_low", "msg": f"B_shadow low: {b_shadow} < {min_b_shadow}"})
-    if c_slice < min_c_slice:
-        alerts.append({"level": "WARN", "rule": "c_slice_low", "msg": f"C_slice low: {c_slice} < {min_c_slice}"})
+    effective_min_b = min_b_shadow
+    effective_min_c = min_c_slice
+    if eligible_live_total > 0 and min_b_ratio > 0:
+        effective_min_b = min(effective_min_b, int(round(eligible_live_total * min_b_ratio)))
+    if eligible_live_total > 0 and min_c_ratio > 0:
+        effective_min_c = min(effective_min_c, int(round(eligible_live_total * min_c_ratio)))
+    if b_shadow < effective_min_b:
+        alerts.append({"level": "WARN", "rule": "b_shadow_low", "msg": f"B_shadow low: {b_shadow} < {effective_min_b} (eligible={eligible_live_total})"})
+    if c_slice < effective_min_c:
+        alerts.append({"level": "WARN", "rule": "c_slice_low", "msg": f"C_slice low: {c_slice} < {effective_min_c} (eligible={eligible_live_total})"})
 
     entered_monitoring = int(cap.get("entered_monitoring", 0) or 0)
     ht_ou_rows = int(cap.get("fixtures_with_ht_ou_normalized", 0) or 0)

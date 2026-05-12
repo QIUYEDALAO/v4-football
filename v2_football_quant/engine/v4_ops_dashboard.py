@@ -47,7 +47,7 @@ def render(date_str: str) -> Path:
 <h2>A/B/C</h2>
 <pre>{json.dumps(status.get('tier_counts', {}), ensure_ascii=False, indent=2)}</pre>
 <h2>Universe Filter</h2>
-<pre>{json.dumps({"universe_total": status.get("universe_total", 0), "eligible_live_total": status.get("eligible_live_total", 0), "excluded_reason_counts": status.get("excluded_reason_counts", {})}, ensure_ascii=False, indent=2)}</pre>
+<pre>{json.dumps({"universe_total": status.get("universe_total", 0), "eligible_live_total": status.get("eligible_live_total", 0), "universe_files_used": status.get("universe_files_used", []), "universe_files_expected": status.get("universe_files_expected", []), "universe_files_missing": status.get("universe_files_missing", []), "excluded_reason_counts": status.get("excluded_reason_counts", {})}, ensure_ascii=False, indent=2)}</pre>
 <h2>Alerts</h2>
 <pre>{json.dumps(alerts, ensure_ascii=False, indent=2)}</pre>
 <h2>Validation Progress ({month})</h2>

@@ -74,11 +74,16 @@ def _load_universe_window_auto(
     lookahead_days: int,
     lookback_days: int,
     max_universe_files: int,
-) -> tuple[list[dict], list[str]]:
+) -> tuple[list[dict], list[str], list[str], list[str]]:
     base_dt = _parse_date_key(base_key)
     start_dt = base_dt - timedelta(days=max(0, int(lookback_days)))
     end_dt = base_dt + timedelta(days=max(0, int(lookahead_days)))
     keys = _available_universe_keys()
+    expected = []
+    cur = start_dt
+    while cur <= end_dt:
+        expected.append(cur.strftime("%Y%m%d"))
+        cur += timedelta(days=1)
     selected = []
     for key in keys:
         try:
@@ -93,7 +98,8 @@ def _load_universe_window_auto(
     rows = []
     for key in selected:
         rows.extend(_load_jsonl(UNIVERSE_DIR / f"fixtures_universe_{key}.jsonl"))
-    return rows, selected
+    missing = [k for k in expected if k not in selected]
+    return rows, selected, expected, missing
 
 
 def _dt(value: str):
@@ -116,7 +122,7 @@ def _cov_rank(level: str) -> int:
     return 0
 
 
-def _has_ht_lines_075_10_125(row: dict) -> bool:
+def _has_required_ht_lines(row: dict, required_lines: list[float]) -> bool:
     lines = row.get("ht_ou_lines") or []
     got = set()
     for item in lines:
@@ -125,7 +131,7 @@ def _has_ht_lines_075_10_125(row: dict) -> bool:
             got.add(float(v))
         except Exception:
             continue
-    return all(x in got for x in (0.75, 1.0, 1.25))
+    return all(x in got for x in required_lines)
 
 
 def _ht_live_score(row: dict) -> float:
@@ -208,7 +214,7 @@ def build_tasks(
     # Fallback: when live_watchlist is absent, use scout for strict extraction.
     if not isinstance(watch, list) or not watch:
         watch = scout if isinstance(scout, list) else []
-    universe, universe_keys = _load_universe_window_auto(
+    universe, universe_keys, universe_expected_keys, universe_missing_keys = _load_universe_window_auto(
         key,
         lookahead_days=lookahead_days,
         lookback_days=lookback_days,
@@ -220,6 +226,14 @@ def build_tasks(
     a_relaxed = []
     strict_from_v1 = 0
     strict_from_v2 = 0
+    sched = profile.get("scheduler") or {}
+    strict_v2_conf = sched.get("strict_v2") or {}
+    strict_v2_enabled = bool(strict_v2_conf.get("enabled", True))
+    strict_v2_min_ht = float(strict_v2_conf.get("min_ht_live_score", 55.0))
+    strict_v2_cov = {
+        str(x).upper() for x in (strict_v2_conf.get("allow_coverage_levels") or ["BASIC", "GOOD", "FULL"])
+    }
+    strict_v2_lines = [float(x) for x in (strict_v2_conf.get("require_key_lines") or [0.75, 1.0, 1.25])]
     for x in watch:
         cov = str(((x.get("data_coverage") or {}).get("coverage_level") or "")).upper()
         # v1 strict: old definition
@@ -233,7 +247,7 @@ def build_tasks(
         # v2 strict: for capture infrastructure, allow BASIC coverage when
         # HT live score is strong and HT key lines are present.
         ht_score = _ht_live_score(x)
-        if cov in ("BASIC", "GOOD", "FULL") and ht_score >= 55 and _has_ht_lines_075_10_125(x):
+        if strict_v2_enabled and cov in strict_v2_cov and ht_score >= strict_v2_min_ht and _has_required_ht_lines(x, strict_v2_lines):
             row = {
                 "a_source": "strict",
                 "strict_rule": "v2_ht_score_and_key_lines",
@@ -347,7 +361,6 @@ def build_tasks(
     )
     c_rows.sort(key=lambda x: float(x.get("best_score") or 0), reverse=True)
 
-    sched = profile.get("scheduler") or {}
     day_budget = profile.get("daily_budget") or {}
     reserve = int(day_budget.get("reserve", 10000))
     usable_budget = max(0, int(budget) - reserve)
@@ -414,8 +427,19 @@ def build_tasks(
         "eligible_live_total": eligible_live_total,
         "universe_count": len(universe),
         "universe_files_used": universe_keys,
+        "universe_files_expected": universe_expected_keys,
+        "universe_files_missing": universe_missing_keys,
         "excluded_reason_counts": dict(excluded_reason_counts),
         "scheduler_limits": {"max_a": eff_max_a, "max_b": eff_max_b, "max_c": eff_max_c},
+        "strict_rule_config": {
+            "v1": {"market_focus": "HT_LIVE_OVER", "coverage_levels": ["GOOD", "FULL"]},
+            "v2": {
+                "enabled": strict_v2_enabled,
+                "min_ht_live_score": strict_v2_min_ht,
+                "allow_coverage_levels": sorted(strict_v2_cov),
+                "require_key_lines": strict_v2_lines,
+            },
+        },
         "minimum_targets": {"min_b": int(min_b), "min_c": int(min_c)},
         "estimated_cost_per_match": {"A_candidate": a_cost, "B_shadow": b_cost, "C_slice": c_cost},
         "budget_planning": {
