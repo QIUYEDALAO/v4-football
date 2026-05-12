@@ -12,7 +12,7 @@ from datetime import datetime
 from typing import Optional
 import os
 
-API_KEY = os.getenv("APIFOOTBALL_KEY", "your-api-key-here")
+API_KEY = os.environ.get("APIFOOTBALL_KEY", "your-api-key-here")
 API_HOST = "https://v3.football.api-sports.io"
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
 

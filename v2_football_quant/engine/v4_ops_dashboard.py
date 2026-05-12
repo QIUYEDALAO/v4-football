@@ -3,7 +3,7 @@ from __future__ import annotations
 import argparse
 import json
 import sys
-from datetime import datetime
+from datetime import datetime, timedelta
 from pathlib import Path
 
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -12,6 +12,7 @@ if str(BASE_DIR) not in sys.path:
 
 from engine.v4_ops_alert import run_alerts
 from engine.v4_ops_status import build_status
+from engine.team_cn_unmapped_daily_report import run as run_team_unmapped_daily
 from engine.v4_validation_progress import build_progress
 
 REPORT_DIR = BASE_DIR / "data" / "daily_reports"
@@ -40,6 +41,15 @@ def _date_key(date_str: str) -> str:
     return date_str.replace("-", "")
 
 
+def _session_date(now: datetime | None = None) -> str:
+    """午夜 00:00-05:59 默认回退到前一天，和采集器会话日期保持一致。"""
+    if now is None:
+        now = datetime.now()
+    if now.hour < 6:
+        now = now - timedelta(days=1)
+    return now.strftime("%Y%m%d")
+
+
 def render(date_str: str) -> Path:
     key = _date_key(date_str)
     status = build_status(key)
@@ -47,6 +57,7 @@ def render(date_str: str) -> Path:
     month = resolved_key[:6]
     progress = build_progress(month)
     alerts = run_alerts(resolved_key)
+    unmapped = run_team_unmapped_daily(resolved_key, update_map=True)
     alert_rows = []
     for a in alerts.get("alerts", []):
         rule = str(a.get("rule") or "")
@@ -71,8 +82,10 @@ def render(date_str: str) -> Path:
     html = f"""<!doctype html>
 <html><head><meta charset='utf-8'><title>V4 运维监控塔 {key}</title>
 <style>body{{font-family:Arial;padding:20px}} .kpi{{display:inline-block;margin-right:20px}} table{{border-collapse:collapse}} td,th{{border:1px solid #ccc;padding:6px}}</style>
+<meta http-equiv='refresh' content='30'>
 </head><body>
 <h1>V4 运维监控塔 - {resolved_key}</h1>
+<div class='kpi'>页面生成时间: {status.get('generated_at')}</div>
 <div class='kpi'>请求日期: {status.get('requested_date')}</div>
 <div class='kpi'>回退启用: {status.get('date_fallback_used')}</div>
 <div class='kpi'>API用量: {status.get('api_used')}/{status.get('api_limit')}</div>
@@ -83,6 +96,7 @@ def render(date_str: str) -> Path:
 <div class='kpi'>每个OK快照标准化行数: {status.get('normalized_rows_per_ok_snapshot', 0)}</div>
 <div class='kpi'>卡住任务(STALE): {status.get('stale_jobs')}</div>
 <div class='kpi'>重复启动拦截: {status.get('duplicate_cron_starts', 0)}</div>
+<div class='kpi'>未映射球队: {unmapped.get('unmapped_count', 0)}</div>
 <h2>任务状态</h2>
 <table><tr><th>任务名</th><th>状态</th><th>心跳间隔(秒)</th></tr>{''.join(rows)}</table>
 <h2>分层进度</h2>
@@ -95,17 +109,21 @@ def render(date_str: str) -> Path:
 <pre>{json.dumps({"date": alerts.get("date"), "alert_count": alerts.get("alert_count"), "alerts": alert_rows, "alerts_path": alerts.get("alerts_path")}, ensure_ascii=False, indent=2)}</pre>
 <h2>月底验证进度 ({month})</h2>
 <pre>{json.dumps(progress, ensure_ascii=False, indent=2)}</pre>
+<h2>未映射球队清单（待人工补词典）</h2>
+<pre>{json.dumps({"date": unmapped.get("date"), "unmapped_count": unmapped.get("unmapped_count"), "top": (unmapped.get("unmapped_teams") or [])[:20], "report_path": unmapped.get("report_path"), "map_path": ((unmapped.get("map_update") or {}).get("map_path"))}, ensure_ascii=False, indent=2)}</pre>
 </body></html>"""
 
     REPORT_DIR.mkdir(parents=True, exist_ok=True)
     out = REPORT_DIR / f"v4_ops_dashboard_{key}.html"
     out.write_text(html, encoding="utf-8")
+    latest = REPORT_DIR / "v4_ops_dashboard_latest.html"
+    latest.write_text(html, encoding="utf-8")
     return out
 
 
 def main() -> None:
     parser = argparse.ArgumentParser()
-    parser.add_argument("--date", default=datetime.now().strftime("%Y%m%d"))
+    parser.add_argument("--date", default=_session_date())
     args = parser.parse_args()
     out = render(args.date)
     print(json.dumps({"dashboard_path": str(out)}, ensure_ascii=False, indent=2))

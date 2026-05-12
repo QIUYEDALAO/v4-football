@@ -408,7 +408,653 @@
     "České Budějovice": "布杰约维采",
     "Ceske Budejovice": "布杰约维采"
   },
-  "note": "fuzzy match via difflib, threshold=0.6",
-  "unknown": [],
-  "updated_at": "2026-05-11T22:51:57.375533"
+  "unknown": [
+    {
+      "name": "Arda Kardzhali",
+      "count": 41,
+      "sources": [
+        "live_odds_normalized.jsonl",
+        "v4_capture_tasks_20260513.json"
+      ],
+      "last_seen_date": "20260513"
+    },
+    {
+      "name": "Botev Plovdiv",
+      "count": 41,
+      "sources": [
+        "live_odds_normalized.jsonl",
+        "v4_capture_tasks_20260513.json"
+      ],
+      "last_seen_date": "20260513"
+    },
+    {
+      "name": "Ismaily SC",
+      "count": 40,
+      "sources": [
+        "live_odds_normalized.jsonl",
+        "v4_capture_tasks_20260513.json"
+      ],
+      "last_seen_date": "20260513"
+    },
+    {
+      "name": "Wadi Degla",
+      "count": 40,
+      "sources": [
+        "live_odds_normalized.jsonl",
+        "v4_capture_tasks_20260513.json"
+      ],
+      "last_seen_date": "20260513"
+    },
+    {
+      "name": "Juve Stabia",
+      "count": 22,
+      "sources": [
+        "live_odds_normalized.jsonl",
+        "v4_capture_tasks_20260513.json"
+      ],
+      "last_seen_date": "20260513"
+    },
+    {
+      "name": "Modena",
+      "count": 22,
+      "sources": [
+        "live_odds_normalized.jsonl",
+        "v4_capture_tasks_20260513.json"
+      ],
+      "last_seen_date": "20260513"
+    },
+    {
+      "name": "Aberdeen",
+      "count": 2,
+      "sources": [
+        "scout_v4_20260513.json",
+        "v4_capture_tasks_20260513.json"
+      ],
+      "last_seen_date": "20260513"
+    },
+    {
+      "name": "Argentinos JRS",
+      "count": 2,
+      "sources": [
+        "v4_capture_tasks_20260513.json"
+      ],
+      "last_seen_date": "20260513"
+    },
+    {
+      "name": "Aurora",
+      "count": 2,
+      "sources": [
+        "v4_capture_tasks_20260513.json"
+      ],
+      "last_seen_date": "20260513"
+    },
+    {
+      "name": "Avellino",
+      "count": 2,
+      "sources": [
+        "scout_v4_20260513.json",
+        "v4_capture_tasks_20260513.json"
+      ],
+      "last_seen_date": "20260513"
+    },
+    {
+      "name": "Belgrano Cordoba",
+      "count": 2,
+      "sources": [
+        "v4_capture_tasks_20260513.json"
+      ],
+      "last_seen_date": "20260513"
+    },
+    {
+      "name": "Catanzaro",
+      "count": 2,
+      "sources": [
+        "scout_v4_20260513.json",
+        "v4_capture_tasks_20260513.json"
+      ],
+      "last_seen_date": "20260513"
+    },
+    {
+      "name": "Dobrudzha",
+      "count": 2,
+      "sources": [
+        "v4_capture_tasks_20260513.json"
+      ],
+      "last_seen_date": "20260513"
+    },
+    {
+      "name": "Dundee",
+      "count": 2,
+      "sources": [
+        "scout_v4_20260513.json",
+        "v4_capture_tasks_20260513.json"
+      ],
+      "last_seen_date": "20260513"
+    },
+    {
+      "name": "Dundee Utd",
+      "count": 2,
+      "sources": [
+        "scout_v4_20260513.json",
+        "v4_capture_tasks_20260513.json"
+      ],
+      "last_seen_date": "20260513"
+    },
+    {
+      "name": "Dunfermline",
+      "count": 2,
+      "sources": [
+        "v4_capture_tasks_20260513.json"
+      ],
+      "last_seen_date": "20260513"
+    },
+    {
+      "name": "FC Luzern",
+      "count": 2,
+      "sources": [
+        "scout_v4_20260513.json",
+        "v4_capture_tasks_20260513.json"
+      ],
+      "last_seen_date": "20260513"
+    },
+    {
+      "name": "FC Winterthur",
+      "count": 2,
+      "sources": [
+        "scout_v4_20260513.json",
+        "v4_capture_tasks_20260513.json"
+      ],
+      "last_seen_date": "20260513"
+    },
+    {
+      "name": "FC Zurich",
+      "count": 2,
+      "sources": [
+        "scout_v4_20260513.json",
+        "v4_capture_tasks_20260513.json"
+      ],
+      "last_seen_date": "20260513"
+    },
+    {
+      "name": "Grasshoppers",
+      "count": 2,
+      "sources": [
+        "scout_v4_20260513.json",
+        "v4_capture_tasks_20260513.json"
+      ],
+      "last_seen_date": "20260513"
+    },
+    {
+      "name": "Hungary U18",
+      "count": 2,
+      "sources": [
+        "v4_capture_tasks_20260513.json"
+      ],
+      "last_seen_date": "20260513"
+    },
+    {
+      "name": "Huracan",
+      "count": 2,
+      "sources": [
+        "v4_capture_tasks_20260513.json"
+      ],
+      "last_seen_date": "20260513"
+    },
+    {
+      "name": "Kilmarnock",
+      "count": 2,
+      "sources": [
+        "scout_v4_20260513.json",
+        "v4_capture_tasks_20260513.json"
+      ],
+      "last_seen_date": "20260513"
+    },
+    {
+      "name": "Kudrivka",
+      "count": 2,
+      "sources": [
+        "v4_capture_tasks_20260513.json"
+      ],
+      "last_seen_date": "20260513"
+    },
+    {
+      "name": "Lausanne",
+      "count": 2,
+      "sources": [
+        "v4_capture_tasks_20260513.json"
+      ],
+      "last_seen_date": "20260513"
+    },
+    {
+      "name": "Livingston",
+      "count": 2,
+      "sources": [
+        "scout_v4_20260513.json",
+        "v4_capture_tasks_20260513.json"
+      ],
+      "last_seen_date": "20260513"
+    },
+    {
+      "name": "Machida Zelvia",
+      "count": 2,
+      "sources": [
+        "v4_capture_tasks_20260513.json"
+      ],
+      "last_seen_date": "20260513"
+    },
+    {
+      "name": "Partick",
+      "count": 2,
+      "sources": [
+        "v4_capture_tasks_20260513.json"
+      ],
+      "last_seen_date": "20260513"
+    },
+    {
+      "name": "RED Star FC 93",
+      "count": 2,
+      "sources": [
+        "v4_capture_tasks_20260513.json"
+      ],
+      "last_seen_date": "20260513"
+    },
+    {
+      "name": "Real Betis",
+      "count": 2,
+      "sources": [
+        "scout_v4_20260513.json",
+        "v4_capture_tasks_20260513.json"
+      ],
+      "last_seen_date": "20260513"
+    },
+    {
+      "name": "Real Oruro",
+      "count": 2,
+      "sources": [
+        "v4_capture_tasks_20260513.json"
+      ],
+      "last_seen_date": "20260513"
+    },
+    {
+      "name": "Rodez",
+      "count": 2,
+      "sources": [
+        "v4_capture_tasks_20260513.json"
+      ],
+      "last_seen_date": "20260513"
+    },
+    {
+      "name": "Ruh Lviv",
+      "count": 2,
+      "sources": [
+        "v4_capture_tasks_20260513.json"
+      ],
+      "last_seen_date": "20260513"
+    },
+    {
+      "name": "ST Mirren",
+      "count": 2,
+      "sources": [
+        "scout_v4_20260513.json",
+        "v4_capture_tasks_20260513.json"
+      ],
+      "last_seen_date": "20260513"
+    },
+    {
+      "name": "San Antonio Bulo Bulo",
+      "count": 2,
+      "sources": [
+        "scout_v4_20260513.json",
+        "v4_capture_tasks_20260513.json"
+      ],
+      "last_seen_date": "20260513"
+    },
+    {
+      "name": "Servette FC",
+      "count": 2,
+      "sources": [
+        "v4_capture_tasks_20260513.json"
+      ],
+      "last_seen_date": "20260513"
+    },
+    {
+      "name": "Slavia Sofia",
+      "count": 2,
+      "sources": [
+        "v4_capture_tasks_20260513.json"
+      ],
+      "last_seen_date": "20260513"
+    },
+    {
+      "name": "Turkey U18",
+      "count": 2,
+      "sources": [
+        "v4_capture_tasks_20260513.json"
+      ],
+      "last_seen_date": "20260513"
+    },
+    {
+      "name": "Union Santa Fe",
+      "count": 2,
+      "sources": [
+        "v4_capture_tasks_20260513.json"
+      ],
+      "last_seen_date": "20260513"
+    },
+    {
+      "name": "Universitario de Vinto",
+      "count": 2,
+      "sources": [
+        "scout_v4_20260513.json",
+        "v4_capture_tasks_20260513.json"
+      ],
+      "last_seen_date": "20260513"
+    },
+    {
+      "name": "Always Ready",
+      "count": 1,
+      "sources": [
+        "scout_v4_20260513.json"
+      ],
+      "last_seen_date": "20260513"
+    },
+    {
+      "name": "Aris Thessalonikis",
+      "count": 1,
+      "sources": [
+        "scout_v4_20260513.json"
+      ],
+      "last_seen_date": "20260513"
+    },
+    {
+      "name": "Arka Gdynia",
+      "count": 1,
+      "sources": [
+        "scout_v4_20260513.json"
+      ],
+      "last_seen_date": "20260513"
+    },
+    {
+      "name": "BSC Young Boys",
+      "count": 1,
+      "sources": [
+        "scout_v4_20260513.json"
+      ],
+      "last_seen_date": "20260513"
+    },
+    {
+      "name": "Blooming",
+      "count": 1,
+      "sources": [
+        "scout_v4_20260513.json"
+      ],
+      "last_seen_date": "20260513"
+    },
+    {
+      "name": "Bolívar",
+      "count": 1,
+      "sources": [
+        "scout_v4_20260513.json"
+      ],
+      "last_seen_date": "20260513"
+    },
+    {
+      "name": "CSKA 1948",
+      "count": 1,
+      "sources": [
+        "scout_v4_20260513.json"
+      ],
+      "last_seen_date": "20260513"
+    },
+    {
+      "name": "CSKA Sofia",
+      "count": 1,
+      "sources": [
+        "scout_v4_20260513.json"
+      ],
+      "last_seen_date": "20260513"
+    },
+    {
+      "name": "Celtic",
+      "count": 1,
+      "sources": [
+        "scout_v4_20260513.json"
+      ],
+      "last_seen_date": "20260513"
+    },
+    {
+      "name": "Chicago Fire",
+      "count": 1,
+      "sources": [
+        "scout_v4_20260513.json"
+      ],
+      "last_seen_date": "20260513"
+    },
+    {
+      "name": "DC United",
+      "count": 1,
+      "sources": [
+        "scout_v4_20260513.json"
+      ],
+      "last_seen_date": "20260513"
+    },
+    {
+      "name": "Dynamo Kyiv",
+      "count": 1,
+      "sources": [
+        "v4_capture_tasks_20260513.json"
+      ],
+      "last_seen_date": "20260513"
+    },
+    {
+      "name": "FC Basel 1893",
+      "count": 1,
+      "sources": [
+        "scout_v4_20260513.json"
+      ],
+      "last_seen_date": "20260513"
+    },
+    {
+      "name": "FC Lugano",
+      "count": 1,
+      "sources": [
+        "scout_v4_20260513.json"
+      ],
+      "last_seen_date": "20260513"
+    },
+    {
+      "name": "FC ST. Gallen",
+      "count": 1,
+      "sources": [
+        "scout_v4_20260513.json"
+      ],
+      "last_seen_date": "20260513"
+    },
+    {
+      "name": "FC Sion",
+      "count": 1,
+      "sources": [
+        "scout_v4_20260513.json"
+      ],
+      "last_seen_date": "20260513"
+    },
+    {
+      "name": "FC Thun",
+      "count": 1,
+      "sources": [
+        "scout_v4_20260513.json"
+      ],
+      "last_seen_date": "20260513"
+    },
+    {
+      "name": "Falkirk",
+      "count": 1,
+      "sources": [
+        "scout_v4_20260513.json"
+      ],
+      "last_seen_date": "20260513"
+    },
+    {
+      "name": "Heart Of Midlothian",
+      "count": 1,
+      "sources": [
+        "scout_v4_20260513.json"
+      ],
+      "last_seen_date": "20260513"
+    },
+    {
+      "name": "Independiente Petrolero",
+      "count": 1,
+      "sources": [
+        "scout_v4_20260513.json"
+      ],
+      "last_seen_date": "20260513"
+    },
+    {
+      "name": "Kolos Kovalivka",
+      "count": 1,
+      "sources": [
+        "v4_capture_tasks_20260513.json"
+      ],
+      "last_seen_date": "20260513"
+    },
+    {
+      "name": "LNZ Cherkasy",
+      "count": 1,
+      "sources": [
+        "v4_capture_tasks_20260513.json"
+      ],
+      "last_seen_date": "20260513"
+    },
+    {
+      "name": "Levski Sofia",
+      "count": 1,
+      "sources": [
+        "scout_v4_20260513.json"
+      ],
+      "last_seen_date": "20260513"
+    },
+    {
+      "name": "Los Angeles Galaxy",
+      "count": 1,
+      "sources": [
+        "scout_v4_20260513.json"
+      ],
+      "last_seen_date": "20260513"
+    },
+    {
+      "name": "Ludogorets",
+      "count": 1,
+      "sources": [
+        "scout_v4_20260513.json"
+      ],
+      "last_seen_date": "20260513"
+    },
+    {
+      "name": "Motherwell",
+      "count": 1,
+      "sources": [
+        "scout_v4_20260513.json"
+      ],
+      "last_seen_date": "20260513"
+    },
+    {
+      "name": "Nacional Potosí",
+      "count": 1,
+      "sources": [
+        "scout_v4_20260513.json"
+      ],
+      "last_seen_date": "20260513"
+    },
+    {
+      "name": "Nashville SC",
+      "count": 1,
+      "sources": [
+        "scout_v4_20260513.json"
+      ],
+      "last_seen_date": "20260513"
+    },
+    {
+      "name": "New England Revolution",
+      "count": 1,
+      "sources": [
+        "scout_v4_20260513.json"
+      ],
+      "last_seen_date": "20260513"
+    },
+    {
+      "name": "Obolon'-Brovar",
+      "count": 1,
+      "sources": [
+        "scout_v4_20260513.json"
+      ],
+      "last_seen_date": "20260513"
+    },
+    {
+      "name": "Raków Częstochowa",
+      "count": 1,
+      "sources": [
+        "scout_v4_20260513.json"
+      ],
+      "last_seen_date": "20260513"
+    },
+    {
+      "name": "SK Poltava",
+      "count": 1,
+      "sources": [
+        "v4_capture_tasks_20260513.json"
+      ],
+      "last_seen_date": "20260513"
+    },
+    {
+      "name": "San Jose Earthquakes",
+      "count": 1,
+      "sources": [
+        "scout_v4_20260513.json"
+      ],
+      "last_seen_date": "20260513"
+    },
+    {
+      "name": "Seattle Sounders",
+      "count": 1,
+      "sources": [
+        "scout_v4_20260513.json"
+      ],
+      "last_seen_date": "20260513"
+    },
+    {
+      "name": "Shakhtar Donetsk",
+      "count": 1,
+      "sources": [
+        "scout_v4_20260513.json"
+      ],
+      "last_seen_date": "20260513"
+    },
+    {
+      "name": "Sporting Kansas City",
+      "count": 1,
+      "sources": [
+        "scout_v4_20260513.json"
+      ],
+      "last_seen_date": "20260513"
+    },
+    {
+      "name": "The Strongest",
+      "count": 1,
+      "sources": [
+        "scout_v4_20260513.json"
+      ],
+      "last_seen_date": "20260513"
+    },
+    {
+      "name": "Volos NFC",
+      "count": 1,
+      "sources": [
+        "scout_v4_20260513.json"
+      ],
+      "last_seen_date": "20260513"
+    }
+  ],
+  "updated_at": "2026-05-13T02:03:49.284387",
+  "note": "unknown 为待人工补充的英文队名；请把确认后的映射补到 exact。"
 }

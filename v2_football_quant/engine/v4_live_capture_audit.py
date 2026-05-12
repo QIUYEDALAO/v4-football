@@ -3,7 +3,7 @@ from __future__ import annotations
 import argparse
 import json
 from collections import Counter, defaultdict
-from datetime import datetime
+from datetime import datetime, timedelta
 from pathlib import Path
 
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -15,6 +15,15 @@ MONITOR_DIR = BASE_DIR / "data" / "live_monitor"
 
 def _date_key(date_str: str) -> str:
     return date_str.replace("-", "")
+
+
+def _session_date(now: datetime | None = None) -> str:
+    """午夜 00:00-05:59 默认回退到前一天，和采集器会话日期保持一致。"""
+    if now is None:
+        now = datetime.now()
+    if now.hour < 6:
+        now = now - timedelta(days=1)
+    return now.strftime("%Y%m%d")
 
 
 def _load_json(path: Path, default):
@@ -150,7 +159,7 @@ def build_audit(date_str: str) -> dict:
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument("--date", default=datetime.now().strftime("%Y%m%d"), help="YYYYMMDD 或 YYYY-MM-DD")
+    parser.add_argument("--date", default=_session_date(), help="YYYYMMDD 或 YYYY-MM-DD")
     args = parser.parse_args()
 
     result = build_audit(args.date)

@@ -24,9 +24,9 @@ REPORT_DIR = BASE_DIR / "data" / "daily_reports"
 DASHBOARD_DIR = BASE_DIR / "docs" / "v4_dashboards"
 
 try:
-    from engine.team_cn_map import fuzzy_match
+    from engine.team_cn_map import strict_match as team_name_cn
 except Exception:
-    def fuzzy_match(name: str) -> str:
+    def team_name_cn(name: str) -> str:
         return name
 
 try:
@@ -84,6 +84,10 @@ def _line_float(line) -> float:
     return _float(str(line).replace("Over", "").replace("Under", "").strip(), 0.0)
 
 
+def _over_odds_float(line_row: dict) -> float:
+    return _float(line_row.get("over"), 0.0)
+
+
 def _ko_time(kickoff: str) -> str:
     if not kickoff:
         return ""
@@ -91,6 +95,15 @@ def _ko_time(kickoff: str) -> str:
         return datetime.fromisoformat(kickoff.replace("Z", "+00:00")).strftime("%H:%M")
     except Exception:
         return kickoff[-8:-3] if len(kickoff) >= 5 else kickoff
+
+
+def _kickoff_sort_value(kickoff: str) -> int:
+    if not kickoff:
+        return 32503680000  # year 3000, put unknown kickoff at end
+    try:
+        return int(datetime.fromisoformat(kickoff.replace("Z", "+00:00")).timestamp())
+    except Exception:
+        return 32503680000
 
 
 def calculate_hotness(factors: dict) -> float:
@@ -128,7 +141,24 @@ def tier(score: float) -> str:
 def _best_line(lines: list[dict]) -> dict:
     if not lines:
         return {}
-    return max(lines, key=lambda x: _line_float(x.get("line")))
+    preferred_order = [1.0, 1.25, 0.75, 1.5, 0.5, 1.75]
+    line_rank = {v: i for i, v in enumerate(preferred_order)}
+
+    scored = []
+    for ln in lines:
+        line_val = _line_float(ln.get("line"))
+        over_dec = _over_odds_float(ln)
+        # Asian principal line: over水位最接近1（HK赔率）≈ decimal最接近2.00。
+        if over_dec > 1.0:
+            water = over_dec - 1.0
+            water_distance = abs(water - 1.0)
+        else:
+            # 无法识别赔率时，降低优先级，走线值兜底
+            water_distance = 999.0
+        scored.append((water_distance, line_rank.get(line_val, 999), abs(line_val - 1.25), ln))
+
+    scored.sort(key=lambda x: (x[0], x[1], x[2]))
+    return scored[0][3] if scored else {}
 
 
 def _line_text(lines: list[dict]) -> str:
@@ -225,6 +255,13 @@ def _rows_json(rows: list[dict]) -> str:
         away_sched = schedule_pressure.get("away", {}) or {}
         live_status = r.get("live_status") or {}
         live_entry = r.get("live_entry") or {}
+        entry_line = str(live_entry.get("entry_line", "") or "").strip()
+        entry_odds = str(live_entry.get("entry_over_odds", "") or "").strip()
+        has_live_line = entry_line not in ("", "-", "None", "null")
+        has_live_odds = entry_odds not in ("", "-", "None", "null")
+        display_line = entry_line if has_live_line else str(r.get("pre_ht_line", "") or "")
+        display_odds = entry_odds if has_live_odds else str(r.get("pre_over_odds", "") or "")
+        display_source = "走地" if has_live_line else "赛前参考"
         scores = r.get("market_scores") or f.get("market_scores") or {}
         market_focus = r.get("market_focus") or "HT_LIVE_OVER"
         intelligence = explain_match(r)
@@ -241,8 +278,8 @@ def _rows_json(rows: list[dict]) -> str:
         match_profile = intelligence.get("profile", "")
         home = r.get("home") or ""
         away = r.get("away") or ""
-        home_cn = fuzzy_match(home)
-        away_cn = fuzzy_match(away)
+        home_cn = team_name_cn(home)
+        away_cn = team_name_cn(away)
         compact.append({
             "fixture_id": r.get("fixture_id"),
             "home": home_cn,
@@ -251,6 +288,7 @@ def _rows_json(rows: list[dict]) -> str:
             "awayEn": away,
             "league": r.get("league"),
             "time": _ko_time(r.get("kickoff", "")),
+            "kickoffSort": _kickoff_sort_value(r.get("kickoff", "")),
             "hotness": r.get("hotness_score"),
             "tier": r.get("tier"),
             "is_watch": is_live_radar,
@@ -359,6 +397,9 @@ def _rows_json(rows: list[dict]) -> str:
             "line": r.get("pre_ht_line", ""),
             "lineFloat": r.get("pre_ht_line_float", 0),
             "overOdds": r.get("pre_over_odds", ""),
+            "displayLine": display_line,
+            "displayOdds": display_odds,
+            "displayLineSource": display_source,
             "linesText": _line_text(r.get("ht_ou_lines", [])),
             "injuryText": _injury_text(r.get("injury", {})),
             "lineupText": _lineup_text(r.get("lineup_gate")),
@@ -375,7 +416,6 @@ def render_dashboard(date_str: str) -> Path:
     live_status = _load_json(BASE_DIR / "data" / "live_monitor" / f"v4_live_status_{key}.json", {})
     live_entries = _load_json(BASE_DIR / "data" / "paper_trading" / f"v4_live_entries_{key}.json", [])
     review = _load_json(REPORT_DIR / f"v4_review_{key}.json", {})
-    calibration = _load_json(REPORT_DIR / "v4_calibration_report.json", {})
     if not scout:
         raise FileNotFoundError(f"没有可渲染的 V4 情报数据: {scout_path}")
     rows = _enrich_records(
@@ -402,8 +442,6 @@ def render_dashboard(date_str: str) -> Path:
     flags_text = "；".join(flags) if flags else "无触发"
 
     data_json = _rows_json(rows)
-    review_json = json.dumps(review if isinstance(review, dict) else {}, ensure_ascii=False)
-    calibration_json = json.dumps(calibration if isinstance(calibration, dict) else {}, ensure_ascii=False)
     title = f"V4 作战仪表盘 | {date_str}"
     html_doc = f"""<!doctype html>
 <html lang="zh-CN">
@@ -425,7 +463,7 @@ def render_dashboard(date_str: str) -> Path:
     h1 {{ margin:0 0 8px; font-size:24px; letter-spacing:0; }}
     .summary {{ display:flex; flex-wrap:wrap; gap:10px; color:var(--muted); font-size:14px; }}
     .pill {{ border:1px solid var(--line); background:var(--panel); border-radius:8px; padding:7px 10px; }}
-    .filters {{ display:grid; grid-template-columns: 1.5fr repeat(6, minmax(105px, 1fr)); gap:10px; margin-top:14px; }}
+    .filters {{ display:grid; grid-template-columns: repeat(2, minmax(220px, 320px)); gap:10px; margin-top:14px; }}
     input, select {{ width:100%; border:1px solid var(--line); border-radius:8px; background:#fff; padding:10px 11px; font-size:14px; }}
     main {{ max-width:1280px; margin:0 auto; padding:18px 20px 36px; }}
     .grid {{ display:grid; grid-template-columns:repeat(auto-fill, minmax(360px, 1fr)); gap:14px; }}
@@ -454,6 +492,13 @@ def render_dashboard(date_str: str) -> Path:
     .detail {{ font-size:13px; line-height:1.55; }}
     .audit {{ margin-top:12px; border-top:1px solid var(--line); padding-top:10px; }}
     .audit summary {{ cursor:pointer; color:var(--accent); font-size:13px; font-weight:700; }}
+    .list-wrap {{ display:flex; flex-direction:column; gap:8px; }}
+    .list-row {{ display:grid; grid-template-columns: 78px 1fr 140px 64px; gap:10px; align-items:center; background:var(--panel); border:1px solid var(--line); border-radius:8px; padding:10px 12px; }}
+    .list-time {{ color:var(--muted); font-weight:700; font-size:13px; text-align:center; }}
+    .list-match {{ font-size:14px; font-weight:700; }}
+    .list-league {{ color:var(--muted); font-size:12px; margin-top:2px; }}
+    .list-action {{ font-size:12px; text-align:right; color:#334155; }}
+    .list-score {{ text-align:right; font-weight:800; color:#7c2d12; }}
     .health-panel {{ margin-top:12px; border:1px solid var(--line); border-radius:8px; padding:10px 12px; background:#fff; }}
     .health-head {{ display:flex; align-items:center; gap:10px; flex-wrap:wrap; margin-bottom:8px; }}
     .health-dot {{ width:10px; height:10px; border-radius:999px; display:inline-block; }}
@@ -466,13 +511,9 @@ def render_dashboard(date_str: str) -> Path:
     .health-item b {{ font-size:14px; }}
     .quick {{ display:grid; grid-template-columns:1.4fr repeat(3, .75fr); gap:8px; margin-top:10px; }}
     .quick .metric:first-child b {{ font-size:14px; }}
-    .table-view {{ width:100%; border-collapse:collapse; background:var(--panel); border:1px solid var(--line); border-radius:8px; overflow:hidden; }}
-    th, td {{ text-align:left; padding:10px; border-bottom:1px solid var(--line); font-size:13px; }}
-    th {{ color:var(--muted); background:#f9fafb; cursor:pointer; user-select:none; }}
-    tr:hover td {{ background:#f9fafb; }}
     .hidden {{ display:none; }}
     .empty {{ color:var(--muted); text-align:center; padding:40px; background:var(--panel); border:1px solid var(--line); border-radius:8px; }}
-    @media (max-width: 860px) {{ .filters {{ grid-template-columns:1fr 1fr; }} .grid {{ grid-template-columns:1fr; }} }}
+    @media (max-width: 860px) {{ .filters {{ grid-template-columns:1fr; }} .grid {{ grid-template-columns:1fr; }} }}
   </style>
 </head>
 <body>
@@ -484,7 +525,7 @@ def render_dashboard(date_str: str) -> Path:
         <span class="pill"><b id="visibleCount">0</b> / {len(rows)} 场</span>
         <span class="pill">滚球雷达 {len(watchlist)} 场</span>
         <span class="pill">S:{counts["S"]} A:{counts["A"]} B:{counts["B"]}</span>
-        <span class="pill">模式：临场作战（默认）</span>
+        <span class="pill">默认显示：全部比赛</span>
       </div>
       <div class="health-panel {health_class}">
         <div class="health-head">
@@ -500,87 +541,25 @@ def render_dashboard(date_str: str) -> Path:
         </div>
       </div>
       <div class="filters">
-        <input id="q" placeholder="搜索球队 / 联赛">
-        <select id="mode"><option value="ops">临场作战</option><option value="review">复盘</option><option value="research">研究</option></select>
-        <select id="strategy"><option value="HT">HT 主策略</option><option value="SH">SH 观察</option><option value="ALL">全部</option></select>
-        <select id="action"><option value="">全部动作</option><option value="PAPER_BUY_NOW">可进场</option><option value="WAIT_LINE">等待降盘</option><option value="WAIT_TEMPO">等待节奏</option><option value="WAIT_CONFIDENCE">等待置信</option><option value="PAPER_ONLY">仅观察</option><option value="SKIP">已跳过</option><option value="RISK_BLOCKED">风控拦截</option></select>
-        <select id="tier"><option value="">全部等级</option><option>A+</option><option>A</option><option>B</option><option>C</option></select>
-        <select id="watch"><option value="1">仅主信号(默认)</option><option value="">全部</option></select>
-        <select id="line"><option value="">全部盘口</option><option value="1.25">≥1.25</option><option value="1.5">≥1.5</option></select>
-        <select id="view"><option value="cards">卡片</option><option value="table">表格</option></select>
-        <select id="sort"><option value="time">时间排序</option><option value="hotness">热度排序</option><option value="line">盘口排序</option></select>
+        <select id="sort">
+          <option value="hotness">按评分推荐</option>
+          <option value="time">按比赛开始时间</option>
+        </select>
+        <select id="view">
+          <option value="cards">卡片模式</option>
+          <option value="list">列表模式</option>
+        </select>
       </div>
     </div>
   </header>
   <main>
-    <div id="opsSummary" class="summary" style="margin:0 0 12px 0;">
-      <span class="pill">监控 <b id="sumTotal">0</b> 场</span>
-      <span class="pill">A+ <b id="sumAPlus">0</b></span>
-      <span class="pill">A <b id="sumA">0</b></span>
-      <span class="pill">等待 <b id="sumWait">0</b></span>
-      <span class="pill">跳过 <b id="sumSkip">0</b></span>
-    </div>
-    <h3 id="secBuy">🔥 可进场</h3>
-    <div id="cardsBuy" class="grid"></div>
-    <h3 id="secWait">⏳ 等待触发</h3>
-    <div id="cardsWait" class="grid"></div>
-    <h3 id="secRisk">⚠️ 风险观察</h3>
-    <div id="cardsRisk" class="grid"></div>
-    <h3 id="secSkip">❌ 已跳过</h3>
-    <div id="cardsSkip" class="grid"></div>
     <div id="cards" class="grid"></div>
-    <div id="reviewPanel" class="card hidden" style="margin-bottom:12px;">
-      <div class="match">复盘摘要</div>
-      <div class="meta">今日动作分布与EV标签分布（用于复盘，不用于临场决策）</div>
-      <div class="metrics" style="margin-top:10px;">
-        <div class="metric"><label>PAPER_BUY_NOW</label><b id="rvBuy">0</b></div>
-        <div class="metric"><label>PAPER_ONLY</label><b id="rvPaper">0</b></div>
-        <div class="metric"><label>SKIP/RISK</label><b id="rvSkip">0</b></div>
-        <div class="metric"><label>EV强</label><b id="rvEvStrong">0</b></div>
-        <div class="metric"><label>EV合格</label><b id="rvEvOk">0</b></div>
-        <div class="metric"><label>EV观察</label><b id="rvEvWatch">0</b></div>
-      </div>
-      <div class="section">
-        <div class="section-title">legacy vs EV</div>
-        <div class="detail" id="rvLegacyEv">暂无复盘数据（先运行 v4_review_report.py）</div>
-        <div class="detail" id="rvLegacyDelta" style="margin-top:6px; font-weight:700;">—</div>
-      </div>
-      <div class="section">
-        <div class="section-title">跳过后影子表现</div>
-        <div class="detail" id="rvShadow">暂无 shadow backtest 数据</div>
-      </div>
-      <div class="section">
-        <div class="section-title">EV 分桶校准</div>
-        <div class="detail" id="rvCalibrationText">暂无校准数据（先运行 v4_calibration_report.py --save）</div>
-        <table id="rvCalibrationTable" class="table-view hidden" style="margin-top:8px;">
-          <thead><tr><th>EV桶</th><th>样本</th><th>预测命中</th><th>实际命中</th><th>偏差</th></tr></thead>
-          <tbody></tbody>
-        </table>
-      </div>
-    </div>
-    <div id="researchPanel" class="card hidden" style="margin-bottom:12px;">
-      <div class="match">研究摘要</div>
-      <div class="meta">研究模式显示全量样本，参数详情请展开单场卡片“查看完整数据”</div>
-      <div class="metrics" style="margin-top:10px;">
-        <div class="metric"><label>样本总数</label><b id="rsTotal">0</b></div>
-        <div class="metric"><label>HT方向</label><b id="rsHT">0</b></div>
-        <div class="metric"><label>SH方向</label><b id="rsSH">0</b></div>
-      </div>
-      <div class="section">
-        <div class="section-title">Walk-forward 摘要</div>
-        <div class="detail" id="rsWalkForwardText">暂无 walk-forward 数据</div>
-      </div>
-    </div>
-    <table id="table" class="table-view hidden"><thead><tr>
-      <th data-sort="hotness">🔥</th><th>比赛</th><th>时间</th><th>动作</th><th>盘口</th><th>EV等级</th><th>风险</th>
-    </tr></thead><tbody></tbody></table>
+    <div id="list" class="list-wrap hidden"></div>
     <div id="empty" class="empty hidden">没有符合过滤条件的比赛</div>
   </main>
   <script>
     const rows = {data_json};
-    const state = {{ q:'', mode:'ops', strategy:'HT', action:'', tier:'', watch:'1', line:'', view:'cards', sort:'hotness' }};
-    const reviewData = {review_json};
-    const calibrationData = {calibration_json};
+    const state = {{ sort:'hotness', view:'cards' }};
     const el = id => document.getElementById(id);
     function actionOf(row) {{ return row.actionCode || 'SKIP'; }}
     function tierOf(row) {{
@@ -615,7 +594,7 @@ def render_dashboard(date_str: str) -> Path:
         <div class="tags">
           <span class="tag ${{actionColor(action)}}">${{action}}</span>
           <span class="tag">${{t}}</span>
-          <span class="tag">大${{row.line || '?'}} @${{row.overOdds || '-'}}</span>
+          <span class="tag">${{row.displayLineSource || '赛前参考'}} 大${{row.displayLine || '?'}} @${{row.displayOdds || '-'}}</span>
           <span class="tag">${{row.evLabel || 'EV观察'}}</span>
           <span class="tag">${{row.executionLabel || '仅观察'}}</span>
           <span class="tag">窗口 ${{
@@ -655,124 +634,41 @@ def render_dashboard(date_str: str) -> Path:
           <div class="section"><div class="section-title">下半场 / 全场参考</div>
             <div class="detail">SH有球: ${{row.shText}} · 场均SH球: ${{row.avgShGoals}} · FT 2+球: ${{row.ftOverText}}<br>46-60: ${{row.binsSecond['46-60']}} · 61-75: ${{row.binsSecond['61-75']}} · 76-90: ${{row.binsSecond['76-90']}}</div>
           </div>
-          <div class="section"><div class="section-title">大球盘口线</div><div class="detail">${{row.linesText}}</div></div>
+          <div class="section"><div class="section-title">赛前大球盘口全量</div><div class="detail">${{row.linesText}}</div></div>
           <div class="section"><div class="section-title">伤停 / 首发闸门</div><div class="detail">${{row.injuryText}}<br>${{row.lineupText}}</div></div>
         </details>
       </article>`;
     }}
-    function tableRow(row) {{
-      return `<tr><td>${{row.hotness}}</td><td>${{row.home}} vs ${{row.away}}</td><td>${{row.time}}</td><td>${{actionOf(row)}}</td><td>大${{row.line || '?'}} @${{row.overOdds || '-'}}</td><td>${{row.evLabel || 'EV观察'}}</td><td>${{row.riskLevel || '-'}}</td></tr>`;
-    }}
     function filtered() {{
-      let out = rows.filter(r => {{
-        const hay = `${{r.home}} ${{r.away}} ${{r.homeEn}} ${{r.awayEn}} ${{r.league}}`.toLowerCase();
-        if (state.q && !hay.includes(state.q.toLowerCase())) return false;
-        if (state.strategy === 'HT' && r.marketFocus !== 'HT_LIVE_OVER') return false;
-        if (state.strategy === 'SH' && r.marketFocus !== 'SECOND_HALF_OVER') return false;
-        if (state.action && actionOf(r) !== state.action) return false;
-        if (state.tier && tierOf(r) !== state.tier) return false;
-        if (state.watch && !r.is_watch) return false;
-        if (state.line && Number(r.lineFloat) < Number(state.line)) return false;
-        return true;
-      }});
+      let out = rows.slice();
       out.sort((a,b) => {{
-        if (state.sort === 'time') return String(a.time).localeCompare(String(b.time));
-        if (state.sort === 'line') return Number(b.lineFloat) - Number(a.lineFloat);
+        if (state.sort === 'time') return Number(a.kickoffSort || 0) - Number(b.kickoffSort || 0);
         return Number(b.hotness) - Number(a.hotness);
       }});
       return out;
     }}
-    function render() {{
-      let out = filtered();
-      if (state.mode === 'review') {{
-        out = out.filter(r => ['PAPER_BUY_NOW','PAPER_ONLY','SKIP','RISK_BLOCKED'].includes(actionOf(r)));
-      }} else if (state.mode === 'research') {{
-        // 全量保留
-      }} else {{
-        out = out.filter(r => ['PAPER_BUY_NOW','WAIT_LINE','WAIT_TEMPO','WAIT_CONFIDENCE','PAPER_ONLY','SKIP','RISK_BLOCKED'].includes(actionOf(r)));
-      }}
-      el('visibleCount').textContent = out.length;
-      const buy = out.filter(r => actionOf(r) === 'PAPER_BUY_NOW');
-      const wait = out.filter(r => ['WAIT_LINE','WAIT_TEMPO','WAIT_CONFIDENCE'].includes(actionOf(r)));
-      const risk = out.filter(r => ['PAPER_ONLY','RISK_BLOCKED'].includes(actionOf(r)));
-      const skip = out.filter(r => actionOf(r) === 'SKIP');
-      const evStrong = out.filter(r => (r.evLabel || '') === 'EV强').length;
-      const evOk = out.filter(r => (r.evLabel || '') === 'EV合格').length;
-      const evWatch = out.filter(r => (r.evLabel || '') === 'EV观察').length;
-      el('sumTotal').textContent = out.length;
-      el('sumAPlus').textContent = out.filter(r => tierOf(r)==='A+').length;
-      el('sumA').textContent = out.filter(r => tierOf(r)==='A').length;
-      el('sumWait').textContent = wait.length;
-      el('sumSkip').textContent = skip.length;
-      el('cards').classList.toggle('hidden', state.view !== 'cards');
-      el('table').classList.toggle('hidden', state.view !== 'table');
-      el('empty').classList.toggle('hidden', out.length > 0);
-      el('cards').innerHTML = out.map(card).join('');
-      el('cardsBuy').innerHTML = buy.map(card).join('');
-      el('cardsWait').innerHTML = wait.map(card).join('');
-      el('cardsRisk').innerHTML = risk.map(card).join('');
-      el('cardsSkip').innerHTML = skip.map(card).join('');
-      el('table').querySelector('tbody').innerHTML = out.map(tableRow).join('');
-      const ops = state.mode === 'ops' && state.view === 'cards';
-      const review = state.mode === 'review' && state.view === 'cards';
-      const research = state.mode === 'research' && state.view === 'cards';
-      ['opsSummary','secBuy','cardsBuy','secWait','cardsWait','secRisk','cardsRisk','secSkip','cardsSkip'].forEach(id => {{
-        el(id).classList.toggle('hidden', !ops);
-      }});
-      el('reviewPanel').classList.toggle('hidden', !review);
-      el('researchPanel').classList.toggle('hidden', !research);
-      el('rvBuy').textContent = buy.length;
-      el('rvPaper').textContent = risk.length;
-      el('rvSkip').textContent = skip.length;
-      el('rvEvStrong').textContent = evStrong;
-      el('rvEvOk').textContent = evOk;
-      el('rvEvWatch').textContent = evWatch;
-      const rt = (reviewData && reviewData.roi_triplet) || {{}};
-      const rawRoi = Number(rt.raw_paper_roi_pct || 0).toFixed(2);
-      const slipRoi = Number(rt.slippage_adjusted_roi_pct || 0).toFixed(2);
-      const consRoi = Number(rt.conservative_fill_roi_pct || 0).toFixed(2);
-      const execN = Number(rt.execution_samples || 0);
-      const lg = (reviewData && reviewData.legacy_summary) || {{}};
-      const legacyRoi = Number(lg.legacy_proxy_roi_pct || 0);
-      const delta = Number(consRoi) - legacyRoi;
-      if (reviewData && Object.keys(reviewData).length) {{
-        el('rvLegacyEv').textContent = `EV三层ROI：Raw ${{rawRoi}}% / Slippage ${{slipRoi}}% / Conservative ${{consRoi}}%（执行样本 ${{execN}}）`;
-        const deltaText = `EV-Conservative vs Legacy 代理 ROI：${{delta >= 0 ? '+' : ''}}${{delta.toFixed(2)}}%`;
-        el('rvLegacyDelta').textContent = deltaText;
-        el('rvLegacyDelta').style.color = delta > 0 ? '#15803d' : (delta < 0 ? '#b91c1c' : '#92400e');
-      }}
-      const shadow = (reviewData && reviewData.shadow_summary) || null;
-      if (shadow) {{
-        const wc = Number(shadow.would_enter_count || 0);
-        const sr = Number(shadow.skip_realized_roi_pct || 0).toFixed(2);
-        el('rvShadow').textContent = `影子样本 ${{wc}} 场，跳过后模拟ROI ${{sr}}%`;
-      }}
-      const ctbl = (calibrationData && calibrationData.calibration_table) || [];
-      const cN = Number((calibrationData && calibrationData.sample_size) || 0);
-      if (ctbl.length > 0) {{
-        el('rvCalibrationText').textContent = `校准样本 ${{cN}} 场`;
-        el('rvCalibrationTable').classList.remove('hidden');
-        el('rvCalibrationTable').querySelector('tbody').innerHTML = ctbl.map(x =>
-          `<tr><td>${{x.bucket}}</td><td>${{x.samples}}</td><td>${{x.predicted_hit_rate_pct}}%</td><td>${{x.actual_hit_rate_pct}}%</td><td>${{x.bias_pct}}%</td></tr>`
-        ).join('');
-      }} else {{
-        el('rvCalibrationTable').classList.add('hidden');
-      }}
-      el('rsTotal').textContent = out.length;
-      el('rsHT').textContent = out.filter(r => r.marketFocus === 'HT_LIVE_OVER').length;
-      el('rsSH').textContent = out.filter(r => r.marketFocus === 'SECOND_HALF_OVER').length;
-      const wf = (reviewData && reviewData.walk_forward) || {{}};
-      const splits = wf.splits || {{}};
-      const valid = splits.valid || {{}};
-      const fwd = splits.forward_sim || {{}};
-      const live = splits.paper_live || {{}};
-      if (wf && Object.keys(wf).length) {{
-        el('rsWalkForwardText').textContent =
-          `样本 ${{wf.sample_size || 0}} | valid ROI ${{valid.roi_pct ?? '-'}}% | forward ROI ${{fwd.roi_pct ?? '-'}}% | paper_live ROI ${{live.roi_pct ?? '-'}}%`;
-      }}
-      el('cards').classList.toggle('hidden', state.view !== 'cards' || ops);
+    function listRow(row) {{
+      const action = actionOf(row);
+      return `<div class="list-row">
+        <div class="list-time">${{row.time || '--:--'}}</div>
+        <div>
+          <div class="list-match">${{row.home}} vs ${{row.away}}</div>
+          <div class="list-league">${{row.league}} · #${{row.fixture_id}}</div>
+        </div>
+        <div class="list-action">${{action}}<br>${{row.displayLineSource || '赛前参考'}} 大${{row.displayLine || '?'}} @${{row.displayOdds || '-'}}</div>
+        <div class="list-score">${{row.hotness}}</div>
+      </div>`;
     }}
-    ['q','mode','strategy','action','tier','watch','line','view','sort'].forEach(id => {{
+    function render() {{
+      const out = filtered();
+      el('visibleCount').textContent = out.length;
+      el('empty').classList.toggle('hidden', out.length > 0);
+      el('cards').classList.toggle('hidden', state.view !== 'cards');
+      el('list').classList.toggle('hidden', state.view !== 'list');
+      el('cards').innerHTML = out.map(card).join('');
+      el('list').innerHTML = out.map(listRow).join('');
+    }}
+    ['sort','view'].forEach(id => {{
       el(id).addEventListener('input', e => {{ state[id] = e.target.value; render(); }});
     }});
     render();

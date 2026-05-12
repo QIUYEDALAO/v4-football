@@ -10,9 +10,9 @@ sys.path.insert(0, str(BASE_DIR))
 DATA_DIR = BASE_DIR / "data" / "daily_reports"
 
 try:
-    from engine.team_cn_map import fuzzy_match
+    from engine.team_cn_map import strict_match as team_name_cn
 except Exception:
-    def fuzzy_match(name: str) -> str:
+    def team_name_cn(name: str) -> str:
         return name
 
 # ── 核心球员权重库 ──
@@ -100,8 +100,8 @@ def calculate_hotness(factors: dict) -> float:
 def generate_match_card(match_data: dict, show_hotness: bool = True) -> str:
     home_raw = match_data["home"]
     away_raw = match_data["away"]
-    home = fuzzy_match(home_raw)
-    away = fuzzy_match(away_raw)
+    home = team_name_cn(home_raw)
+    away = team_name_cn(away_raw)
     league = match_data.get("league", "Unknown")
     ko = match_data.get("kickoff", "")
     try:

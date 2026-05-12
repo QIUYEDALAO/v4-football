@@ -32,7 +32,7 @@ def _get_api_key() -> str:
         from config.secrets import API_KEY
         return API_KEY
     except Exception:
-        return os.getenv("APIFOOTBALL_KEY", "")
+        return os.environ.get("APIFOOTBALL_KEY", "")
 
 # ── Python urllib (优先尝试) ──
 try:

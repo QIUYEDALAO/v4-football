@@ -496,6 +496,7 @@ for league_map in [
 import difflib
 import json
 import os
+import re
 
 MAP_PATH = os.path.join(os.path.dirname(__file__), "team_cn_map.json")
 
@@ -517,6 +518,50 @@ def _load_external_exact_map():
 _load_external_exact_map()
 
 
+def _normalize_team_key(name: str) -> str:
+    s = str(name or "").strip().lower()
+    if not s:
+        return ""
+    # Keep only alnum to reduce punctuation/style noise, but avoid semantic fuzzy mapping.
+    s = re.sub(r"[^a-z0-9]+", "", s)
+    return s
+
+
+_LOWER_EXACT_MAP = {}
+_NORMALIZED_EXACT_MAP = {}
+_NORMALIZED_AMBIGUOUS = set()
+for _en, _cn in TEAM_CN_MAP.items():
+    low = str(_en).strip().lower()
+    if low and low not in _LOWER_EXACT_MAP:
+        _LOWER_EXACT_MAP[low] = _cn
+    nk = _normalize_team_key(_en)
+    if not nk:
+        continue
+    old = _NORMALIZED_EXACT_MAP.get(nk)
+    if old is None:
+        _NORMALIZED_EXACT_MAP[nk] = _cn
+    elif old != _cn:
+        _NORMALIZED_AMBIGUOUS.add(nk)
+
+
+def strict_match(name: str) -> str:
+    """
+    严格球队名翻译：只允许字典精确映射（含规范化同义写法），
+    映射不到就返回英文原名，避免误翻为错误球队/城市名。
+    """
+    if not name:
+        return name
+    if name in TEAM_CN_MAP:
+        return TEAM_CN_MAP[name]
+    low = str(name).strip().lower()
+    if low in _LOWER_EXACT_MAP:
+        return _LOWER_EXACT_MAP[low]
+    nk = _normalize_team_key(name)
+    if nk and nk not in _NORMALIZED_AMBIGUOUS and nk in _NORMALIZED_EXACT_MAP:
+        return _NORMALIZED_EXACT_MAP[nk]
+    return name
+
+
 def fuzzy_match(name: str, threshold: float = 0.6) -> str:
     """
     模糊匹配球队中文名。
@@ -528,15 +573,12 @@ def fuzzy_match(name: str, threshold: float = 0.6) -> str:
     Returns:
         中文名，找不到返回原英文名
     """
-    # 精确匹配
-    if name in TEAM_CN_MAP:
-        return TEAM_CN_MAP[name]
-    
-    # 大小写不敏感
+    # 优先走严格映射，避免误翻
+    strict = strict_match(name)
+    if strict != name:
+        return strict
+
     low = name.lower()
-    for en, cn in TEAM_CN_MAP.items():
-        if en.lower() == low:
-            return cn
     
     # 子串匹配
     for en, cn in TEAM_CN_MAP.items():
