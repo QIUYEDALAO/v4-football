@@ -16,6 +16,7 @@ from __future__ import annotations
 import argparse
 import json, ssl, certifi, time, sys
 import urllib.request
+from urllib.parse import urlsplit, parse_qsl, urlencode
 from pathlib import Path
 from datetime import datetime, date, timedelta
 
@@ -24,7 +25,12 @@ sys.path.insert(0, str(BASE_DIR))
 
 from config.secrets import API_KEY, API_HOST
 from engine.data_sources.api_coverage import evaluate_fixture_coverage
-from engine.data_sources.h2h_engine import evaluate_h2h_edge
+from engine.data_sources.h2h_engine import (
+    evaluate_h2h_edge,
+    warm_recent_goal_profiles,
+    recent_profile_cache_stats,
+    reset_recent_profile_cache_stats,
+)
 from engine.data_sources.league_baseline import baseline_for_fixture
 from engine.data_sources.lineup_strength import LineupStrengthAnalyzer
 from engine.data_sources.motivation import evaluate_match_motivation
@@ -49,6 +55,7 @@ with open(BASE_DIR / "config" / "leagues_whitelist.json") as f:
     LEAGUE_CN = json.load(f)["leagueId"]
 
 WL_SET = set(str(k) for k in LEAGUE_CN.keys())
+SCAN_PROFILE_STABLE_FULL_24H = "stable_full_24h"
 
 
 def _load_league_status_map() -> dict[str, dict]:
@@ -84,14 +91,30 @@ def api_get(endpoint: str):
 
 def _cached_api_client(base_client):
     cache: dict[str, dict | None] = {}
+    stats = {"calls_total": 0, "cache_hits": 0, "cache_misses": 0}
+
+    def _normalize_endpoint(endpoint: str) -> str:
+        if "?" not in endpoint:
+            return endpoint
+        split = urlsplit(endpoint)
+        q = parse_qsl(split.query, keep_blank_values=True)
+        q_sorted = sorted(q, key=lambda x: (x[0], x[1]))
+        normalized_q = urlencode(q_sorted, doseq=True)
+        return f"{split.path}?{normalized_q}"
 
     def _get(endpoint: str):
-        if endpoint in cache:
-            return cache[endpoint]
+        stats["calls_total"] += 1
+        key = _normalize_endpoint(endpoint)
+        if key in cache:
+            stats["cache_hits"] += 1
+            return cache[key]
+        stats["cache_misses"] += 1
         resp = base_client(endpoint)
-        cache[endpoint] = resp
+        cache[key] = resp
         return resp
 
+    _get._stats = stats
+    _get._cache = cache
     return _get
 
 
@@ -231,7 +254,14 @@ def _query_injury_health(api_client, team_id: int, team_name: str) -> dict:
         return {"status": "unknown", "missing": []}
 
 
-def run_v4_scan(run_tag="V4_DEFAULT", with_lineups=False, lookahead_hours=None, scan_mode: str = "fast"):
+def run_v4_scan(
+    run_tag="V4_DEFAULT",
+    with_lineups=False,
+    lookahead_hours=None,
+    scan_mode: str = "fast",
+    recent_prewarm: str = "on",
+):
+    t0 = time.perf_counter()
     logger.info(f"🔭 V4 球探扫描 | {run_tag} | {datetime.now().strftime('%H:%M')}")
     api_client = _cached_api_client(api_get)
     lineup_analyzer = LineupStrengthAnalyzer(api_client) if with_lineups else None
@@ -250,7 +280,30 @@ def run_v4_scan(run_tag="V4_DEFAULT", with_lineups=False, lookahead_hours=None, 
     scout_reports = []
     live_watchlist = []
     stats = {"total": len(fixtures), "no_h2h": 0, "below_threshold": 0,
-             "api_error": 0, "scouted": 0, "no_odds": 0}
+             "api_error": 0, "scouted": 0, "no_odds": 0, "valid_h2h_count": 0}
+
+    # 预热 recent profile：按 team_id 去重，只拉一次，H2H 阶段直接复用缓存
+    prewarm_info = {"enabled": False, "teams_total": 0, "warmed": 0, "skipped": 0, "cache_size": 0}
+    if str(recent_prewarm).lower() == "on":
+        prewarm_team_ids = []
+        for fx in fixtures:
+            if fx.get("homeId"):
+                prewarm_team_ids.append(int(fx["homeId"]))
+            if fx.get("awayId"):
+                prewarm_team_ids.append(int(fx["awayId"]))
+        prewarm_info = warm_recent_goal_profiles(
+            api_client,
+            prewarm_team_ids,
+            last_n=5,
+            include_events=False,
+        )
+        prewarm_info["enabled"] = True
+        logger.info(
+            f"  ♨️ recent预热: teams={prewarm_info['teams_total']} | warmed={prewarm_info['warmed']} | "
+            f"skipped={prewarm_info['skipped']} | cache={prewarm_info['cache_size']}"
+        )
+    # 只统计“预热之后扫描阶段”的缓存命中率，避免被预热miss污染
+    reset_recent_profile_cache_stats()
 
     for i, fx in enumerate(fixtures):
         if (i + 1) % 20 == 0:
@@ -286,6 +339,7 @@ def run_v4_scan(run_tag="V4_DEFAULT", with_lineups=False, lookahead_hours=None, 
             fx["homeId"],
             fx["awayId"],
             api_client,
+            mode=scan_mode,
         )
         h2h_valid = bool(result.get("valid"))
         h2h_reason = result.get("reason", "")
@@ -318,6 +372,7 @@ def run_v4_scan(run_tag="V4_DEFAULT", with_lineups=False, lookahead_hours=None, 
             else:
                 stats["below_threshold"] += 1
             continue
+        stats["valid_h2h_count"] += 1
 
         # ── 庄家盘口阵地：捕获所有 HT OU 线 ──
         odds_resp = api_client(f"odds?fixture={fx['id']}")
@@ -496,6 +551,35 @@ def run_v4_scan(run_tag="V4_DEFAULT", with_lineups=False, lookahead_hours=None, 
     except Exception as e:
         logger.warning(f"  ⚠️ 仪表盘生成失败: {e}")
 
+    elapsed = round(time.perf_counter() - t0, 2)
+    api_stats = getattr(api_client, "_stats", {})
+    perf = {
+        "date": date.today().isoformat(),
+        "run_tag": run_tag,
+        "scan_mode": scan_mode,
+        "scan_profile": SCAN_PROFILE_STABLE_FULL_24H,
+        "lookahead_hours": lookahead_hours,
+        "elapsed_seconds": elapsed,
+        "total_fixtures": stats["total"],
+        "valid_h2h_count": stats["valid_h2h_count"],
+        "scouted_count": stats["scouted"],
+        "watchlist_count": len(live_watchlist),
+        "api_calls_total": api_stats.get("calls_total", 0),
+        "api_cache_hits": api_stats.get("cache_hits", 0),
+        "api_cache_misses": api_stats.get("cache_misses", 0),
+        "recent_prewarm": prewarm_info,
+        "recent_profile_cache": recent_profile_cache_stats(),
+        "generated_at": datetime.now().isoformat(),
+    }
+    perf_path = REPORT_DIR / f"scan_perf_v4_{today_str}.json"
+    with open(perf_path, "w", encoding="utf-8") as f:
+        json.dump(perf, f, ensure_ascii=False, indent=2)
+    logger.info(
+        f"  ⚙️ 性能摘要: fixtures={perf['total_fixtures']} | valid_h2h={perf['valid_h2h_count']} | "
+        f"api_calls={perf['api_calls_total']} | cache_hit={perf['api_cache_hits']} | {elapsed}s"
+    )
+    logger.info(f"  ⚙️ 性能文件: {perf_path}")
+
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
@@ -517,10 +601,17 @@ if __name__ == "__main__":
         default="fast",
         help="fast: 先轻筛再跑重模块（推荐）；full: 每场全量引擎",
     )
+    parser.add_argument(
+        "--recent-prewarm",
+        choices=["on", "off"],
+        default="off",
+        help="recent画像是否在扫描前预热（40场规模默认off更快）",
+    )
     args = parser.parse_args()
     run_v4_scan(
         run_tag=args.run_tag,
         with_lineups=args.with_lineups,
         lookahead_hours=args.lookahead_hours,
         scan_mode=args.scan_mode,
+        recent_prewarm=args.recent_prewarm,
     )

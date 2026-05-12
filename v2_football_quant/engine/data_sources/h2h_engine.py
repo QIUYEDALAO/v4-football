@@ -19,6 +19,7 @@ from typing import Optional
 
 logger = logging.getLogger("V4_H2H_Engine")
 _RECENT_PROFILE_CACHE: dict[tuple[int, int, bool], dict] = {}
+_RECENT_PROFILE_STATS = {"hits": 0, "misses": 0}
 
 H2H_YEAR_CUTOFF = 2020
 H2H_REFERENCE_MIN_SAMPLES = 4
@@ -151,7 +152,9 @@ def _query_recent_goal_profile(api_client, team_id: int, last_n: int = 5, includ
     """查询某队最近 N 场完赛的上下半场进球画像。"""
     cache_key = (int(team_id), int(last_n), bool(include_events))
     if cache_key in _RECENT_PROFILE_CACHE:
+        _RECENT_PROFILE_STATS["hits"] += 1
         return _RECENT_PROFILE_CACHE[cache_key]
+    _RECENT_PROFILE_STATS["misses"] += 1
     empty = {
         "ht_over": 0.0, "ht_avg": 0.0, "ht_scored": 0.0, "ht_conceded": 0.0,
         "ht_goals_for_avg": 0.0, "ht_goals_against_avg": 0.0,
@@ -265,6 +268,50 @@ def _query_recent_goal_profile(api_client, team_id: int, last_n: int = 5, includ
     return empty
 
 
+def warm_recent_goal_profiles(
+    api_client,
+    team_ids,  # type: ignore
+    *,
+    last_n: int = 5,
+    include_events: bool = False,
+) -> dict:
+    """预热近期画像缓存，减少扫描过程中的临场调用抖动。"""
+    unique_ids = sorted({int(t) for t in (team_ids or []) if int(t) > 0})
+    warmed = 0
+    skipped = 0
+    for tid in unique_ids:
+        key = (tid, int(last_n), bool(include_events))
+        if key in _RECENT_PROFILE_CACHE:
+            skipped += 1
+            continue
+        _query_recent_goal_profile(
+            api_client,
+            tid,
+            last_n=last_n,
+            include_events=include_events,
+        )
+        warmed += 1
+    return {
+        "teams_total": len(unique_ids),
+        "warmed": warmed,
+        "skipped": skipped,
+        "cache_size": len(_RECENT_PROFILE_CACHE),
+    }
+
+
+def recent_profile_cache_stats() -> dict:
+    return {
+        "hits": int(_RECENT_PROFILE_STATS.get("hits", 0)),
+        "misses": int(_RECENT_PROFILE_STATS.get("misses", 0)),
+        "cache_size": len(_RECENT_PROFILE_CACHE),
+    }
+
+
+def reset_recent_profile_cache_stats() -> None:
+    _RECENT_PROFILE_STATS["hits"] = 0
+    _RECENT_PROFILE_STATS["misses"] = 0
+
+
 def evaluate_h2h_edge(home_id: int, away_id: int, api_client, mode: str = "full") -> dict:
     endpoint = f"fixtures/headtohead?h2h={home_id}-{away_id}"
     resp = api_client(endpoint)
@@ -289,7 +336,7 @@ def evaluate_h2h_edge(home_id: int, away_id: int, api_client, mode: str = "full"
     recent_3y = [m for m in matches if _match_timestamp(m) >= cutoff]
     n_3y = len(recent_3y)
 
-    fast_mode = False
+    fast_mode = str(mode).lower() == "fast"
     recent_limit = 10
     recent = sorted(recent_3y, key=lambda x: _match_timestamp(x), reverse=True)[:recent_limit]
     n = len(recent)
@@ -346,25 +393,26 @@ def evaluate_h2h_edge(home_id: int, away_id: int, api_client, mode: str = "full"
         "31_45": 0,
     }
     second_half_bins = {"46_60": 0, "61_75": 0, "76_90": 0}
-    for m in recent:
-        fid = m.get("fixture", {}).get("id")
-        if not fid:
-            continue
-        try:
-            bins = _parse_goal_events(api_client, fid)
-            if bins["0_10"]: time_bins["0_10"] += 1
-            if bins["11_15"]: time_bins["11_15"] += 1
-            if bins["0_15"]: time_bins["0_15"] += 1
-            if bins["11_30"]: time_bins["11_30"] += 1
-            if bins["11_45"]: time_bins["11_45"] += 1
-            if bins["16_30"]: time_bins["16_30"] += 1
-            if bins["16_45"]: time_bins["16_45"] += 1
-            if bins["31_45"]: time_bins["31_45"] += 1
-            if bins["46_60"]: second_half_bins["46_60"] += 1
-            if bins["61_75"]: second_half_bins["61_75"] += 1
-            if bins["76_90"]: second_half_bins["76_90"] += 1
-        except Exception:
-            pass
+    if not fast_mode:
+        for m in recent:
+            fid = m.get("fixture", {}).get("id")
+            if not fid:
+                continue
+            try:
+                bins = _parse_goal_events(api_client, fid)
+                if bins["0_10"]: time_bins["0_10"] += 1
+                if bins["11_15"]: time_bins["11_15"] += 1
+                if bins["0_15"]: time_bins["0_15"] += 1
+                if bins["11_30"]: time_bins["11_30"] += 1
+                if bins["11_45"]: time_bins["11_45"] += 1
+                if bins["16_30"]: time_bins["16_30"] += 1
+                if bins["16_45"]: time_bins["16_45"] += 1
+                if bins["31_45"]: time_bins["31_45"] += 1
+                if bins["46_60"]: second_half_bins["46_60"] += 1
+                if bins["61_75"]: second_half_bins["61_75"] += 1
+                if bins["76_90"]: second_half_bins["76_90"] += 1
+            except Exception:
+                pass
 
     for k in time_bins:
         time_bins[k] = round(time_bins[k] / h2h_denominator, 3)

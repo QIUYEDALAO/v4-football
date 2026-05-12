@@ -13,7 +13,7 @@ export APIFOOTBALL_KEY='你的key'
 ## 1) 赛前扫描（会调用 fixtures/odds/h2h/predictions 等 API）
 
 ```bash
-python3 engine/v4_runner.py --run_tag PROD --lookahead-hours 24
+python3 engine/v4_runner.py --run_tag PROD --lookahead-hours 24 --scan-mode fast --recent-prewarm off
 ```
 
 ## 2) HT 走地监控（会调用 fixtures/odds/live/statistics/events）
@@ -51,4 +51,3 @@ python3 engine/v4_master_run.py --date 20260512 --phase full
 ```bash
 python3 engine/v4_master_run.py --date 20260512 --phase reports --offline
 ```
-
