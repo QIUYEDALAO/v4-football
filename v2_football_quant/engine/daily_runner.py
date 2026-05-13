@@ -599,7 +599,10 @@ def run_once(run_tag="DEFAULT"):
     logger.info(f"✅ 主策略 V2_MAIN (2.00-2.90 固定1u): {stats['bet_placed']}")
     logger.info(f"🔻 联赛去重: {stats.get('league_skipped',0)}")
     logger.info(f"🔻 日上限截断: {stats.get('daily_capped',0)}")
+    logger.info(f"👁️ WATCH_ONLY (>=2.90): {stats.get('watch_odds_high',0)}")
+    logger.info(f"❌ SKIP (<2.00): {stats.get('skip_odds_band',0)}")
     logger.info(f"🎯 最终推荐: {len(bets)}")
+    logger.info(f"📊 漏斗: 候选{stats['bet_placed']} → 去重后{stats['bet_placed']-stats.get('league_skipped',0)} → 上限后{len(bets)}")
     logger.info(f"📏 Kelly暂停 · EV仅记录 · 每日上限20场")
     logger.info("="*40)
 
