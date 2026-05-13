@@ -43,6 +43,10 @@ except ImportError:
     _SSL_CTX.check_hostname = False
     _SSL_CTX.verify_mode = ssl.CERT_NONE
 
+# 绕过 macOS 系统代理 (127.0.0.1:10808)，所有 API 直连
+_PROXY_OPENER = urllib.request.build_opener(urllib.request.ProxyHandler({}))
+urllib.request.install_opener(_PROXY_OPENER)
+
 
 def _urllib_get(endpoint: str, api_key: str, api_host: str = "https://v3.football.api-sports.io") -> Optional[dict]:
     """Python urllib 请求 (可能被 403)"""

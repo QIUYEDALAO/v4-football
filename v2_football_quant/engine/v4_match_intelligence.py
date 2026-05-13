@@ -35,6 +35,7 @@ class MatchIntelligence:
     risk_level: str
     ev_label: str
     execution_label: str
+    recommendation_bucket: str
 
     def to_dict(self) -> dict:
         return {
@@ -53,7 +54,154 @@ class MatchIntelligence:
             "risk_level": self.risk_level,
             "ev_label": self.ev_label,
             "execution_label": self.execution_label,
+            "recommendation_bucket": self.recommendation_bucket,
         }
+
+
+def build_ht_recommendation(record: dict) -> dict:
+    """
+    赛前HT情报推荐器（不含投注动作）：
+    A/B/C/HT_SKIP
+    """
+    factors = record.get("factors", {}) or {}
+    scores = record.get("market_scores") or factors.get("market_scores") or {}
+    market_focus = record.get("market_focus") or "HT_LIVE_OVER"
+
+    ht_score = _float(scores.get("HT_LIVE_OVER"))
+    h2h_ht = _float(factors.get("h2h_ht_goal_rate"))
+    avg_ht_goals = _float(factors.get("h2h_avg_ht_goals"))
+    recent_ht = _float(factors.get("recent_form_avg"))
+    ht_attack = _float(factors.get("ht_attack_vs_defense"))
+    tb = factors.get("time_bins", {}) or {}
+    rtb = factors.get("recent_time_bins", {}) or {}
+    # 优先用 H2H time_bins；全为 0 时（fast模式导致）回退到 recent_time_bins
+    _tb_has_data = any(float(v or 0) > 0 for v in (tb or {}).values())
+    effective_tb = tb if _tb_has_data else rtb
+    late_11_45 = _float(effective_tb.get("11_45"))
+    early_only_flag = bool(factors.get("early_only_flag") or factors.get("recent_early_only_flag"))
+    pullback_fit = str(factors.get("pullback_fit") or factors.get("recent_timing_fit") or "-")
+    sample_size = int(_float(factors.get("h2h_sample_size"), 0.0))
+
+    reasons: list[str] = []
+    risks: list[str] = []
+    script_type = "均衡波动型"
+    p0_15 = _float(tb.get("0_15"))
+    p16_30 = _float(tb.get("16_30"))
+    p31_45 = _float(tb.get("31_45"))
+    if p31_45 >= max(p0_15, p16_30) and p31_45 >= 0.40:
+        script_type = "中后段发力型"
+    elif p0_15 >= max(p16_30, p31_45) and p0_15 >= 0.30:
+        script_type = "开局冲击型"
+    elif p16_30 >= max(p0_15, p31_45):
+        script_type = "中段发力型"
+
+    if market_focus != "HT_LIVE_OVER":
+        best_focus_label = {"SECOND_HALF_OVER": "下半场", "FULLTIME_OVER": "全场"}.get(market_focus, market_focus)
+        risks.append(f"方向冲突：系统总分最强为{best_focus_label}，但HT数据已达推荐级，人工决策时注意区分")
+
+    if sample_size < 3:
+        risks.append("样本数偏少")
+    if early_only_flag:
+        risks.append("early_only_flag=true")
+    if pullback_fit == "WEAK":
+        risks.append("pullback_fit=WEAK")
+
+    reasons.append(f"HT综合评分 {ht_score:.1f}")
+    reasons.append(f"H2H上半场有球率 {h2h_ht:.0%}")
+    reasons.append(f"11-45分钟压力 {late_11_45:.0%}")
+
+    # A级：强推荐
+    if (
+        ht_score >= 70
+        and h2h_ht >= 0.65
+        and recent_ht >= 0.70
+        and ht_attack >= 0.70
+        and late_11_45 >= 0.55
+        and not early_only_flag
+        and sample_size >= 3
+    ):
+        return {
+            "grade": "A",
+            "status": "HT_PREMATCH_RECOMMEND",
+            "bucket": "HT_MAIN",
+            "reason": "上半场强推荐",
+            "reasons": reasons + ["近期HT攻防动能强", "11-45回调压力强", "非纯早球型"],
+            "risks": risks[:3],
+            "script_type": script_type,
+            "ht_score": ht_score,
+            "h2h_ht_goal_rate": h2h_ht,
+            "ht_avg_goals": avg_ht_goals,
+            "time_bins": {"0_15": p0_15, "16_30": p16_30, "31_45": p31_45},
+            "sample_size": sample_size,
+        }
+
+    # B级：达标观察（仍在主推荐池）
+    if (
+        ht_score >= 60
+        and h2h_ht >= 0.55
+        and recent_ht >= 0.60
+        and ht_attack >= 0.60
+        and late_11_45 >= 0.45
+        and sample_size >= 3
+    ):
+        return {
+            "grade": "B",
+            "status": "HT_PREMATCH_RECOMMEND",
+            "bucket": "HT_MAIN",
+            "reason": "上半场达标推荐",
+            "reasons": reasons + ["HT基因达标，建议临场关注8-45节奏"],
+            "risks": risks[:3],
+            "script_type": script_type,
+            "ht_score": ht_score,
+            "h2h_ht_goal_rate": h2h_ht,
+            "ht_avg_goals": avg_ht_goals,
+            "time_bins": {"0_15": p0_15, "16_30": p16_30, "31_45": p31_45},
+            "sample_size": sample_size,
+        }
+
+    # C级：仅情报观察
+    if ht_score >= 50:
+        return {
+            "grade": "C",
+            "status": "HT_OBSERVE",
+            "bucket": "HT_OBSERVE",
+            "reason": "仅情报观察",
+            "reasons": reasons + ["信号不够强，保留观察"],
+            "risks": risks[:3],
+            "script_type": script_type,
+            "ht_score": ht_score,
+            "h2h_ht_goal_rate": h2h_ht,
+            "ht_avg_goals": avg_ht_goals,
+            "time_bins": {"0_15": p0_15, "16_30": p16_30, "31_45": p31_45},
+            "sample_size": sample_size,
+        }
+
+    # SKIP
+    skip_reasons = []
+    if h2h_ht < 0.50:
+        skip_reasons.append("HT有球率不足")
+    if avg_ht_goals < 0.60:
+        skip_reasons.append("上半场场均进球不足")
+    if late_11_45 < 0.45:
+        skip_reasons.append("11-45分钟压力弱")
+    if pullback_fit == "WEAK":
+        skip_reasons.append("回调适配弱")
+    if early_only_flag:
+        skip_reasons.append("早球型，不适合HT推荐")
+    return {
+        "grade": "SKIP",
+        "status": "HT_SKIP",
+        "bucket": "HT_SKIP",
+        "reason": "上半场基因不足",
+        "reasons": skip_reasons[:4] or ["综合评分不足"],
+        "risks": risks[:3],
+        "script_type": script_type,
+        "ht_score": ht_score,
+        "h2h_ht_goal_rate": h2h_ht,
+        "ht_avg_goals": avg_ht_goals,
+        "time_bins": {"0_15": p0_15, "16_30": p16_30, "31_45": p31_45},
+        "sample_size": sample_size,
+    }
 
 
 def explain_match(record: dict) -> dict:
@@ -74,15 +222,28 @@ def explain_match(record: dict) -> dict:
     sh_score = _float(scores.get("SECOND_HALF_OVER"))
     ft_score = _float(scores.get("FULLTIME_OVER"))
     h2h_ht = _float(factors.get("h2h_ht_goal_rate"))
+    avg_ht_goals = _float(factors.get("h2h_avg_ht_goals"))
     recent_ht = _float(factors.get("recent_form_avg"))
     recent_sh = _float(factors.get("recent_sh_avg"))
     ht_attack = _float(factors.get("ht_attack_vs_defense"))
     tb = factors.get("time_bins", {}) or {}
+    rtb = factors.get("recent_time_bins", {}) or {}
+    _tb_has_data = any(float(v or 0) > 0 for v in (tb or {}).values())
+    effective_tb = tb if _tb_has_data else rtb
     sh_tb = factors.get("second_half_bins", {}) or {}
-    early_0_10 = _float(tb.get("0_10"))
-    late_11_45 = _float(tb.get("11_45"))
-    late_sh = max([_float(v) for v in sh_tb.values()] or [0.0])
-    pullback_fit = factors.get("pullback_fit", "-")
+    early_0_10 = _float(effective_tb.get("0_10"))
+    early_0_15 = _float(effective_tb.get("0_15"))
+    late_11_45 = _float(effective_tb.get("11_45"))
+    pullback_fit = factors.get("pullback_fit") or factors.get("recent_timing_fit") or "-"
+    early_only_flag = bool(factors.get("early_only_flag") or factors.get("recent_early_only_flag"))
+    pre_ht_line = record.get("pre_ht_line")
+    pre_ht_line_val = None
+    if isinstance(pre_ht_line, dict):
+        pre_ht_line_val = pre_ht_line.get("line")
+    elif isinstance(pre_ht_line, (int, float, str)):
+        pre_ht_line_val = pre_ht_line
+    pre_line = _float(pre_ht_line_val or record.get("pre_ht_line_float"))
+    threat = _float(factors.get("both_sides_ht_threat"))
 
     match_type: list[str] = []
     why: list[str] = []
@@ -106,15 +267,7 @@ def explain_match(record: dict) -> dict:
     ft_open = best_focus == "FULLTIME_OVER" or ft_score >= max(ht_score, sh_score)
     data_weak = data_action in ("WATCH_ONLY", "SKIP_DATA_WEAK")
     market_missing = data_action == "WATCH_MARKET_MISSING"
-    pre_ht_line = record.get("pre_ht_line")
-    pre_ht_line_val = None
-    if isinstance(pre_ht_line, dict):
-        pre_ht_line_val = pre_ht_line.get("line")
-    elif isinstance(pre_ht_line, (int, float, str)):
-        pre_ht_line_val = pre_ht_line
-    price_expensive = _float(pre_ht_line_val or record.get("pre_ht_line_float")) >= 1.75
-    dull_trap = ht_score >= 50 and pullback_fit == "WEAK" and late_11_45 < 0.50 and not early_flash
-
+    price_expensive = pre_line >= 1.75
     if early_flash:
         match_type.append("EARLY_FLASH")
         why.append(f"0-10分钟热度 {early_0_10:.0%}，但回调适配 WEAK")
@@ -136,88 +289,62 @@ def explain_match(record: dict) -> dict:
     elif market_missing:
         match_type.append("MARKET_MISSING")
         why.append(f"统计可用，但盘口端待赛中确认：{data_coverage.get('coverage_level', '-')} / {data_action}")
-    if dull_trap:
-        match_type.append("DULL_TRAP")
-        why.append("分数不低但10分钟后回调质量差")
-
     if not match_type:
         match_type.append("NO_CLEAR_EDGE")
         why.append("HT/SH/FT方向不够集中")
 
-    is_live_radar = (
-        bool(record.get("is_watch"))
-        and market_focus == "HT_LIVE_OVER"
-        and data_action == "ALLOW_V4_LIVE"
-        and ht_pullback
-    )
+    ht_recommendation = build_ht_recommendation(record)
+    ht_decision = {
+        "action": f"HT_{ht_recommendation.get('grade', 'SKIP')}",
+        "bucket": ht_recommendation.get("bucket", "HT_SKIP"),
+        "is_main_recommendation": ht_recommendation.get("grade") in ("A", "B"),
+        "reason": ht_recommendation.get("reason", ""),
+    }
 
-    primary_direction = "SKIP"
-    execution_status = "观察不入场"
-    trade_action = "跳过：只记录情报"
-    action_code = "SKIP"
-    profile = "画像：方向不够集中"
-    summary = "结论：不作为交易候选"
+    # --- 2) SH 仅附加观察，不覆盖主出口 ---
+    sh_observation = None
+    if sh_surge:
+        sh_observation = {
+            "action": "SH_OBSERVE_ONLY",
+            "bucket": "SH_OBSERVE",
+            "is_main_recommendation": False,
+            "reason": "下半场倾向更强，但不计入HT主推荐",
+            "trade_action": "下半场观察：不属于V4_HT主推荐",
+        }
 
-    if ht_pullback and is_live_radar:
-        primary_direction = "HT"
-        execution_status = "滚球雷达"
-        trade_action = "上半场：0-15分钟等降盘，满足节奏再进"
-        action_code = "WAIT_LINE"
-        profile = "画像：上半场回调型"
-        summary = "结论：上半场走地候选"
-        wait_for = ["0-10分钟无进球", "盘口降到大1.0或大0.75", "赛中节奏不沉闷"]
-    elif sh_surge:
-        primary_direction = "SH"
-        execution_status = "下半场观察"
-        trade_action = "上半场：只防闪击；下半场：半场后再评估" if early_flash else "上半场：跳过；下半场：半场后再评估"
-        action_code = "PAPER_ONLY"
-        profile = "画像：下半场倾向更强，且上半场早段有闪击风险" if early_flash else "画像：下半场倾向更强"
-        summary = "结论：不做上半场回调，半场后看下半场盘口"
-        wait_for = ["半场比分0-0/1-0/0-1/1-1", "上半场射门和危险进攻不沉闷", "SH Over 0.75/1.0合理水位"]
-    elif early_flash:
-        primary_direction = "EARLY_HT"
-        execution_status = "早段闪击观察"
-        trade_action = "上半场：只防闪击，不做0-10后回调追入"
-        action_code = "SKIP"
-        profile = "画像：上半场早段有球风险高，但不是回调型"
-        summary = "结论：回调适配WEAK不代表上半场不进，只代表等待降盘买点差"
-        wait_for = ["赛前盘口是否已过热", "开场前是否有更低风险表达"]
-    elif ft_open:
-        primary_direction = "FT"
-        execution_status = "全场观察"
-        trade_action = "上半场：跳过；全场：只做参考"
-        action_code = "PAPER_ONLY"
-        profile = "画像：全场开放局，不等于下半场单边优势"
-        summary = "结论：不强行分时进场"
-        wait_for = ["盘口价格回到合理区间", "场面持续开放"]
+    # --- 3) 主展示动作只使用 HT 推荐结果 ---
+    is_live_radar = bool(record.get("is_watch")) and market_focus == "HT_LIVE_OVER"
+    action_code = ht_decision["action"]
+    recommendation_bucket = ht_decision["bucket"]
+    primary_direction = "HT"
+    if ht_recommendation.get("grade") in ("A", "B"):
+        execution_status = f"上半场推荐 {ht_recommendation.get('grade')}级"
+        trade_action = "情报推荐：由你决定是否投注与入场时机"
+        profile = f"画像：HT赛前推荐({ht_recommendation.get('script_type')})"
+        summary = "结论：推荐进入今日上半场重点关注清单"
+        wait_for = ["关注0-15/16-30/31-45分布", "结合临场节奏自行决策"]
+    elif ht_recommendation.get("grade") == "C":
+        execution_status = "上半场观察 C级"
+        trade_action = "仅观察：不进入主推荐"
+        profile = f"画像：HT仅情报观察({ht_recommendation.get('script_type')})"
+        summary = "结论：保留观察，不作为主推荐"
+        wait_for = []
+    else:
+        execution_status = "上半场跳过"
+        trade_action = "HT_SKIP：上半场基因不足"
+        profile = "画像：HT基因不足"
+        summary = "结论：不进入上半场推荐"
+        wait_for = []
 
-    # 节奏弱时直接等待节奏，不给可进场信号
-    if "节奏不沉闷" in " ".join(wait_for) and late_11_45 < 0.55 and action_code == "WAIT_LINE":
-        action_code = "WAIT_TEMPO"
-
-    if data_action == "WATCH_ONLY":
-        avoid_if.append("API覆盖不足导致实时统计/盘口缺失")
-        action_code = "PAPER_ONLY"
-    elif data_action == "WATCH_MARKET_MISSING":
-        avoid_if.append("盘口端暂缺/延迟，待赛中盘口恢复")
-        if action_code in ("WAIT_LINE", "WAIT_TEMPO", "WAIT_CONFIDENCE", "PAPER_BUY_NOW"):
-            action_code = "PAPER_ONLY"
-    if schedule_action == "WATCH_CAUTION":
-        avoid_if.append("赛程压力高")
-        if action_code in ("WAIT_LINE", "WAIT_TEMPO"):
-            action_code = "PAPER_ONLY"
-    if motivation_gate.get("action") == "WATCH_ONLY":
-        avoid_if.append("战意不清晰")
-        action_code = "PAPER_ONLY"
-    if pullback_fit == "WEAK" and primary_direction == "HT":
-        avoid_if.append("0-10无球后继续追入")
     rg = record.get("risk_guard") or {}
     if isinstance(rg, dict) and (rg.get("allow") is False):
-        action_code = "RISK_BLOCKED"
+        action_code = "HT_SKIP_RISK_GUARD"
+        recommendation_bucket = "HT_SKIP"
         avoid_if.append(f"风控拦截: {rg.get('reason', 'RISK_GUARD')}")
-        trade_action = "风控拦截：不允许进场"
+        trade_action = "风控拦截：仅保留观察"
         execution_status = "风控拦截"
 
+    # 信心和执行标签
     confidence = 40
     confidence += min(max(ht_score, sh_score, ft_score), 90) * 0.35
     confidence += 10 if h2h_ht >= 0.70 else 0
@@ -226,33 +353,28 @@ def explain_match(record: dict) -> dict:
     confidence -= 12 if data_weak else 0
     confidence -= 8 if schedule_action == "WATCH_CAUTION" else 0
     confidence = int(max(0, min(round(confidence), 95)))
-    if action_code == "WAIT_LINE" and confidence < 72:
-        action_code = "WAIT_CONFIDENCE"
-    if action_code == "WAIT_LINE" and confidence >= 72 and pullback_fit in ("OK", "STRONG"):
-        action_code = "PAPER_BUY_NOW"
-    if "红牌" in " ".join(avoid_if):
-        pass
+
     risk_level = "MID"
-    if action_code in ("SKIP", "RISK_BLOCKED"):
+    if ht_recommendation.get("grade") == "SKIP":
         risk_level = "HIGH"
-    elif action_code == "PAPER_BUY_NOW":
-        risk_level = "MID" if schedule_action == "WATCH_CAUTION" else "LOW"
-    elif action_code == "PAPER_ONLY":
-        risk_level = "MID"
-    ev_label = "EV观察"
+    elif ht_recommendation.get("grade") in ("A", "B"):
+        risk_level = "LOW"
+
+    ev_label = "情报推荐"
     if confidence >= 75:
-        ev_label = "EV强"
+        ev_label = "推荐强"
     elif confidence >= 60:
-        ev_label = "EV合格"
-    execution_label = "可成交"
-    if action_code in ("WAIT_LINE", "WAIT_TEMPO", "WAIT_CONFIDENCE"):
-        execution_label = "等待条件"
-    elif action_code in ("PAPER_ONLY", "SKIP"):
-        execution_label = "仅观察"
-    elif action_code == "RISK_BLOCKED":
+        ev_label = "推荐中"
+
+    execution_label = "仅情报"
+    if ht_recommendation.get("grade") in ("A", "B"):
+        execution_label = "主推荐"
+    elif ht_recommendation.get("grade") == "C":
+        execution_label = "观察池"
+    elif action_code == "HT_SKIP_RISK_GUARD":
         execution_label = "风控拦截"
 
-    return MatchIntelligence(
+    out = MatchIntelligence(
         match_type=match_type,
         primary_direction=primary_direction,
         trade_action=trade_action,
@@ -268,4 +390,12 @@ def explain_match(record: dict) -> dict:
         risk_level=risk_level,
         ev_label=ev_label,
         execution_label=execution_label,
+        recommendation_bucket=recommendation_bucket,
     ).to_dict()
+    out["ht_decision"] = ht_decision
+    out["ht_recommendation"] = ht_recommendation
+    out["sh_observation"] = sh_observation
+    out["display_bucket"] = ht_decision["bucket"]
+    out["is_ht_main_recommendation"] = bool(ht_decision.get("is_main_recommendation"))
+    out["ht_reason"] = ht_decision.get("reason", "")
+    return out

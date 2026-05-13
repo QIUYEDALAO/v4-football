@@ -46,6 +46,8 @@ except Exception:
             "avoid_if": [],
             "execution_status": "球探观察",
             "is_live_radar": False,
+            "action_code": "INFO_ONLY",
+            "recommendation_bucket": "INFO_ONLY",
         }
 
 
@@ -144,7 +146,10 @@ def _ko_local_date_key(kickoff: str) -> str:
 
 
 def _in_session_window(kickoff: str, date_key: str) -> bool:
-    return True  # 不做日期过滤，全部显示
+    if not date_key:
+        return True
+    ko_date = _ko_local_date_key(kickoff)
+    return (ko_date == date_key) if ko_date else True
 
 
 def _in_ops_window(kickoff: str, date_key: str) -> bool:
@@ -169,6 +174,70 @@ def _kickoff_sort_value(kickoff: str) -> int:
     if ko is None:
         return 32503680000  # year 3000, put unknown kickoff at end
     return int(ko.timestamp())
+
+
+def _story_label(tb: dict) -> str:
+    p0_15 = _float(tb.get("0_15"))
+    p16_30 = _float(tb.get("16_30"))
+    p31_45 = _float(tb.get("31_45"))
+    if p31_45 >= max(p0_15, p16_30) and p31_45 >= 0.45:
+        return "慢热绝杀型"
+    if p0_15 >= 0.35:
+        return "开局冲击型"
+    if p16_30 >= max(p0_15, p31_45):
+        return "中段发力型"
+    return "均衡波动型"
+
+
+def _opening_pressure_text(factors: dict) -> str:
+    threat = _float(factors.get("both_sides_ht_threat"))
+    if threat >= 0.60:
+        return f"🟢 高 (前场威胁 {_pct(threat)})"
+    if threat >= 0.45:
+        return f"🟡 中 (前场威胁 {_pct(threat)})"
+    return f"⚠️ 低 (前场威胁 {_pct(threat)})"
+
+
+def _poisson_ev(expected_goals: float, line: float, odds: float) -> tuple[float, float, float]:
+    expected_goals = _float(expected_goals)
+    line = _float(line)
+    odds = _float(odds)
+    if expected_goals <= 0 or odds <= 1.0:
+        return 0.0, 0.0, 0.0
+
+    import math
+    p0 = math.exp(-expected_goals)
+    p1 = expected_goals * p0
+    p2 = 1 - p0 - p1
+
+    if abs(line - 0.75) < 1e-9:
+        ev05, fair05, win05 = _poisson_ev(expected_goals, 0.5, odds)
+        ev10, fair10, win10 = _poisson_ev(expected_goals, 1.0, odds)
+        return round((ev05 + ev10) / 2, 1), round((fair05 + fair10) / 2, 2), round((win05 + win10) / 2, 1)
+    if abs(line - 1.25) < 1e-9:
+        ev10, fair10, win10 = _poisson_ev(expected_goals, 1.0, odds)
+        ev15, fair15, win15 = _poisson_ev(expected_goals, 1.5, odds)
+        return round((ev10 + ev15) / 2, 1), round((fair10 + fair15) / 2, 2), round((win10 + win15) / 2, 1)
+
+    if abs(line - 1.5) < 1e-9:
+        win_prob = p2
+        ev = (win_prob * odds) - 1
+        fair_odds = 1 / win_prob if win_prob > 0 else 0.0
+    elif abs(line - 1.0) < 1e-9:
+        win_prob = p2
+        push_prob = p1
+        lose_prob = p0
+        ev = (win_prob * (odds - 1)) - lose_prob
+        fair_odds = (1 - push_prob) / win_prob if win_prob > 0 else 0.0
+    elif abs(line - 0.5) < 1e-9:
+        win_prob = 1 - p0
+        ev = (win_prob * odds) - 1
+        fair_odds = 1 / win_prob if win_prob > 0 else 0.0
+    else:
+        anchor = min([0.5, 1.0, 1.5], key=lambda x: abs(x - line))
+        return _poisson_ev(expected_goals, anchor, odds)
+
+    return round(ev * 100, 1), round(fair_odds, 2), round(win_prob * 100, 1)
 
 
 def calculate_hotness(factors: dict) -> float:
@@ -342,24 +411,118 @@ def _rows_json(rows: list[dict]) -> str:
         display_line = entry_line if has_live_line else str(r.get("pre_ht_line", "") or "")
         display_odds = entry_odds if has_live_odds else str(r.get("pre_over_odds", "") or "")
         display_source = "走地" if has_live_line else "赛前参考"
+        line_num = _line_float(display_line)
+        odds_num = _float(display_odds)
+        model_xg = _float(f.get("h2h_avg_ht_goals"))
+        implied_pct = (100.0 / odds_num) if odds_num > 1 else 0.0
+        ev_pct, fair_odds, win_prob = _poisson_ev(model_xg, line_num, odds_num)
+        story_label = _story_label(tb)
+        pressure_text = _opening_pressure_text(f)
+        p0_15 = _float(tb.get("0_15"))
+        p16_30 = _float(tb.get("16_30"))
+        p31_45 = _float(tb.get("31_45"))
+        threat_val = _float(f.get("both_sides_ht_threat"))
+        if ev_pct >= 8.0:
+            ev_conclusion = f"✅ 赛前价值突显！(正期望 +{ev_pct}%) 庄家赔率给高了。"
+        elif ev_pct > 5.0:
+            ev_conclusion = f"✅ 赛前小幅正期望 (+{ev_pct}%)，可纸盘观察。"
+        elif ev_pct <= -12.0:
+            ev_conclusion = f"❌ 赛前负期望 ({ev_pct}%)，庄家明显高估开局火力。"
+        elif ev_pct < -5.0:
+            ev_conclusion = f"❌ 赛前负期望 ({ev_pct}%)，坚决不追赛前，等待滚球降盘。"
+        else:
+            ev_conclusion = f"🟡 赔率接近合理区间 (EV {ev_pct}%)，先观望。"
+        action_plan_1 = f"👉 赛前动作: {'赛前允许轻仓试探大 ' + str(line_num) if ev_pct >= 8.0 else '赛前空仓，不追大 ' + str(line_num if line_num > 0 else '?') + '。'}"
+        action_plan_2 = "👉 滚球潜伏: 设定闹钟在第 25 分钟，复核比分、节奏、红牌。"
+        if p31_45 >= 0.5 and p0_15 <= 0.2 and threat_val <= 0.45:
+            action_plan_3 = "👉 狙击扳机: 若 25' 仍 0-0 且场面沉闷，大0.5水位 > 1.80 再评估进场。"
+        elif p31_45 >= 0.45:
+            action_plan_3 = "👉 狙击扳机: 若 25' 仍 0-0 且无红牌，优先等大0.5/大0.75再评估。"
+        else:
+            action_plan_3 = "👉 狙击扳机: 若 10-15' 形成高压并回调到目标线，再执行纸盘进场。"
         scores = r.get("market_scores") or f.get("market_scores") or {}
         market_focus = r.get("market_focus") or "HT_LIVE_OVER"
         intelligence = explain_match(r)
+        recommendation_bucket = intelligence.get("display_bucket") or intelligence.get("recommendation_bucket", "INFO_ONLY")
         is_live_radar = bool(intelligence.get("is_live_radar"))
         execution_status = intelligence.get("execution_status", "球探观察")
         trade_action = intelligence.get("trade_action", "跳过：只记录情报")
         action_code = intelligence.get("action_code", "SKIP")
         risk_level = intelligence.get("risk_level", "MID")
+        ht_decision = intelligence.get("ht_decision") or {}
+        ht_rec = intelligence.get("ht_recommendation") or {}
+        sh_observation = intelligence.get("sh_observation") or None
         live_action = live_status.get("action", "-")
         if live_action == "SKIP_RISK_GUARD":
             action_code = "RISK_BLOCKED"
             risk_level = "HIGH"
+            recommendation_bucket = "HT_MAIN" if market_focus == "HT_LIVE_OVER" else recommendation_bucket
+        if action_code == "RISK_BLOCKED":
+            strategy_state = "回避"
+            strategy_state_class = "plan-red"
+            strategy_state_text = "🔴 风控拦截: 暂停执行，等待风险解除。"
+        elif ev_pct >= 8.0:
+            strategy_state = "可打"
+            strategy_state_class = "plan-green"
+            strategy_state_text = "🟢 可打: 出现条件时允许轻仓执行。"
+        elif ev_pct <= -8.0:
+            strategy_state = "回避"
+            strategy_state_class = "plan-red"
+            strategy_state_text = "🔴 回避: 赛前负EV明显，优先等待更优走地线。"
+        else:
+            strategy_state = "观望"
+            strategy_state_class = "plan-yellow"
+            strategy_state_text = "🟡 观望: 先跟踪节奏与盘口，再做条件触发。"
         decision_summary = f"{intelligence.get('profile', '')}。{intelligence.get('summary', '')}"
         match_profile = intelligence.get("profile", "")
         home = r.get("home") or ""
         away = r.get("away") or ""
         home_cn = team_name_cn(home)
         away_cn = team_name_cn(away)
+        rec_grade = (ht_rec.get("grade") or "").upper()
+        is_ht_recommend = rec_grade in ("A", "B")
+        is_ht_observe = rec_grade == "C"
+        is_ht_skip = rec_grade == "SKIP" or recommendation_bucket == "HT_SKIP"
+        is_sh_observe = recommendation_bucket == "SH_OBSERVE" or bool(sh_observation)
+        is_ht_pool = is_ht_recommend or is_ht_observe or is_ht_skip
+        if is_ht_recommend and rec_grade == "A":
+            tier_head = "A级 | 上半场强推荐"
+        elif is_ht_recommend and rec_grade == "B":
+            tier_head = "B级 | 上半场达标推荐"
+        elif is_ht_observe:
+            tier_head = "C级 | 仅情报观察"
+        elif is_ht_skip:
+            tier_head = "HT跳过 | 条件不足"
+        elif is_sh_observe:
+            tier_head = "SH观察池 | 非HT推荐"
+        elif _float(r.get("hotness_score")) >= 90:
+            tier_head = "S级 | 绝对焦点"
+        elif _float(r.get("hotness_score")) >= 80:
+            tier_head = "A级 | 优质候选"
+        else:
+            tier_head = "B级 | 达标观察"
+        if is_ht_recommend:
+            display_bucket = "HT_MAIN"
+        elif is_ht_observe:
+            display_bucket = "HT_OBSERVE"
+        elif is_ht_skip:
+            display_bucket = "HT_SKIP"
+        elif is_sh_observe:
+            display_bucket = "SH_OBSERVE"
+        else:
+            display_bucket = "INFO_ONLY"
+        if is_ht_recommend:
+            action_plan_1 = "👉 建议: 今日上半场重点盯盘。"
+            action_plan_2 = "👉 执行: 根据你自己的盘口/赔率偏好决定是否入场。"
+            action_plan_3 = "👉 验证: 赛后核对HT是否有球与时间段命中。"
+        elif is_ht_observe:
+            action_plan_1 = "👉 建议: 保留观察，不进入主推荐。"
+            action_plan_2 = "👉 执行: 临场如节奏异常增强，可人工升级关注。"
+            action_plan_3 = "👉 验证: 赛后记录时间段命中率。"
+        elif is_ht_skip:
+            action_plan_1 = "👉 HT处理: 本场不进入上半场推荐。"
+            action_plan_2 = "👉 原因: 上半场基因不足或条件不达标。"
+            action_plan_3 = "👉 后续: 仅保留信息，不设上半场触发。"
         compact.append({
             "fixture_id": r.get("fixture_id"),
             "home": home_cn,
@@ -372,6 +535,7 @@ def _rows_json(rows: list[dict]) -> str:
             "kickoffSort": _kickoff_sort_value(r.get("kickoff", "")),
             "hotness": r.get("hotness_score"),
             "tier": r.get("tier"),
+            "tierHead": tier_head,
             "is_watch": is_live_radar,
             "executionStatus": execution_status,
             "tradeAction": trade_action,
@@ -398,6 +562,21 @@ def _rows_json(rows: list[dict]) -> str:
             "entryOdds": live_entry.get("entry_over_odds", "-"),
             "marketFocus": market_focus,
             "marketLabel": MARKET_LABELS.get(market_focus, market_focus),
+            "recommendationBucket": display_bucket,
+            "isHtMain": bool(is_ht_pool),
+            "isHtRecommendation": bool(is_ht_recommend),
+            "isHtObserve": bool(is_ht_observe),
+            "isHtSkip": bool(is_ht_skip),
+            "isShObserve": bool(is_sh_observe),
+            "htDecisionAction": ht_decision.get("action", ""),
+            "htDecisionReason": ht_decision.get("reason", ""),
+            "htRecGrade": rec_grade or "-",
+            "htRecStatus": ht_rec.get("status", "-"),
+            "htRecReason": ht_rec.get("reason", ""),
+            "htRecScriptType": ht_rec.get("script_type", "-"),
+            "htRecReasons": "；".join(ht_rec.get("reasons", []) or []),
+            "htRecRisks": "；".join(ht_rec.get("risks", []) or []),
+            "htRecSampleSize": ht_rec.get("sample_size", 0),
             "bestFocusByScore": r.get("best_focus_by_score") or f.get("best_focus_by_score") or "",
             "htScore": _float(scores.get("HT_LIVE_OVER")),
             "shScore": _float(scores.get("SECOND_HALF_OVER")),
@@ -481,6 +660,26 @@ def _rows_json(rows: list[dict]) -> str:
             "displayLine": display_line,
             "displayOdds": display_odds,
             "displayLineSource": display_source,
+            "storyLabel": story_label,
+            "pressureText": pressure_text,
+            "modelXg": round(model_xg, 2),
+            "lineNum": line_num,
+            "oddsNum": round(odds_num, 2) if odds_num else 0.0,
+            "impliedPct": round(implied_pct, 1),
+            "evPct": ev_pct,
+            "fairOdds": fair_odds,
+            "winProb": win_prob,
+            "evConclusion": ev_conclusion,
+            "actionPlan1": action_plan_1,
+            "actionPlan2": action_plan_2,
+            "actionPlan3": action_plan_3,
+            "strategyState": strategy_state,
+            "strategyStateClass": strategy_state_class,
+            "strategyStateListClass": "list-state-green" if strategy_state_class == "plan-green" else ("list-state-red" if strategy_state_class == "plan-red" else "list-state-yellow"),
+            "strategyStateText": strategy_state_text,
+            "p0_15": _pct(p0_15),
+            "p16_30": _pct(p16_30),
+            "p31_45": _pct(p31_45),
             "linesText": _line_text(r.get("ht_ou_lines", [])),
             "injuryText": _injury_text(r.get("injury", {})),
             "lineupText": _lineup_text(r.get("lineup_gate")),
@@ -489,7 +688,7 @@ def _rows_json(rows: list[dict]) -> str:
     return json.dumps(compact, ensure_ascii=False)
 
 
-def render_dashboard(date_str: str, window_mode: str = "ops") -> Path:
+def render_dashboard(date_str: str, window_mode: str = "natural") -> Path:
     key = _date_key(date_str)
     scout_path = REPORT_DIR / f"scout_v4_{key}.json"
     scout = _load_json(scout_path, [])
@@ -497,6 +696,7 @@ def render_dashboard(date_str: str, window_mode: str = "ops") -> Path:
     live_status = _load_json(BASE_DIR / "data" / "live_monitor" / f"v4_live_status_{key}.json", {})
     live_entries = _load_json(BASE_DIR / "data" / "paper_trading" / f"v4_live_entries_{key}.json", [])
     review = _load_json(REPORT_DIR / f"v4_review_{key}.json", {})
+    validation = _load_json(REPORT_DIR / f"v4_ht_recommend_validation_{key}.json", {})
     if not scout:
         raise FileNotFoundError(f"没有可渲染的 V4 情报数据: {scout_path}")
     rows = _enrich_records(
@@ -512,7 +712,35 @@ def render_dashboard(date_str: str, window_mode: str = "ops") -> Path:
     for r in rows:
         counts[r["tier"]] += 1
 
-    hp = (review.get("health_panel", {}) if isinstance(review, dict) else {}) or {}
+    # 健康面板：验证文件 > 复盘文件 > 空
+    hp = {}
+    if isinstance(validation, dict) and validation.get("total_matches"):
+        grades = validation.get("per_grade", {})
+        total = validation.get("total_matches", 0)
+        pending = validation.get("pending_matches", total)
+        completed = total - pending
+        a_data = grades.get("A", {})
+        b_data = grades.get("B", {})
+        c_data = grades.get("C", {})
+        ab_total = a_data.get("total", 0) + b_data.get("total", 0)
+        ab_hit = a_data.get("hit", 0) + b_data.get("hit", 0)
+        ab_rate = round(ab_hit / max(ab_total, 1) * 100, 1)
+        c_rate = round(c_data.get("hit_rate_pct", 0), 1)
+        hp = {
+            "health_status": "GREEN" if completed >= total * 0.8 else ("YELLOW" if completed > 0 else "UNKNOWN"),
+            "kill_criteria_flags": [],
+            "sample_progress": {
+                "sample_size": completed,
+                "min_sample": total,
+                "progress_pct": round(completed / max(total, 1) * 100, 1),
+            },
+            "execution_quality": {
+                "conservative_fill_roi_pct": ab_rate,
+                "slippage_adjusted_roi_pct": c_rate,
+            },
+        }
+    elif isinstance(review, dict):
+        hp = review.get("health_panel", {}) or {}
     sp = hp.get("sample_progress", {}) if isinstance(hp, dict) else {}
     ex = hp.get("execution_quality", {}) if isinstance(hp, dict) else {}
     flags = hp.get("kill_criteria_flags", []) if isinstance(hp, dict) else []
@@ -527,6 +755,70 @@ def render_dashboard(date_str: str, window_mode: str = "ops") -> Path:
     data_json = _rows_json(rows)
     title = f"V4 作战仪表盘 | {date_str}"
     mode_text = "北京时间自然日 00:00-23:59" if window_mode != "ops" else "运营日 12:00-次日11:59"
+    
+    # 发现所有可用日期，嵌入全量数据以便日期切换
+    available_dates = sorted(
+        {p.stem.replace("scout_v4_", "") for p in REPORT_DIR.glob("scout_v4_*.json")},
+        reverse=True
+    )
+    date_options = "".join(
+        f'<option value="{d}"{" selected" if d == date_str else ""}>{d[:4]}-{d[4:6]}-{d[6:8]}</option>'
+        for d in available_dates
+    ) if available_dates else f'<option>{date_str}</option>'
+    
+    # 嵌入所有日期的数据
+    all_rows_json = {}
+    for d in available_dates:
+        d_scout = _load_json(REPORT_DIR / f"scout_v4_{d}.json", [])
+        d_watch = _load_json(REPORT_DIR / f"live_watchlist_{d}.json", [])
+        d_live = _load_json(BASE_DIR / "data" / "live_monitor" / f"v4_live_status_{d}.json", {})
+        d_entry = _load_json(BASE_DIR / "data" / "paper_trading" / f"v4_live_entries_{d}.json", [])
+        d_review = _load_json(REPORT_DIR / f"v4_review_{d}.json", {})
+        d_valid = _load_json(REPORT_DIR / f"v4_ht_recommend_validation_{d}.json", {})
+        try:
+            d_rows = _enrich_records(
+                d_scout if isinstance(d_scout, list) else [],
+                d_watch if isinstance(d_watch, list) else [],
+                d_live, d_entry if isinstance(d_entry, list) else [],
+                d, window_mode,
+            )
+            d_json_rows = json.loads(_rows_json(d_rows))
+            # 健康面板
+            d_hp = {}
+            if isinstance(d_valid, dict) and d_valid.get("total_matches"):
+                grades = d_valid.get("per_grade", {})
+                total = d_valid.get("total_matches", 0)
+                pending = d_valid.get("pending_matches", total)
+                completed = total - pending
+                a_data = grades.get("A", {})
+                b_data = grades.get("B", {})
+                c_data = grades.get("C", {})
+                ab_total = a_data.get("total", 0) + b_data.get("total", 0)
+                ab_hit = a_data.get("hit", 0) + b_data.get("hit", 0)
+                d_hp = {
+                    "status": "GREEN" if completed >= total * 0.8 else ("YELLOW" if completed > 0 else "UNKNOWN"),
+                    "completed": completed, "total": total,
+                    "pct": round(completed / max(total, 1) * 100, 1),
+                    "abRate": round(ab_hit / max(ab_total, 1) * 100, 1),
+                    "cRate": round(c_data.get("hit_rate_pct", 0), 1),
+                }
+            elif isinstance(d_review, dict):
+                rhp = d_review.get("health_panel", {}) or {}
+                sp = rhp.get("sample_progress", {}) or {}
+                ex = rhp.get("execution_quality", {}) or {}
+                d_hp = {
+                    "status": rhp.get("health_status", "UNKNOWN"),
+                    "completed": sp.get("sample_size", 0), "total": sp.get("min_sample", 0),
+                    "pct": sp.get("progress_pct", 0),
+                    "abRate": ex.get("conservative_fill_roi_pct", 0),
+                    "cRate": ex.get("slippage_adjusted_roi_pct", 0),
+                }
+            all_rows_json[d] = {"rows": d_json_rows, "health": d_hp}
+        except Exception:
+            all_rows_json[d] = {"rows": [], "health": {}}
+    
+    all_data_json = json.dumps(all_rows_json, ensure_ascii=False)
+    
     html_doc = f"""<!doctype html>
 <html lang="zh-CN">
 <head>
@@ -547,11 +839,13 @@ def render_dashboard(date_str: str, window_mode: str = "ops") -> Path:
     h1 {{ margin:0 0 8px; font-size:24px; letter-spacing:0; }}
     .summary {{ display:flex; flex-wrap:wrap; gap:10px; color:var(--muted); font-size:14px; }}
     .pill {{ border:1px solid var(--line); background:var(--panel); border-radius:8px; padding:7px 10px; }}
-    .filters {{ display:grid; grid-template-columns: repeat(2, minmax(220px, 320px)); gap:10px; margin-top:14px; }}
-    input, select {{ width:100%; border:1px solid var(--line); border-radius:8px; background:#fff; padding:10px 11px; font-size:14px; }}
+    .filters {{ display:flex; flex-wrap:wrap; gap:10px; margin-top:14px; justify-content:center; }}
+    .filters select {{ width:200px; border:1px solid var(--line); border-radius:8px; background:#fff; padding:8px 10px; font-size:14px; }}
+    input, select {{ border:1px solid var(--line); border-radius:8px; background:#fff; padding:10px 11px; font-size:14px; }}
     main {{ max-width:1280px; margin:0 auto; padding:18px 20px 36px; }}
     .grid {{ display:grid; grid-template-columns:repeat(auto-fill, minmax(360px, 1fr)); gap:14px; }}
     .card {{ background:var(--panel); border:1px solid var(--line); border-radius:8px; padding:14px; box-shadow:0 1px 2px rgba(15,23,42,.04); }}
+    .battle-head {{ font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace; white-space: pre-wrap; line-height:1.45; font-size:13px; background:#fbfcff; border:1px solid var(--line); border-radius:8px; padding:10px; margin-bottom:10px; }}
     .card-top {{ display:flex; justify-content:space-between; gap:12px; align-items:flex-start; }}
     .match {{ font-weight:700; font-size:17px; line-height:1.25; }}
     .meta {{ color:var(--muted); font-size:13px; margin-top:4px; }}
@@ -574,6 +868,10 @@ def render_dashboard(date_str: str, window_mode: str = "ops") -> Path:
     .section {{ margin-top:12px; border-top:1px solid var(--line); padding-top:11px; }}
     .section-title {{ color:var(--muted); font-size:12px; margin-bottom:6px; }}
     .detail {{ font-size:13px; line-height:1.55; }}
+    .plan-strip {{ margin-top:10px; border-radius:8px; padding:8px 10px; font-size:12px; font-weight:700; border:1px solid var(--line); }}
+    .plan-green {{ background:#dcfce7; color:#166534; border-color:#86efac; }}
+    .plan-yellow {{ background:#fef3c7; color:#92400e; border-color:#fcd34d; }}
+    .plan-red {{ background:#fee2e2; color:#991b1b; border-color:#fca5a5; }}
     .audit {{ margin-top:12px; border-top:1px solid var(--line); padding-top:10px; }}
     .audit summary {{ cursor:pointer; color:var(--accent); font-size:13px; font-weight:700; }}
     .list-wrap {{ display:flex; flex-direction:column; gap:8px; }}
@@ -582,6 +880,10 @@ def render_dashboard(date_str: str, window_mode: str = "ops") -> Path:
     .list-match {{ font-size:14px; font-weight:700; }}
     .list-league {{ color:var(--muted); font-size:12px; margin-top:2px; }}
     .list-action {{ font-size:12px; text-align:right; color:#334155; }}
+    .list-state {{ margin-top:3px; font-size:11px; font-weight:700; }}
+    .list-state-green {{ color:#166534; }}
+    .list-state-yellow {{ color:#92400e; }}
+    .list-state-red {{ color:#991b1b; }}
     .list-score {{ text-align:right; font-weight:800; color:#7c2d12; }}
     .health-panel {{ margin-top:12px; border:1px solid var(--line); border-radius:8px; padding:10px 12px; background:#fff; }}
     .health-head {{ display:flex; align-items:center; gap:10px; flex-wrap:wrap; margin-bottom:8px; }}
@@ -597,40 +899,50 @@ def render_dashboard(date_str: str, window_mode: str = "ops") -> Path:
     .quick .metric:first-child b {{ font-size:14px; }}
     .hidden {{ display:none; }}
     .empty {{ color:var(--muted); text-align:center; padding:40px; background:var(--panel); border:1px solid var(--line); border-radius:8px; }}
-    @media (max-width: 860px) {{ .filters {{ grid-template-columns:1fr; }} .grid {{ grid-template-columns:1fr; }} }}
+    @media (max-width: 860px) {{ .filters select {{ width:100%; }} .grid {{ grid-template-columns:1fr; }} }}
   </style>
 </head>
 <body>
   <header>
     <div class="wrap">
-      <h1>V4 HT LIVE PULLBACK — 今日作战台</h1>
+      <h1>V4 HT PREMATCH RECOMMEND — 今日情报台</h1>
       <div class="summary">
-        <span class="pill">{html.escape(date_str)}</span>
+        <span class="pill" style="min-width:130px">📅 <select id="datePicker" onchange="switchDate(this.value)" style="border:none;background:transparent;font-size:inherit;font-weight:700;cursor:pointer;color:var(--ink);">
+          {date_options}
+        </select></span>
         <span class="pill"><b id="visibleCount">0</b> / {len(rows)} 场</span>
-        <span class="pill">滚球雷达 {len(watchlist)} 场</span>
-        <span class="pill">S:{counts["S"]} A:{counts["A"]} B:{counts["B"]}</span>
         <span class="pill">时间口径：{html.escape(mode_text)}</span>
+        <span class="pill">A级: <b id="cntHTA">0</b> · B级: <b id="cntHTB">0</b> · C级: <b id="cntHTC">0</b> · SKIP: <b id="cntHTSkip">0</b></span>
       </div>
-      <div class="health-panel {health_class}">
+      <div class="health-panel health-yellow" id="healthPanel">
         <div class="health-head">
           <span class="health-dot"></span>
-          <b>策略健康：{html.escape(health_status)}</b>
-          <span class="pill">Kill Flags: {html.escape(flags_text)}</span>
+          <b id="healthStatus">策略健康：UNKNOWN</b>
+          <span class="pill" id="healthFlags">Kill Flags: 无触发</span>
         </div>
         <div class="health-grid">
-          <div class="health-item"><small>样本进度</small><b>{sp.get("sample_size", 0)}/{sp.get("min_sample", 0)}</b></div>
-          <div class="health-item"><small>样本完成率</small><b>{sp.get("progress_pct", 0)}%</b></div>
-          <div class="health-item"><small>Conservative ROI</small><b>{ex.get("conservative_fill_roi_pct", 0)}%</b></div>
-          <div class="health-item"><small>Slippage ROI</small><b>{ex.get("slippage_adjusted_roi_pct", 0)}%</b></div>
+          <div class="health-item"><small>赛后验证进度</small><b id="healthProgress">0/0</b></div>
+          <div class="health-item"><small>验证完成率</small><b id="healthPct">0%</b></div>
+          <div class="health-item"><small>A+B级HT命中率</small><b id="healthAB">0%</b></div>
+          <div class="health-item"><small>C级HT命中率</small><b id="healthC">0%</b></div>
+        </div>
         </div>
       </div>
       <div class="filters">
+        <select id="pool">
+          <option value="ht_main">今日上半场推荐(A/B)</option>
+          <option value="ht_observe">上半场观察(C)</option>
+          <option value="sh_observe">下半场观察池</option>
+          <option value="ht_skip">上半场跳过诊断</option>
+          <option value="info_only">其他情报</option>
+          <option value="all" selected>全部</option>
+        </select>
         <select id="sort">
           <option value="hotness">按评分推荐</option>
-          <option value="time">按比赛开始时间</option>
+          <option value="time" selected>按比赛开始时间</option>
         </select>
         <select id="view">
-          <option value="cards">卡片模式</option>
+          <option value="cards" selected>卡片模式</option>
           <option value="list">列表模式</option>
         </select>
       </div>
@@ -642,8 +954,10 @@ def render_dashboard(date_str: str, window_mode: str = "ops") -> Path:
     <div id="empty" class="empty hidden">没有符合过滤条件的比赛</div>
   </main>
   <script>
-    const rows = {data_json};
-    const state = {{ sort:'hotness', view:'cards' }};
+    const allData = {all_data_json};
+    let rows = allData['{date_str}'] ? (allData['{date_str}'].rows || []) : [];
+    let currentDate = '{date_str}';
+    const state = {{ sort:'time', view:'cards', pool:'all' }};
     const el = id => document.getElementById(id);
     function actionOf(row) {{ return row.actionCode || 'SKIP'; }}
     function tierOf(row) {{
@@ -653,9 +967,10 @@ def render_dashboard(date_str: str, window_mode: str = "ops") -> Path:
       return 'C';
     }}
     function actionColor(action) {{
-      if (action === 'PAPER_BUY_NOW') return 'good';
-      if (action === 'WAIT_LINE' || action === 'WAIT_TEMPO') return 'warn';
-      if (action === 'RISK_BLOCKED') return 'watch';
+      if (action === 'HT_A' || action === 'HT_B') return 'good';
+      if (action === 'HT_C') return 'warn';
+      if (action === 'SH_OBSERVE_ONLY') return 'watch';
+      if (action && action.startsWith('HT_SKIP')) return 'watch';
       return '';
     }}
 
@@ -678,15 +993,29 @@ def render_dashboard(date_str: str, window_mode: str = "ops") -> Path:
         <div class="tags">
           <span class="tag ${{actionColor(action)}}">${{action}}</span>
           <span class="tag">${{t}}</span>
-          <span class="tag">${{row.displayLineSource || '赛前参考'}} 大${{row.displayLine || '?'}} @${{row.displayOdds || '-'}}</span>
-          <span class="tag">${{row.evLabel || 'EV观察'}}</span>
-          <span class="tag">${{row.executionLabel || '仅观察'}}</span>
-          <span class="tag">窗口 ${{
-            row.liveMinute && Number(row.liveMinute) >= 10 ? "now" : "10-13"
-          }}</span>
+          <span class="tag">初盘 大${{row.lineNum || row.displayLine || '?'}} @${{row.oddsNum || row.displayOdds || '-'}}</span>
+          <span class="tag">HT评分 ${{row.htScore || '-'}}</span>
+          <span class="tag">HT有球率 ${{row.h2hText || '-'}}</span>
+          <span class="tag">样本 ${{row.htRecSampleSize || 0}}</span>
+          <span class="tag">分布 ${{row.htRecScriptType || '-'}}</span>
         </div>
-        <div class="verdict">${{action}} · ${{row.marketLabel}}</div>
-        <div class="detail"><b>主因：</b>${{(row.whyText || '-').split('；').slice(0,3).join(' / ')}}<br><b>风险：</b>${{(row.avoidIfText || '-').split('；').slice(0,2).join(' / ')}}</div>
+        <div class="verdict">HT推荐结论：${{row.htRecGrade || '-'}}级 · ${{row.htRecReason || row.htDecisionReason || '-'}}${{(row.isShObserve && !row.isHtMain) ? ' ｜ SH观察：不计入HT主推荐' : ''}}</div>
+        <div class="detail">
+          📋 <b>历史基因</b>: HT有球率 ${{row.h2hText}} | 场均进球 ${{row.modelXg || row.avgGoals}} 球<br>
+          ⏱ <b>进球剧本</b>: ${{row.storyLabel || '-'}} (0-15m ${{row.p0_15 || '-'}} | 16-30m ${{row.p16_30 || '-'}} | 31-45m ${{row.p31_45 || '-'}})<br>
+          ⚔️ <b>开局施压</b>: ${{row.pressureText || '-'}}
+        </div>
+        <div class="section">
+          <div class="section-title">🎯 推荐理由</div>
+          <div class="detail">${{row.htRecReasons || row.whyText || '-'}}
+          </div>
+        </div>
+        <div class="section">
+          <div class="section-title">💡 执行与风险</div>
+          <div class="detail">${{row.actionPlan1 || '-'}}<br>${{row.actionPlan2 || '-'}}<br>${{row.actionPlan3 || '-'}}<br>
+          风险: ${{row.htRecRisks || (row.avoidIfText || '-').split('；').slice(0,2).join(' / ')}}</div>
+        </div>
+        <div class="plan-strip ${{row.strategyStateClass || 'plan-yellow'}}">赛后验证：记录 HT是否有球 + 命中时间段（0-15/16-30/31-45）</div>
         <details class="audit"><summary>查看完整数据</summary>
           <div class="section"><div class="section-title">H2H / 近期</div>
             <div class="detail">H2H HT率 ${{row.h2hText}} (${{row.h2hCountText}}) · 场均HT球 ${{row.avgGoals}} · 近期动能 ${{row.momentumText}}</div>
@@ -715,7 +1044,7 @@ def render_dashboard(date_str: str, window_mode: str = "ops") -> Path:
           <div class="section"><div class="section-title">近期HT攻防动能</div>
             <div class="detail">${{row.home}}：进球 ${{row.homeHtScored}} / 失球 ${{row.homeHtConceded}} · ${{row.away}}：进球 ${{row.awayHtScored}} / 失球 ${{row.awayHtConceded}}<br>主攻客防 ${{row.homeAttackVsAwayDefense}} · 客攻主防 ${{row.awayAttackVsHomeDefense}} · 最强组合 ${{row.htAttackVsDefense}}</div>
           </div>
-          <div class="section"><div class="section-title">下半场 / 全场参考</div>
+          <div class="section"><div class="section-title">下半场 / 全场参考（独立观察）</div>
             <div class="detail">SH有球: ${{row.shText}} · 场均SH球: ${{row.avgShGoals}} · FT 2+球: ${{row.ftOverText}}<br>46-60: ${{row.binsSecond['46-60']}} · 61-75: ${{row.binsSecond['61-75']}} · 76-90: ${{row.binsSecond['76-90']}}</div>
           </div>
           <div class="section"><div class="section-title">赛前大球盘口全量</div><div class="detail">${{row.linesText}}</div></div>
@@ -725,6 +1054,17 @@ def render_dashboard(date_str: str, window_mode: str = "ops") -> Path:
     }}
     function filtered() {{
       let out = rows.slice();
+      if (state.pool === 'ht_main') {{
+        out = out.filter(r => !!r.isHtRecommendation);
+      }} else if (state.pool === 'ht_observe') {{
+        out = out.filter(r => !!r.isHtObserve);
+      }} else if (state.pool === 'sh_observe') {{
+        out = out.filter(r => !!r.isShObserve);
+      }} else if (state.pool === 'ht_skip') {{
+        out = out.filter(r => !!r.isHtSkip);
+      }} else if (state.pool === 'info_only') {{
+        out = out.filter(r => !r.isHtMain && !r.isShObserve);
+      }}
       out.sort((a,b) => {{
         if (state.sort === 'time') {{
           const ka = Number(a.kickoffSort || 32503680000);
@@ -744,22 +1084,58 @@ def render_dashboard(date_str: str, window_mode: str = "ops") -> Path:
           <div class="list-match">${{row.home}} vs ${{row.away}}</div>
           <div class="list-league">${{row.league}} · #${{row.fixture_id}}</div>
         </div>
-        <div class="list-action">${{action}}<br>${{row.displayLineSource || '赛前参考'}} 大${{row.displayLine || '?'}} @${{row.displayOdds || '-'}}</div>
+        <div class="list-action">HT ${{row.htRecGrade || '-'}}级<br>HT率 ${{row.h2hText || '-'}} · 11-45 ${{row.bins['11-45'] || '-'}}<br><div class="list-state ${{row.strategyStateListClass || 'list-state-yellow'}}">${{row.htRecReason || row.strategyState || '观察'}}</div></div>
         <div class="list-score">${{row.hotness}}</div>
       </div>`;
     }}
+    function switchDate(date) {{
+      if (date === currentDate) return;
+      const entry = allData[date];
+      if (!entry) return;
+      rows = entry.rows || [];
+      currentDate = date;
+      updateHealth(date);
+      render();
+    }}
+    function updateHealth(date) {{
+      const h = (allData[date] && allData[date].health) || {{}};
+      const status = h.status || 'UNKNOWN';
+      const panel = document.getElementById('healthPanel');
+      panel.className = 'health-panel ' + (status === 'GREEN' ? 'health-green' : status === 'RED' ? 'health-red' : 'health-yellow');
+      document.getElementById('healthStatus').textContent = '策略健康：' + status;
+      document.getElementById('healthProgress').textContent = (h.completed || 0) + '/' + (h.total || 0);
+      document.getElementById('healthPct').textContent = (h.pct || 0) + '%';
+      document.getElementById('healthAB').textContent = (h.abRate || 0) + '%';
+      document.getElementById('healthC').textContent = (h.cRate || 0) + '%';
+    }}
     function render() {{
+      const htA = rows.filter(r => (r.htRecGrade || '') === 'A').length;
+      const htB = rows.filter(r => (r.htRecGrade || '') === 'B').length;
+      const htC = rows.filter(r => !!r.isHtObserve).length;
+      const htSkip = rows.filter(r => !!r.isHtSkip).length;
+      el('cntHTA').textContent = String(htA);
+      el('cntHTB').textContent = String(htB);
+      el('cntHTC').textContent = String(htC);
+      el('cntHTSkip').textContent = String(htSkip);
       const out = filtered();
       el('visibleCount').textContent = out.length;
+      if (out.length === 0) {{
+        if (state.pool === 'ht_main') {{
+          el('empty').textContent = '暂无符合过滤条件的比赛';
+        }} else {{
+          el('empty').textContent = '没有符合过滤条件的比赛';
+        }}
+      }}
       el('empty').classList.toggle('hidden', out.length > 0);
       el('cards').classList.toggle('hidden', state.view !== 'cards');
       el('list').classList.toggle('hidden', state.view !== 'list');
       el('cards').innerHTML = out.map(card).join('');
       el('list').innerHTML = out.map(listRow).join('');
     }}
-    ['sort','view'].forEach(id => {{
+    ['pool','sort','view'].forEach(id => {{
       el(id).addEventListener('input', e => {{ state[id] = e.target.value; render(); }});
     }});
+    updateHealth(currentDate);
     render();
   </script>
 </body>
@@ -784,6 +1160,12 @@ def main():
     args = parser.parse_args()
     out_path = render_dashboard(args.date, args.window_mode)
     print(f"V4 dashboard saved: {out_path}")
+    # 自动拷贝到 canvas 嵌入目录
+    canvas_path = BASE_DIR.parent.parent / "canvas" / "documents" / "v4_dashboard" / "index.html"
+    canvas_path.parent.mkdir(parents=True, exist_ok=True)
+    import shutil
+    shutil.copy(out_path, canvas_path)
+    print(f"Canvas: {canvas_path}")
     if args.open:
         subprocess.run(["open", str(out_path)], check=False)
 

@@ -1,6 +1,7 @@
 # engine/v4_scout_report.py — V4 战术指挥面板
 # Hotness排序 + 红绿灯 + 多维过滤 → 赛前情报卡片
 import json
+import math
 import sys
 from pathlib import Path
 from datetime import datetime
@@ -25,6 +26,115 @@ def _load_core_weights():
         return {}
 
 CORE_WEIGHTS = _load_core_weights()
+
+
+def _f(x, default=0.0) -> float:
+    try:
+        return float(x)
+    except Exception:
+        return default
+
+
+def calculate_ht_ev(expected_goals, line, current_odds):
+    """
+    基于泊松分布，计算半场大小球 EV / 公平赔率 / 胜率。
+    兼容 0.5 / 1.0 / 1.5 及 0.75 / 1.25（按拆分注处理）。
+    """
+    expected_goals = _f(expected_goals, 0.0)
+    line = _f(line, 0.0)
+    current_odds = _f(current_odds, 0.0)
+    if expected_goals <= 0 or current_odds <= 1.0:
+        return 0.0, 0.0, 0.0
+
+    p0 = math.exp(-expected_goals)
+    p1 = expected_goals * p0
+    p2 = 1 - p0 - p1
+
+    # 半注拆分支持亚洲四分之一线
+    if abs(line - 0.75) < 1e-9:
+        ev05, fair05, win05 = calculate_ht_ev(expected_goals, 0.5, current_odds)
+        ev10, fair10, win10 = calculate_ht_ev(expected_goals, 1.0, current_odds)
+        return round((ev05 + ev10) / 2, 1), round((fair05 + fair10) / 2, 2), round((win05 + win10) / 2, 1)
+    if abs(line - 1.25) < 1e-9:
+        ev10, fair10, win10 = calculate_ht_ev(expected_goals, 1.0, current_odds)
+        ev15, fair15, win15 = calculate_ht_ev(expected_goals, 1.5, current_odds)
+        return round((ev10 + ev15) / 2, 1), round((fair10 + fair15) / 2, 2), round((win10 + win15) / 2, 1)
+
+    ev = 0.0
+    fair_odds = 0.0
+    win_prob = 0.0
+    if abs(line - 1.5) < 1e-9:
+        win_prob = p2
+        ev = (win_prob * current_odds) - 1
+        fair_odds = 1 / win_prob if win_prob > 0 else 0.0
+    elif abs(line - 1.0) < 1e-9:
+        win_prob = p2
+        push_prob = p1
+        lose_prob = p0
+        ev = (win_prob * (current_odds - 1)) - lose_prob
+        fair_odds = (1 - push_prob) / win_prob if win_prob > 0 else 0.0
+    elif abs(line - 0.5) < 1e-9:
+        win_prob = 1 - p0
+        ev = (win_prob * current_odds) - 1
+        fair_odds = 1 / win_prob if win_prob > 0 else 0.0
+    else:
+        # 其他线型先按最接近可解释线近似
+        anchor = min([0.5, 1.0, 1.5], key=lambda x: abs(x - line))
+        return calculate_ht_ev(expected_goals, anchor, current_odds)
+
+    return round(ev * 100, 1), round(fair_odds, 2), round(win_prob * 100, 1)
+
+
+def _line_val(v) -> float:
+    s = str(v or "").strip().replace("Over", "").replace("Under", "")
+    return _f(s, 0.0)
+
+
+def _pick_primary_line(ht_lines: list[dict]) -> tuple[float, float]:
+    """
+    选主盘：优先 over 水位接近 2.00（HK水位约1.0）且线在 1.0/1.25/0.75/1.5。
+    """
+    if not ht_lines:
+        return 0.0, 0.0
+    pref = [1.0, 1.25, 0.75, 1.5, 0.5]
+    rank = {x: i for i, x in enumerate(pref)}
+    scored = []
+    for ln in ht_lines:
+        line = _line_val(ln.get("line"))
+        odds = _f(ln.get("over"), 0.0)
+        if odds <= 1.0:
+            continue
+        dist = abs(odds - 2.0)
+        scored.append((dist, rank.get(line, 999), abs(line - 1.25), line, odds))
+    if not scored:
+        first = ht_lines[0]
+        return _line_val(first.get("line")), _f(first.get("over"), 0.0)
+    scored.sort(key=lambda x: (x[0], x[1], x[2]))
+    _, _, _, line, odds = scored[0]
+    return line, odds
+
+
+def _story_label(tb: dict) -> str:
+    p0_15 = _f(tb.get("0_15"), 0.0)
+    p16_30 = _f(tb.get("16_30"), 0.0)
+    p31_45 = _f(tb.get("31_45"), 0.0)
+    if p31_45 >= max(p0_15, p16_30) and p31_45 >= 0.45:
+        return "慢热绝杀型"
+    if p0_15 >= 0.35:
+        return "开局冲击型"
+    if p16_30 >= max(p0_15, p31_45):
+        return "中段发力型"
+    return "均衡波动型"
+
+
+def _opening_pressure_text(factors: dict) -> str:
+    # 当前数据集中无稳定角球字段，先用 both_sides_ht_threat 代理开局压制度
+    threat = _f(factors.get("both_sides_ht_threat"), 0.0)
+    if threat >= 0.60:
+        return f"🟢 高 (前场威胁 {_pct(threat)})"
+    if threat >= 0.45:
+        return f"🟡 中 (前场威胁 {_pct(threat)})"
+    return f"⚠️ 低 (前场威胁 {_pct(threat)})"
 
 
 def load_scout_data(date_str: str):
@@ -97,7 +207,7 @@ def calculate_hotness(factors: dict) -> float:
 
 
 # ── 卡片渲染 ──
-def generate_match_card(match_data: dict, show_hotness: bool = True) -> str:
+def generate_match_card(match_data: dict, show_hotness: bool = True, compact: bool = False) -> str:
     home_raw = match_data["home"]
     away_raw = match_data["away"]
     home = team_name_cn(home_raw)
@@ -135,20 +245,77 @@ def generate_match_card(match_data: dict, show_hotness: bool = True) -> str:
         "SECOND_HALF_OVER": "下半场大球参考",
         "FULLTIME_OVER": "全场大球参考",
     }.get(market_focus, market_focus)
+    tier_text = tier_label(hotness) if show_hotness else "情报关注"
+    ht_rate = _f(factors.get("h2h_ht_goal_rate"), 0.0)
+    avg_ht_goals = _f(factors.get("h2h_avg_ht_goals"), 0.0)
+    p0_15 = _f(tb.get("0_15"), 0.0)
+    p16_30 = _f(tb.get("16_30"), 0.0)
+    p31_45 = _f(tb.get("31_45"), 0.0)
+    story = _story_label(tb)
+    threat_val = _f(factors.get("both_sides_ht_threat"), 0.0)
+    pressure_text = _opening_pressure_text(factors)
+    bookie_line, bookie_odds = _pick_primary_line(ht_lines)
+    implied = (100.0 / bookie_odds) if bookie_odds > 1.0 else 0.0
+    ev_pct, fair_odds, win_prob = calculate_ht_ev(avg_ht_goals, bookie_line, bookie_odds)
 
     lines = []
     lines.append("=" * 60)
-    if show_hotness and hotness > 0:
-        hot_bar = _heat_bar(hotness / 100, 15)
-        lines.append(f"🏟  {league}                                  🔥热度: {hotness}/100 {hot_bar}")
-    else:
-        lines.append(f"🏟  {league}")
-    lines.append(f"⏰  {ko_str}")
-    lines.append(f"🔥  {home} vs {away}  |  {market_label}")
+    lines.append(f"🔥 [{tier_text}] {home} vs {away} ({league})")
     lines.append("=" * 60)
+    lines.append(f"⏰ 开赛时间: {ko_str} | 方向: {market_label}")
+    lines.append(f"📋 【历史基因】: HT有球率 {_pct(ht_rate)} | 场均进球: {round(avg_ht_goals, 2)} 球")
+    lines.append(
+        f"⏱ 【进球剧本】: {story} (0-15m {_pct(p0_15)} | 16-30m {_pct(p16_30)} | 31-45m {_pct(p31_45)})"
+    )
+    lines.append(f"⚔️ 【开局施压】: {pressure_text}")
+    lines.append("")
+    lines.append(f"⚖️ 【盘口价值探测 (泊松期望 {round(avg_ht_goals, 2)} 球)】")
+    if bookie_line > 0 and bookie_odds > 1:
+        lines.append(
+            f"   庄家线: 大 {bookie_line} @ {round(bookie_odds, 2)} (隐含概率 {round(implied, 1)}%)"
+        )
+        lines.append(
+            f"   模型线: 大 {bookie_line} 公平 @ {fair_odds} (模型概率 {win_prob}%)"
+        )
+        if ev_pct >= 8.0:
+            lines.append(f"   ✅ 结论: 赛前价值突显！(正期望 +{ev_pct}%) 庄家赔率给高了。")
+        elif ev_pct > 5.0:
+            lines.append(f"   ✅ 结论: 赛前小幅正期望 (+{ev_pct}%)，可纸盘观察。")
+        elif ev_pct <= -12.0:
+            lines.append(f"   ❌ 结论: 赛前负期望 ({ev_pct}%)，庄家明显高估开局火力。")
+        elif ev_pct < -5.0:
+            lines.append(f"   ❌ 结论: 赛前负期望 ({ev_pct}%)，坚决不追赛前，等待滚球降盘。")
+        else:
+            lines.append(f"   🟡 结论: 赔率接近合理区间 (EV {ev_pct}%)，先观望。")
+    else:
+        lines.append("   ❓ 暂无可用半场盘口，无法进行赛前EV估值。")
+
+    lines.append("")
+    lines.append("💡 【作战执行指令 (Action Plan)】")
+    if bookie_line > 0 and bookie_odds > 1:
+        if ev_pct >= 8.0:
+            lines.append(f"   👉 赛前动作: 赛前允许轻仓试探大 {bookie_line}。")
+        else:
+            lines.append(f"   👉 赛前动作: 赛前空仓，不追大 {bookie_line}。")
+        lines.append("   👉 滚球潜伏: 设定闹钟在第 25 分钟，复核比分、节奏、红牌。")
+        if p31_45 >= 0.5 and p0_15 <= 0.2 and threat_val <= 0.45:
+            lines.append("   👉 狙击扳机: 若 25' 仍 0-0 且场面沉闷，盘口降到大0.5后再看水位。")
+            lines.append("   👉 执行细则: 大0.5水位 > 1.80 才允许纸盘进场。")
+        elif p31_45 >= 0.45:
+            lines.append("   👉 狙击扳机: 若 25' 仍 0-0 且无红牌，优先等大0.5/大0.75再评估。")
+        else:
+            lines.append("   👉 狙击扳机: 若 10-15' 形成高压并回调到目标线，再执行纸盘进场。")
+    else:
+        lines.append("   👉 赛前动作: 暂不交易，只做走地监控。")
+        lines.append("   👉 滚球潜伏: 等待出现 HT 目标线(0.75/1.0/1.25)后再评估。")
+    lines.append("=" * 60)
+
+    if compact:
+        return "\n".join(lines)
 
     # 📋 历史基因
     lines.append("")
+    lines.append("📚 【详细情报附录】")
     lines.append("🎚 【三方向评分】")
     lines.append(f"   HT走地: {scores.get('HT_LIVE_OVER', 0):>5}  |  SH参考: {scores.get('SECOND_HALF_OVER', 0):>5}  |  FT参考: {scores.get('FULLTIME_OVER', 0):>5}")
     lines.append(f"   当前方向: {market_label}  |  评分最强: {match_data.get('best_focus_by_score') or factors.get('best_focus_by_score', '-')}")
@@ -301,6 +468,7 @@ if __name__ == "__main__":
     parser.add_argument("--min_ht_rate", type=float, default=0.7, help="最低HT有球率")
     parser.add_argument("--min_recent", type=float, default=0.0, help="最低近期动能")
     parser.add_argument("--fixture_id", type=int, help="只看某场(跳过过滤)")
+    parser.add_argument("--compact", action="store_true", help="仅输出核心作战卡片，不输出长附录")
     args = parser.parse_args()
 
     data = load_scout_data(args.date)
@@ -322,6 +490,10 @@ if __name__ == "__main__":
         filtered.append(rec)
 
     sorted_matches = sorted(filtered, key=lambda x: x["hotness_score"], reverse=True)
+    if args.fixture_id and not sorted_matches:
+        print(f"\n❌ 未找到 fixture_id={args.fixture_id} (date={args.date})")
+        print("   提示：该比赛可能在其他日期文件里，或数据源当天未入库。")
+        sys.exit(1)
     league_str = args.league or "全部"
     print(f"\n🔭 V4 战术情报雷达 | {args.date} | {league_str}")
     print(f"🎯 过滤: HT率≥{args.min_ht_rate} | 动能≥{args.min_recent}")
@@ -347,7 +519,7 @@ if __name__ == "__main__":
         print(f"{tier_name} (共 {len(group)} 场)")
         print("-" * 40)
         for rec in group:
-            print(generate_match_card(rec))
+            print(generate_match_card(rec, compact=args.compact))
             print()
 
     print(f"📊 共 {len(sorted_matches)} 场  |  S:{len(tiers['S'])} A:{len(tiers['A'])} B:{len(tiers['B'])}")

@@ -51,6 +51,11 @@ CANDIDATE_RULES_PATH = BASE_DIR / "config" / "v4_candidate_rules.yaml"
 # SSL
 ctx = ssl.create_default_context(cafile=certifi.where())
 
+# 绕过 macOS 系统代理 (127.0.0.1:10808)，API-Football 直连更快更稳
+_no_proxy_handler = urllib.request.ProxyHandler({})
+_no_proxy_opener = urllib.request.build_opener(_no_proxy_handler)
+urllib.request.install_opener(_no_proxy_opener)
+
 # 白名单
 with open(BASE_DIR / "config" / "leagues_whitelist.json") as f:
     LEAGUE_CN = json.load(f)["leagueId"]

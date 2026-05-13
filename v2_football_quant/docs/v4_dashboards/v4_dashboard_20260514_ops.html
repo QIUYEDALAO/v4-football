@@ -1,0 +1,323 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>V4 作战仪表盘 | 20260514</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --bg:#f7f8fb; --panel:#ffffff; --ink:#1f2937; --muted:#6b7280;
+      --line:#e5e7eb; --accent:#0f766e; --hot:#b45309; --bad:#b91c1c;
+      --good:#15803d; --watch:#1d4ed8;
+    }
+    * { box-sizing: border-box; }
+    body { margin:0; font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif; background:var(--bg); color:var(--ink); }
+    header { position:sticky; top:0; z-index:5; background:rgba(247,248,251,.96); border-bottom:1px solid var(--line); backdrop-filter:blur(8px); }
+    .wrap { max-width:1280px; margin:0 auto; padding:18px 20px; }
+    h1 { margin:0 0 8px; font-size:24px; letter-spacing:0; }
+    .summary { display:flex; flex-wrap:wrap; gap:10px; color:var(--muted); font-size:14px; }
+    .pill { border:1px solid var(--line); background:var(--panel); border-radius:8px; padding:7px 10px; }
+    .filters { display:grid; grid-template-columns: repeat(2, minmax(220px, 320px)); gap:10px; margin-top:14px; }
+    input, select { width:100%; border:1px solid var(--line); border-radius:8px; background:#fff; padding:10px 11px; font-size:14px; }
+    main { max-width:1280px; margin:0 auto; padding:18px 20px 36px; }
+    .grid { display:grid; grid-template-columns:repeat(auto-fill, minmax(360px, 1fr)); gap:14px; }
+    .card { background:var(--panel); border:1px solid var(--line); border-radius:8px; padding:14px; box-shadow:0 1px 2px rgba(15,23,42,.04); }
+    .battle-head { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace; white-space: pre-wrap; line-height:1.45; font-size:13px; background:#fbfcff; border:1px solid var(--line); border-radius:8px; padding:10px; margin-bottom:10px; }
+    .card-top { display:flex; justify-content:space-between; gap:12px; align-items:flex-start; }
+    .match { font-weight:700; font-size:17px; line-height:1.25; }
+    .meta { color:var(--muted); font-size:13px; margin-top:4px; }
+    .score { min-width:58px; text-align:center; border-radius:8px; padding:8px 6px; font-weight:800; color:#fff; background:var(--hot); }
+    .score small { display:block; font-size:11px; font-weight:600; opacity:.9; }
+    .tags { display:flex; flex-wrap:wrap; gap:6px; margin:12px 0; }
+    .tag { border-radius:7px; padding:5px 7px; font-size:12px; background:#eef2ff; color:#3730a3; }
+    .tag.watch { background:#dbeafe; color:var(--watch); }
+    .tag.good { background:#dcfce7; color:var(--good); }
+    .tag.warn { background:#fef3c7; color:#92400e; }
+    .metrics { display:grid; grid-template-columns:repeat(3, 1fr); gap:8px; }
+    .scores { display:grid; grid-template-columns:repeat(3, 1fr); gap:8px; margin-top:10px; }
+    .scorebox { border:1px solid var(--line); border-radius:8px; padding:8px; background:#fbfdff; }
+    .scorebox label { display:block; color:var(--muted); font-size:12px; margin-bottom:4px; }
+    .scorebox b { font-size:16px; }
+    .metric { border:1px solid var(--line); border-radius:8px; padding:9px; }
+    .metric label { display:block; color:var(--muted); font-size:12px; margin-bottom:4px; }
+    .metric b { font-size:16px; }
+    .verdict { margin-top:10px; padding:10px 12px; border-radius:8px; background:#f8fafc; border:1px solid var(--line); font-weight:700; color:#111827; }
+    .section { margin-top:12px; border-top:1px solid var(--line); padding-top:11px; }
+    .section-title { color:var(--muted); font-size:12px; margin-bottom:6px; }
+    .detail { font-size:13px; line-height:1.55; }
+    .plan-strip { margin-top:10px; border-radius:8px; padding:8px 10px; font-size:12px; font-weight:700; border:1px solid var(--line); }
+    .plan-green { background:#dcfce7; color:#166534; border-color:#86efac; }
+    .plan-yellow { background:#fef3c7; color:#92400e; border-color:#fcd34d; }
+    .plan-red { background:#fee2e2; color:#991b1b; border-color:#fca5a5; }
+    .audit { margin-top:12px; border-top:1px solid var(--line); padding-top:10px; }
+    .audit summary { cursor:pointer; color:var(--accent); font-size:13px; font-weight:700; }
+    .list-wrap { display:flex; flex-direction:column; gap:8px; }
+    .list-row { display:grid; grid-template-columns: 78px 1fr 140px 64px; gap:10px; align-items:center; background:var(--panel); border:1px solid var(--line); border-radius:8px; padding:10px 12px; }
+    .list-time { color:var(--muted); font-weight:700; font-size:13px; text-align:center; }
+    .list-match { font-size:14px; font-weight:700; }
+    .list-league { color:var(--muted); font-size:12px; margin-top:2px; }
+    .list-action { font-size:12px; text-align:right; color:#334155; }
+    .list-state { margin-top:3px; font-size:11px; font-weight:700; }
+    .list-state-green { color:#166534; }
+    .list-state-yellow { color:#92400e; }
+    .list-state-red { color:#991b1b; }
+    .list-score { text-align:right; font-weight:800; color:#7c2d12; }
+    .health-panel { margin-top:12px; border:1px solid var(--line); border-radius:8px; padding:10px 12px; background:#fff; }
+    .health-head { display:flex; align-items:center; gap:10px; flex-wrap:wrap; margin-bottom:8px; }
+    .health-dot { width:10px; height:10px; border-radius:999px; display:inline-block; }
+    .health-green .health-dot { background:#16a34a; }
+    .health-yellow .health-dot { background:#ca8a04; }
+    .health-red .health-dot { background:#dc2626; }
+    .health-grid { display:grid; grid-template-columns:repeat(4,minmax(120px,1fr)); gap:8px; }
+    .health-item { border:1px solid var(--line); border-radius:8px; padding:8px; }
+    .health-item small { display:block; color:var(--muted); font-size:11px; }
+    .health-item b { font-size:14px; }
+    .quick { display:grid; grid-template-columns:1.4fr repeat(3, .75fr); gap:8px; margin-top:10px; }
+    .quick .metric:first-child b { font-size:14px; }
+    .hidden { display:none; }
+    .empty { color:var(--muted); text-align:center; padding:40px; background:var(--panel); border:1px solid var(--line); border-radius:8px; }
+    @media (max-width: 860px) { .filters { grid-template-columns:1fr; } .grid { grid-template-columns:1fr; } }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="wrap">
+      <h1>V4 HT PREMATCH RECOMMEND — 今日情报台</h1>
+      <div class="summary">
+        <span class="pill">📅 <select id="datePicker" onchange="switchDate(this.value)" style="border:none;background:transparent;font-size:inherit;font-weight:700;cursor:pointer;color:var(--ink);">
+          <option value="20260514" selected>2026-05-14</option><option value="20260513">2026-05-13</option><option value="20260512">2026-05-12</option><option value="20260511">2026-05-11</option><option value="20260510">2026-05-10</option><option value="20260509">2026-05-09</option><option value="20260508">2026-05-08</option><option value="20260507">2026-05-07</option><option value="20260506">2026-05-06</option><option value="20260505">2026-05-05</option>
+        </select></span>
+        <span class="pill"><b id="visibleCount">0</b> / 6 场</span>
+        <span class="pill">滚球雷达 0 场</span>
+        <span class="pill">热度分层 S:0 A:1 B:5</span>
+        <span class="pill">时间口径：运营日 12:00-次日11:59</span>
+        <span class="pill">HT推荐总数: <b id="cntHT">0</b></span>
+        <span class="pill">A级推荐: <b id="cntHTA">0</b></span>
+        <span class="pill">B级推荐: <b id="cntHTB">0</b></span>
+        <span class="pill">C级观察: <b id="cntHTC">0</b></span>
+        <span class="pill">HT跳过: <b id="cntHTSkip">0</b></span>
+        <span class="pill">SH观察: <b id="cntSH">0</b></span>
+        <span class="pill">普通情报: <b id="cntINFO">0</b></span>
+      </div>
+      <div class="health-panel health-yellow">
+        <div class="health-head">
+          <span class="health-dot"></span>
+          <b>策略健康：UNKNOWN</b>
+          <span class="pill">Kill Flags: 无触发</span>
+        </div>
+        <div class="health-grid">
+          <div class="health-item"><small>赛后验证进度</small><b>0/0</b></div>
+          <div class="health-item"><small>验证完成率</small><b>0%</b></div>
+          <div class="health-item"><small>A+B级HT命中率</small><b>0%</b></div>
+          <div class="health-item"><small>C级HT命中率</small><b>0%</b></div>
+        </div>
+      </div>
+      <div class="filters">
+        <select id="pool">
+          <option value="ht_main">今日上半场推荐(A/B)</option>
+          <option value="ht_observe">上半场观察(C)</option>
+          <option value="sh_observe">下半场观察池</option>
+          <option value="ht_skip">上半场跳过诊断</option>
+          <option value="info_only">其他情报</option>
+          <option value="all">全部</option>
+        </select>
+        <select id="sort">
+          <option value="hotness">按评分推荐</option>
+          <option value="time">按比赛开始时间</option>
+        </select>
+        <select id="view">
+          <option value="cards">卡片模式</option>
+          <option value="list">列表模式</option>
+        </select>
+      </div>
+    </div>
+  </header>
+  <main>
+    <div id="cards" class="grid"></div>
+    <div id="list" class="list-wrap hidden"></div>
+    <div id="empty" class="empty hidden">没有符合过滤条件的比赛</div>
+  </main>
+  <script>
+    const rows = [{"fixture_id": 1538492, "home": "巴塞尔", "away": "圣加仑", "homeEn": "FC Basel 1893", "awayEn": "FC ST. Gallen", "league": "瑞士超", "time": "22:30", "timeLabel": "05-14 22:30", "kickoffSort": 1778769000, "hotness": 75.5, "tier": "B", "tierHead": "HT跳过 | 条件不足", "is_watch": false, "executionStatus": "上半场跳过", "tradeAction": "HT_SKIP：上半场基因不足", "actionCode": "HT_SKIP", "riskLevel": "HIGH", "evLabel": "推荐中", "executionLabel": "仅情报", "decisionSummary": "画像：HT基因不足。结论：不进入上半场推荐", "matchProfile": "画像：HT基因不足", "intelligence": {"match_type": ["SH_SURGE", "FT_OPEN_GAME", "DATA_TOO_WEAK"], "primary_direction": "HT", "trade_action": "HT_SKIP：上半场基因不足", "confidence": 72, "profile": "画像：HT基因不足", "summary": "结论：不进入上半场推荐", "why": ["下半场信号更强：SH 65.0 vs HT 46.7", "全场大球分 75.5 是主要开放信号", "API覆盖为 BASIC / WATCH_ONLY"], "wait_for": [], "avoid_if": ["红牌", "重大伤退", "盘口水位异常"], "execution_status": "上半场跳过", "is_live_radar": false, "action_code": "HT_SKIP", "risk_level": "HIGH", "ev_label": "推荐中", "execution_label": "仅情报", "recommendation_bucket": "HT_SKIP", "ht_decision": {"action": "HT_SKIP", "bucket": "HT_SKIP", "is_main_recommendation": false, "reason": "上半场基因不足"}, "ht_recommendation": {"grade": "SKIP", "status": "HT_SKIP", "bucket": "HT_SKIP", "reason": "上半场基因不足", "reasons": ["11-45分钟压力弱", "回调适配弱"], "risks": ["方向冲突：系统总分最强为下半场，但HT数据已达推荐级，人工决策时注意区分", "pullback_fit=WEAK"], "script_type": "中段发力型", "ht_score": 46.7, "h2h_ht_goal_rate": 0.7, "ht_avg_goals": 1.0, "time_bins": {"0_15": 0.0, "16_30": 0.0, "31_45": 0.0}, "sample_size": 10}, "sh_observation": {"action": "SH_OBSERVE_ONLY", "bucket": "SH_OBSERVE", "is_main_recommendation": false, "reason": "下半场倾向更强，但不计入HT主推荐", "trade_action": "下半场观察：不属于V4_HT主推荐"}, "display_bucket": "HT_SKIP", "is_ht_main_recommendation": false, "ht_reason": "上半场基因不足"}, "matchTypes": "SH_SURGE / FT_OPEN_GAME / DATA_TOO_WEAK", "primaryDirection": "HT", "confidence": 72, "whyText": "下半场信号更强：SH 65.0 vs HT 46.7；全场大球分 75.5 是主要开放信号；API覆盖为 BASIC / WATCH_ONLY", "whyTop": ["下半场信号更强：SH 65.0 vs HT 46.7", "全场大球分 75.5 是主要开放信号", "API覆盖为 BASIC / WATCH_ONLY"], "waitForText": "", "avoidIfText": "红牌；重大伤退；盘口水位异常", "riskTop": ["红牌", "重大伤退"], "liveAction": "-", "liveReason": "-", "liveScore": "-", "liveMinute": "-", "entryLine": "-", "entryOdds": "-", "marketFocus": "SECOND_HALF_OVER", "marketLabel": "下半场大球参考", "recommendationBucket": "HT_SKIP", "isHtMain": true, "isHtRecommendation": false, "isHtObserve": false, "isHtSkip": true, "isShObserve": true, "htDecisionAction": "HT_SKIP", "htDecisionReason": "上半场基因不足", "htRecGrade": "SKIP", "htRecStatus": "HT_SKIP", "htRecReason": "上半场基因不足", "htRecScriptType": "中段发力型", "htRecReasons": "11-45分钟压力弱；回调适配弱", "htRecRisks": "方向冲突：系统总分最强为下半场，但HT数据已达推荐级，人工决策时注意区分；pullback_fit=WEAK", "htRecSampleSize": 10, "bestFocusByScore": "FULLTIME_OVER", "htScore": 46.7, "shScore": 65.0, "ftScore": 75.5, "phaseBias": "BALANCED", "h2h": 0.7, "h2hText": "70%", "h2hCountText": "7/10", "htStrictPass": false, "htGateModel": "RECENT_FIRST_H2H_REFERENCE", "recentTimingFit": "WEAK", "dataCoverageLevel": "BASIC", "dataGateAction": "WATCH_ONLY", "leagueHtEnv": "-", "leagueShEnv": "-", "leagueHtRate": "-", "leagueShRate": "-", "leagueFtRate": "-", "leagueSample": 0, "leagueAdjustment": "KEEP", "seasonPhase": "-", "seasonProgress": "-", "seasonCompleted": 0, "seasonTotal": 0, "remainingRounds": "-", "phaseAdjustment": "KEEP", "motivationGate": "KEEP", "motivationReason": "FAST_MODE_PRECHECK", "motivationScore": "-", "homeRank": "-", "awayRank": "-", "homeMotTags": "-", "awayMotTags": "-", "scheduleAction": "KEEP", "scheduleLevel": "-", "scheduleReason": "FAST_MODE_PRECHECK", "homeSchedule": "-场/7天 · 最短-天", "awaySchedule": "-场/7天 · 最短-天", "shText": "70%", "ftOverText": "70%", "avgGoals": 1.0, "avgShGoals": 1.1, "avgFtGoals": 2.1, "momentum": 0.7, "momentumText": "70%", "homeHtScored": "40%", "homeHtConceded": "80%", "awayHtScored": "20%", "awayHtConceded": "40%", "homeAttackVsAwayDefense": "40%", "awayAttackVsHomeDefense": "47%", "htAttackVsDefense": "47%", "bothSidesHtThreat": "44%", "secondMomentumText": "100%", "homeRecent": "80%", "awayRecent": "60%", "homeRecentSh": "100%", "awayRecentSh": "100%", "bins": {"0-10": "0%", "11-15": "0%", "0-15": "0%", "11-30": "0%", "11-45": "0%", "16-30": "0%", "16-45": "0%", "31-45": "0%"}, "lateFhPressure": "0%", "pullbackFit": "WEAK", "earlyOnlyFlag": false, "binsSecond": {"46-60": "0%", "61-75": "0%", "76-90": "0%"}, "hotspot": "0_10", "line": "1.5", "lineFloat": 1.5, "overOdds": 2.07, "displayLine": "1.5", "displayOdds": "2.07", "displayLineSource": "赛前参考", "storyLabel": "中段发力型", "pressureText": "⚠️ 低 (前场威胁 44%)", "modelXg": 1.0, "lineNum": 1.5, "oddsNum": 2.07, "impliedPct": 48.3, "evPct": -45.3, "fairOdds": 3.78, "winProb": 26.4, "evConclusion": "❌ 赛前负期望 (-45.3%)，庄家明显高估开局火力。", "actionPlan1": "👉 HT处理: 本场不进入上半场推荐。", "actionPlan2": "👉 原因: 上半场基因不足或条件不达标。", "actionPlan3": "👉 后续: 仅保留信息，不设上半场触发。", "strategyState": "回避", "strategyStateClass": "plan-red", "strategyStateListClass": "list-state-red", "strategyStateText": "🔴 回避: 赛前负EV明显，优先等待更优走地线。", "p0_15": "0%", "p16_30": "0%", "p31_45": "0%", "linesText": "大1.0@1.38 | 大1.25@1.72 | 大1.5@2.07 | 大1.75@2.49 | 大2.0@3.42", "injuryText": "无核心伤停", "lineupText": "未检查", "lineupAction": "NOT_CHECKED"}, {"fixture_id": 1538493, "home": "锡永", "away": "卢加诺", "homeEn": "FC Sion", "awayEn": "FC Lugano", "league": "瑞士超", "time": "22:30", "timeLabel": "05-14 22:30", "kickoffSort": 1778769000, "hotness": 69.5, "tier": "B", "tierHead": "HT跳过 | 条件不足", "is_watch": false, "executionStatus": "上半场跳过", "tradeAction": "HT_SKIP：上半场基因不足", "actionCode": "HT_SKIP", "riskLevel": "HIGH", "evLabel": "推荐中", "executionLabel": "仅情报", "decisionSummary": "画像：HT基因不足。结论：不进入上半场推荐", "matchProfile": "画像：HT基因不足", "intelligence": {"match_type": ["SH_SURGE", "FT_OPEN_GAME", "DATA_TOO_WEAK"], "primary_direction": "HT", "trade_action": "HT_SKIP：上半场基因不足", "confidence": 70, "profile": "画像：HT基因不足", "summary": "结论：不进入上半场推荐", "why": ["下半场信号更强：SH 67.0 vs HT 40.4", "全场大球分 69.5 是主要开放信号", "API覆盖为 BASIC / WATCH_ONLY"], "wait_for": [], "avoid_if": ["红牌", "重大伤退", "盘口水位异常"], "execution_status": "上半场跳过", "is_live_radar": false, "action_code": "HT_SKIP", "risk_level": "HIGH", "ev_label": "推荐中", "execution_label": "仅情报", "recommendation_bucket": "HT_SKIP", "ht_decision": {"action": "HT_SKIP", "bucket": "HT_SKIP", "is_main_recommendation": false, "reason": "上半场基因不足"}, "ht_recommendation": {"grade": "SKIP", "status": "HT_SKIP", "bucket": "HT_SKIP", "reason": "上半场基因不足", "reasons": ["11-45分钟压力弱", "回调适配弱"], "risks": ["方向冲突：系统总分最强为下半场，但HT数据已达推荐级，人工决策时注意区分", "pullback_fit=WEAK"], "script_type": "中段发力型", "ht_score": 40.4, "h2h_ht_goal_rate": 0.7, "ht_avg_goals": 1.1, "time_bins": {"0_15": 0.0, "16_30": 0.0, "31_45": 0.0}, "sample_size": 10}, "sh_observation": {"action": "SH_OBSERVE_ONLY", "bucket": "SH_OBSERVE", "is_main_recommendation": false, "reason": "下半场倾向更强，但不计入HT主推荐", "trade_action": "下半场观察：不属于V4_HT主推荐"}, "display_bucket": "HT_SKIP", "is_ht_main_recommendation": false, "ht_reason": "上半场基因不足"}, "matchTypes": "SH_SURGE / FT_OPEN_GAME / DATA_TOO_WEAK", "primaryDirection": "HT", "confidence": 70, "whyText": "下半场信号更强：SH 67.0 vs HT 40.4；全场大球分 69.5 是主要开放信号；API覆盖为 BASIC / WATCH_ONLY", "whyTop": ["下半场信号更强：SH 67.0 vs HT 40.4", "全场大球分 69.5 是主要开放信号", "API覆盖为 BASIC / WATCH_ONLY"], "waitForText": "", "avoidIfText": "红牌；重大伤退；盘口水位异常", "riskTop": ["红牌", "重大伤退"], "liveAction": "-", "liveReason": "-", "liveScore": "-", "liveMinute": "-", "entryLine": "-", "entryOdds": "-", "marketFocus": "SECOND_HALF_OVER", "marketLabel": "下半场大球参考", "recommendationBucket": "HT_SKIP", "isHtMain": true, "isHtRecommendation": false, "isHtObserve": false, "isHtSkip": true, "isShObserve": true, "htDecisionAction": "HT_SKIP", "htDecisionReason": "上半场基因不足", "htRecGrade": "SKIP", "htRecStatus": "HT_SKIP", "htRecReason": "上半场基因不足", "htRecScriptType": "中段发力型", "htRecReasons": "11-45分钟压力弱；回调适配弱", "htRecRisks": "方向冲突：系统总分最强为下半场，但HT数据已达推荐级，人工决策时注意区分；pullback_fit=WEAK", "htRecSampleSize": 10, "bestFocusByScore": "FULLTIME_OVER", "htScore": 40.4, "shScore": 67.0, "ftScore": 69.5, "phaseBias": "BALANCED", "h2h": 0.7, "h2hText": "70%", "h2hCountText": "7/10", "htStrictPass": false, "htGateModel": "RECENT_FIRST_H2H_REFERENCE", "recentTimingFit": "WEAK", "dataCoverageLevel": "BASIC", "dataGateAction": "WATCH_ONLY", "leagueHtEnv": "-", "leagueShEnv": "-", "leagueHtRate": "-", "leagueShRate": "-", "leagueFtRate": "-", "leagueSample": 0, "leagueAdjustment": "KEEP", "seasonPhase": "-", "seasonProgress": "-", "seasonCompleted": 0, "seasonTotal": 0, "remainingRounds": "-", "phaseAdjustment": "KEEP", "motivationGate": "KEEP", "motivationReason": "FAST_MODE_PRECHECK", "motivationScore": "-", "homeRank": "-", "awayRank": "-", "homeMotTags": "-", "awayMotTags": "-", "scheduleAction": "KEEP", "scheduleLevel": "-", "scheduleReason": "FAST_MODE_PRECHECK", "homeSchedule": "-场/7天 · 最短-天", "awaySchedule": "-场/7天 · 最短-天", "shText": "80%", "ftOverText": "80%", "avgGoals": 1.1, "avgShGoals": 1.2, "avgFtGoals": 2.3, "momentum": 0.4, "momentumText": "40%", "homeHtScored": "80%", "homeHtConceded": "0%", "awayHtScored": "0%", "awayHtConceded": "0%", "homeAttackVsAwayDefense": "44%", "awayAttackVsHomeDefense": "0%", "htAttackVsDefense": "44%", "bothSidesHtThreat": "22%", "secondMomentumText": "90%", "homeRecent": "80%", "awayRecent": "0%", "homeRecentSh": "80%", "awayRecentSh": "100%", "bins": {"0-10": "0%", "11-15": "0%", "0-15": "0%", "11-30": "0%", "11-45": "0%", "16-30": "0%", "16-45": "0%", "31-45": "0%"}, "lateFhPressure": "0%", "pullbackFit": "WEAK", "earlyOnlyFlag": false, "binsSecond": {"46-60": "0%", "61-75": "0%", "76-90": "0%"}, "hotspot": "0_10", "line": "1.25", "lineFloat": 1.25, "overOdds": 2.13, "displayLine": "1.25", "displayOdds": "2.13", "displayLineSource": "赛前参考", "storyLabel": "中段发力型", "pressureText": "⚠️ 低 (前场威胁 22%)", "modelXg": 1.1, "lineNum": 1.25, "oddsNum": 2.13, "impliedPct": 46.9, "evPct": -17.6, "fairOdds": 2.71, "winProb": 30.1, "evConclusion": "❌ 赛前负期望 (-17.6%)，庄家明显高估开局火力。", "actionPlan1": "👉 HT处理: 本场不进入上半场推荐。", "actionPlan2": "👉 原因: 上半场基因不足或条件不达标。", "actionPlan3": "👉 后续: 仅保留信息，不设上半场触发。", "strategyState": "回避", "strategyStateClass": "plan-red", "strategyStateListClass": "list-state-red", "strategyStateText": "🔴 回避: 赛前负EV明显，优先等待更优走地线。", "p0_15": "0%", "p16_30": "0%", "p31_45": "0%", "linesText": "大0.75@1.42 | 大1.0@1.66 | 大1.25@2.13 | 大1.5@2.57 | 大1.75@3.27", "injuryText": "无核心伤停", "lineupText": "未检查", "lineupAction": "NOT_CHECKED"}, {"fixture_id": 1538494, "home": "图恩", "away": "伯尔尼年轻人", "homeEn": "FC Thun", "awayEn": "BSC Young Boys", "league": "瑞士超", "time": "22:30", "timeLabel": "05-14 22:30", "kickoffSort": 1778769000, "hotness": 85.0, "tier": "A", "tierHead": "HT跳过 | 条件不足", "is_watch": false, "executionStatus": "上半场跳过", "tradeAction": "HT_SKIP：上半场基因不足", "actionCode": "HT_SKIP", "riskLevel": "HIGH", "evLabel": "推荐中", "executionLabel": "仅情报", "decisionSummary": "画像：HT基因不足。结论：不进入上半场推荐", "matchProfile": "画像：HT基因不足", "intelligence": {"match_type": ["SH_SURGE", "FT_OPEN_GAME", "DATA_TOO_WEAK"], "primary_direction": "HT", "trade_action": "HT_SKIP：上半场基因不足", "confidence": 66, "profile": "画像：HT基因不足", "summary": "结论：不进入上半场推荐", "why": ["下半场信号更强：SH 72.0 vs HT 31.1", "全场大球分 85.0 是主要开放信号", "API覆盖为 BASIC / WATCH_ONLY"], "wait_for": [], "avoid_if": ["红牌", "重大伤退", "盘口水位异常"], "execution_status": "上半场跳过", "is_live_radar": false, "action_code": "HT_SKIP", "risk_level": "HIGH", "ev_label": "推荐中", "execution_label": "仅情报", "recommendation_bucket": "HT_SKIP", "ht_decision": {"action": "HT_SKIP", "bucket": "HT_SKIP", "is_main_recommendation": false, "reason": "上半场基因不足"}, "ht_recommendation": {"grade": "SKIP", "status": "HT_SKIP", "bucket": "HT_SKIP", "reason": "上半场基因不足", "reasons": ["11-45分钟压力弱", "回调适配弱"], "risks": ["方向冲突：系统总分最强为下半场，但HT数据已达推荐级，人工决策时注意区分", "pullback_fit=WEAK"], "script_type": "中段发力型", "ht_score": 31.1, "h2h_ht_goal_rate": 0.5, "ht_avg_goals": 0.8, "time_bins": {"0_15": 0.0, "16_30": 0.0, "31_45": 0.0}, "sample_size": 10}, "sh_observation": {"action": "SH_OBSERVE_ONLY", "bucket": "SH_OBSERVE", "is_main_recommendation": false, "reason": "下半场倾向更强，但不计入HT主推荐", "trade_action": "下半场观察：不属于V4_HT主推荐"}, "display_bucket": "HT_SKIP", "is_ht_main_recommendation": false, "ht_reason": "上半场基因不足"}, "matchTypes": "SH_SURGE / FT_OPEN_GAME / DATA_TOO_WEAK", "primaryDirection": "HT", "confidence": 66, "whyText": "下半场信号更强：SH 72.0 vs HT 31.1；全场大球分 85.0 是主要开放信号；API覆盖为 BASIC / WATCH_ONLY", "whyTop": ["下半场信号更强：SH 72.0 vs HT 31.1", "全场大球分 85.0 是主要开放信号", "API覆盖为 BASIC / WATCH_ONLY"], "waitForText": "", "avoidIfText": "红牌；重大伤退；盘口水位异常", "riskTop": ["红牌", "重大伤退"], "liveAction": "-", "liveReason": "-", "liveScore": "-", "liveMinute": "-", "entryLine": "-", "entryOdds": "-", "marketFocus": "SECOND_HALF_OVER", "marketLabel": "下半场大球参考", "recommendationBucket": "HT_SKIP", "isHtMain": true, "isHtRecommendation": false, "isHtObserve": false, "isHtSkip": true, "isShObserve": true, "htDecisionAction": "HT_SKIP", "htDecisionReason": "上半场基因不足", "htRecGrade": "SKIP", "htRecStatus": "HT_SKIP", "htRecReason": "上半场基因不足", "htRecScriptType": "中段发力型", "htRecReasons": "11-45分钟压力弱；回调适配弱", "htRecRisks": "方向冲突：系统总分最强为下半场，但HT数据已达推荐级，人工决策时注意区分；pullback_fit=WEAK", "htRecSampleSize": 10, "bestFocusByScore": "FULLTIME_OVER", "htScore": 31.1, "shScore": 72.0, "ftScore": 85.0, "phaseBias": "SECOND_HALF_BIAS", "h2h": 0.5, "h2hText": "50%", "h2hCountText": "5/10", "htStrictPass": false, "htGateModel": "RECENT_FIRST_H2H_REFERENCE", "recentTimingFit": "WEAK", "dataCoverageLevel": "BASIC", "dataGateAction": "WATCH_ONLY", "leagueHtEnv": "-", "leagueShEnv": "-", "leagueHtRate": "-", "leagueShRate": "-", "leagueFtRate": "-", "leagueSample": 0, "leagueAdjustment": "KEEP", "seasonPhase": "-", "seasonProgress": "-", "seasonCompleted": 0, "seasonTotal": 0, "remainingRounds": "-", "phaseAdjustment": "KEEP", "motivationGate": "KEEP", "motivationReason": "FAST_MODE_PRECHECK", "motivationScore": "-", "homeRank": "-", "awayRank": "-", "homeMotTags": "-", "awayMotTags": "-", "scheduleAction": "KEEP", "scheduleLevel": "-", "scheduleReason": "FAST_MODE_PRECHECK", "homeSchedule": "-场/7天 · 最短-天", "awaySchedule": "-场/7天 · 最短-天", "shText": "90%", "ftOverText": "90%", "avgGoals": 0.8, "avgShGoals": 3.0, "avgFtGoals": 3.8, "momentum": 0.4, "momentumText": "40%", "homeHtScored": "40%", "homeHtConceded": "40%", "awayHtScored": "20%", "awayHtConceded": "20%", "homeAttackVsAwayDefense": "31%", "awayAttackVsHomeDefense": "29%", "htAttackVsDefense": "31%", "bothSidesHtThreat": "30%", "secondMomentumText": "90%", "homeRecent": "60%", "awayRecent": "20%", "homeRecentSh": "80%", "awayRecentSh": "100%", "bins": {"0-10": "0%", "11-15": "0%", "0-15": "0%", "11-30": "0%", "11-45": "0%", "16-30": "0%", "16-45": "0%", "31-45": "0%"}, "lateFhPressure": "0%", "pullbackFit": "WEAK", "earlyOnlyFlag": false, "binsSecond": {"46-60": "0%", "61-75": "0%", "76-90": "0%"}, "hotspot": "0_10", "line": "1.5", "lineFloat": 1.5, "overOdds": 2.02, "displayLine": "1.5", "displayOdds": "2.02", "displayLineSource": "赛前参考", "storyLabel": "中段发力型", "pressureText": "⚠️ 低 (前场威胁 30%)", "modelXg": 0.8, "lineNum": 1.5, "oddsNum": 2.02, "impliedPct": 49.5, "evPct": -61.4, "fairOdds": 5.23, "winProb": 19.1, "evConclusion": "❌ 赛前负期望 (-61.4%)，庄家明显高估开局火力。", "actionPlan1": "👉 HT处理: 本场不进入上半场推荐。", "actionPlan2": "👉 原因: 上半场基因不足或条件不达标。", "actionPlan3": "👉 后续: 仅保留信息，不设上半场触发。", "strategyState": "回避", "strategyStateClass": "plan-red", "strategyStateListClass": "list-state-red", "strategyStateText": "🔴 回避: 赛前负EV明显，优先等待更优走地线。", "p0_15": "0%", "p16_30": "0%", "p31_45": "0%", "linesText": "大1.0@1.36 | 大1.25@1.68 | 大1.5@2.02 | 大1.75@2.41 | 大2.0@3.27", "injuryText": "无核心伤停", "lineupText": "未检查", "lineupAction": "NOT_CHECKED"}, {"fixture_id": 1391177, "home": "瓦伦西亚", "away": "巴列卡诺", "homeEn": "Valencia", "awayEn": "Rayo Vallecano", "league": "西甲", "time": "01:00", "timeLabel": "05-15 01:00", "kickoffSort": 1778778000, "hotness": 62.0, "tier": "B", "tierHead": "HT跳过 | 条件不足", "is_watch": false, "executionStatus": "上半场跳过", "tradeAction": "HT_SKIP：上半场基因不足", "actionCode": "HT_SKIP", "riskLevel": "HIGH", "evLabel": "情报推荐", "executionLabel": "仅情报", "decisionSummary": "画像：HT基因不足。结论：不进入上半场推荐", "matchProfile": "画像：HT基因不足", "intelligence": {"match_type": ["SH_SURGE", "DATA_TOO_WEAK"], "primary_direction": "HT", "trade_action": "HT_SKIP：上半场基因不足", "confidence": 58, "profile": "画像：HT基因不足", "summary": "结论：不进入上半场推荐", "why": ["下半场信号更强：SH 62.0 vs HT 33.3", "API覆盖为 BASIC / WATCH_ONLY"], "wait_for": [], "avoid_if": ["红牌", "重大伤退", "盘口水位异常"], "execution_status": "上半场跳过", "is_live_radar": false, "action_code": "HT_SKIP", "risk_level": "HIGH", "ev_label": "情报推荐", "execution_label": "仅情报", "recommendation_bucket": "HT_SKIP", "ht_decision": {"action": "HT_SKIP", "bucket": "HT_SKIP", "is_main_recommendation": false, "reason": "上半场基因不足"}, "ht_recommendation": {"grade": "SKIP", "status": "HT_SKIP", "bucket": "HT_SKIP", "reason": "上半场基因不足", "reasons": ["11-45分钟压力弱", "回调适配弱"], "risks": ["方向冲突：系统总分最强为下半场，但HT数据已达推荐级，人工决策时注意区分", "pullback_fit=WEAK"], "script_type": "中段发力型", "ht_score": 33.3, "h2h_ht_goal_rate": 0.6, "ht_avg_goals": 0.6, "time_bins": {"0_15": 0.0, "16_30": 0.0, "31_45": 0.0}, "sample_size": 10}, "sh_observation": {"action": "SH_OBSERVE_ONLY", "bucket": "SH_OBSERVE", "is_main_recommendation": false, "reason": "下半场倾向更强，但不计入HT主推荐", "trade_action": "下半场观察：不属于V4_HT主推荐"}, "display_bucket": "HT_SKIP", "is_ht_main_recommendation": false, "ht_reason": "上半场基因不足"}, "matchTypes": "SH_SURGE / DATA_TOO_WEAK", "primaryDirection": "HT", "confidence": 58, "whyText": "下半场信号更强：SH 62.0 vs HT 33.3；API覆盖为 BASIC / WATCH_ONLY", "whyTop": ["下半场信号更强：SH 62.0 vs HT 33.3", "API覆盖为 BASIC / WATCH_ONLY"], "waitForText": "", "avoidIfText": "红牌；重大伤退；盘口水位异常", "riskTop": ["红牌", "重大伤退"], "liveAction": "-", "liveReason": "-", "liveScore": "-", "liveMinute": "-", "entryLine": "-", "entryOdds": "-", "marketFocus": "SECOND_HALF_OVER", "marketLabel": "下半场大球参考", "recommendationBucket": "HT_SKIP", "isHtMain": true, "isHtRecommendation": false, "isHtObserve": false, "isHtSkip": true, "isShObserve": true, "htDecisionAction": "HT_SKIP", "htDecisionReason": "上半场基因不足", "htRecGrade": "SKIP", "htRecStatus": "HT_SKIP", "htRecReason": "上半场基因不足", "htRecScriptType": "中段发力型", "htRecReasons": "11-45分钟压力弱；回调适配弱", "htRecRisks": "方向冲突：系统总分最强为下半场，但HT数据已达推荐级，人工决策时注意区分；pullback_fit=WEAK", "htRecSampleSize": 10, "bestFocusByScore": "SECOND_HALF_OVER", "htScore": 33.3, "shScore": 62.0, "ftScore": 55.5, "phaseBias": "BALANCED", "h2h": 0.6, "h2hText": "60%", "h2hCountText": "6/10", "htStrictPass": false, "htGateModel": "RECENT_FIRST_H2H_REFERENCE", "recentTimingFit": "WEAK", "dataCoverageLevel": "BASIC", "dataGateAction": "WATCH_ONLY", "leagueHtEnv": "-", "leagueShEnv": "-", "leagueHtRate": "-", "leagueShRate": "-", "leagueFtRate": "-", "leagueSample": 0, "leagueAdjustment": "KEEP", "seasonPhase": "-", "seasonProgress": "-", "seasonCompleted": 0, "seasonTotal": 0, "remainingRounds": "-", "phaseAdjustment": "KEEP", "motivationGate": "KEEP", "motivationReason": "FAST_MODE_PRECHECK", "motivationScore": "-", "homeRank": "-", "awayRank": "-", "homeMotTags": "-", "awayMotTags": "-", "scheduleAction": "KEEP", "scheduleLevel": "-", "scheduleReason": "FAST_MODE_PRECHECK", "homeSchedule": "-场/7天 · 最短-天", "awaySchedule": "-场/7天 · 最短-天", "shText": "70%", "ftOverText": "60%", "avgGoals": 0.6, "avgShGoals": 0.9, "avgFtGoals": 1.5, "momentum": 0.3, "momentumText": "30%", "homeHtScored": "0%", "homeHtConceded": "0%", "awayHtScored": "60%", "awayHtConceded": "20%", "homeAttackVsAwayDefense": "9%", "awayAttackVsHomeDefense": "33%", "htAttackVsDefense": "33%", "bothSidesHtThreat": "21%", "secondMomentumText": "90%", "homeRecent": "0%", "awayRecent": "60%", "homeRecentSh": "100%", "awayRecentSh": "80%", "bins": {"0-10": "0%", "11-15": "0%", "0-15": "0%", "11-30": "0%", "11-45": "0%", "16-30": "0%", "16-45": "0%", "31-45": "0%"}, "lateFhPressure": "0%", "pullbackFit": "WEAK", "earlyOnlyFlag": false, "binsSecond": {"46-60": "0%", "61-75": "0%", "76-90": "0%"}, "hotspot": "0_10", "line": "1.0", "lineFloat": 1.0, "overOdds": 1.85, "displayLine": "1.0", "displayOdds": "1.85", "displayLineSource": "赛前参考", "storyLabel": "中段发力型", "pressureText": "⚠️ 低 (前场威胁 21%)", "modelXg": 0.6, "lineNum": 1.0, "oddsNum": 1.85, "impliedPct": 54.1, "evPct": -44.5, "fairOdds": 5.5, "winProb": 12.2, "evConclusion": "❌ 赛前负期望 (-44.5%)，庄家明显高估开局火力。", "actionPlan1": "👉 HT处理: 本场不进入上半场推荐。", "actionPlan2": "👉 原因: 上半场基因不足或条件不达标。", "actionPlan3": "👉 后续: 仅保留信息，不设上半场触发。", "strategyState": "回避", "strategyStateClass": "plan-red", "strategyStateListClass": "list-state-red", "strategyStateText": "🔴 回避: 赛前负EV明显，优先等待更优走地线。", "p0_15": "0%", "p16_30": "0%", "p31_45": "0%", "linesText": "大0.5@1.38 | 大0.75@1.52 | 大1.0@1.85 | 大1.25@2.36 | 大1.5@2.87", "injuryText": "无核心伤停", "lineupText": "未检查", "lineupAction": "NOT_CHECKED"}, {"fixture_id": 1541002, "home": "Lokomotiv Sofia", "away": "Beroe", "homeEn": "Lokomotiv Sofia", "awayEn": "Beroe", "league": "保甲", "time": "01:15", "timeLabel": "05-15 01:15", "kickoffSort": 1778778900, "hotness": 64.0, "tier": "B", "tierHead": "HT跳过 | 条件不足", "is_watch": false, "executionStatus": "上半场跳过", "tradeAction": "HT_SKIP：上半场基因不足", "actionCode": "HT_SKIP", "riskLevel": "HIGH", "evLabel": "情报推荐", "executionLabel": "仅情报", "decisionSummary": "画像：HT基因不足。结论：不进入上半场推荐", "matchProfile": "画像：HT基因不足", "intelligence": {"match_type": ["SH_SURGE", "FT_OPEN_GAME", "DATA_TOO_WEAK"], "primary_direction": "HT", "trade_action": "HT_SKIP：上半场基因不足", "confidence": 58, "profile": "画像：HT基因不足", "summary": "结论：不进入上半场推荐", "why": ["下半场信号更强：SH 62.0 vs HT 41.1", "全场大球分 64.0 是主要开放信号", "API覆盖为 BASIC / WATCH_ONLY"], "wait_for": [], "avoid_if": ["红牌", "重大伤退", "盘口水位异常"], "execution_status": "上半场跳过", "is_live_radar": false, "action_code": "HT_SKIP", "risk_level": "HIGH", "ev_label": "情报推荐", "execution_label": "仅情报", "recommendation_bucket": "HT_SKIP", "ht_decision": {"action": "HT_SKIP", "bucket": "HT_SKIP", "is_main_recommendation": false, "reason": "上半场基因不足"}, "ht_recommendation": {"grade": "SKIP", "status": "HT_SKIP", "bucket": "HT_SKIP", "reason": "上半场基因不足", "reasons": ["11-45分钟压力弱", "回调适配弱"], "risks": ["方向冲突：系统总分最强为下半场，但HT数据已达推荐级，人工决策时注意区分", "pullback_fit=WEAK"], "script_type": "中段发力型", "ht_score": 41.1, "h2h_ht_goal_rate": 0.5, "ht_avg_goals": 0.6, "time_bins": {"0_15": 0.0, "16_30": 0.0, "31_45": 0.0}, "sample_size": 10}, "sh_observation": {"action": "SH_OBSERVE_ONLY", "bucket": "SH_OBSERVE", "is_main_recommendation": false, "reason": "下半场倾向更强，但不计入HT主推荐", "trade_action": "下半场观察：不属于V4_HT主推荐"}, "display_bucket": "HT_SKIP", "is_ht_main_recommendation": false, "ht_reason": "上半场基因不足"}, "matchTypes": "SH_SURGE / FT_OPEN_GAME / DATA_TOO_WEAK", "primaryDirection": "HT", "confidence": 58, "whyText": "下半场信号更强：SH 62.0 vs HT 41.1；全场大球分 64.0 是主要开放信号；API覆盖为 BASIC / WATCH_ONLY", "whyTop": ["下半场信号更强：SH 62.0 vs HT 41.1", "全场大球分 64.0 是主要开放信号", "API覆盖为 BASIC / WATCH_ONLY"], "waitForText": "", "avoidIfText": "红牌；重大伤退；盘口水位异常", "riskTop": ["红牌", "重大伤退"], "liveAction": "-", "liveReason": "-", "liveScore": "-", "liveMinute": "-", "entryLine": "-", "entryOdds": "-", "marketFocus": "SECOND_HALF_OVER", "marketLabel": "下半场大球参考", "recommendationBucket": "HT_SKIP", "isHtMain": true, "isHtRecommendation": false, "isHtObserve": false, "isHtSkip": true, "isShObserve": true, "htDecisionAction": "HT_SKIP", "htDecisionReason": "上半场基因不足", "htRecGrade": "SKIP", "htRecStatus": "HT_SKIP", "htRecReason": "上半场基因不足", "htRecScriptType": "中段发力型", "htRecReasons": "11-45分钟压力弱；回调适配弱", "htRecRisks": "方向冲突：系统总分最强为下半场，但HT数据已达推荐级，人工决策时注意区分；pullback_fit=WEAK", "htRecSampleSize": 10, "bestFocusByScore": "FULLTIME_OVER", "htScore": 41.1, "shScore": 62.0, "ftScore": 64.0, "phaseBias": "SECOND_HALF_BIAS", "h2h": 0.5, "h2hText": "50%", "h2hCountText": "5/10", "htStrictPass": false, "htGateModel": "RECENT_FIRST_H2H_REFERENCE", "recentTimingFit": "WEAK", "dataCoverageLevel": "BASIC", "dataGateAction": "WATCH_ONLY", "leagueHtEnv": "-", "leagueShEnv": "-", "leagueHtRate": "-", "leagueShRate": "-", "leagueFtRate": "-", "leagueSample": 0, "leagueAdjustment": "KEEP", "seasonPhase": "-", "seasonProgress": "-", "seasonCompleted": 0, "seasonTotal": 0, "remainingRounds": "-", "phaseAdjustment": "KEEP", "motivationGate": "KEEP", "motivationReason": "FAST_MODE_PRECHECK", "motivationScore": "-", "homeRank": "-", "awayRank": "-", "homeMotTags": "-", "awayMotTags": "-", "scheduleAction": "KEEP", "scheduleLevel": "-", "scheduleReason": "FAST_MODE_PRECHECK", "homeSchedule": "-场/7天 · 最短-天", "awaySchedule": "-场/7天 · 最短-天", "shText": "70%", "ftOverText": "60%", "avgGoals": 0.6, "avgShGoals": 1.4, "avgFtGoals": 2.0, "momentum": 0.8, "momentumText": "80%", "homeHtScored": "60%", "homeHtConceded": "60%", "awayHtScored": "20%", "awayHtConceded": "40%", "homeAttackVsAwayDefense": "51%", "awayAttackVsHomeDefense": "38%", "htAttackVsDefense": "51%", "bothSidesHtThreat": "44%", "secondMomentumText": "90%", "homeRecent": "100%", "awayRecent": "60%", "homeRecentSh": "100%", "awayRecentSh": "80%", "bins": {"0-10": "0%", "11-15": "0%", "0-15": "0%", "11-30": "0%", "11-45": "0%", "16-30": "0%", "16-45": "0%", "31-45": "0%"}, "lateFhPressure": "0%", "pullbackFit": "WEAK", "earlyOnlyFlag": false, "binsSecond": {"46-60": "0%", "61-75": "0%", "76-90": "0%"}, "hotspot": "0_10", "line": "1.0", "lineFloat": 1.0, "overOdds": 1.83, "displayLine": "1.0", "displayOdds": "1.83", "displayLineSource": "赛前参考", "storyLabel": "中段发力型", "pressureText": "⚠️ 低 (前场威胁 44%)", "modelXg": 0.6, "lineNum": 1.0, "oddsNum": 1.83, "impliedPct": 54.6, "evPct": -44.8, "fairOdds": 5.5, "winProb": 12.2, "evConclusion": "❌ 赛前负期望 (-44.8%)，庄家明显高估开局火力。", "actionPlan1": "👉 HT处理: 本场不进入上半场推荐。", "actionPlan2": "👉 原因: 上半场基因不足或条件不达标。", "actionPlan3": "👉 后续: 仅保留信息，不设上半场触发。", "strategyState": "回避", "strategyStateClass": "plan-red", "strategyStateListClass": "list-state-red", "strategyStateText": "🔴 回避: 赛前负EV明显，优先等待更优走地线。", "p0_15": "0%", "p16_30": "0%", "p31_45": "0%", "linesText": "大0.5@1.36 | 大0.75@1.51 | 大1.0@1.83 | 大1.25@2.33 | 大1.5@2.83", "injuryText": "无核心伤停", "lineupText": "未检查", "lineupAction": "NOT_CHECKED"}, {"fixture_id": 1538380, "home": "Oriente Petrolero", "away": "Guabirá", "homeEn": "Oriente Petrolero", "awayEn": "Guabirá", "league": "玻利甲", "time": "08:00", "timeLabel": "05-15 08:00", "kickoffSort": 1778803200, "hotness": 76.5, "tier": "B", "tierHead": "HT跳过 | 条件不足", "is_watch": false, "executionStatus": "上半场跳过", "tradeAction": "HT_SKIP：上半场基因不足", "actionCode": "HT_SKIP", "riskLevel": "HIGH", "evLabel": "推荐中", "executionLabel": "仅情报", "decisionSummary": "画像：HT基因不足。结论：不进入上半场推荐", "matchProfile": "画像：HT基因不足", "intelligence": {"match_type": ["SH_SURGE", "FT_OPEN_GAME", "DATA_TOO_WEAK"], "primary_direction": "HT", "trade_action": "HT_SKIP：上半场基因不足", "confidence": 63, "profile": "画像：HT基因不足", "summary": "结论：不进入上半场推荐", "why": ["下半场信号更强：SH 72.0 vs HT 42.0", "全场大球分 76.5 是主要开放信号", "API覆盖为 BASIC / WATCH_ONLY"], "wait_for": [], "avoid_if": ["红牌", "重大伤退", "盘口水位异常"], "execution_status": "上半场跳过", "is_live_radar": false, "action_code": "HT_SKIP", "risk_level": "HIGH", "ev_label": "推荐中", "execution_label": "仅情报", "recommendation_bucket": "HT_SKIP", "ht_decision": {"action": "HT_SKIP", "bucket": "HT_SKIP", "is_main_recommendation": false, "reason": "上半场基因不足"}, "ht_recommendation": {"grade": "SKIP", "status": "HT_SKIP", "bucket": "HT_SKIP", "reason": "上半场基因不足", "reasons": ["11-45分钟压力弱", "回调适配弱"], "risks": ["方向冲突：系统总分最强为下半场，但HT数据已达推荐级，人工决策时注意区分", "pullback_fit=WEAK"], "script_type": "中段发力型", "ht_score": 42.0, "h2h_ht_goal_rate": 0.5, "ht_avg_goals": 0.7, "time_bins": {"0_15": 0.0, "16_30": 0.0, "31_45": 0.0}, "sample_size": 10}, "sh_observation": {"action": "SH_OBSERVE_ONLY", "bucket": "SH_OBSERVE", "is_main_recommendation": false, "reason": "下半场倾向更强，但不计入HT主推荐", "trade_action": "下半场观察：不属于V4_HT主推荐"}, "display_bucket": "HT_SKIP", "is_ht_main_recommendation": false, "ht_reason": "上半场基因不足"}, "matchTypes": "SH_SURGE / FT_OPEN_GAME / DATA_TOO_WEAK", "primaryDirection": "HT", "confidence": 63, "whyText": "下半场信号更强：SH 72.0 vs HT 42.0；全场大球分 76.5 是主要开放信号；API覆盖为 BASIC / WATCH_ONLY", "whyTop": ["下半场信号更强：SH 72.0 vs HT 42.0", "全场大球分 76.5 是主要开放信号", "API覆盖为 BASIC / WATCH_ONLY"], "waitForText": "", "avoidIfText": "红牌；重大伤退；盘口水位异常", "riskTop": ["红牌", "重大伤退"], "liveAction": "-", "liveReason": "-", "liveScore": "-", "liveMinute": "-", "entryLine": "-", "entryOdds": "-", "marketFocus": "SECOND_HALF_OVER", "marketLabel": "下半场大球参考", "recommendationBucket": "HT_SKIP", "isHtMain": true, "isHtRecommendation": false, "isHtObserve": false, "isHtSkip": true, "isShObserve": true, "htDecisionAction": "HT_SKIP", "htDecisionReason": "上半场基因不足", "htRecGrade": "SKIP", "htRecStatus": "HT_SKIP", "htRecReason": "上半场基因不足", "htRecScriptType": "中段发力型", "htRecReasons": "11-45分钟压力弱；回调适配弱", "htRecRisks": "方向冲突：系统总分最强为下半场，但HT数据已达推荐级，人工决策时注意区分；pullback_fit=WEAK", "htRecSampleSize": 10, "bestFocusByScore": "FULLTIME_OVER", "htScore": 42.0, "shScore": 72.0, "ftScore": 76.5, "phaseBias": "SECOND_HALF_BIAS", "h2h": 0.5, "h2hText": "50%", "h2hCountText": "5/10", "htStrictPass": false, "htGateModel": "RECENT_FIRST_H2H_REFERENCE", "recentTimingFit": "WEAK", "dataCoverageLevel": "BASIC", "dataGateAction": "WATCH_ONLY", "leagueHtEnv": "-", "leagueShEnv": "-", "leagueHtRate": "-", "leagueShRate": "-", "leagueFtRate": "-", "leagueSample": 0, "leagueAdjustment": "KEEP", "seasonPhase": "-", "seasonProgress": "-", "seasonCompleted": 0, "seasonTotal": 0, "remainingRounds": "-", "phaseAdjustment": "KEEP", "motivationGate": "KEEP", "motivationReason": "FAST_MODE_PRECHECK", "motivationScore": "-", "homeRank": "-", "awayRank": "-", "homeMotTags": "-", "awayMotTags": "-", "scheduleAction": "KEEP", "scheduleLevel": "-", "scheduleReason": "FAST_MODE_PRECHECK", "homeSchedule": "-场/7天 · 最短-天", "awaySchedule": "-场/7天 · 最短-天", "shText": "90%", "ftOverText": "70%", "avgGoals": 0.7, "avgShGoals": 2.2, "avgFtGoals": 2.9, "momentum": 0.8, "momentumText": "80%", "homeHtScored": "40%", "homeHtConceded": "60%", "awayHtScored": "60%", "awayHtConceded": "40%", "homeAttackVsAwayDefense": "40%", "awayAttackVsHomeDefense": "60%", "htAttackVsDefense": "60%", "bothSidesHtThreat": "50%", "secondMomentumText": "90%", "homeRecent": "80%", "awayRecent": "80%", "homeRecentSh": "80%", "awayRecentSh": "100%", "bins": {"0-10": "0%", "11-15": "0%", "0-15": "0%", "11-30": "0%", "11-45": "0%", "16-30": "0%", "16-45": "0%", "31-45": "0%"}, "lateFhPressure": "0%", "pullbackFit": "WEAK", "earlyOnlyFlag": false, "binsSecond": {"46-60": "0%", "61-75": "0%", "76-90": "0%"}, "hotspot": "0_10", "line": "", "lineFloat": 0.0, "overOdds": "", "displayLine": "", "displayOdds": "", "displayLineSource": "赛前参考", "storyLabel": "中段发力型", "pressureText": "🟡 中 (前场威胁 50%)", "modelXg": 0.7, "lineNum": 0.0, "oddsNum": 0.0, "impliedPct": 0.0, "evPct": 0.0, "fairOdds": 0.0, "winProb": 0.0, "evConclusion": "🟡 赔率接近合理区间 (EV 0.0%)，先观望。", "actionPlan1": "👉 HT处理: 本场不进入上半场推荐。", "actionPlan2": "👉 原因: 上半场基因不足或条件不达标。", "actionPlan3": "👉 后续: 仅保留信息，不设上半场触发。", "strategyState": "观望", "strategyStateClass": "plan-yellow", "strategyStateListClass": "list-state-yellow", "strategyStateText": "🟡 观望: 先跟踪节奏与盘口，再做条件触发。", "p0_15": "0%", "p16_30": "0%", "p31_45": "0%", "linesText": "暂无盘口", "injuryText": "无核心伤停", "lineupText": "未检查", "lineupAction": "NOT_CHECKED"}];
+    const state = { sort:'hotness', view:'cards', pool:'ht_main' };
+    const el = id => document.getElementById(id);
+    function actionOf(row) { return row.actionCode || 'SKIP'; }
+    function tierOf(row) {
+      if (row.hotness >= 85) return 'A+';
+      if (row.hotness >= 70) return 'A';
+      if (row.hotness >= 55) return 'B';
+      return 'C';
+    }
+    function actionColor(action) {
+      if (action === 'HT_A' || action === 'HT_B') return 'good';
+      if (action === 'HT_C') return 'warn';
+      if (action === 'SH_OBSERVE_ONLY') return 'watch';
+      if (action && action.startsWith('HT_SKIP')) return 'watch';
+      return '';
+    }
+
+    function clsFor(row) {
+      if (row.tier === 'S') return 'good';
+      if (row.is_watch) return 'watch';
+      return 'warn';
+    }
+    function card(row) {
+      const action = actionOf(row);
+      const t = tierOf(row);
+      return `<article class="card">
+        <div class="card-top">
+          <div>
+            <div class="match">${row.home} vs ${row.away}</div>
+            <div class="meta">${row.league} · ${row.timeLabel || row.time || '--:--'} · #${row.fixture_id} · ${row.liveMinute || '-'}' ${row.liveScore || '-'}</div>
+          </div>
+          <div class="score">${row.hotness}<small>${t}</small></div>
+        </div>
+        <div class="tags">
+          <span class="tag ${actionColor(action)}">${action}</span>
+          <span class="tag">${t}</span>
+          <span class="tag">初盘 大${row.lineNum || row.displayLine || '?'} @${row.oddsNum || row.displayOdds || '-'}</span>
+          <span class="tag">HT评分 ${row.htScore || '-'}</span>
+          <span class="tag">HT有球率 ${row.h2hText || '-'}</span>
+          <span class="tag">样本 ${row.htRecSampleSize || 0}</span>
+          <span class="tag">分布 ${row.htRecScriptType || '-'}</span>
+        </div>
+        <div class="verdict">HT推荐结论：${row.htRecGrade || '-'}级 · ${row.htRecReason || row.htDecisionReason || '-'}${(row.isShObserve && !row.isHtMain) ? ' ｜ SH观察：不计入HT主推荐' : ''}</div>
+        <div class="detail">
+          📋 <b>历史基因</b>: HT有球率 ${row.h2hText} | 场均进球 ${row.modelXg || row.avgGoals} 球<br>
+          ⏱ <b>进球剧本</b>: ${row.storyLabel || '-'} (0-15m ${row.p0_15 || '-'} | 16-30m ${row.p16_30 || '-'} | 31-45m ${row.p31_45 || '-'})<br>
+          ⚔️ <b>开局施压</b>: ${row.pressureText || '-'}
+        </div>
+        <div class="section">
+          <div class="section-title">🎯 推荐理由</div>
+          <div class="detail">${row.htRecReasons || row.whyText || '-'}
+          </div>
+        </div>
+        <div class="section">
+          <div class="section-title">💡 执行与风险</div>
+          <div class="detail">${row.actionPlan1 || '-'}<br>${row.actionPlan2 || '-'}<br>${row.actionPlan3 || '-'}<br>
+          风险: ${row.htRecRisks || (row.avoidIfText || '-').split('；').slice(0,2).join(' / ')}</div>
+        </div>
+        <div class="plan-strip ${row.strategyStateClass || 'plan-yellow'}">赛后验证：记录 HT是否有球 + 命中时间段（0-15/16-30/31-45）</div>
+        <details class="audit"><summary>查看完整数据</summary>
+          <div class="section"><div class="section-title">H2H / 近期</div>
+            <div class="detail">H2H HT率 ${row.h2hText} (${row.h2hCountText}) · 场均HT球 ${row.avgGoals} · 近期动能 ${row.momentumText}</div>
+          </div>
+          <div class="section"><div class="section-title">上半场进球时间分布</div>
+            <div class="detail">0-10: ${row.bins['0-10']} · 11-30: ${row.bins['11-30']} · 11-45: ${row.bins['11-45']} · 16-45: ${row.bins['16-45']}<br>回调适配: ${row.pullbackFit} · 近期时间适配: ${row.recentTimingFit} · 11-45压力: ${row.lateFhPressure} ${row.earlyOnlyFlag ? '· 开场闪击型' : ''}</div>
+          </div>
+          <div class="section"><div class="section-title">API数据覆盖</div>
+            <div class="detail">${row.dataCoverageLevel} · ${row.dataGateAction} · ${row.htGateModel || '-'}</div>
+          </div>
+          <div class="section"><div class="section-title">联赛基准</div>
+            <div class="detail">HT环境 ${row.leagueHtEnv} · HT ${row.leagueHtRate} · SH ${row.leagueShRate} · FT2+ ${row.leagueFtRate} · 样本 ${row.leagueSample} · 调整 ${row.leagueAdjustment}</div>
+          </div>
+          <div class="section"><div class="section-title">赛季阶段</div>
+            <div class="detail">${row.seasonPhase} · 进度 ${row.seasonProgress} · ${row.seasonCompleted}/${row.seasonTotal} · 剩余约 ${row.remainingRounds} 轮 · 调整 ${row.phaseAdjustment}</div>
+          </div>
+          <div class="section"><div class="section-title">排名战意</div>
+            <div class="detail">${row.motivationGate} · 分数 ${row.motivationScore} · ${row.motivationReason}<br>${row.home} #${row.homeRank}: ${row.homeMotTags} · ${row.away} #${row.awayRank}: ${row.awayMotTags}</div>
+          </div>
+          <div class="section"><div class="section-title">赛程压力</div>
+            <div class="detail">${row.scheduleLevel} · ${row.scheduleAction} · ${row.scheduleReason}<br>${row.home}：${row.homeSchedule} · ${row.away}：${row.awaySchedule}</div>
+          </div>
+          <div class="section"><div class="section-title">走地状态</div>
+            <div class="detail">${row.liveAction} · ${row.liveReason}<br>分钟 ${row.liveMinute} · 比分 ${row.liveScore} · 入场 大${row.entryLine} @${row.entryOdds}</div>
+          </div>
+          <div class="section"><div class="section-title">近期HT攻防动能</div>
+            <div class="detail">${row.home}：进球 ${row.homeHtScored} / 失球 ${row.homeHtConceded} · ${row.away}：进球 ${row.awayHtScored} / 失球 ${row.awayHtConceded}<br>主攻客防 ${row.homeAttackVsAwayDefense} · 客攻主防 ${row.awayAttackVsHomeDefense} · 最强组合 ${row.htAttackVsDefense}</div>
+          </div>
+          <div class="section"><div class="section-title">下半场 / 全场参考（独立观察）</div>
+            <div class="detail">SH有球: ${row.shText} · 场均SH球: ${row.avgShGoals} · FT 2+球: ${row.ftOverText}<br>46-60: ${row.binsSecond['46-60']} · 61-75: ${row.binsSecond['61-75']} · 76-90: ${row.binsSecond['76-90']}</div>
+          </div>
+          <div class="section"><div class="section-title">赛前大球盘口全量</div><div class="detail">${row.linesText}</div></div>
+          <div class="section"><div class="section-title">伤停 / 首发闸门</div><div class="detail">${row.injuryText}<br>${row.lineupText}</div></div>
+        </details>
+      </article>`;
+    }
+    function filtered() {
+      let out = rows.slice();
+      if (state.pool === 'ht_main') {
+        out = out.filter(r => !!r.isHtRecommendation);
+      } else if (state.pool === 'ht_observe') {
+        out = out.filter(r => !!r.isHtObserve);
+      } else if (state.pool === 'sh_observe') {
+        out = out.filter(r => !!r.isShObserve);
+      } else if (state.pool === 'ht_skip') {
+        out = out.filter(r => !!r.isHtSkip);
+      } else if (state.pool === 'info_only') {
+        out = out.filter(r => !r.isHtMain && !r.isShObserve);
+      }
+      out.sort((a,b) => {
+        if (state.sort === 'time') {
+          const ka = Number(a.kickoffSort || 32503680000);
+          const kb = Number(b.kickoffSort || 32503680000);
+          if (ka !== kb) return ka - kb;
+          return Number(a.fixture_id || 0) - Number(b.fixture_id || 0);
+        }
+        return Number(b.hotness) - Number(a.hotness);
+      });
+      return out;
+    }
+    function listRow(row) {
+      const action = actionOf(row);
+      return `<div class="list-row">
+        <div class="list-time">${row.timeLabel || row.time || '--:--'}</div>
+        <div>
+          <div class="list-match">${row.home} vs ${row.away}</div>
+          <div class="list-league">${row.league} · #${row.fixture_id}</div>
+        </div>
+        <div class="list-action">HT ${row.htRecGrade || '-'}级<br>HT率 ${row.h2hText || '-'} · 11-45 ${row.bins['11-45'] || '-'}<br><div class="list-state ${row.strategyStateListClass || 'list-state-yellow'}">${row.htRecReason || row.strategyState || '观察'}</div></div>
+        <div class="list-score">${row.hotness}</div>
+      </div>`;
+    }
+    function switchDate(date) {
+      if (date && date !== '20260514') {
+        window.location = 'v4_dashboard_' + date + '_ops.html';
+      }
+    }
+    function render() {
+      const htCount = rows.filter(r => !!r.isHtRecommendation).length;
+      const htA = rows.filter(r => (r.htRecGrade || '') === 'A').length;
+      const htB = rows.filter(r => (r.htRecGrade || '') === 'B').length;
+      const htC = rows.filter(r => !!r.isHtObserve).length;
+      const shCount = rows.filter(r => !!r.isShObserve).length;
+      const htSkip = rows.filter(r => !!r.isHtSkip).length;
+      const infoCount = rows.length - htCount - htC - htSkip - shCount;
+      el('cntHT').textContent = String(htCount);
+      el('cntHTA').textContent = String(htA);
+      el('cntHTB').textContent = String(htB);
+      el('cntHTC').textContent = String(htC);
+      el('cntHTSkip').textContent = String(htSkip);
+      el('cntSH').textContent = String(shCount);
+      el('cntINFO').textContent = String(Math.max(infoCount, 0));
+      const out = filtered();
+      el('visibleCount').textContent = out.length;
+      if (out.length === 0) {
+        if (state.pool === 'ht_main') {
+          el('empty').textContent = '今日暂无 A/B 级上半场推荐（可切换到C级观察或SH观察池）';
+        } else if (state.pool === 'sh_observe') {
+          el('empty').textContent = '今日暂无下半场观察样本';
+        } else if (state.pool === 'ht_observe') {
+          el('empty').textContent = '今日暂无 C 级上半场观察样本';
+        } else if (state.pool === 'ht_skip') {
+          el('empty').textContent = '今日暂无 HT 跳过诊断样本';
+        } else if (state.pool === 'info_only') {
+          el('empty').textContent = '今日暂无其他情报';
+        } else {
+          el('empty').textContent = '没有符合过滤条件的比赛';
+        }
+      }
+      el('empty').classList.toggle('hidden', out.length > 0);
+      el('cards').classList.toggle('hidden', state.view !== 'cards');
+      el('list').classList.toggle('hidden', state.view !== 'list');
+      el('cards').innerHTML = out.map(card).join('');
+      el('list').innerHTML = out.map(listRow).join('');
+    }
+    ['pool','sort','view'].forEach(id => {
+      el(id).addEventListener('input', e => { state[id] = e.target.value; render(); });
+    });
+    render();
+  </script>
+</body>
+</html>

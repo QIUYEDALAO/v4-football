@@ -32,9 +32,10 @@ RECENT_ATTACK_DEFENSE_MIN = 0.65
 RECENT_TIMING_PRESSURE_MIN = 0.50
 H2H_BAD_FLOOR_MIN = 0.50
 HT_LIVE_SCORE_MIN = 0.50
-# 性能开关：recent画像默认不再逐场拉 fixtures/events（保留 recent=5 样本深度）
-# 进球时间分布仍由 H2H 主样本提供，避免 full 扫描在 valid 场次上超时。
-RECENT_PROFILE_INCLUDE_EVENTS = False
+# 性能开关：recent画像的进球时间分布对 pullback_fit / 11-45压力判断至关重要。
+# 关闭会导致 time_bins 全 0，HT候选全部被 recent_timing_pass 卡死。
+# 每场多 ~10 次 API 调用（recent=5×2队），换取准确的时间分布诊断。
+RECENT_PROFILE_INCLUDE_EVENTS = True
 
 
 def _clamp_score(value: float) -> float:
@@ -444,13 +445,13 @@ def evaluate_h2h_edge(home_id: int, away_id: int, api_client, mode: str = "full"
         api_client,
         home_id,
         last_n=recent_last_n,
-        include_events=(not fast_mode and RECENT_PROFILE_INCLUDE_EVENTS),
+        include_events=RECENT_PROFILE_INCLUDE_EVENTS,
     )
     away_recent = _query_recent_goal_profile(
         api_client,
         away_id,
         last_n=recent_last_n,
-        include_events=(not fast_mode and RECENT_PROFILE_INCLUDE_EVENTS),
+        include_events=RECENT_PROFILE_INCLUDE_EVENTS,
     )
 
     recent_form_avg = (home_recent["ht_over"] + away_recent["ht_over"]) / 2
