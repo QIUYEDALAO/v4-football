@@ -598,34 +598,30 @@ def run_once(run_tag="DEFAULT", quick_mode=False):
         base_rec["stake_info"] = stake_info
         
         # ── V2.3 开赛相对时间 gating ──
-        # T-12h/T-6h: 只记录赔率，WATCH_ONLY
-        # T-3h: 候选，不锁
-        # T-90m/T-45m: 正式推荐 V2_MAIN
+        # T-12h/FAR_FUTURE: 只记录赔率
+        # T-6h: 早盘观察（显示给用户但不锁定）
+        # T-3h/T-90m/T-45m: 正式推荐窗口
         # T-15m: 仅最终记录，不新增推荐
         if scan_stage == "STARTED_OR_CLOSED":
             all_candidates.append(base_rec)
-            continue  # 已开赛，不处理
-        if scan_stage in ("FAR_FUTURE", "T_MINUS_12H", "T_MINUS_6H"):
+            continue
+        if scan_stage in ("FAR_FUTURE", "T_MINUS_12H"):
             stats["stage_early_watch"] = stats.get("stage_early_watch", 0) + 1
             base_rec.update({"action": "WATCH_ONLY", 
                            "skip_code": "STAGE_EARLY",
                            "skip_reason": f"{scan_stage} 只记录赔率，不进入推荐"})
             all_candidates.append(base_rec)
             continue
-        elif scan_stage == "T_MINUS_3H":
-            stats["stage_candidate"] = stats.get("stage_candidate", 0) + 1
-            base_rec["action"] = "CANDIDATE"
-            base_rec["skip_code"] = "STAGE_CANDIDATE"
-            base_rec["skip_reason"] = "T-3h 候选，等待 T-90m 锁定"
-            # 不锁 already_selected
-        elif scan_stage == "T_MINUS_15M":
+        # T-6h: 早盘候选，显示但不锁定
+        # T-3h/T-90m/T-45m: 正式推荐
+        if scan_stage == "T_MINUS_15M":
             stats["stage_too_late"] = stats.get("stage_too_late", 0) + 1
             base_rec.update({"action": "WATCH_ONLY",
                            "skip_code": "STAGE_TOO_LATE",
                            "skip_reason": "T-15m 仅最终记录，不新增推荐"})
             all_candidates.append(base_rec)
             continue
-        # T-90m / T-45m → 正式推荐，走下面的锁逻辑
+        # T-6h/T-3h/T-90m/T-45m → 正式推荐，走下面的锁逻辑
         
         # ── 🌟 首次触发去重锁 (Time-Series Signal Lock) ──
         if fx["id"] in already_selected:
