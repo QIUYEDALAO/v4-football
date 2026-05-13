@@ -1,6 +1,6 @@
 {
-  "engine_name": "V3_PERCEPTION_GAP_SNIPER",
-  "version": "1.1_WC2026_PROD",
+  "engine_name": "V3_WC_BUBBLE",
+  "version": "1.2_WC2026_ENGINEERING",
   "activated": false,
   "note": "WC2026 开幕前一周将 activated 改为 true。MD1=纯纸盘校准, MD2=极小仓侦察兵, MD3=强制熔断退场。",
   "rules": {
@@ -8,7 +8,7 @@
       "description": "MD1 纯纸盘校准：测试环境偏移与市场 Price-in 程度",
       "target_stage": ["GROUP_STAGE_ROUND_1"],
       "execution": {
-        "action": "PAPER_ONLY",
+        "action": "V3_MD1_PAPER",
         "reason": "MD1_CALIBRATION_PHASE"
       }
     },
@@ -20,7 +20,7 @@
         "favorite_psch_max": 1.45
       },
       "execution": {
-        "action": "BET_OPPOSITE",
+        "action": "V3_MD2_MICRO",
         "live_mode": "MICRO_SANDBOX",
         "max_stake_pct": 0.0025,
         "daily_limit": 1,
@@ -31,7 +31,7 @@
       "description": "MD3 小组赛末轮避险：默契球与战意污染期",
       "target_stage": ["GROUP_STAGE_ROUND_3"],
       "execution": {
-        "action": "SKIP_ALL",
+        "action": "V3_BLOCK_MD3",
         "reason": "MD3_MUTUAL_DRAW_FIREWALL"
       }
     },
@@ -39,7 +39,7 @@
       "description": "淘汰赛避险：常规感知偏差失效区",
       "target_stage": ["KNOCKOUTS"],
       "execution": {
-        "action": "SKIP_ALL",
+        "action": "V3_BLOCK_KO",
         "reason": "KNOCKOUT_DYNAMICS_UNSUPPORTED"
       }
     }

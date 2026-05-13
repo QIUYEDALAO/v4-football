@@ -1,0 +1,24 @@
+{
+  "world_cup_window": {
+    "enabled": false,
+    "tournament": "WC2026",
+    "mode": "PAPER"
+  },
+  "thresholds": {
+    "medium_gap_min": 0.70,
+    "extreme_gap_min": 1.00,
+    "true_mismatch": {
+      "elo_diff_max_for_bubble": 450,
+      "favorite_odds_min": 1.25
+    }
+  },
+  "md1_gate": {
+    "min_bets": 10,
+    "min_avg_true_clv_pct": 0.0,
+    "min_data_completeness_pct": 90.0
+  },
+  "micro_sandbox": {
+    "max_stake_pct": 0.0025,
+    "daily_limit": 1
+  }
+}

@@ -10,6 +10,7 @@ Phase 4: 纸盘至实盘最高权力网关 (Live Bridge)
 """
 
 import logging
+import json
 from enum import Enum
 from pathlib import Path
 
@@ -24,6 +25,17 @@ class LiveMode(str, Enum):
 
 
 BASE_DIR = Path(__file__).resolve().parent.parent
+V3_WC_CONFIG_PATH = BASE_DIR / "config" / "v3_wc_config.yaml"
+
+
+def _load_v3_wc_config() -> dict:
+    if not V3_WC_CONFIG_PATH.exists():
+        return {}
+    try:
+        with open(V3_WC_CONFIG_PATH, encoding="utf-8") as f:
+            return json.load(f)
+    except Exception:
+        return {}
 
 
 class LiveBridgeGateway:
@@ -34,6 +46,7 @@ class LiveBridgeGateway:
 
     def __init__(self, mode: LiveMode = LiveMode.PAPER):
         self.mode = mode
+        self.v3_wc_config = _load_v3_wc_config()
 
     def can_enter_micro_sandbox(self, paper_summary: dict, router_summary: dict) -> bool:
         """
@@ -78,13 +91,25 @@ class LiveBridgeGateway:
         md1_stats = v3_paper_summary.get("MD1_stats", {})
         bets = md1_stats.get("bets", 0)
         clv = md1_stats.get("avg_true_clv_pct", 0.0)
+        completeness = md1_stats.get("data_completeness_pct", 0.0)
+        gate = (self.v3_wc_config.get("md1_gate") or {})
+        min_bets = int(gate.get("min_bets", 10))
+        min_clv = float(gate.get("min_avg_true_clv_pct", 0.0))
+        min_comp = float(gate.get("min_data_completeness_pct", 90.0))
 
-        if bets < 10:
-            logger.warning(f"[GUARD] V3_BRIDGE_BLOCKED | code=V3_N_TOO_SMALL | detail=MD1 纸盘样本 {bets} < 要求 10")
+        if bets < min_bets:
+            logger.warning(f"[GUARD] V3_BRIDGE_BLOCKED | code=V3_N_TOO_SMALL | detail=MD1 纸盘样本 {bets} < 要求 {min_bets}")
             return False
 
-        if clv < 0.0:
-            logger.warning(f"[GUARD] V3_BRIDGE_BLOCKED | code=V3_CLV_NEG | detail=MD1 纸盘 CLV {clv}% < 要求 0%")
+        if clv < min_clv:
+            logger.warning(f"[GUARD] V3_BRIDGE_BLOCKED | code=V3_CLV_NEG | detail=MD1 纸盘 CLV {clv}% < 要求 {min_clv}%")
+            return False
+
+        if completeness < min_comp:
+            logger.warning(
+                f"[GUARD] V3_BRIDGE_BLOCKED | code=V3_DATA_INCOMPLETE | "
+                f"detail=MD1 数据完整率 {completeness}% < 要求 {min_comp}%"
+            )
             return False
 
         logger.info("✅ V3 准入审查通过！授权激活 MD2 MICRO_SANDBOX 侦察兵模式。")

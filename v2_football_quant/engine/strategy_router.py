@@ -1,4 +1,8 @@
+from __future__ import annotations
+
 import logging
+
+from engine.v3_router_guard import apply_v3_router_guard, load_v3_wc_config
 
 logger = logging.getLogger(__name__)
 
@@ -17,7 +21,22 @@ class StrategyRouter:
         self.enable_active_routing = enable_active_routing
         self.summary_stats = summary_stats or {}
         self.config = config or {}
+        self.v3_wc_config = load_v3_wc_config()
         self.v2_icu_freeze = True  # 🚨 V2 ICU 冻结: 连续负 CLV → 仅采集不下单  # 🌟 接收来自 paper_trading 的统计数据
+
+    def is_wc_window_enabled(self) -> bool:
+        cfg_enabled = bool((self.v3_wc_config.get("world_cup_window") or {}).get("enabled", False))
+        runtime_enabled = self.config.get("is_world_cup_window")
+        if runtime_enabled is None:
+            return cfg_enabled
+        return bool(runtime_enabled)
+
+    def _apply_v3_guard(self, signal: dict, engine_stats: dict | None = None) -> dict:
+        cfg = dict(self.v3_wc_config or {})
+        wc_cfg = dict(cfg.get("world_cup_window") or {})
+        wc_cfg["enabled"] = self.is_wc_window_enabled()
+        cfg["world_cup_window"] = wc_cfg
+        return apply_v3_router_guard(signal, engine_stats=engine_stats or {}, cfg=cfg)
 
     def _check_iron_rule(self, pattern_key: str, required_type: str) -> bool:
         """
@@ -85,18 +104,12 @@ class StrategyRouter:
                             signal["priority"] = 0
 
                 # ── V3 认知泡沫狙击手 (大赛引擎) ──
-                elif strategy_id == "V3_PERCEPTION_GAP_SNIPER":
-                    is_world_cup_window = False  # 线上常态关闭, 大赛期间手动开启
-                    if not is_world_cup_window:
-                        signal["action"] = "SKIP_OFF_SEASON"
-                        signal["skip_reason"] = "Router 阻断: 当前非世界杯/欧洲杯窗口"
-                        signal["priority"] = 0
-                    else:
-                        requested_leverage = signal.get("leverage_boost", 1.0)
-                        if requested_leverage > 1.0:
-                            signal["leverage_boost"] = 1.0
-                            signal["router_note"] = f"[GUARD] 强制压制杠杆 {requested_leverage} -> 1.0"
-                        signal["priority"] = 99  # 国家队大肉，最高优先级
+                elif strategy_id in {"V3_PERCEPTION_GAP_SNIPER", "V3_WC_BUBBLE"}:
+                    signal = self._apply_v3_guard(signal)
+                    if signal.get("action") == "V3_MD2_MICRO":
+                        signal["priority"] = 99
+                    elif str(signal.get("action", "")).startswith("V3_"):
+                        signal["priority"] = min(orig_priority, 40)
 
             routed_signals.append(signal)
 
@@ -118,43 +131,8 @@ class StrategyRouter:
             return signal
 
         # ── 🚀 V3 世界杯核武网关 (三段式 + 动态加仓) ──
-        if strategy_id == "V3_WC_BUBBLE":
-            wc_stage = signal.get("wc_stage", "UNKNOWN")
-            gap = signal.get("gap", 0.0)
-
-            # 1. 拦截非 MD2 阶段
-            if wc_stage != "MD2":
-                signal["action"] = "OBSERVE_ONLY" if wc_stage == "MD1" else "ROUTER_BLOCKED"
-                signal["max_risk_units"] = 0.0
-                signal["skip_reason"] = f"[GUARD] 当前阶段 {wc_stage}，非开火窗口。"
-                return signal
-
-            # 2. 中度泡沫区 (0.7-1.0): 扩大纸盘雷达
-            if 0.7 <= gap < 1.0:
-                signal["action"] = "OBSERVE_ONLY"
-                signal["max_risk_units"] = 0.0
-                signal["skip_reason"] = f"[GUARD] 中度泡沫区 (Gap={gap:.2f})，开启纸盘数据收集。"
-                return signal
-
-            # 3. 极端泡沫区 (Gap >= 1.0): 进入击杀程序
-            if gap >= 1.0:
-                rolling_clv = engine_stats.get("md2_rolling_10_clv", 0.0)
-
-                if rolling_clv > 0:
-                    signal["action"] = "EXECUTE"
-                    signal["max_risk_units"] = 0.50
-                    signal["skip_reason"] = f"[GUARD] 极端泡沫锁定! CLV验证为正 (+{rolling_clv*100:.1f}%), 触发0.5%加强火力。"
-                else:
-                    signal["action"] = "EXECUTE"
-                    signal["max_risk_units"] = 0.25
-                    signal["skip_reason"] = f"[GUARD] 极端泡沫锁定。当前CLV未达标, 维持0.25%基础侦察火力。"
-                return signal
-
-            # 4. 其他不满足条件的 MD2 比赛，直接忽略
-            signal["action"] = "SKIP"
-            signal["max_risk_units"] = 0.0
-            signal["skip_reason"] = f"[GUARD] 泡沫深度不足 (Gap={gap:.2f})。"
-            return signal
+        if strategy_id in {"V3_WC_BUBBLE", "V3_PERCEPTION_GAP_SNIPER"}:
+            return self._apply_v3_guard(signal, engine_stats=engine_stats)
 
         return signal  # 非 V2/V4/V3 信号，正常放行
 
