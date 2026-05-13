@@ -1,18 +1,6 @@
 """
-V4 OpenClaw brief
-=================
-
-Daily push-style V4 HT recommendation brief.
-
-Reads:
-  data/daily_reports/scout_v4_YYYYMMDD.json
-  previous day's v4_ht_recommend_validation_YYYYMMDD.json if available
-
-Writes:
-  data/daily_reports/v4_openclaw_brief_YYYYMMDD.txt
-
-Usage:
-  python3 engine/v4_openclaw_brief.py --date 20260514
+V4 OpenClaw brief — 开门简报
+每天 V4 扫描后自动生成并推送 QQ Bot
 """
 
 from __future__ import annotations
@@ -50,11 +38,6 @@ def _load_json(path: Path, default: Any) -> Any:
             return json.load(f)
     except Exception:
         return default
-
-
-def _save_text(path: Path, text: str) -> None:
-    path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text(text, encoding="utf-8")
 
 
 def _pct(v: Any) -> str:
@@ -123,8 +106,6 @@ def _collect_rows(scout: list[dict[str, Any]]) -> list[dict[str, Any]]:
                 },
                 "reasons": ht_rec.get("reasons") or [],
                 "risks": ht_rec.get("risks") or [],
-                "risk_top": ht_rec.get("risk_top") or "",
-                "status": ht_rec.get("status") or intel.get("execution_status") or "-",
             }
         )
     rows.sort(key=lambda x: (x["time"], x["league"], x["home"]))
@@ -150,50 +131,23 @@ def _skip_reason_key(reason: str) -> str:
     return s[:24] if s else "其他"
 
 
-def _format_main_row(idx: int, r: dict[str, Any]) -> str:
+def _format_card(r: dict[str, Any]) -> str:
     tb = r["time_bins"]
     reasons = " / ".join(r["reasons"][:3]) if r["reasons"] else "-"
     risks = " / ".join(r["risks"][:1]) if r["risks"] else "-"
     return (
-        f"{idx}. {r['home']} vs {r['away']} — {r['league']} · {r['time']} | "
-        f"HT评分{r['ht_score']:.0f} | HT有球率{_pct(r['h2h_rate'])} | 场均{r['avg_goals']:.2f}球 | 样本{r['sample_size']} | "
-        f"{r['script_type']} | 0-15m {_pct(tb['0_15'])} / 16-30m {_pct(tb['16_30'])} / 31-45m {_pct(tb['31_45'])} | "
-        f"主因:{reasons} | 风险:{risks}"
+        f"{r['home']} vs {r['away']}\n"
+        f" {r['league']} · {r['time']} · #{r['fixture_id']}\n"
+        f" HT评分 {r['ht_score']:.0f} | HT有球率 {_pct(r['h2h_rate'])} | 场均HT进球 {r['avg_goals']:.2f} | 样本 {r['sample_size']}\n"
+        f" 剧本：{r['script_type']}\n"
+        f" 分布：0-15m {_pct(tb['0_15'])} | 16-30m {_pct(tb['16_30'])} | 31-45m {_pct(tb['31_45'])}\n"
+        f" 主因：{reasons}\n"
+        f" 风险：{risks}"
     )
-
-
-def _format_c_row(idx: int, r: dict[str, Any]) -> str:
-    return (
-        f"{idx}. {r['home']} vs {r['away']} — {r['league']} · {r['time']} | "
-        f"HT评分{r['ht_score']:.0f} | HT有球率{_pct(r['h2h_rate'])} | {r['script_type']}"
-    )
-
-
-def _validation_lines(key: str) -> list[str]:
-    prev = _prev_key(key)
-    path = REPORT_DIR / f"v4_ht_recommend_validation_{prev}.json"
-    val = _load_json(path, {})
-    if not val:
-        return ["📌 昨日V4验证", f"未找到昨日验证文件：{path.name}", ""]
-    per = val.get("per_grade") or {}
-    funnel = val.get("funnel") or {}
-    bucket = val.get("bucket_quality") or {}
-    lines = ["📌 昨日V4验证"]
-    for g, label in [("A", "A级"), ("B", "B级"), ("C", "C级")]:
-        m = per.get(g) or {}
-        lines.append(
-            f"{label}：{m.get('hit', 0)}/{m.get('completed', 0)} 命中，命中率 {m.get('hit_rate_pct', 0)}%"
-        )
-    lines.append(f"SKIP反杀率：{funnel.get('skip_backfire_rate_pct', 0)}%")
-    lines.append(f"时间段命中率 when_goal：{bucket.get('bucket_hit_rate_when_goal_pct', 0)}%")
-    lines.append("")
-    return lines
 
 
 def build_brief(date_str: str) -> str:
-    """输出纯文本格式，匹配用户指定的简报模板"""
     key = _date_key(date_str)
-    prev_key = _prev_key(key)
     scout_path = REPORT_DIR / f"scout_v4_{key}.json"
     scout = _load_json(scout_path, [])
     if isinstance(scout, dict):
@@ -212,89 +166,91 @@ def build_brief(date_str: str) -> str:
 
     skip_counter: Counter[str] = Counter()
     for r in skip_rows:
-        reasons = r["reasons"] or r["risks"] or [r["risk_top"] or "其他"]
+        reasons = r.get("reasons", [])
         for reason in reasons[:2]:
             skip_counter[_skip_reason_key(reason)] += 1
 
+    sep = "━" * 40
     lines: list[str] = []
     lines.append(f"⏰ V4 上半场情报扫描 — {key}")
     lines.append("")
-    lines.append("指标                         数值")
-    lines.append(f"🔥 A级强推荐                  {len(a_rows)} 场")
-    lines.append(f"🟢 B级达标推荐                {len(b_rows)} 场")
-    lines.append(f"👁️ C级观察                    {len(c_rows)} 场")
-    lines.append(f"⚪ HT_SKIP跳过                 {len(skip_rows)} 场")
-    lines.append(f"🌎 全量扫描                    {total} 场")
-    lines.append(f"📊 A+B覆盖率                   {ab_ratio}")
-    lines.append("")
+    lines.append("📊 统计概览")
+    lines.append(f"🔥 A级强推荐：{len(a_rows)}场")
+    lines.append(f"🟢 B级达标推荐：{len(b_rows)}场")
+    lines.append(f"👁️ C级观察：{len(c_rows)}场")
+    lines.append(f"⚪ HT_SKIP跳过：{len(skip_rows)}场")
+    lines.append(f"🌎 全量扫描：{total}场")
+    lines.append(f"📊 A+B覆盖率：{ab_ratio}")
+    lines.append(sep)
 
     # A级
-    lines.append("🔥 A级上半场强推荐")
     if a_rows:
         for r in a_rows:
-            tb = r["time_bins"]
-            reasons = " / ".join(r["reasons"][:3]) if r["reasons"] else "-"
-            risks = " / ".join(r["risks"][:1]) if r["risks"] else "-"
             lines.append("")
-            lines.append(f"{r['home']} vs {r['away']}")
-            lines.append(f" {r['league']} · {r['time']} · #{r['fixture_id']}")
-            lines.append(f" HT评分 {r['ht_score']:.0f} | HT有球率 {_pct(r['h2h_rate'])} | 场均HT进球 {r['avg_goals']:.2f} | 样本 {r['sample_size']}")
-            lines.append(f" 剧本：{r['script_type']}")
-            lines.append(f" 分布：0-15m {_pct(tb['0_15'])} | 16-30m {_pct(tb['16_30'])} | 31-45m {_pct(tb['31_45'])}")
-            lines.append(f" 主因：{reasons}")
-            lines.append(f" 风险：{risks}")
-            lines.append(f" 建议：今日上半场重点盯盘")
+            lines.append("🔥 A级上半场强推荐")
+            lines.append(_format_card(r))
+            lines.append(sep)
     else:
-        lines.append("(无)")
-    lines.append("")
+        lines.append("")
+        lines.append("🔥 A级上半场强推荐：(无)")
+        lines.append(sep)
 
     # B级
-    lines.append("🟢 B级上半场达标推荐")
     if b_rows:
         for r in b_rows:
-            tb = r["time_bins"]
-            reasons = " / ".join(r["reasons"][:3]) if r["reasons"] else "-"
-            risks = " / ".join(r["risks"][:1]) if r["risks"] else "-"
             lines.append("")
-            lines.append(f"{r['home']} vs {r['away']}")
-            lines.append(f" {r['league']} · {r['time']} · #{r['fixture_id']}")
-            lines.append(f" HT评分 {r['ht_score']:.0f} | HT有球率 {_pct(r['h2h_rate'])} | 场均HT进球 {r['avg_goals']:.2f} | 样本 {r['sample_size']}")
-            lines.append(f" 剧本：{r['script_type']}")
-            lines.append(f" 分布：0-15m {_pct(tb['0_15'])} | 16-30m {_pct(tb['16_30'])} | 31-45m {_pct(tb['31_45'])}")
-            lines.append(f" 主因：{reasons}")
-            lines.append(f" 风险：{risks}")
-            lines.append(f" 建议：今日上半场重点盯盘")
+            lines.append("🟢 B级上半场达标推荐")
+            lines.append(_format_card(r))
+            lines.append(sep)
     else:
-        lines.append("(无)")
-    lines.append("")
+        lines.append("")
+        lines.append("🟢 B级上半场达标推荐：(无)")
+        lines.append(sep)
 
     # C级
+    lines.append("")
     lines.append(f"👁️ C级观察池：{len(c_rows)}场")
     if c_rows:
         for r in c_rows:
-            tb = r["time_bins"]
-            lines.append("")
-            lines.append(f"{r['home']} vs {r['away']}")
-            lines.append(f" {r['league']} · {r['time']} | HT评分{r['ht_score']:.0f} | HT有球率{_pct(r['h2h_rate'])} | {r['script_type']}")
-    lines.append("")
+            lines.append(f"{r['home']} vs {r['away']} — {r['league']} {r['time']} | HT{r['ht_score']:.0f} | {_pct(r['h2h_rate'])} | {r['script_type']}")
+    else:
+        lines.append("(无)")
+    lines.append(sep)
 
     # SKIP
+    lines.append("")
     lines.append(f"⚪ 跳过统计：{len(skip_rows)}场")
     if skip_counter:
-        for reason, n in skip_counter.most_common(8):
+        for reason, n in skip_counter.most_common(6):
             lines.append(f"- {reason}：{n}场")
-    lines.append("")
+    lines.append(sep)
 
     # 昨日验证
-    lines.extend(_validation_lines(key))
+    prev = _prev_key(key)
+    val_path = REPORT_DIR / f"v4_ht_recommend_validation_{prev}.json"
+    val = _load_json(val_path, {})
+    lines.append("")
+    lines.append("📌 昨日V4验证")
+    if val:
+        per = val.get("per_grade") or {}
+        for g, label in [("A", "A级"), ("B", "B级"), ("C", "C级")]:
+            m = per.get(g) or {}
+            lines.append(f"{label}：{m.get('hit',0)}/{m.get('completed',0)}，命中率 {m.get('hit_rate_pct',0)}%")
+        lines.append(f"SKIP反杀率：{val.get('skip_reverse_rate_pct', 0)}%")
+    else:
+        lines.append("暂无昨日验证数据")
+    lines.append(sep)
 
-    # 结论
-    lines.append("本次结论：")
+    lines.append("")
     if ab_total:
         lines.append(f"今日 V4 有 {ab_total} 场上半场推荐，其中 A级{len(a_rows)}场，B级{len(b_rows)}场。")
     else:
         lines.append("今日 V4 无A/B上半场主推荐。")
-    lines.append("")
+
+    out_path = REPORT_DIR / f"v4_openclaw_brief_{key}.txt"
+    out_path.parent.mkdir(parents=True, exist_ok=True)
+    out_path.write_text("\n".join(lines), encoding="utf-8")
+
     return "\n".join(lines)
 
 
@@ -302,12 +258,7 @@ def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--date", required=True, help="YYYYMMDD or YYYY-MM-DD")
     args = parser.parse_args()
-    key = _date_key(args.date)
-    text = build_brief(args.date)
-    out_path = REPORT_DIR / f"v4_openclaw_brief_{key}.txt"
-    _save_text(out_path, text)
-    print(text)
-    print(json.dumps({"output_path": str(out_path)}, ensure_ascii=False))
+    print(build_brief(args.date))
 
 
 if __name__ == "__main__":
