@@ -271,8 +271,11 @@ def build_brief(date_str: str) -> str:
     # C级
     lines.append(f"👁️ C级观察池：{len(c_rows)}场")
     if c_rows:
-        for i, r in enumerate(c_rows, 1):
-            lines.append(f"{i}. {r['home']} vs {r['away']} — HT评分{r['ht_score']:.0f} | HT有球率{_pct(r['h2h_rate'])} | {r['script_type']}")
+        for r in c_rows:
+            tb = r["time_bins"]
+            lines.append("")
+            lines.append(f"{r['home']} vs {r['away']}")
+            lines.append(f" {r['league']} · {r['time']} | HT评分{r['ht_score']:.0f} | HT有球率{_pct(r['h2h_rate'])} | {r['script_type']}")
     lines.append("")
 
     # SKIP
