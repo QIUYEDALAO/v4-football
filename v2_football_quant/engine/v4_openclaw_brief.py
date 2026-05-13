@@ -145,23 +145,16 @@ def _skip_reason_key(reason: str) -> str:
     return s[:24] if s else "其他"
 
 
-def _format_main_row(idx: int, r: dict[str, Any]) -> list[str]:
+def _format_main_row(idx: int, r: dict[str, Any]) -> str:
     tb = r["time_bins"]
     reasons = " / ".join(r["reasons"][:3]) if r["reasons"] else "-"
-    risks = " / ".join(r["risks"][:2]) if r["risks"] else "无明显高优先级风险"
-    grade_label = "A级 · 上半场强推荐" if r["grade"] == "A" else "B级 · 上半场达标推荐"
-    return [
-        f"{idx}. {r['home']} vs {r['away']}",
-        f"   {r['league']} · {r['time']} · #{r['fixture_id']}",
-        f"   等级：{grade_label}",
-        f"   HT评分 {r['ht_score']:.0f} | HT有球率 {_pct(r['h2h_rate'])} | 场均HT进球 {r['avg_goals']:.2f} | 样本 {r['sample_size']}",
-        f"   剧本：{r['script_type']}",
-        f"   分布：0-15m {_pct(tb['0_15'])} | 16-30m {_pct(tb['16_30'])} | 31-45m {_pct(tb['31_45'])}",
-        f"   主因：{reasons}",
-        f"   风险：{risks}",
-        "   建议：今日上半场重点盯盘，具体入场时间由你人工判断。",
-        "",
-    ]
+    risks = " / ".join(r["risks"][:1]) if r["risks"] else "-"
+    return (
+        f"{idx}. {r['home']} vs {r['away']} — {r['league']} · {r['time']} | "
+        f"HT评分{r['ht_score']:.0f} | HT有球率{_pct(r['h2h_rate'])} | 场均{r['avg_goals']:.2f}球 | 样本{r['sample_size']} | "
+        f"{r['script_type']} | 0-15m {_pct(tb['0_15'])} / 16-30m {_pct(tb['16_30'])} / 31-45m {_pct(tb['31_45'])} | "
+        f"主因:{reasons} | 风险:{risks}"
+    )
 
 
 def _format_c_row(idx: int, r: dict[str, Any]) -> str:
@@ -193,7 +186,9 @@ def _validation_lines(key: str) -> list[str]:
 
 
 def build_brief(date_str: str) -> str:
+    """输出纯文本格式，匹配用户指定的简报模板"""
     key = _date_key(date_str)
+    prev_key = _prev_key(key)
     scout_path = REPORT_DIR / f"scout_v4_{key}.json"
     scout = _load_json(scout_path, [])
     if isinstance(scout, dict):
@@ -216,63 +211,81 @@ def build_brief(date_str: str) -> str:
         for reason in reasons[:2]:
             skip_counter[_skip_reason_key(reason)] += 1
 
-    now = datetime.now().strftime("%Y-%m-%d %H:%M")
-    lines: list[str] = [
-        f"⏰ V4 上半场情报扫描 — {key} {now}",
-        "",
-        "指标                         数值",
-        f"🔥 A级强推荐                  {len(a_rows)} 场",
-        f"🟢 B级达标推荐                {len(b_rows)} 场",
-        f"👁️ C级观察                    {len(c_rows)} 场",
-        f"⚪ HT_SKIP跳过                 {len(skip_rows)} 场",
-        f"🌎 全量扫描                    {total} 场",
-        f"📊 A+B覆盖率                   {ab_ratio}",
-        "",
-    ]
-
-    lines.append("🔥 A级上半场强推荐")
-    if a_rows:
-        for i, r in enumerate(a_rows, 1):
-            lines.extend(_format_main_row(i, r))
-    else:
-        lines.append("本次无A级强推荐。")
-        lines.append("")
-
-    lines.append("🟢 B级上半场达标推荐")
-    if b_rows:
-        for i, r in enumerate(b_rows, 1):
-            lines.extend(_format_main_row(i, r))
-    else:
-        lines.append("本次无B级达标推荐。")
-        lines.append("")
-
-    lines.append(f"👁️ C级观察池：{len(c_rows)}场")
-    if c_rows:
-        for i, r in enumerate(c_rows[:20], 1):
-            lines.append(_format_c_row(i, r))
-        if len(c_rows) > 20:
-            lines.append(f"... 另有 {len(c_rows) - 20} 场C级观察未展开")
-    else:
-        lines.append("本次无C级观察。")
+    lines: list[str] = []
+    lines.append(f"⏰ V4 上半场情报扫描 — {key}")
+    lines.append("")
+    lines.append("指标                         数值")
+    lines.append(f"🔥 A级强推荐                  {len(a_rows)} 场")
+    lines.append(f"🟢 B级达标推荐                {len(b_rows)} 场")
+    lines.append(f"👁️ C级观察                    {len(c_rows)} 场")
+    lines.append(f"⚪ HT_SKIP跳过                 {len(skip_rows)} 场")
+    lines.append(f"🌎 全量扫描                    {total} 场")
+    lines.append(f"📊 A+B覆盖率                   {ab_ratio}")
     lines.append("")
 
+    # A级
+    lines.append("🔥 A级上半场强推荐")
+    if a_rows:
+        for r in a_rows:
+            tb = r["time_bins"]
+            reasons = " / ".join(r["reasons"][:3]) if r["reasons"] else "-"
+            risks = " / ".join(r["risks"][:1]) if r["risks"] else "-"
+            lines.append("")
+            lines.append(f"{r['home']} vs {r['away']}")
+            lines.append(f" {r['league']} · {r['time']} · #{r['fixture_id']}")
+            lines.append(f" HT评分 {r['ht_score']:.0f} | HT有球率 {_pct(r['h2h_rate'])} | 场均HT进球 {r['avg_goals']:.2f} | 样本 {r['sample_size']}")
+            lines.append(f" 剧本：{r['script_type']}")
+            lines.append(f" 分布：0-15m {_pct(tb['0_15'])} | 16-30m {_pct(tb['16_30'])} | 31-45m {_pct(tb['31_45'])}")
+            lines.append(f" 主因：{reasons}")
+            lines.append(f" 风险：{risks}")
+            lines.append(f" 建议：今日上半场重点盯盘")
+    else:
+        lines.append("(无)")
+    lines.append("")
+
+    # B级
+    lines.append("🟢 B级上半场达标推荐")
+    if b_rows:
+        for r in b_rows:
+            tb = r["time_bins"]
+            reasons = " / ".join(r["reasons"][:3]) if r["reasons"] else "-"
+            risks = " / ".join(r["risks"][:1]) if r["risks"] else "-"
+            lines.append("")
+            lines.append(f"{r['home']} vs {r['away']}")
+            lines.append(f" {r['league']} · {r['time']} · #{r['fixture_id']}")
+            lines.append(f" HT评分 {r['ht_score']:.0f} | HT有球率 {_pct(r['h2h_rate'])} | 场均HT进球 {r['avg_goals']:.2f} | 样本 {r['sample_size']}")
+            lines.append(f" 剧本：{r['script_type']}")
+            lines.append(f" 分布：0-15m {_pct(tb['0_15'])} | 16-30m {_pct(tb['16_30'])} | 31-45m {_pct(tb['31_45'])}")
+            lines.append(f" 主因：{reasons}")
+            lines.append(f" 风险：{risks}")
+            lines.append(f" 建议：今日上半场重点盯盘")
+    else:
+        lines.append("(无)")
+    lines.append("")
+
+    # C级
+    lines.append(f"👁️ C级观察池：{len(c_rows)}场")
+    if c_rows:
+        for i, r in enumerate(c_rows, 1):
+            lines.append(f"{i}. {r['home']} vs {r['away']} — HT评分{r['ht_score']:.0f} | HT有球率{_pct(r['h2h_rate'])} | {r['script_type']}")
+    lines.append("")
+
+    # SKIP
     lines.append(f"⚪ 跳过统计：{len(skip_rows)}场")
     if skip_counter:
         for reason, n in skip_counter.most_common(8):
             lines.append(f"- {reason}：{n}场")
-    else:
-        lines.append("- 暂无跳过原因统计")
-    lines.append("说明：HT_SKIP = 本场不进入上半场推荐，不需要你看盘。")
     lines.append("")
 
+    # 昨日验证
     lines.extend(_validation_lines(key))
 
+    # 结论
     lines.append("本次结论：")
     if ab_total:
-        lines.append(f"V4 今日有 {ab_total} 场上半场推荐，其中 A级{len(a_rows)}场，B级{len(b_rows)}场。")
+        lines.append(f"今日 V4 有 {ab_total} 场上半场推荐，其中 A级{len(a_rows)}场，B级{len(b_rows)}场。")
     else:
-        lines.append("V4 今日无A/B上半场主推荐，仅保留观察与跳过统计。")
-    lines.append("HT_SKIP 不展示单场，默认直接跳过。")
+        lines.append("今日 V4 无A/B上半场主推荐。")
     lines.append("")
     return "\n".join(lines)
 
