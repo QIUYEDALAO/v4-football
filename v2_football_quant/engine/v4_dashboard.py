@@ -946,12 +946,11 @@ def render_dashboard(date_str: str, window_mode: str = "natural") -> Path:
       </div>
       <div class="filters">
         <select id="pool">
-          <option value="ht_main">今日上半场推荐(A/B)</option>
+          <option value="ht_main" selected>今日上半场推荐(A/B)</option>
           <option value="ht_observe">上半场观察(C)</option>
           <option value="sh_observe">下半场观察池</option>
-          <option value="ht_skip">上半场跳过诊断</option>
           <option value="info_only">其他情报</option>
-          <option value="all" selected>全部</option>
+          <option value="all">完整情报池(高级)</option>
         </select>
         <select id="sort">
           <option value="hotness">按评分推荐</option>
@@ -961,6 +960,13 @@ def render_dashboard(date_str: str, window_mode: str = "natural") -> Path:
           <option value="cards" selected>卡片模式</option>
           <option value="list">列表模式</option>
         </select>
+      </div>
+      <div class="health-panel" style="margin-top:10px">
+        <div class="health-head">
+          <b>跳过统计（HT_SKIP）</b>
+          <span class="pill">今日跳过：<b id="skipCount">0</b> 场</span>
+        </div>
+        <div id="skipReasons" class="detail">-</div>
       </div>
     </div>
   </header>
@@ -973,7 +979,7 @@ def render_dashboard(date_str: str, window_mode: str = "natural") -> Path:
     const allData = {all_data_json};
     let rows = allData['{date_str}'] ? (allData['{date_str}'].rows || []) : [];
     let currentDate = '{date_str}';
-    const state = {{ sort:'time', view:'cards', pool:'all' }};
+    const state = {{ sort:'time', view:'cards', pool:'ht_main' }};
     const el = id => document.getElementById(id);
     function actionOf(row) {{ return row.actionCode || 'SKIP'; }}
     function tierOf(row) {{
@@ -1077,8 +1083,6 @@ def render_dashboard(date_str: str, window_mode: str = "natural") -> Path:
         out = out.filter(r => !!r.isHtObserve);
       }} else if (state.pool === 'sh_observe') {{
         out = out.filter(r => !!r.isShObserve);
-      }} else if (state.pool === 'ht_skip') {{
-        out = out.filter(r => !!r.isHtSkip);
       }} else if (state.pool === 'info_only') {{
         out = out.filter(r => !r.isHtMain && !r.isShObserve);
       }}
@@ -1131,12 +1135,24 @@ def render_dashboard(date_str: str, window_mode: str = "natural") -> Path:
       const htB = rows.filter(r => (r.htRecGrade || '') === 'B').length;
       const htC = rows.filter(r => !!r.isHtObserve).length;
       const htSkip = rows.filter(r => !!r.isHtSkip).length;
+      const skipRows = rows.filter(r => !!r.isHtSkip);
+      const skipReasonMap = new Map();
+      for (const r of skipRows) {{
+        const reason = (r.htRecReason || r.htDecisionReason || '未注明原因').trim();
+        skipReasonMap.set(reason, (skipReasonMap.get(reason) || 0) + 1);
+      }}
+      const skipReasonTop = Array.from(skipReasonMap.entries())
+        .sort((a,b) => b[1]-a[1])
+        .slice(0, 6)
+        .map(([k,v]) => `${{k}}: ${{v}}场`);
       const total = rows.length || 1;
       const abRatio = ((htA + htB) / total) * 100;
       el('cntHTA').textContent = String(htA);
       el('cntHTB').textContent = String(htB);
       el('cntHTC').textContent = String(htC);
       el('cntHTSkip').textContent = String(htSkip);
+      el('skipCount').textContent = String(htSkip);
+      el('skipReasons').textContent = skipReasonTop.length ? skipReasonTop.join(' | ') : '暂无';
       el('cntABRatio').textContent = abRatio.toFixed(1) + '%';
       let abHealth = 'OK';
       if (abRatio < 5) abHealth = '偏低';
@@ -1146,7 +1162,7 @@ def render_dashboard(date_str: str, window_mode: str = "natural") -> Path:
       el('visibleCount').textContent = out.length;
       if (out.length === 0) {{
         if (state.pool === 'ht_main') {{
-          el('empty').textContent = '暂无符合过滤条件的比赛';
+          el('empty').textContent = '今日暂无 HT_A/HT_B 推荐';
         }} else {{
           el('empty').textContent = '没有符合过滤条件的比赛';
         }}

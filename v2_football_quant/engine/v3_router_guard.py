@@ -78,6 +78,14 @@ def _is_bubble_aligned_with_market_favorite(signal: dict[str, Any]) -> bool:
     return side == market_side
 
 
+def _explicit_not_market_favorite(signal: dict[str, Any]) -> bool:
+    # Prefer explicit builder flag when present.
+    v = signal.get("is_market_favorite")
+    if isinstance(v, bool):
+        return v is False
+    return False
+
+
 def apply_v3_router_guard(
     signal: dict[str, Any],
     engine_stats: dict[str, Any] | None = None,
@@ -140,6 +148,12 @@ def apply_v3_router_guard(
         out["action"] = "V3_SKIP_TRUE_MISMATCH"
         out["max_risk_units"] = 0.0
         out["skip_reason"] = "Elo实力断层过大，跳过伪泡沫"
+        return out
+
+    if _explicit_not_market_favorite(out):
+        out["action"] = "V3_MD2_WATCH"
+        out["max_risk_units"] = 0.0
+        out["skip_reason"] = "泡沫方不是市场热门，降级观察"
         return out
 
     if not _is_bubble_aligned_with_market_favorite(out):

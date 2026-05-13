@@ -280,6 +280,10 @@ def _date_key(v: str) -> str:
 
 def ensure_v3_data_layout() -> None:
     DATA_DIR.mkdir(parents=True, exist_ok=True)
+    # 如果 WC2026 数据已锁定，跳过自动播种
+    lock_file = DATA_DIR / ".wc2026_locked"
+    if lock_file.exists():
+        return
     for name in [
         "teams_master.json",
         "group_schedule.json",
@@ -362,7 +366,20 @@ def ensure_v3_data_layout() -> None:
 
 def build_signals(date_str: str, source_path: Path | None = None) -> dict[str, Any]:
     ensure_v3_data_layout()
-    team_master = _load_json(DATA_DIR / "teams_master.json", {})
+    team_master_raw = _load_json(DATA_DIR / "teams_master.json", {})
+    elo_data = _load_json(DATA_DIR / "elo_snapshots.json", [])
+    squad_data = _load_json(DATA_DIR / "squad_values.json", [])
+    # 兼容新旧格式：list → dict，并注入 Elo/身价
+    if isinstance(team_master_raw, list):
+        team_master = {}
+        elo_map = {e["team"]: e.get("elo", 1400) for e in elo_data}
+        sq_map = {s["team"]: s.get("squad_value_m", 50) for s in squad_data}
+        for t in team_master_raw:
+            if isinstance(t, dict) and t.get("name"):
+                name = t["name"]
+                team_master[name] = {**t, "elo": elo_map.get(name, 1400), "squad_value_m": sq_map.get(name, 50)}
+    else:
+        team_master = team_master_raw
     cfg = load_v3_wc_config()
 
     if source_path and source_path.exists():
@@ -371,7 +388,46 @@ def build_signals(date_str: str, source_path: Path | None = None) -> dict[str, A
         else:
             matches = _load_json(source_path, [])
     else:
-        matches = _load_json(MASTER_FALLBACK, [])
+        # WC2026 模式：从独立数据文件组装比赛记录
+        schedule = _load_json(DATA_DIR / "group_schedule.json", [])
+        elo_list = _load_json(DATA_DIR / "elo_snapshots.json", [])
+        squad_list = _load_json(DATA_DIR / "squad_values.json", [])
+        odds_list = _load_json(DATA_DIR / "odds_open_close.json", [])
+        
+        elo_map = {e["team"]: e.get("elo", 1400) for e in elo_list}
+        squad_map = {s["team"]: s.get("squad_value_m", 50) for s in squad_list}
+        odds_map = {}
+        for o in odds_list:
+            fid = o.get("fixture_id", "")
+            if fid:
+                odds_map[fid] = o
+        
+        matches = []
+        for m in schedule:
+            home = m.get("home_team", "")
+            away = m.get("away_team", "")
+            fid = str(m.get("fixture_id", ""))
+            odds = odds_map.get(fid, {})
+            matches.append({
+                "match_id": fid,
+                "fixture_id": fid,
+                "tournament": "WC2026",
+                "date": m.get("date", ""),
+                "stage": m.get("stage", "group"),
+                "home_team": home,
+                "away_team": away,
+                "elo_home": elo_map.get(home, 1400),
+                "elo_away": elo_map.get(away, 1400),
+                "squad_value_home": squad_map.get(home, 50),
+                "squad_value_away": squad_map.get(away, 50),
+                "psch": odds.get("psch_open") or odds.get("psch"),
+                "pscd": odds.get("pscd_open") or odds.get("pscd"),
+                "psca": odds.get("psca_open") or odds.get("psca"),
+                "home_bubble": False,
+                "away_bubble": False,
+            })
+        if not matches:
+            matches = _load_json(MASTER_FALLBACK, [])
 
     group_idx = build_group_schedule_index(matches)
     signals = []
