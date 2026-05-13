@@ -298,9 +298,8 @@ def generate_report(fixtures: list[dict], bets: list[dict], stats: dict) -> str:
         f"📊 今日扫描: {stats['total_scanned']} 场 (白名单) · 推荐: {len(bets)} 场",
         "",
         f"🔍 漏斗: 总{stats['total_fixtures']}场 → 扫描{stats['total_scanned']} "
-        f"→ 无盘口{stats['skip_no_market']} → 无Edge{stats['skip_no_edge']} "
-        f"→ 负EV{stats['skip_neg_ev']} → 熔断{stats['skip_meltdown']} "
-        f"→ 低Kelly{stats['skip_low_kelly']} → ✅{stats['bet_placed']}",
+        f"→ 无盘口{stats['skip_no_market']} → 赔率过低{stats.get('skip_odds_band',0)} "
+        f"→ 赔率过高{stats.get('watch_odds_high',0)}(观察池) → ✅{stats['bet_placed']}",
         "",
         "模型: att_def_spread 10档分位定价 · 投注方向: HT 1X2 · 全量死因追踪",
         "",
@@ -327,20 +326,20 @@ def generate_report(fixtures: list[dict], bets: list[dict], stats: dict) -> str:
         lines.append(f"| 🏦 市场概率 | H={rec['market_probs']['H']:.3f} D={rec['market_probs']['D']:.3f} A={rec['market_probs']['A']:.3f} |")
         lines.append(f"| 💰 {rec.get('bookmaker', '?')} 半场平 | **{odds_D:.2f}** |")
         lines.append(f"| 📊 保本概率 | {rec['break_even_prob']:.3f} |")
-        lines.append(f"| 🎲 Edge | **{rec['edge_pp']*100:+.1f}%** |")
-        lines.append(f"| 📈 EV | **{rec['ev_pct']*100:+.1f}%** |")
+        lines.append(f"| 🎲 Edge | {rec.get('edge_pp', 0)*100:+.1f}% (仅记录) |")
+        lines.append(f"| 📈 EV | {rec.get('ev_pct', 0)*100:+.1f}% (仅记录) |")
         si = rec.get("stake_info", {})
         if si:
-            lines.append(f"| 💵 注码 | {si.get('stake', 0)} (Kelly {si.get('kelly_factor_used', 0)*4:.0f}/4) |")
+            lines.append(f"| 💵 注码 | {si.get('stake', 1.0):.0f}u (固定1u · Kelly暂停) |")
         lines.append("")
         lines.append("---")
         lines.append("")
 
     lines.append("")
-    lines.append(f"> 🤖 V2 v2.1 · HT 1X2 分档模型 · 全量死因追踪")
+    lines.append(f"> 🤖 V2 v2.2 FIXED_ODDS_BAND · 赔率带策略 2.00-2.90")
     lines.append(f"> ⚠️ 纸盘模式 — 仅记录，不下单")
-    lines.append(f"> 💡 模型基于 2322 场历史 att_def_spread 分位概率")
-    lines.append(f"> 🛡️ Kelly 1/4 · 软熔断15% · 硬熔断30% · 本金20000")
+    lines.append(f"> 🔑 赔率 2.00-2.90 固定1u | 2.90+ 观察池 | EV只记录不筛选")
+    lines.append(f"> 📏 每日上限20场 · 同联赛上限2场 · Kelly暂停")
 
     return "\n".join(lines)
 
@@ -429,10 +428,8 @@ def run_once(run_tag="DEFAULT"):
         "total_fixtures": len(fixtures),
         "total_scanned": 0,
         "skip_no_market": 0,
-        "skip_no_edge": 0,
-        "skip_neg_ev": 0,
-        "skip_meltdown": 0,
-        "skip_low_kelly": 0,
+        "skip_odds_band": 0,
+        "watch_odds_high": 0,
         "bet_placed": 0
     }
     
@@ -513,32 +510,47 @@ def run_once(run_tag="DEFAULT"):
             "bookmaker": bookmaker
         })
         
-        if edge_pp <= 0:
-            stats["skip_no_edge"] += 1
-            base_rec.update({"action": "SKIP", "skip_code": "NO_EDGE", "skip_reason": f"Edge {edge_pp} <= 0"})
+        # ── V2.2 赔率带筛选（替代 EV 排序）──
+        # EV/edge 只记录不筛选，暂存原值供后续校准
+        base_rec["ev_pct"] = ev_pct
+        base_rec["edge_pp"] = edge_pp
+        
+        # 赔率过低：不做
+        if odds_D < 2.00:
+            stats["skip_odds_band"] = stats.get("skip_odds_band", 0) + 1
+            base_rec.update({"action": "SKIP", "skip_code": "ODDS_TOO_LOW", 
+                           "skip_reason": f"赔率 {odds_D:.2f} < 2.00"})
             all_candidates.append(base_rec)
             continue
         
-        if ev_pct < 0:
-            stats["skip_neg_ev"] += 1
-            base_rec.update({"action": "SKIP", "skip_code": "NEG_EV", "skip_reason": f"EV {ev_pct} < 0"})
+        # 赔率过高：进入观察池
+        if odds_D >= 2.90:
+            stats["watch_odds_high"] = stats.get("watch_odds_high", 0) + 1
+            base_rec.update({"action": "WATCH_ONLY", "skip_code": "ODDS_WATCH_HIGH",
+                           "skip_reason": f"赔率 {odds_D:.2f} >= 2.90，进入观察池",
+                           "strategy_id": "V2_HT_DRAW_WATCH"})
             all_candidates.append(base_rec)
             continue
         
-        # ── 资金风控测算 ──
-        stake_info = calculate_stake(br, prob_D, odds_D)
+        # ── 主策略 V2_MAIN 2.00-2.90 ──
+        # Kelly 暂停，固定 1u
+        base_rec["strategy_id"] = "V2_HT_DRAW_v2.2_FIXED_ODDS_BAND"
+        stake_info = {
+            "action": "BET",
+            "stake": 1.0,
+            "reason": "FIXED_1U | Kelly_OFF | EV_record_only",
+            "raw_kelly": 0.0,
+            "effective_kelly": 0.0,
+            "kelly_factor_used": 0.0,
+        }
         base_rec["stake_info"] = stake_info
         
-        action = stake_info["action"]
-        if action.startswith("SKIP"):
-            code = action.replace("SKIP_", "")
-            if code == "MELTDOWN":
-                stats["skip_meltdown"] += 1
-            else:
-                stats["skip_low_kelly"] += 1
-            base_rec.update({"action": "SKIP", "skip_code": code, "skip_reason": stake_info.get("reason")})
+        # 每日主策略上限 20 场
+        bets_today = sum(1 for c in all_candidates if c.get("action") == "BET" and c.get("strategy_id") == "V2_HT_DRAW_v2.2_FIXED_ODDS_BAND")
+        if bets_today >= 20:
+            base_rec.update({"action": "SKIP", "skip_code": "DAILY_CAP", 
+                           "skip_reason": "当日主策略已达 20 场上限"})
             all_candidates.append(base_rec)
-            # 熔断/低 Kelly 也有盘口数据，值得记录但不算推荐
             continue
         
         # ── 🌟 首次触发去重锁 (Time-Series Signal Lock) ──
@@ -574,11 +586,10 @@ def run_once(run_tag="DEFAULT"):
     logger.info(f"📦 原始赛程总数: {stats['total_fixtures']}")
     logger.info(f"🔍 进模型分档场次: {stats['total_scanned']}")
     logger.info(f"❌ 过滤 (盘口未开): {stats['skip_no_market']}")
-    logger.info(f"❌ 过滤 (无数学Edge): {stats['skip_no_edge']}")
-    logger.info(f"❌ 过滤 (负期望EV): {stats['skip_neg_ev']}")
-    logger.info(f"🛑 过滤 (硬熔断): {stats['skip_meltdown']}")
-    logger.info(f"🛡️ 过滤 (低Kelly/资金红线): {stats['skip_low_kelly']}")
-    logger.info(f"✅ 最终符合下注: {stats['bet_placed']}")
+    logger.info(f"❌ 过滤 (赔率<2.00): {stats.get('skip_odds_band',0)}")
+    logger.info(f"👁️ 观察池 (赔率>=2.90): {stats.get('watch_odds_high',0)}")
+    logger.info(f"✅ 主策略 V2_MAIN (2.00-2.90 固定1u): {stats['bet_placed']}")
+    logger.info(f"📏 Kelly暂停 · EV仅记录 · 每日上限20场")
     logger.info("="*40)
 
     # ── 🌎 全量候选池快照 (基准防线 · 专家建议三) ──
