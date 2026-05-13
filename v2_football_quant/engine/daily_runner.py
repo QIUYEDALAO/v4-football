@@ -346,7 +346,7 @@ def generate_report(fixtures: list[dict], bets: list[dict], stats: dict) -> str:
 
 def run_once(run_tag="DEFAULT"):
     print("=" * 60)
-    print(f"V2 Daily Runner v2.1 (HT 1X2) | TAG: {run_tag}")
+    print(f"V2 Daily Runner v2.2 FIXED_ODDS_BAND (HT 1X2) | TAG: {run_tag}")
     print(f"启动: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
     print("=" * 60)
 
@@ -545,14 +545,6 @@ def run_once(run_tag="DEFAULT"):
         }
         base_rec["stake_info"] = stake_info
         
-        # 每日主策略上限 20 场
-        bets_today = sum(1 for c in all_candidates if c.get("action") == "BET" and c.get("strategy_id") == "V2_HT_DRAW_v2.2_FIXED_ODDS_BAND")
-        if bets_today >= 20:
-            base_rec.update({"action": "SKIP", "skip_code": "DAILY_CAP", 
-                           "skip_reason": "当日主策略已达 20 场上限"})
-            all_candidates.append(base_rec)
-            continue
-        
         # ── 🌟 首次触发去重锁 (Time-Series Signal Lock) ──
         if fx["id"] in already_selected:
             base_rec.update({"action": "ALREADY_SELECTED", "skip_code": "DUPLICATE",
@@ -561,24 +553,40 @@ def run_once(run_tag="DEFAULT"):
             all_candidates.append(base_rec)
             continue
 
-        # ── 通过！计入推荐 ──
+        # ── 通过！暂入候选池，联赛去重+日上限稍后统一处理 ──
         stats["bet_placed"] += 1
         base_rec.update({"action": "BET", "skip_code": None, "skip_reason": None})
         all_candidates.append(base_rec)
         bets.append(base_rec)
-        already_selected.add(fx["id"])  # 🌟 锁定该场比赛
+        already_selected.add(fx["id"])
         logger.success(f"  ✅ {fx['home']}vs{fx['away']}: 推D odds={odds_D:.2f} edge={edge_pp*100:+.1f}% ev={ev_pct*100:+.1f}%")
     
-    # ── 同联赛去重：每天每联赛最多2场 ──
+    # ── 联赛去重：每天每联赛最多2场 ──
     bets.sort(key=lambda x: -(x["ev_pct"] or 0))
     lg_count = {}
-    final_bets = []
+    league_deduped = []
+    league_skipped = []
     for r in bets:
         lg = r["league_name"]
         lg_count[lg] = lg_count.get(lg, 0) + 1
         if lg_count[lg] <= 2:
-            final_bets.append(r)
+            league_deduped.append(r)
+        else:
+            league_skipped.append(r)
+            r["action"] = "SKIP"
+            r["skip_code"] = "LEAGUE_CAP"
+            r["skip_reason"] = f"{lg} 已满2场"
+    
+    # ── 日上限20场（在联赛去重之后）──
+    final_bets = league_deduped[:20]
+    daily_capped = league_deduped[20:]
+    for r in daily_capped:
+        r["action"] = "SKIP"
+        r["skip_code"] = "DAILY_CAP"
+        r["skip_reason"] = "日上限20场（联赛去重后）"
     bets = final_bets
+    stats["league_skipped"] = len(league_skipped)
+    stats["daily_capped"] = len(daily_capped)
     
     # ── 漏斗日报 ──
     logger.info("="*40)
@@ -589,6 +597,9 @@ def run_once(run_tag="DEFAULT"):
     logger.info(f"❌ 过滤 (赔率<2.00): {stats.get('skip_odds_band',0)}")
     logger.info(f"👁️ 观察池 (赔率>=2.90): {stats.get('watch_odds_high',0)}")
     logger.info(f"✅ 主策略 V2_MAIN (2.00-2.90 固定1u): {stats['bet_placed']}")
+    logger.info(f"🔻 联赛去重: {stats.get('league_skipped',0)}")
+    logger.info(f"🔻 日上限截断: {stats.get('daily_capped',0)}")
+    logger.info(f"🎯 最终推荐: {len(bets)}")
     logger.info(f"📏 Kelly暂停 · EV仅记录 · 每日上限20场")
     logger.info("="*40)
 
