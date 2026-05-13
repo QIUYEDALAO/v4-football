@@ -2,9 +2,10 @@
 V4 HT赛前推荐验证器
 ===================
 用途：
-1) 读取当日 scout，按 A/B/C/SKIP 生成HT推荐分层
-2) 拉取赛果后验证上半场是否有球（命中）
-3) 对比预测时间段（0-15 / 16-30 / 31-45）与实际进球时间段
+1) 读取当日 scout，按 A/B/C/SKIP 分层
+2) 拉赛果验证 HT 是否有球
+3) 验证预测时间段命中（0-15 / 16-30 / 31-45）
+4) 输出漏斗指标、单调性、联赛校准、覆盖率健康
 
 用法：
   python3 engine/v4_ht_result_validator.py --date 20260513
@@ -25,7 +26,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(BASE_DIR))
 
 from engine import net_utils
-from engine.v4_match_intelligence import explain_match
+from engine.v4_match_intelligence import _load_rules, explain_match
 
 REPORT_DIR = BASE_DIR / "data" / "daily_reports"
 
@@ -84,14 +85,28 @@ def _fetch_fixture_ht_goals(fixture_id: int) -> int | None:
         return None
 
 
+def _is_goal_event(ev: dict) -> bool:
+    et = str(ev.get("type") or "").strip().lower()
+    detail = str(ev.get("detail") or "").strip().lower()
+    if et != "goal":
+        return False
+    # 严格过滤：只认真实进球，不认 missed penalty / var / awarded
+    allowed = {"normal goal", "own goal", "penalty"}
+    denied_keywords = {"missed", "cancel", "var", "awarded", "disallowed"}
+    if detail in allowed:
+        return True
+    if any(k in detail for k in denied_keywords):
+        return False
+    # 某些源可能 detail 为空，但 type=Goal 且有 elapsed，保留
+    return detail == ""
+
+
 def _fetch_fixture_first_half_goal_buckets(fixture_id: int) -> list[str]:
     resp = _api_get(f"fixtures/events?fixture={fixture_id}")
     rows = resp.get("response") or []
     buckets: list[str] = []
     for ev in rows:
-        et = str(ev.get("type") or "").lower()
-        detail = str(ev.get("detail") or "").lower()
-        if "goal" not in et and "goal" not in detail and "penalty" not in detail:
+        if not _is_goal_event(ev):
             continue
         elapsed = (ev.get("time") or {}).get("elapsed")
         if elapsed is None:
@@ -105,6 +120,97 @@ def _fetch_fixture_first_half_goal_buckets(fixture_id: int) -> list[str]:
     return sorted(set(buckets))
 
 
+def _safe_pct(numer: int, denom: int) -> float:
+    return round(numer / denom * 100, 1) if denom else 0.0
+
+
+def _grade_stats(details: list[dict], grade: str) -> dict:
+    subset = [d for d in details if d["grade"] == grade]
+    completed = [d for d in subset if not d["pending"]]
+    goal_hits = [d for d in completed if d["hit"] is True]
+    bucket_hits = [d for d in completed if d["bucket_hit"]]
+    return {
+        "total": len(subset),
+        "completed": len(completed),
+        "pending": len(subset) - len(completed),
+        "hit": len(goal_hits),
+        "hit_rate_pct": _safe_pct(len(goal_hits), len(completed)),
+        "bucket_hit": len(bucket_hits),
+        "bucket_hit_rate_all_pct": _safe_pct(len(bucket_hits), len(completed)),
+        "bucket_hit_rate_when_goal_pct": _safe_pct(len(bucket_hits), len(goal_hits)),
+    }
+
+
+def _monotonic_check(per_grade: dict) -> dict:
+    """
+    期望：A > B > C > SKIP
+    """
+    seq = ["A", "B", "C", "SKIP"]
+    rates = [float((per_grade.get(g) or {}).get("hit_rate_pct", 0.0)) for g in seq]
+    monotonic = all(rates[i] >= rates[i + 1] for i in range(len(rates) - 1))
+    return {"sequence": seq, "rates": rates, "status": "PASS" if monotonic else "FAIL"}
+
+
+def _league_calibration(details: list[dict]) -> list[dict]:
+    by_league: dict[str, dict] = defaultdict(lambda: {
+        "ab_recommended": 0,
+        "ab_completed": 0,
+        "ab_hit": 0,
+        "ab_bucket_hit": 0,
+        "ab_goal_hits": 0,
+        "skip_total": 0,
+        "skip_completed": 0,
+        "skip_hit": 0,
+    })
+    for d in details:
+        lg = str(d.get("league") or "-")
+        g = d.get("grade")
+        pending = bool(d.get("pending"))
+        hit = d.get("hit") is True
+        bucket_hit = d.get("bucket_hit") is True
+        if g in ("A", "B"):
+            by_league[lg]["ab_recommended"] += 1
+            if not pending:
+                by_league[lg]["ab_completed"] += 1
+                if hit:
+                    by_league[lg]["ab_hit"] += 1
+                    by_league[lg]["ab_goal_hits"] += 1
+                if bucket_hit:
+                    by_league[lg]["ab_bucket_hit"] += 1
+        if g == "SKIP":
+            by_league[lg]["skip_total"] += 1
+            if not pending:
+                by_league[lg]["skip_completed"] += 1
+                if hit:
+                    by_league[lg]["skip_hit"] += 1
+
+    out = []
+    for lg, m in by_league.items():
+        ab_rate = _safe_pct(m["ab_hit"], m["ab_completed"])
+        skip_rate = _safe_pct(m["skip_hit"], m["skip_completed"])
+        bucket_when_goal = _safe_pct(m["ab_bucket_hit"], m["ab_goal_hits"])
+        if m["ab_completed"] < 20:
+            status = "YELLOW"
+        elif ab_rate > skip_rate and ab_rate >= 55:
+            status = "GREEN"
+        elif ab_rate <= skip_rate:
+            status = "RED"
+        else:
+            status = "YELLOW"
+        out.append({
+            "league": lg,
+            "ab_recommended": m["ab_recommended"],
+            "ab_completed": m["ab_completed"],
+            "ab_hit_rate_pct": ab_rate,
+            "skip_completed": m["skip_completed"],
+            "skip_hit_rate_pct": skip_rate,
+            "ab_bucket_hit_when_goal_pct": bucket_when_goal,
+            "status": status,
+        })
+    out.sort(key=lambda x: (-x["ab_recommended"], x["league"]))
+    return out
+
+
 def run_validation(date_str: str, sleep_ms: int = 120) -> dict:
     key = _date_key(date_str)
     scout_path = REPORT_DIR / f"scout_v4_{key}.json"
@@ -114,9 +220,6 @@ def run_validation(date_str: str, sleep_ms: int = 120) -> dict:
 
     rows = scout if isinstance(scout, list) else scout.get("results", [])
     details = []
-    grade_counts = Counter()
-    hit_counts = Counter()
-    bucket_match_counts = Counter()
     pending = 0
 
     for rec in rows:
@@ -124,7 +227,6 @@ def run_validation(date_str: str, sleep_ms: int = 120) -> dict:
         intel = explain_match(rec)
         ht_rec = intel.get("ht_recommendation") or {}
         grade = str(ht_rec.get("grade") or "SKIP")
-        grade_counts[grade] += 1
         predicted_bucket = _pick_predicted_bucket(ht_rec.get("time_bins") or {})
 
         ht_goals = None
@@ -141,11 +243,6 @@ def run_validation(date_str: str, sleep_ms: int = 120) -> dict:
         hit = (ht_goals or 0) > 0 if ht_goals is not None else None
         bucket_hit = predicted_bucket in actual_buckets if actual_buckets else False
 
-        if hit is True:
-            hit_counts[grade] += 1
-        if bucket_hit:
-            bucket_match_counts[grade] += 1
-
         details.append(
             {
                 "fixture_id": fid,
@@ -154,6 +251,7 @@ def run_validation(date_str: str, sleep_ms: int = 120) -> dict:
                 "league": rec.get("league"),
                 "grade": grade,
                 "status": ht_rec.get("status"),
+                "rule_version": ht_rec.get("rule_version"),
                 "predicted_bucket": predicted_bucket,
                 "actual_buckets": actual_buckets,
                 "bucket_hit": bucket_hit,
@@ -163,28 +261,70 @@ def run_validation(date_str: str, sleep_ms: int = 120) -> dict:
             }
         )
 
-    per_grade = {}
-    for grade, total in grade_counts.items():
-        completed = sum(1 for d in details if d["grade"] == grade and not d["pending"])
-        hits = hit_counts.get(grade, 0)
-        bucket_hits = bucket_match_counts.get(grade, 0)
-        per_grade[grade] = {
-            "total": total,
-            "completed": completed,
-            "pending": total - completed,
-            "hit": hits,
-            "hit_rate_pct": round(hits / completed * 100, 1) if completed else 0.0,
-            "bucket_hit": bucket_hits,
-            "bucket_hit_rate_pct": round(bucket_hits / completed * 100, 1) if completed else 0.0,
-        }
+    per_grade = {g: _grade_stats(details, g) for g in ("A", "B", "C", "SKIP")}
+    completed_all = [d for d in details if not d["pending"]]
+    goal_hits_all = [d for d in completed_all if d["hit"] is True]
+    bucket_hits_all = [d for d in completed_all if d["bucket_hit"]]
+    ab_completed = [d for d in completed_all if d["grade"] in ("A", "B")]
+    ab_goal_hits = [d for d in ab_completed if d["hit"] is True]
+    ab_bucket_hits = [d for d in ab_completed if d["bucket_hit"]]
 
+    funnel = {
+        "total": len(details),
+        "completed": len(completed_all),
+        "pending": pending,
+        "a_plus_b_total": len([d for d in details if d["grade"] in ("A", "B")]),
+        "a_plus_b_completed": len(ab_completed),
+        "a_plus_b_hit_rate_pct": _safe_pct(len(ab_goal_hits), len(ab_completed)),
+        "a_hit_rate_pct": per_grade["A"]["hit_rate_pct"],
+        "b_hit_rate_pct": per_grade["B"]["hit_rate_pct"],
+        "c_hit_rate_pct": per_grade["C"]["hit_rate_pct"],
+        "skip_hit_rate_pct": per_grade["SKIP"]["hit_rate_pct"],
+        "skip_backfire_rate_pct": per_grade["SKIP"]["hit_rate_pct"],  # SKIP反杀率
+    }
+
+    bucket_quality = {
+        "bucket_hit_rate_all_pct": _safe_pct(len(bucket_hits_all), len(completed_all)),
+        "bucket_hit_rate_when_goal_pct": _safe_pct(len(bucket_hits_all), len(goal_hits_all)),
+        "ab_bucket_hit_rate_all_pct": _safe_pct(len(ab_bucket_hits), len(ab_completed)),
+        "ab_bucket_hit_rate_when_goal_pct": _safe_pct(len(ab_bucket_hits), len(ab_goal_hits)),
+    }
+
+    monotonic = _monotonic_check(per_grade)
+    league_calibration = _league_calibration(details)
+
+    rules = _load_rules()
+    ab_ratio = _safe_pct(
+        len([d for d in details if d["grade"] in ("A", "B")]),
+        len(details),
+    )
+    ab_min = float(((rules.get("coverage_target") or {}).get("ab_ratio_min_pct")) or 5.0)
+    ab_max = float(((rules.get("coverage_target") or {}).get("ab_ratio_max_pct")) or 15.0)
+    coverage_health = "OK"
+    if ab_ratio < ab_min:
+        coverage_health = "LOW"
+    elif ab_ratio > ab_max:
+        coverage_health = "HIGH"
+
+    grade_counts = Counter(d["grade"] for d in details)
     out = {
         "date": key,
         "generated_at": datetime.now().isoformat(),
+        "rule_version": str(rules.get("rule_version") or "-"),
         "total_matches": len(details),
         "pending_matches": pending,
         "grade_counts": dict(grade_counts),
+        "funnel": funnel,
         "per_grade": per_grade,
+        "monotonicity": monotonic,
+        "bucket_quality": bucket_quality,
+        "coverage_monitor": {
+            "ab_ratio_pct": ab_ratio,
+            "target_min_pct": ab_min,
+            "target_max_pct": ab_max,
+            "health": coverage_health,
+        },
+        "league_calibration": league_calibration,
         "details": details,
     }
     out_path = REPORT_DIR / f"v4_ht_recommend_validation_{key}.json"
@@ -199,7 +339,8 @@ def main() -> None:
     parser.add_argument("--sleep-ms", type=int, default=120, help="API调用间隔（毫秒）")
     args = parser.parse_args()
     result = run_validation(args.date, sleep_ms=args.sleep_ms)
-    print(json.dumps({k: v for k, v in result.items() if k != "details"}, ensure_ascii=False, indent=2))
+    print(json.dumps({k: v for k, v in result.items() if k not in ("details", "league_calibration")}, ensure_ascii=False, indent=2))
+    print(json.dumps({"league_calibration_top10": result.get("league_calibration", [])[:10]}, ensure_ascii=False, indent=2))
 
 
 if __name__ == "__main__":

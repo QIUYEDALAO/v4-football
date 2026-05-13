@@ -79,7 +79,9 @@ def main() -> None:
 
     print(f"\nV4_HT 推荐简报 | {args.date}")
     print("=" * 68)
+    ab_ratio = round((len(ht_a) + len(ht_b)) / max(len(rows), 1) * 100, 1)
     print(f"总场次: {len(rows)} | HT池: {len(ht_pool)} | A:{len(ht_a)} B:{len(ht_b)} C:{len(ht_c)} SKIP:{len(ht_skip)} | SH观察池: {len(sh_pool)} | 普通情报: {len(info_pool)}")
+    print(f"A+B推荐覆盖率: {ab_ratio}%（目标 5%-15%）")
     print("-" * 68)
 
     print(f"一、HT A级推荐 ({len(ht_a)})")

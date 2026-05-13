@@ -422,24 +422,10 @@ def _rows_json(rows: list[dict]) -> str:
         p16_30 = _float(tb.get("16_30"))
         p31_45 = _float(tb.get("31_45"))
         threat_val = _float(f.get("both_sides_ht_threat"))
-        if ev_pct >= 8.0:
-            ev_conclusion = f"✅ 赛前价值突显！(正期望 +{ev_pct}%) 庄家赔率给高了。"
-        elif ev_pct > 5.0:
-            ev_conclusion = f"✅ 赛前小幅正期望 (+{ev_pct}%)，可纸盘观察。"
-        elif ev_pct <= -12.0:
-            ev_conclusion = f"❌ 赛前负期望 ({ev_pct}%)，庄家明显高估开局火力。"
-        elif ev_pct < -5.0:
-            ev_conclusion = f"❌ 赛前负期望 ({ev_pct}%)，坚决不追赛前，等待滚球降盘。"
-        else:
-            ev_conclusion = f"🟡 赔率接近合理区间 (EV {ev_pct}%)，先观望。"
-        action_plan_1 = f"👉 赛前动作: {'赛前允许轻仓试探大 ' + str(line_num) if ev_pct >= 8.0 else '赛前空仓，不追大 ' + str(line_num if line_num > 0 else '?') + '。'}"
-        action_plan_2 = "👉 滚球潜伏: 设定闹钟在第 25 分钟，复核比分、节奏、红牌。"
-        if p31_45 >= 0.5 and p0_15 <= 0.2 and threat_val <= 0.45:
-            action_plan_3 = "👉 狙击扳机: 若 25' 仍 0-0 且场面沉闷，大0.5水位 > 1.80 再评估进场。"
-        elif p31_45 >= 0.45:
-            action_plan_3 = "👉 狙击扳机: 若 25' 仍 0-0 且无红牌，优先等大0.5/大0.75再评估。"
-        else:
-            action_plan_3 = "👉 狙击扳机: 若 10-15' 形成高压并回调到目标线，再执行纸盘进场。"
+        ev_conclusion = "仅作为赛前情报参考，不作为自动下注指令。"
+        action_plan_1 = "👉 建议: 先看HT推荐等级和时间分布。"
+        action_plan_2 = "👉 执行: 是否投注与入场时机由你人工决定。"
+        action_plan_3 = "👉 验证: 赛后核对 HT是否有球 与 时间段命中。"
         scores = r.get("market_scores") or f.get("market_scores") or {}
         market_focus = r.get("market_focus") or "HT_LIVE_OVER"
         intelligence = explain_match(r)
@@ -457,22 +443,29 @@ def _rows_json(rows: list[dict]) -> str:
             action_code = "RISK_BLOCKED"
             risk_level = "HIGH"
             recommendation_bucket = "HT_MAIN" if market_focus == "HT_LIVE_OVER" else recommendation_bucket
+        # 时间分布统一使用推荐器输出的 effective time bins
+        rec_tb = (ht_rec.get("time_bins") or {}) if isinstance(ht_rec, dict) else {}
+        if rec_tb:
+            p0_15 = _float(rec_tb.get("0_15"))
+            p16_30 = _float(rec_tb.get("16_30"))
+            p31_45 = _float(rec_tb.get("31_45"))
+            story_label = ht_rec.get("script_type") or _story_label(rec_tb)
         if action_code == "RISK_BLOCKED":
             strategy_state = "回避"
             strategy_state_class = "plan-red"
             strategy_state_text = "🔴 风控拦截: 暂停执行，等待风险解除。"
-        elif ev_pct >= 8.0:
+        elif (ht_rec.get("grade") or "").upper() == "A":
             strategy_state = "可打"
             strategy_state_class = "plan-green"
-            strategy_state_text = "🟢 可打: 出现条件时允许轻仓执行。"
-        elif ev_pct <= -8.0:
+            strategy_state_text = "🟢 推荐: A级上半场情报，优先关注。"
+        elif (ht_rec.get("grade") or "").upper() == "SKIP":
             strategy_state = "回避"
             strategy_state_class = "plan-red"
-            strategy_state_text = "🔴 回避: 赛前负EV明显，优先等待更优走地线。"
+            strategy_state_text = "🔴 跳过: 上半场不推荐。"
         else:
             strategy_state = "观望"
             strategy_state_class = "plan-yellow"
-            strategy_state_text = "🟡 观望: 先跟踪节奏与盘口，再做条件触发。"
+            strategy_state_text = "🟡 观望: 作为情报观察样本。"
         decision_summary = f"{intelligence.get('profile', '')}。{intelligence.get('summary', '')}"
         match_profile = intelligence.get("profile", "")
         home = r.get("home") or ""
@@ -495,12 +488,8 @@ def _rows_json(rows: list[dict]) -> str:
             tier_head = "HT跳过 | 条件不足"
         elif is_sh_observe:
             tier_head = "SH观察池 | 非HT推荐"
-        elif _float(r.get("hotness_score")) >= 90:
-            tier_head = "S级 | 绝对焦点"
-        elif _float(r.get("hotness_score")) >= 80:
-            tier_head = "A级 | 优质候选"
         else:
-            tier_head = "B级 | 达标观察"
+            tier_head = "HT_SKIP | 上半场不推荐"
         if is_ht_recommend:
             display_bucket = "HT_MAIN"
         elif is_ht_observe:
@@ -576,7 +565,12 @@ def _rows_json(rows: list[dict]) -> str:
             "htRecScriptType": ht_rec.get("script_type", "-"),
             "htRecReasons": "；".join(ht_rec.get("reasons", []) or []),
             "htRecRisks": "；".join(ht_rec.get("risks", []) or []),
+            "htRecRiskTop": ht_rec.get("risk_top", ""),
+            "htRecRiskSeverity": ht_rec.get("risk_severity", ""),
             "htRecSampleSize": ht_rec.get("sample_size", 0),
+            "htRecRuleVersion": ht_rec.get("rule_version", "-"),
+            "htRecTimeBinsSource": ht_rec.get("time_bins_source", "-"),
+            "htRecDirectionFocus": ht_rec.get("direction_focus", "-"),
             "bestFocusByScore": r.get("best_focus_by_score") or f.get("best_focus_by_score") or "",
             "htScore": _float(scores.get("HT_LIVE_OVER")),
             "shScore": _float(scores.get("SECOND_HALF_OVER")),
@@ -716,19 +710,31 @@ def render_dashboard(date_str: str, window_mode: str = "natural") -> Path:
     hp = {}
     if isinstance(validation, dict) and validation.get("total_matches"):
         grades = validation.get("per_grade", {})
+        funnel = validation.get("funnel", {}) or {}
+        monotonic = validation.get("monotonicity", {}) or {}
+        cov = validation.get("coverage_monitor", {}) or {}
         total = validation.get("total_matches", 0)
         pending = validation.get("pending_matches", total)
         completed = total - pending
-        a_data = grades.get("A", {})
-        b_data = grades.get("B", {})
         c_data = grades.get("C", {})
-        ab_total = a_data.get("total", 0) + b_data.get("total", 0)
-        ab_hit = a_data.get("hit", 0) + b_data.get("hit", 0)
-        ab_rate = round(ab_hit / max(ab_total, 1) * 100, 1)
+        ab_rate = round(float(funnel.get("a_plus_b_hit_rate_pct", 0.0)), 1)
         c_rate = round(c_data.get("hit_rate_pct", 0), 1)
+        flags = []
+        if str(monotonic.get("status", "UNKNOWN")) == "FAIL":
+            flags.append("分级单调性失败")
+        cov_health = str(cov.get("health", "OK"))
+        if cov_health == "LOW":
+            flags.append("A+B覆盖率偏低")
+        elif cov_health == "HIGH":
+            flags.append("A+B覆盖率偏高")
+        health_status = "GREEN"
+        if completed == 0:
+            health_status = "UNKNOWN"
+        elif flags:
+            health_status = "YELLOW"
         hp = {
-            "health_status": "GREEN" if completed >= total * 0.8 else ("YELLOW" if completed > 0 else "UNKNOWN"),
-            "kill_criteria_flags": [],
+            "health_status": health_status,
+            "kill_criteria_flags": flags,
             "sample_progress": {
                 "sample_size": completed,
                 "min_sample": total,
@@ -787,20 +793,28 @@ def render_dashboard(date_str: str, window_mode: str = "natural") -> Path:
             d_hp = {}
             if isinstance(d_valid, dict) and d_valid.get("total_matches"):
                 grades = d_valid.get("per_grade", {})
+                funnel = d_valid.get("funnel", {}) or {}
+                monotonic = d_valid.get("monotonicity", {}) or {}
+                cov = d_valid.get("coverage_monitor", {}) or {}
                 total = d_valid.get("total_matches", 0)
                 pending = d_valid.get("pending_matches", total)
                 completed = total - pending
-                a_data = grades.get("A", {})
-                b_data = grades.get("B", {})
                 c_data = grades.get("C", {})
-                ab_total = a_data.get("total", 0) + b_data.get("total", 0)
-                ab_hit = a_data.get("hit", 0) + b_data.get("hit", 0)
+                flags = []
+                if str(monotonic.get("status", "UNKNOWN")) == "FAIL":
+                    flags.append("分级单调性失败")
+                cov_health = str(cov.get("health", "OK"))
+                if cov_health == "LOW":
+                    flags.append("A+B覆盖率偏低")
+                elif cov_health == "HIGH":
+                    flags.append("A+B覆盖率偏高")
                 d_hp = {
-                    "status": "GREEN" if completed >= total * 0.8 else ("YELLOW" if completed > 0 else "UNKNOWN"),
+                    "status": "GREEN" if completed > 0 and not flags else ("YELLOW" if completed > 0 else "UNKNOWN"),
                     "completed": completed, "total": total,
                     "pct": round(completed / max(total, 1) * 100, 1),
-                    "abRate": round(ab_hit / max(ab_total, 1) * 100, 1),
+                    "abRate": round(float(funnel.get("a_plus_b_hit_rate_pct", 0.0)), 1),
                     "cRate": round(c_data.get("hit_rate_pct", 0), 1),
+                    "flags": "；".join(flags) if flags else "无触发",
                 }
             elif isinstance(d_review, dict):
                 rhp = d_review.get("health_panel", {}) or {}
@@ -812,6 +826,7 @@ def render_dashboard(date_str: str, window_mode: str = "natural") -> Path:
                     "pct": sp.get("progress_pct", 0),
                     "abRate": ex.get("conservative_fill_roi_pct", 0),
                     "cRate": ex.get("slippage_adjusted_roi_pct", 0),
+                    "flags": "无触发",
                 }
             all_rows_json[d] = {"rows": d_json_rows, "health": d_hp}
         except Exception:
@@ -913,6 +928,7 @@ def render_dashboard(date_str: str, window_mode: str = "natural") -> Path:
         <span class="pill"><b id="visibleCount">0</b> / {len(rows)} 场</span>
         <span class="pill">时间口径：{html.escape(mode_text)}</span>
         <span class="pill">A级: <b id="cntHTA">0</b> · B级: <b id="cntHTB">0</b> · C级: <b id="cntHTC">0</b> · SKIP: <b id="cntHTSkip">0</b></span>
+        <span class="pill">覆盖率(A+B): <b id="cntABRatio">0%</b> <span id="cntABHealth"></span></span>
       </div>
       <div class="health-panel health-yellow" id="healthPanel">
         <div class="health-head">
@@ -988,16 +1004,17 @@ def render_dashboard(date_str: str, window_mode: str = "natural") -> Path:
             <div class="match">${{row.home}} vs ${{row.away}}</div>
             <div class="meta">${{row.league}} · ${{row.timeLabel || row.time || '--:--'}} · #${{row.fixture_id}} · ${{row.liveMinute || '-'}}' ${{row.liveScore || '-'}}</div>
           </div>
-          <div class="score">${{row.hotness}}<small>${{t}}</small></div>
+          <div class="score">${{row.hotness}}<small>全局热度</small></div>
         </div>
         <div class="tags">
           <span class="tag ${{actionColor(action)}}">${{action}}</span>
-          <span class="tag">${{t}}</span>
           <span class="tag">初盘 大${{row.lineNum || row.displayLine || '?'}} @${{row.oddsNum || row.displayOdds || '-'}}</span>
           <span class="tag">HT评分 ${{row.htScore || '-'}}</span>
           <span class="tag">HT有球率 ${{row.h2hText || '-'}}</span>
           <span class="tag">样本 ${{row.htRecSampleSize || 0}}</span>
           <span class="tag">分布 ${{row.htRecScriptType || '-'}}</span>
+          <span class="tag">分布源 ${{row.htRecTimeBinsSource || '-'}}</span>
+          <span class="tag">规则 ${{row.htRecRuleVersion || '-'}}</span>
         </div>
         <div class="verdict">HT推荐结论：${{row.htRecGrade || '-'}}级 · ${{row.htRecReason || row.htDecisionReason || '-'}}${{(row.isShObserve && !row.isHtMain) ? ' ｜ SH观察：不计入HT主推荐' : ''}}</div>
         <div class="detail">
@@ -1013,7 +1030,7 @@ def render_dashboard(date_str: str, window_mode: str = "natural") -> Path:
         <div class="section">
           <div class="section-title">💡 执行与风险</div>
           <div class="detail">${{row.actionPlan1 || '-'}}<br>${{row.actionPlan2 || '-'}}<br>${{row.actionPlan3 || '-'}}<br>
-          风险: ${{row.htRecRisks || (row.avoidIfText || '-').split('；').slice(0,2).join(' / ')}}</div>
+          风险: ${{row.htRecRiskTop || row.htRecRisks || (row.avoidIfText || '-').split('；').slice(0,2).join(' / ')}}</div>
         </div>
         <div class="plan-strip ${{row.strategyStateClass || 'plan-yellow'}}">赛后验证：记录 HT是否有球 + 命中时间段（0-15/16-30/31-45）</div>
         <details class="audit"><summary>查看完整数据</summary>
@@ -1103,6 +1120,7 @@ def render_dashboard(date_str: str, window_mode: str = "natural") -> Path:
       const panel = document.getElementById('healthPanel');
       panel.className = 'health-panel ' + (status === 'GREEN' ? 'health-green' : status === 'RED' ? 'health-red' : 'health-yellow');
       document.getElementById('healthStatus').textContent = '策略健康：' + status;
+      document.getElementById('healthFlags').textContent = 'Flags: ' + (h.flags || '无触发');
       document.getElementById('healthProgress').textContent = (h.completed || 0) + '/' + (h.total || 0);
       document.getElementById('healthPct').textContent = (h.pct || 0) + '%';
       document.getElementById('healthAB').textContent = (h.abRate || 0) + '%';
@@ -1113,10 +1131,17 @@ def render_dashboard(date_str: str, window_mode: str = "natural") -> Path:
       const htB = rows.filter(r => (r.htRecGrade || '') === 'B').length;
       const htC = rows.filter(r => !!r.isHtObserve).length;
       const htSkip = rows.filter(r => !!r.isHtSkip).length;
+      const total = rows.length || 1;
+      const abRatio = ((htA + htB) / total) * 100;
       el('cntHTA').textContent = String(htA);
       el('cntHTB').textContent = String(htB);
       el('cntHTC').textContent = String(htC);
       el('cntHTSkip').textContent = String(htSkip);
+      el('cntABRatio').textContent = abRatio.toFixed(1) + '%';
+      let abHealth = 'OK';
+      if (abRatio < 5) abHealth = '偏低';
+      else if (abRatio > 15) abHealth = '偏高';
+      el('cntABHealth').textContent = '[' + abHealth + ']';
       const out = filtered();
       el('visibleCount').textContent = out.length;
       if (out.length === 0) {{
@@ -1160,12 +1185,15 @@ def main():
     args = parser.parse_args()
     out_path = render_dashboard(args.date, args.window_mode)
     print(f"V4 dashboard saved: {out_path}")
-    # 自动拷贝到 canvas 嵌入目录
-    canvas_path = BASE_DIR.parent.parent / "canvas" / "documents" / "v4_dashboard" / "index.html"
-    canvas_path.parent.mkdir(parents=True, exist_ok=True)
-    import shutil
-    shutil.copy(out_path, canvas_path)
-    print(f"Canvas: {canvas_path}")
+    # 自动拷贝到 canvas 嵌入目录（权限不足时忽略）
+    try:
+        canvas_path = BASE_DIR.parent.parent / "canvas" / "documents" / "v4_dashboard" / "index.html"
+        canvas_path.parent.mkdir(parents=True, exist_ok=True)
+        import shutil
+        shutil.copy(out_path, canvas_path)
+        print(f"Canvas: {canvas_path}")
+    except Exception:
+        pass
     if args.open:
         subprocess.run(["open", str(out_path)], check=False)
 

@@ -1,0 +1,41 @@
+{
+  "rule_version": "v4_ht_recommend_20260513",
+  "coverage_target": {
+    "ab_ratio_min_pct": 5.0,
+    "ab_ratio_max_pct": 15.0
+  },
+  "sample_policy": {
+    "min_for_ab": 3,
+    "a_downgrade_to_b_if_sample_lt": 5,
+    "a_mark_medium_sample_if_lt": 8,
+    "confidence_boost_if_sample_gte": 10
+  },
+  "grades": {
+    "A": {
+      "min_ht_score": 70,
+      "min_h2h_ht_goal_rate": 0.65,
+      "min_recent_ht": 0.70,
+      "min_ht_attack": 0.70,
+      "min_late_11_45": 0.55,
+      "min_sample_size": 5,
+      "allow_early_only": false
+    },
+    "B": {
+      "min_ht_score": 60,
+      "min_h2h_ht_goal_rate": 0.55,
+      "min_recent_ht": 0.60,
+      "min_ht_attack": 0.60,
+      "min_late_11_45": 0.45,
+      "min_sample_size": 3,
+      "allow_early_only": true
+    },
+    "C": {
+      "min_ht_score": 50
+    }
+  },
+  "skip": {
+    "min_h2h_ht_goal_rate": 0.50,
+    "min_ht_avg_goals": 0.60,
+    "min_late_11_45": 0.45
+  }
+}
