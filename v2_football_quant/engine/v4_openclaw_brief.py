@@ -29,6 +29,11 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(BASE_DIR))
 
 from engine.v4_match_intelligence import explain_match
+try:
+    from engine.team_cn_map import strict_match as team_name_cn
+except Exception:
+    def team_name_cn(name: str) -> str:
+        return name
 
 REPORT_DIR = BASE_DIR / "data" / "daily_reports"
 
@@ -101,8 +106,8 @@ def _collect_rows(scout: list[dict[str, Any]]) -> list[dict[str, Any]]:
         rows.append(
             {
                 "fixture_id": rec.get("fixture_id"),
-                "home": rec.get("home") or "-",
-                "away": rec.get("away") or "-",
+                "home": team_name_cn(rec.get("home") or "-"),
+                "away": team_name_cn(rec.get("away") or "-"),
                 "league": rec.get("league") or "-",
                 "time": _row_time(rec),
                 "grade": grade,
