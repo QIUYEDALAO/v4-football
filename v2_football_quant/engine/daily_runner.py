@@ -15,6 +15,7 @@ import json, ssl, time, os, math, certifi, sys, argparse
 import urllib.request
 from pathlib import Path
 from datetime import datetime, date, timedelta, timezone
+from zoneinfo import ZoneInfo
 from typing import Optional
 from logger import logger, log_event
 
@@ -57,6 +58,15 @@ if MATRIX_CONFIG_PATH.exists():
 
 TOP5_IDS = set(MATRIX_CONFIG.get("top5_league_ids", [39, 140, 135, 78, 61]))
 
+LOCAL_TZ = ZoneInfo("Asia/Shanghai")
+
+def get_ops_date(now=None):
+    """运营日: 12:00切换。午夜后凌晨比赛仍归前一天运营窗口"""
+    now = now or datetime.now(LOCAL_TZ)
+    if now.hour < 12:
+        return now.date() - timedelta(days=1)
+    return now.date()
+
 
 def get_matrix_for_league(league_id):
     """双轨制: 五大联赛用专项矩阵, 其余用默认"""
@@ -86,7 +96,7 @@ def fetch_today_fixtures() -> list[dict]:
     北京时间 12:00 到次日 12:00 为一天。
     对应拉取今天+明天的 api-football 数据，再按北京时间过滤。
     """
-    td = date.today()
+    td = get_ops_date()
     td_str = td.strftime("%Y-%m-%d")
     nd_str = (td + timedelta(days=1)).strftime("%Y-%m-%d")
     logger.info(f"[1/7] 拉取赛程 (BJ {td_str} 12:00 → {nd_str} 12:00)...")
@@ -157,12 +167,18 @@ def fetch_today_fixtures() -> list[dict]:
     logger.info(f"  → {len(unique)} 场未开始")
     return unique
 
-def fetch_details(fixtures: list[dict]) -> list[dict]:
+def fetch_details(fixtures: list[dict], quick_mode: bool = False) -> list[dict]:
     logger.info(f"[2/7] 拉取 Predictions...")
     enriched = []
 
     for i, fx in enumerate(fixtures):
         fid = fx["id"]
+        if quick_mode:
+            # 快速模式：跳过 Predictions API，用缓存数据
+            fx["_predictions"] = fx.get("_predictions", {})
+            fx["_fallback"] = True
+            enriched.append(fx)
+            continue
         try:
             pred_resp = api(f"predictions?fixture={fid}")
         except Exception as e:
@@ -289,7 +305,7 @@ def calc_edge(fx: dict) -> Optional[dict]:
 
 # ===== Step 6: 日报生成 =====
 def generate_report(fixtures: list[dict], bets: list[dict], stats: dict) -> str:
-    td = date.today().strftime("%Y-%m-%d")
+    td = get_ops_date().strftime("%Y-%m-%d")
     now = datetime.now().strftime("%H:%M")
 
     lines = [
@@ -344,14 +360,15 @@ def generate_report(fixtures: list[dict], bets: list[dict], stats: dict) -> str:
     return "\n".join(lines)
 
 
-def run_once(run_tag="DEFAULT"):
+def run_once(run_tag="DEFAULT", quick_mode=False):
+    """quick_mode: 只刷新赔率，跳过 Predictions 和矩阵重建"""
     print("=" * 60)
-    print(f"V2 Daily Runner v2.3 KICKOFF_RELATIVE (HT 1X2) | TAG: {run_tag}")
+    print(f"V2 Daily Runner v2.3 KICKOFF_RELATIVE (HT 1X2) | TAG: {run_tag} | {'QUICK' if quick_mode else 'FULL'}")
     print(f"启动: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
     print("=" * 60)
 
     # 🌟 读取今日已锁定比赛 (防止三频重复下单)
-    today_str = date.today().strftime("%Y%m%d")
+    today_str = get_ops_date().strftime("%Y%m%d")
     state_file = STATE_DIR / f"selected_fixtures_{today_str}.json"
     already_selected = set()
     if state_file.exists():
@@ -364,7 +381,7 @@ def run_once(run_tag="DEFAULT"):
         print("\n> 今日无比赛，退出")
         return
 
-    fixtures = fetch_details(fixtures)
+    fixtures = fetch_details(fixtures, quick_mode=quick_mode)
 
     # 💰 实例化真实资金池 (P0 修复: 打通 bankroll.py 经脉)
     br = Bankroll()
@@ -488,18 +505,22 @@ def run_once(run_tag="DEFAULT"):
         
         # ── V2.3 开赛相对时间扫描阶段 ──
         try:
-            ko_str = str(fx.get("kickoff", "")).replace("Z", "+00:00")
+            ko_str = str(fx.get("date", "")).replace("Z", "+00:00")
             ko_dt = datetime.fromisoformat(ko_str)
             if ko_dt.tzinfo is None:
-                ko_dt = ko_dt.replace(tzinfo=timezone(timedelta(hours=8)))
+                ko_dt = ko_dt.replace(tzinfo=LOCAL_TZ)
+            else:
+                ko_dt = ko_dt.astimezone(LOCAL_TZ)
         except Exception:
             ko_dt = None
         minutes_to_ko = None
         scan_stage = "FAR_FUTURE"
         if ko_dt:
-            now_local = datetime.now()
+            now_local = datetime.now(LOCAL_TZ)
             minutes_to_ko = int((ko_dt - now_local).total_seconds() / 60)
-            if minutes_to_ko <= 15:
+            if minutes_to_ko < 0:
+                scan_stage = "STARTED_OR_CLOSED"
+            elif minutes_to_ko <= 15:
                 scan_stage = "T_MINUS_15M"
             elif minutes_to_ko <= 45:
                 scan_stage = "T_MINUS_45M"
@@ -581,6 +602,9 @@ def run_once(run_tag="DEFAULT"):
         # T-3h: 候选，不锁
         # T-90m/T-45m: 正式推荐 V2_MAIN
         # T-15m: 仅最终记录，不新增推荐
+        if scan_stage == "STARTED_OR_CLOSED":
+            all_candidates.append(base_rec)
+            continue  # 已开赛，不处理
         if scan_stage in ("FAR_FUTURE", "T_MINUS_12H", "T_MINUS_6H"):
             stats["stage_early_watch"] = stats.get("stage_early_watch", 0) + 1
             base_rec.update({"action": "WATCH_ONLY", 
@@ -669,7 +693,7 @@ def run_once(run_tag="DEFAULT"):
 
     # ── 🌎 全量候选池快照 (基准防线 · 专家建议三) ──
     universe = []
-    today_str = date.today().strftime('%Y%m%d')
+    today_str = get_ops_date().strftime('%Y%m%d')
     for fx in fixtures:
         odds = fx.get("_ht_1x2", {})
         row = fx.get("decile_info", {})
@@ -698,13 +722,13 @@ def run_once(run_tag="DEFAULT"):
 
     logger.info(f"[6/7] 生成日报 + 保存全量死因追踪...")
     report = generate_report(fixtures, bets, stats)
-    report_path = REPORT_DIR / f"daily_{date.today().strftime('%Y%m%d')}.md"
+    report_path = REPORT_DIR / f"daily_{get_ops_date().strftime('%Y%m%d')}.md"
     with open(report_path, "w") as f:
         f.write(report)
     logger.info(f"  → {report_path}")
     
     # ── 保存全量死因追踪 (三频合并, 复合主键去重) ──
-    scan_path = REPORT_DIR / f"full_scan_{date.today().strftime('%Y%m%d')}.json"
+    scan_path = REPORT_DIR / f"full_scan_{get_ops_date().strftime('%Y%m%d')}.json"
     existing_full = []
     existing_scan_keys = set()
     if scan_path.exists():
@@ -728,7 +752,7 @@ def run_once(run_tag="DEFAULT"):
         if f"{p['fixture_id']}_{p.get('scan_tag', 'DEFAULT')}" not in existing_scan_keys
     ]
     with open(scan_path, "w") as f:
-        json.dump({"date": date.today().isoformat(), "stats": stats, "candidates": merged_full}, f, ensure_ascii=False, indent=2)
+        json.dump({"date": get_ops_date().isoformat(), "stats": stats, "candidates": merged_full}, f, ensure_ascii=False, indent=2)
     logger.info(f"📋 全量死因追踪: {len(merged_full)} 场 (新增 {len(all_candidates)}) → {scan_path}")
 
     logger.info(f"[7/7] 输出日报 + 保存预测")
@@ -740,7 +764,7 @@ def run_once(run_tag="DEFAULT"):
     for rec in bets:
         pred_save.append({
             "fixture_id": rec["fixture_id"],
-            "date": date.today().isoformat(),
+            "date": get_ops_date().isoformat(),
             "home": rec["home"],
             "away": rec["away"],
             "league": rec["league_name"],
@@ -763,7 +787,7 @@ def run_once(run_tag="DEFAULT"):
             "attrition_boost_candidate": rec.get("attrition_boost_candidate", False),
         })
 
-    pred_path = REPORT_DIR / f"predictions_{date.today().strftime('%Y%m%d')}.json"
+    pred_path = REPORT_DIR / f"predictions_{get_ops_date().strftime('%Y%m%d')}.json"
     # 读取现有 → 合并 → 去重（防止重复运行覆盖之前的结果）
     existing = []
     existing_ids = set()
@@ -789,16 +813,19 @@ def run_once(run_tag="DEFAULT"):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument("--run_tag", type=str, default="MANUAL", help="运行时段标识 AM0800/NOON1200/PM1600")
+    parser.add_argument("--run_tag", type=str, default="MANUAL", help="运行时段标识")
+    parser.add_argument("--quick", action="store_true", help="快速模式：只刷新赔率，跳过Predictions")
     parser.add_argument("--watch", action="store_true")
     args = parser.parse_args()
 
     if args.watch:
         print("持续监控模式 (不再推荐，请使用 Cron)")
         import schedule as sched
-        sched.every().day.at("08:00").do(run_once, run_tag="AM0800")
+        sched.every().day.at("12:00").do(run_once, run_tag="DAILY_POOL", quick_mode=False)
+        for hour in range(24):
+            sched.every().day.at(f"{hour:02d}:00").do(run_once, run_tag=f"HOURLY_{hour:02d}", quick_mode=True)
         while True:
             sched.run_pending()
             time.sleep(60)
     else:
-        run_once(run_tag=args.run_tag)
+        run_once(run_tag=args.run_tag, quick_mode=args.quick)
