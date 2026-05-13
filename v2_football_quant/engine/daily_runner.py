@@ -336,9 +336,9 @@ def generate_report(fixtures: list[dict], bets: list[dict], stats: dict) -> str:
         lines.append("")
 
     lines.append("")
-    lines.append(f"> 🤖 V2 v2.2 FIXED_ODDS_BAND · 赔率带策略 2.00-2.90")
+    lines.append(f"> 🤖 V2 v2.3 KICKOFF_RELATIVE · T-90m/T-45m 主推荐窗口")
     lines.append(f"> ⚠️ 纸盘模式 — 仅记录，不下单")
-    lines.append(f"> 🔑 赔率 2.00-2.90 固定1u | 2.90+ 观察池 | EV只记录不筛选")
+    lines.append(f"> 🔑 赔率 2.00-2.90 固定1u | T-12h早盘观察 | T-3h候选 | T-90m锁定")
     lines.append(f"> 📏 每日上限20场 · 同联赛上限2场 · Kelly暂停")
 
     return "\n".join(lines)
@@ -346,7 +346,7 @@ def generate_report(fixtures: list[dict], bets: list[dict], stats: dict) -> str:
 
 def run_once(run_tag="DEFAULT"):
     print("=" * 60)
-    print(f"V2 Daily Runner v2.2 FIXED_ODDS_BAND (HT 1X2) | TAG: {run_tag}")
+    print(f"V2 Daily Runner v2.3 KICKOFF_RELATIVE (HT 1X2) | TAG: {run_tag}")
     print(f"启动: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
     print("=" * 60)
 
@@ -430,7 +430,10 @@ def run_once(run_tag="DEFAULT"):
         "skip_no_market": 0,
         "skip_odds_band": 0,
         "watch_odds_high": 0,
-        "bet_placed": 0
+        "bet_placed": 0,
+        "stage_early_watch": 0,
+        "stage_candidate": 0,
+        "stage_too_late": 0,
     }
     
     all_candidates = []  # 全量追踪：每场都有记录 (含SKIP死因)
@@ -483,6 +486,34 @@ def run_once(run_tag="DEFAULT"):
             "scan_time_local": datetime.now().isoformat(),
         }
         
+        # ── V2.3 开赛相对时间扫描阶段 ──
+        try:
+            ko_str = str(fx.get("kickoff", "")).replace("Z", "+00:00")
+            ko_dt = datetime.fromisoformat(ko_str)
+            if ko_dt.tzinfo is None:
+                ko_dt = ko_dt.replace(tzinfo=timezone(timedelta(hours=8)))
+        except Exception:
+            ko_dt = None
+        minutes_to_ko = None
+        scan_stage = "FAR_FUTURE"
+        if ko_dt:
+            now_local = datetime.now()
+            minutes_to_ko = int((ko_dt - now_local).total_seconds() / 60)
+            if minutes_to_ko <= 15:
+                scan_stage = "T_MINUS_15M"
+            elif minutes_to_ko <= 45:
+                scan_stage = "T_MINUS_45M"
+            elif minutes_to_ko <= 90:
+                scan_stage = "T_MINUS_90M"
+            elif minutes_to_ko <= 180:
+                scan_stage = "T_MINUS_3H"
+            elif minutes_to_ko <= 360:
+                scan_stage = "T_MINUS_6H"
+            elif minutes_to_ko <= 720:
+                scan_stage = "T_MINUS_12H"
+        base_rec["scan_stage"] = scan_stage
+        base_rec["minutes_to_kickoff"] = minutes_to_ko
+        
         market_odds = fx.get("_ht_1x2") or {}
         odds_D = market_odds.get("D")
         odds_H = market_odds.get("H")
@@ -534,7 +565,7 @@ def run_once(run_tag="DEFAULT"):
         
         # ── 主策略 V2_MAIN 2.00-2.90 ──
         # Kelly 暂停，固定 1u
-        base_rec["strategy_id"] = "V2_HT_DRAW_v2.2_FIXED_ODDS_BAND"
+        base_rec["strategy_id"] = "V2_HT_DRAW_v2.3_KICKOFF_RELATIVE"
         stake_info = {
             "action": "BET",
             "stake": 1.0,
@@ -544,6 +575,33 @@ def run_once(run_tag="DEFAULT"):
             "kelly_factor_used": 0.0,
         }
         base_rec["stake_info"] = stake_info
+        
+        # ── V2.3 开赛相对时间 gating ──
+        # T-12h/T-6h: 只记录赔率，WATCH_ONLY
+        # T-3h: 候选，不锁
+        # T-90m/T-45m: 正式推荐 V2_MAIN
+        # T-15m: 仅最终记录，不新增推荐
+        if scan_stage in ("FAR_FUTURE", "T_MINUS_12H", "T_MINUS_6H"):
+            stats["stage_early_watch"] = stats.get("stage_early_watch", 0) + 1
+            base_rec.update({"action": "WATCH_ONLY", 
+                           "skip_code": "STAGE_EARLY",
+                           "skip_reason": f"{scan_stage} 只记录赔率，不进入推荐"})
+            all_candidates.append(base_rec)
+            continue
+        elif scan_stage == "T_MINUS_3H":
+            stats["stage_candidate"] = stats.get("stage_candidate", 0) + 1
+            base_rec["action"] = "CANDIDATE"
+            base_rec["skip_code"] = "STAGE_CANDIDATE"
+            base_rec["skip_reason"] = "T-3h 候选，等待 T-90m 锁定"
+            # 不锁 already_selected
+        elif scan_stage == "T_MINUS_15M":
+            stats["stage_too_late"] = stats.get("stage_too_late", 0) + 1
+            base_rec.update({"action": "WATCH_ONLY",
+                           "skip_code": "STAGE_TOO_LATE",
+                           "skip_reason": "T-15m 仅最终记录，不新增推荐"})
+            all_candidates.append(base_rec)
+            continue
+        # T-90m / T-45m → 正式推荐，走下面的锁逻辑
         
         # ── 🌟 首次触发去重锁 (Time-Series Signal Lock) ──
         if fx["id"] in already_selected:
@@ -602,6 +660,9 @@ def run_once(run_tag="DEFAULT"):
     logger.info(f"👁️ WATCH_ONLY (>=2.90): {stats.get('watch_odds_high',0)}")
     logger.info(f"❌ SKIP (<2.00): {stats.get('skip_odds_band',0)}")
     logger.info(f"🎯 最终推荐: {len(bets)}")
+    logger.info(f"⏰ 早盘观察 (T-12h/T-6h): {stats.get('stage_early_watch',0)}")
+    logger.info(f"⏰ 候选观察 (T-3h): {stats.get('stage_candidate',0)}")
+    logger.info(f"⏰ 过晚跳过 (T-15m): {stats.get('stage_too_late',0)}")
     logger.info(f"📊 漏斗: 候选{stats['bet_placed']} → 去重后{stats['bet_placed']-stats.get('league_skipped',0)} → 上限后{len(bets)}")
     logger.info(f"📏 Kelly暂停 · EV仅记录 · 每日上限20场")
     logger.info("="*40)
