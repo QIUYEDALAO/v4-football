@@ -432,7 +432,22 @@ def run_once(run_tag="DEFAULT", quick_mode=False):
 
     logger.info(f"[4/7] 拉取 HT 1X2 赔率...")
     for fx in fixtures:
-        odds = fetch_ht_1x2(fx["id"])
+        fid = fx["id"]
+        if quick_mode:
+            # 快速模式：只拉距开赛 12h 内的赔率，减少 API 调用
+            try:
+                ko_str = str(fx.get("date", "")).replace("Z", "+00:00")
+                ko_dt = datetime.fromisoformat(ko_str)
+                if ko_dt.tzinfo is None:
+                    ko_dt = ko_dt.replace(tzinfo=LOCAL_TZ)
+                else:
+                    ko_dt = ko_dt.astimezone(LOCAL_TZ)
+                if (ko_dt - datetime.now(LOCAL_TZ)).total_seconds() > 43200:
+                    fx["_ht_1x2"] = fx.get("_ht_1x2") or {}
+                    continue
+            except Exception:
+                pass
+        odds = fetch_ht_1x2(fid)
         fx["_ht_1x2"] = odds
         if odds and "H" in odds:
             print(f"  {fx['home']}vs{fx['away']}: H={odds.get('H','?')} D={odds.get('D','?')} A={odds.get('A','?')}")
