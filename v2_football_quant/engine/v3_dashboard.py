@@ -71,6 +71,10 @@ def render_dashboard(date_key: str) -> dict[str, Any]:
     rows = _load_jsonl(signals_path)
     clv = _load_json(V3_DIR / "v3_clv_audit.json", {})
     counts = _build_counts(rows)
+    by_source = {}
+    for r in rows:
+        s = str(r.get("stage_source") or "unknown")
+        by_source[s] = by_source.get(s, 0) + 1
 
     extreme = sorted(
         [r for r in rows if float(r.get("gap_abs") or 0.0) >= 1.0],
@@ -113,7 +117,7 @@ def render_dashboard(date_key: str) -> dict[str, Any]:
 </head>
 <body>
   <h1>🌍 V3 世界杯泡沫雷达（{date_key}）</h1>
-  <div class="grid">
+    <div class="grid">
     <div class="card"><div class="label">MD1 纸盘</div><div class="val">{counts.get('V3_MD1_PAPER', 0)}</div></div>
     <div class="card"><div class="label">MD2 观察</div><div class="val">{counts.get('V3_MD2_WATCH', 0)}</div></div>
     <div class="card"><div class="label">MD2 微沙盒</div><div class="val">{counts.get('V3_MD2_MICRO', 0)}</div></div>
@@ -126,6 +130,13 @@ def render_dashboard(date_key: str) -> dict[str, Any]:
     <div class="card"><div class="label">MD1 平均CLV</div><div class="val">{((clv.get('MD1_stats') or {{}}).get('avg_true_clv_pct') or 0):.2f}%</div></div>
     <div class="card"><div class="label">MD2 Rolling10 CLV</div><div class="val">{((clv.get('MD2_rolling_10') or {{}}).get('avg_true_clv_pct') or 0):.2f}%</div></div>
     <div class="card"><div class="label">Micro准入</div><div class="val">{_html_escape(((clv.get('micro_gate') or {{}}).get('status') or 'BLOCK'))}</div></div>
+    </div>
+  <div class="grid">
+    <div class="card"><div class="label">阶段来源 explicit</div><div class="val">{by_source.get('explicit', 0)}</div></div>
+    <div class="card"><div class="label">阶段来源 matchday</div><div class="val">{by_source.get('matchday', 0)}</div></div>
+    <div class="card"><div class="label">阶段来源 team_group_order</div><div class="val">{by_source.get('team_group_order', 0)}</div></div>
+    <div class="card"><div class="label">阶段来源 global_fallback</div><div class="val">{by_source.get('global_fallback', 0)}</div></div>
+    <div class="card"><div class="label">阶段来源 unknown</div><div class="val">{by_source.get('unknown', 0)}</div></div>
   </div>
   <h2>🔥 极端泡沫 Top</h2>
   <table>
@@ -148,6 +159,7 @@ def render_dashboard(date_key: str) -> dict[str, Any]:
         "date": date_key,
         "signals": len(rows),
         "counts": counts,
+        "by_stage_source": by_source,
         "output_path": str(out),
         "latest_path": str(latest),
     }
@@ -167,4 +179,3 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
-

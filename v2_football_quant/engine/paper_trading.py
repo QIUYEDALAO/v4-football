@@ -877,7 +877,7 @@ def full_summary(window_size: int = 10):
         print("=" * 60)
 
     # ── 🌍 V3 大赛引擎专属仪表盘 ──
-    v3_bets = [r for r in all_results if r.get("strategy_id") == "V3_PERCEPTION_GAP_SNIPER"]
+    v3_bets = [r for r in all_results if r.get("strategy_id") in {"V3_PERCEPTION_GAP_SNIPER", "V3_WC_BUBBLE"}]
     if v3_bets:
         print(f"\n🌍 【V3 大赛引擎专属仪表盘】")
         print("=" * 60)

@@ -72,6 +72,9 @@ class StrategyRouter:
 
             if self.enable_active_routing:
                 strategy_id = signal.get("strategy_id", "UNKNOWN")
+                if strategy_id == "V3_PERCEPTION_GAP_SNIPER":
+                    signal["strategy_id"] = "V3_WC_BUBBLE"
+                    strategy_id = "V3_WC_BUBBLE"
                 orig_priority = signal.get("priority", 50)
 
                 if strategy_id == "V2_HT_DRAW":
@@ -104,7 +107,7 @@ class StrategyRouter:
                             signal["priority"] = 0
 
                 # ── V3 认知泡沫狙击手 (大赛引擎) ──
-                elif strategy_id in {"V3_PERCEPTION_GAP_SNIPER", "V3_WC_BUBBLE"}:
+                elif strategy_id == "V3_WC_BUBBLE":
                     signal = self._apply_v3_guard(signal)
                     if signal.get("action") == "V3_MD2_MICRO":
                         signal["priority"] = 99
@@ -121,6 +124,9 @@ class StrategyRouter:
         """
         engine_stats = engine_stats or {}
         strategy_id = signal.get("strategy_id", "UNKNOWN")
+        if strategy_id == "V3_PERCEPTION_GAP_SNIPER":
+            signal["strategy_id"] = "V3_WC_BUBBLE"
+            strategy_id = "V3_WC_BUBBLE"
 
         # ── V2 物理断路器 (长期负EV, 绝对禁止实盘) ──
         if strategy_id == "V2_HT_DRAW":
@@ -131,7 +137,7 @@ class StrategyRouter:
             return signal
 
         # ── 🚀 V3 世界杯核武网关 (三段式 + 动态加仓) ──
-        if strategy_id in {"V3_WC_BUBBLE", "V3_PERCEPTION_GAP_SNIPER"}:
+        if strategy_id == "V3_WC_BUBBLE":
             return self._apply_v3_guard(signal, engine_stats=engine_stats)
 
         return signal  # 非 V2/V4/V3 信号，正常放行

@@ -8,6 +8,7 @@ from typing import Any
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 V3_DIR = BASE_DIR / "data" / "v3_wc2026"
+CONFIG_PATH = BASE_DIR / "config" / "v3_wc_config.json"
 
 
 def _load_jsonl(path: Path) -> list[dict[str, Any]]:
@@ -31,6 +32,16 @@ def _to_float(v: Any, default: float = 0.0) -> float:
         return float(v)
     except Exception:
         return default
+
+
+def _load_cfg() -> dict[str, Any]:
+    if not CONFIG_PATH.exists():
+        return {}
+    try:
+        with open(CONFIG_PATH, encoding="utf-8") as f:
+            return json.load(f)
+    except Exception:
+        return {}
 
 
 def _calc_clv_pct(entry_odds: float, close_odds: float) -> float:
@@ -74,6 +85,11 @@ def run_audit(date_key: str) -> dict[str, Any]:
     md2 = [x for x in normalized if x.get("wc_stage") == "MD2"]
     md2_last10 = md2[-10:] if len(md2) >= 10 else md2
 
+    md1_comp_values = [_to_float(x.get("data_completeness_pct"), 0.0) for x in md1]
+    md1_comp_avg = round(sum(md1_comp_values) / len(md1_comp_values), 2) if md1_comp_values else 0.0
+    cfg = _load_cfg()
+    min_comp = _to_float(((cfg.get("md1_gate") or {}).get("min_data_completeness_pct")), 90.0)
+
     out = {
         "date": date_key,
         "generated_at": datetime.utcnow().isoformat() + "Z",
@@ -82,12 +98,18 @@ def run_audit(date_key: str) -> dict[str, Any]:
         "MD1_stats": _summarize(md1),
         "MD2_stats": _summarize(md2),
         "MD2_rolling_10": _summarize(md2_last10),
+        "MD1_data_completeness_pct": md1_comp_avg,
     }
     out["micro_gate"] = {
         "md1_bets_ge_10": out["MD1_stats"]["bets"] >= 10,
         "md1_clv_ge_0": out["MD1_stats"]["avg_true_clv_pct"] >= 0.0,
+        "md1_data_completeness_ge_90": md1_comp_avg >= min_comp,
         "status": "PASS"
-        if out["MD1_stats"]["bets"] >= 10 and out["MD1_stats"]["avg_true_clv_pct"] >= 0.0
+        if (
+            out["MD1_stats"]["bets"] >= 10
+            and out["MD1_stats"]["avg_true_clv_pct"] >= 0.0
+            and md1_comp_avg >= min_comp
+        )
         else "BLOCK",
     }
 
@@ -108,4 +130,3 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
-

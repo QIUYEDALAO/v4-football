@@ -13,7 +13,7 @@ DATA_DIR = BASE_DIR / "data" / "v3_wc2026"
 MASTER_FALLBACK = BASE_DIR / "engine" / "v3_config" / "intl_big4_master.json"
 sys.path.insert(0, str(BASE_DIR))
 
-from engine.v3_wc_stage_resolver import build_group_schedule_index, resolve_wc_stage
+from engine.v3_wc_stage_resolver import build_group_schedule_index, resolve_wc_stage_with_source
 from engine.v3_router_guard import apply_v3_router_guard, load_v3_wc_config
 
 
@@ -137,6 +137,23 @@ def _bubble_level(gap_abs: float) -> str:
     return "NONE"
 
 
+def _market_favorite_side(psch: float, pscd: float, psca: float) -> str:
+    vals = []
+    if psch > 0:
+        vals.append(("HOME", psch))
+    if psca > 0:
+        vals.append(("AWAY", psca))
+    if pscd > 0:
+        vals.append(("DRAW", pscd))
+    if not vals:
+        return "UNKNOWN"
+    vals.sort(key=lambda x: x[1])
+    side, _ = vals[0]
+    if side == "DRAW":
+        return "DRAWISH"
+    return side
+
+
 def _build_signal(row: dict[str, Any], team_master: dict[str, Any], group_idx) -> dict[str, Any]:
     home, away = _home_away(row)
     fid = _fixture_id(row)
@@ -144,7 +161,7 @@ def _build_signal(row: dict[str, Any], team_master: dict[str, Any], group_idx) -
     psch, pscd, psca = _derive_odds(row)
     elo_h, elo_a, val_h, val_a = _derive_elo_values(row, team_master)
     gap = _calc_gap(elo_h, elo_a, val_h, val_a)
-    stage = resolve_wc_stage(row, group_idx)
+    stage, stage_source = resolve_wc_stage_with_source(row, group_idx)
 
     if gap >= 0:
         bubble_side = "HOME"
@@ -163,6 +180,8 @@ def _build_signal(row: dict[str, Any], team_master: dict[str, Any], group_idx) -
 
     if favorite_odds >= 99.0 and psch > 0 and psca > 0:
         favorite_odds = min(psch, psca)
+    market_favorite_side = _market_favorite_side(psch, pscd, psca)
+    is_market_favorite = market_favorite_side not in {"UNKNOWN", "DRAWISH"} and market_favorite_side == bubble_side
 
     elo_diff = abs(elo_h - elo_a)
     val_ratio = (max(val_h, 0.0) / max(val_a, 1e-9)) if val_a > 0 else 0.0
@@ -207,6 +226,7 @@ def _build_signal(row: dict[str, Any], team_master: dict[str, Any], group_idx) -
         "away": away,
         "stage": str(row.get("stage") or ""),
         "wc_stage": stage,
+        "stage_source": stage_source,
         "bubble_side": bubble_side,
         "bubble_team": bubble_team,
         "opposite_team": opposite_team,
@@ -224,6 +244,8 @@ def _build_signal(row: dict[str, Any], team_master: dict[str, Any], group_idx) -
         "bubble_level": _bubble_level(abs(gap)),
         "elo_diff": round(elo_diff, 1),
         "favorite_odds": round(favorite_odds, 3) if favorite_odds < 90 else None,
+        "market_favorite_side": market_favorite_side,
+        "is_market_favorite": is_market_favorite,
         "odds_open": {"psch": psch or None, "pscd": pscd or None, "psca": psca or None},
         "elo_home": elo_h or None,
         "elo_away": elo_a or None,
@@ -363,14 +385,17 @@ def build_signals(date_str: str, source_path: Path | None = None) -> dict[str, A
     _save_jsonl(out_path, signals)
 
     by_stage = {}
+    by_source = {}
     by_level = {}
     for s in signals:
         by_stage[s["wc_stage"]] = by_stage.get(s["wc_stage"], 0) + 1
+        by_source[s["stage_source"]] = by_source.get(s["stage_source"], 0) + 1
         by_level[s["bubble_level"]] = by_level.get(s["bubble_level"], 0) + 1
     stage_audit = {
         "date": key,
         "signals": len(signals),
         "by_stage": dict(sorted(by_stage.items())),
+        "by_stage_source": dict(sorted(by_source.items())),
         "by_bubble_level": dict(sorted(by_level.items())),
         "output_path": str(out_path),
     }

@@ -5,8 +5,8 @@
     "mode": "PAPER"
   },
   "thresholds": {
-    "medium_gap_min": 0.70,
-    "extreme_gap_min": 1.00,
+    "medium_gap_min": 0.7,
+    "extreme_gap_min": 1.0,
     "true_mismatch": {
       "elo_diff_max_for_bubble": 450,
       "favorite_odds_min": 1.25
@@ -22,3 +22,4 @@
     "daily_limit": 1
   }
 }
+

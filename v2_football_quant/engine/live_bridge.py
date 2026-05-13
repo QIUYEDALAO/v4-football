@@ -25,7 +25,7 @@ class LiveMode(str, Enum):
 
 
 BASE_DIR = Path(__file__).resolve().parent.parent
-V3_WC_CONFIG_PATH = BASE_DIR / "config" / "v3_wc_config.yaml"
+V3_WC_CONFIG_PATH = BASE_DIR / "config" / "v3_wc_config.json"
 
 
 def _load_v3_wc_config() -> dict:

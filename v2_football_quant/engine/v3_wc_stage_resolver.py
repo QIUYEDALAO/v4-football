@@ -105,10 +105,13 @@ def build_group_schedule_index(matches: list[dict[str, Any]]) -> dict[str, list[
     return idx
 
 
-def resolve_wc_stage(match: dict[str, Any], group_schedule: dict[str, list[tuple[datetime, str]]] | None = None) -> str:
+def resolve_wc_stage_with_source(
+    match: dict[str, Any],
+    group_schedule: dict[str, list[tuple[datetime, str]]] | None = None,
+) -> tuple[str, str]:
     wc_stage = _detect_stage_from_text(match.get("wc_stage"))
     if wc_stage in {"MD1", "MD2", "MD3", "KO"}:
-        return wc_stage
+        return wc_stage, "explicit"
 
     stage_text = (
         match.get("stage")
@@ -117,20 +120,20 @@ def resolve_wc_stage(match: dict[str, Any], group_schedule: dict[str, list[tuple
     )
     detected = _detect_stage_from_text(stage_text)
     if detected == "KO":
-        return "KO"
+        return "KO", "explicit"
     if detected in {"MD1", "MD2", "MD3"}:
-        return detected
+        return detected, "explicit"
 
     md = match.get("matchday") or match.get("group_matchday")
     if md is not None:
         try:
             m = int(md)
             if m == 1:
-                return "MD1"
+                return "MD1", "matchday"
             if m == 2:
-                return "MD2"
+                return "MD2", "matchday"
             if m == 3:
-                return "MD3"
+                return "MD3", "matchday"
         except Exception:
             pass
 
@@ -150,11 +153,11 @@ def resolve_wc_stage(match: dict[str, Any], group_schedule: dict[str, list[tuple
             h_no = next((i + 1 for i, (_, xmid) in enumerate(home_list) if str(xmid) == str(mid)), None)
             a_no = next((i + 1 for i, (_, xmid) in enumerate(away_list) if str(xmid) == str(mid)), None)
             if h_no == 1 and a_no == 1:
-                return "MD1"
+                return "MD1", "team_group_order"
             if h_no == 2 and a_no == 2:
-                return "MD2"
+                return "MD2", "team_group_order"
             if h_no == 3 and a_no == 3:
-                return "MD3"
+                return "MD3", "team_group_order"
             # Fallback: use global group sequence split when team-by-team round is ambiguous.
             seq = group_schedule.get("__GROUP_MATCH_ORDER__") or []
             idx_no = next((i for i, (_, xmid) in enumerate(seq) if str(xmid) == str(mid)), None)
@@ -163,13 +166,18 @@ def resolve_wc_stage(match: dict[str, Any], group_schedule: dict[str, list[tuple
                 one = max(1, n // 3)
                 two = max(one + 1, one * 2)
                 if idx_no < one:
-                    return "MD1"
+                    return "MD1", "global_fallback"
                 if idx_no < two:
-                    return "MD2"
-                return "MD3"
-        return "UNKNOWN_STAGE"
+                    return "MD2", "global_fallback"
+                return "MD3", "global_fallback"
+        return "UNKNOWN_STAGE", "unknown"
 
-    return "UNKNOWN_STAGE"
+    return "UNKNOWN_STAGE", "unknown"
+
+
+def resolve_wc_stage(match: dict[str, Any], group_schedule: dict[str, list[tuple[datetime, str]]] | None = None) -> str:
+    stage, _ = resolve_wc_stage_with_source(match, group_schedule)
+    return stage
 
 
 def _load_json_or_jsonl(path: Path) -> list[dict[str, Any]]:
@@ -200,9 +208,15 @@ def _load_json_or_jsonl(path: Path) -> list[dict[str, Any]]:
 
 def _save_stage_audit(rows: list[dict[str, Any]], output: Path) -> None:
     by_stage: dict[str, int] = defaultdict(int)
+    by_source: dict[str, int] = defaultdict(int)
     for r in rows:
         by_stage[str(r.get("wc_stage") or "UNKNOWN")] += 1
-    payload = {"rows": len(rows), "by_stage": dict(sorted(by_stage.items()))}
+        by_source[str(r.get("stage_source") or "unknown")] += 1
+    payload = {
+        "rows": len(rows),
+        "by_stage": dict(sorted(by_stage.items())),
+        "by_stage_source": dict(sorted(by_source.items())),
+    }
     output.parent.mkdir(parents=True, exist_ok=True)
     with open(output, "w", encoding="utf-8") as f:
         json.dump(payload, f, ensure_ascii=False, indent=2)
@@ -220,7 +234,9 @@ def main() -> None:
     out = []
     for r in rows:
         x = dict(r)
-        x["wc_stage"] = resolve_wc_stage(x, idx)
+        stage, source = resolve_wc_stage_with_source(x, idx)
+        x["wc_stage"] = stage
+        x["stage_source"] = source
         out.append(x)
 
     if args.output:
@@ -232,9 +248,20 @@ def main() -> None:
 
     _save_stage_audit(out, Path(args.audit_output))
     by_stage = defaultdict(int)
+    by_source = defaultdict(int)
     for r in out:
         by_stage[r.get("wc_stage", "UNKNOWN")] += 1
-    print(json.dumps({"rows": len(out), "by_stage": dict(sorted(by_stage.items()))}, ensure_ascii=False))
+        by_source[r.get("stage_source", "unknown")] += 1
+    print(
+        json.dumps(
+            {
+                "rows": len(out),
+                "by_stage": dict(sorted(by_stage.items())),
+                "by_stage_source": dict(sorted(by_source.items())),
+            },
+            ensure_ascii=False,
+        )
+    )
 
 
 if __name__ == "__main__":

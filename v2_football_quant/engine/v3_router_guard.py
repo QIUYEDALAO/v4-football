@@ -5,7 +5,7 @@ from pathlib import Path
 from typing import Any
 
 BASE_DIR = Path(__file__).resolve().parent.parent
-CONFIG_PATH = BASE_DIR / "config" / "v3_wc_config.yaml"
+CONFIG_PATH = BASE_DIR / "config" / "v3_wc_config.json"
 
 
 def _load_json_config(path: Path) -> dict[str, Any]:
@@ -66,6 +66,16 @@ def _is_true_mismatch(signal: dict[str, Any], cfg: dict[str, Any]) -> bool:
     elo_diff = abs(_to_float(signal.get("elo_diff"), 0.0))
     favorite_odds = _to_float(signal.get("favorite_odds"), 99.0)
     return elo_diff > elo_diff_cap and favorite_odds < favorite_odds_floor
+
+
+def _is_bubble_aligned_with_market_favorite(signal: dict[str, Any]) -> bool:
+    side = str(signal.get("bubble_side") or "").upper()
+    market_side = str(signal.get("market_favorite_side") or "").upper()
+    if not side or not market_side:
+        return True
+    if market_side in {"UNKNOWN", "DRAWISH"}:
+        return False
+    return side == market_side
 
 
 def apply_v3_router_guard(
@@ -132,6 +142,12 @@ def apply_v3_router_guard(
         out["skip_reason"] = "Elo实力断层过大，跳过伪泡沫"
         return out
 
+    if not _is_bubble_aligned_with_market_favorite(out):
+        out["action"] = "V3_MD2_WATCH"
+        out["max_risk_units"] = 0.0
+        out["skip_reason"] = "泡沫方与市场热门不一致，降级观察"
+        return out
+
     md2_bets, md2_clv = _rolling_md2_stats(engine_stats)
     if md2_bets >= 10 and md2_clv < 0:
         out["action"] = "V3_KILL_CLV"
@@ -165,4 +181,3 @@ def apply_v3_router_guard(
     }
     out["gate_md2"] = {"rolling_10_bets": md2_bets, "rolling_10_avg_true_clv_pct": md2_clv}
     return out
-
