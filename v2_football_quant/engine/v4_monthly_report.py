@@ -28,6 +28,7 @@ from typing import Any
 BASE_DIR = Path(__file__).resolve().parent.parent
 DAILY_DIR = BASE_DIR / "data" / "daily_reports"
 MONTHLY_DIR = BASE_DIR / "data" / "monthly_reports"
+ATTRIB_DIR = BASE_DIR / "data" / "v4_archive"
 
 
 def _load_json(path: Path, default: Any) -> Any:
@@ -38,6 +39,27 @@ def _load_json(path: Path, default: Any) -> Any:
             return json.load(f)
     except Exception:
         return default
+
+
+def _load_jsonl(path: Path) -> list[dict[str, Any]]:
+    if not path.exists():
+        return []
+    rows: list[dict[str, Any]] = []
+    try:
+        with open(path, encoding="utf-8") as f:
+            for line in f:
+                line = line.strip()
+                if not line:
+                    continue
+                try:
+                    obj = json.loads(line)
+                    if isinstance(obj, dict):
+                        rows.append(obj)
+                except Exception:
+                    continue
+    except Exception:
+        return []
+    return rows
 
 
 def _pct(n: int, d: int) -> float:
@@ -64,6 +86,18 @@ def aggregate(month: str) -> dict[str, Any]:
     rule_versions = Counter()
     loaded = []
     total_matches = 0
+    diagnosis_counts = Counter()
+    model_result_counts = Counter()
+    noisy_labels = {"NOISY_WIN", "NOISY_LOSS"}
+    ab_raw_total = 0
+    ab_raw_hit = 0
+    ab_denoised_total = 0
+    ab_denoised_hit = 0
+    recent_total = 0
+    recent_hit = 0
+    context_noise_total = 0
+    time_source = defaultdict(lambda: {"total": 0, "hit": 0})
+    script_type_perf = defaultdict(lambda: {"total": 0, "hit": 0})
 
     for key in days:
         val = _load_json(DAILY_DIR / f"v4_ht_recommend_validation_{key}.json", {})
@@ -110,6 +144,36 @@ def aggregate(month: str) -> dict[str, Any]:
             league[lg]["skip_completed"] += skip_completed
             league[lg]["skip_hit"] += skip_hit
 
+        attrib_rows = _load_jsonl(ATTRIB_DIR / f"v4_result_attribution_{key}.jsonl")
+        for row in attrib_rows:
+            diagnosis = str(row.get("diagnosis") or "UNKNOWN")
+            model_result = str(row.get("model_result") or "UNKNOWN")
+            pre_grade = str(row.get("pre_grade") or "").upper()
+            ht_goal = bool(row.get("ht_goal"))
+            tbs = str(row.get("time_bin_source") or "NONE")
+            stp = str(row.get("script_type") or "UNKNOWN")
+            diagnosis_counts[diagnosis] += 1
+            model_result_counts[model_result] += 1
+            time_source[tbs]["total"] += 1
+            script_type_perf[stp]["total"] += 1
+            if ht_goal:
+                time_source[tbs]["hit"] += 1
+                script_type_perf[stp]["hit"] += 1
+            if row.get("context_noise"):
+                context_noise_total += 1
+            if tbs == "RECENT_DISCOUNTED":
+                recent_total += 1
+                if ht_goal:
+                    recent_hit += 1
+            if pre_grade in ("A", "B", "C"):
+                ab_raw_total += 1
+                if ht_goal:
+                    ab_raw_hit += 1
+                if diagnosis not in noisy_labels:
+                    ab_denoised_total += 1
+                    if ht_goal:
+                        ab_denoised_hit += 1
+
     per_grade = {}
     for g in ("A", "B", "C", "SKIP"):
         m = grades[g]
@@ -138,6 +202,30 @@ def aggregate(month: str) -> dict[str, Any]:
     monotonic = all(rates[i] >= rates[i + 1] for i in range(len(rates) - 1))
     ab_total = grade_counts["A"] + grade_counts["B"]
 
+    time_source_rows = []
+    for k, v in time_source.items():
+        time_source_rows.append(
+            {
+                "time_bin_source": k,
+                "samples": v["total"],
+                "hit": v["hit"],
+                "hit_rate_pct": _pct(v["hit"], v["total"]),
+            }
+        )
+    time_source_rows.sort(key=lambda x: (-x["samples"], x["time_bin_source"]))
+
+    script_rows = []
+    for k, v in script_type_perf.items():
+        script_rows.append(
+            {
+                "script_type": k,
+                "samples": v["total"],
+                "hit": v["hit"],
+                "hit_rate_pct": _pct(v["hit"], v["total"]),
+            }
+        )
+    script_rows.sort(key=lambda x: (-x["samples"], x["script_type"]))
+
     return {
         "month": month,
         "dates_loaded": loaded,
@@ -148,12 +236,32 @@ def aggregate(month: str) -> dict[str, Any]:
         "monotonicity": {"status": "PASS" if monotonic else "FAIL", "rates": rates},
         "coverage_monitor": {"ab_ratio_pct": _pct(ab_total, total_matches), "target_min_pct": 5.0, "target_max_pct": 15.0},
         "league_calibration": league_rows,
+        "attribution": {
+            "model_result_counts": dict(model_result_counts),
+            "diagnosis_counts": dict(diagnosis_counts),
+            "ab_raw_hit_rate_pct": _pct(ab_raw_hit, ab_raw_total),
+            "ab_denoised_hit_rate_pct": _pct(ab_denoised_hit, ab_denoised_total),
+            "context_noise_samples": context_noise_total,
+            "recent_discounted": {
+                "samples": recent_total,
+                "hit": recent_hit,
+                "hit_rate_pct": _pct(recent_hit, recent_total),
+            },
+            "time_bin_source_performance": time_source_rows,
+            "script_type_performance": script_rows,
+        },
     }
 
 
 def _decision(report: dict[str, Any]) -> list[str]:
     per = report["per_grade"]
     cov = report["coverage_monitor"]["ab_ratio_pct"]
+    attr = report.get("attribution") or {}
+    dcnt = attr.get("diagnosis_counts") or {}
+    recent = (attr.get("recent_discounted") or {})
+    total_attr = sum(int(v or 0) for v in dcnt.values())
+    noisy_cnt = int(dcnt.get("NOISY_WIN", 0)) + int(dcnt.get("NOISY_LOSS", 0))
+    noisy_ratio = (noisy_cnt / total_attr * 100.0) if total_attr else 0.0
     lines = []
     if report["monotonicity"]["status"] != "PASS":
         lines.append("分级单调性失败：需要回看 A/B/C 阈值。")
@@ -163,6 +271,17 @@ def _decision(report: dict[str, Any]) -> list[str]:
         lines.append("A+B覆盖率偏高：规则过松，应提高A/B门槛。")
     if per["SKIP"]["hit_rate_pct"] > 35:
         lines.append("SKIP反杀率偏高：跳过规则过严或某些联赛需放宽。")
+    if int(dcnt.get("MODEL_OVERCONFIDENT", 0)) >= int(dcnt.get("MODEL_TOO_STRICT", 0)) + 3:
+        lines.append("MODEL_OVERCONFIDENT 偏高：A/B/C 规则可能偏松，建议提高阈值。")
+    if int(dcnt.get("MODEL_TOO_STRICT", 0)) >= int(dcnt.get("MODEL_OVERCONFIDENT", 0)) + 3:
+        lines.append("MODEL_TOO_STRICT 偏高：SKIP 规则可能偏严，建议放宽 C/B 边界。")
+    if noisy_ratio >= 25.0:
+        lines.append("NOISY_WIN/NOISY_LOSS 占比高：本月偶然性偏强，先观测，避免过度改规则。")
+    if int(recent.get("samples", 0)) >= 10:
+        if float(recent.get("hit_rate_pct", 0.0)) >= 60.0:
+            lines.append("RECENT_DISCOUNTED 命中率稳定较高：继续保留 recent ×0.75 回填。")
+        elif float(recent.get("hit_rate_pct", 0.0)) < 50.0:
+            lines.append("RECENT_DISCOUNTED 命中率偏低：建议该来源最高仅到 C，不升 B。")
     red = [x for x in report["league_calibration"] if x["status"] == "RED"]
     if red:
         lines.append("存在RED联赛：建议下月对这些联赛提高阈值或降级观察。")
@@ -175,6 +294,9 @@ def render(report: dict[str, Any]) -> str:
     gc = report["grade_counts"]
     per = report["per_grade"]
     cov = report["coverage_monitor"]
+    attr = report.get("attribution") or {}
+    dcnt = attr.get("diagnosis_counts") or {}
+    recent = attr.get("recent_discounted") or {}
     lines = [
         "📈 V4_HT 月度策略校准报告",
         f"周期：{report['month']}",
@@ -201,7 +323,36 @@ def render(report: dict[str, Any]) -> str:
         "",
         f"分级单调性：{report['monotonicity']['status']}",
         "",
-        "三、联赛校准",
+        "三、赛后归因",
+        "",
+        "标签                      场次",
+        f"MODEL_VALID               {dcnt.get('MODEL_VALID', 0)}",
+        f"MODEL_OVERCONFIDENT       {dcnt.get('MODEL_OVERCONFIDENT', 0)}",
+        f"MODEL_TOO_STRICT          {dcnt.get('MODEL_TOO_STRICT', 0)}",
+        f"NOISY_WIN                 {dcnt.get('NOISY_WIN', 0)}",
+        f"NOISY_LOSS                {dcnt.get('NOISY_LOSS', 0)}",
+        f"DATA_QUALITY_ISSUE        {dcnt.get('DATA_QUALITY_ISSUE', 0)}",
+        "",
+        f"A/B/C 原始命中率：{attr.get('ab_raw_hit_rate_pct', 0.0)}%",
+        f"A/B/C 去噪命中率：{attr.get('ab_denoised_hit_rate_pct', 0.0)}%",
+        f"RECENT_DISCOUNTED：样本{recent.get('samples', 0)}，命中{recent.get('hit', 0)}，{recent.get('hit_rate_pct', 0.0)}%",
+        f"context_noise 样本数：{attr.get('context_noise_samples', 0)}",
+        "",
+        "四、time_bin_source 表现（Top 8）",
+        "",
+    ]
+    for item in (attr.get("time_bin_source_performance") or [])[:8]:
+        lines.append(f"- {item['time_bin_source']}：样本{item['samples']}，命中{item['hit']}，{item['hit_rate_pct']}%")
+    lines += [
+        "",
+        "五、script_type 表现（Top 8）",
+        "",
+    ]
+    for item in (attr.get("script_type_performance") or [])[:8]:
+        lines.append(f"- {item['script_type']}：样本{item['samples']}，命中{item['hit']}，{item['hit_rate_pct']}%")
+    lines += [
+        "",
+        "六、联赛校准",
         "",
         "联赛        A+B完赛    A+B命中率    SKIP反杀率    状态",
     ]
@@ -212,13 +363,13 @@ def render(report: dict[str, Any]) -> str:
         )
     lines += [
         "",
-        "四、规则调整建议",
+        "七、规则调整建议",
     ]
     for x in _decision(report):
         lines.append(f"- {x}")
     lines += [
         "",
-        "五、下月策略结论",
+        "八、下月策略结论",
         "月报只负责是否改规则；不负责每日看盘。",
         "",
     ]

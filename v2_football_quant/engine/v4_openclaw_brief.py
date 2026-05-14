@@ -40,6 +40,22 @@ def _load_json(path: Path, default: Any) -> Any:
         return default
 
 
+def _load_jsonl(path: Path) -> list[dict[str, Any]]:
+    if not path.exists():
+        return []
+    out = []
+    with open(path, encoding="utf-8") as f:
+        for line in f:
+            line = line.strip()
+            if not line:
+                continue
+            try:
+                out.append(json.loads(line))
+            except Exception:
+                continue
+    return out
+
+
 def _pct(v: Any) -> str:
     try:
         return f"{float(v) * 100:.0f}%"
@@ -229,6 +245,8 @@ def build_brief(date_str: str) -> str:
     prev = _prev_key(key)
     val_path = REPORT_DIR / f"v4_ht_recommend_validation_{prev}.json"
     val = _load_json(val_path, {})
+    attrib_path = BASE_DIR / "data" / "v4_archive" / f"v4_result_attribution_{prev}.jsonl"
+    attrib_rows = _load_jsonl(attrib_path)
     lines.append("")
     lines.append("📌 昨日V4验证")
     if val:
@@ -239,7 +257,48 @@ def build_brief(date_str: str) -> str:
         lines.append(f"SKIP反杀率：{val.get('skip_reverse_rate_pct', 0)}%")
     else:
         lines.append("暂无昨日验证数据")
+    if attrib_rows:
+        diag = Counter(str(r.get("diagnosis") or "-") for r in attrib_rows)
+        lines.append("")
+        lines.append("去噪后：")
+        for k in ["MODEL_VALID", "NOISY_WIN", "NOISY_LOSS", "MODEL_OVERCONFIDENT", "MODEL_TOO_STRICT", "DATA_QUALITY_ISSUE"]:
+            lines.append(f"{k}：{diag.get(k, 0)}场")
+
+        rec_rows = [r for r in attrib_rows if str(r.get("pre_grade") or "").upper() in ("A", "B", "C")]
+        rec_clean = [r for r in rec_rows if str(r.get("diagnosis")) not in ("NOISY_WIN", "NOISY_LOSS")]
+        raw_hit = sum(1 for r in rec_rows if bool(r.get("ht_goal")))
+        clean_hit = sum(1 for r in rec_clean if bool(r.get("ht_goal")))
+        raw_rate = _pct_value(raw_hit, len(rec_rows))
+        clean_rate = _pct_value(clean_hit, len(rec_clean))
+        lines.append(f"A/B/C 原始命中率：{raw_rate}")
+        lines.append(f"A/B/C 去噪命中率：{clean_rate}")
+
+        recent_rows = [r for r in rec_rows if str(r.get("time_bin_source") or "") == "RECENT_DISCOUNTED"]
+        recent_hit = sum(1 for r in recent_rows if bool(r.get("ht_goal")))
+        lines.append(f"RECENT_DISCOUNTED：{len(recent_rows)}场，命中{recent_hit}场")
+        noise_event_cnt = sum(1 for r in attrib_rows if any(x in (r.get("event_noise") or []) for x in ("RED_CARD", "PENALTY", "VAR_PENALTY", "OWN_GOAL")))
+        lines.append(f"红牌/点球/乌龙干扰：{noise_event_cnt}场")
     lines.append(sep)
+
+    if attrib_rows:
+        anomalies = []
+        for r in attrib_rows:
+            diag = str(r.get("diagnosis") or "")
+            if diag in ("NOISY_LOSS", "NOISY_WIN") or str(r.get("model_result")) == "MODEL_SKIP_BACKFIRE":
+                anomalies.append(r)
+        lines.append("")
+        lines.append("⚠️ 昨日异常样本")
+        if anomalies:
+            for idx, r in enumerate(anomalies[:3], 1):
+                reason = ", ".join((r.get("event_noise") or [])[:2]) or "无明显事件噪音"
+                lines.append(
+                    f"{idx}. {team_name_cn(r.get('home') or '-')} vs {team_name_cn(r.get('away') or '-')}\n"
+                    f"   结果：{r.get('model_result')} | 诊断：{r.get('diagnosis')}\n"
+                    f"   干扰：{reason}"
+                )
+        else:
+            lines.append("无明显异常样本")
+        lines.append(sep)
 
     lines.append("")
     if ab_total:
