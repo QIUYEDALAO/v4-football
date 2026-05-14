@@ -25,6 +25,7 @@ from config.secrets import API_KEY, API_HOST
 from bankroll import Bankroll, calculate_stake
 from engine.data_sources.apifootball_deep import InjuryAttritionEngine
 from engine import net_utils
+from engine.task_watchdog import v2_window_checker_watchdog, v2_pool_watchdog
 DATA_DIR = BASE_DIR / "data" / "raw_fixtures"
 REPORT_DIR = BASE_DIR / "data" / "daily_reports"
 REPORT_DIR.mkdir(exist_ok=True)
@@ -384,6 +385,11 @@ def run_once(run_tag="DEFAULT", quick_mode=False):
     print(f"V2 Daily Runner v2.3.1 KICKOFF_RELATIVE (HT 1X2) | TAG: {run_tag} | {'QUICK' if quick_mode else 'FULL'}")
     print(f"启动: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
     print("=" * 60)
+
+    # ── 任务监控 ──
+    is_pool = "DAILY_POOL" in str(run_tag)
+    wd = v2_pool_watchdog() if is_pool else v2_window_checker_watchdog(str(run_tag).lower())
+    wd.start(total_items=0)
 
     # 🌟 读取今日已锁定比赛 (防止三频重复下单)
     today_str = get_ops_date().strftime("%Y%m%d")
@@ -1052,6 +1058,10 @@ def run_once(run_tag="DEFAULT", quick_mode=False):
             indent=2,
         )
     logger.info(f"🔒 状态机: {len(already_selected)} 场比赛已锁定 → {state_file}")
+
+    # ── 任务监控：完成 ──
+    bets_count = len([r for r in all_candidates if r.get("action_code") == "BET_LOCKED"])
+    wd.finish(status="DONE", output_files={"predictions": str(pred_path), "state": str(state_file)})
 
     # 结算已分离至独立 Cron: python3 engine/paper_trading.py --verify-yesterday
 
