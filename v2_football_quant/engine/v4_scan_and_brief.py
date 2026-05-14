@@ -72,8 +72,13 @@ def main():
     if GLOBAL_LOCK.exists():
         stale_s = time.time() - GLOBAL_LOCK.stat().st_mtime
         if stale_s < HARD_TIMEOUT:
-            print(f"[WATCHDOG] V4 global scan lock active, skip", flush=True)
+            wd = v4_scan_watchdog(args.window)
+            wd.start(total_items=0)
+            wd.finish(status="SKIPPED_GLOBAL_LOCK", error="v4_scan_global.lock active")
+            print("[WATCHDOG] V4 global scan lock active, SKIPPED_GLOBAL_LOCK", flush=True)
             return
+        else:
+            GLOBAL_LOCK.unlink(missing_ok=True)
     GLOBAL_LOCK.write_text(str(os.getpid()))
 
     wd = v4_scan_watchdog(args.window)
@@ -149,7 +154,7 @@ def main():
         if args.push == "never":
             print("[WATCHDOG] brief generated, push skipped (never)", flush=True)
         elif args.push == "conditional":
-            has_ab = "A级上半场强推荐" in brief_text or "B级上半场达标推荐" in brief_text
+            has_ab = "今日 V4 有 " in brief_text and "上半场推荐" in brief_text
             if has_ab:
                 print(brief_text, flush=True)
             else:

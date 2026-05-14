@@ -638,12 +638,15 @@ def run_v4_scan(
             json.dump(live_watchlist, f, ensure_ascii=False, indent=2)
         logger.info(f"  🎯 滚球雷达池: {live_path} ({len(live_watchlist)} 场)")
 
-    try:
-        from engine.v4_dashboard import render_dashboard
-        dashboard_path = render_dashboard(today_str)
-        logger.info(f"  🖥 交互仪表盘: {dashboard_path}")
-    except Exception as e:
-        logger.warning(f"  ⚠️ 仪表盘生成失败: {e}")
+    if generate_dashboard:
+        try:
+            from engine.v4_dashboard import render_dashboard
+            dashboard_path = render_dashboard(today_str)
+            logger.info(f"  🖥 交互仪表盘: {dashboard_path}")
+        except Exception as e:
+            logger.warning(f"  ⚠️ 仪表盘生成失败: {e}")
+    else:
+        logger.info("  🖥 dashboard skipped by generate_dashboard=False")
 
     elapsed = round(time.perf_counter() - t0, 2)
     api_stats = getattr(api_client, "_stats", {})
