@@ -47,6 +47,23 @@ except ImportError:
 _PROXY_OPENER = urllib.request.build_opener(urllib.request.ProxyHandler({}))
 urllib.request.install_opener(_PROXY_OPENER)
 
+# RPM 限流保护 (API-Football Pro: 600次/分钟, 留20%余量)
+_RPM_LIMIT = 480
+_rpm_window: list[float] = []  # sliding window of request timestamps
+
+
+def _rpm_wait():
+    """等待直到 RPM 窗口有空位"""
+    global _rpm_window
+    now = time.time()
+    _rpm_window = [t for t in _rpm_window if now - t < 60]
+    if len(_rpm_window) >= _RPM_LIMIT:
+        oldest = _rpm_window[0]
+        wait_s = 60 - (now - oldest) + 0.5
+        if wait_s > 0:
+            time.sleep(wait_s)
+    _rpm_window.append(time.time())
+
 
 def _urllib_get(endpoint: str, api_key: str, api_host: str = "https://v3.football.api-sports.io") -> Optional[dict]:
     """Python urllib 请求 (可能被 403)"""
@@ -96,6 +113,7 @@ def api_get(endpoint: str, api_key: Optional[str] = None,
             api_host: str = "https://v3.football.api-sports.io",
             retries: int = 3) -> Optional[dict]:
     """智能 API 请求: urllib 优先 (重试1次), 403/5xx 自动回退 curl"""
+    _rpm_wait()  # RPM 限流保护
     if not api_key:
         api_key = _get_api_key()
         if not api_key:

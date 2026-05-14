@@ -25,6 +25,7 @@ sys.path.insert(0, str(BASE_DIR))
 
 from config.secrets import API_KEY, API_HOST
 from engine.data_sources.api_coverage import evaluate_fixture_coverage
+from engine.net_utils import _rpm_wait
 from engine.data_sources.h2h_engine import (
     evaluate_h2h_edge,
     warm_recent_goal_profiles,
@@ -88,6 +89,7 @@ def _load_league_status_map() -> dict[str, dict]:
 
 
 def api_get(endpoint: str):
+    _rpm_wait()  # RPM 限流保护 (480次/分钟)
     url = f"{API_HOST}/{endpoint}"
     req = urllib.request.Request(url, headers={
         "x-apisports-key": API_KEY,
