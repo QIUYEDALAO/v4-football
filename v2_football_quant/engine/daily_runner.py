@@ -309,10 +309,13 @@ def generate_report(fixtures: list[dict], bets: list[dict], stats: dict, all_can
     td = get_ops_date().strftime("%Y-%m-%d")
     now = datetime.now().strftime("%H:%M")
 
+    new_bet_count = len(bets)
+    historical_count = len(already_selected)  # 包含本轮+历史
+    
     lines = [
         f"## ⚽ V2 每日扫描 (HT 1X2) | {td} {now}",
         "",
-        f"📊 扫描: {stats['total_scanned']}场 | 🔒 正式锁定: {len(bets)}场",
+        f"📊 扫描: {stats['total_scanned']}场 | 本轮新增BET_LOCKED: {new_bet_count}场 | 历史锁定池: {historical_count}场",
         "",
     ]
 
@@ -320,18 +323,25 @@ def generate_report(fixtures: list[dict], bets: list[dict], stats: dict, all_can
     from collections import Counter
     action_counts = Counter(r.get("action_code", r.get("action", "?")) for r in (all_candidates or []) if r.get("action_code"))
     status_lines = []
-    if action_counts.get("BET_LOCKED"): status_lines.append(f"🔒 正式推荐: {action_counts['BET_LOCKED']}场")
-    if action_counts.get("CANDIDATE"): status_lines.append(f"🟡 T-3h候选: {action_counts['CANDIDATE']}场")
-    if action_counts.get("WATCH_EARLY"): status_lines.append(f"👁️ 早盘观察: {action_counts['WATCH_EARLY']}场")
-    if action_counts.get("ODDS_OUT"): status_lines.append(f"⚠️ 赔率漂出: {action_counts['ODDS_OUT']}场")
-    if action_counts.get("WATCH_HIGH"): status_lines.append(f"👁️ 观察池(≥2.90): {action_counts['WATCH_HIGH']}场")
-    if action_counts.get("SKIP_LOW"): status_lines.append(f"❌ 赔率过低: {action_counts['SKIP_LOW']}场")
-    if status_lines:
-        lines.extend(status_lines)
+    status_lines.append(f"本轮新增BET_LOCKED: {new_bet_count}场")
+    today_total = sum(1 for r in all_candidates if r.get("action_code") == "BET_LOCKED")
+    if today_total != new_bet_count:
+        status_lines.append(f"今日累计BET_LOCKED: {today_total}场")
+    status_lines.append(f"历史锁定池: {historical_count}场")
+    if action_counts.get("WATCH_EARLY"): status_lines.append(f"👁️ WATCH_EARLY: {action_counts['WATCH_EARLY']}场")
+    if action_counts.get("CANDIDATE"): status_lines.append(f"🟡 CANDIDATE: {action_counts['CANDIDATE']}场")
+    if action_counts.get("ODDS_OUT"): status_lines.append(f"⚠️ ODDS_OUT: {action_counts['ODDS_OUT']}场")
+    if action_counts.get("WATCH_HIGH"): status_lines.append(f"👁️ WATCH_HIGH(≥2.90): {action_counts['WATCH_HIGH']}场")
+    if action_counts.get("SKIP_LOW"): status_lines.append(f"❌ SKIP_LOW(<2.00): {action_counts['SKIP_LOW']}场")
+    lines.extend(status_lines)
+    
+    # 口径冲突检测
+    if new_bet_count == 0 and today_total > 0:
+        lines.append("⚠️ 口径冲突: 历史锁定池有累计但本轮0新增")
     lines.append("")
 
     if not bets:
-        lines.append("> ⚠️ 今日无满足条件的推荐")
+        lines.append("> 本轮无正式 BET_LOCKED，不执行投注。")
         return "\n".join(lines)
 
     for i, rec in enumerate(bets, 1):
@@ -371,10 +381,8 @@ def generate_report(fixtures: list[dict], bets: list[dict], stats: dict, all_can
         lines.append("")
 
     lines.append("")
-    lines.append(f"> 🤖 V2 v2.3.1 · T-90m/T-45m正式锁定 · 早盘候选不锁")
-    lines.append(f"> ⚠️ 纸盘模式 — 仅记录，不下单")
-    lines.append(f"> 🔑 赔率 2.00-2.90 固定1u | 锁定后漂出按锁定价结算")
-    lines.append(f"> 📏 每日上限20场 · 同联赛上限2场 · Kelly暂停")
+    lines.append(f"> 🤖 V2 v2.3.1 · T-90m/T-45m唯一锁定 · 早盘候选不锁")
+    lines.append(f"> ⚠️ 本轮无正式 BET_LOCKED，不执行投注。" if new_bet_count == 0 else f"> 🔒 本轮 {new_bet_count} 场 BET_LOCKED")
 
     return "\n".join(lines)
 
