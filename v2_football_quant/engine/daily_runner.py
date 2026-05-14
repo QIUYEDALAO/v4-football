@@ -309,19 +309,25 @@ def generate_report(fixtures: list[dict], bets: list[dict], stats: dict) -> str:
     now = datetime.now().strftime("%H:%M")
 
     lines = [
-        f"## ⚽ V2 每日推荐 (HT 1X2) | {td} {now}",
+        f"## ⚽ V2 每日扫描 (HT 1X2) | {td} {now}",
         "",
-        f"📊 今日扫描: {stats['total_scanned']} 场 (白名单) · 推荐: {len(bets)} 场",
-        "",
-        f"🔍 漏斗: 总{stats['total_fixtures']}场 → 扫描{stats['total_scanned']} "
-        f"→ 无盘口{stats['skip_no_market']} → 赔率过低{stats.get('skip_odds_band',0)} "
-        f"→ 赔率过高{stats.get('watch_odds_high',0)}(观察池) → ✅{stats['bet_placed']}",
-        "",
-        "模型: att_def_spread 10档分位定价 · 投注方向: HT 1X2 · 全量死因追踪",
-        "",
-        "---",
+        f"📊 扫描: {stats['total_scanned']}场 | 🔒 正式锁定: {len(bets)}场",
         "",
     ]
+
+    # 状态分布摘要
+    from collections import Counter
+    action_counts = Counter(r.get("action_code", r.get("action", "?")) for r in all_candidates if r.get("action_code"))
+    status_lines = []
+    if action_counts.get("BET_LOCKED"): status_lines.append(f"🔒 正式推荐: {action_counts['BET_LOCKED']}场")
+    if action_counts.get("CANDIDATE"): status_lines.append(f"🟡 T-3h候选: {action_counts['CANDIDATE']}场")
+    if action_counts.get("WATCH_EARLY"): status_lines.append(f"👁️ 早盘观察: {action_counts['WATCH_EARLY']}场")
+    if action_counts.get("ODDS_OUT"): status_lines.append(f"⚠️ 赔率漂出: {action_counts['ODDS_OUT']}场")
+    if action_counts.get("WATCH_HIGH"): status_lines.append(f"👁️ 观察池(≥2.90): {action_counts['WATCH_HIGH']}场")
+    if action_counts.get("SKIP_LOW"): status_lines.append(f"❌ 赔率过低: {action_counts['SKIP_LOW']}场")
+    if status_lines:
+        lines.extend(status_lines)
+    lines.append("")
 
     if not bets:
         lines.append("> ⚠️ 今日无满足条件的推荐")
@@ -330,13 +336,21 @@ def generate_report(fixtures: list[dict], bets: list[dict], stats: dict) -> str:
     for i, rec in enumerate(bets, 1):
         mprobs = rec["model_probs"]
         odds_D = rec["offered_odds_D"]
+        ac = rec.get("action_code", rec.get("action", "-"))
+        ss = rec.get("scan_stage", "-")
+        lk_odds = rec.get("locked_odds_D")
+        fos = rec.get("final_odds_status", "")
         
-        lines.append(f"### {i}. {rec['home']} vs {rec['away']} → 推 **半场平局**")
+        # 状态标签
+        status_tag = "🔒 正式锁定" if ac == "BET_LOCKED" else ("🟡 候选" if ac == "CANDIDATE" else ("👁️ 观察" if "WATCH" in str(ac) else ac))
+        lines.append(f"### {i}. {rec['home']} vs {rec['away']} → {status_tag}")
         lines.append("")
         lines.append(f"| 维度 | 数据 |")
         lines.append(f"|------|------|")
-        lines.append(f"| ⏰ 时间 | {rec.get('time_bj', '?')} |")
+        lines.append(f"| ⏰ 开赛 | {rec.get('time_bj', '?')} |")
+        lines.append(f"| ⏱ 扫描阶段 | {ss} ({rec.get('minutes_to_kickoff', '?')}分钟) |")
         lines.append(f"| 🏟 联赛 | {rec['league_name']} |")
+        lines.append(f"| 💰 {rec.get('bookmaker', '?')} 半场平 | **{odds_D:.2f}** |")
         lines.append(f"| 📐 att_def_spread | {rec.get('att_def_spread', '?')} (档{rec['decile']}) |")
         lines.append(f"| 🎯 公平概率 | H={mprobs['H']:.3f} D={mprobs['D']:.3f} A={mprobs['A']:.3f} |")
         lines.append(f"| 🏦 市场概率 | H={rec['market_probs']['H']:.3f} D={rec['market_probs']['D']:.3f} A={rec['market_probs']['A']:.3f} |")
@@ -347,14 +361,18 @@ def generate_report(fixtures: list[dict], bets: list[dict], stats: dict) -> str:
         si = rec.get("stake_info", {})
         if si:
             lines.append(f"| 💵 注码 | {si.get('stake', 1.0):.0f}u (固定1u · Kelly暂停) |")
-        lines.append("")
-        lines.append("---")
+        if lk_odds and lk_odds != odds_D:
+            lines.append(f"| 🔐 锁定价 | {lk_odds:.2f} (结算用) |")
+        if fos == "MOVED_OUT_AFTER_LOCK":
+            lines.append(f"| ⚠️ 状态 | 锁定后赔率漂出，按锁定价结算 |")
+        elif fos == "MOVED_OUT_BEFORE_LOCK":
+            lines.append(f"| ⚠️ 状态 | 曾入区间但未锁定已漂出 |")
         lines.append("")
 
     lines.append("")
-    lines.append(f"> 🤖 V2 v2.3.1 KICKOFF_RELATIVE · T-90m/T-45m 主推荐窗口")
+    lines.append(f"> 🤖 V2 v2.3.1 · T-90m/T-45m正式锁定 · 早盘候选不锁")
     lines.append(f"> ⚠️ 纸盘模式 — 仅记录，不下单")
-    lines.append(f"> 🔑 赔率 2.00-2.90 固定1u | T-12h/T-6h早盘观察 | T-3h候选 | T-90m/T-45m锁定")
+    lines.append(f"> 🔑 赔率 2.00-2.90 固定1u | 锁定后漂出按锁定价结算")
     lines.append(f"> 📏 每日上限20场 · 同联赛上限2场 · Kelly暂停")
 
     return "\n".join(lines)
