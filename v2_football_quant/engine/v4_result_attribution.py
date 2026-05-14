@@ -396,11 +396,17 @@ def _load_live_stats_index(date_key: str) -> dict[int, list[dict[str, Any]]]:
 
 def _match_flow_dimension(fixture_id: int, stats_index: dict[int, list[dict[str, Any]]]) -> dict[str, Any]:
     rows = stats_index.get(int(fixture_id), [])
-    rows = [r for r in rows if _safe_int(r.get("minute"), 0) <= 45]
+    rows = [
+        r
+        for r in rows
+        if _safe_int(r.get("minute"), 0) <= 45
+        and str(r.get("snapshot_quality") or "") in ("ON_TIME", "LATE_ALLOWED")
+    ]
     if not rows:
         return {
             "stats_available": False,
             "snapshot_minute": None,
+            "snapshot_quality": "UNKNOWN",
             "ht_shots_total": 0.0,
             "ht_shots_on_target_total": 0.0,
             "ht_corners_total": 0.0,
@@ -418,6 +424,7 @@ def _match_flow_dimension(fixture_id: int, stats_index: dict[int, list[dict[str,
     return {
         "stats_available": True,
         "snapshot_minute": _safe_int(row.get("minute"), None),
+        "snapshot_quality": str(row.get("snapshot_quality") or "UNKNOWN"),
         "ht_shots_total": shots_total,
         "ht_shots_on_target_total": sot_total,
         "ht_corners_total": corners_total,

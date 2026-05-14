@@ -26,6 +26,7 @@ from engine import net_utils
 
 REPORT_DIR = BASE_DIR / "data" / "daily_reports"
 ARCHIVE_DIR = BASE_DIR / "data" / "v4_archive"
+SNAPSHOT_TOLERANCE_MIN = 3
 
 
 def _date_key(v: str) -> str:
@@ -176,7 +177,10 @@ def run(date_str: str, minutes: list[int], fixture_id: int | None = None, sleep_
     written = 0
     skipped_existing = 0
     skipped_not_reached = 0
+    skipped_late = 0
     skipped_state = 0
+    rows_no_stats = 0
+    quality_counts = {"ON_TIME": 0, "LATE_ALLOWED": 0, "NO_STATS": 0, "STALE_SKIPPED": 0}
 
     for rec in selected:
         fid = int(rec.get("fixture_id") or 0)
@@ -202,6 +206,21 @@ def run(date_str: str, minutes: list[int], fixture_id: int | None = None, sleep_
             if elapsed < minute:
                 skipped_not_reached += 1
                 continue
+            if minute != 45 and elapsed > minute + SNAPSHOT_TOLERANCE_MIN:
+                # 禁止用45'累计数据回填15'/30'快照，避免赛后污染
+                skipped_late += 1
+                quality_counts["STALE_SKIPPED"] += 1
+                continue
+
+            if minute == 45 and elapsed > minute + SNAPSHOT_TOLERANCE_MIN:
+                snapshot_quality = "LATE_ALLOWED"
+            else:
+                snapshot_quality = "ON_TIME"
+            if not bool(snapshot.get("stats_available")):
+                snapshot_quality = "NO_STATS"
+                rows_no_stats += 1
+            quality_counts[snapshot_quality] += 1
+
             row = {
                 "fixture_id": fid,
                 "date": key,
@@ -210,6 +229,8 @@ def run(date_str: str, minutes: list[int], fixture_id: int | None = None, sleep_
                 "away": rec.get("away"),
                 "minute": minute,
                 "observed_elapsed_minute": elapsed,
+                "snapshot_tolerance_min": SNAPSHOT_TOLERANCE_MIN,
+                "snapshot_quality": snapshot_quality,
                 "status_short": status,
                 "scan_time": scan_time,
                 "shots_home": snapshot.get("shots_home", 0.0),
@@ -237,10 +258,14 @@ def run(date_str: str, minutes: list[int], fixture_id: int | None = None, sleep_
     return {
         "date": key,
         "minutes": minutes,
+        "snapshot_tolerance_min": SNAPSHOT_TOLERANCE_MIN,
         "rows_written": written,
         "skipped_existing": skipped_existing,
         "skipped_not_reached": skipped_not_reached,
+        "skipped_late": skipped_late,
         "skipped_state": skipped_state,
+        "rows_no_stats": rows_no_stats,
+        "snapshot_quality_counts": quality_counts,
         "output_path": str(out_path),
     }
 
@@ -269,4 +294,3 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
-
