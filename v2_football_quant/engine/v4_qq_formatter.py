@@ -41,23 +41,37 @@ def format_qq(date_str: str) -> str:
     L.append(f"扫描{_num('全量扫描')}场 | A{_num('A级强推荐')} B{_num('B级达标推荐')} C{_num('C级观察')} 跳{_num('HT_SKIP跳过')} | 覆盖{_num('A+B覆盖率')}")
     L.append(SEP)
     
-    # B级 cards - simple extraction
-    if "B级上半场达标推荐" in full:
-        b_sec = full.split("B级上半场达标推荐")[1].split("C级观察池")[0]
-        b_pairs = re.findall(r"(.+?) vs (.+?)\n", b_sec)
-        b_ht_scores = re.findall(r"HT评分 (\d+)", b_sec)
-        b_rates = re.findall(r"HT有球率 (\d+%)", b_sec)
-        b_goals = re.findall(r"场均HT进球 ([\d.]+)", b_sec)
-        b_scripts = re.findall(r"剧本：(.+)", b_sec)
-        if b_pairs:
-            L.append(f"【B级{_num('B级达标推荐')}场】")
-            for i, (h, a) in enumerate(b_pairs[:3]):
-                ht = b_ht_scores[i] if i<len(b_ht_scores) else "?"
-                rate = b_rates[i] if i<len(b_rates) else "?"
-                goal = b_goals[i] if i<len(b_goals) else "?"
-                script = b_scripts[i].strip() if i<len(b_scripts) else "?"
-                L.append(f"{_cn(h.strip())} vs {_cn(a.strip())} | HT{ht} {rate} {goal}球 | {script}")
-            L.append(SEP)
+    # B级 cards - each match has its own header
+    b_all = full  # search entire text for all vs lines in B context
+    b_pairs_all = []
+    b_ht_all = []
+    b_rate_all = []
+    b_goal_all = []
+    b_script_all = []
+    # Split by B级 headers
+    parts = full.split("B级上半场达标推荐")
+    for part in parts[1:]:
+        end = part.find("C级观察池")
+        if end < 0:
+            end = part.find("━━")
+        chunk = part[:end] if end > 0 else part[:200]
+        pair = re.search(r"(.+?) vs (.+?)\n", chunk)
+        ht = re.search(r"HT评分 (\d+)", chunk)
+        rate = re.search(r"HT有球率 (\d+%)", chunk)
+        goal = re.search(r"场均HT进球 ([\d.]+)", chunk)
+        script = re.search(r"剧本：(.+)", chunk)
+        if pair:
+            b_pairs_all.append((pair.group(1).strip(), pair.group(2).strip()))
+            b_ht_all.append(ht.group(1) if ht else "?")
+            b_rate_all.append(rate.group(1) if rate else "?")
+            b_goal_all.append(goal.group(1) if goal else "?")
+            b_script_all.append(script.group(1).strip() if script else "?")
+    if b_pairs_all:
+        L.append(f"【B级{_num('B级达标推荐')}场】")
+        for i in range(min(len(b_pairs_all), 3)):
+            h, a = b_pairs_all[i]
+            L.append(f"{_cn(h)} vs {_cn(a)} | HT{b_ht_all[i]} {b_rate_all[i]} {b_goal_all[i]}球 | {b_script_all[i]}")
+        L.append(SEP)
     
     # C级
     c_section = full.split("C级观察池")[1].split("跳过统计")[0] if "C级观察池" in full else ""
