@@ -618,6 +618,7 @@ def run(date_str: str, fixture_id: int | None = None, sleep_ms: int = 120) -> di
         ht_rec = intel.get("ht_recommendation") or {}
         pre_grade = str(ht_rec.get("grade") or "SKIP").upper()
         pre_ht_score = _safe_float(ht_rec.get("ht_score"), 0.0)
+        model_skip_cause = " / ".join(ht_rec.get("reasons") or [])[:120] if pre_grade == "SKIP" else (" / ".join(ht_rec.get("risks") or [])[:120])
         pre_market_focus = str(rec.get("market_focus") or "-")
         time_bin_source = str(ht_rec.get("time_bins_source") or "NONE")
         script_type = str(ht_rec.get("script_type") or "-")
@@ -710,6 +711,7 @@ def run(date_str: str, fixture_id: int | None = None, sleep_ms: int = 120) -> di
             "league": rec.get("league"),
             "pre_grade": pre_grade,
             "pre_ht_score": round(pre_ht_score, 1),
+            "model_skip_cause": model_skip_cause,
             "pre_market_focus": pre_market_focus,
             "time_bin_source": time_bin_source,
             "script_type": script_type,

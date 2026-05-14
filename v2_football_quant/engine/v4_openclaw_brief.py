@@ -260,6 +260,22 @@ def build_brief(date_str: str) -> str:
             or 0
         )
         lines.append(f"SKIP反杀率：{skip_rate}%")
+        # SKIP反杀详情
+        skip_backfires = [
+            r for r in attrib_rows
+            if str(r.get("pre_grade") or "").upper() == "SKIP" and bool(r.get("ht_goal"))
+        ]
+        if skip_backfires:
+            lines.append("")
+            lines.append("⚠️ SKIP反杀分析：")
+            for sb in skip_backfires[:5]:
+                home = sb.get("home", "?")
+                away = sb.get("away", "?")
+                skip_cause = str(sb.get("model_skip_cause") or "")
+                diag = str(sb.get("diagnosis") or "")
+                if not skip_cause:
+                    skip_cause = "-"
+                lines.append(f"{home} vs {away}：跳过原因={skip_cause}；归因={diag}")
     else:
         lines.append("暂无昨日验证数据")
     if attrib_rows:
