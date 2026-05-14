@@ -215,11 +215,22 @@ def verify_date(date_str: str) -> dict:
     for i, pred in enumerate(predictions):
         fid = pred.get("fixture_id", pred.get("id"))
         bet_outcome = pred.get("outcome", pred.get("bet"))  # "H"|"D"|"A"
-        placed_odds = pred.get("placed_odds", pred.get("odds", 0))
-        stake = pred.get("stake", 0)
+        locked_odds = pred.get("locked_odds_D")
+        placed_odds = locked_odds if locked_odds else pred.get("placed_odds", pred.get("odds", 0))
+        stake = pred.get("stake")
+        if stake is None:
+            stake = ((pred.get("stake_info") or {}).get("stake"))
+        try:
+            stake = float(stake or 0)
+        except Exception:
+            stake = 0.0
         league = pred.get("league", "")
         home = pred.get("home", "")
         away = pred.get("away", "")
+        locked_stage = pred.get("locked_stage")
+        locked_time = pred.get("locked_time")
+        final_observed_odds_D = pred.get("final_observed_odds_D")
+        final_odds_status = pred.get("final_odds_status")
 
         # --- 拉取实际赛果 ---
         resp = api(f"fixtures?id={fid}")
@@ -269,6 +280,12 @@ def verify_date(date_str: str) -> dict:
             "league": league,
             "bet_outcome": bet_outcome,
             "placed_odds": placed_odds,
+            "used_locked_odds": bool(locked_odds),
+            "locked_odds_D": locked_odds,
+            "locked_stage": locked_stage,
+            "locked_time": locked_time,
+            "final_observed_odds_D": final_observed_odds_D,
+            "final_odds_status": final_odds_status,
             "stake": stake,
             "ht_score": ht_str,
             "actual_outcome": actual_outcome,
@@ -285,6 +302,16 @@ def verify_date(date_str: str) -> dict:
             "true_clv": round(true_clv or 0.0, 4),  # 向后兼容
             "ht_has_goal": (ht_home + ht_away) > 0,
         }
+        if final_odds_status == "MOVED_OUT_AFTER_LOCK":
+            try:
+                fo = float(final_observed_odds_D)
+                if fo > 0:
+                    r["moved_out_after_lock"] = True
+                    r["locked_vs_last_observed_clv_pct"] = round((placed_odds / fo - 1.0) * 100.0, 4)
+                else:
+                    r["moved_out_after_lock"] = True
+            except Exception:
+                r["moved_out_after_lock"] = True
         results.append(r)
 
         logger.info(

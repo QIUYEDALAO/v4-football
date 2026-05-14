@@ -352,9 +352,9 @@ def generate_report(fixtures: list[dict], bets: list[dict], stats: dict) -> str:
         lines.append("")
 
     lines.append("")
-    lines.append(f"> 🤖 V2 v2.3 KICKOFF_RELATIVE · T-90m/T-45m 主推荐窗口")
+    lines.append(f"> 🤖 V2 v2.3.1 KICKOFF_RELATIVE · T-90m/T-45m 主推荐窗口")
     lines.append(f"> ⚠️ 纸盘模式 — 仅记录，不下单")
-    lines.append(f"> 🔑 赔率 2.00-2.90 固定1u | T-12h早盘观察 | T-3h候选 | T-90m锁定")
+    lines.append(f"> 🔑 赔率 2.00-2.90 固定1u | T-12h/T-6h早盘观察 | T-3h候选 | T-90m/T-45m锁定")
     lines.append(f"> 📏 每日上限20场 · 同联赛上限2场 · Kelly暂停")
 
     return "\n".join(lines)
@@ -363,7 +363,7 @@ def generate_report(fixtures: list[dict], bets: list[dict], stats: dict) -> str:
 def run_once(run_tag="DEFAULT", quick_mode=False):
     """quick_mode: 只刷新赔率，跳过 Predictions 和矩阵重建"""
     print("=" * 60)
-    print(f"V2 Daily Runner v2.3 KICKOFF_RELATIVE (HT 1X2) | TAG: {run_tag} | {'QUICK' if quick_mode else 'FULL'}")
+    print(f"V2 Daily Runner v2.3.1 KICKOFF_RELATIVE (HT 1X2) | TAG: {run_tag} | {'QUICK' if quick_mode else 'FULL'}")
     print(f"启动: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
     print("=" * 60)
 
@@ -371,9 +371,17 @@ def run_once(run_tag="DEFAULT", quick_mode=False):
     today_str = get_ops_date().strftime("%Y%m%d")
     state_file = STATE_DIR / f"selected_fixtures_{today_str}.json"
     already_selected = set()
+    fixture_state = {}
     if state_file.exists():
         with open(state_file, "r") as f:
-            already_selected = set(json.load(f))
+            state_payload = json.load(f)
+            if isinstance(state_payload, list):
+                # Backward compatible with old format
+                already_selected = set(state_payload)
+                fixture_state = {}
+            elif isinstance(state_payload, dict):
+                already_selected = set(state_payload.get("selected_fixture_ids", []))
+                fixture_state = state_payload.get("fixtures", {}) or {}
         logger.info(f"💾 状态机: 今日已有 {len(already_selected)} 场被锁定")
 
     fixtures = fetch_today_fixtures()
@@ -463,6 +471,8 @@ def run_once(run_tag="DEFAULT", quick_mode=False):
         stats["total_scanned"] += 1
         
         # ── 基础骨架：保证任何阶段 SKIP 都有完整记录 ──
+        fid_key = str(fx["id"])
+        fstate = fixture_state.get(fid_key, {}) or {}
         base_rec = {
             "fixture_id": fx["id"],
             "home": fx["home"],
@@ -501,6 +511,13 @@ def run_once(run_tag="DEFAULT", quick_mode=False):
             "scan_tag": run_tag,
             "scan_time_utc": datetime.now(timezone.utc).isoformat(),
             "scan_time_local": datetime.now().isoformat(),
+            # v2.3.1 action/state extensions
+            "action_code": None,
+            "locked_stage": fstate.get("locked_stage"),
+            "locked_odds_D": fstate.get("locked_odds_D"),
+            "locked_time": fstate.get("locked_time"),
+            "final_observed_odds_D": fstate.get("final_observed_odds_D"),
+            "final_odds_status": fstate.get("final_odds_status"),
         }
         
         # ── V2.3 开赛相对时间扫描阶段 ──
@@ -543,7 +560,23 @@ def run_once(run_tag="DEFAULT", quick_mode=False):
         
         if not odds_D or not odds_H or not odds_A:
             stats["skip_no_market"] += 1
-            base_rec.update({"action": "SKIP", "skip_code": "NO_MARKET", "skip_reason": "HT 1X2盘口未开"})
+            base_rec.update({
+                "action": "SKIP",
+                "action_code": "FINAL_RECORD" if scan_stage in ("T_MINUS_45M", "T_MINUS_15M", "STARTED_OR_CLOSED") else "WATCH_EARLY",
+                "skip_code": "NO_MARKET",
+                "skip_reason": "HT 1X2盘口未开",
+            })
+            # persist final state
+            fixture_state[fid_key] = {
+                **fstate,
+                "seen_in_band": bool(fstate.get("seen_in_band", False)),
+                "last_seen_time": datetime.now(timezone.utc).isoformat(),
+                "final_observed_odds_D": None,
+                "final_odds_status": "NO_MARKET",
+                "locked_stage": fstate.get("locked_stage"),
+                "locked_odds_D": fstate.get("locked_odds_D"),
+                "locked_time": fstate.get("locked_time"),
+            }
             all_candidates.append(base_rec)
             continue
         
@@ -567,26 +600,83 @@ def run_once(run_tag="DEFAULT", quick_mode=False):
         base_rec["ev_pct"] = ev_pct
         base_rec["edge_pp"] = edge_pp
         
+        # update state snapshot
+        now_utc = datetime.now(timezone.utc).isoformat()
+        seen_in_band = bool(fstate.get("seen_in_band", False))
+        in_band_now = 2.00 <= odds_D < 2.90
+        if in_band_now:
+            seen_in_band = True
+        final_status = "IN_BAND" if in_band_now else ("ABOVE_BAND" if odds_D >= 2.90 else "BELOW_BAND")
+        fixture_state[fid_key] = {
+            **fstate,
+            "seen_in_band": seen_in_band,
+            "last_seen_time": now_utc,
+            "last_seen_stage": scan_stage,
+            "last_seen_odds_D": odds_D,
+            "final_observed_odds_D": odds_D,
+            "final_odds_status": final_status,
+            "locked_stage": fstate.get("locked_stage"),
+            "locked_odds_D": fstate.get("locked_odds_D"),
+            "locked_time": fstate.get("locked_time"),
+        }
+
         # 赔率过低：不做
         if odds_D < 2.00:
             stats["skip_odds_band"] = stats.get("skip_odds_band", 0) + 1
-            base_rec.update({"action": "SKIP", "skip_code": "ODDS_TOO_LOW", 
-                           "skip_reason": f"赔率 {odds_D:.2f} < 2.00"})
+            if seen_in_band:
+                moved_status = "MOVED_OUT_AFTER_LOCK" if fstate.get("locked_odds_D") else "MOVED_OUT_BEFORE_LOCK"
+                st = fixture_state.get(fid_key, {}) or {}
+                st["final_odds_status"] = moved_status
+                st["final_observed_odds_D"] = odds_D
+                fixture_state[fid_key] = st
+                base_rec.update({
+                    "action": "WATCH_ONLY",
+                    "action_code": "ODDS_OUT",
+                    "skip_code": "ODDS_OUT_LOW",
+                    "skip_reason": f"曾在区间内，现漂出到 {odds_D:.2f} (<2.00)",
+                    "final_odds_status": moved_status,
+                })
+            else:
+                base_rec.update({
+                    "action": "SKIP",
+                    "action_code": "SKIP_LOW",
+                    "skip_code": "ODDS_TOO_LOW",
+                    "skip_reason": f"赔率 {odds_D:.2f} < 2.00",
+                })
             all_candidates.append(base_rec)
             continue
         
         # 赔率过高：进入观察池
         if odds_D >= 2.90:
             stats["watch_odds_high"] = stats.get("watch_odds_high", 0) + 1
-            base_rec.update({"action": "WATCH_ONLY", "skip_code": "ODDS_WATCH_HIGH",
-                           "skip_reason": f"赔率 {odds_D:.2f} >= 2.90，进入观察池",
-                           "strategy_id": "V2_HT_DRAW_WATCH"})
+            if seen_in_band:
+                moved_status = "MOVED_OUT_AFTER_LOCK" if fstate.get("locked_odds_D") else "MOVED_OUT_BEFORE_LOCK"
+                st = fixture_state.get(fid_key, {}) or {}
+                st["final_odds_status"] = moved_status
+                st["final_observed_odds_D"] = odds_D
+                fixture_state[fid_key] = st
+                base_rec.update({
+                    "action": "WATCH_ONLY",
+                    "action_code": "ODDS_OUT",
+                    "skip_code": "ODDS_OUT_HIGH",
+                    "skip_reason": f"曾在区间内，现漂出到 {odds_D:.2f} (>=2.90)",
+                    "strategy_id": "V2_HT_DRAW_ODDS_OUT",
+                    "final_odds_status": moved_status,
+                })
+            else:
+                base_rec.update({
+                    "action": "WATCH_ONLY",
+                    "action_code": "WATCH_HIGH",
+                    "skip_code": "ODDS_WATCH_HIGH",
+                    "skip_reason": f"赔率 {odds_D:.2f} >= 2.90，进入观察池",
+                    "strategy_id": "V2_HT_DRAW_WATCH",
+                })
             all_candidates.append(base_rec)
             continue
         
         # ── 主策略 V2_MAIN 2.00-2.90 ──
         # Kelly 暂停，固定 1u
-        base_rec["strategy_id"] = "V2_HT_DRAW_v2.3_KICKOFF_RELATIVE"
+        base_rec["strategy_id"] = "V2_HT_DRAW_v2.3.1_KICKOFF_RELATIVE"
         stake_info = {
             "action": "BET",
             "stake": 1.0,
@@ -597,43 +687,112 @@ def run_once(run_tag="DEFAULT", quick_mode=False):
         }
         base_rec["stake_info"] = stake_info
         
-        # ── V2.3 开赛相对时间 gating ──
-        # T-12h/FAR_FUTURE: 只记录赔率
-        # T-6h: 早盘观察（显示给用户但不锁定）
-        # T-3h/T-90m/T-45m: 正式推荐窗口
-        # T-15m: 仅最终记录，不新增推荐
+        # ── V2.3.1 开赛相对时间 gating ──
+        # T-12h/FAR_FUTURE: WATCH_EARLY
+        # T-6h: WATCH_EARLY
+        # T-3h: CANDIDATE（不锁）
+        # T-90m/T-45m: 唯一允许 BET_LOCKED
+        # T-15m/开赛后: FINAL_RECORD
         if scan_stage == "STARTED_OR_CLOSED":
+            base_rec.update({
+                "action": "WATCH_ONLY",
+                "action_code": "FINAL_RECORD",
+                "skip_code": "FINAL_RECORD_ONLY",
+                "skip_reason": "已开赛/已关闭，仅记录最终状态",
+            })
             all_candidates.append(base_rec)
             continue
-        if scan_stage in ("FAR_FUTURE", "T_MINUS_12H"):
+        if scan_stage in ("FAR_FUTURE", "T_MINUS_12H", "T_MINUS_6H"):
             stats["stage_early_watch"] = stats.get("stage_early_watch", 0) + 1
-            base_rec.update({"action": "WATCH_ONLY", 
-                           "skip_code": "STAGE_EARLY",
-                           "skip_reason": f"{scan_stage} 只记录赔率，不进入推荐"})
+            base_rec.update({
+                "action": "WATCH_ONLY",
+                "action_code": "WATCH_EARLY",
+                "skip_code": "STAGE_EARLY",
+                "skip_reason": f"{scan_stage} 只记录赔率，不进入锁定",
+            })
             all_candidates.append(base_rec)
             continue
-        # T-6h: 早盘候选，显示但不锁定
-        # T-3h/T-90m/T-45m: 正式推荐
+        if scan_stage == "T_MINUS_3H":
+            stats["stage_candidate"] = stats.get("stage_candidate", 0) + 1
+            base_rec.update({
+                "action": "WATCH_ONLY",
+                "action_code": "CANDIDATE",
+                "skip_code": "STAGE_CANDIDATE",
+                "skip_reason": "T-3h 候选观察，不锁定",
+            })
+            all_candidates.append(base_rec)
+            continue
+
         if scan_stage == "T_MINUS_15M":
             stats["stage_too_late"] = stats.get("stage_too_late", 0) + 1
-            base_rec.update({"action": "WATCH_ONLY",
-                           "skip_code": "STAGE_TOO_LATE",
-                           "skip_reason": "T-15m 仅最终记录，不新增推荐"})
+            base_rec.update({
+                "action": "WATCH_ONLY",
+                "action_code": "FINAL_RECORD",
+                "skip_code": "STAGE_TOO_LATE",
+                "skip_reason": "T-15m 仅最终记录，不新增推荐",
+            })
             all_candidates.append(base_rec)
             continue
-        # T-6h/T-3h/T-90m/T-45m → 正式推荐，走下面的锁逻辑
+        # 非 T-90m/T-45m 不允许锁定
+        if scan_stage not in ("T_MINUS_90M", "T_MINUS_45M"):
+            base_rec.update({
+                "action": "WATCH_ONLY",
+                "action_code": "WATCH_EARLY",
+                "skip_code": "STAGE_NOT_LOCK_WINDOW",
+                "skip_reason": f"{scan_stage} 非锁定窗口",
+            })
+            all_candidates.append(base_rec)
+            continue
         
         # ── 🌟 首次触发去重锁 (Time-Series Signal Lock) ──
         if fx["id"] in already_selected:
-            base_rec.update({"action": "ALREADY_SELECTED", "skip_code": "DUPLICATE",
-                           "skip_reason": f"今日 [{run_tag}] 前已被锁定",
-                           "strategy_note": "multi_scan_duplicate"})
+            # Keep tracking post-lock status for CLV diagnostics
+            st = fixture_state.get(fid_key, {})
+            if st.get("locked_odds_D") and odds_D and not (2.00 <= odds_D < 2.90):
+                st["final_odds_status"] = "MOVED_OUT_AFTER_LOCK"
+            fixture_state[fid_key] = st
+            base_rec.update({
+                "action": "ALREADY_SELECTED",
+                "action_code": "FINAL_RECORD",
+                "skip_code": "DUPLICATE",
+                "skip_reason": f"今日 [{run_tag}] 前已被锁定",
+                "strategy_note": "multi_scan_duplicate",
+                "locked_stage": st.get("locked_stage"),
+                "locked_odds_D": st.get("locked_odds_D"),
+                "locked_time": st.get("locked_time"),
+                "final_observed_odds_D": st.get("final_observed_odds_D"),
+                "final_odds_status": st.get("final_odds_status"),
+            })
             all_candidates.append(base_rec)
             continue
 
         # ── 通过！暂入候选池，联赛去重+日上限稍后统一处理 ──
         stats["bet_placed"] += 1
-        base_rec.update({"action": "BET", "skip_code": None, "skip_reason": None})
+        lock_time = datetime.now(timezone.utc).isoformat()
+        fixture_state[fid_key] = {
+            **fixture_state.get(fid_key, {}),
+            "seen_in_band": True,
+            "last_seen_time": lock_time,
+            "last_seen_stage": scan_stage,
+            "last_seen_odds_D": odds_D,
+            "locked": True,
+            "locked_stage": scan_stage,
+            "locked_odds_D": odds_D,
+            "locked_time": lock_time,
+            "final_observed_odds_D": odds_D,
+            "final_odds_status": "LOCKED_IN_BAND",
+        }
+        base_rec.update({
+            "action": "BET",
+            "action_code": "BET_LOCKED",
+            "skip_code": None,
+            "skip_reason": None,
+            "locked_stage": scan_stage,
+            "locked_odds_D": odds_D,
+            "locked_time": lock_time,
+            "final_observed_odds_D": odds_D,
+            "final_odds_status": "LOCKED_IN_BAND",
+        })
         all_candidates.append(base_rec)
         bets.append(base_rec)
         already_selected.add(fx["id"])
@@ -652,16 +811,33 @@ def run_once(run_tag="DEFAULT", quick_mode=False):
         else:
             league_skipped.append(r)
             r["action"] = "SKIP"
+            r["action_code"] = "FINAL_RECORD"
             r["skip_code"] = "LEAGUE_CAP"
             r["skip_reason"] = f"{lg} 已满2场"
+            # unlock if it was pre-locked in this pass
+            fid = r.get("fixture_id")
+            if fid in already_selected:
+                already_selected.discard(fid)
+            st = fixture_state.get(str(fid), {}) or {}
+            st["locked"] = False
+            st["final_odds_status"] = st.get("final_odds_status") or "IN_BAND"
+            fixture_state[str(fid)] = st
     
     # ── 日上限20场（在联赛去重之后）──
     final_bets = league_deduped[:20]
     daily_capped = league_deduped[20:]
     for r in daily_capped:
         r["action"] = "SKIP"
+        r["action_code"] = "FINAL_RECORD"
         r["skip_code"] = "DAILY_CAP"
         r["skip_reason"] = "日上限20场（联赛去重后）"
+        fid = r.get("fixture_id")
+        if fid in already_selected:
+            already_selected.discard(fid)
+        st = fixture_state.get(str(fid), {}) or {}
+        st["locked"] = False
+        st["final_odds_status"] = st.get("final_odds_status") or "IN_BAND"
+        fixture_state[str(fid)] = st
     bets = final_bets
     stats["league_skipped"] = len(league_skipped)
     stats["daily_capped"] = len(daily_capped)
@@ -755,9 +931,10 @@ def run_once(run_tag="DEFAULT", quick_mode=False):
     print()
     print(report)
 
-    # 保存预测 (🔍 仅 BET 记录 → paper_trading.py 结算用)
+    # 保存预测 (🔍 仅 BET_LOCKED 记录 → paper_trading.py 结算用)
     pred_save = []
     for rec in bets:
+        st = fixture_state.get(str(rec["fixture_id"]), {})
         pred_save.append({
             "fixture_id": rec["fixture_id"],
             "date": get_ops_date().isoformat(),
@@ -771,11 +948,17 @@ def run_once(run_tag="DEFAULT", quick_mode=False):
             "model_probs": rec["model_probs"],
             "market_probs": rec["market_probs"],
             "placed_odds": rec["offered_odds_D"],
+            "locked_stage": rec.get("locked_stage") or st.get("locked_stage"),
+            "locked_odds_D": rec.get("locked_odds_D") or st.get("locked_odds_D"),
+            "locked_time": rec.get("locked_time") or st.get("locked_time"),
+            "final_observed_odds_D": st.get("final_observed_odds_D"),
+            "final_odds_status": st.get("final_odds_status"),
             "break_even_prob": rec["break_even_prob"],
             "edge_pp": rec["edge_pp"],
             "ev_pct": rec["ev_pct"],
             "stake_info": rec.get("stake_info", {}),
             "action": rec["action"],
+            "action_code": rec.get("action_code"),
             "bookmaker": rec.get("bookmaker", "?"),
             # Strategy Router 契约
             "strategy_id": rec.get("strategy_id", "V2_HT_DRAW"),
@@ -794,14 +977,38 @@ def run_once(run_tag="DEFAULT", quick_mode=False):
             existing_ids = {p["fixture_id"] for p in existing if isinstance(p, dict)}
         except:
             pass
-    merged = existing + [p for p in pred_save if p["fixture_id"] not in existing_ids]
+    # Merge by fixture_id and keep latest state fields for already-locked fixtures.
+    merged_map = {int(p["fixture_id"]): p for p in existing if isinstance(p, dict) and p.get("fixture_id") is not None}
+    for p in pred_save:
+        merged_map[int(p["fixture_id"])] = p
+    # Backfill final observed odds/status from state for any locked fixture already in prediction file.
+    for fid_int, p in list(merged_map.items()):
+        st = fixture_state.get(str(fid_int), {})
+        if st.get("locked_odds_D"):
+            p["locked_stage"] = p.get("locked_stage") or st.get("locked_stage")
+            p["locked_odds_D"] = p.get("locked_odds_D") or st.get("locked_odds_D")
+            p["locked_time"] = p.get("locked_time") or st.get("locked_time")
+            p["final_observed_odds_D"] = st.get("final_observed_odds_D")
+            p["final_odds_status"] = st.get("final_odds_status")
+            if st.get("final_odds_status") == "MOVED_OUT_AFTER_LOCK":
+                p["moved_out_after_lock"] = True
+    merged = [merged_map[k] for k in sorted(merged_map.keys())]
     with open(pred_path, "w") as f:
         json.dump(merged, f, ensure_ascii=False, indent=2)
     logger.info(f"\n预测数据: {pred_path}")
 
     # 🌟 写入状态机，把锁定的比赛传给下一个 Cron
     with open(state_file, "w") as f:
-        json.dump(sorted(list(already_selected)), f)
+        json.dump(
+            {
+                "selected_fixture_ids": sorted(list(already_selected)),
+                "fixtures": fixture_state,
+                "updated_at": datetime.now(timezone.utc).isoformat(),
+            },
+            f,
+            ensure_ascii=False,
+            indent=2,
+        )
     logger.info(f"🔒 状态机: {len(already_selected)} 场比赛已锁定 → {state_file}")
 
     # 结算已分离至独立 Cron: python3 engine/paper_trading.py --verify-yesterday
