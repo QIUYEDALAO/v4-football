@@ -305,12 +305,12 @@ def calc_edge(fx: dict) -> Optional[dict]:
 
 
 # ===== Step 6: 日报生成 =====
-def generate_report(fixtures: list[dict], bets: list[dict], stats: dict, all_candidates: list[dict] = None) -> str:
+def generate_report(fixtures: list[dict], bets: list[dict], stats: dict, all_candidates: list[dict] = None, already_selected: set = None) -> str:
     td = get_ops_date().strftime("%Y-%m-%d")
     now = datetime.now().strftime("%H:%M")
 
     new_bet_count = len(bets)
-    historical_count = len(already_selected)  # 包含本轮+历史
+    historical_count = len(already_selected) if already_selected else 0  # 包含本轮+历史
     
     lines = [
         f"## ⚽ V2 每日扫描 (HT 1X2) | {td} {now}",
@@ -937,7 +937,7 @@ def run_once(run_tag="DEFAULT", quick_mode=False):
     logger.info(f"\n🌎 全量候选池: {len(universe)} 场 → {univ_path}")
 
     logger.info(f"[6/7] 生成日报 + 保存全量死因追踪...")
-    report = generate_report(fixtures, bets, stats, all_candidates)
+    report = generate_report(fixtures, bets, stats, all_candidates, already_selected)
     report_path = REPORT_DIR / f"daily_{get_ops_date().strftime('%Y%m%d')}.md"
     with open(report_path, "w") as f:
         f.write(report)
