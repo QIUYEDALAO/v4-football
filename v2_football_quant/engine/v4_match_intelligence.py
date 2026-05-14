@@ -151,7 +151,7 @@ def _time_bins_with_fallback(factors: dict) -> tuple[dict, str]:
     tb_has_data = any(_float(v, 0.0) > 0 for v in tb.values())
     if tb_has_data:
         return tb, "h2h"
-    return rtb, "recent_fallback"
+    return rtb, "RECENT_DISCOUNTED"
 
 
 def _script_type_from_bins(time_bins: dict) -> str:
