@@ -150,13 +150,14 @@ def format_qq(date_str: str) -> str:
         for vl in val_lines:
             out.append(vl)
     else:
-        out.append("昨日验证：暂无数据")
+        out.append("暂无昨日V4验证数据")
     
     # ── 滚动验证 ──
     out.append("")
     out.append(SEP)
     out.append("【滚动验证】")
-    out.append("样本不足，仅观察。")
+    out.append("近7天：样本不足，仅观察")
+    out.append("近30天：样本不足，仅观察")
     
     # ── 今日结论 ──
     out.append("")
