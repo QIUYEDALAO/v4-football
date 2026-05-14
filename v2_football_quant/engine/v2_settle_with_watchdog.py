@@ -11,8 +11,6 @@ from __future__ import annotations
 import argparse
 import json
 import sys
-import time
-from datetime import datetime
 from pathlib import Path
 
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -36,11 +34,17 @@ def main():
 
     try:
         from engine import paper_trading
-        # paper_trading.py 的 verify_yesterday 直接跑
+
+        # 转换日期格式 20260514 → 2026-05-14
+        date_str = str(args.date).replace("-", "")
+        formatted_date = f"{date_str[:4]}-{date_str[4:6]}-{date_str[6:8]}"
+
         old_argv = sys.argv
-        sys.argv = ["paper_trading.py", "--verify-yesterday"]
-        paper_trading.main()
-        sys.argv = old_argv
+        try:
+            sys.argv = ["paper_trading.py", "--verify", formatted_date]
+            paper_trading.main()
+        finally:
+            sys.argv = old_argv
 
         # 检查结算文件
         key = str(args.date).replace("-", "")
