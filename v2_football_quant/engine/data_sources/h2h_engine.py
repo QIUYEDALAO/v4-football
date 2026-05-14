@@ -499,12 +499,22 @@ def evaluate_h2h_edge(home_id: int, away_id: int, api_client, mode: str = "full"
         else "WEAK"
     )
 
+    # ── 方案B: effective_time_bins ──
+    # H2H time_bins全0时, 用recent_time_bins×0.75回填
+    _h2h_tb_has_data = any(v > 0 for v in time_bins.values())
+    if not _h2h_tb_has_data and recent_time_bins:
+        effective_time_bins = {
+            k: round(v * 0.75, 3) for k, v in recent_time_bins.items()
+        }
+    else:
+        effective_time_bins = time_bins
+
     score_pack = _score_market_fit(
         ht_rate=ht_rate,
         ht_goal_count=ht_goal_count,
         n=n,
         recent_form_avg=recent_form_avg,
-        time_bins=time_bins,
+        time_bins=effective_time_bins,
         sh_rate=sh_rate,
         recent_sh_avg=recent_sh_avg,
         second_half_bins=second_half_bins,
