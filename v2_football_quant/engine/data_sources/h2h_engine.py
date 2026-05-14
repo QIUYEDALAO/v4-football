@@ -619,6 +619,7 @@ def evaluate_h2h_edge(home_id: int, away_id: int, api_client, mode: str = "full"
             "h2h_expired": expired_count,
             "ft_0_0_count": ft_zero_count,
             "time_bins": time_bins,
+            "time_bin_source": "H2H" if _h2h_tb_has_data else ("RECENT_DISCOUNTED" if recent_time_bins else "NONE"),
             "late_fh_pressure": late_fh_pressure,
             "early_only_flag": early_only_flag,
             "pullback_fit": pullback_fit,
