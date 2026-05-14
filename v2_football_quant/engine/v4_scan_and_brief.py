@@ -27,6 +27,8 @@ LOCAL_TZ = timezone(timedelta(hours=8))
 FORBIDDEN_KEYWORDS = [
     "SECOND_HALF_OVER", "FULLTIME_OVER", "market_scores",
     "球探扫描结果", "高评分", "全场大球", "下半场大球", "V33",
+    "皇冠半场盘口", "交叉参考", "按V33策略", "需独立分析",
+    "另出独立分析", "是否需要我", "评分体系不同",
 ]
 REQUIRED_KEYWORDS = [
     "A级上半场强推荐", "B级上半场达标推荐", "C级观察池",
