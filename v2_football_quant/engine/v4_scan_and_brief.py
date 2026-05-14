@@ -1,15 +1,17 @@
 #!/usr/bin/env python3
-"""engine/v4_scan_and_brief.py — V4 唯一推送入口（含watchdog+内容守卫）
+"""engine/v4_scan_and_brief.py — V4 supervisor（父进程）
 ============================================================
-QQ Bot 只输出 V4 HT简报（A/B/C/SKIP），禁止旧口径(SecondHalf/FullTime/market_scores)。
+子进程 v4_scan_worker 跑扫描，父进程管 watchdog/简报/推送。
+SIGKILL 时父进程存活并记录状态。
 """
 
 from __future__ import annotations
 
 import argparse
+import os
+import subprocess
 import sys
 import time
-import os
 from datetime import datetime, timezone, timedelta
 from pathlib import Path
 
@@ -18,6 +20,8 @@ sys.path.insert(0, str(BASE_DIR))
 
 REPORT_DIR = BASE_DIR / "data" / "daily_reports"
 LOG_DIR = BASE_DIR / "data" / "runtime" / "logs"
+LOCK_DIR = BASE_DIR / "data" / "runtime" / "locks"
+GLOBAL_LOCK = LOCK_DIR / "v4_scan_global.lock"
 LOCAL_TZ = timezone(timedelta(hours=8))
 
 FORBIDDEN_KEYWORDS = [
@@ -29,18 +33,27 @@ REQUIRED_KEYWORDS = [
     "HT_SKIP跳过", "无A/B上半场主推荐",
 ]
 
+HARD_TIMEOUT = 3600  # 60 min
+SOFT_TIMEOUT = 1800  # 30 min
+
 
 def _content_guard(text: str) -> bool:
-    """内容守卫：只要包含禁止关键词，直接 BLOCK"""
     for kw in FORBIDDEN_KEYWORDS:
         if kw in text:
-            print(f"[GUARD] BLOCKED: 简报包含禁止关键词 '{kw}'", flush=True)
+            print(f"[GUARD] BLOCKED: '{kw}'", flush=True)
             return False
-    has_required = any(kw in text for kw in REQUIRED_KEYWORDS)
-    if not has_required:
-        print("[GUARD] BLOCKED: 简报缺少必需关键词", flush=True)
-        return False
-    return True
+    return any(kw in text for kw in REQUIRED_KEYWORDS)
+
+
+def _sigmask_push(window: str, date: str, status: str, progress: str, reason: str) -> None:
+    print(f"""⛔ V4扫描被系统终止
+窗口：{window}
+日期：{date}
+状态：{status}
+进度：{progress}
+原因：{reason}
+处理：不生成正式简报，不读取半成品 scout
+下一步：等待下一窗口或手动低负载重跑""", flush=True)
 
 
 def main():
@@ -53,47 +66,72 @@ def main():
     args = parser.parse_args()
 
     from engine.task_watchdog import v4_scan_watchdog
-    from engine.v4_runner import run_v4_scan
+
+    # Global lock
+    LOCK_DIR.mkdir(parents=True, exist_ok=True)
+    if GLOBAL_LOCK.exists():
+        stale_s = time.time() - GLOBAL_LOCK.stat().st_mtime
+        if stale_s < HARD_TIMEOUT:
+            print(f"[WATCHDOG] V4 global scan lock active, skip", flush=True)
+            return
+    GLOBAL_LOCK.write_text(str(os.getpid()))
 
     wd = v4_scan_watchdog(args.window)
-    if not wd.acquire_lock():
-        return
-
-    now = datetime.now(LOCAL_TZ)
     wd.start(total_items=0)
-
-    # 扫描日志重定向
-    LOG_DIR.mkdir(parents=True, exist_ok=True)
+    now = datetime.now(LOCAL_TZ)
     today_key = str(args.date).replace("-", "")
+
+    LOG_DIR.mkdir(parents=True, exist_ok=True)
     log_path = LOG_DIR / f"v4_scan_{args.window}_{today_key}.log"
-    log_fh = open(str(log_path), "w")
-    old_stdout, old_stderr = sys.stdout, sys.stderr
-    sys.stdout = log_fh
-    sys.stderr = log_fh
 
     try:
-        result = run_v4_scan(
-            run_tag=f"V4_{args.window.upper()}",
-            lookahead_hours=args.lookahead_hours,
-            scan_mode=args.scan_mode,
-            recent_prewarm="off",
-            scan_date=args.date,
-            use_watchdog=False,
-        )
+        with open(str(log_path), "w") as log_fh:
+            child = subprocess.Popen(
+                [sys.executable, "-u", str(BASE_DIR / "engine" / "v4_scan_worker.py"),
+                 "--date", args.date, "--window", args.window,
+                 "--lookahead-hours", str(args.lookahead_hours),
+                 "--scan-mode", args.scan_mode],
+                stdout=log_fh, stderr=subprocess.STDOUT,
+            )
 
-        sys.stdout = old_stdout
-        sys.stderr = old_stderr
-        log_fh.close()
+            started_at = time.time()
 
-        if result.get("skipped"):
-            wd.finish(status="SKIPPED_OVERLAP")
+            while child.poll() is None:
+                elapsed = time.time() - started_at
+                wd.heartbeat(current=0, total=0, item="worker running", api_calls=0)
+                if elapsed > HARD_TIMEOUT:
+                    child.terminate()
+                    time.sleep(10)
+                    if child.poll() is None:
+                        child.kill()
+                    GLOBAL_LOCK.unlink(missing_ok=True)
+                    wd.finish(status="TIMEOUT", error="hard timeout, worker killed")
+                    _sigmask_push(args.window, args.date, "TIMEOUT", "unknown", "hard timeout 60min")
+                    return
+                if elapsed > SOFT_TIMEOUT:
+                    wd._write_status("DELAYED", "超过30分钟")
+                time.sleep(30)
+
+            rc = child.returncode
+
+        if rc == -9:
+            GLOBAL_LOCK.unlink(missing_ok=True)
+            wd.finish(status="KILLED_SIGKILL", error="worker received SIGKILL, likely OOM")
+            _sigmask_push(args.window, args.date, "KILLED_SIGKILL", "unknown", "worker SIGKILL")
             return
 
+        if rc != 0:
+            GLOBAL_LOCK.unlink(missing_ok=True)
+            wd.finish(status="FAILED", error=f"worker exit code {rc}")
+            return
+
+        # Worker success — validate scout
         scout_path = REPORT_DIR / f"scout_v4_{today_key}.json"
         scout_ok = scout_path.exists() and scout_path.stat().st_size > 0 and \
                    datetime.fromtimestamp(scout_path.stat().st_mtime, tz=LOCAL_TZ) >= now
 
         if not scout_ok:
+            GLOBAL_LOCK.unlink(missing_ok=True)
             wd.finish(status="FAILED", error="scout校验失败")
             return
 
@@ -103,32 +141,27 @@ def main():
         brief_path.write_text(brief_text, encoding="utf-8")
 
         if not _content_guard(brief_text):
+            GLOBAL_LOCK.unlink(missing_ok=True)
             wd.finish(status="FAILED", error="内容守卫拦截")
             return
 
-        # push 逻辑
+        # Push logic
         if args.push == "never":
             print("[WATCHDOG] brief generated, push skipped (never)", flush=True)
         elif args.push == "conditional":
-            should_push = False
-            ab_count = brief_text.count("A级上半场强推荐") + brief_text.count("B级上半场达标推荐")
-            if ab_count > 0 or brief_text.count("今日 V4 有 ") > 0:
-                should_push = True
-            if not should_push:
-                print("[WATCHDOG] brief generated, push skipped by conditional rule", flush=True)
-            else:
+            has_ab = "A级上半场强推荐" in brief_text or "B级上半场达标推荐" in brief_text
+            if has_ab:
                 print(brief_text, flush=True)
+            else:
+                print("[WATCHDOG] brief generated, push skipped (conditional: no A/B)", flush=True)
         else:
             print(brief_text, flush=True)
 
-        wd.finish(status="DONE", output_files={
-            "scout": str(scout_path), "brief": str(brief_path), "scan_log": str(log_path),
-        })
+        GLOBAL_LOCK.unlink(missing_ok=True)
+        wd.finish(status="DONE", output_files={"scout": str(scout_path), "brief": str(brief_path), "scan_log": str(log_path)})
 
     except Exception as e:
-        sys.stdout = old_stdout
-        sys.stderr = old_stderr
-        log_fh.close()
+        GLOBAL_LOCK.unlink(missing_ok=True)
         wd.finish(status="FAILED", error=str(e)[:200])
         raise
 

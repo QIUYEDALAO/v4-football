@@ -183,7 +183,20 @@ class TaskWatchdog:
             f"下一步：{'继续等待' if elapsed < self.timeout_soft_s else '已标记延迟'}"
         )
 
-    # ── internal ──
+# ── internal ──
+
+    def _write_status(self, status: str, message: str = "") -> None:
+        """直接写状态（用于 DELAYED / STALE 等中间状态）"""
+        state = {}
+        if self._status_path.exists():
+            try:
+                state = json.loads(self._status_path.read_text())
+            except Exception:
+                pass
+        state["status"] = status
+        state["message"] = message
+        state["last_heartbeat_at"] = datetime.now(LOCAL_TZ).isoformat()
+        self._write_full(state)
 
     def _write_full(self, state: dict) -> None:
         self._status_path.parent.mkdir(parents=True, exist_ok=True)

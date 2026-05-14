@@ -295,6 +295,7 @@ def run_v4_scan(
     recent_prewarm: str = "on",
     scan_date: str | None = None,
     use_watchdog: bool = True,
+    generate_dashboard: bool = False,
 ):
     t0 = time.perf_counter()
     logger.info(f"🔭 V4 球探扫描 | {run_tag} | {datetime.now().strftime('%H:%M')}")
