@@ -294,6 +294,7 @@ def run_v4_scan(
     scan_mode: str = "fast",
     recent_prewarm: str = "on",
     scan_date: str | None = None,
+    use_watchdog: bool = True,
 ):
     t0 = time.perf_counter()
     logger.info(f"🔭 V4 球探扫描 | {run_tag} | {datetime.now().strftime('%H:%M')}")
@@ -311,13 +312,15 @@ def run_v4_scan(
     )
     today_key = scan_dt.strftime("%Y%m%d")
     
-    # ── 任务监控 ──
-    window = "midday" if "NOON" in run_tag else ("evening" if "PM" in run_tag else ("late" if "LATE" in run_tag else "manual"))
-    wd = v4_scan_watchdog(window)
-    if not wd.acquire_lock():
-        logger.warning(f"[WATCHDOG] V4扫描-{window} 已有实例运行，跳过")
-        return {"skipped": True, "reason": "concurrent_scan"}
-    wd.start(total_items=len(fixtures))
+    # ── 任务监控（仅独立运行时启用；wrapper模式下由调用方管理）──
+    wd = None
+    if use_watchdog:
+        window = "midday" if "NOON" in run_tag else ("evening" if "PM" in run_tag else ("late" if "LATE" in run_tag else "manual"))
+        wd = v4_scan_watchdog(window)
+        if not wd.acquire_lock():
+            logger.warning(f"[WATCHDOG] V4扫描-{window} 已有实例运行，跳过")
+            return {"skipped": True, "reason": "concurrent_scan"}
+        wd.start(total_items=len(fixtures))
     
     universe_out = universe_path(today_key)
     if universe_out.exists():
@@ -371,7 +374,7 @@ def run_v4_scan(
     cov_rank = {"UNKNOWN": 1, "BASIC": 2, "GOOD": 3, "FULL": 4}
 
     for i, fx in enumerate(fixtures):
-        if (i + 1) % 10 == 0:
+        if (i + 1) % 10 == 0 and wd:
             wd.heartbeat(current=i+1, total=len(fixtures), item=f"{fx.get('home','?')} vs {fx.get('away','?')}", api_calls=getattr(api_client, "_stats", {}).get("calls_total",0))
         if (i + 1) % 20 == 0:
             logger.info(f"  H2H 查询: {i+1}/{len(fixtures)}")
@@ -671,12 +674,13 @@ def run_v4_scan(
     logger.info(f"  ⚙️ 性能文件: {perf_path}")
     
     # ── 任务监控：完成 ──
-    scout_ok = out_path.exists() and out_path.stat().st_size > 0
-    wd.finish(
-        status="DONE" if scout_ok else "PARTIAL_DONE",
-        output_files={"scout": str(out_path), "perf": str(perf_path)},
-        error="" if scout_ok else "scout文件为空或不存在",
-    )
+    if wd:
+        scout_ok = out_path.exists() and out_path.stat().st_size > 0
+        wd.finish(
+            status="DONE" if scout_ok else "PARTIAL_DONE",
+            output_files={"scout": str(out_path), "perf": str(perf_path)},
+            error="" if scout_ok else "scout文件为空或不存在",
+        )
 
 
 if __name__ == "__main__":
