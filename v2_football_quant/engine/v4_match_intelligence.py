@@ -196,7 +196,15 @@ def build_ht_recommendation(record: dict) -> dict:
     ht_attack = _float(factors.get("ht_attack_vs_defense"))
     sample_size = int(_float(factors.get("h2h_sample_size"), 0.0))
     early_only_flag = bool(factors.get("early_only_flag") or factors.get("recent_early_only_flag"))
-    pullback_fit = str(factors.get("pullback_fit") or factors.get("recent_timing_fit") or "-")
+    pullback_fit_raw = factors.get("pullback_fit") or "-"
+    recent_timing_fit = factors.get("recent_timing_fit") or "-"
+    # 当 H2H time_bins 全 0 且 recent_timing_fit 有有效值时，用 recent 回退
+    h2h_tb = factors.get("time_bins", {}) or {}
+    tb_has_data = any(_float(v or 0, 0.0) > 0 for v in h2h_tb.values())
+    if tb_has_data:
+        pullback_fit = str(pullback_fit_raw)
+    else:
+        pullback_fit = str(recent_timing_fit) if str(recent_timing_fit) not in ("-", "WEAK") else str(pullback_fit_raw)
 
     effective_tb, tb_source = _time_bins_with_fallback(factors)
     p0_15 = _float(effective_tb.get("0_15"))
@@ -361,6 +369,10 @@ def explain_match(record: dict) -> dict:
     early_0_10 = _float(effective_tb.get("0_10"))
     late_11_45 = _float(effective_tb.get("11_45"))
     pullback_fit = factors.get("pullback_fit") or factors.get("recent_timing_fit") or "-"
+    # 当 H2H time_bins 全 0 且 recent_timing_fit 有有效值时，用 recent 回退
+    _tb_has = any(float(v or 0) > 0 for v in (effective_tb or {}).values())
+    if not _tb_has and factors.get("recent_timing_fit") not in (None, "-", "WEAK"):
+        pullback_fit = factors.get("recent_timing_fit")
 
     match_type: list[str] = []
     why: list[str] = []

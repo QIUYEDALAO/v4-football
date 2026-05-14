@@ -304,7 +304,7 @@ def calc_edge(fx: dict) -> Optional[dict]:
 
 
 # ===== Step 6: 日报生成 =====
-def generate_report(fixtures: list[dict], bets: list[dict], stats: dict) -> str:
+def generate_report(fixtures: list[dict], bets: list[dict], stats: dict, all_candidates: list[dict] = None) -> str:
     td = get_ops_date().strftime("%Y-%m-%d")
     now = datetime.now().strftime("%H:%M")
 
@@ -317,7 +317,7 @@ def generate_report(fixtures: list[dict], bets: list[dict], stats: dict) -> str:
 
     # 状态分布摘要
     from collections import Counter
-    action_counts = Counter(r.get("action_code", r.get("action", "?")) for r in all_candidates if r.get("action_code"))
+    action_counts = Counter(r.get("action_code", r.get("action", "?")) for r in (all_candidates or []) if r.get("action_code"))
     status_lines = []
     if action_counts.get("BET_LOCKED"): status_lines.append(f"🔒 正式推荐: {action_counts['BET_LOCKED']}场")
     if action_counts.get("CANDIDATE"): status_lines.append(f"🟡 T-3h候选: {action_counts['CANDIDATE']}场")
@@ -923,7 +923,7 @@ def run_once(run_tag="DEFAULT", quick_mode=False):
     logger.info(f"\n🌎 全量候选池: {len(universe)} 场 → {univ_path}")
 
     logger.info(f"[6/7] 生成日报 + 保存全量死因追踪...")
-    report = generate_report(fixtures, bets, stats)
+    report = generate_report(fixtures, bets, stats, all_candidates)
     report_path = REPORT_DIR / f"daily_{get_ops_date().strftime('%Y%m%d')}.md"
     with open(report_path, "w") as f:
         f.write(report)
