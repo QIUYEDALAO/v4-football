@@ -142,30 +142,37 @@ def main():
             wd.finish(status="FAILED", error="scout校验失败")
             return
 
+        # Step 3: 生成双版本简报
         from engine.v4_openclaw_brief import build_brief
+        from engine.v4_qq_formatter import format_qq
+        
         brief_text = build_brief(args.date)
         brief_path = REPORT_DIR / f"v4_openclaw_brief_{today_key}.txt"
         brief_path.write_text(brief_text, encoding="utf-8")
+        
+        qq_text = format_qq(args.date)
+        qq_path = REPORT_DIR / f"v4_openclaw_brief_qq_{today_key}.txt"
+        qq_path.write_text(qq_text, encoding="utf-8")
 
-        if not _content_guard(brief_text):
+        if not _content_guard(qq_text):
             GLOBAL_LOCK.unlink(missing_ok=True)
             wd.finish(status="FAILED", error="内容守卫拦截")
             return
 
-        # Push logic
+        # Push logic: 推送 QQ 版
         if args.push == "never":
             print("[WATCHDOG] brief generated, push skipped (never)", flush=True)
         elif args.push == "conditional":
-            has_ab = "今日 V4 有 " in brief_text and "上半场推荐" in brief_text
+            has_ab = "今日 V4 有 " in qq_text and "上半场推荐" in qq_text
             if has_ab:
-                print(brief_text, flush=True)
+                print(qq_text, flush=True)
             else:
                 print("[WATCHDOG] brief generated, push skipped (conditional: no A/B)", flush=True)
         else:
-            print(brief_text, flush=True)
+            print(qq_text, flush=True)
 
         GLOBAL_LOCK.unlink(missing_ok=True)
-        wd.finish(status="DONE", output_files={"scout": str(scout_path), "brief": str(brief_path), "scan_log": str(log_path)})
+        wd.finish(status="DONE", output_files={"scout": str(scout_path), "brief": str(brief_path), "brief_qq": str(qq_path), "scan_log": str(log_path)})
 
     except Exception as e:
         GLOBAL_LOCK.unlink(missing_ok=True)
