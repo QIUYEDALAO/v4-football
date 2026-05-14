@@ -39,21 +39,28 @@ def main():
         date_str = str(args.date).replace("-", "")
         formatted_date = f"{date_str[:4]}-{date_str[4:6]}-{date_str[6:8]}"
 
-        old_argv = sys.argv
-        try:
-            sys.argv = ["paper_trading.py", "--verify", formatted_date]
-            paper_trading.main()
-        finally:
-            sys.argv = old_argv
+        paper_trading.verify_date(formatted_date)
 
-        # 检查结算文件
+        # 检查结算文件并判断 pending
         key = str(args.date).replace("-", "")
         verified_path = BASE_DIR / "data" / "paper_trading" / f"verified_{key}.json"
-        if verified_path.exists() and verified_path.stat().st_size > 0:
-            wd.finish(status="DONE", output_files={"verified": str(verified_path)})
-        else:
+        if not verified_path.exists() or verified_path.stat().st_size == 0:
             wd.finish(status="PARTIAL_DONE", error="verified文件缺失",
                       output_files={"verified": str(verified_path) if verified_path.exists() else None})
+        else:
+            verified = json.loads(verified_path.read_text())
+            pending = verified.get("pending", 0)
+            total_completed = verified.get("total_completed", 0)
+            total_predicted = verified.get("total_predicted", 0)
+            if pending > 0:
+                wd.finish(status="PARTIAL_DONE",
+                          error=f"仍有 {pending} 场未结算",
+                          output_files={"verified": str(verified_path)})
+            elif total_completed == 0:
+                wd.finish(status="PARTIAL_DONE", error="total_completed为0",
+                          output_files={"verified": str(verified_path)})
+            else:
+                wd.finish(status="DONE", output_files={"verified": str(verified_path)})
     except Exception as e:
         wd.finish(status="FAILED", error=str(e)[:200])
         raise
