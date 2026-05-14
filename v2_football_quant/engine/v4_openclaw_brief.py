@@ -280,7 +280,7 @@ def build_brief(date_str: str) -> str:
             root[rc] += 1
         lines.append("")
         lines.append("去噪后：")
-        for k in ["MODEL_VALID", "NOISY_WIN", "NOISY_LOSS", "MODEL_OVERCONFIDENT", "MODEL_TOO_STRICT", "DATA_QUALITY_ISSUE"]:
+        for k in ["MODEL_VALID_STRONG", "MODEL_VALID", "UNLUCKY_MISS", "LUCKY_HIT", "NOISY_WIN", "NOISY_LOSS", "MODEL_OVERCONFIDENT", "MODEL_TOO_STRICT", "DATA_QUALITY_ISSUE"]:
             lines.append(f"{k}：{diag.get(k, 0)}场")
 
         rec_rows = [r for r in attrib_rows if str(r.get("pre_grade") or "").upper() in ("A", "B", "C")]
@@ -299,7 +299,7 @@ def build_brief(date_str: str) -> str:
         lines.append(f"红牌/点球/乌龙干扰：{noise_event_cnt}场")
         lines.append("")
         lines.append("昨日归因维度：")
-        for k in ["MODEL_FEATURE", "TIME_DISTRIBUTION", "MATCH_FLOW", "MARKET_SIGNAL", "EVENT_NOISE", "CONTEXT_NOISE", "WEATHER_NOISE", "DATA_QUALITY", "NORMAL_VARIANCE"]:
+        for k in ["MODEL_FEATURE", "TIME_DISTRIBUTION", "MATCH_FLOW", "MARKET_SIGNAL", "EVENT_NOISE", "CONTEXT_NOISE", "WEATHER_NOISE", "LINEUP_CHANGE", "MOTIVATION_MISREAD", "DATA_QUALITY", "NORMAL_VARIANCE"]:
             lines.append(f"{k}：{root.get(k, 0)}场")
     lines.append(sep)
 

@@ -39,6 +39,24 @@ def _load_json(path: Path, default: Any):
         return json.load(f)
 
 
+def _load_jsonl(path: Path) -> list[dict[str, Any]]:
+    if not path.exists():
+        return []
+    rows: list[dict[str, Any]] = []
+    with open(path, encoding="utf-8") as f:
+        for line in f:
+            line = line.strip()
+            if not line:
+                continue
+            try:
+                obj = json.loads(line)
+                if isinstance(obj, dict):
+                    rows.append(obj)
+            except Exception:
+                continue
+    return rows
+
+
 def _safe_float(v: Any, default: float = 0.0) -> float:
     try:
         return float(v)
@@ -307,6 +325,126 @@ def _market_dimension(rec: dict, pre_grade: str) -> dict[str, Any]:
     }
 
 
+def _motivation_dimension(rec: dict) -> dict[str, Any]:
+    mot = rec.get("motivation") or {}
+    gate = mot.get("gate") or {}
+    home = mot.get("home") or {}
+    away = mot.get("away") or {}
+    lvl = "UNKNOWN"
+    if str(gate.get("action") or "") in ("BOOST", "ALLOW_V4_LIVE"):
+        lvl = "HIGH"
+    elif str(gate.get("action") or "") in ("KEEP", "KEEP_WATCH"):
+        lvl = "MEDIUM"
+    elif str(gate.get("action") or "") in ("WATCH_ONLY", "DROP"):
+        lvl = "LOW"
+    return {
+        "available": bool(mot),
+        "home_rank": home.get("rank"),
+        "home_points": home.get("points"),
+        "away_rank": away.get("rank"),
+        "away_points": away.get("points"),
+        "home_tags": home.get("tags") or [],
+        "away_tags": away.get("tags") or [],
+        "motivation_gate_action": gate.get("action"),
+        "motivation_level": lvl,
+    }
+
+
+def _lineup_dimension(rec: dict) -> dict[str, Any]:
+    gate = rec.get("lineup_gate") or {}
+    home = gate.get("home") or {}
+    away = gate.get("away") or {}
+    action = str(gate.get("lineup_action") or rec.get("lineup_action") or "LINEUP_UNKNOWN")
+    if action in ("BOOST", "KEEP_WATCH"):
+        risk = "LOW"
+    elif action in ("WATCH_CAUTION", "KEEP_WATCH_LIGHT", "LINEUP_PENDING"):
+        risk = "MEDIUM"
+    else:
+        risk = "HIGH"
+    return {
+        "lineup_available": bool(gate),
+        "lineup_action": action,
+        "home_attack_unit_available": home.get("attack_unit_available"),
+        "away_attack_unit_available": away.get("attack_unit_available"),
+        "home_rotation_count": home.get("rotation_count"),
+        "away_rotation_count": away.get("rotation_count"),
+        "lineup_risk_level": risk,
+    }
+
+
+def _flow_quality(shots_total: float, shots_on_target_total: float, corners_total: float, dangerous_attacks_total: float) -> str:
+    if shots_total >= 6 or shots_on_target_total >= 3 or corners_total >= 4 or dangerous_attacks_total >= 25:
+        return "GOOD"
+    if shots_total >= 4 or shots_on_target_total >= 2 or corners_total >= 2 or dangerous_attacks_total >= 15:
+        return "OK"
+    return "POOR"
+
+
+def _load_live_stats_index(date_key: str) -> dict[int, list[dict[str, Any]]]:
+    path = ARCHIVE_DIR / f"live_stats_snapshot_{date_key}.jsonl"
+    rows = _load_jsonl(path)
+    idx: dict[int, list[dict[str, Any]]] = {}
+    for row in rows:
+        fid = _safe_int(row.get("fixture_id"), 0)
+        if not fid:
+            continue
+        idx.setdefault(fid, []).append(row)
+    for fid, lst in idx.items():
+        lst.sort(key=lambda x: _safe_int(x.get("minute"), 0))
+    return idx
+
+
+def _match_flow_dimension(fixture_id: int, stats_index: dict[int, list[dict[str, Any]]]) -> dict[str, Any]:
+    rows = stats_index.get(int(fixture_id), [])
+    rows = [r for r in rows if _safe_int(r.get("minute"), 0) <= 45]
+    if not rows:
+        return {
+            "stats_available": False,
+            "snapshot_minute": None,
+            "ht_shots_total": 0.0,
+            "ht_shots_on_target_total": 0.0,
+            "ht_corners_total": 0.0,
+            "ht_dangerous_attacks_total": 0.0,
+            "tempo_supported": False,
+            "pressure_supported": False,
+            "flow_quality": "UNKNOWN",
+        }
+    row = rows[-1]
+    shots_total = _safe_float(row.get("shots_total"), _safe_float(row.get("ht_shots_total"), 0.0))
+    sot_total = _safe_float(row.get("shots_on_target_total"), _safe_float(row.get("ht_shots_on_target_total"), 0.0))
+    corners_total = _safe_float(row.get("corners_total"), _safe_float(row.get("ht_corners_total"), 0.0))
+    danger_total = _safe_float(row.get("dangerous_attacks_total"), _safe_float(row.get("ht_dangerous_attacks_total"), 0.0))
+    flow = _flow_quality(shots_total, sot_total, corners_total, danger_total)
+    return {
+        "stats_available": True,
+        "snapshot_minute": _safe_int(row.get("minute"), None),
+        "ht_shots_total": shots_total,
+        "ht_shots_on_target_total": sot_total,
+        "ht_corners_total": corners_total,
+        "ht_dangerous_attacks_total": danger_total,
+        "tempo_supported": flow in ("GOOD", "OK"),
+        "pressure_supported": flow == "GOOD",
+        "flow_quality": flow,
+    }
+
+
+def _variance_dimension(pre_grade: str, ht_goal: bool, flow_quality: str) -> dict[str, Any]:
+    luck_class = "NORMAL_VARIANCE"
+    if pre_grade in ("A", "B", "C") and not ht_goal and flow_quality == "GOOD":
+        luck_class = "UNLUCKY_MISS"
+    elif pre_grade in ("A", "B", "C") and ht_goal and flow_quality == "POOR":
+        luck_class = "LUCKY_HIT"
+    elif pre_grade == "SKIP" and not ht_goal and flow_quality in ("POOR", "UNKNOWN"):
+        luck_class = "FAIR_RESULT"
+    elif pre_grade in ("A", "B", "C") and ht_goal and flow_quality in ("GOOD", "OK"):
+        luck_class = "FAIR_RESULT"
+    return {
+        "luck_class": luck_class,
+        "process_good_but_no_goal": pre_grade in ("A", "B", "C") and (not ht_goal) and flow_quality == "GOOD",
+        "process_bad_but_goal": pre_grade in ("A", "B", "C") and ht_goal and flow_quality == "POOR",
+    }
+
+
 def _root_cause(
     diagnosis: str,
     pre_grade: str,
@@ -316,18 +454,34 @@ def _root_cause(
     weather_dimension: dict[str, Any],
     market_dimension: dict[str, Any],
     bucket_hit: bool,
+    match_flow_dimension: dict[str, Any],
+    lineup_dimension: dict[str, Any],
+    motivation_dimension: dict[str, Any],
+    variance_dimension: dict[str, Any],
 ) -> tuple[str, list[str], str]:
     secondary: list[str] = []
     weather_tags = set(weather_dimension.get("weather_tags") or [])
     weather_noise = any(t in weather_tags for t in ("HEAVY_RAIN", "MODERATE_RAIN", "STRONG_WIND", "EXTREME_COLD", "EXTREME_HEAT", "WET_PITCH_RISK"))
+    flow_quality = str(match_flow_dimension.get("flow_quality") or "UNKNOWN")
+    lineup_action = str(lineup_dimension.get("lineup_action") or "")
+    mot_tags = set((motivation_dimension.get("home_tags") or []) + (motivation_dimension.get("away_tags") or []))
+    luck_class = str(variance_dimension.get("luck_class") or "NORMAL_VARIANCE")
     if diagnosis == "DATA_QUALITY_ISSUE":
         return "DATA_QUALITY", ["NORMAL_VARIANCE"], "HIGH"
+    if lineup_action in ("DROP_ATTACK_WEAK", "DROP_HEAVY_ROTATION"):
+        return "LINEUP_CHANGE", ["MATCH_FLOW"], "MEDIUM"
+    if "MID_TABLE_SAFE" in mot_tags and not ht_goal and pre_grade in ("A", "B", "C"):
+        return "MOTIVATION_MISREAD", ["MODEL_FEATURE"], "MEDIUM"
     if weather_noise and not ht_goal and pre_grade in ("A", "B", "C"):
         secondary = ["CONTEXT_NOISE"]
         return "WEATHER_NOISE", secondary, "MEDIUM"
     if any(x in event_noise for x in ("RED_CARD", "PENALTY", "OWN_GOAL", "VAR_PENALTY", "INJURY_SUB", "LATE_STOPPAGE_GOAL")):
         secondary = ["MATCH_FLOW"] if bucket_hit is False else ["NORMAL_VARIANCE"]
         return "EVENT_NOISE", secondary, "HIGH"
+    if diagnosis in ("UNLUCKY_MISS", "LUCKY_HIT"):
+        return "NORMAL_VARIANCE", ["MATCH_FLOW"], "LOW"
+    if flow_quality == "POOR" and pre_grade in ("A", "B", "C") and not ht_goal:
+        return "MATCH_FLOW", ["TIME_DISTRIBUTION"], "MEDIUM"
     if market_dimension.get("market_signal") == "MARKET_DIRECTION_CONFLICT":
         return "MARKET_SIGNAL", ["MODEL_FEATURE"], "MEDIUM"
     if diagnosis == "MODEL_OVERCONFIDENT":
@@ -340,6 +494,8 @@ def _root_cause(
         return "TIME_DISTRIBUTION", ["NORMAL_VARIANCE"], "LOW"
     if pre_grade == "SKIP" and ht_goal:
         return "MODEL_FEATURE", ["NORMAL_VARIANCE"], "MEDIUM"
+    if luck_class in ("UNLUCKY_MISS", "LUCKY_HIT"):
+        return "NORMAL_VARIANCE", [], "LOW"
     return "NORMAL_VARIANCE", secondary, "LOW"
 
 
@@ -358,9 +514,12 @@ def _diagnosis(
     pred_bins: dict[str, float],
     sample_size: int,
     coverage_level: str,
+    bucket_hit: bool,
+    match_flow_dimension: dict[str, Any],
 ) -> str:
     noisy_win_tags = {"PENALTY", "OWN_GOAL", "LATE_STOPPAGE_GOAL", "VAR_PENALTY"}
     noisy_loss_tags = {"RED_CARD", "INJURY_SUB"}
+    flow_quality = str(match_flow_dimension.get("flow_quality") or "UNKNOWN")
     if sample_size < 3:
         return "DATA_QUALITY_ISSUE"
     if time_bin_source in ("NONE", "", "-"):
@@ -373,10 +532,16 @@ def _diagnosis(
     if pre_grade in ("A", "B", "C") and ht_goal:
         if noisy_win_tags.intersection(event_noise):
             return "NOISY_WIN"
+        if flow_quality == "POOR":
+            return "LUCKY_HIT"
+        if bucket_hit and flow_quality == "GOOD":
+            return "MODEL_VALID_STRONG"
         return "MODEL_VALID"
     if pre_grade in ("A", "B", "C") and not ht_goal:
         if noisy_loss_tags.intersection(event_noise) or context_noise:
             return "NOISY_LOSS"
+        if flow_quality == "GOOD":
+            return "UNLUCKY_MISS"
         return "MODEL_OVERCONFIDENT"
     if pre_grade == "SKIP" and ht_goal:
         if noisy_win_tags.intersection(event_noise) or noisy_loss_tags.intersection(event_noise):
@@ -411,6 +576,8 @@ def _format_single(row: dict) -> str:
             "事件：",
             f"event_noise: {', '.join(row.get('event_noise') or ['无'])}",
             f"context_noise: {', '.join(row.get('context_noise') or ['无'])}",
+            f"flow_quality: {(row.get('match_flow_dimension') or {}).get('flow_quality', 'UNKNOWN')}",
+            f"weather_tags: {', '.join((row.get('weather_dimension') or {}).get('weather_tags') or ['NORMAL_WEATHER'])}",
             "",
             "归因：",
             f"{row.get('model_result')}",
@@ -433,6 +600,7 @@ def run(date_str: str, fixture_id: int | None = None, sleep_ms: int = 120) -> di
     if not isinstance(scout, list) or not scout:
         return {"error": f"scout文件不存在或为空: {scout_path}"}
 
+    stats_index = _load_live_stats_index(key)
     out_rows = []
     selected = [r for r in scout if (fixture_id is None or int(r.get("fixture_id") or 0) == int(fixture_id))]
     for rec in selected:
@@ -452,6 +620,9 @@ def run(date_str: str, fixture_id: int | None = None, sleep_ms: int = 120) -> di
         coverage_level = str(((rec.get("data_coverage") or {}).get("coverage_level") or "")).upper()
         weather_dimension = _weather_dimension(rec)
         market_dimension = _market_dimension(rec, pre_grade=pre_grade)
+        motivation_dimension = _motivation_dimension(rec)
+        lineup_dimension = _lineup_dimension(rec)
+        match_flow_dimension = _match_flow_dimension(fid, stats_index)
 
         f_resp = _api_get(f"fixtures?id={fid}")
         f_rows = f_resp.get("response") or []
@@ -485,9 +656,14 @@ def run(date_str: str, fixture_id: int | None = None, sleep_ms: int = 120) -> di
             pred_bins=pred_bins,
             sample_size=sample_size,
             coverage_level=coverage_level,
+            bucket_hit=bucket_hit,
+            match_flow_dimension=match_flow_dimension,
         )
+        variance_dimension = _variance_dimension(pre_grade, ht_goal, str(match_flow_dimension.get("flow_quality") or "UNKNOWN"))
         if diagnosis == "MODEL_VALID":
             diag_summary = "模型判断有效，且无明显偶然性干扰。"
+        elif diagnosis == "MODEL_VALID_STRONG":
+            diag_summary = "模型强命中：命中时间段且比赛过程质量良好。"
         elif diagnosis == "MODEL_OVERCONFIDENT":
             diag_summary = "推荐未中且无明显噪音，模型偏乐观。"
         elif diagnosis == "MODEL_TOO_STRICT":
@@ -496,6 +672,10 @@ def run(date_str: str, fixture_id: int | None = None, sleep_ms: int = 120) -> di
             diag_summary = "命中包含噪音事件，避免误判为稳定优势。"
         elif diagnosis == "NOISY_LOSS":
             diag_summary = "未命中受噪音事件影响，不宜直接调严规则。"
+        elif diagnosis == "UNLUCKY_MISS":
+            diag_summary = "过程支持但未进球，属于正常波动下的倒霉未中。"
+        elif diagnosis == "LUCKY_HIT":
+            diag_summary = "过程偏弱但命中，存在运气成分。"
         elif diagnosis == "DATA_QUALITY_ISSUE":
             diag_summary = "样本/分布/覆盖质量不足，先补数据。"
         else:
@@ -509,6 +689,10 @@ def run(date_str: str, fixture_id: int | None = None, sleep_ms: int = 120) -> di
             weather_dimension=weather_dimension,
             market_dimension=market_dimension,
             bucket_hit=bucket_hit,
+            match_flow_dimension=match_flow_dimension,
+            lineup_dimension=lineup_dimension,
+            motivation_dimension=motivation_dimension,
+            variance_dimension=variance_dimension,
         )
 
         row = {
@@ -539,6 +723,10 @@ def run(date_str: str, fixture_id: int | None = None, sleep_ms: int = 120) -> di
             "context_noise": context_noise,
             "weather_dimension": weather_dimension,
             "market_dimension": market_dimension,
+            "motivation_dimension": motivation_dimension,
+            "lineup_dimension": lineup_dimension,
+            "match_flow_dimension": match_flow_dimension,
+            "variance_dimension": variance_dimension,
             "model_result": model_result,
             "diagnosis": diagnosis,
             "diagnosis_summary": diag_summary,

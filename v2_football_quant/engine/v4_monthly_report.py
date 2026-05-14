@@ -304,8 +304,16 @@ def _decision(report: dict[str, Any]) -> list[str]:
         lines.append("TIME_DISTRIBUTION 偏差偏多：建议校准时间分布逻辑。")
     if int(rcnt.get("WEATHER_NOISE", 0)) >= 3:
         lines.append("WEATHER_NOISE 偏多：先继续观测天气样本，不直接改评分。")
+    if int(dcnt.get("UNLUCKY_MISS", 0)) >= 5 and int(rcnt.get("MATCH_FLOW", 0)) < 3:
+        lines.append("UNLUCKY_MISS 偏多且比赛过程并不差：优先视为正常波动，不急于改规则。")
+    if int(dcnt.get("LUCKY_HIT", 0)) >= 5:
+        lines.append("LUCKY_HIT 偏多：命中含运气成分，需继续扩样观察。")
     if int(rcnt.get("DATA_QUALITY", 0)) >= 5:
         lines.append("DATA_QUALITY 问题偏多：优先补采与提升覆盖。")
+    if int(rcnt.get("LINEUP_CHANGE", 0)) >= 3:
+        lines.append("LINEUP_CHANGE 偏多：建议加强首发变动监控与归因采样。")
+    if int(rcnt.get("MOTIVATION_MISREAD", 0)) >= 3:
+        lines.append("MOTIVATION_MISREAD 偏多：建议复核战意标签与赛季阶段识别。")
     red = [x for x in report["league_calibration"] if x["status"] == "RED"]
     if red:
         lines.append("存在RED联赛：建议下月对这些联赛提高阈值或降级观察。")
@@ -351,7 +359,10 @@ def render(report: dict[str, Any]) -> str:
         "三、赛后归因",
         "",
         "标签                      场次",
+        f"MODEL_VALID_STRONG       {dcnt.get('MODEL_VALID_STRONG', 0)}",
         f"MODEL_VALID               {dcnt.get('MODEL_VALID', 0)}",
+        f"UNLUCKY_MISS              {dcnt.get('UNLUCKY_MISS', 0)}",
+        f"LUCKY_HIT                 {dcnt.get('LUCKY_HIT', 0)}",
         f"MODEL_OVERCONFIDENT       {dcnt.get('MODEL_OVERCONFIDENT', 0)}",
         f"MODEL_TOO_STRICT          {dcnt.get('MODEL_TOO_STRICT', 0)}",
         f"NOISY_WIN                 {dcnt.get('NOISY_WIN', 0)}",
@@ -380,7 +391,7 @@ def render(report: dict[str, Any]) -> str:
         "六、Root Cause 分布",
         "",
     ]
-    for k in ["MODEL_FEATURE", "TIME_DISTRIBUTION", "MATCH_FLOW", "MARKET_SIGNAL", "EVENT_NOISE", "CONTEXT_NOISE", "WEATHER_NOISE", "DATA_QUALITY", "NORMAL_VARIANCE"]:
+    for k in ["MODEL_FEATURE", "TIME_DISTRIBUTION", "MATCH_FLOW", "MARKET_SIGNAL", "EVENT_NOISE", "CONTEXT_NOISE", "WEATHER_NOISE", "LINEUP_CHANGE", "MOTIVATION_MISREAD", "DATA_QUALITY", "NORMAL_VARIANCE"]:
         lines.append(f"- {k}: {rcnt.get(k, 0)}")
     lines += [
         "",
