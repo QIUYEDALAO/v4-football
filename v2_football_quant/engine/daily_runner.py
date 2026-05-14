@@ -797,6 +797,8 @@ def run_once(run_tag="DEFAULT", quick_mode=False):
             "locked_stage": scan_stage,
             "locked_odds_D": odds_D,
             "locked_time": lock_time,
+            "lock_cancelled": False,
+            "lock_cancel_reason": None,
             "final_observed_odds_D": odds_D,
             "final_odds_status": "LOCKED_IN_BAND",
         }
@@ -838,7 +840,12 @@ def run_once(run_tag="DEFAULT", quick_mode=False):
                 already_selected.discard(fid)
             st = fixture_state.get(str(fid), {}) or {}
             st["locked"] = False
-            st["final_odds_status"] = st.get("final_odds_status") or "IN_BAND"
+            st["locked_stage"] = None
+            st["locked_odds_D"] = None
+            st["locked_time"] = None
+            st["lock_cancelled"] = True
+            st["lock_cancel_reason"] = "LEAGUE_CAP"
+            st["final_odds_status"] = "LOCK_CANCELLED_LEAGUE_CAP"
             fixture_state[str(fid)] = st
     
     # ── 日上限20场（在联赛去重之后）──
@@ -854,7 +861,12 @@ def run_once(run_tag="DEFAULT", quick_mode=False):
             already_selected.discard(fid)
         st = fixture_state.get(str(fid), {}) or {}
         st["locked"] = False
-        st["final_odds_status"] = st.get("final_odds_status") or "IN_BAND"
+        st["locked_stage"] = None
+        st["locked_odds_D"] = None
+        st["locked_time"] = None
+        st["lock_cancelled"] = True
+        st["lock_cancel_reason"] = "DAILY_CAP"
+        st["final_odds_status"] = "LOCK_CANCELLED_DAILY_CAP"
         fixture_state[str(fid)] = st
     bets = final_bets
     stats["league_skipped"] = len(league_skipped)
@@ -969,6 +981,8 @@ def run_once(run_tag="DEFAULT", quick_mode=False):
             "locked_stage": rec.get("locked_stage") or st.get("locked_stage"),
             "locked_odds_D": rec.get("locked_odds_D") or st.get("locked_odds_D"),
             "locked_time": rec.get("locked_time") or st.get("locked_time"),
+            "lock_cancelled": bool(st.get("lock_cancelled", False)),
+            "lock_cancel_reason": st.get("lock_cancel_reason"),
             "final_observed_odds_D": st.get("final_observed_odds_D"),
             "final_odds_status": st.get("final_odds_status"),
             "break_even_prob": rec["break_even_prob"],
@@ -1002,6 +1016,16 @@ def run_once(run_tag="DEFAULT", quick_mode=False):
     # Backfill final observed odds/status from state for any locked fixture already in prediction file.
     for fid_int, p in list(merged_map.items()):
         st = fixture_state.get(str(fid_int), {})
+        p["lock_cancelled"] = bool(st.get("lock_cancelled", p.get("lock_cancelled", False)))
+        p["lock_cancel_reason"] = st.get("lock_cancel_reason", p.get("lock_cancel_reason"))
+        if st.get("lock_cancelled"):
+            p["locked_stage"] = None
+            p["locked_odds_D"] = None
+            p["locked_time"] = None
+            p["moved_out_after_lock"] = False
+            p["final_odds_status"] = st.get("final_odds_status", p.get("final_odds_status"))
+            p["final_observed_odds_D"] = st.get("final_observed_odds_D", p.get("final_observed_odds_D"))
+            continue
         if st.get("locked_odds_D"):
             p["locked_stage"] = p.get("locked_stage") or st.get("locked_stage")
             p["locked_odds_D"] = p.get("locked_odds_D") or st.get("locked_odds_D")
