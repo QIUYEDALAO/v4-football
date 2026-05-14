@@ -76,15 +76,7 @@ def main():
             return
 
         # Step 3: 触发简报
-        if args.push == "never":
-            wd.finish(status="DONE", output_files={"scout": str(scout_path)})
-            return
-
-        if args.push == "conditional" and elapsed > 600:
-            wd.finish(status="DONE", output_files={"scout": str(scout_path)},
-                      error="conditional skip: scan took too long")
-            return
-
+        # Step 3: 总是生成简报文件；push=conditional只控制是否推送
         from engine.v4_openclaw_brief import build_brief
         brief_text = build_brief(args.date)
         brief_path = REPORT_DIR / f"v4_openclaw_brief_{today_key}.txt"
