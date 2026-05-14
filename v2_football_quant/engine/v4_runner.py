@@ -26,6 +26,7 @@ sys.path.insert(0, str(BASE_DIR))
 from config.secrets import API_KEY, API_HOST
 from engine.data_sources.api_coverage import evaluate_fixture_coverage
 from engine.net_utils import _rpm_wait
+from engine.task_watchdog import v4_scan_watchdog
 from engine.data_sources.h2h_engine import (
     evaluate_h2h_edge,
     warm_recent_goal_profiles,
