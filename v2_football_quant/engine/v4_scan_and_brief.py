@@ -31,9 +31,9 @@ REQUIRED_KEYWORDS = [
 
 
 def _content_guard(text: str) -> bool:
-    """内容守卫：简报文本必须通过校验"""
+    """内容守卫：只要包含禁止关键词，直接 BLOCK"""
     for kw in FORBIDDEN_KEYWORDS:
-        if kw in text and "风险" not in text and "提示" not in text:
+        if kw in text:
             print(f"[GUARD] BLOCKED: 简报包含禁止关键词 '{kw}'", flush=True)
             return False
     has_required = any(kw in text for kw in REQUIRED_KEYWORDS)
@@ -106,8 +106,20 @@ def main():
             wd.finish(status="FAILED", error="内容守卫拦截")
             return
 
-        # 唯一输出：简报文本
-        print(brief_text, flush=True)
+        # push 逻辑
+        if args.push == "never":
+            print("[WATCHDOG] brief generated, push skipped (never)", flush=True)
+        elif args.push == "conditional":
+            should_push = False
+            ab_count = brief_text.count("A级上半场强推荐") + brief_text.count("B级上半场达标推荐")
+            if ab_count > 0 or brief_text.count("今日 V4 有 ") > 0:
+                should_push = True
+            if not should_push:
+                print("[WATCHDOG] brief generated, push skipped by conditional rule", flush=True)
+            else:
+                print(brief_text, flush=True)
+        else:
+            print(brief_text, flush=True)
 
         wd.finish(status="DONE", output_files={
             "scout": str(scout_path), "brief": str(brief_path), "scan_log": str(log_path),
