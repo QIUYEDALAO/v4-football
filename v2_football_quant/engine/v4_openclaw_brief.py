@@ -254,7 +254,12 @@ def build_brief(date_str: str) -> str:
         for g, label in [("A", "A级"), ("B", "B级"), ("C", "C级")]:
             m = per.get(g) or {}
             lines.append(f"{label}：{m.get('hit',0)}/{m.get('completed',0)}，命中率 {m.get('hit_rate_pct',0)}%")
-        lines.append(f"SKIP反杀率：{val.get('skip_reverse_rate_pct', 0)}%")
+        skip_rate = (
+            val.get("skip_reverse_rate_pct")
+            or (val.get("funnel") or {}).get("skip_backfire_rate_pct")
+            or 0
+        )
+        lines.append(f"SKIP反杀率：{skip_rate}%")
     else:
         lines.append("暂无昨日验证数据")
     if attrib_rows:

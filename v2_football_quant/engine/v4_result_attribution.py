@@ -337,16 +337,19 @@ def run(date_str: str, fixture_id: int | None = None, sleep_ms: int = 120) -> di
         out_rows.append(row)
         time.sleep(max(sleep_ms, 0) / 1000.0)
 
-    ARCHIVE_DIR.mkdir(parents=True, exist_ok=True)
-    out_path = ARCHIVE_DIR / f"v4_result_attribution_{key}.jsonl"
-    with open(out_path, "w", encoding="utf-8") as f:
-        for row in out_rows:
-            f.write(json.dumps(row, ensure_ascii=False) + "\n")
+    out_path: Path | None = None
+    if fixture_id is None:
+        ARCHIVE_DIR.mkdir(parents=True, exist_ok=True)
+        out_path = ARCHIVE_DIR / f"v4_result_attribution_{key}.jsonl"
+        with open(out_path, "w", encoding="utf-8") as f:
+            for row in out_rows:
+                f.write(json.dumps(row, ensure_ascii=False) + "\n")
 
     summary = {
         "date": key,
         "rows": len(out_rows),
-        "output_path": str(out_path),
+        "output_path": str(out_path) if out_path else None,
+        "main_file_written": fixture_id is None,
         "model_result_counts": {},
         "diagnosis_counts": {},
     }
@@ -374,4 +377,3 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
-
