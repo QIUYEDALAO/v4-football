@@ -123,24 +123,132 @@ def _event_noise_tags(events: list[dict], first_ht_goal_minute: int | None) -> l
     return sorted(tags)
 
 
-def _context_noise_tags(rec: dict) -> list[str]:
+def _event_noise_detail(events: list[dict], first_ht_goal_minute: int | None) -> dict[str, Any]:
+    detail: dict[str, Any] = {
+        "red_card_minute": None,
+        "penalty_minute": None,
+        "own_goal_minute": None,
+        "injury_sub_minute": None,
+        "stoppage_goal": False,
+        "noise_before_goal": False,
+        "noise_after_goal": False,
+    }
+    noise_minutes: list[int] = []
+    for ev in events:
+        et = str(ev.get("type") or "").strip().lower()
+        info = str(ev.get("detail") or "").strip().lower()
+        elapsed = _safe_int((ev.get("time") or {}).get("elapsed"), -1)
+        extra = _safe_int((ev.get("time") or {}).get("extra"), 0)
+        minute = elapsed + (extra if elapsed == 45 and extra > 0 else 0)
+        if elapsed < 0 or elapsed > 45:
+            continue
+        if et == "card" and ("red card" in info or "second yellow" in info):
+            if detail["red_card_minute"] is None:
+                detail["red_card_minute"] = minute
+            noise_minutes.append(minute)
+        if et == "goal" and "penalty" in info:
+            if detail["penalty_minute"] is None:
+                detail["penalty_minute"] = minute
+            noise_minutes.append(minute)
+        if et == "goal" and "own goal" in info:
+            if detail["own_goal_minute"] is None:
+                detail["own_goal_minute"] = minute
+            noise_minutes.append(minute)
+        if et == "subst" and "injury" in info:
+            if detail["injury_sub_minute"] is None:
+                detail["injury_sub_minute"] = minute
+            noise_minutes.append(minute)
+        if et == "goal" and elapsed == 45 and extra >= 1:
+            detail["stoppage_goal"] = True
+            noise_minutes.append(minute)
+    if first_ht_goal_minute is not None:
+        detail["noise_before_goal"] = any(m <= first_ht_goal_minute for m in noise_minutes)
+        detail["noise_after_goal"] = any(m > first_ht_goal_minute for m in noise_minutes)
+    else:
+        detail["noise_before_goal"] = bool(noise_minutes)
+    return detail
+
+
+def _weather_dimension(rec: dict) -> dict[str, Any]:
+    ctx = rec.get("context_observation") or {}
+    weather = (ctx.get("weather") or {}) if isinstance(ctx, dict) else {}
+    status = str(weather.get("status") or "")
+    if status in ("SKIPPED_FAST_MODE", "MISSING", "ERROR"):
+        return {
+            "weather_available": False,
+            "source": status or "unknown",
+            "temperature_c": None,
+            "rain_mm": None,
+            "wind_speed_mps": None,
+            "humidity": None,
+            "condition": None,
+            "weather_risk_level": "UNKNOWN",
+            "weather_tags": ["NORMAL_WEATHER"],
+        }
+
+    temp_c = weather.get("temperature_c", weather.get("temp_c", weather.get("temp")))
+    rain_mm = weather.get("rain_mm", weather.get("precipitation_mm", weather.get("rain")))
+    wind = weather.get("wind_speed_mps", weather.get("wind_speed", weather.get("wind_mps")))
+    humidity = weather.get("humidity", weather.get("humidity_pct"))
+    condition = str(weather.get("condition") or weather.get("description") or "").lower() or None
+
+    t = _safe_float(temp_c, 999.0)
+    r = _safe_float(rain_mm, 0.0)
+    w = _safe_float(wind, 0.0)
+    h = _safe_float(humidity, 0.0)
+
+    tags: list[str] = []
+    if r >= 8:
+        tags.append("HEAVY_RAIN")
+    elif r >= 2:
+        tags.append("MODERATE_RAIN")
+    elif r > 0:
+        tags.append("LIGHT_RAIN")
+    if w >= 10:
+        tags.append("STRONG_WIND")
+    if t <= 0:
+        tags.append("EXTREME_COLD")
+    if t >= 32:
+        tags.append("EXTREME_HEAT")
+    if h >= 85:
+        tags.append("HIGH_HUMIDITY")
+    if r >= 2 and h >= 80:
+        tags.append("WET_PITCH_RISK")
+    if not tags:
+        tags = ["NORMAL_WEATHER"]
+
+    if any(x in tags for x in ("HEAVY_RAIN", "STRONG_WIND", "EXTREME_COLD", "EXTREME_HEAT")):
+        risk = "HIGH"
+    elif any(x in tags for x in ("MODERATE_RAIN", "HIGH_HUMIDITY", "WET_PITCH_RISK")):
+        risk = "MEDIUM"
+    else:
+        risk = "LOW"
+
+    return {
+        "weather_available": True,
+        "source": str(weather.get("source") or "external_weather_api"),
+        "temperature_c": None if temp_c is None else round(_safe_float(temp_c, 0.0), 2),
+        "rain_mm": None if rain_mm is None else round(_safe_float(rain_mm, 0.0), 2),
+        "wind_speed_mps": None if wind is None else round(_safe_float(wind, 0.0), 2),
+        "humidity": None if humidity is None else round(_safe_float(humidity, 0.0), 2),
+        "condition": condition,
+        "weather_risk_level": risk,
+        "weather_tags": tags,
+    }
+
+
+def _context_noise_tags(rec: dict, weather_dimension: dict[str, Any]) -> list[str]:
     tags: set[str] = set()
     ctx = rec.get("context_observation") or {}
-    weather = ctx.get("weather") or {}
     pitch = ctx.get("pitch") or {}
     referee = ctx.get("referee") or {}
-
-    w_text = json.dumps(weather, ensure_ascii=False).lower()
     p_text = json.dumps(pitch, ensure_ascii=False).lower()
     r_text = json.dumps(referee, ensure_ascii=False).lower()
 
-    if "heavy rain" in w_text or "暴雨" in w_text or "大雨" in w_text:
-        tags.add("HEAVY_RAIN")
-    if "strong wind" in w_text or "大风" in w_text or _safe_float(weather.get("wind_speed"), 0.0) >= 10:
-        tags.add("STRONG_WIND")
-    temp_c = weather.get("temperature_c")
-    if temp_c is not None and _safe_float(temp_c, 99.0) <= 0:
-        tags.add("EXTREME_COLD")
+    # weather tags 进入归因上下文，不参与实时评分
+    for tag in weather_dimension.get("weather_tags") or []:
+        if tag != "NORMAL_WEATHER":
+            tags.add(tag)
     if any(x in p_text for x in ("bad", "poor", "mud", "waterlog", "烂", "湿滑")):
         tags.add("BAD_PITCH")
     if any(x in p_text for x in ("artificial", "turf", "人造草")):
@@ -150,6 +258,89 @@ def _context_noise_tags(rec: dict) -> list[str]:
     if _safe_float(referee.get("avg_penalties"), 0.0) >= 0.35 or "high penalty" in r_text or "高点球" in r_text:
         tags.add("REF_PENALTY_HIGH")
     return sorted(tags)
+
+
+def _market_dimension(rec: dict, pre_grade: str) -> dict[str, Any]:
+    lines = rec.get("ht_ou_lines") or []
+    market_focus = str(rec.get("market_focus") or "")
+    best_line = None
+    over_odds = None
+    under_odds = None
+    if isinstance(lines, list) and lines:
+        row = lines[0]
+        best_line = _safe_float(row.get("line"), None)
+        over_odds = _safe_float(row.get("over"), None)
+        under_odds = _safe_float(row.get("under"), None)
+        try:
+            row = min(lines, key=lambda x: abs(_safe_float(x.get("line"), 999) - 1.0))
+            best_line = _safe_float(row.get("line"), best_line)
+            over_odds = _safe_float(row.get("over"), over_odds)
+            under_odds = _safe_float(row.get("under"), under_odds)
+        except Exception:
+            pass
+
+    if not lines:
+        market_signal = "MARKET_DATA_MISSING"
+        tags = ["MARKET_DATA_MISSING"]
+    elif market_focus == "HT_LIVE_OVER":
+        market_signal = "HT_MARKET_SUPPORT"
+        tags = ["HT_MARKET_SUPPORT"]
+    else:
+        market_signal = "MARKET_DIRECTION_CONFLICT" if pre_grade in ("A", "B") else "HT_MARKET_NEUTRAL"
+        tags = [market_signal]
+
+    if best_line is not None and best_line >= 1.5:
+        tags.append("LINE_TOO_HIGH")
+    elif best_line is not None and best_line <= 0.5:
+        tags.append("LINE_TOO_LOW")
+
+    return {
+        "ht_ou_available": bool(lines),
+        "best_ht_line": best_line,
+        "over_odds": over_odds,
+        "under_odds": under_odds,
+        "line_bucket": f"{best_line:.2f}" if isinstance(best_line, float) else None,
+        "market_focus": market_focus or None,
+        "direction_conflict": market_focus not in ("", "HT_LIVE_OVER"),
+        "market_signal": market_signal,
+        "market_tags": tags,
+    }
+
+
+def _root_cause(
+    diagnosis: str,
+    pre_grade: str,
+    ht_goal: bool,
+    event_noise: list[str],
+    context_noise: list[str],
+    weather_dimension: dict[str, Any],
+    market_dimension: dict[str, Any],
+    bucket_hit: bool,
+) -> tuple[str, list[str], str]:
+    secondary: list[str] = []
+    weather_tags = set(weather_dimension.get("weather_tags") or [])
+    weather_noise = any(t in weather_tags for t in ("HEAVY_RAIN", "MODERATE_RAIN", "STRONG_WIND", "EXTREME_COLD", "EXTREME_HEAT", "WET_PITCH_RISK"))
+    if diagnosis == "DATA_QUALITY_ISSUE":
+        return "DATA_QUALITY", ["NORMAL_VARIANCE"], "HIGH"
+    if weather_noise and not ht_goal and pre_grade in ("A", "B", "C"):
+        secondary = ["CONTEXT_NOISE"]
+        return "WEATHER_NOISE", secondary, "MEDIUM"
+    if any(x in event_noise for x in ("RED_CARD", "PENALTY", "OWN_GOAL", "VAR_PENALTY", "INJURY_SUB", "LATE_STOPPAGE_GOAL")):
+        secondary = ["MATCH_FLOW"] if bucket_hit is False else ["NORMAL_VARIANCE"]
+        return "EVENT_NOISE", secondary, "HIGH"
+    if market_dimension.get("market_signal") == "MARKET_DIRECTION_CONFLICT":
+        return "MARKET_SIGNAL", ["MODEL_FEATURE"], "MEDIUM"
+    if diagnosis == "MODEL_OVERCONFIDENT":
+        return "MODEL_FEATURE", ["TIME_DISTRIBUTION"], "MEDIUM"
+    if diagnosis == "MODEL_TOO_STRICT":
+        return "MODEL_FEATURE", ["MARKET_SIGNAL"], "MEDIUM"
+    if diagnosis in ("NOISY_WIN", "NOISY_LOSS"):
+        return "CONTEXT_NOISE", ["NORMAL_VARIANCE"], "LOW"
+    if pre_grade in ("A", "B", "C") and ht_goal and not bucket_hit:
+        return "TIME_DISTRIBUTION", ["NORMAL_VARIANCE"], "LOW"
+    if pre_grade == "SKIP" and ht_goal:
+        return "MODEL_FEATURE", ["NORMAL_VARIANCE"], "MEDIUM"
+    return "NORMAL_VARIANCE", secondary, "LOW"
 
 
 def _model_result(pre_grade: str, ht_goal: bool) -> str:
@@ -224,6 +415,8 @@ def _format_single(row: dict) -> str:
             "归因：",
             f"{row.get('model_result')}",
             f"{row.get('diagnosis')}",
+            f"root_cause: {row.get('root_cause_dimension')} ({row.get('root_cause_confidence')})",
+            f"secondary: {', '.join(row.get('secondary_dimensions') or ['-'])}",
             "",
             "结论：",
             row.get("diagnosis_summary", "见诊断标签"),
@@ -257,6 +450,8 @@ def run(date_str: str, fixture_id: int | None = None, sleep_ms: int = 120) -> di
         predicted_top_bucket = _top_predicted_bucket(pred_bins)
         sample_size = _safe_int(ht_rec.get("sample_size"), 0)
         coverage_level = str(((rec.get("data_coverage") or {}).get("coverage_level") or "")).upper()
+        weather_dimension = _weather_dimension(rec)
+        market_dimension = _market_dimension(rec, pre_grade=pre_grade)
 
         f_resp = _api_get(f"fixtures?id={fid}")
         f_rows = f_resp.get("response") or []
@@ -277,7 +472,8 @@ def run(date_str: str, fixture_id: int | None = None, sleep_ms: int = 120) -> di
         first_min, hit_bucket = _first_ht_goal_minute(events)
         bucket_hit = bool(ht_goal and first_min is not None and hit_bucket == predicted_top_bucket)
         event_noise = _event_noise_tags(events, first_min)
-        context_noise = _context_noise_tags(rec)
+        event_noise_detail = _event_noise_detail(events, first_min)
+        context_noise = _context_noise_tags(rec, weather_dimension=weather_dimension)
 
         model_result = _model_result(pre_grade, ht_goal)
         diagnosis = _diagnosis(
@@ -304,6 +500,16 @@ def run(date_str: str, fixture_id: int | None = None, sleep_ms: int = 120) -> di
             diag_summary = "样本/分布/覆盖质量不足，先补数据。"
         else:
             diag_summary = "赛前赛中上下文变化，建议人工复核。"
+        root_dim, second_dims, root_conf = _root_cause(
+            diagnosis=diagnosis,
+            pre_grade=pre_grade,
+            ht_goal=ht_goal,
+            event_noise=event_noise,
+            context_noise=context_noise,
+            weather_dimension=weather_dimension,
+            market_dimension=market_dimension,
+            bucket_hit=bucket_hit,
+        )
 
         row = {
             "fixture_id": fid,
@@ -329,10 +535,16 @@ def run(date_str: str, fixture_id: int | None = None, sleep_ms: int = 120) -> di
             "hit_bucket": hit_bucket,
             "bucket_hit": bucket_hit,
             "event_noise": event_noise,
+            "event_noise_detail": event_noise_detail,
             "context_noise": context_noise,
+            "weather_dimension": weather_dimension,
+            "market_dimension": market_dimension,
             "model_result": model_result,
             "diagnosis": diagnosis,
             "diagnosis_summary": diag_summary,
+            "root_cause_dimension": root_dim,
+            "secondary_dimensions": second_dims,
+            "root_cause_confidence": root_conf,
         }
         out_rows.append(row)
         time.sleep(max(sleep_ms, 0) / 1000.0)
@@ -352,10 +564,13 @@ def run(date_str: str, fixture_id: int | None = None, sleep_ms: int = 120) -> di
         "main_file_written": fixture_id is None,
         "model_result_counts": {},
         "diagnosis_counts": {},
+        "root_cause_counts": {},
     }
     for row in out_rows:
         summary["model_result_counts"][row["model_result"]] = summary["model_result_counts"].get(row["model_result"], 0) + 1
         summary["diagnosis_counts"][row["diagnosis"]] = summary["diagnosis_counts"].get(row["diagnosis"], 0) + 1
+        rcd = str(row.get("root_cause_dimension") or "UNKNOWN")
+        summary["root_cause_counts"][rcd] = summary["root_cause_counts"].get(rcd, 0) + 1
 
     if fixture_id is not None and out_rows:
         summary["single_report"] = _format_single(out_rows[0])

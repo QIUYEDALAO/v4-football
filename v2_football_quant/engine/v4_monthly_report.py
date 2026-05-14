@@ -88,6 +88,7 @@ def aggregate(month: str) -> dict[str, Any]:
     total_matches = 0
     diagnosis_counts = Counter()
     model_result_counts = Counter()
+    root_cause_counts = Counter()
     noisy_labels = {"NOISY_WIN", "NOISY_LOSS"}
     ab_raw_total = 0
     ab_raw_hit = 0
@@ -154,6 +155,19 @@ def aggregate(month: str) -> dict[str, Any]:
             stp = str(row.get("script_type") or "UNKNOWN")
             diagnosis_counts[diagnosis] += 1
             model_result_counts[model_result] += 1
+            root = str(row.get("root_cause_dimension") or "").strip()
+            if not root:
+                if diagnosis == "DATA_QUALITY_ISSUE":
+                    root = "DATA_QUALITY"
+                elif diagnosis in ("NOISY_WIN", "NOISY_LOSS"):
+                    root = "EVENT_NOISE"
+                elif diagnosis == "MODEL_OVERCONFIDENT":
+                    root = "MODEL_FEATURE"
+                elif diagnosis == "MODEL_TOO_STRICT":
+                    root = "MODEL_FEATURE"
+                else:
+                    root = "NORMAL_VARIANCE"
+            root_cause_counts[root] += 1
             time_source[tbs]["total"] += 1
             script_type_perf[stp]["total"] += 1
             if ht_goal:
@@ -239,6 +253,7 @@ def aggregate(month: str) -> dict[str, Any]:
         "attribution": {
             "model_result_counts": dict(model_result_counts),
             "diagnosis_counts": dict(diagnosis_counts),
+            "root_cause_counts": dict(root_cause_counts),
             "ab_raw_hit_rate_pct": _pct(ab_raw_hit, ab_raw_total),
             "ab_denoised_hit_rate_pct": _pct(ab_denoised_hit, ab_denoised_total),
             "context_noise_samples": context_noise_total,
@@ -258,6 +273,7 @@ def _decision(report: dict[str, Any]) -> list[str]:
     cov = report["coverage_monitor"]["ab_ratio_pct"]
     attr = report.get("attribution") or {}
     dcnt = attr.get("diagnosis_counts") or {}
+    rcnt = attr.get("root_cause_counts") or {}
     recent = (attr.get("recent_discounted") or {})
     total_attr = sum(int(v or 0) for v in dcnt.values())
     noisy_cnt = int(dcnt.get("NOISY_WIN", 0)) + int(dcnt.get("NOISY_LOSS", 0))
@@ -282,6 +298,14 @@ def _decision(report: dict[str, Any]) -> list[str]:
             lines.append("RECENT_DISCOUNTED 命中率稳定较高：继续保留 recent ×0.75 回填。")
         elif float(recent.get("hit_rate_pct", 0.0)) < 50.0:
             lines.append("RECENT_DISCOUNTED 命中率偏低：建议该来源最高仅到 C，不升 B。")
+    if int(rcnt.get("MATCH_FLOW", 0)) >= 5:
+        lines.append("MATCH_FLOW 失败偏多：建议增强赛中节奏确认。")
+    if int(rcnt.get("TIME_DISTRIBUTION", 0)) >= 5:
+        lines.append("TIME_DISTRIBUTION 偏差偏多：建议校准时间分布逻辑。")
+    if int(rcnt.get("WEATHER_NOISE", 0)) >= 3:
+        lines.append("WEATHER_NOISE 偏多：先继续观测天气样本，不直接改评分。")
+    if int(rcnt.get("DATA_QUALITY", 0)) >= 5:
+        lines.append("DATA_QUALITY 问题偏多：优先补采与提升覆盖。")
     red = [x for x in report["league_calibration"] if x["status"] == "RED"]
     if red:
         lines.append("存在RED联赛：建议下月对这些联赛提高阈值或降级观察。")
@@ -296,6 +320,7 @@ def render(report: dict[str, Any]) -> str:
     cov = report["coverage_monitor"]
     attr = report.get("attribution") or {}
     dcnt = attr.get("diagnosis_counts") or {}
+    rcnt = attr.get("root_cause_counts") or {}
     recent = attr.get("recent_discounted") or {}
     lines = [
         "📈 V4_HT 月度策略校准报告",
@@ -352,7 +377,14 @@ def render(report: dict[str, Any]) -> str:
         lines.append(f"- {item['script_type']}：样本{item['samples']}，命中{item['hit']}，{item['hit_rate_pct']}%")
     lines += [
         "",
-        "六、联赛校准",
+        "六、Root Cause 分布",
+        "",
+    ]
+    for k in ["MODEL_FEATURE", "TIME_DISTRIBUTION", "MATCH_FLOW", "MARKET_SIGNAL", "EVENT_NOISE", "CONTEXT_NOISE", "WEATHER_NOISE", "DATA_QUALITY", "NORMAL_VARIANCE"]:
+        lines.append(f"- {k}: {rcnt.get(k, 0)}")
+    lines += [
+        "",
+        "七、联赛校准",
         "",
         "联赛        A+B完赛    A+B命中率    SKIP反杀率    状态",
     ]
@@ -363,13 +395,13 @@ def render(report: dict[str, Any]) -> str:
         )
     lines += [
         "",
-        "七、规则调整建议",
+        "八、规则调整建议",
     ]
     for x in _decision(report):
         lines.append(f"- {x}")
     lines += [
         "",
-        "八、下月策略结论",
+        "九、下月策略结论",
         "月报只负责是否改规则；不负责每日看盘。",
         "",
     ]

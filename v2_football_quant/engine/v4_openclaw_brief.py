@@ -264,6 +264,20 @@ def build_brief(date_str: str) -> str:
         lines.append("暂无昨日验证数据")
     if attrib_rows:
         diag = Counter(str(r.get("diagnosis") or "-") for r in attrib_rows)
+        root = Counter()
+        for r in attrib_rows:
+            rc = str(r.get("root_cause_dimension") or "").strip()
+            if not rc:
+                d = str(r.get("diagnosis") or "")
+                if d == "DATA_QUALITY_ISSUE":
+                    rc = "DATA_QUALITY"
+                elif d in ("NOISY_WIN", "NOISY_LOSS"):
+                    rc = "EVENT_NOISE"
+                elif d in ("MODEL_OVERCONFIDENT", "MODEL_TOO_STRICT"):
+                    rc = "MODEL_FEATURE"
+                else:
+                    rc = "NORMAL_VARIANCE"
+            root[rc] += 1
         lines.append("")
         lines.append("去噪后：")
         for k in ["MODEL_VALID", "NOISY_WIN", "NOISY_LOSS", "MODEL_OVERCONFIDENT", "MODEL_TOO_STRICT", "DATA_QUALITY_ISSUE"]:
@@ -283,6 +297,10 @@ def build_brief(date_str: str) -> str:
         lines.append(f"RECENT_DISCOUNTED：{len(recent_rows)}场，命中{recent_hit}场")
         noise_event_cnt = sum(1 for r in attrib_rows if any(x in (r.get("event_noise") or []) for x in ("RED_CARD", "PENALTY", "VAR_PENALTY", "OWN_GOAL")))
         lines.append(f"红牌/点球/乌龙干扰：{noise_event_cnt}场")
+        lines.append("")
+        lines.append("昨日归因维度：")
+        for k in ["MODEL_FEATURE", "TIME_DISTRIBUTION", "MATCH_FLOW", "MARKET_SIGNAL", "EVENT_NOISE", "CONTEXT_NOISE", "WEATHER_NOISE", "DATA_QUALITY", "NORMAL_VARIANCE"]:
+            lines.append(f"{k}：{root.get(k, 0)}场")
     lines.append(sep)
 
     if attrib_rows:

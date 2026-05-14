@@ -95,6 +95,7 @@ def aggregate(start: str, end: str) -> dict[str, Any]:
     total_pending = 0
     diagnosis_counts = Counter()
     model_result_counts = Counter()
+    root_cause_counts = Counter()
     time_bin_source_stats = defaultdict(lambda: {"total": 0, "hit": 0})
     script_type_stats = defaultdict(lambda: {"total": 0, "hit": 0})
     ab_raw_total = 0
@@ -142,6 +143,19 @@ def aggregate(start: str, end: str) -> dict[str, Any]:
             ht_goal = bool(row.get("ht_goal"))
             diagnosis_counts[diagnosis] += 1
             model_result_counts[model_result] += 1
+            root = str(row.get("root_cause_dimension") or "").strip()
+            if not root:
+                if diagnosis == "DATA_QUALITY_ISSUE":
+                    root = "DATA_QUALITY"
+                elif diagnosis in ("NOISY_WIN", "NOISY_LOSS"):
+                    root = "EVENT_NOISE"
+                elif diagnosis == "MODEL_OVERCONFIDENT":
+                    root = "MODEL_FEATURE"
+                elif diagnosis == "MODEL_TOO_STRICT":
+                    root = "MODEL_FEATURE"
+                else:
+                    root = "NORMAL_VARIANCE"
+            root_cause_counts[root] += 1
             source = str(row.get("time_bin_source") or "NONE")
             script = str(row.get("script_type") or "UNKNOWN")
             time_bin_source_stats[source]["total"] += 1
@@ -228,6 +242,7 @@ def aggregate(start: str, end: str) -> dict[str, Any]:
         "attribution": {
             "model_result_counts": dict(model_result_counts),
             "diagnosis_counts": dict(diagnosis_counts),
+            "root_cause_counts": dict(root_cause_counts),
             "ab_raw_hit_rate_pct": _pct(ab_raw_hit, ab_raw_total),
             "ab_denoised_hit_rate_pct": _pct(ab_denoised_hit, ab_denoised_total),
             "time_bin_source_performance": time_source_rows,
@@ -242,6 +257,7 @@ def render(report: dict[str, Any]) -> str:
     cov = report["coverage_monitor"]
     attr = report.get("attribution") or {}
     dcnt = attr.get("diagnosis_counts") or {}
+    rcnt = attr.get("root_cause_counts") or {}
     lines = [
         "📊 V4_HT 周度验证报告",
         f"周期：{report['start']} ~ {report['end']}",
@@ -308,7 +324,14 @@ def render(report: dict[str, Any]) -> str:
         lines.append(f"- {item['script_type']}：样本{item['samples']}，命中{item['hit']}，{item['hit_rate_pct']}%")
     lines += [
         "",
-        "六、本周结论",
+        "六、Root Cause 分布",
+        "",
+    ]
+    for k in ["MODEL_FEATURE", "TIME_DISTRIBUTION", "MATCH_FLOW", "MARKET_SIGNAL", "EVENT_NOISE", "CONTEXT_NOISE", "WEATHER_NOISE", "DATA_QUALITY", "NORMAL_VARIANCE"]:
+        lines.append(f"- {k}: {rcnt.get(k, 0)}")
+    lines += [
+        "",
+        "七、本周结论",
         "如果分级单调性 PASS 且 A+B 覆盖率在 5%-15%，当前规则继续运行；否则进入月度校准候选。",
         "",
     ]
