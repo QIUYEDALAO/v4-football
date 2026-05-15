@@ -1,8 +1,13 @@
 【V4 情报系统】
 📌 {{review_date}} V4正式复盘
 ━━━━━━━━━━━━━━
-A {{a_count}} / B {{b_count}} / C {{c_count}} / SKIP {{skip_count}}
-{{ab_summary}}
+【正式输出】
+A：{{a_count}}｜B：{{b_count}}｜C：{{c_count}}｜SKIP：{{skip_count}}
+A+B主推荐：{{ab_count}}场
+正式推荐：{{recommendation_summary}}
+
+数据源：{{official_brief_file}}
+Guard：{{guard_status}}
 ━━━━━━━━━━━━━━
 
 【逐场验证】
@@ -12,59 +17,96 @@ A {{a_count}} / B {{b_count}} / C {{c_count}} / SKIP {{skip_count}}
 ━━━━━━━━━━━━━━
 
 【昨日汇总】
-C级：{{c_hit}}/{{c_total}} · {{c_hit_rate}}
-SKIP反杀：{{skip_backfire}}/{{skip_total}} · {{skip_backfire_rate}}
+A：{{a_hit}}/{{a_total}}｜{{a_hit_rate}}
+B：{{b_hit}}/{{b_total}}｜{{b_hit_rate}}
+C：{{c_hit}}/{{c_total}}｜{{c_hit_rate}}
+SKIP正确：{{skip_correct}}/{{skip_total}}｜{{skip_correct_rate}}
+SKIP反杀：{{skip_backfire}}/{{skip_total}}｜{{skip_backfire_rate}}
 
+说明：{{daily_summary_note}}
 ━━━━━━━━━━━━━━
 
 【时间分布】
-{{sample_count}}场总{{ht_goal_total}}球
-0-15m：{{goals_0_15}}球（{{goals_0_15_minutes}}）
-16-30m：{{goals_16_30}}球（{{goals_16_30_minutes}}）
-31-45+：{{goals_31_45}}球（{{goals_31_45_minutes}}）
+{{sample_count}}场｜上半场总{{ht_goal_total}}球
 
-首球时段
+0-15m：{{goals_0_15_total}}球（{{goals_0_15_minutes}}）
+16-30m：{{goals_16_30_total}}球（{{goals_16_30_minutes}}）
+31-45+：{{goals_31_45_total}}球（{{goals_31_45_minutes}}）
+
+首球时段：
 0-15m：{{first_goal_0_15}}场
 16-30m：{{first_goal_16_30}}场
-31-45m：{{first_goal_31_45}}场
+31-45+：{{first_goal_31_45}}场
 无进球：{{no_ht_goal_count}}场
+数据缺失：{{data_missing_count}}场
+━━━━━━━━━━━━━━
 
-SKIP反杀首球
-0-15m：{{skip_backfire_first_0_15}}场（{{skip_backfire_first_0_15_matches}}）
-16-30m：{{skip_backfire_first_16_30}}场（{{skip_backfire_first_16_30_matches}}）
-31-45m：{{skip_backfire_first_31_45}}场（{{skip_backfire_first_31_45_matches}}）
+【赛前剧本验证】
+SCRIPT_HIT：{{script_hit}}场
+SCRIPT_PARTIAL：{{script_partial}}场
+SCRIPT_MISS：{{script_miss}}场
+NO_HT_GOAL：{{no_ht_goal_to_validate}}场
+SCRIPT_NA：{{script_not_available}}场
 
+偏差方向：
+MATCHED：{{matched_count}}
+偏早：{{earlier_than_expected}}
+偏晚：{{later_than_expected}}
+过严：{{too_strict_script}}
+无数据：{{script_no_data}}
+
+重点：{{script_review_note}}
+━━━━━━━━━━━━━━
+
+【赛前信号复盘】
+A/B样本：{{ab_sample_count}}场
+平均HT评分：{{avg_ht_score}}
+平均HT率：{{avg_ht_goal_rate}}
+平均场均HT：{{avg_avg_ht_goals}}
+盘口支持：{{market_support_count}}场
+全场强于HT风险：{{fulltime_stronger_count}}场
+风险验证有效：{{risk_validated_count}}场
+
+说明：{{pre_match_signal_note}}
 ━━━━━━━━━━━━━━
 
 【天气/场地因子】
-{{weather_rows}}
+{{weather_rows_or_summary}}
 
-━━━━━━━━━━━━━━
-
-【归因】
-MODEL_TOO_STRICT × {{model_too_strict_count}}
-NOISY_WIN × {{noisy_win_count}}
-MODEL_OVERCONFIDENT × {{model_overconfident_count}}
-DATA_QUALITY_ISSUE × {{data_quality_issue_count}}
-
+说明：天气只作归因辅助，不参与重算评级。
 ━━━━━━━━━━━━━━
 
 【滚动统计】
 近7天 A/B：{{rolling_7d_ab}}
 近7天 C级：{{rolling_7d_c}}
 近7天 SKIP反杀：{{rolling_7d_skip_backfire}}
+近7天 剧本命中：{{rolling_7d_script}}
 
 近14天：{{rolling_14d_summary}}
 近30天：{{rolling_30d_summary}}
 累计：{{cumulative_summary}}
 
+来源：{{rolling_source_files}}
+━━━━━━━━━━━━━━
+
+【累计归因】
+MODEL_VALID：{{model_valid_count}}
+MODEL_TOO_STRICT：{{model_too_strict_count}}
+MODEL_OVERCONFIDENT：{{model_overconfident_count}}
+NOISY_WIN：{{noisy_win_count}}
+NOISY_LOSS：{{noisy_loss_count}}
+DATA_QUALITY_ISSUE：{{data_quality_issue_count}}
+WEATHER_RISK：{{weather_risk_count}}
+
+重点：{{diagnosis_note}}
 ━━━━━━━━━━━━━━
 
 【结论】
 {{rule_decision}}
 {{ab_conclusion}}
 {{skip_observation}}
+{{script_observation}}
+{{data_quality_note}}
 {{sample_warning}}
 
-━━━━━━━━━━━━━━
 ⚠️ 赛后归因报告，不代表今日实盘推荐

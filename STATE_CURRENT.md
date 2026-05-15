@@ -134,7 +134,14 @@
 
 ---
 
-## 6. 当前 WARNING（不阻塞生产）
+## 6. 天气数据状态
+
+- 2026-05-14 复盘：7/7 场天气数据 DATA_UNAVAILABLE，不参与归因
+- v4_weather/ 目录尚未创建
+- V4扫描阶段未保存比赛时天气快照
+- 后续接入方案：V4扫描对进入正式 brief 的样本保存 weather snapshot 至 data/v4_weather/（天气 API 不可用时写 WEATHER_DATA_UNAVAILABLE，不阻塞扫描，不改 A/B/C/SKIP）
+
+## 7. 当前 WARNING（不阻塞生产）
 
 1. allowInsecureAuth=true（loopback-only，风险可控，暂不动）
 2. QQ Bot initializing（通道启动中）
@@ -142,6 +149,7 @@
 4. V4傍晚 TIMEOUT（已修复，等待自然验证）
 5. APIFOOTBALL_KEY shell/env 映射待统一（仅记录，暂不改）
 6. 昨日复盘 MODEL_TOO_STRICT ×9（规则偏严，样本不足不改规则）
+7. 天气数据 7/7 DATA_UNAVAILABLE（后续接入采集，不阻塞复盘）
 
 ---
 
