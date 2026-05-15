@@ -7,13 +7,13 @@
 
 ## 0. 更新时间
 
-- 更新时间：2026-05-15 19:32
-- 更新人：OpenClaw（治理分支已合并到 main）
+- 更新时间：2026-05-16 04:33
+- 更新人：ClawOps
 - GitHub 仓库：whoerixxz/v2-football-quant
-- 最新 commit：`488522b` acceptance fixes + governance merge
+- 最新 commit：`551fe61` V2条件systemEvent通知
 - 当前运行环境：生产
-- 当前阶段：纸盘验证
-- 治理分支已合并：openclaw-architecture-governance-20260515 → main ✅
+- 当前阶段：纸盘验证，生产观察期
+- V2条件systemEvent：已 push（551fe61）
 - 本周末：周六高比赛量重点观察
 
 ---
@@ -215,26 +215,43 @@
 - git push/cron修改/配置修改/推送/systemEvent后必须立即出最终报告
 - delivery.mode=none 不禁止正式回报
 
-## 10. 当前禁止事项
+## 11. V4待排查异常（生产观察期）
 
-- 不 push 新变更
-- 不修改 V2/V4 策略
-- 不修改 cron
-- 不创建 Agent
-- 不改 allowInsecureAuth
-- 不改 env
-- 不引用 V33
-- 不运行 V4重扫描
-- 不自由 kill/retry
-- 不运行重任务
-- 日报阶段禁止提出核心规则修改
+| # | 任务 | 时间 | 异常 | 首次出现 | 状态 |
+|:-:|:----|:---:|:----|:--------:|:----:|
+| 1 | V4赛后复盘 | 12:35 | LLM 网络连接错误 | 2026-05-15 | ⚠️ 待观察 |
+| 2 | V4扫描-午间 | 14:05 | LLM 网络连接错误 | 2026-05-15 | ⚠️ 待观察 |
+| 3 | V4扫描-傍晚 | 16:20 | TIMEOUT（1200s） | 2026-05-15 | ⚠️ 待观察 |
+| 4 | V4扫描-凌晨 | 01:20 | Gateway restart interrupted | 2026-05-16 | ⚠️ 待观察 |
+| 5 | V4赛中快照 | */3min | 连续超时（300s timeout） | 2026-05-15 | ⚠️ 待观察 |
+
+说明：
+- 不自动 kill
+- 不自动 retry
+- 不改 timeout
+- 不改 cron
+- 不改 V4 策略
+- 不重跑 V4 扫描
+- 不重跑 V4 复盘
+- 只记录状态，等待 BOSS 指令
 
 ---
 
-## 8. 下一步待办（低风险推进）
+## 12. 生产观察期禁止事项
 
-1. allowInsecureAuth → 待稳定后安全硬化（设置 false + 配置 ownerAllowFrom）
-2. APIFOOTBALL_KEY shell/env 映射统一
-3. AlertAgent / ReportAgent 待低风险推进
-4. 明日周六高比赛量重点观察
-5. QQ Bot 上线后验证实际投递
+- 不修改 V2/V4 策略
+- 不修改 A/B/C/SKIP 规则
+- 不修改 BET_LOCKED 规则
+- 不恢复 announce
+- 不改 delivery.mode=on-complete
+- 不改 cron 时间
+- 不改 timeout
+- 不自动重跑失败任务
+- 不 kill 进程
+- 不 retry
+- 不创建新 Agent
+- 不禁用 healthcheck/weather
+- 不继续 skill 第二批精简
+- 不推 full report 到 QQ
+- 不绕过 ReportAgent
+- 不自动修复
