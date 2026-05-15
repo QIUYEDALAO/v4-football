@@ -27,6 +27,7 @@ def main():
 
     wd = v2_settle_watchdog()
     if not wd.acquire_lock():
+        print("【V2 量化系统】", flush=True)
         print(f"[WATCHDOG] V2结算 已有实例运行，跳过", flush=True)
         return
 

@@ -48,6 +48,7 @@ def _content_guard(text: str) -> bool:
 
 
 def _sigmask_push(window: str, date: str, status: str, progress: str, reason: str) -> None:
+    print("【V4 情报系统】", flush=True)
     print(f"""⛔ V4扫描被系统终止
 窗口：{window}
 日期：{date}
@@ -77,6 +78,7 @@ def main():
             wd = v4_scan_watchdog(args.window)
             wd.start(total_items=0)
             wd.finish(status="SKIPPED_GLOBAL_LOCK", error="v4_scan_global.lock active")
+            print("【V4 情报系统】", flush=True)
             print("[WATCHDOG] V4 global scan lock active, SKIPPED_GLOBAL_LOCK", flush=True)
             return
         else:

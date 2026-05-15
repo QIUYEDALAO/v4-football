@@ -188,6 +188,7 @@ def build_brief(date_str: str) -> str:
 
     sep = "━" * 40
     lines: list[str] = []
+    lines.append("【V4 情报系统】")
     lines.append(f"⏰ V4 上半场情报扫描 — {key}")
     lines.append("")
     lines.append("📊 统计概览")
