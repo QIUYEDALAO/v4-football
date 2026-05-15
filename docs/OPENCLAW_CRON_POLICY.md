@@ -65,6 +65,29 @@
 
 ---
 
+## V4每日复盘固定模板纪律
+
+V4每日复盘必须使用固定模板：`templates/v4_daily_review_qq_template.md`
+
+V4每日复盘必须生成：
+- `data/daily_reports/v4_review_structured_YYYYMMDD.json`（结构化输入）
+- `data/daily_reports/v4_review_qq_YYYYMMDD.txt`（渲染输出）
+- `data/runtime/status/v4_review_guard_YYYYMMDD.json`（守卫结果）
+
+流程：
+1. 读取正式 brief 确定 A/B/C/SKIP
+2. 结构化 JSON
+3. API 获取赛果/events
+4. renderer.py 推 QQ 文本
+5. guard.py 检查
+6. guard PASS 后 ClawOps 推送
+
+禁止：
+- agentTurn 自由总结
+- announce
+- ReportAgent 自由改结构
+- validation 全量样本反推正式分级
+
 ## 禁止命令
 
 **禁止在 cron 中出现的命令：**
@@ -83,4 +106,6 @@
 - `daily_runner.py --run_tag DAILY_POOL`
 - `v4_scan_and_brief.py`
 - `v4_review_with_watchdog.py`
+- `v4_review_renderer.py`
+- `v4_review_guard.py`
 - `v4_live_stats_snapshot.py`

@@ -39,6 +39,15 @@ ClawOps 根据任务类型调用：
 - 不新增 QQ Bot，不新增 QQ App，不复制 appSecret/token
 - 周六高比赛量期间禁止调整 QQ Bot 结构
 
+### V4每日复盘固定模板纪律
+
+- 正式 brief 是唯一样本基准
+- structured JSON 是唯一渲染输入
+- template 是唯一 QQ 输出结构
+- guard PASS 是唯一推送前提
+- ReportAgent 只做排版
+- ClawOps 是唯一推送入口
+
 ### ReportAgent 排版固定流程
 
 后续所有日报、周报、月报、QQ简报排版任务，必须先走 ReportAgent。
