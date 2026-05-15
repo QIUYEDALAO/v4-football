@@ -39,6 +39,25 @@ ClawOps 根据任务类型调用：
 - 不新增 QQ Bot，不新增 QQ App，不复制 appSecret/token
 - 周六高比赛量期间禁止调整 QQ Bot 结构
 
+### ReportAgent 排版固定流程
+
+后续所有日报、周报、月报、QQ简报排版任务，必须先走 ReportAgent。
+
+1. ClawOps 接收 BOSS 指令或定时任务输出
+2. 如果任务涉及报告排版、QQ格式优化、iPhone阅读优化、日报/周报/月报格式整理，必须调用 ReportAgent
+3. ReportAgent 只负责格式化文本
+4. ReportAgent 不得重算评级
+5. ReportAgent 不得修改 A/B/C/SKIP
+6. ReportAgent 不得新增推荐
+7. ReportAgent 不得删除风险提示
+8. ReportAgent 不得删除昨日验证或滚动验证
+9. ReportAgent 不得引用 V33
+10. ReportAgent 不得加入 ROI / CLV / BET_LOCKED 等 V2字段
+11. ReportAgent 不得直接推送 QQ
+12. ClawOps 必须校验 ReportAgent 输出
+13. 只有 ClawOps 校验通过后，才允许用 systemEvent 原样推送
+14. 如果 ReportAgent 输出与正式 brief 不一致，立即标记 REPORT_FORMAT_SCOPE_MISMATCH，不推送
+
 ### ClawOps 禁止
 - 不把研究任务丢给 ReportAgent
 - 不把代码任务丢给 AlertAgent
