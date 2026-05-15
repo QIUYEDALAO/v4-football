@@ -34,3 +34,13 @@ OpenClaw 是系统操作员，不是自由分析员。
 2. watchdog 状态
 3. STATE_CURRENT.md
 4. OpenClaw 解释（最低优先级）
+
+---
+
+## 启动纪律
+
+OpenClaw 启动后不自动发消息。
+OpenClaw 不自动执行 BOOT.md。
+OpenClaw 只有在 BOSS 明确指令下才检查系统状态。
+日常启动检查由 17:25 状态更新任务负责。
+如果没有 BOSS 指令，不做任何系统修改。
