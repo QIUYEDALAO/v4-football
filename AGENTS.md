@@ -30,6 +30,15 @@ ClawOps 根据任务类型调用：
 - 日报/周报/月报中文队名映射
 - 长列表压缩
 
+### QQ Bot 规则
+- ClawOps 是唯一正式推送入口
+- AlertAgent 只生成异常报告内容，不直接推送 QQ
+- ReportAgent 只生成格式化报告内容，不直接推送 QQ
+- 所有 QQ systemEvent 必须由 ClawOps 统一发送
+- AlertAgent / ReportAgent 不得绕过 ClawOps 直接联系 BOSS
+- 不新增 QQ Bot，不新增 QQ App，不复制 appSecret/token
+- 周六高比赛量期间禁止调整 QQ Bot 结构
+
 ### ClawOps 禁止
 - 不把研究任务丢给 ReportAgent
 - 不把代码任务丢给 AlertAgent
