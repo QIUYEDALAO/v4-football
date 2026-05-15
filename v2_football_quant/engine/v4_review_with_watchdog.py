@@ -57,6 +57,26 @@ def main():
         status = "DONE"
         error_msg = ""
 
+        # ── 守卫：检查正式 brief 是否与 validation scope 一致 ──
+        brief_path = REPORT_DIR / f"v4_openclaw_brief_{key}.txt"
+        brief_a = 0
+        brief_b = 0
+        if brief_path.exists():
+            brief_text = brief_path.read_text()
+            import re
+            a_match = re.search(r'A级.*?强推荐[：:]\s*(\d+)', brief_text)
+            b_match = re.search(r'B级.*?达标推荐[：:]\s*(\d+)', brief_text)
+            if a_match:
+                brief_a = int(a_match.group(1))
+            if b_match:
+                brief_b = int(b_match.group(1))
+            if brief_a == 0 and brief_b == 0:
+                print(f"[GUARD] REVIEW_SCOPE_MISMATCH: brief A={brief_a} B={brief_b} — 无A/B主推荐，禁用validation全量样本生成命中率", flush=True)
+                print(f"[GUARD] validation/attribution 仅作为正式样本赛果补充，不得决定样本范围", flush=True)
+                print(f"[GUARD] 警告：请勿使用此日validation统计数据作为正式复盘命中率", flush=True)
+        else:
+            print(f"[GUARD] DATA_MISSING: 未找到正式 brief 文件 {brief_path}，无法生成命中率报告", flush=True)
+
         # Step 1: 赛后验证
         result_val = subprocess.run(
             [sys.executable, "-u", str(BASE_DIR / "engine" / "v4_ht_result_validator.py"), "--date", args.date],
