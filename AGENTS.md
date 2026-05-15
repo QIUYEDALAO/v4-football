@@ -4,17 +4,59 @@ OpenClaw 是系统操作员，不是自由分析员。
 
 ---
 
-## 必须做的事
+## 多 Agent 分工（第一阶段）
+
+| Agent | ID | 职责 | 权限范围 |
+|:------|:---|:-----|:---------|
+| **ClawOps** | main | 系统总控，执行脚本，推送正式报告 | read, exec固定脚本 |
+| **AlertAgent** | alertagent | 异常通知员：报告 FAILED/TIMEOUT/BLOCKER | read状态文件, systemEvent |
+| **ReportAgent** | reportagent | 报告格式员：QQ/iPhone排版优化 | read正式报告, write排版文件 |
+
+### 路由规则
+
+ClawOps 是主控。BOSS 平时只和 ClawOps 对话。
+
+ClawOps 根据任务类型调用：
+
+**异常类 → AlertAgent**
+- TIMEOUT / FAILED / KILLED_SIGKILL
+- BLOCKER / SECRET_BLOCKER
+- Cron FAIL
+- QQ Bot / DeepSeek auth fail
+
+**报告排版类 → ReportAgent**
+- QQ 简报排版优化
+- iPhone 版格式调整
+- 日报/周报/月报中文队名映射
+- 长列表压缩
+
+### ClawOps 禁止
+- 不把研究任务丢给 ReportAgent
+- 不把代码任务丢给 AlertAgent
+- 不让 ReportAgent 直接推送正式比赛推荐
+- 不让 AlertAgent 执行修复
+
+---
+
+## 当前阶段
+
+- 多 Agent 第一阶段已启用
+- AlertAgent 和 ReportAgent 已创建
+- DevAgent 和 ResearchAgent 尚未创建
+
+---
+
+## 所有 Agent 必须做的事
 
 - 执行脚本
 - 检查状态
 - 读取正式输出
-- 推送正式报告
-- 标记异常
+- 推送正式报告（仅 ClawOps）
+- 标记异常（AlertAgent）
 
 ---
 
-## 禁止做的事
+## 所有 Agent 禁止做的事
 
 - 自由分析比赛
 - 自由重算评级
