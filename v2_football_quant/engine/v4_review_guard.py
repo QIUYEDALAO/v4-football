@@ -92,7 +92,26 @@ def main():
     if not fg:
         issues.append("MISSING_FIRST_GOAL_DISTRIBUTION")
 
-    # 6. Check diagnosis_summary
+    # 6. Check weather_context
+    weather_unavail = 0
+    for i, m in enumerate(matches):
+        wc = m.get("weather_context", {})
+        if not wc:
+            issues.append(f"MATCH_{i+1}_MISSING_WEATHER_CONTEXT")
+        elif not wc.get("weather_source"):
+            issues.append(f"MATCH_{i+1}_MISSING_WEATHER_SOURCE")
+        elif wc.get("weather_source") == "DATA_UNAVAILABLE":
+            weather_unavail += 1
+        else:
+            # Has actual weather data - check for source
+            risk = wc.get("weather_risk_level", "UNKNOWN")
+            if risk == "HIGH" and not wc.get("weather_note"):
+                issues.append(f"MATCH_{i+1}_HIGH_RISK_MISSING_NOTE")
+    if weather_unavail > 0:
+        issues.append(f"WEATHER_DATA_UNAVAILABLE: {weather_unavail}/{len(matches)} matches")
+        # Not a blocker, just a warning
+
+    # 7. Check diagnosis_summary
     ds = data.get("diagnosis_summary", {})
     if not ds:
         issues.append("MISSING_DIAGNOSIS_SUMMARY")

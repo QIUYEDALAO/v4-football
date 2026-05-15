@@ -36,6 +36,11 @@ SKIP反杀首球
 
 ━━━━━━━━━━━━━━
 
+【天气/场地因子】
+{{weather_rows}}
+
+━━━━━━━━━━━━━━
+
 【归因】
 MODEL_TOO_STRICT × {{model_too_strict_count}}
 NOISY_WIN × {{noisy_win_count}}

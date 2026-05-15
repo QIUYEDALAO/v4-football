@@ -116,6 +116,36 @@ def main():
     fg = td.get("first_goal", {})
     sbfg = td.get("skip_backfire_first_goal", {})
 
+    # ── Weather rows ──
+    def _weather_row(m: dict, idx: int) -> str:
+        num_emoji = _num_emoji(idx)
+        home = m.get("home", "?")
+        away = m.get("away", "?")
+        wc = m.get("weather_context", {})
+        source = wc.get("weather_source", "DATA_UNAVAILABLE")
+        if source == "DATA_UNAVAILABLE":
+            return (
+                f"{num_emoji} {home} vs {away}\n"
+                f"天气：DATA_UNAVAILABLE\n"
+                f"归因：天气数据缺失，不参与归因"
+            )
+        cond = wc.get("weather_condition", "未知")
+        temp = wc.get("temperature_c", "?")
+        wind = wc.get("wind_speed_kmh", "?")
+        precip = wc.get("precipitation_mm", "?")
+        pitch = wc.get("pitch_condition", "未知")
+        risk = wc.get("weather_risk_level", "UNKNOWN")
+        note = wc.get("weather_note", "")
+        return (
+            f"{num_emoji} {home} vs {away}\n"
+            f"天气：{cond}｜{temp}℃｜风{wind}km/h\n"
+            f"降雨：{precip}mm｜场地：{pitch}\n"
+            f"风险：{risk}\n"
+            f"归因：{note}"
+        )
+
+    weather_rows = "\n\n".join(_weather_row(m, i) for i, m in enumerate(matches))
+
     # ── Diagnosis ──
     ds = data.get("diagnosis_summary", {})
 
@@ -174,6 +204,7 @@ def main():
         "{{rolling_7d_skip_backfire}}": rs.get("7d_skip_backfire", "样本不足，仅观察"),
         "{{rolling_14d_summary}}": rs.get("14d_summary", "样本不足，仅观察"),
         "{{rolling_30d_summary}}": rs.get("30d_summary", "样本不足，仅观察"),
+        "{{weather_rows}}": weather_rows,
         "{{cumulative_summary}}": rs.get("cumulative", "样本不足，仅观察"),
         "{{rule_decision}}": "不改规则",
         "{{ab_conclusion}}": ab_conclusion,
