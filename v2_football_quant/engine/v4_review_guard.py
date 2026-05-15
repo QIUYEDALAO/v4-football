@@ -35,22 +35,48 @@ FORBIDDEN = [
     "FULLTIME_OVER", "SECOND_HALF_OVER", "market_scores",
     "A：7/7", "B：5/5", "A+B：12/12",
     "全场大", "下半场大", "回报",
+    # Compressed enum (ground truth)
+    "SCRIPTNOTAVAILABLE", "MODELTOOSTRICT", "DATAUNAVAILABLE",
+    "APIHALFTIMESCORE",
+    # Raw formats
+    "fid=None", "FT DATA_UNAVAILABLE",
 ]
 
-REQUIRED_SECTIONS = [
+# QQ display must not contain these raw enums
+RAW_ENUMS_IN_QQ = [
+    "SCRIPT_HIT", "SCRIPT_PARTIAL", "SCRIPT_MISS",
+    "NO_HT_GOAL", "SCRIPT_NA", "SCRIPT_NOT_AVAILABLE",
+    "MODEL_VALID", "MODEL_TOO_STRICT", "MODEL_OVERCONFIDENT",
+    "NOISY_WIN", "NOISY_LOSS", "DATA_QUALITY_ISSUE", "WEATHER_RISK",
+]
+
+REQUIRED_SECTIONS_FULL = [
     "正式输出", "逐场验证", "昨日汇总", "时间分布",
     "赛前剧本验证", "赛前信号复盘", "天气/场地因子",
     "滚动统计", "累计归因", "结论",
+]
+
+REQUIRED_SECTIONS_QQ = [
+    "正式推荐", "C/SKIP汇总", "滚动观察", "结论",
+]
+
+DISPLAY_PER_MATCH_FIELDS = [
+    "官方：", "赛果：", "进球：", "实际：",
+    "结果：", "剧本：", "风险：", "天气：", "来源：",
 ]
 
 
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--date", required=True)
+    parser.add_argument("--mode", default="full", choices=["full", "qq"])
     args = parser.parse_args()
 
     struct_path = REPORT_DIR / f"v4_review_structured_{args.date}.json"
-    qq_path = REPORT_DIR / f"v4_review_qq_{args.date}.txt"
+    if args.mode == "full":
+        qq_path = REPORT_DIR / f"v4_review_full_{args.date}.txt"
+    else:
+        qq_path = REPORT_DIR / f"v4_review_qq_{args.date}.txt"
     issues = []
     status = "PASS"
 
@@ -137,15 +163,62 @@ def main():
                 issues.append(f"FORBIDDEN: {word}")
 
     # 20. Required sections in QQ text
+    required_sections = REQUIRED_SECTIONS_QQ if args.mode == "qq" else REQUIRED_SECTIONS_FULL
     if qq_path.exists():
         text = qq_path.read_text()
-        for section in REQUIRED_SECTIONS:
+        for section in required_sections:
             if section not in text:
                 issues.append(f"MISSING_SECTION: {section}")
 
+    # ── Display Guard: check final QQ text (full mode only) ──
+    display_guard_ok = True
+    if qq_path.exists() and args.mode == "full":
+        text = qq_path.read_text()
+        
+        # a) Raw enum check
+        for raw in RAW_ENUMS_IN_QQ:
+            if raw in text:
+                issues.append(f"DISPLAY_RAW_ENUM: {raw}")
+                display_guard_ok = False
+        
+        # b) Compressed enum check
+        for comp in ["SCRIPTNOTAVAILABLE", "MODELTOOSTRICT", "DATAUNAVAILABLE", "APIHALFTIMESCORE"]:
+            if comp in text:
+                issues.append(f"DISPLAY_COMPRESSED_ENUM: {comp}")
+                display_guard_ok = False
+        
+        # c) None check
+        none_count = text.count("None")
+        if none_count > 0:
+            issues.append(f"DISPLAY_NONE: {none_count} occurrences")
+            display_guard_ok = False
+        
+        # d) N/A check
+        na_count = text.count("N/A")
+        if na_count > 8:
+            issues.append(f"DISPLAY_EXCESS_NA: {na_count} occurrences (limit 8)")
+            display_guard_ok = False
+        
+        # e) Separator check (per-match)
+        separator = "━" * 20
+        sep_count = text.count(separator)
+        expected_seps = len(matches) - 1  # between each pair of matches
+        if sep_count < expected_seps and len(matches) > 1:
+            issues.append(f"DISPLAY_MISSING_SEPARATOR: found {sep_count}, expected >= {expected_seps}")
+            display_guard_ok = False
+        
+        # f) Per-match field check
+        for field in DISPLAY_PER_MATCH_FIELDS:
+            if text.count(field) < len(matches):
+                issues.append(f"DISPLAY_MISSING_FIELD: {field} (found {text.count(field)}, expected {len(matches)})")
+                display_guard_ok = False
+        
+        if not display_guard_ok:
+            issues.append("REPORT_DISPLAY_GUARD_GAP")
+
     # Determine status
     if issues:
-        blocker_kw = ["BLOCKER", "MATCH_COUNT", "FORBIDDEN", "MISSING_STRUCTURED"]
+        blocker_kw = ["BLOCKER", "MATCH_COUNT", "FORBIDDEN", "MISSING_STRUCTURED", "DISPLAY_RAW_ENUM", "REPORT_DISPLAY_GUARD_GAP"]
         has_blocker = any(k in str(issues) for k in blocker_kw)
         status = "BLOCKER" if has_blocker else "WARNING"
 

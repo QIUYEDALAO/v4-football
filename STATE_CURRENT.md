@@ -181,7 +181,18 @@
 - 周六高比赛量期间禁止调整 QQ Bot 结构
 - 多Agent共用现有 QQ Bot，由 ClawOps 统一调度和推送
 
-## 9. 任务汇报纪律
+## 9. 推送纪律违纪记录
+
+### P1_PUSH_BEFORE_BOSS_CONFIRM（2026-05-16）
+
+问题：在 BOSS 确认完整版 V4复盘前，ClawOps 已通过 `--deliver --channel qqbot` 推送精简版。
+来源：2026-05-16 02:29 BOSS 指令
+处理：
+- 后续 V4复盘必须 guard PASS + BOSS确认 + sent_marker 后才允许推送
+- 不允许先推精简版再等确认
+- 不允许绕过 BOSS确认
+
+## 10. 任务汇报纪律
 
 标记：TASK_REPORTING_VIOLATION（P1）
 来源：2026-05-16 00:24 BOSS 指令
