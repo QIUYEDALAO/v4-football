@@ -33,6 +33,7 @@ def main():
 
     wd = v4_review_watchdog()
     if not wd.acquire_lock():
+        print("【V4 情报系统】", flush=True)
         print("[WATCHDOG] V4复盘 已有实例运行，跳过", flush=True)
         return
 

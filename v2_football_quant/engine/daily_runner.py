@@ -389,6 +389,13 @@ def generate_report(fixtures: list[dict], bets: list[dict], stats: dict, all_can
 
 def run_once(run_tag="DEFAULT", quick_mode=False):
     """quick_mode: 只刷新赔率，跳过 Predictions 和矩阵重建"""
+
+    # ── 硬阻断：HOURLY 已废弃 ──
+    if "HOURLY" in str(run_tag).upper():
+        print(f"BLOCKED_DEPRECATED_HOURLY | run_tag={run_tag}")
+        print("HOURLY 模式已废弃。当前使用 v2_window_checker_with_watchdog.py（每小时05/35分窗口检查器）。")
+        sys.exit(77)  # exit code 77 = BLOCKED_DEPRECATED_HOURLY
+
     print("=" * 60)
     print(f"V2 Daily Runner v2.3.1 KICKOFF_RELATIVE (HT 1X2) | TAG: {run_tag} | {'QUICK' if quick_mode else 'FULL'}")
     print(f"启动: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")

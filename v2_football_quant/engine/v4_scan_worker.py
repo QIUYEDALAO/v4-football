@@ -35,7 +35,9 @@ def main():
         generate_dashboard=False,
     )
 
-    if result.get("skipped"):
+    if result is None:
+        sys.exit(0)
+    if isinstance(result, dict) and result.get("skipped"):
         sys.exit(42)
 
     sys.exit(0)
