@@ -192,6 +192,16 @@
 - 不允许先推精简版再等确认
 - 不允许绕过 BOSS确认
 
+### P1_REPORTAGENT_BYPASS（2026-05-16）
+
+问题：ClawOps 在生成/校验/推送 V4 QQ简报时绕过 ReportAgent，未执行格式审查。
+来源：2026-05-16 03:12 BOSS 指令
+处理：
+- 后续所有 V4 QQ简报/日报/周报/月报排版必须经过 ReportAgent 格式审查
+- ReportAgent 不改数据/结论/A/B/C/SKIP，只做 QQ/iPhone 阅读体验和格式合规
+- ClawOps 只有 ReportAgent PASS + guard PASS 后才允许 systemEvent 推送
+- 已推送到 QQ 的历史内容不重复处理
+
 ## 10. 任务汇报纪律
 
 标记：TASK_REPORTING_VIOLATION（P1）

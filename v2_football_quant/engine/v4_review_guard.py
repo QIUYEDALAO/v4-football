@@ -216,6 +216,23 @@ def main():
         if not display_guard_ok:
             issues.append("REPORT_DISPLAY_GUARD_GAP")
 
+    # ── Route marker check (QQ mode only) ──
+    if args.mode == "qq":
+        route_path = STATUS_DIR / f"v4_review_route_{args.date}.json"
+        if not route_path.exists():
+            issues.append("MISSING_ROUTE_MARKER")
+        else:
+            try:
+                with open(route_path) as f:
+                    route = json.load(f)
+                if not route.get("reportagent_called", False):
+                    issues.append("REPORTAGENT_BYPASS")
+                if not route.get("allowed_to_push", False):
+                    if not route.get("historical_exception", False):
+                        issues.append("PUSH_BLOCKED_BY_ROUTE")
+            except Exception:
+                issues.append("ROUTE_MARKER_PARSE_ERROR")
+
     # Determine status
     if issues:
         blocker_kw = ["BLOCKER", "MATCH_COUNT", "FORBIDDEN", "MISSING_STRUCTURED", "DISPLAY_RAW_ENUM", "REPORT_DISPLAY_GUARD_GAP"]

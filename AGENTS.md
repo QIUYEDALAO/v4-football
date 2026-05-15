@@ -48,6 +48,48 @@ ClawOps 根据任务类型调用：
 - ReportAgent 只做排版
 - ClawOps 是唯一推送入口
 
+### ReportAgent V4复盘职责
+
+ReportAgent 在 V4复盘中的职责：
+
+**允许：**
+1. 检查 QQ文本是否适合 iPhone 阅读
+2. 检查每个模块是否清晰
+3. 检查 A/B 是否详细展示
+4. 检查 C/SKIP 是否只汇总
+5. 检查是否误推 full report
+6. 检查是否有 raw enum
+7. 检查是否有 V2字段
+8. 检查是否有 V33
+9. 检查是否过长
+10. 输出 PASS / FAIL 和原因
+
+**禁止：**
+1. 不得修改 A/B/C/SKIP
+2. 不得修改赛果
+3. 不得修改命中率
+4. 不得修改滚动统计
+5. 不得修改归因
+6. 不得新增推荐
+7. 不得删除风险提示
+8. 不得直接推送 QQ
+9. 不得绕过 ClawOps
+10. 不得自由总结比赛
+
+### V4每日复盘固定流程
+
+1. `v4_review_renderer.py --mode full`
+2. `v4_review_renderer.py --mode qq`
+3. `v4_review_guard.py --mode full`
+4. `v4_review_guard.py --mode qq`
+5. ClawOps 调用 ReportAgent 检查 QQ版
+6. 写 `v4_review_route_YYYYMMDD.json`
+7. ClawOps 最终校验
+8. ClawOps systemEvent 原样推送
+9. 写 `v4_review_push_YYYYMMDD.json`
+
+缺任一步，不得推 QQ。
+
 ### ReportAgent 排版固定流程
 
 后续所有日报、周报、月报、QQ简报排版任务，必须先走 ReportAgent。
