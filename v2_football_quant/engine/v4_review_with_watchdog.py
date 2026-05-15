@@ -80,8 +80,20 @@ def main():
         output_files = {
             "validation": str(validation_path) if validation_path.exists() else None,
             "attribution": str(attribution_path) if attribution_path.exists() else None,
+            "review": str(REPORT_DIR / f"v4_review_{key}.txt") if (REPORT_DIR / f"v4_review_{key}.txt").exists() else None,
+            "qq_review": str(REPORT_DIR / f"v4_review_qq_{key}.txt") if (REPORT_DIR / f"v4_review_qq_{key}.txt").exists() else None,
         }
         wd.finish(status=status, error=error_msg[:200] or None, output_files=output_files)
+
+        # ── stdout 摘要输出（供cron/agent读取，非AI总结）──
+        print(f"【V4 情报系统】", flush=True)
+        print(f"V4复盘完成", flush=True)
+        print(f"date={args.date}", flush=True)
+        print(f"validation_file={output_files['validation'] or 'NOT_FOUND'}", flush=True)
+        print(f"attribution_file={output_files['attribution'] or 'NOT_FOUND'}", flush=True)
+        print(f"review_file={output_files['review'] or 'NOT_FOUND'}", flush=True)
+        print(f"qq_file={output_files['qq_review'] or 'NOT_FOUND'}", flush=True)
+        print(f"status={status}", flush=True)
 
     except Exception as e:
         wd.finish(status="FAILED", error=str(e)[:200])
