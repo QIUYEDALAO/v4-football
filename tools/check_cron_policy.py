@@ -19,15 +19,27 @@ REQUIRED_JOBS = [
     ("V4扫描-凌晨", "01:20"),
     ("V4扫描-早场", "07:20"),
     ("V2早场兜底", "07:35"),
-    ("V4每日复盘", "10:30"),
     ("V2每日结算", "12:10"),
-    ("V2建池-每日", "12:35"),
-    ("V4扫描-午间", "13:20"),
+    ("V4每日复盘", "12:35"),
+    ("SYS每日结算汇总", "13:00"),
+    ("V2建池-每日", "13:15"),
+    ("V4扫描-午间", "14:05"),
     ("V2每日结算-补跑", "15:35"),
     ("V4扫描-傍晚", "16:20"),
     ("V4扫描-晚间", "22:20"),
     ("V2晚场兜底", "18:35"),
     ("V2夜间兜底", "23:35"),
+    ("SYS-架构审计守卫", "08:40/17:40/23:40"),
+]
+
+NOTIFICATION_JOBS = [
+    "SYS-架构审计守卫",  # BLOCKER/FAIL → systemEvent
+    "V4扫描-午间",       # push=always
+    "V4扫描-傍晚",       # push=conditional (A/B or异常)
+    "V4扫描-晚间",       # push=conditional
+    "V4扫描-早场",       # push=conditional
+    "V4扫描-凌晨",       # push=conditional
+    "SYS每日结算汇总",    # 13:00 统一推送
 ]
 
 FORBIDDEN_CMDS = [
@@ -108,6 +120,31 @@ def main():
                         f"{name}: timeout={to}s (expected >= {expected}s)"
                     )
 
+    # Check NOTIFICATION_GAP: delivery.mode must not be announce
+    announce_count = sum(1 for j in jobs if j.get("delivery", {}).get("mode") == "announce")
+    result["announce_count"] = announce_count
+    result["notification_gaps"] = []
+    for notif_name in NOTIFICATION_JOBS:
+        found = False
+        for j in jobs:
+            if j.get("name") == notif_name or ("V4扫描" in notif_name and "V4扫描" in j.get("name", "")):
+                found = True
+                break
+        if not found:
+            result["notification_gaps"].append(notif_name)
+    # Also check that SYS审计守卫 has conditional push for BLOCKER
+    sys_guard_found = False
+    sys_guard_has_conditional = False
+    for j in jobs:
+        if "SYS-架构审计守卫" in j.get("name", ""):
+            sys_guard_found = True
+            msg = j.get("payload", {}).get("message", "")
+            if "BLOCKER" in msg and "架构审计异常" in msg:
+                sys_guard_has_conditional = True
+            break
+    if not sys_guard_has_conditional and sys_guard_found:
+        result["notification_gaps"].append("SYS-架构审计守卫: BLOCKER通知配置")
+
     # Determine status
     if result["forbidden_found"]:
         result["status"] = "BLOCKER"
@@ -115,6 +152,10 @@ def main():
         result["status"] = "WARNING"
     elif result["timeout_issues"]:
         result["status"] = "WARNING"
+    elif announce_count > 0:
+        result["status"] = "WARNING"
+    elif result["notification_gaps"]:
+        result["status"] = "NOTIFICATION_GAP"
     else:
         result["status"] = "PASS"
 

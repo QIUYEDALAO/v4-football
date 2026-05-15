@@ -173,7 +173,20 @@
 - 周六高比赛量期间禁止调整 QQ Bot 结构
 - 多Agent共用现有 QQ Bot，由 ClawOps 统一调度和推送
 
-## 8. 当前禁止事项
+## 9. 任务汇报纪律
+
+标记：TASK_REPORTING_VIOLATION（P1）
+来源：2026-05-16 00:24 BOSS 指令
+问题：ClawOps 完成 git push 后未主动汇报，直到 BOSS 追问才补报
+
+纪律（已写入 AGENTS.md / MEMORY.md）：
+- 任何任务完成后必须主动汇报
+- 不允许沉默等待 BOSS 追问
+- 3分钟以上运行中任务必须汇报进度
+- git push/cron修改/配置修改/推送/systemEvent后必须立即出最终报告
+- delivery.mode=none 不禁止正式回报
+
+## 10. 当前禁止事项
 
 - 不 push 新变更
 - 不修改 V2/V4 策略
