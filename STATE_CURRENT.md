@@ -22,7 +22,13 @@
 ### V2 今日状态
 
 - 系统版本：v2.3.1
-- 扫描频率：每小时
+- V2 不再运行 HOURLY 全量扫描
+- 每小时 05/35 运行 v2_window_checker_with_watchdog.py
+- V2窗口检查器只读 state 文件，无 active window 时快速退出
+- 只有 T-90/T-45 才允许 BET_LOCKED
+- T-15m 只做 FINAL_RECORD
+- DAILY_POOL 每天 12:35 合法建池
+- V2 正式推荐只认 BET_LOCKED
 - BET_LOCKED：12 场
 - WATCH_EARLY：正常
 - CANDIDATE：正常
@@ -32,7 +38,7 @@
 - LOCK_CANCELLED：0
 - 今日异常：无
 
-今日判断：V2 每小时正常锁定，12 场 BET_LOCKED。
+今日判断：V2 窗口检查器正常，12 场 BET_LOCKED。
 
 ---
 
@@ -132,16 +138,15 @@
 
 ### V2
 ```bash
-# 每小时自动
-python3 engine/daily_runner.py --run_tag HOURLY --quick
-# 建池
+# 每小时 05/35 窗口检查器
+python3 engine/v2_window_checker_with_watchdog.py
+# 建池（12:35）
 python3 engine/daily_runner.py --run_tag DAILY_POOL
 ```
 
 ### V4
 ```bash
-python3 engine/v4_runner.py --scan-mode fast --lookahead-hours 24 --recent-prewarm off
-python3 engine/v4_openclaw_brief.py --date 20260514
+python3 engine/v4_scan_and_brief.py --date $(date +%Y%m%d) --window evening --lookahead-hours 24
 ```
 
 ---
@@ -152,13 +157,12 @@ python3 engine/v4_openclaw_brief.py --date 20260514
 - brief：data/daily_reports/v4_openclaw_brief_20260514.txt
 - validation：data/daily_reports/v4_ht_recommend_validation_20260513.json (A+B 100%)
 - attribution：data/v4_archive/v4_result_attribution_20260513.jsonl
-- V2 predictions：data/daily_reports/predictions_20260514.json (12场锁定)
 
 ---
 
 ## 7. 今日最终结论
 
-V2：BET_LOCKED 12 场，每小时正常锁定。
+V2：BET_LOCKED 12 场，窗口检查器正常锁定。
 V3：战备，enabled=false。
 V4：今日无 A/B 主推荐，仅 C 观察 2 场。
 昨日复盘：A+B 100% 优秀，SKIP 偏严（MODEL_TOO_STRICT×9）但样本不足不调规则。
