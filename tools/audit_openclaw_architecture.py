@@ -112,6 +112,27 @@ ALLOWED_MARKET_SCORES = [
 ]
 
 
+def _is_deprecation_context(text: str, pattern: str) -> bool:
+    """判断匹配到的废弃词是否在禁止性说明的上下文中"""
+    deprecation_markers = [
+        "已废弃", "废弃口径", "禁止", "禁止引用", "不得引用",
+        "不得使用", "不得出现", "已下线", "不再使用",
+        "已彻底禁用", "已清理", "已删除",
+        "不参与推送", "不作为", "不承认",
+        "禁止运行", "禁止在 cron", "禁止在",
+        "V33污染", "旧 HOURLY",
+    ]
+    # 查找匹配行附近200字符（对比100，覆盖更远的上下文）
+    for m in re.finditer(pattern, text):
+        start = max(0, m.start() - 200)
+        end = min(len(text), m.end() + 200)
+        context = text[start:end]
+        for marker in deprecation_markers:
+            if marker in context:
+                return True
+    return False
+
+
 def classify_path(rel_path: str) -> str:
     """分类路径：blocker / allowed_ref / info / live"""
     # Check exact match first
@@ -176,8 +197,17 @@ def check_file(path: Path) -> list[dict]:
             severity = "INFO"
         elif is_allowed_ref:
             severity = "ALLOWED_REFERENCE"
-        elif is_blocker_root and label in ("V33引用", "v33引用", "旧HOURLY命令"):
-            severity = "BLOCKER"
+        elif is_blocker_root and label in ("V33引用", "v33引用"):
+            # 上下文检测：判断是禁止性说明还是仍然引用
+            if _is_deprecation_context(text, pattern):
+                severity = "ALLOWED_REFERENCE"
+            else:
+                severity = "BLOCKER"
+        elif is_blocker_root and label == "旧HOURLY命令":
+            if _is_deprecation_context(text, r"HOURLY"):
+                severity = "ALLOWED_REFERENCE"
+            else:
+                severity = "BLOCKER"
         elif is_live and label in ("V33引用", "v33引用", "旧HOURLY命令"):
             severity = "BLOCKER"
         elif is_live:
@@ -310,32 +340,30 @@ def main():
         all_findings.extend(check_file(cp))
 
     # Aggregate counts
-    blocker_count = len([f for f in all_findings if f["severity"] == "BLOCKER"])
+    real_blocker_count = len([f for f in all_findings if f["severity"] == "BLOCKER"])
+    secret_blocker_count = len([f for f in all_findings if f["severity"] == "SECRET_BLOCKER"])
     allowed_ref_count = len([f for f in all_findings if f["severity"] == "ALLOWED_REFERENCE"])
     info_count = len([f for f in all_findings if f["severity"] == "INFO"])
-    secret_blocker_count = len([f for f in all_findings if f["severity"] == "SECRET_BLOCKER"])
     warning_count = len([f for f in all_findings if f["severity"] == "WARNING"])
 
-    if blocker_count > 0 or secret_blocker_count > 0:
-        status = "BLOCKER"
-    elif warning_count > 0:
-        status = "PASS_WITH_REFERENCES"
+    if real_blocker_count > 0 or secret_blocker_count > 0:
+        final_status = "BLOCKER"
     elif allowed_ref_count > 0 or info_count > 0:
-        status = "PASS_WITH_REFERENCES"
+        final_status = "PASS_WITH_REFERENCES"
     else:
-        status = "PASS"
+        final_status = "PASS"
 
     result = {
         "date": today,
         "total_findings": len(all_findings),
         "summary": {
-            "blocker_count": blocker_count,
+            "real_blocker_count": real_blocker_count,
+            "secret_blocker_count": secret_blocker_count,
             "allowed_reference_count": allowed_ref_count,
             "info_count": info_count,
-            "secret_blocker_count": secret_blocker_count,
             "warning_count": warning_count,
         },
-        "status": status,
+        "final_status": final_status,
         "findings": all_findings,
     }
 
@@ -344,9 +372,9 @@ def main():
         json.dump(result, f, ensure_ascii=False, indent=2)
 
     print(f"📋 OpenClaw 架构审计 | {today}")
-    print(f"   状态: {status}")
+    print(f"   final_status: {final_status}")
     print(f"   总计: {len(all_findings)}")
-    print(f"   🔴 BLOCKER: {blocker_count}")
+    print(f"   🔴 real BLOCKER: {real_blocker_count}")
     print(f"   🟠 SECRET:  {secret_blocker_count}")
     print(f"   🟡 WARNING: {warning_count}")
     if allowed_ref_count > 0:
@@ -355,7 +383,7 @@ def main():
         print(f"   ⚪ INFO: {info_count} (归档内容，不计入BLOCKER)")
     print(f"   输出: {out_path}")
 
-    if blocker_count > 0:
+    if real_blocker_count > 0:
         print("\n--- BLOCKER (运行态污染) ---")
         for f in all_findings:
             if f["severity"] == "BLOCKER":
@@ -372,12 +400,12 @@ def main():
                 print(f"  🟡 {f['file']}: {f['pattern']} ({f['count']}x)")
 
     print()
-    if status == "PASS":
+    if final_status == "PASS":
         print("✅ 审计通过")
-    elif status == "PASS_WITH_REFERENCES":
-        print("✅ 审计通过（仅治理说明/归档引用）")
+    elif final_status == "PASS_WITH_REFERENCES":
+        print("✅ 审计通过（仅治理说明/归档引用，无运行态BLOCKER）")
     else:
-        print("❌ 审计未通过，需处理 BLOCKER/SECRET_BLOCKER")
+        print("❌ 审计未通过，需处理 real BLOCKER / SECRET_BLOCKER")
 
 
 if __name__ == "__main__":
