@@ -7,14 +7,14 @@
 
 ## 0. 更新时间
 
-- 更新时间：2026-05-16 04:33
+- 更新时间：2026-05-16 12:48
 - 更新人：ClawOps
 - GitHub 仓库：whoerixxz/v2-football-quant
-- 最新 commit：`551fe61` V2条件systemEvent通知
+- 最新 commit：`pending_push` → SYS: 收口中午结算汇总与V4昨日验证来源
 - 当前运行环境：生产
 - 当前阶段：纸盘验证，生产观察期
-- V2条件systemEvent：已 push（551fe61）
 - 本周末：周六高比赛量重点观察
+- **生产链路收口修复完成**：12:10 V2每日结算 cron 恢复 + SYS汇总路径修正 + V4 昨日验证来源修正
 
 ---
 
@@ -27,7 +27,10 @@
 - **BOOT循环**：已修复，boot-md disabled
 - **Health event loop**：degraded（event_loop_utilization，CPU 0.99，无运行影响）
 - **Architecture Audit**：PASS_WITH_REFERENCES（0 real BLOCKER，0 SECRET BLOCKER）
-- **Cron Policy**：PASS（13 required，0 forbidden）
+- **Cron Policy**：PASS（19 required，0 forbidden）— 新增内核链路强校验（12:10/12:35/13:00/13:15/14:05），缺失→FAIL
+- **Cron 修复**：新增 12:10 V2每日结算 cron；SYS统一汇总 V2路径→verified.json、V4路径→review_guard_qq
+- **V4昨日验证来源**：修复为只读 v4_review_guard + v4_review_qq，不再读 validation/attribution
+- **V2建池完成通知方案**：写入 P2 待办，暂不实施
 
 ## 1a. 多Agent状态
 

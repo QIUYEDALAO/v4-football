@@ -7,6 +7,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import re
 import sys
 from collections import Counter
 from datetime import datetime, timedelta
@@ -24,6 +25,7 @@ except Exception:
         return name
 
 REPORT_DIR = BASE_DIR / "data" / "daily_reports"
+STATUS_DIR = BASE_DIR / "data" / "runtime" / "status"
 
 
 def _date_key(date_str: str) -> str:
@@ -242,94 +244,53 @@ def build_brief(date_str: str) -> str:
             lines.append(f"- {reason}：{n}场")
     lines.append(sep)
 
-    # 昨日验证
+    # 昨日验证 — 仅来源于 V4复盘 guard PASS 结果
+    # 禁止使用 validation / attribution 全量样本反推
     prev = _prev_key(key)
-    val_path = REPORT_DIR / f"v4_ht_recommend_validation_{prev}.json"
-    val = _load_json(val_path, {})
-    attrib_path = BASE_DIR / "data" / "v4_archive" / f"v4_result_attribution_{prev}.jsonl"
-    attrib_rows = _load_jsonl(attrib_path)
+    guard_path = STATUS_DIR / f"v4_review_guard_{prev}.json"
+    review_qq_path = REPORT_DIR / f"v4_review_qq_{prev}.txt"
+    review_struct_path = REPORT_DIR / f"v4_review_structured_{prev}.json"
+    guard = _load_json(guard_path, {})
+    guard_ok = guard.get("guard_status") == "PASS"
     lines.append("")
-    lines.append("📌 昨日V4验证")
-    if val:
-        per = val.get("per_grade") or {}
-        for g, label in [("A", "A级"), ("B", "B级"), ("C", "C级")]:
-            m = per.get(g) or {}
-            lines.append(f"{label}：{m.get('hit',0)}/{m.get('completed',0)}，命中率 {m.get('hit_rate_pct',0)}%")
-        skip_rate = (
-            val.get("skip_reverse_rate_pct")
-            or (val.get("funnel") or {}).get("skip_backfire_rate_pct")
-            or 0
-        )
-        lines.append(f"SKIP反杀率：{skip_rate}%")
-        # SKIP反杀详情
-        skip_backfires = [
-            r for r in attrib_rows
-            if str(r.get("pre_grade") or "").upper() == "SKIP" and bool(r.get("ht_goal"))
-        ]
-        if skip_backfires:
-            lines.append("")
-            lines.append("⚠️ SKIP反杀分析：")
-            for sb in skip_backfires[:5]:
-                home = sb.get("home", "?")
-                away = sb.get("away", "?")
-                skip_cause = str(sb.get("model_skip_cause") or "")
-                diag = str(sb.get("diagnosis") or "")
-                if not skip_cause:
-                    skip_cause = "-"
-                lines.append(f"{home} vs {away}：跳过原因={skip_cause}；归因={diag}")
+    lines.append("📌 昨日验证（V4复盘）")
+    if guard_ok and review_qq_path.exists():
+        review_text = review_qq_path.read_text(encoding="utf-8")
+        # 从 review_qq 提取 A/B/C/SKIP 概况
+        ab_match = re.search(r"[🟢🔥]?\s*(A/B|A级|A|推荐)[^：]*[：:]\s*(\d+)场", review_text)
+        c_match = re.search(r"[👁️]?\s*(C级|C|观察)[^：]*[：:]\s*(\d+)场", review_text)
+        skip_match = re.search(r"[⚪]?\s*(跳过|SKIP)[^：]*[：:]\s*(\d+)场", review_text)
+        if ab_match:
+            lines.append(f"A/B推荐：{ab_match.group(2)}场")
+        if c_match:
+            lines.append(f"C级观察：{c_match.group(2)}场")
+        if skip_match:
+            lines.append(f"跳过：{skip_match.group(2)}场")
+        # 从结构化数据读取命中概要
+        struct_data = _load_json(review_struct_path, {})
+        if struct_data:
+            verdict = struct_data.get("verdict_summary") or struct_data.get("summary") or {}
+            hit = verdict.get("hits", verdict.get("hit", 0))
+            total = verdict.get("total", verdict.get("completed", 0))
+            if total > 0:
+                pct = round(hit / total * 100, 1)
+                lines.append(f"A/B/C 命中率：{hit}/{total}（{pct}%）")
     else:
-        lines.append("暂无昨日验证数据")
-    if attrib_rows:
-        diag = Counter(str(r.get("diagnosis") or "-") for r in attrib_rows)
-        root = Counter()
-        for r in attrib_rows:
-            rc = str(r.get("root_cause_dimension") or "").strip()
-            if not rc:
-                d = str(r.get("diagnosis") or "")
-                if d == "DATA_QUALITY_ISSUE":
-                    rc = "DATA_QUALITY"
-                elif d in ("NOISY_WIN", "NOISY_LOSS"):
-                    rc = "EVENT_NOISE"
-                elif d in ("MODEL_OVERCONFIDENT", "MODEL_TOO_STRICT"):
-                    rc = "MODEL_FEATURE"
-                else:
-                    rc = "NORMAL_VARIANCE"
-            root[rc] += 1
-        lines.append("")
-        lines.append("去噪后：")
-        for k in ["MODEL_VALID_STRONG", "MODEL_VALID", "UNLUCKY_MISS", "LUCKY_HIT", "NOISY_WIN", "NOISY_LOSS", "MODEL_OVERCONFIDENT", "MODEL_TOO_STRICT", "DATA_QUALITY_ISSUE"]:
-            lines.append(f"{k}：{diag.get(k, 0)}场")
-
-        rec_rows = [r for r in attrib_rows if str(r.get("pre_grade") or "").upper() in ("A", "B", "C")]
-        rec_clean = [r for r in rec_rows if str(r.get("diagnosis")) not in ("NOISY_WIN", "NOISY_LOSS")]
-        raw_hit = sum(1 for r in rec_rows if bool(r.get("ht_goal")))
-        clean_hit = sum(1 for r in rec_clean if bool(r.get("ht_goal")))
-        raw_rate = _pct_value(raw_hit, len(rec_rows))
-        clean_rate = _pct_value(clean_hit, len(rec_clean))
-        lines.append(f"A/B/C 原始命中率：{raw_rate}")
-        lines.append(f"A/B/C 去噪命中率：{clean_rate}")
-
-        recent_rows = [r for r in rec_rows if str(r.get("time_bin_source") or "") == "RECENT_DISCOUNTED"]
-        recent_hit = sum(1 for r in recent_rows if bool(r.get("ht_goal")))
-        lines.append(f"RECENT_DISCOUNTED：{len(recent_rows)}场，命中{recent_hit}场")
-        noise_event_cnt = sum(1 for r in attrib_rows if any(x in (r.get("event_noise") or []) for x in ("RED_CARD", "PENALTY", "VAR_PENALTY", "OWN_GOAL")))
-        lines.append(f"红牌/点球/乌龙干扰：{noise_event_cnt}场")
-        lines.append("")
-        lines.append("昨日归因维度：")
-        for k in ["MODEL_FEATURE", "TIME_DISTRIBUTION", "MATCH_FLOW", "MARKET_SIGNAL", "EVENT_NOISE", "CONTEXT_NOISE", "WEATHER_NOISE", "LINEUP_CHANGE", "MOTIVATION_MISREAD", "DATA_QUALITY", "NORMAL_VARIANCE"]:
-            lines.append(f"{k}：{root.get(k, 0)}场")
+        guard_status = guard.get("guard_status", "MISSING")
+        lines.append(f"V4正式复盘未完成，等待复盘链路（guard_status={guard_status}）")
+        # 不生成 A/B/C 命中率
     lines.append(sep)
 
-    if attrib_rows:
-        anomalies = []
-        for r in attrib_rows:
-            diag = str(r.get("diagnosis") or "")
-            if diag in ("NOISY_LOSS", "NOISY_WIN") or str(r.get("model_result")) == "MODEL_SKIP_BACKFIRE":
-                anomalies.append(r)
+    # 异常样本 — 仅来自 review_structured，不来自 attribution
+    anomaly_rows = []
+    struct_data = _load_json(review_struct_path, {})
+    if struct_data:
+        anomaly_rows = struct_data.get("anomalies", struct_data.get("flagged", [])) or []
+    if anomaly_rows:
         lines.append("")
         lines.append("⚠️ 昨日异常样本")
-        if anomalies:
-            for idx, r in enumerate(anomalies[:3], 1):
+        if anomaly_rows:
+            for idx, r in enumerate(anomaly_rows[:3], 1):
                 reason = ", ".join((r.get("event_noise") or [])[:2]) or "无明显事件噪音"
                 lines.append(
                     f"{idx}. {team_name_cn(r.get('home') or '-')} vs {team_name_cn(r.get('away') or '-')}\n"

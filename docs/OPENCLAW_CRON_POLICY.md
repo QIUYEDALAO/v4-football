@@ -41,6 +41,16 @@
 
 ---
 
+## 强校验规则
+
+check_cron_policy.py 强校验要求：
+- 19项必要任务必须全部存在且名称精确匹配
+- 核心时间链路（12:10/12:35/13:00/13:15/14:05）expr精确匹配
+- 任何缺失或时间不匹配 → status=FAIL
+- 全部 delivery.mode=none
+- announce=0
+- 禁止命令出现 → BLOCKER
+
 ## 中午链路规则
 
 - V2/V4 结算不并发；
@@ -49,6 +59,9 @@
 - 不允许 announce；
 - 不允许 agentTurn 自由摘要；
 - SYS汇总只读正式文件，不自由总结。
+- SYS汇总 V4路径：v4_review_qq + v4_review_guard_qq + v4_review_structured（非 v4_openclaw_brief）
+- SYS汇总 V2路径：data/paper_trading/verified_{date}.json
+- V4扫描简报昨日验证来源：仅限 review_guard PASS 的 review_qq 摘要，不得使用 validation/attribution 全量样本反推
 
 ---
 

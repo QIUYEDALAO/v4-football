@@ -41,6 +41,36 @@ def format_qq(date_str: str) -> str:
     L.append(f"扫描{_num('全量扫描')}场 | A{_num('A级强推荐')} B{_num('B级达标推荐')} C{_num('C级观察')} 跳{_num('HT_SKIP跳过')} | 覆盖{_num('A+B覆盖率')}")
     L.append(SEP)
     
+    # A级 cards
+    a_parts = full.split("A级上半场强推荐")
+    a_pairs_all = []
+    a_ht_all = []
+    a_rate_all = []
+    a_goal_all = []
+    a_script_all = []
+    for part in a_parts[1:]:
+        end = part.find("B级上半场达标推荐")
+        if end < 0:
+            end = part.find("━━")
+        chunk = part[:end] if end > 0 else part[:300]
+        pair = re.search(r"(.+?) vs (.+?)\n", chunk)
+        ht = re.search(r"HT评分 (\d+)", chunk)
+        rate = re.search(r"HT有球率 (\d+%)", chunk)
+        goal = re.search(r"场均HT进球 ([\d.]+)", chunk)
+        script = re.search(r"剧本：(.+)", chunk)
+        if pair:
+            a_pairs_all.append((pair.group(1).strip(), pair.group(2).strip()))
+            a_ht_all.append(ht.group(1) if ht else "?")
+            a_rate_all.append(rate.group(1) if rate else "?")
+            a_goal_all.append(goal.group(1) if goal else "?")
+            a_script_all.append(script.group(1).strip() if script else "?")
+    if a_pairs_all:
+        L.append(f"🔥【A级{_num('A级强推荐')}场】")
+        for i in range(len(a_pairs_all)):
+            h, a = a_pairs_all[i]
+            L.append(f"{_cn(h)} vs {_cn(a)} | HT{a_ht_all[i]} {a_rate_all[i]} {a_goal_all[i]}球 | {a_script_all[i]}")
+        L.append(SEP)
+    
     # B级 cards - each match has its own header
     b_all = full  # search entire text for all vs lines in B context
     b_pairs_all = []
@@ -88,7 +118,7 @@ def format_qq(date_str: str) -> str:
         L.append(SEP)
     
     # 昨日验证
-    val_section = full.split("昨日V4验证")[1].split("━━")[0] if "昨日V4验证" in full else ""
+    val_section = full.split("昨日验证（V4复盘）")[1].split("━━")[0] if "昨日验证（V4复盘）" in full else ""
     v_lines = re.findall(r"(A级|B级|C级|SKIP反杀率)[：:]\s*(.+)", val_section)
     L.append("【昨日验证】")
     if v_lines:
@@ -103,12 +133,18 @@ def format_qq(date_str: str) -> str:
     L.append(SEP)
     
     # 结论
-    if _num('B级达标推荐') != "0":
-        L.append(f"B级{_num('B级达标推荐')}场，重点关注阿治曼vs迪拜胜利、维拉vs利物浦")
+    a_count = _num('A级强推荐')
+    b_count = _num('B级达标推荐')
+    if a_count != "0" and a_pairs_all:
+        top2 = "、".join(f"{_cn(h)} vs {_cn(a)}" for h,a in a_pairs_all[:2])
+        L.append(f"A{a_count}B{b_count}场，重点A级前2：{top2}")
+    elif b_count != "0":
+        top2_b = "、".join(f"{_cn(h)} vs {_cn(a)}" for h,a in b_pairs_all[:2]) if b_pairs_all else "见上方B级"
+        L.append(f"B级{b_count}场，重点关注{top2_b}")
     else:
         L.append("无A/B主推荐，仅C级观察")
     
-    L.append("⚠️V4最终结论 | 禁止追加V33/旧口径")
+    L.append("⚠️V4最终结论 | 以V4口径为准，禁止追加旧口径")
     
     result = "\n".join(L)
     qq_path = REPORT_DIR / f"v4_openclaw_brief_qq_{key}.txt"
