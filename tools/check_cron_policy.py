@@ -206,9 +206,6 @@ def main():
         result["notification_gaps"].append("SYS-架构审计守卫: BLOCKER通知配置")
 
     # Check V4复盘 pipeline completeness
-    # v4_review_with_watchdog.py 内部已集成 validator + attribution + readiness检查
-    # renderer/guard 在 watchdog 内部通过 subprocess 调用或跳过
-    # Cron Policy 只检查 watchdog 存在性，不检查内部子进程（已封装）
     result["v4_review_pipeline_issues"] = []
     v4_review_job = None
     for j in jobs:
@@ -222,6 +219,25 @@ def main():
     else:
         result["v4_review_pipeline_issues"].append("V4每日复盘: 任务缺失")
 
+    # Check SYS每日结算汇总 — 必须使用直接脚本，不得 agentTurn 自由分析
+    result["sys_summary_issues"] = []
+    sys_summary_job = None
+    for j in jobs:
+        if j.get("name") == "SYS每日结算汇总":
+            sys_summary_job = j
+            break
+    if sys_summary_job:
+        msg = sys_summary_job.get("payload", {}).get("message", "")
+        if "sys_daily_settlement_summary" not in msg:
+            result["sys_summary_issues"].append("SYS汇总: 未使用 sys_daily_settlement_summary.py 直接脚本")
+        if "memory_search" in msg:
+            result["sys_summary_issues"].append("SYS汇总: 包含 memory_search（禁止）")
+        dm = sys_summary_job.get("delivery", {}).get("mode")
+        if dm != "none":
+            result["sys_summary_issues"].append(f"SYS汇总: delivery.mode={dm}（必须none）")
+    else:
+        result["sys_summary_issues"].append("SYS每日结算汇总: 任务缺失")
+
     # Determine status
     if result["forbidden_found"]:
         result["status"] = "BLOCKER"
@@ -231,6 +247,8 @@ def main():
         result["status"] = "FAIL"  # 核心链路异常 → FAIL
     elif result["delivery_mode_issues"]:
         result["status"] = "FAIL"  # announce残留或非none模式 → FAIL
+    elif result["sys_summary_issues"]:
+        result["status"] = "FAIL"  # SYS汇总禁止agentTurn
     elif result["v4_review_pipeline_issues"]:
         result["status"] = "WARNING_BLOCKER"  # V4复盘流水线不完整
     elif result["timeout_issues"]:
@@ -264,6 +282,9 @@ def main():
     if result["delivery_mode_issues"]:
         for d in result["delivery_mode_issues"]:
             print(f"  ❌ 投递模式: {d}")
+    if result["sys_summary_issues"]:
+        for s in result["sys_summary_issues"]:
+            print(f"  ❌ SYS汇总: {s}")
     if result["v4_review_pipeline_issues"]:
         for v in result["v4_review_pipeline_issues"]:
             print(f"  🟠 V4复盘流水线: {v}")

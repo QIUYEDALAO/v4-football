@@ -15,6 +15,13 @@
 - 当前阶段：纸盘验证，生产观察期
 - 本周末：周六高比赛量重点观察
 - **生产链路收口修复完成**：12:10 V2每日结算 cron 恢复 + SYS汇总路径修正 + V4 昨日验证来源修正
+- **13:00 SYS每日结算汇总首跑失败**（agentTurn memory_search 超时，已推送错误 MISSING 摘要）
+  - 该摘要作废，不进入任何统计
+  - 后续 SYS汇总必须改为直接脚本，不得使用 agentTurn
+- **V4复盘日期语义问题**：12:35 复盘全部 pending，初步判断 API_KEY 子进程继承问题
+  - readiness 状态=REVIEW_STATUS_UNVERIFIED
+  - secrets.py + net_utils 已修复支持 OPENCLAW_APIFOOTBALL_KEY fallback
+  - watchdog 已修复显式传递 env 给子进程
 
 ---
 
