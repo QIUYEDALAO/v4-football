@@ -9,15 +9,13 @@
       "report_type": "daily_review",
       "channel": "full",
       "required_sections": [
-        "正式推荐",
+        "正式输出",
         "逐场验证",
-        "A/B汇总",
-        "C/SKIP汇总",
-        "时间分布",
+        "昨日汇总",
         "赛前剧本验证",
-        "赛前信号",
-        "天气因子",
-        "滚动统计",
+        "时间分布",
+        "赛前信号复盘",
+        "天气/场地因子",
         "累计归因",
         "结论"
       ],
@@ -38,7 +36,11 @@
       "renderer": "v4_review_renderer.py --mode full",
       "guard_rules": "v4_review_guard.py --mode full",
       "output_path_pattern": "data/daily_reports/v4_review_full_{date}.txt",
-      "push_marker_path_pattern": "data/runtime/status/v4_review_push_{date}.json"
+      "push_marker_path_pattern": "data/runtime/status/v4_review_push_{date}.json",
+      "_audit": {
+        "missing": [],
+        "status": "PASS"
+      }
     },
     {
       "template_id": "v4_daily_review_qq_v1",
@@ -47,9 +49,11 @@
       "report_type": "daily_review",
       "channel": "qq",
       "required_sections": [
-        "正式推荐",
-        "A/B逐场验证",
+        "正式输出",
+        "逐场验证",
         "C/SKIP汇总",
+        "赛前剧本验证",
+        "时间分布",
         "滚动观察",
         "结论"
       ],
@@ -74,7 +78,11 @@
       "guard_rules": "v4_review_guard.py --mode qq",
       "output_path_pattern": "data/daily_reports/v4_review_qq_{date}.txt",
       "push_marker_path_pattern": "data/runtime/status/v4_review_push_{date}.json",
-      "notes": "C=0/SKIP=0时renderer自动输出固定文本，不报MISSING_SECTION"
+      "notes": "C=0/SKIP=0时renderer自动输出固定文本，不报MISSING_SECTION",
+      "_audit": {
+        "missing": [],
+        "status": "PASS"
+      }
     },
     {
       "template_id": "v4_scan_brief_qq_v1",
@@ -83,11 +91,12 @@
       "report_type": "scan_brief",
       "channel": "qq",
       "required_sections": [
-        "标题",
+        "扫描",
         "A级",
         "B级",
         "C级",
         "跳过原因",
+        "昨日验证",
         "结论"
       ],
       "optional_sections": [
@@ -117,8 +126,7 @@
       "report_type": "daily_pool_summary",
       "channel": "qq",
       "required_sections": [
-        "标题",
-        "扫描数",
+        "扫描",
         "BET_LOCKED",
         "WATCH_EARLY",
         "CANDIDATE",
@@ -140,7 +148,11 @@
       "renderer": "v2_daily_pool_summary.py --push qq",
       "guard_rules": "check_cron_policy + QQ_DELIVERY_CONTRACT",
       "output_path_pattern": "data/runtime/status/v2_daily_pool_summary_{date}.json",
-      "push_marker_path_pattern": "data/runtime/status/v2_daily_pool_push_{date}.json"
+      "push_marker_path_pattern": "data/runtime/status/v2_daily_pool_push_{date}.json",
+      "_audit": {
+        "missing": [],
+        "status": "PASS"
+      }
     },
     {
       "template_id": "v2_daily_settlement_qq_v1",
@@ -149,10 +161,10 @@
       "report_type": "daily_settlement",
       "channel": "qq",
       "required_sections": [
-        "标题",
         "BET_LOCKED",
-        "命中率",
-        "PnL"
+        "命中",
+        "PnL",
+        "状态"
       ],
       "optional_sections": [
         "CLV"
@@ -168,7 +180,11 @@
       "renderer": "v2_settle_with_watchdog.py + systemEvent",
       "guard_rules": "QQ_DELIVERY_CONTRACT",
       "output_path_pattern": "data/paper_trading/verified_{date}.json",
-      "push_marker_path_pattern": "data/runtime/status/v2_settle_push_{date}.json"
+      "push_marker_path_pattern": "data/runtime/status/v2_settle_push_{date}.json",
+      "_audit": {
+        "missing": [],
+        "status": "PASS"
+      }
     },
     {
       "template_id": "sys_daily_summary_qq_v1",
@@ -177,9 +193,8 @@
       "report_type": "daily_summary",
       "channel": "qq",
       "required_sections": [
-        "标题",
-        "V2结算",
-        "V4复盘",
+        "V2昨日结算",
+        "V4昨日复盘",
         "今日准备"
       ],
       "optional_sections": [
@@ -199,7 +214,11 @@
       "renderer": "sys_daily_settlement_summary.py --push qq",
       "guard_rules": "check_cron_policy + QQ_DELIVERY_CONTRACT",
       "output_path_pattern": "data/runtime/status/sys_daily_summary_{date}.json",
-      "push_marker_path_pattern": "data/runtime/status/sys_daily_summary_{date}.json"
+      "push_marker_path_pattern": "data/runtime/status/sys_daily_summary_{date}.json",
+      "_audit": {
+        "missing": [],
+        "status": "PASS"
+      }
     },
     {
       "template_id": "alert_system_event_qq_v1",
@@ -208,10 +227,9 @@
       "report_type": "alert",
       "channel": "qq",
       "required_sections": [
-        "标题",
         "系统",
         "状态",
-        "异常列表",
+        "异常",
         "动作"
       ],
       "optional_sections": [
@@ -230,7 +248,11 @@
       "renderer": "alert_system_event.py --push qq",
       "guard_rules": "QQ_DELIVERY_CONTRACT",
       "output_path_pattern": "data/runtime/status/alert_{date}_{type}.json",
-      "push_marker_path_pattern": "data/runtime/status/alert_push_{date}_{type}.json"
+      "push_marker_path_pattern": "data/runtime/status/alert_push_{date}_{type}.json",
+      "_audit": {
+        "missing": [],
+        "status": "PASS"
+      }
     }
   ]
 }
