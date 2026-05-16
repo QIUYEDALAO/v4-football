@@ -336,6 +336,16 @@ def main():
 
     weather_rows_or_summary = _weather_summary(matches)
 
+    # ── C/SKIP section ──
+    if c == 0 and s == 0:
+        c_skip_section = "本日无 C/SKIP 正式样本。"
+    else:
+        c_rate = summary.get("c", {}).get("rate_str", "N/A")
+        sc_rate = "N/A"
+        if skip_total and skip_total > 0:
+            sc_rate = f"{skip_correct/skip_total*100:.1f}%"
+        c_skip_section = f"A：{summary.get('a',{}).get('hit',0)}/{summary.get('a',{}).get('total',0)}｜{summary.get('a',{}).get('rate_str','N/A')}\nB：{summary.get('b',{}).get('hit',0)}/{summary.get('b',{}).get('total',0)}｜{summary.get('b',{}).get('rate_str','N/A')}\nC：{summary.get('c',{}).get('hit',0)}/{summary.get('c',{}).get('total',0)}｜{c_rate}\nSKIP正确：{skip_correct}/{skip_total}｜{sc_rate}\nSKIP反杀：{skip_backfire}/{skip_total}｜{skip_backfire_rate}"
+
     # ── Build replacements ──
     r = {
         "{{review_date}}": data.get("review_date", args.date),
@@ -343,6 +353,7 @@ def main():
         "{{b_count}}": str(b),
         "{{c_count}}": str(c),
         "{{skip_count}}": str(s),
+        "{{c_skip_section}}": c_skip_section,
         "{{ab_count}}": str(ab_count),
         "{{recommendation_summary}}": rec_summary,
         "{{official_brief_file}}": data.get("official_source", f"v4_openclaw_brief_{args.date}.txt"),

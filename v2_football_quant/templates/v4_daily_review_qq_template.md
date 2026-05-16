@@ -11,17 +11,14 @@ Guard：{{guard_status}}
 ━━━━━━━━━━━━━━
 
 【逐场验证】
+{{pre_match_note}}
 
 {{match_rows}}
 
 ━━━━━━━━━━━━━━
 
-【昨日汇总】
-A：{{a_hit}}/{{a_total}}｜{{a_hit_rate}}
-B：{{b_hit}}/{{b_total}}｜{{b_hit_rate}}
-C：{{c_hit}}/{{c_total}}｜{{c_hit_rate}}
-SKIP正确：{{skip_correct}}/{{skip_total}}｜{{skip_correct_rate}}
-SKIP反杀：{{skip_backfire}}/{{skip_total}}｜{{skip_backfire_rate}}
+【C/SKIP汇总】
+{{c_skip_section}}
 
 说明：{{daily_summary_note}}
 ━━━━━━━━━━━━━━
@@ -42,14 +39,14 @@ SKIP反杀：{{skip_backfire}}/{{skip_total}}｜{{skip_backfire_rate}}
 ━━━━━━━━━━━━━━
 
 【赛前剧本验证】
-SCRIPT_HIT：{{script_hit}}场
-SCRIPT_PARTIAL：{{script_partial}}场
-SCRIPT_MISS：{{script_miss}}场
-NO_HT_GOAL：{{no_ht_goal_to_validate}}场
-SCRIPT_NA：{{script_not_available}}场
+剧本命中：{{script_hit}}场
+部分命中：{{script_partial}}场
+剧本偏差：{{script_miss}}场
+无HT球可验证：{{no_ht_goal_to_validate}}场
+剧本未存档：{{script_not_available}}场
 
 偏差方向：
-MATCHED：{{matched_count}}
+符合：{{matched_count}}
 偏早：{{earlier_than_expected}}
 偏晚：{{later_than_expected}}
 过严：{{too_strict_script}}
@@ -76,7 +73,7 @@ A/B样本：{{ab_sample_count}}场
 说明：天气只作归因辅助，不参与重算评级。
 ━━━━━━━━━━━━━━
 
-【滚动统计】
+【滚动观察】
 近7天 A/B：{{rolling_7d_ab}}
 近7天 C级：{{rolling_7d_c}}
 近7天 SKIP反杀：{{rolling_7d_skip_backfire}}
@@ -90,13 +87,13 @@ A/B样本：{{ab_sample_count}}场
 ━━━━━━━━━━━━━━
 
 【累计归因】
-MODEL_VALID：{{model_valid_count}}
-MODEL_TOO_STRICT：{{model_too_strict_count}}
-MODEL_OVERCONFIDENT：{{model_overconfident_count}}
-NOISY_WIN：{{noisy_win_count}}
-NOISY_LOSS：{{noisy_loss_count}}
-DATA_QUALITY_ISSUE：{{data_quality_issue_count}}
-WEATHER_RISK：{{weather_risk_count}}
+模型有效：{{model_valid_count}}
+模型过严：{{model_too_strict_count}}
+模型过度自信：{{model_overconfident_count}}
+噪音命中：{{noisy_win_count}}
+噪音失败：{{noisy_loss_count}}
+数据质量问题：{{data_quality_issue_count}}
+天气风险：{{weather_risk_count}}
 
 重点：{{diagnosis_note}}
 ━━━━━━━━━━━━━━
