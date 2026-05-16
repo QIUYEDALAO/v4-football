@@ -73,6 +73,17 @@ TIMEOUT_RULES = {
 }
 
 
+def _has_direct_renderer_call(msg: str) -> bool:
+    """检查消息中是否有 renderer 直接调用或 watchdog 内部调用"""
+    # watchdog 如果内部调用 renderer 也算覆盖
+    return "v4_review_renderer" in msg
+
+
+def _has_direct_guard_call(msg: str) -> bool:
+    """检查消息中是否有 guard 直接调用或 watchdog 内部调用"""
+    return "v4_review_guard" in msg
+
+
 def main():
     cron_path = os.path.expanduser("~/.openclaw/cron/jobs.json")
     if not os.path.exists(cron_path):
@@ -194,6 +205,23 @@ def main():
     if not sys_guard_has_conditional and sys_guard_found:
         result["notification_gaps"].append("SYS-架构审计守卫: BLOCKER通知配置")
 
+    # Check V4复盘 pipeline completeness
+    # v4_review_with_watchdog.py 内部已集成 validator + attribution + readiness检查
+    # renderer/guard 在 watchdog 内部通过 subprocess 调用或跳过
+    # Cron Policy 只检查 watchdog 存在性，不检查内部子进程（已封装）
+    result["v4_review_pipeline_issues"] = []
+    v4_review_job = None
+    for j in jobs:
+        if j.get("name") == "V4每日复盘":
+            v4_review_job = j
+            break
+    if v4_review_job:
+        msg = v4_review_job.get("payload", {}).get("message", "")
+        if "v4_review_with_watchdog" not in msg:
+            result["v4_review_pipeline_issues"].append("V4每日复盘: 缺少 v4_review_with_watchdog")
+    else:
+        result["v4_review_pipeline_issues"].append("V4每日复盘: 任务缺失")
+
     # Determine status
     if result["forbidden_found"]:
         result["status"] = "BLOCKER"
@@ -203,6 +231,8 @@ def main():
         result["status"] = "FAIL"  # 核心链路异常 → FAIL
     elif result["delivery_mode_issues"]:
         result["status"] = "FAIL"  # announce残留或非none模式 → FAIL
+    elif result["v4_review_pipeline_issues"]:
+        result["status"] = "WARNING_BLOCKER"  # V4复盘流水线不完整
     elif result["timeout_issues"]:
         result["status"] = "WARNING"
     elif result["notification_gaps"]:
@@ -234,6 +264,9 @@ def main():
     if result["delivery_mode_issues"]:
         for d in result["delivery_mode_issues"]:
             print(f"  ❌ 投递模式: {d}")
+    if result["v4_review_pipeline_issues"]:
+        for v in result["v4_review_pipeline_issues"]:
+            print(f"  🟠 V4复盘流水线: {v}")
     if result["forbidden_found"]:
         for f in result["forbidden_found"]:
             print(f"  🔴 禁止命令: {f}")
