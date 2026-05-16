@@ -4,13 +4,15 @@ OpenClaw 是系统操作员，不是自由分析员。
 
 ---
 
-## 多 Agent 分工（第一阶段）
+## 多 Agent 分工（第二阶段 — 5 Agent 生产角色）
 
 | Agent | ID | 职责 | 权限范围 |
 |:------|:---|:-----|:---------|
-| **ClawOps** | main | 系统总控，执行脚本，推送正式报告 | read, exec固定脚本 |
-| **AlertAgent** | alertagent | 异常通知员：报告 FAILED/TIMEOUT/BLOCKER | read状态文件, systemEvent |
-| **ReportAgent** | reportagent | 报告格式员：QQ/iPhone排版优化 | read正式报告, write排版文件 |
+| **ClawOps** | main | 系统总控，执行脚本，状态检查，文件生成。**不得直接向报告QQBOT发送。** | read, exec固定脚本 |
+| **ReportAgent** | reportagent | 报告格式员：QQ/iPhone排版优化。**不得改数据，不得直接向报告QQBOT发送。** | read正式报告, write排版文件 |
+| **AlertAgent** | alertagent | 异常通知员：TIMEOUT/FAILED/BLOCKER/API_KEY/QQ_DELIVERY_FAILED。**不得直接向报告QQBOT发送。** | read状态文件, systemEvent |
+| **GuardAgent** | guardagent | 审计守卫：Cron Policy、Architecture Audit、模板guard、manifest scope、invalid source、marker合规。**只拦截违规，不改内容，不推QQ。** | read所有文件, write audit结果 |
+| **SafeOutboundSender** | sendagent | **唯一允许向报告QQBOT发送固定模板报告的出口。** 只能发送 template registry命中 + renderer输出 + guard PASS + ReportAgent PASS + route marker允许的固定文本。**禁止调用LLM/announce/agentTurn/wake/main session。** | read渲染结果, send to qqbot |
 
 ### 路由规则
 
@@ -29,6 +31,12 @@ ClawOps 根据任务类型调用：
 - iPhone 版格式调整
 - 日报/周报/月报中文队名映射
 - 长列表压缩
+
+**QQ报告发送类 → SafeOutboundSender**
+- 唯一允许向报告 QQBOT（appid=1904021677）发送的出口
+- 发送前置条件：template registry命中 + renderer输出 + guard PASS + ReportAgent PASS + route marker allowed_to_push=true
+- 禁止调用 LLM / memory_search / announce / agentTurn / wake / main session
+- 不改文本、不自由总结
 
 ### QQ Bot 规则
 - ClawOps 是唯一正式推送入口
