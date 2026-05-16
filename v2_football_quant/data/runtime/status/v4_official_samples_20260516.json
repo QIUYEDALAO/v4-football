@@ -1,0 +1,46 @@
+{
+  "date": "20260516",
+  "manifest_status": "INCOMPLETE",
+  "official_source": "v4_openclaw_brief_20260516.txt",
+  "source_hash": "d94e794bd51a72d9",
+  "created_at": "2026-05-16T16:15:30.569768+08:00",
+  "boss_confirmed": true,
+  "official_counts": {
+    "A": 8,
+    "B": 9,
+    "C": 32,
+    "SKIP": 23
+  },
+  "fixtures": [
+    {
+      "fixture_id": "1522809",
+      "home": "Kauno Žalgiris",
+      "away": "Šiauliai",
+      "league": "立陶甲",
+      "kickoff": "05-16 19:15",
+      "official_bucket": "A",
+      "score_pre": "71",
+      "ht_rate_pre": "70",
+      "avg_ht_pre": "1.20",
+      "script_type_pre": "中后段发力型",
+      "time_distribution_pre": "DATA_UNAVAILABLE",
+      "risk_pre": "DATA_UNAVAILABLE"
+    },
+    {
+      "fixture_id": "1540032",
+      "home": "凯尔特人",
+      "away": "哈茨",
+      "league": "苏超",
+      "kickoff": "05-16 19:30",
+      "official_bucket": "B",
+      "score_pre": "66",
+      "ht_rate_pre": "70",
+      "avg_ht_pre": "1.20",
+      "script_type_pre": "中段发力型",
+      "time_distribution_pre": "DATA_UNAVAILABLE",
+      "risk_pre": "DATA_UNAVAILABLE"
+    }
+  ],
+  "reason": "FIXTURE_DETAIL_INCOMPLETE: 72 fixtures from scan_date=20260516 not yet parsed",
+  "manifest_scope": "FULL_OFFICIAL"
+}

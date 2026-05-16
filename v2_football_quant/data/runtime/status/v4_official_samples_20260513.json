@@ -1,0 +1,45 @@
+{
+  "date": "20260513",
+  "manifest_status": "FIXTURE_LEVEL",
+  "official_source": "v4_openclaw_brief_20260513.txt",
+  "source_hash": "a77deb8780f9396f",
+  "created_at": "2026-05-16T16:15:30.569768+08:00",
+  "boss_confirmed": true,
+  "official_counts": {
+    "A": 1,
+    "B": 1,
+    "C": 0,
+    "SKIP": 0
+  },
+  "fixtures": [
+    {
+      "fixture_id": "1490292",
+      "home": "西雅图海湾人",
+      "away": "圣何塞地震",
+      "league": "美职业",
+      "kickoff": "05-14 09:30",
+      "official_bucket": "A",
+      "score_pre": "70",
+      "ht_rate_pre": "80",
+      "avg_ht_pre": "1.30",
+      "script_type_pre": "开局冲击型",
+      "time_distribution_pre": "DATA_UNAVAILABLE",
+      "risk_pre": "DATA_UNAVAILABLE"
+    },
+    {
+      "fixture_id": "1542830",
+      "home": "布拉格斯拉维亚",
+      "away": "亚布洛内茨",
+      "league": "捷克甲",
+      "kickoff": "05-14 02:00",
+      "official_bucket": "B",
+      "score_pre": "71",
+      "ht_rate_pre": "90",
+      "avg_ht_pre": "1.90",
+      "script_type_pre": "中后段发力型",
+      "time_distribution_pre": "DATA_UNAVAILABLE",
+      "risk_pre": "DATA_UNAVAILABLE"
+    }
+  ],
+  "manifest_scope": "FULL_OFFICIAL"
+}

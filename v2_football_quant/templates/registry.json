@@ -1,0 +1,126 @@
+{
+  "created_at": "2026-05-16T17:02:05.504258+08:00",
+  "templates": [
+    {
+      "template_id": "v4_daily_review_full_v1",
+      "system": "V4",
+      "report_type": "daily_review",
+      "channel": "full",
+      "required_fields": [
+        "review_date",
+        "official_counts",
+        "matches",
+        "summary",
+        "diagnosis_summary"
+      ],
+      "allowed_sources": [
+        "v4_official_samples_{date}.json",
+        "v4_review_structured_{date}.json"
+      ],
+      "forbidden_sources": [
+        "scout_v4",
+        "validation",
+        "attribution",
+        "invalid_reports"
+      ],
+      "renderer": "v4_review_renderer.py --mode full",
+      "guard": "v4_review_guard.py --mode full"
+    },
+    {
+      "template_id": "v4_daily_review_qq_v1",
+      "system": "V4",
+      "report_type": "daily_review",
+      "channel": "qq",
+      "required_fields": [
+        "official_counts",
+        "matches",
+        "summary",
+        "script_validation"
+      ],
+      "allowed_sources": [
+        "v4_official_samples",
+        "v4_review_structured",
+        "v4_review_readiness",
+        "v4_review_guard_qq"
+      ],
+      "forbidden_sources": [
+        "scout_v4",
+        "validation",
+        "attribution",
+        "lookahead_brief"
+      ],
+      "renderer": "v4_review_renderer.py --mode qq",
+      "guard": "v4_review_guard.py --mode qq",
+      "notes": "C=0/SKIP=0应输出固定文本，不报MISSING_SECTION"
+    },
+    {
+      "template_id": "v4_scan_brief_qq_v1",
+      "system": "V4",
+      "report_type": "scan_brief",
+      "channel": "qq",
+      "required_fields": [
+        "official_counts",
+        "A_detail",
+        "B_detail",
+        "skip_reasons"
+      ],
+      "allowed_sources": [
+        "v4_openclaw_brief_qq",
+        "v4_review_readiness"
+      ],
+      "forbidden_sources": [
+        "validation",
+        "attribution",
+        "old口径"
+      ],
+      "renderer": "v4_scan_and_brief.py",
+      "guard": "content_guard"
+    },
+    {
+      "template_id": "v2_daily_pool_summary_qq_v1",
+      "system": "V2",
+      "report_type": "daily_pool_summary",
+      "channel": "qq",
+      "required_fields": [
+        "scan_count",
+        "BET_LOCKED",
+        "WATCH_EARLY",
+        "CANDIDATE"
+      ],
+      "allowed_sources": [
+        "selected_fixtures",
+        "predictions",
+        "task_status"
+      ],
+      "forbidden_sources": [
+        "validation",
+        "daily.md_as_push"
+      ],
+      "renderer": "v2_daily_pool_summary.py",
+      "guard": "Cron Policy"
+    },
+    {
+      "template_id": "sys_daily_summary_qq_v1",
+      "system": "SYS",
+      "report_type": "daily_summary",
+      "channel": "qq",
+      "required_fields": [
+        "v2_status",
+        "v4_status",
+        "today_ready"
+      ],
+      "allowed_sources": [
+        "verified",
+        "review_readiness",
+        "task_status"
+      ],
+      "forbidden_sources": [
+        "agentTurn",
+        "memory_search",
+        "announce"
+      ],
+      "renderer": "sys_daily_settlement_summary.py",
+      "guard": "check_cron_policy"
+    }
+  ]
+}

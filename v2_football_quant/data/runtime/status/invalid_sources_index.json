@@ -1,0 +1,25 @@
+{
+  "created_at": "2026-05-16T16:40:00+08:00",
+  "invalid_sources": [
+    {
+      "path": "archive/invalid_reports/20260515/",
+      "reason": "partial validation misreported as final review",
+      "forbidden_for": ["final_review", "rolling_stats", "qq_report", "monthly_report"]
+    },
+    {
+      "path": "data/daily_reports/v4_ht_recommend_validation_20260515.json",
+      "reason": "contains individual classification, not official scope. A6/B8 from explain_match() is not official A/B/C/SKIP.",
+      "forbidden_for": ["official_scope", "rolling_stats_scope"]
+    },
+    {
+      "path": "data/daily_reports/v4_openclaw_brief_20260515.txt",
+      "reason": "lookahead scan batch, contains cross-date fixtures (May 16 matches mixed in)",
+      "forbidden_for": ["review_scope_20260515"]
+    },
+    {
+      "path": "v4_ht_recommend_validation_20260515.json → fixture_id=1544854 CF Pachuca vs U.N.A.M. - Pumas",
+      "reason": "not official 20260515 3B. Appeared in contaminated B=8 lookahead brief.",
+      "forbidden_for": ["v4_review_20260515"]
+    }
+  ]
+}

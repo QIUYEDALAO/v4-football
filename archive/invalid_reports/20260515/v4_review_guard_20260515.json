@@ -1,0 +1,11 @@
+{
+  "date": "20260515",
+  "guard_status": "BLOCKER",
+  "issues": [
+    "MATCH_COUNT_MISMATCH: 37 vs 76",
+    "MISSING_SECTION: C/SKIP汇总",
+    "MISSING_SECTION: 滚动观察",
+    "MISSING_ROUTE_MARKER"
+  ],
+  "checked_at": "2026-05-16T15:57:43.545755"
+}

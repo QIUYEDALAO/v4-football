@@ -1,0 +1,61 @@
+{
+  "date": "20260515",
+  "manifest_status": "FIXTURE_LEVEL",
+  "manifest_scope": "FULL_OFFICIAL",
+  "official_source": "v4_openclaw_brief_20260514.txt + BOSS direct confirmation",
+  "created_at": "2026-05-16T16:40:00+08:00",
+  "boss_confirmed": true,
+  "official_counts": {
+    "A": 0,
+    "B": 3,
+    "C": 0,
+    "SKIP": 0
+  },
+  "fixtures": [
+    {
+      "fixture_id": "1544963",
+      "home": "阿治曼",
+      "away": "迪拜胜利",
+      "league": "阿联酋超",
+      "kickoff": "DATA_UNAVAILABLE",
+      "official_bucket": "B",
+      "score_pre": "71",
+      "ht_rate_pre": "80",
+      "avg_ht_pre": "2.00",
+      "script_type_pre": "中后段发力型",
+      "time_distribution_pre": "0-15m 40% | 16-30m 20% | 31-45m 40%",
+      "risk_pre": "DATA_UNAVAILABLE",
+      "source": "BOSS direct confirmation"
+    },
+    {
+      "fixture_id": "1544965",
+      "home": "瓦斯尔",
+      "away": "伊蒂哈德卡尔巴",
+      "league": "阿联酋超",
+      "kickoff": "DATA_UNAVAILABLE",
+      "official_bucket": "B",
+      "score_pre": "62",
+      "ht_rate_pre": "60",
+      "avg_ht_pre": "0.80",
+      "script_type_pre": "中后段发力型",
+      "time_distribution_pre": "0-15m 40% | 16-30m 50% | 31-45m 50%",
+      "risk_pre": "DATA_UNAVAILABLE",
+      "source": "BOSS direct confirmation"
+    },
+    {
+      "fixture_id": "1379330",
+      "home": "阿斯顿维拉",
+      "away": "利物浦",
+      "league": "英超",
+      "kickoff": "DATA_UNAVAILABLE",
+      "official_bucket": "B",
+      "score_pre": "76",
+      "ht_rate_pre": "80",
+      "avg_ht_pre": "1.50",
+      "script_type_pre": "中后段发力型",
+      "time_distribution_pre": "0-15m 40% | 16-30m 20% | 31-45m 50%",
+      "risk_pre": "DATA_UNAVAILABLE",
+      "source": "BOSS direct confirmation"
+    }
+  ]
+}

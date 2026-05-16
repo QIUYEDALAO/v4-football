@@ -139,10 +139,7 @@ def push_to_qqbot(summary_text: str, date_key: str) -> bool:
             "target_type": "qqbot",
         }, ensure_ascii=False, indent=2), encoding="utf-8")
 
-        # 尝试通过 QQ Bot 通道发送
-        from engine import net_utils
         qq_target = "fbc6f797a5c3b6fe2680a8b25f95e143"
-        # 写入推送标记
         marker_path = STATUS_DIR / f"v2_daily_pool_push_{date_key}.json"
 
         # 检查是否可验证 QQ delivery
