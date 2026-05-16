@@ -22,11 +22,16 @@
   - readiness 状态=REVIEW_STATUS_UNVERIFIED
   - secrets.py + net_utils 已修复支持 OPENCLAW_APIFOOTBALL_KEY fallback
   - watchdog 已修复显式传递 env 给子进程
-- **V2建池 DONE 但 QQ补发失败**
-  - 13:26 V2建池 DONE，selected_fixtures 已生成
-  - 但 QQ建池摘要推送使用 agentTurn/model-call 路径，超时失败
-  - 后续必须由固定脚本 v2_daily_pool_summary.py 内部 systemEvent 推送
-  - 不得通过 agentTurn/announce/wake/临时cron 推送
+- **V2建池推送出现 P1_QQ_TARGET_MISMATCH**
+  - 首次 agentTurn/model-call 路径超时 → marker=FAILED
+  - 第二次 sessions_send 推到主会话而非 QQ Bot → marker=WRONG_TARGET
+  - 错误根因：
+    - v2_daily_pool_summary.py --push 未严格区分 qqbot target 与 main session
+    - 主会话送达不等于 QQ Bot 正式送达
+  - 修复方向：
+    - --push qq 必须显式 target qqbot
+    - 无 QQ delivery log 不得写 SENT
+    - 需可查证 delivery success + message_hash + target_type=qqbot
 - **Scheduler 文件态异常**（MEDIUM_CONTROL_PLANE_STORE_DRIFT）
   - 内存 timerArmed=true，13:15 V2建池自然触发正常
   - 但 jobs.json 上 22/22 的 nextRunAt 全部为 None（序列化异常）

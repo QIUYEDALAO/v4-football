@@ -112,39 +112,76 @@ def build_summary(date_key: str) -> dict:
     }
 
 
-def push_to_qq(summary_text: str, date_key: str) -> bool:
-    """通过 systemEvent 写入推送文件。实际发送由 Gateway 处理。"""
+def push_to_qqbot(summary_text: str, date_key: str) -> bool:
+    """推送到 QQBOT 正式通道。
+
+    QQ_DELIVERY_CONTRACT:
+    - target_type 必须 == qqbot
+    - target 必须 != agent:main:main
+    - delivery_mode 不得为 announce
+    - source 不得为 wake / agentTurn
+    - 有 delivery success log 才能写 SENT
+    - 否则写 WRONG_TARGET / QQBOT_TARGET_NOT_FOUND
+    """
+    msg_hash = hashlib.sha256(summary_text.encode()).hexdigest()[:16]
+    now = datetime.now(LOCAL_TZ)
+
+    # ── 尝试 QQBOT 正式通道 ──
+    # 写法一：写 cron/systemEvent deliverable 文件
     try:
-        msg_hash = hashlib.sha256(summary_text.encode()).hexdigest()[:16]
-        now = datetime.now(LOCAL_TZ).isoformat()
+        # 写 summary 文件（供 cron/systemEvent 通道消费）
+        summary_path = STATUS_DIR / f"v2_daily_pool_summary_{date_key}.json"
+        STATUS_DIR.mkdir(parents=True, exist_ok=True)
+        summary_path.write_text(json.dumps({
+            "summary": summary_text,
+            "message_hash": msg_hash,
+            "created_at": now.isoformat(),
+            "target_type": "qqbot",
+        }, ensure_ascii=False, indent=2), encoding="utf-8")
+
+        # 尝试通过 QQ Bot 通道发送
+        from engine import net_utils
+        qq_target = "fbc6f797a5c3b6fe2680a8b25f95e143"
+        # 写入推送标记
+        marker_path = STATUS_DIR / f"v2_daily_pool_push_{date_key}.json"
+
+        # 检查是否可验证 QQ delivery
+        # 当前架构中，纯脚本无法直接调用 QQ Bot API。
+        # 只能写 summary 文件 + marker，由 Gateway systemEvent 通道消费。
+        # 因此标记为 PENDING_QQ_CONFIRMATION，不做 SENT。
         marker = {
             "date": date_key,
             "type": "v2_daily_pool_summary",
-            "status": "SENT",
+            "status": "PENDING_QQ_CONFIRMATION",
             "delivery": "qqbot",
             "version": "v2_daily_pool_summary_v1",
             "message_hash": msg_hash,
-            "pushed_at": now,
-            "source": "direct_script_systemEvent",
+            "target_type": "qqbot",
+            "target": qq_target,
+            "source": "direct_script_qqbot",
+            "qq_delivered": False,
+            "created_at": now.isoformat(),
+            "note": "等待 QQ Bot 通道确认 delivery success 后才能更新为 SENT",
         }
-        marker_path = STATUS_DIR / f"v2_daily_pool_push_{date_key}.json"
-        STATUS_DIR.mkdir(parents=True, exist_ok=True)
         marker_path.write_text(json.dumps(marker, ensure_ascii=False, indent=2), encoding="utf-8")
-
-        # Also write summary to status file for systemEvent pickup
-        summary_path = STATUS_DIR / f"v2_daily_pool_summary_{date_key}.json"
-        summary_data = {
-            "summary": summary_text,
-            "message_hash": msg_hash,
-            "pushed_at": now,
-        }
-        summary_path.write_text(json.dumps(summary_data, ensure_ascii=False, indent=2), encoding="utf-8")
-        print(f"[PUSH] ✅ marker written: {marker_path}", flush=True)
-        print(f"[PUSH] ✅ summary file written: {summary_path}", flush=True)
-        print(f"[PUSH] ⚠️ 实际QQ发送需由 systemEvent 通道完成", flush=True)
+        print(f"[PUSH] ✅ qqbot summary file written: {summary_path}", flush=True)
+        print(f"[PUSH] ✅ qqbot push marker written (PENDING): {marker_path}", flush=True)
+        print(f"[PUSH] ⚠️ 等待 Gateway systemEvent 通道确认 delivery success", flush=True)
         return True
     except Exception as e:
-        print(f"[PUSH] ❌ write error: {e}", flush=True)
+        # 失败：写失败 marker
+        fail_marker = {
+            "date": date_key,
+            "type": "v2_daily_pool_summary",
+            "status": "QQBOT_TARGET_NOT_FOUND",
+            "delivery": "qqbot",
+            "reason": str(e)[:200],
+            "source": "direct_script_qqbot",
+            "qq_delivered": False,
+        }
+        fail_path = STATUS_DIR / f"v2_daily_pool_push_{date_key}.json"
+        fail_path.write_text(json.dumps(fail_marker, ensure_ascii=False, indent=2), encoding="utf-8")
+        print(f"[PUSH] ❌ qqbot push failed: {e}", flush=True)
         return False
 
 
@@ -152,7 +189,7 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--date", required=True, help="YYYYMMDD")
     parser.add_argument("--dry-run", action="store_true", help="仅输出，不推送")
-    parser.add_argument("--push", action="store_true", help="推送")
+    parser.add_argument("--push", choices=["qq"], help="推送目标 qq=QQBOT")
     args = parser.parse_args()
 
     date_key = str(args.date).replace("-", "")
@@ -164,13 +201,13 @@ def main():
         print()
         print("--- dry-run (no push) ---")
 
-    if args.push:
+    if args.push == "qq":
         print()
-        ok = push_to_qq(result["summary"], date_key)
+        ok = push_to_qqbot(result["summary"], date_key)
         if ok:
-            print("[PUSH] ✅ push completed")
+            print("[PUSH] ✅ qqbot push completed (pending confirmation)")
         else:
-            print("[PUSH] ❌ push failed", flush=True)
+            print("[PUSH] ❌ qqbot push failed", flush=True)
 
 
 if __name__ == "__main__":
