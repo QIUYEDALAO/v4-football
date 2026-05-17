@@ -1,31 +1,33 @@
 #!/usr/bin/env python3
-"""engine/v4_review_renderer.py — V4复盘QQ模板渲染器 v1.0
+"""engine/v4_review_renderer.py — V4复盘模板渲染器 v1.1
 
-读取 v4_review_structured_YYYYMMDD.json + templates/v4_daily_review_qq_template.md
-严格按模板渲染，禁止AI自由改结构。
+读取 v4_review_structured_YYYYMMDD.json + 模板文件，严格按模板渲染。
 
-输出：
-  data/daily_reports/v4_review_qq_YYYYMMDD.txt
+mode=full:
+  data/daily_reports/v4_review_full_YYYYMMDD.txt — 全部49场逐场展示
+
+mode=qq:
+  data/daily_reports/v4_review_qq_YYYYMMDD.txt — A/B摘要+有限高亮，C/SKIP仅汇总
+
+用法:
+  python3 engine/v4_review_renderer.py --date 20260516 --mode full
+  python3 engine/v4_review_renderer.py --date 20260516 --mode qq
 """
 
 import argparse
 import json
 import sys
+from collections import Counter
 from pathlib import Path
 
 BASE_DIR = Path(__file__).resolve().parent.parent
-TEMPLATE = BASE_DIR / "templates" / "v4_daily_review_qq_template.md"
+FULL_TEMPLATE = BASE_DIR / "templates" / "v4_daily_review_full_template.md"
+QQ_TEMPLATE = BASE_DIR / "templates" / "v4_daily_review_qq_template.md"
+QQ_BRIEF_TEMPLATE = BASE_DIR / "templates" / "v4_daily_review_qq_brief.md"
 REPORT_DIR = BASE_DIR / "data" / "daily_reports"
 
 
 # ── Display label mapping ──
-_MODEL_LABELS = {
-    "C_HIT": "C命中", "C_MISS": "C未中",
-    "SKIP_CORRECT": "SKIP正确", "SKIP_BACKFIRE": "SKIP反杀",
-    "A_HIT": "A命中", "A_MISS": "A未中",
-    "B_HIT": "B命中", "B_MISS": "B未中",
-}
-
 _DIAG_LABELS = {
     "MODEL_VALID": "模型有效",
     "MODEL_TOO_STRICT": "模型过严",
@@ -36,34 +38,19 @@ _DIAG_LABELS = {
     "CONTEXT_CHANGED": "环境变化",
 }
 
-_SCRIPT_LABELS = {
-    "SCRIPT_HIT": "剧本命中",
-    "SCRIPT_PARTIAL": "剧本部分命中",
-    "SCRIPT_MISS": "剧本偏差",
-    "SCRIPT_NOT_AVAILABLE": "剧本未存档",
-    "NO_HT_GOAL": "无HT进球",
-    "MATCHED": "匹配", "earlier_than_expected": "偏早",
-    "later_than_expected": "偏晚", "too_strict": "过严",
-}
-
 _SOURCE_LABELS = {
     "DATA_UNAVAILABLE": "数据缺失",
     "API_HALFTIME_SCORE": "API半场比分",
     "API_EVENTS": "API事件",
     "API_HALFTIME_SCORE+API_EVENTS": "API半场比分+事件",
+    "API_FIXTURES": "API数据",
     "MANUAL_CONFIRMED_BY_BOSS": "BOSS人工确认",
 }
 
 
-_SKIP_RISK_LABELS = {
-    "SKIP_BACKFIRE_FIRST": "反杀",
-}
-
-
 def _lbl(v, mapping: dict) -> str:
-    """Map an enum value to Chinese label, fallback to original."""
     if v is None:
-        return mapping.get("SCRIPT_NOT_AVAILABLE", "数据缺失")
+        return "数据缺失"
     s = str(v)
     for raw, label in mapping.items():
         if raw in s:
@@ -71,293 +58,180 @@ def _lbl(v, mapping: dict) -> str:
     return s
 
 
-def _has_prematch_data(m: dict) -> bool:
-    hv = m.get("ht_score_value")
-    hr = m.get("ht_goal_rate")
-    ah = m.get("avg_ht_goals")
-    return not (hv is None and hr is None and ah is None)
+def _strip_fid(url_or_num):
+    """Return fixture_id as string."""
+    s = str(url_or_num)
+    if "?" in s:
+        for pair in s.split("?"):
+            if "id=" in pair:
+                return pair.split("id=")[-1].strip()
+    if s.startswith("?"):
+        return s[1:]
+    return s
 
 
-def _num_emoji(n: int) -> str:
-    emojis = ["①", "②", "③", "④", "⑤", "⑥", "⑦", "⑧", "⑨", "⑩"]
-    return emojis[n] if n < len(emojis) else f"{n+1}."
-
-
-def _match_row(m: dict, idx: int) -> str:
-    num_emoji = _num_emoji(idx)
+def _match_row_full(m: dict, idx: int) -> str:
+    """Full per-match rendering (used in full report)."""
     home = m.get("home", "?")
     away = m.get("away", "?")
     league = m.get("league", "?")
-    fid = m.get("fixture_id", "?")
+    fid = _strip_fid(m.get("fixture_id", "?"))
     bucket = m.get("official_bucket", "?")
-    ht = m.get("ht_score", "?")
-    ft = m.get("ft_score", "?")
+    ht = m.get("ht_score", "数据缺失")
+    ft = m.get("ft_score", "数据缺失")
     goals = m.get("first_half_goal_minutes", [])
     g0 = m.get("goals_0_15", 0)
     g16 = m.get("goals_16_30", 0)
     g31 = m.get("goals_31_45", 0)
-    result = m.get("model_result", "?")
-    diag = m.get("diagnosis", "?")
-    ds = m.get("data_source", "?")
-    script_check = _lbl(m.get("script_check", "SCRIPT_NOT_AVAILABLE"), _SCRIPT_LABELS)
-    risk_review = m.get("risk_review", "风险数据缺失")
-    wc = m.get("weather_context", {})
-    wsrc = wc.get("weather_source", "DATA_UNAVAILABLE")
-    
-    result_cn = _lbl(result, _MODEL_LABELS)
+    result = m.get("model_result", "数据缺失")
+    diag = m.get("diagnosis", "数据缺失")
+    ds = m.get("data_source", "数据缺失")
+    script_check = m.get("script_check", "SCRIPT_NOT_AVAILABLE")
+    risk_review = m.get("risk_review", "风险数据未存档")
+
     diag_cn = _lbl(diag, _DIAG_LABELS)
     source_cn = _lbl(ds, _SOURCE_LABELS)
-    
+
     if goals:
         goals_text = "、".join(f"{g}′" for g in goals)
     else:
         goals_text = "无"
-    
-    if wsrc == "DATA_UNAVAILABLE":
-        weather_line = "天气：数据缺失"
+
+    # Clean up script/risk
+    if script_check in ("SCRIPT_NOT_AVAILABLE", "False", False, None):
+        script_text = "剧本未存档"
     else:
-        cond = wc.get("weather_condition", "未知")
-        weather_line = f"天气：{cond}"
+        script_text = str(script_check)
 
-    lines = [
-        f"{num_emoji} {home} vs {away}",
-        f"{league}｜fid={fid}",
-        f"官方：{bucket}",
-        f"赛果：HT {ht}｜FT {ft}",
-        f"进球：{goals_text}",
-        f"实际：0-15 {g0}｜16-30 {g16}｜31-45+ {g31}",
-        f"结果：{result_cn}｜{diag_cn}",
-        f"剧本：{script_check}",
-        f"风险：{risk_review}",
-        weather_line,
-        f"来源：{source_cn}",
-    ]
-    
-    result_text = "\n".join(lines)
-    if idx > 0:
-        result_text = "━" * 20 + "\n" + result_text
-    return result_text
-
-
-def _weather_summary(matches: list) -> str:
-    """Generate weather rows or a summary line."""
-    unavail_count = 0
-    rows = []
-    for i, m in enumerate(matches):
-        wc = m.get("weather_context", {})
-        source = wc.get("weather_source", "DATA_UNAVAILABLE")
-        if source == "DATA_UNAVAILABLE":
-            unavail_count += 1
-        else:
-            cond = wc.get("weather_condition", "未知")
-            temp = wc.get("temperature_c", "?")
-            pitch = wc.get("pitch_condition", "未知")
-            risk = wc.get("weather_risk_level", "UNKNOWN")
-            note = wc.get("weather_note", "")
-            num = _num_emoji(i)
-            rows.append(f"{num} {m['home']} vs {m['away']}\n天气：{cond}｜{temp}℃\n场地：{pitch}\n风险：{risk}\n{note}")
-
-    if rows:
-        return "\n\n".join(rows)
-
-    if unavail_count == len(matches):
-        return f"全部{len(matches)}场天气数据缺失，不参与本日归因"
-
-    return f"{unavail_count}/{len(matches)}场天气数据缺失，其余不参与归因"
-
-
-def _str_or_default(v, default="N/A"):
-    if v is None:
-        return "N/A"
-    return str(v)
-
-
-def render_full(data, args):
-    """Render full detailed report."""
-    template = TEMPLATE.read_text()
-    return _render_template(template, data, args)
-
-
-def render_qq(data, args):
-    """Render QQ daily brief - only A/B detailed, C/SKIP summary only."""
-    oc = data.get("official_counts", {})
-    a = oc.get("A", 0)
-    b = oc.get("B", 0)
-    
-    if a > 0 or b > 0:
-        # Use full detailed template for days with A/B
-        template = TEMPLATE.read_text()
+    if not risk_review or risk_review in ("", "False", False, None):
+        risk_text = "风险数据未存档"
     else:
-        # Use brief template - no per-match detail
-        brief_template = BASE_DIR / "templates" / "v4_daily_review_qq_brief.md"
-        if not brief_template.exists():
-            print(f"[RENDERER] ERROR: QQ brief template not found: {brief_template}", flush=True)
-            sys.exit(1)
-        template = brief_template.read_text()
-    
-    return _render_template(template, data, args, qq_mode=True)
+        risk_text = str(risk_review)
+
+    separator = "\n" + "━" * 20 + "\n" if idx > 0 else ""
+    return (
+        f"{separator}"
+        f"{idx+1}. {home} vs {away}\n"
+        f"{league}｜fid={fid}\n"
+        f"官方：{bucket}\n"
+        f"赛果：HT {ht}｜FT {ft}\n"
+        f"进球：{goals_text}\n"
+        f"实际：0-15 {g0}｜16-30 {g16}｜31-45+ {g31}\n"
+        f"结果：{diag_cn}\n"
+        f"剧本：{script_text}\n"
+        f"风险：{risk_text}\n"
+        f"来源：{source_cn}"
+    )
 
 
-def main():
-    parser = argparse.ArgumentParser()
-    parser.add_argument("--date", required=True, help="YYYYMMDD")
-    parser.add_argument("--mode", default="full", choices=["full", "qq"])
-    args = parser.parse_args()
+def _ab_detail_qq(ab_matches: list) -> str:
+    """Generate A/B detail section for QQ report.
+    - Show unhit/abnormal matches first
+    - Show up to 5 representative hits
+    - Then '其余A/B已入库，详见full report'
+    """
+    if not ab_matches:
+        return ""
 
-    struct_path = REPORT_DIR / f"v4_review_structured_{args.date}.json"
-    if not struct_path.exists():
-        print(f"[RENDERER] ERROR: structured file not found: {struct_path}", flush=True)
+    # Separate hits and misses
+    hits = [m for m in ab_matches if "MISS" not in m.get("model_result", "")
+            and "OVERCONFIDENT" not in m.get("diagnosis", "")]
+    misses = [m for m in ab_matches if "MISS" in m.get("model_result", "")
+              or "OVERCONFIDENT" in m.get("diagnosis", "")]
+
+    lines = []
+    lines.append("【A/B重点逐场】")
+
+    # First: misses/abnormal
+    if misses:
+        lines.append("\n--- 未命中 / 异常 ---")
+        for i, m in enumerate(misses[:], 1):
+            g = "无" if not m.get("first_half_goal_minutes") else "、".join(f"{g}′" for g in m["first_half_goal_minutes"])
+            diag = _lbl(m.get("diagnosis", ""), _DIAG_LABELS)
+            lines.append(
+                f"{i}. {m['home']} vs {m['away']}\n"
+                f"   {m['league']} | {m.get('official_bucket','')}级\n"
+                f"   HT {m.get('ht_score','数据缺失')} | FT {m.get('ft_score','数据缺失')}\n"
+                f"   进球：{g} | 诊断：{diag}"
+            )
+
+    # Then: up to 5 representative hits
+    representative_hits = hits[:5]
+    if representative_hits:
+        lines.append("\n--- 代表性命中 ---")
+        for i, m in enumerate(representative_hits, 1):
+            g = "无" if not m.get("first_half_goal_minutes") else "、".join(f"{g}′" for g in m["first_half_goal_minutes"])
+            lines.append(
+                f"{i}. {m['home']} vs {m['away']}\n"
+                f"   {m['league']} | {m.get('official_bucket','')}级\n"
+                f"   HT {m.get('ht_score','数据缺失')} | 进球：{g}"
+            )
+
+    # Remaining hits count
+    remaining_hits = len(hits) - len(representative_hits)
+    if remaining_hits > 0:
+        lines.append(f"\n其余{remaining_hits}场A/B已入库，详见full report。")
+
+    return "\n".join(lines)
+
+
+def _render_full(data, args):
+    """Render full detailed report (all 49 matches per-match)."""
+    if not FULL_TEMPLATE.exists():
+        print(f"[RENDERER] ERROR: full template not found: {FULL_TEMPLATE}", flush=True)
         sys.exit(1)
 
-    with open(struct_path) as f:
-        data = json.load(f)
-    
-    # Dispatch by mode
-    oc = data.get("official_counts", {})
-    a = oc.get("A", 0)
-    b = oc.get("B", 0)
-    if args.mode == "qq" and a == 0 and b == 0:
-        # No A/B day: use the brief QQ template (no per-match details)
-        brief_path = BASE_DIR / "templates" / "v4_daily_review_qq_brief.md"
-        if not brief_path.exists():
-            print(f"[RENDERER] ERROR: brief template missing: {brief_path}", flush=True)
-            sys.exit(1)
-        template_text = brief_path.read_text()
-        # Build minimal replacements for brief template
-        oc = data.get("official_counts", {})
-        summary = data.get("summary", {})
-        c_sum = summary.get("c", {})
-        c_hit = c_sum.get("hit", 0)
-        c_total = c_sum.get("total", 0)
-        c_rate = c_sum.get("rate", "?")
-        sb = summary.get("skip_backfire", 0)
-        st = summary.get("skip_total", 0)
-        sbr = summary.get("skip_backfire_rate", "?")
-        rs = data.get("rolling_stats", {})
-        r = {
-            "{{review_date}}": data.get("review_date", args.date),
-            "{{a_count}}": str(oc.get("A",0)),
-            "{{b_count}}": str(oc.get("B",0)),
-            "{{ab_summary}}": "无 A/B 主推荐，不计算 A/B 命中率",
-            "{{ab_detail_section}}": "",
-            "{{c_hit}}": str(c_hit),
-            "{{c_total}}": str(c_total),
-            "{{c_hit_rate}}": c_rate if isinstance(c_rate, str) else f"{c_rate}%",
-            "{{skip_backfire}}": str(sb),
-            "{{skip_total}}": str(st),
-            "{{skip_backfire_rate}}": sbr if isinstance(sbr, str) else f"{sbr}%",
-            "{{rolling_7d_ab}}": rs.get("7d_ab", "样本不足"),
-            "{{rolling_7d_c}}": rs.get("7d_c", "样本不足"),
-            "{{rolling_7d_skip_backfire}}": rs.get("7d_skip_backfire", "样本不足"),
-            "{{rule_decision}}": "不改规则，继续观察",
-            "{{sample_warning}}": "不因少量样本改规则",
-        }
-        output = template_text
-        for k, v in r.items():
-            output = output.replace(k, v)
-        out_path = REPORT_DIR / f"v4_review_qq_{args.date}.txt"
-        out_path.write_text(output, encoding="utf-8")
-        print(f"[RENDERER] ✅ rendered (qq-brief) → {out_path}", flush=True)
-        return
-
-    template = TEMPLATE.read_text()
-
-    # ── Match rows ──
+    template = FULL_TEMPLATE.read_text()
     matches = data.get("matches", [])
-    match_rows = "\n".join(_match_row(m, i) for i, m in enumerate(matches))
-    
-    # ── Pre-match note (when historical data unavailable) ──
-    has_any_prematch = any(_has_prematch_data(m) for m in matches)
-    if has_any_prematch:
-        pre_match_note = ""
-    else:
-        pre_match_note = "\n说明：本日赛前评分/HT率/剧本分布等数据未存档，仅显示已存档字段。\n"
-
-    # ── Official counts ──
     oc = data.get("official_counts", {})
-    a = oc.get("A", 0)
-    b = oc.get("B", 0)
-    c = oc.get("C", 0)
-    s = oc.get("SKIP", 0)
-    ab_count = a + b
-
-    # ── Summary ──
     summary = data.get("summary", {})
+    td = data.get("time_distribution", {})
+    sv = data.get("script_validation", {})
+    pms = data.get("pre_match_signal", {})
+    ds = data.get("diagnosis_summary", {})
+    rs = data.get("rolling_stats", {})
+    sc = data.get("script_validation_cn", {})
+
+    match_rows = "\n".join(_match_row_full(m, i) for i, m in enumerate(matches))
+
     for g in ["a", "b", "c"]:
         gd = summary.get(g, {})
-        if gd.get("rate") is None:
-            gd["rate_str"] = "N/A（无样本）"
+        if isinstance(gd.get("rate"), str):
+            gd["rate_str"] = gd["rate"]
+        elif gd.get("rate") is None:
+            gd["rate_str"] = "N/A"
         else:
-            gd["rate_str"] = str(gd["rate"]) if isinstance(gd["rate"], str) else f"{gd['rate']}%"
+            gd["rate_str"] = f"{gd['rate']}%"
+
     skip_correct = summary.get("skip_correct", 0)
     skip_total = summary.get("skip_total", 0)
     skip_backfire = summary.get("skip_backfire", 0)
-    skip_backfire_rate = summary.get("skip_backfire_rate", "?")
     skip_correct_rate = "N/A"
     if skip_total and skip_total > 0:
-        skip_correct_rate = f"{skip_correct/skip_total*100:.1f}%"
+        skip_correct_rate = f"{skip_correct / skip_total * 100:.1f}%"
 
-    # ── Time distribution ──
-    td = data.get("time_distribution", {})
     g0d = td.get("goals_0_15", {})
     g16d = td.get("goals_16_30", {})
     g31d = td.get("goals_31_45", {})
     fg = td.get("first_goal", {})
 
-    # ── Script validation ──
-    sv = data.get("script_validation", {})
-
-    # ── Pre-match signal ──
-    pms = data.get("pre_match_signal", {})
-
-    # ── Diagnosis ──
-    ds = data.get("diagnosis_summary", {})
-
-    # ── Rolling ──
-    rs = data.get("rolling_stats", {})
-
-    # ── Conclusion ──
-    if a == 0 and b == 0:
-        ab_concl = "本日无 A/B 主推荐"
-        rec_summary = "今日 V4 无A/B上半场主推荐"
-    else:
-        ab_concl = f"A+B：{ab_count}场主推荐"
-        rec_summary = f"A级{a}场 + B级{b}场"
-
-    skip_obs = "SKIP 反杀偏高，月报观察" if skip_total and skip_total > 0 and skip_backfire > 0 else "SKIP 反杀在正常范围"
+    a = oc.get("A", 0)
+    b = oc.get("B", 0)
+    ab_count = a + b
+    ab_concl = f"A+B：{ab_count}场主推荐" if ab_count > 0 else "本日无 A/B 主推荐"
+    skip_obs = "SKIP 反杀偏高，月报观察" if skip_total > 0 and skip_backfire > 0 else "SKIP 反杀在正常范围"
     script_obs = "赛前剧本数据缺失" if sv.get("script_na", 0) > 0 else "剧本验证通过"
+    dq_note = f"数据质量：{ds.get('DATA_QUALITY_ISSUE', 0)}场存在数据不足" if ds.get("DATA_QUALITY_ISSUE", 0) > 0 else "数据质量：可接受"
 
-    sample_warn = "不因少量样本改规则"
-    dq_note = ""
-    if ds.get("DATA_QUALITY_ISSUE", 0) > 0:
-        dq_note = f"数据质量：{ds['DATA_QUALITY_ISSUE']}场存在数据不足"
-    else:
-        dq_note = "数据质量：可接受"
-
-    weather_rows_or_summary = _weather_summary(matches)
-
-    # ── C/SKIP section ──
-    if c == 0 and s == 0:
-        c_skip_section = "本日无 C/SKIP 正式样本。"
-    else:
-        c_rate = summary.get("c", {}).get("rate_str", "N/A")
-        sc_rate = "N/A"
-        if skip_total and skip_total > 0:
-            sc_rate = f"{skip_correct/skip_total*100:.1f}%"
-        c_skip_section = f"A：{summary.get('a',{}).get('hit',0)}/{summary.get('a',{}).get('total',0)}｜{summary.get('a',{}).get('rate_str','N/A')}\nB：{summary.get('b',{}).get('hit',0)}/{summary.get('b',{}).get('total',0)}｜{summary.get('b',{}).get('rate_str','N/A')}\nC：{summary.get('c',{}).get('hit',0)}/{summary.get('c',{}).get('total',0)}｜{c_rate}\nSKIP正确：{skip_correct}/{skip_total}｜{sc_rate}\nSKIP反杀：{skip_backfire}/{skip_total}｜{skip_backfire_rate}"
-
-    # ── Build replacements ──
     r = {
         "{{review_date}}": data.get("review_date", args.date),
         "{{a_count}}": str(a),
         "{{b_count}}": str(b),
-        "{{c_count}}": str(c),
-        "{{skip_count}}": str(s),
-        "{{c_skip_section}}": c_skip_section,
+        "{{c_count}}": str(oc.get("C", 0)),
+        "{{skip_count}}": str(oc.get("SKIP", 0)),
         "{{ab_count}}": str(ab_count),
-        "{{recommendation_summary}}": rec_summary,
+        "{{recommendation_summary}}": data.get("recommendation_summary", ""),
         "{{official_brief_file}}": data.get("official_source", f"v4_openclaw_brief_{args.date}.txt"),
-        "{{guard_status}}": data.get("guard_status", "PASS"),
         "{{match_rows}}": match_rows,
         "{{a_hit}}": str(summary.get("a", {}).get("hit", 0)),
         "{{a_total}}": str(summary.get("a", {}).get("total", 0)),
@@ -368,11 +242,11 @@ def main():
         "{{c_hit}}": str(summary.get("c", {}).get("hit", 0)),
         "{{c_total}}": str(summary.get("c", {}).get("total", 0)),
         "{{c_hit_rate}}": summary.get("c", {}).get("rate_str", "N/A"),
-        "{{skip_correct}}": str(skip_correct),
-        "{{skip_total}}": str(skip_total),
+        "{{skip_correct}}": str(summary.get("skip_correct", 0)),
+        "{{skip_total}}": str(summary.get("skip_total", 0)),
         "{{skip_correct_rate}}": skip_correct_rate,
-        "{{skip_backfire}}": str(skip_backfire),
-        "{{skip_backfire_rate}}": str(skip_backfire_rate),
+        "{{skip_backfire}}": str(summary.get("skip_backfire", 0)),
+        "{{skip_backfire_rate}}": str(summary.get("skip_backfire_rate", "N/A")),
         "{{daily_summary_note}}": data.get("daily_summary_note", ""),
         "{{sample_count}}": str(td.get("sample_count", 0)),
         "{{ht_goal_total}}": str(td.get("ht_goal_total", 0)),
@@ -406,15 +280,14 @@ def main():
         "{{fulltime_stronger_count}}": str(pms.get("fulltime_stronger_count", 0)),
         "{{risk_validated_count}}": str(pms.get("risk_validated_count", 0)),
         "{{pre_match_signal_note}}": pms.get("note", ""),
-        "{{pre_match_note}}": pre_match_note,
-        "{{weather_rows_or_summary}}": weather_rows_or_summary,
-        "{{rolling_7d_ab}}": rs.get("7d_ab", "样本不足，仅观察"),
-        "{{rolling_7d_c}}": rs.get("7d_c", "样本不足，仅观察"),
-        "{{rolling_7d_skip_backfire}}": rs.get("7d_skip_backfire", "样本不足，仅观察"),
-        "{{rolling_7d_script}}": rs.get("7d_script", "样本不足，仅观察"),
-        "{{rolling_14d_summary}}": rs.get("14d_summary", "样本不足，仅观察"),
-        "{{rolling_30d_summary}}": rs.get("30d_summary", "样本不足，仅观察"),
-        "{{cumulative_summary}}": rs.get("cumulative", "样本不足，仅观察"),
+        "{{weather_rows_or_summary}}": f"全部{len(matches)}场天气数据缺失，不参与本日归因",
+        "{{rolling_7d_ab}}": rs.get("7d_ab", "样本不足"),
+        "{{rolling_7d_c}}": rs.get("7d_c", "样本不足"),
+        "{{rolling_7d_skip_backfire}}": rs.get("7d_skip_backfire", "样本不足"),
+        "{{rolling_7d_script}}": rs.get("7d_script", "样本不足"),
+        "{{rolling_14d_summary}}": rs.get("14d_summary", "样本不足"),
+        "{{rolling_30d_summary}}": rs.get("30d_summary", "样本不足"),
+        "{{cumulative_summary}}": rs.get("cumulative", "样本不足"),
         "{{rolling_source_files}}": data.get("rolling_source_files", "N/A"),
         "{{model_valid_count}}": str(ds.get("MODEL_VALID", 0)),
         "{{model_too_strict_count}}": str(ds.get("MODEL_TOO_STRICT", 0)),
@@ -429,23 +302,133 @@ def main():
         "{{skip_observation}}": skip_obs,
         "{{script_observation}}": script_obs,
         "{{data_quality_note}}": dq_note,
-        "{{sample_warning}}": sample_warn,
+        "{{sample_warning}}": "不因少量样本改规则",
     }
 
     output = template
-    for placeholder, value in r.items():
-        output = output.replace(placeholder, value)
+    for k, v in r.items():
+        output = output.replace(k, v)
+
+    out_path = REPORT_DIR / f"v4_review_full_{args.date}.txt"
+    out_path.write_text(output, encoding="utf-8")
+    print(f"[RENDERER] ✅ rendered (full) → {out_path} ({len(output)} bytes)", flush=True)
+
+
+def _render_qq(data, args):
+    """Render QQ daily brief.
+    - A/B summary with limited detail (unhits first + up to 5 rep hits)
+    - C/SKIP summary only (no per-match)
+    - No full report sections
+    """
+    oc = data.get("official_counts", {})
+    a = oc.get("A", 0)
+    b = oc.get("B", 0)
+    c = oc.get("C", 0)
+    s = oc.get("SKIP", 0)
+    ab_count = a + b
+    summary = data.get("summary", {})
+    rs = data.get("rolling_stats", {})
+
+    # If no A/B, use brief template
+    if a == 0 and b == 0:
+        if not QQ_BRIEF_TEMPLATE.exists():
+            print(f"[RENDERER] ERROR: brief template not found: {QQ_BRIEF_TEMPLATE}", flush=True)
+            sys.exit(1)
+        template = QQ_BRIEF_TEMPLATE.read_text()
+        c_data = summary.get("c", {})
+        c_hit = c_data.get("hit", 0)
+        c_total = c_data.get("total", 0)
+        c_rate = c_data.get("rate", "N/A") if not isinstance(c_data.get("rate"), str) or c_total == 0 else c_data["rate"]
+
+        r = {
+            "{{review_date}}": data.get("review_date", args.date),
+            "{{a_count}}": "0",
+            "{{b_count}}": "0",
+            "{{ab_summary}}": "无 A/B 主推荐，不计算 A/B 命中率",
+            "{{ab_detail_section}}": "",
+            "{{c_hit}}": str(c_hit),
+            "{{c_total}}": str(c_total),
+            "{{c_hit_rate}}": c_rate if isinstance(c_rate, str) else f"{c_rate}%",
+            "{{skip_backfire}}": str(summary.get("skip_backfire", 0)),
+            "{{skip_total}}": str(summary.get("skip_total", 0)),
+            "{{skip_backfire_rate}}": str(summary.get("skip_backfire_rate", "N/A")),
+            "{{rolling_7d_ab}}": rs.get("7d_ab", "样本不足"),
+            "{{rolling_7d_c}}": rs.get("7d_c", "样本不足"),
+            "{{rolling_7d_skip_backfire}}": rs.get("7d_skip_backfire", "样本不足"),
+            "{{rule_decision}}": "不改规则，继续观察",
+            "{{sample_warning}}": "不因少量样本改规则",
+        }
+        output = template
+        for k, v in r.items():
+            output = output.replace(k, v)
+    else:
+        # A/B day: use QQ brief with A/B detail and C/SKIP summary
+        if not QQ_TEMPLATE.exists():
+            print(f"[RENDERER] ERROR: QQ template not found: {QQ_TEMPLATE}", flush=True)
+            sys.exit(1)
+        template = QQ_TEMPLATE.read_text()
+
+        matches = data.get("matches", [])
+        ab_matches = [m for m in matches if m.get("official_bucket") in ("A", "B")]
+        ab_detail = _ab_detail_qq(ab_matches)
+
+        c_data = summary.get("c", {})
+        c_hit = c_data.get("hit", 0)
+        c_total = c_data.get("total", 0)
+        c_rate = c_data.get("rate", "N/A") if isinstance(c_data.get("rate"), str) else f"{c_data.get('hit',0)}/{c_data.get('total',0)}"
+        sb = summary.get("skip_backfire", 0)
+        st = summary.get("skip_total", 0)
+
+        a_hit = summary.get("a", {}).get("hit", 0)
+        b_hit = summary.get("b", {}).get("hit", 0)
+        ab_hit = a_hit + b_hit
+        ab_summary = f"A：{a_hit}/{a} · B：{b_hit}/{b} · A+B：{ab_hit}/{ab_count}" if ab_count > 0 else "无 A/B 主推荐"
+
+        r = {
+            "{{review_date}}": data.get("review_date", args.date),
+            "{{a_count}}": str(a),
+            "{{b_count}}": str(b),
+            "{{ab_summary}}": f"A：{a_hit}/{a} · B：{b_hit}/{b} · A+B：{ab_hit}/{ab_count}",
+            "{{ab_detail_section}}": ab_detail,
+            "{{c_hit}}": str(c_hit),
+            "{{c_total}}": str(c_total),
+            "{{c_hit_rate}}": c_rate if isinstance(c_rate, str) else f"{c_rate}%",
+            "{{skip_backfire}}": str(sb),
+            "{{skip_total}}": str(st),
+            "{{skip_backfire_rate}}": str(summary.get("skip_backfire_rate", "N/A")),
+            "{{rolling_7d_ab}}": rs.get("7d_ab", "样本不足"),
+            "{{rolling_7d_c}}": rs.get("7d_c", "样本不足"),
+            "{{rolling_7d_skip_backfire}}": rs.get("7d_skip_backfire", "样本不足"),
+            "{{rule_decision}}": "不改规则",
+            "{{sample_warning}}": "不因少量样本改规则",
+        }
+        output = template
+        for k, v in r.items():
+            output = output.replace(k, v)
+
+    out_path = REPORT_DIR / f"v4_review_qq_{args.date}.txt"
+    out_path.write_text(output, encoding="utf-8")
+    print(f"[RENDERER] ✅ rendered (qq) → {out_path} ({len(output)} bytes)", flush=True)
+
+
+def main():
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--date", required=True, help="YYYYMMDD")
+    parser.add_argument("--mode", choices=["full", "qq"], required=True)
+    args = parser.parse_args()
+
+    struct_path = REPORT_DIR / f"v4_review_structured_{args.date}.json"
+    if not struct_path.exists():
+        print(f"[RENDERER] ERROR: structured file not found: {struct_path}", flush=True)
+        sys.exit(1)
+
+    with open(struct_path) as f:
+        data = json.load(f)
 
     if args.mode == "full":
-        out_path = REPORT_DIR / f"v4_review_full_{args.date}.txt"
-        guard_tag = "full"
+        _render_full(data, args)
     else:
-        out_path = REPORT_DIR / f"v4_review_qq_{args.date}.txt"
-        guard_tag = "qq"
-    out_path.write_text(output, encoding="utf-8")
-    print(f"[RENDERER] ✅ rendered ({args.mode}) → {out_path}", flush=True)
-    print(f"[RENDERER] template: {TEMPLATE}", flush=True)
-    print(f"[RENDERER] input: {struct_path}", flush=True)
+        _render_qq(data, args)
 
 
 if __name__ == "__main__":

@@ -105,79 +105,119 @@ def main():
             status = "PARTIAL_DONE"
             error_msg += f"attribution err: {result_att.stderr[:100]}; "
 
-        # ── API Key 可用性检查 ──
-        _has_api_key = bool(os.environ.get("APIFOOTBALL_KEY") or os.environ.get("OPENCLAW_APIFOOTBALL_KEY"))
-        # 检查 validation 结果中是否有实际数据
-        _val_data_available = False
-        if validation_path.exists():
+        # Step 3: 生成 structured JSON（从validation构建，覆盖A/B/C/SKIP全量）
+        val_exists = validation_path.exists()
+        if val_exists:
+            result_struct = subprocess.run(
+                [sys.executable, "-u", str(BASE_DIR / "engine" / "gen_structured.py"), "--date", args.date],
+                capture_output=True, text=True, timeout=600,
+                cwd=str(BASE_DIR), env=_env,
+            )
+            if result_struct.returncode != 0:
+                status = "PARTIAL_DONE"
+                error_msg += f"gen_structured err: {result_struct.stderr[:200]}; "
+            else:
+                print(f"[PIPELINE] gen_structured OK: {result_struct.stdout.strip()[:200]}", flush=True)
+        else:
+            error_msg += "validation missing, cannot gen_structured; "
+
+        # Step 4: renderer --mode full
+        result_rend_full = subprocess.run(
+            [sys.executable, "-u", str(BASE_DIR / "engine" / "v4_review_renderer.py"),
+             "--date", args.date, "--mode", "full"],
+            capture_output=True, text=True, timeout=120,
+            cwd=str(BASE_DIR),
+        )
+        if result_rend_full.returncode != 0:
+            status = "PARTIAL_DONE"
+            error_msg += f"renderer_full err: {result_rend_full.stderr[:100]}; "
+        else:
+            print(f"[PIPELINE] renderer full OK", flush=True)
+
+        # Step 5: renderer --mode qq
+        result_rend_qq = subprocess.run(
+            [sys.executable, "-u", str(BASE_DIR / "engine" / "v4_review_renderer.py"),
+             "--date", args.date, "--mode", "qq"],
+            capture_output=True, text=True, timeout=120,
+            cwd=str(BASE_DIR),
+        )
+        if result_rend_qq.returncode != 0:
+            status = "PARTIAL_DONE"
+            error_msg += f"renderer_qq err: {result_rend_qq.stderr[:100]}; "
+        else:
+            print(f"[PIPELINE] renderer qq OK", flush=True)
+
+        # Step 6: guard --mode full
+        result_guard_full = subprocess.run(
+            [sys.executable, "-u", str(BASE_DIR / "engine" / "v4_review_guard.py"),
+             "--date", args.date, "--mode", "full"],
+            capture_output=True, text=True, timeout=60,
+            cwd=str(BASE_DIR),
+        )
+        if result_guard_full.returncode not in (0, 2):
+            error_msg += f"guard_full err: {result_guard_full.stderr[:100]}; "
+        print(f"[PIPELINE] guard full: {result_guard_full.stdout.strip()[:200]}", flush=True)
+
+        # Step 7: guard --mode qq
+        result_guard_qq = subprocess.run(
+            [sys.executable, "-u", str(BASE_DIR / "engine" / "v4_review_guard.py"),
+             "--date", args.date, "--mode", "qq"],
+            capture_output=True, text=True, timeout=60,
+            cwd=str(BASE_DIR),
+        )
+        if result_guard_qq.returncode not in (0, 2):
+            error_msg += f"guard_qq err: {result_guard_qq.stderr[:100]}; "
+        print(f"[PIPELINE] guard qq: {result_guard_qq.stdout.strip()[:200]}", flush=True)
+
+        # Step 8: route marker (always allowed_to_push=false, waits for BOSS)
+        _full_pass_path = STATUS_DIR / f"v4_review_guard_{key}.json"
+        _guard_file_data = {}
+        if _full_pass_path.exists():
             try:
-                _val = json.loads(validation_path.read_text())
-                _pending = _val.get("pending_matches", 0)
-                _total = _val.get("total_matches", 0)
-                _val_data_available = (_total - _pending) > 0
+                _guard_file_data = json.loads(_full_pass_path.read_text())
             except Exception:
                 pass
+        _full_pass = _guard_file_data.get("guard_status") == "PASS" if _guard_file_data.get("mode") == "full" else False
+        _qq_pass = _guard_file_data.get("guard_status") == "PASS" if _guard_file_data.get("mode") == "qq" else False
+        _overall_pass = _full_pass and _qq_pass
 
-        # ── 细分状态 ──
-        _review_exists = (REPORT_DIR / f"v4_review_{key}.txt").exists()
-        _qq_exists = (REPORT_DIR / f"v4_review_qq_{key}.txt").exists()
-        _guard_full = (STATUS_DIR / f"v4_review_guard_full_{key}.json").exists()
-        _guard_qq = (STATUS_DIR / f"v4_review_guard_qq_{key}.json").exists()
-
-        _validation_status = "DONE" if validation_path.exists() else "FAILED"
-        _attribution_status = "DONE" if attribution_path.exists() else "FAILED"
-
-        if not _has_api_key:
-            _validation_status = "API_NO_KEY"
-            _attribution_status = "API_NO_KEY"
-            _readiness_status = "REVIEW_STATUS_UNVERIFIED"
-            _renderer_status = "SKIPPED_API_UNVERIFIED"
-        elif not _val_data_available:
-            _readiness_status = "REVIEW_NOT_READY"
-            _renderer_status = "SKIPPED_NOT_READY"
-        else:
-            _readiness_status = "FIXTURES_AVAILABLE"
-            _renderer_status = "PENDING" if not _review_exists else "DONE"
-
-        _guard_status = "DONE" if _guard_qq else (_renderer_status if _renderer_status in ("SKIPPED_NOT_READY", "SKIPPED_API_UNVERIFIED") else "PENDING")
-        _push_status = "DONE" if _guard_qq else (_renderer_status if _renderer_status in ("SKIPPED_NOT_READY", "SKIPPED_API_UNVERIFIED") else "PENDING")
-
-        # 整体状态：不是简单 DONE
-        if _readiness_status in ("REVIEW_STATUS_UNVERIFIED", "REVIEW_NOT_READY"):
-            _overall_status = _readiness_status
-        elif _guard_qq:
-            _overall_status = "REVIEW_DONE"
-        elif _qq_exists:
-            _overall_status = "REVIEW_HALF_DONE"
-        else:
-            _overall_status = "REVIEW_PARTIAL"
-
-        output_files = {
-            "validation": str(validation_path) if validation_path.exists() else None,
-            "attribution": str(attribution_path) if attribution_path.exists() else None,
-            "review": str(REPORT_DIR / f"v4_review_{key}.txt") if _review_exists else None,
-            "qq_review": str(REPORT_DIR / f"v4_review_qq_{key}.txt") if _qq_exists else None,
-            "readiness": str(STATUS_DIR / f"v4_review_readiness_{key}.json") if (STATUS_DIR / f"v4_review_readiness_{key}.json").exists() else None,
+        route = {
+            "date": key,
+            "reportagent_called": False,
+            "reportagent_status": "PENDING",
+            "full_guard": _full_pass,
+            "qq_guard": _qq_pass,
+            "allowed_to_push": False,
+            "reason": "PENDING_SAFE_QQ_OUTBOUND + BOSS_CONFIRM" if _overall_pass else f"guard BLOCKER ({_guard_file_data.get('guard_status', 'UNKNOWN')})",
+            "created_at": datetime.now(LOCAL_TZ).isoformat(),
         }
-        wd.finish(status=_overall_status, error=error_msg[:200] or None, output_files=output_files)
+        route_path = STATUS_DIR / f"v4_review_route_{key}.json"
+        with open(route_path, "w") as f:
+            json.dump(route, f, ensure_ascii=False, indent=2)
+        print(f"[PIPELINE] route marker: {_overall_pass} | allowed_to_push=False", flush=True)
 
-        # ── stdout 摘要输出（供cron/agent读取，非AI总结）──
-        print(f"【V4 情报系统】", flush=True)
-        print(f"V4复盘阶段完成", flush=True)
-        print(f"date={args.date}", flush=True)
-        print(f"has_api_key={_has_api_key}", flush=True)
-        print(f"val_data_available={_val_data_available}", flush=True)
-        print(f"validation_status={_validation_status}", flush=True)
-        print(f"attribution_status={_attribution_status}", flush=True)
-        print(f"readiness_status={_readiness_status}", flush=True)
-        print(f"renderer_status={_renderer_status}", flush=True)
-        print(f"guard_status={_guard_status}", flush=True)
-        print(f"push_status={_push_status}", flush=True)
-        print(f"validation_file={output_files['validation'] or 'NOT_FOUND'}", flush=True)
-        print(f"attribution_file={output_files['attribution'] or 'NOT_FOUND'}", flush=True)
-        print(f"review_file={output_files['review'] or 'NOT_FOUND'}", flush=True)
-        print(f"qq_file={output_files['qq_review'] or 'NOT_FOUND'}", flush=True)
-        print(f"status={_overall_status}", flush=True)
+        # Step 9: sent marker (never pushes automatically)
+        import hashlib
+        _qq_path = REPORT_DIR / f"v4_review_qq_{key}.txt"
+        _hash = ""
+        if _qq_path.exists():
+            _hash = hashlib.md5(_qq_path.read_bytes()).hexdigest()
+        sent = {
+            "date": key,
+            "status": "NOT_SENT",
+            "delivery_result": "not_executed",
+            "pushed": False,
+            "reason": f"guard {"PASS" if _overall_pass else "BLOCKER"}, allowed_to_push=False, waiting BOSS confirm",
+            "template_id": "v4_daily_review_qq_v1",
+            "message_hash": _hash,
+            "version": "qq_daily_v1.0",
+            "qq_delivered": False,
+            "created_at": datetime.now(LOCAL_TZ).isoformat(),
+        }
+        sent_path = STATUS_DIR / f"v4_review_push_{key}.json"
+        with open(sent_path, "w") as f:
+            json.dump(sent, f, ensure_ascii=False, indent=2)
+        print(f"[PIPELINE] sent marker: pushed=False, hash={_hash[:12]}...", flush=True)
 
     except Exception as e:
         wd.finish(status="FAILED", error=str(e)[:200])

@@ -33,6 +33,10 @@ FORBIDDEN_KEYWORDS = [
 REQUIRED_KEYWORDS = [
     "A级上半场强推荐", "B级上半场达标推荐", "C级观察池",
     "HT_SKIP跳过", "无A/B上半场主推荐",
+    # QQ精简格式兼容
+    "V4上半场情报", "V4最终结论",
+    "A级强推荐", "B级达标推荐", "C级观察",
+    "跳过原因", "昨日验证",
 ]
 
 HARD_TIMEOUT = 3600  # 60 min

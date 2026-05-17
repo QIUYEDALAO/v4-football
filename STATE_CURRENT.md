@@ -7,31 +7,21 @@
 
 ## 0. 更新时间
 
-- 更新时间：2026-05-16 12:48
+- 更新时间：2026-05-16 20:16
 - 更新人：ClawOps
 - GitHub 仓库：whoerixxz/v2-football-quant
-- 最新 commit：`pending_push` → SYS: 收口中午结算汇总与V4昨日验证来源
+- 最新 commit：`a95ff34` → qqbot_safe_send.py + V4复盘QQ摘要版最终SENT + Alert测试SENT
 - 当前运行环境：生产
 - 当前阶段：纸盘验证，生产观察期
 - 本周末：周六高比赛量重点观察
-- **生产链路收口修复完成**：12:10 V2每日结算 cron 恢复 + SYS汇总路径修正 + V4 昨日验证来源修正
-- **13:00 SYS每日结算汇总首跑失败**（agentTurn memory_search 超时，已推送错误 MISSING 摘要）
-  - 该摘要作废，不进入任何统计
-  - 后续 SYS汇总必须改为直接脚本，不得使用 agentTurn
-- **V4复盘日期语义问题**：12:35 复盘全部 pending，初步判断 API_KEY 子进程继承问题
-  - readiness 状态=REVIEW_STATUS_UNVERIFIED
-  - secrets.py + net_utils 已修复支持 OPENCLAW_APIFOOTBALL_KEY fallback
-  - watchdog 已修复显式传递 env 给子进程
-- **V2建池推送出现 P1_QQ_TARGET_MISMATCH**
-  - 首次 agentTurn/model-call 路径超时 → marker=FAILED
-  - 第二次 sessions_send 推到主会话而非 QQ Bot → marker=WRONG_TARGET
-  - 错误根因：
-    - v2_daily_pool_summary.py --push 未严格区分 qqbot target 与 main session
-    - 主会话送达不等于 QQ Bot 正式送达
-  - 修复方向：
-    - --push qq 必须显式 target qqbot
-    - 无 QQ delivery log 不得写 SENT
-    - 需可查证 delivery success + message_hash + target_type=qqbot
+- **P0 safe outbound 已打通**：openclaw message send --channel qqbot --account report 已验证可用
+- **20项 cron 已确认**，冗余清理完成（删除旧 V2每日结算 `258c4286`）
+- **V4复盘 QQ摘要版最终版已 SENT**：2026-05-15，8cf16b62，✅ 命中标记
+- **Alert 测试已 SENT**（test_only=true），不接入真实 Alert
+- **V2建池摘要 SENT**（b4883e0a）
+- **SYS每日汇总上趟 Message failed**（agentTurn路径），已改为 openclaw message send 直推，待下次自然触发验证
+- **V4复盘日期语义问题已修复**：secrets.py + net_utils + watchdog env 显式传递
+- **V2建池摘要已 SENT**（openclaw message send 直推，hash=b4883e0a）
 - **Scheduler 文件态异常**（MEDIUM_CONTROL_PLANE_STORE_DRIFT）
   - 内存 timerArmed=true，13:15 V2建池自然触发正常
   - 但 jobs.json 上 22/22 的 nextRunAt 全部为 None（序列化异常）
@@ -49,10 +39,9 @@
 - **BOOT循环**：已修复，boot-md disabled
 - **Health event loop**：degraded（event_loop_utilization，CPU 0.99，无运行影响）
 - **Architecture Audit**：PASS_WITH_REFERENCES（0 real BLOCKER，0 SECRET BLOCKER）
-- **Cron Policy**：PASS（19 required，0 forbidden）— 新增内核链路强校验（12:10/12:35/13:00/13:15/14:05），缺失→FAIL
-- **Cron 修复**：新增 12:10 V2每日结算 cron；SYS统一汇总 V2路径→verified.json、V4路径→review_guard_qq
+- **Cron Policy**：PASS（20 required，0 forbidden）— 20项确认 + 核心链路强校验（12:10/12:35/13:00/13:15/14:05）
+- **Cron 清理**：删除旧 V2每日结算 `258c4286`，保留新任务 `2c0a07f2`（带 failureAlert）
 - **V4昨日验证来源**：修复为只读 v4_review_guard + v4_review_qq，不再读 validation/attribution
-- **V2建池完成通知方案**：写入 P2 待办，暂不实施
 
 ## 1a. 多Agent状态
 
@@ -178,33 +167,92 @@
 
 ---
 
-## 7. 中午结算链路（2026-05-15 固化）
+## 7. Cron 20项最终确认（2026-05-16 20:14 BOSS确认）
 
-| 时间 | 任务 | 说明 |
-|:---|:---|:---|
-| 12:10 | V2每日结算 | 固定时间，读取昨日 state 文件结算 |
-| 12:35 | V4每日复盘 | 不再使用10:30，避免昨日比赛未完赛/API数据未稳定 |
-| 13:00 | SYS每日结算汇总 | 只读正式V2结算文件和V4复盘文件，不AI自由总结 |
-| 13:15 | V2建池-每日 | 至少预留50分钟给V4午间扫描后处理 |
-| 14:05 | V4扫描-午间 | 后移避开V2建池，扫描完成后自动触发简报 |
+| # | 时间 | 任务 | 类型 | 状态 |
+|:-:|:----|:----|:----|:----:|
+| 1 | 每3分钟 18:00-11:59 | V4赛中快照 | agentTurn | ✅ ok |
+| 2 | 每小时 05/35 | V2窗口检查器 | agentTurn | ✅ ok |
+| 3 | 01:20 | V4扫描-凌晨 | agentTurn | ⚠️ 上次被重启打断 |
+| 4 | 07:20 | V4扫描-早场 | agentTurn | ✅ ok |
+| 5 | 07:35 | V2早场兜底 | agentTurn | ✅ ok |
+| 6 | 08:40/17:40/23:40 | SYS-架构审计守卫 | agentTurn | ✅ ok |
+| 7 | 周一 11:20 | V4周报 | agentTurn | — |
+| 8 | 12:10 | V2每日结算 | agentTurn | ✅（新，failureAlert） |
+| 9 | 12:35 | V4每日复盘 | agentTurn | ✅ ok |
+| 10 | 13:00 | SYS每日汇总 | agentTurn | ⚠️ Message failed |
+| 11 | 13:15 | V2建池-每日 | agentTurn | ✅ ok |
+| 12 | 14:05 | V4扫描-午间 | agentTurn | ✅ ok |
+| 13 | 14:45 | V4午间最后验收 | systemEvent | ✅ ok |
+| 14 | 15:35 | V2每日结算-补跑 | agentTurn | ✅ ok |
+| 15 | 16:20 | V4扫描-傍晚 | agentTurn | ✅ ok |
+| 16 | 17:25 | 每日状态更新 | systemEvent | ✅ ok |
+| 17 | 18:35 | V2晚场兜底 | agentTurn | ✅ ok |
+| 18 | 22:20 | V4扫描-晚间 | agentTurn | ✅ ok |
+| 19 | 23:35 | V2夜间兜底 | agentTurn | ✅ ok |
+| 20 | 每月1日 13:20 | V4月报 | agentTurn | — |
 
-规则：
-- V2/V4结算不并发；
-- 全部 delivery.mode=none；
-- 正式推送只走 systemEvent；
-- 不允许 announce；
-- 不允许 agentTurn 自由摘要。
+### 已知异常
 
-## 8. QQ Bot 规则（多Agent共用）
+1. **V4扫描-凌晨（01:20）** — 上次被 Gateway 重启打断（error），待下次自然触发验证，不补跑
+2. **SYS每日汇总（13:00）** — 上次 Message failed（agentTurn路径），已换 openclaw message send，待下次自然触发验证
 
-- ClawOps 是唯一正式推送入口
+### V4链路定义
+
+- **V4比赛推送**：来自V4扫描任务的当日简报，template_id=v4_scan_brief_qq_v1，不是复盘
+- **V4结算**：**不是独立cron**，是V4每日复盘（12:35）内部阶段，只按official manifest统计，不决定样本范围
+- **V4复盘**：赛后归因+剧本验证，template_id=v4_daily_review_qq_v1，可引用V4结算结果
+
+### 明天生产流程
+
+1. cron 自然运行
+2. renderer 输出模板文本
+3. guard PASS
+4. ReportAgent PASS
+5. `openclaw message send --channel qqbot --account report --target D1BC6F68CBBAC6A473947C53ECB861EC`
+6. delivery log
+7. marker=DELIVERED_UNCONFIRMED
+8. BOSS确认后 marker=SENT
+
+## 8. QQ Bot 规则（2026-05-16 收口版）
+
+### 报告 QQBOT
+- account=report，appid=1904021677
+- target_id=D1BC6F68CBBAC6A473947C53ECB861EC
+
+### 中控 QQBOT
+- account=control，target_id=FBC6F797A5C3B6FE2680A8B25F95E143
+
+### Safe Outbound
+
+唯一正式推送路径：
+
+```bash
+openclaw message send --channel qqbot --account report --target D1BC6F68CBBAC6A473947C53ECB861EC --message "$(cat <template_file>)"
+```
+
+禁止推送路径：
+- announce ❌
+- agentTurn ❌
+- model-call ❌
+- wake ❌
+- main session ❌
+- stdout ❌
+- Python relay ❌
+- Gateway patch ❌
+
+推送前置条件：
+1. template registry命中
+2. renderer输出
+3. guard PASS
+4. ReportAgent PASS
+5. route marker allowed_to_push=true
+
+### ClawOps 是唯一正式推送入口
 - AlertAgent 只生成异常报告内容，不直接推送 QQ
 - ReportAgent 只生成格式化报告内容，不直接推送 QQ
-- 所有 QQ systemEvent 必须由 ClawOps 统一发送
-- AlertAgent / ReportAgent 不得绕过 ClawOps 直接联系 BOSS
+- 所有推送由 ClawOps 统一发送
 - 不新增 QQ Bot，不新增 QQ App，不复制 appSecret/token
-- 周六高比赛量期间禁止调整 QQ Bot 结构
-- 多Agent共用现有 QQ Bot，由 ClawOps 统一调度和推送
 
 ## 9. 推送纪律违纪记录
 
@@ -240,43 +288,39 @@
 - git push/cron修改/配置修改/推送/systemEvent后必须立即出最终报告
 - delivery.mode=none 不禁止正式回报
 
-## 11. V4待排查异常（生产观察期）
+## 11. 已知异常（2项，不阻塞生产）
 
-| # | 任务 | 时间 | 异常 | 首次出现 | 状态 |
-|:-:|:----|:---:|:----|:--------:|:----:|
-| 1 | V4赛后复盘 | 12:35 | LLM 网络连接错误 | 2026-05-15 | ⚠️ 待观察 |
-| 2 | V4扫描-午间 | 14:05 | LLM 网络连接错误 | 2026-05-15 | ⚠️ 待观察 |
-| 3 | V4扫描-傍晚 | 16:20 | TIMEOUT（1200s） | 2026-05-15 | ⚠️ 待观察 |
-| 4 | V4扫描-凌晨 | 01:20 | Gateway restart interrupted | 2026-05-16 | ⚠️ 待观察 |
-| 5 | V4赛中快照 | */3min | 连续超时（300s timeout） | 2026-05-15 | ⚠️ 待观察 |
+1. **V4扫描-凌晨（01:20）** — 上次被 Gateway 重启打断，待下次自然触发验证，不补跑
+2. **SYS每日汇总（13:00）** — 上次 Message failed（agentTurn路径），已换 openclaw message send 直推，待下次自然触发验证
 
-说明：
-- 不自动 kill
-- 不自动 retry
-- 不改 timeout
-- 不改 cron
-- 不改 V4 策略
-- 不重跑 V4 扫描
-- 不重跑 V4 复盘
-- 只记录状态，等待 BOSS 指令
+## 12. Guard 新增规则（本次收口新增）
+
+- fixed_sections=10/10
+- script_summary=2符合1偏早（瓦斯尔偏早）
+- raw enum=0（MODELHIT/OFFICIALMANIFEST/v4officialsamples）
+- compressed enum=0（QQDELIVERYTEST/APIKEYMISSING 等）
+- command leak=0（EOF/cd/python3/2>&1）
+- full report leak=0（天气/场地/累计归因详细表/赛前信号不泄漏到QQ版）
+- C/SKIP=0条件固化
+- V4污染样本=0（Pachuca/A6/B8/20260516）
+- Alert code字段泄漏=0
 
 ---
 
-## 12. 生产观察期禁止事项
+## 13. 生产观察期禁止事项
 
 - 不修改 V2/V4 策略
 - 不修改 A/B/C/SKIP 规则
 - 不修改 BET_LOCKED 规则
 - 不恢复 announce
-- 不改 delivery.mode=on-complete
+- 不改 delivery.mode
 - 不改 cron 时间
 - 不改 timeout
 - 不自动重跑失败任务
-- 不 kill 进程
-- 不 retry
+- 不新增 cron（无BOSS明确指令）
+- 不使用 announce/agentTurn/wake/main session 推送
 - 不创建新 Agent
 - 不禁用 healthcheck/weather
-- 不继续 skill 第二批精简
 - 不推 full report 到 QQ
-- 不绕过 ReportAgent
+- 不绕过 ReportAgent / guard
 - 不自动修复

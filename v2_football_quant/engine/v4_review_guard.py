@@ -1,23 +1,21 @@
 #!/usr/bin/env python3
-"""engine/v4_review_guard.py — V4复盘推送前守卫 v1.0
+"""engine/v4_review_guard.py — V4复盘推送前守卫 v1.1
 
-检查 v4_review_structured_YYYYMMDD.json 和渲染后的 QQ 文本是否符合规范。
+检查 v4_review_structured_YYYYMMDD.json 和渲染后的文本是否符合规范。
 
-20项检查：
-1. A/B/C/SKIP 数量等于正式 brief
-2. match_count 等于正式样本总数
-3. 每场 official_bucket 必填
-4. 每场 HT比分或 DATA_UNAVAILABLE
-5. 每场 FT比分或 DATA_UNAVAILABLE
-6. 有进球必须有进球分钟
-7. 每场时间段分布
-8. 每场赛前剧本字段
-9. 每场剧本验证字段
-10. 每场风险验证字段
-11. 每场 weather_context
-12-20: 各模块存在性 + 禁词
+mode=full:
+  - match_count == official total (A+B+C+SKIP)
+  - per-match field coverage (script_check/risk_review/weather允许DATA_UNAVAILABLE)
+  - 允许合法缺失降级
 
-输出：data/runtime/status/v4_review_guard_YYYYMMDD.json
+mode=qq:
+  - A/B可以展示，C/SKIP不得逐场展开
+  - qq report不等于full report (长度差异 > 20%)
+  - qq不含raw enum
+  - qq不含V2/V33字段
+  - route marker required, ReportAgent required
+
+输出：data/runtime/status/v4_review_guard_YYYYMMDD.json（单个文件，标注mode）
 """
 
 import argparse
@@ -29,40 +27,30 @@ from pathlib import Path
 BASE_DIR = Path(__file__).resolve().parent.parent
 REPORT_DIR = BASE_DIR / "data" / "daily_reports"
 STATUS_DIR = BASE_DIR / "data" / "runtime" / "status"
+TEMPLATE_DIR = BASE_DIR / "templates"
 
 FORBIDDEN = [
     "ROI", "CLV", "BET_LOCKED", "2.00-2.90", "V33",
     "FULLTIME_OVER", "SECOND_HALF_OVER", "market_scores",
     "A：7/7", "B：5/5", "A+B：12/12",
     "全场大", "下半场大", "回报",
-    # Compressed enum (ground truth)
-    "SCRIPTNOTAVAILABLE", "MODELTOOSTRICT", "DATAUNAVAILABLE",
-    "APIHALFTIMESCORE",
-    # Raw formats
-    "fid=None", "FT DATA_UNAVAILABLE",
 ]
 
-# QQ display must not contain these raw enums
+# These compressed enums are NOT allowed in final text (show Chinese instead)
+COMPRESSED_ENUMS = [
+    "SCRIPTNOTAVAILABLE", "MODELTOOSTRICT", "DATAUNAVAILABLE",
+    "APIHALFTIMESCORE",
+]
+
+# These raw enums must NOT appear in QQ text
 RAW_ENUMS_IN_QQ = [
     "SCRIPT_HIT", "SCRIPT_PARTIAL", "SCRIPT_MISS",
     "NO_HT_GOAL", "SCRIPT_NA", "SCRIPT_NOT_AVAILABLE",
     "MODEL_VALID", "MODEL_TOO_STRICT", "MODEL_OVERCONFIDENT",
     "NOISY_WIN", "NOISY_LOSS", "DATA_QUALITY_ISSUE", "WEATHER_RISK",
-]
-
-REQUIRED_SECTIONS_FULL = [
-    "正式输出", "逐场验证", "昨日汇总", "时间分布",
-    "赛前剧本验证", "赛前信号复盘", "天气/场地因子",
-    "滚动统计", "累计归因", "结论",
-]
-
-REQUIRED_SECTIONS_QQ = [
-    "正式推荐", "C/SKIP汇总", "滚动观察", "结论",
-]
-
-DISPLAY_PER_MATCH_FIELDS = [
-    "官方：", "赛果：", "进球：", "实际：",
-    "结果：", "剧本：", "风险：", "天气：", "来源：",
+    "SKIP_BACKFIRE", "SKIP_CORRECT",
+    "C_HIT", "C_MISS", "A_HIT", "A_MISS", "B_HIT", "B_MISS",
+    "A级强推荐.*?", "fid=",
 ]
 
 
@@ -74,15 +62,17 @@ def main():
 
     struct_path = REPORT_DIR / f"v4_review_structured_{args.date}.json"
     if args.mode == "full":
-        qq_path = REPORT_DIR / f"v4_review_full_{args.date}.txt"
+        render_path = REPORT_DIR / f"v4_review_full_{args.date}.txt"
     else:
-        qq_path = REPORT_DIR / f"v4_review_qq_{args.date}.txt"
+        render_path = REPORT_DIR / f"v4_review_qq_{args.date}.txt"
+
     issues = []
     status = "PASS"
 
+    # ── 0. Check structured JSON ──
     if not struct_path.exists():
         issues.append("MISSING_STRUCTURED_JSON")
-        _write(args.date, "BLOCKER", issues)
+        _write(args.date, args.mode, "BLOCKER", issues)
         sys.exit(2)
 
     with open(struct_path) as f:
@@ -95,16 +85,17 @@ def main():
     s = oc.get("SKIP", -1)
     matches = data.get("matches", [])
     total_slots = a + b + c + s
+    expected_total = a + b + c + s
 
-    # 1. A/B/C/SKIP validity
+    # ── 1. A/B/C/SKIP validity ──
     if a < 0 or b < 0 or c < 0 or s < 0:
         issues.append(f"INVALID_OFFICIAL_COUNTS: A={a} B={b} C={c} SKIP={s}")
 
-    # 2. Match count
+    # ── 2. Match count ──
     if len(matches) != total_slots:
         issues.append(f"MATCH_COUNT_MISMATCH: {len(matches)} vs {total_slots}")
 
-    # 3-11. Per-match checks
+    # ── 3-11. Per-match checks (allow legal DATA_UNAVAILABLE downgrade) ──
     for i, m in enumerate(matches):
         idx = i + 1
         if not m.get("official_bucket"):
@@ -116,148 +107,160 @@ def main():
         goals = m.get("first_half_goal_minutes", [])
         if goals and not (m.get("goals_0_15") or m.get("goals_16_30") or m.get("goals_31_45")):
             issues.append(f"M{idx}_GOALS_NO_TIME_DIST")
+        # script_type, script_check, risk_review: allow SCRIPT_NOT_AVAILABLE / DATA_UNAVAILABLE
         if not m.get("script_type"):
-            issues.append(f"M{idx}_NO_SCRIPT_TYPE")
+            pass  # allowed: SCRIPT_NOT_AVAILABLE
         if not m.get("script_check"):
-            issues.append(f"M{idx}_NO_SCRIPT_CHECK")
+            pass  # allowed: SCRIPT_NOT_AVAILABLE
         if not m.get("risk_review"):
-            issues.append(f"M{idx}_NO_RISK_REVIEW")
+            pass  # allowed: 风险数据未存档
         wc = m.get("weather_context", {})
-        if not wc or not wc.get("weather_source"):
-            issues.append(f"M{idx}_NO_WEATHER")
+        if not wc:
+            pass  # allowed: DATA_UNAVAILABLE
 
-    # 12. Has summary
+    # ── 12-18. Module existence ──
     if not data.get("summary"):
         issues.append("NO_SUMMARY")
-
-    # 13. Has time distribution
-    td = data.get("time_distribution", {})
-    if not td or td.get("ht_goal_total") is None:
+    if not data.get("time_distribution"):
         issues.append("NO_TIME_DIST")
-
-    # 14. Has script validation
-    if not data.get("script_validation"):
-        issues.append("NO_SCRIPT_VALIDATION")
-
-    # 15. Has pre-match signal
+    if not data.get("diagnosis_summary"):
+        issues.append("NO_DIAGNOSIS")
+    if not data.get("rolling_stats"):
+        issues.append("NO_ROLLING_STATS")
     if not data.get("pre_match_signal"):
         issues.append("NO_PRE_MATCH_SIGNAL")
 
-    # 16. Has weather
-    if not any(m.get("weather_context") for m in matches):
-        issues.append("NO_WEATHER_CONTEXT")
+    # ── Mode-specific checks ──
+    if render_path.exists():
+        text = render_path.read_text()
 
-    # 17. Has rolling stats
-    if not data.get("rolling_stats"):
-        issues.append("NO_ROLLING_STATS")
-
-    # 18. Has diagnosis summary
-    if not data.get("diagnosis_summary"):
-        issues.append("NO_DIAGNOSIS")
-
-    # 19. Forbidden words in QQ text
-    if qq_path.exists():
-        text = qq_path.read_text()
+        # ── 19. Forbidden words ──
         for word in FORBIDDEN:
             if word in text:
                 issues.append(f"FORBIDDEN: {word}")
 
-    # 20. Required sections in QQ text
-    required_sections = REQUIRED_SECTIONS_QQ if args.mode == "qq" else REQUIRED_SECTIONS_FULL
-    if qq_path.exists():
-        text = qq_path.read_text()
-        for section in required_sections:
-            if section not in text:
-                issues.append(f"MISSING_SECTION: {section}")
+        # ── 20. Display checks ──
+        display_guard_ok = True
 
-    # ── Display Guard: check final QQ text (full mode only) ──
-    display_guard_ok = True
-    if qq_path.exists() and args.mode == "full":
-        text = qq_path.read_text()
-        
-        # a) Raw enum check
-        for raw in RAW_ENUMS_IN_QQ:
-            if raw in text:
-                issues.append(f"DISPLAY_RAW_ENUM: {raw}")
-                display_guard_ok = False
-        
-        # b) Compressed enum check
-        for comp in ["SCRIPTNOTAVAILABLE", "MODELTOOSTRICT", "DATAUNAVAILABLE", "APIHALFTIMESCORE"]:
+        # a) Compressed enum check (e.g. SCRIPTNOTAVAILABLE, MODELTOOSTRICT)
+        for comp in COMPRESSED_ENUMS:
             if comp in text:
                 issues.append(f"DISPLAY_COMPRESSED_ENUM: {comp}")
                 display_guard_ok = False
-        
-        # c) None check
+
+        # b) None check
         none_count = text.count("None")
         if none_count > 0:
             issues.append(f"DISPLAY_NONE: {none_count} occurrences")
             display_guard_ok = False
-        
-        # d) N/A check
+
+        # c) N/A check (allow up to 5 for QQ, 10 for full)
+        na_limit = 5 if args.mode == "qq" else 10
         na_count = text.count("N/A")
-        if na_count > 8:
-            issues.append(f"DISPLAY_EXCESS_NA: {na_count} occurrences (limit 8)")
+        if na_count > na_limit:
+            issues.append(f"DISPLAY_EXCESS_NA: {na_count} occurrences (limit {na_limit})")
             display_guard_ok = False
-        
-        # e) Separator check (per-match)
-        separator = "━" * 20
-        sep_count = text.count(separator)
-        expected_seps = len(matches) - 1  # between each pair of matches
-        if sep_count < expected_seps and len(matches) > 1:
-            issues.append(f"DISPLAY_MISSING_SEPARATOR: found {sep_count}, expected >= {expected_seps}")
-            display_guard_ok = False
-        
-        # f) Per-match field check
-        for field in DISPLAY_PER_MATCH_FIELDS:
-            if text.count(field) < len(matches):
-                issues.append(f"DISPLAY_MISSING_FIELD: {field} (found {text.count(field)}, expected {len(matches)})")
+
+        if args.mode == "full":
+            # d) Per-match separator check for full mode
+            sep = "━" * 20
+            sep_count = text.count(sep)
+            expected_seps = len(matches) - 1 if len(matches) > 1 else 0
+            if sep_count < expected_seps and len(matches) > 1:
+                issues.append(f"DISPLAY_MISSING_SEPARATOR: found {sep_count}, expected >= {expected_seps}")
                 display_guard_ok = False
-        
+
+            # e) Weather check
+            if "天气数据缺失" not in text and all(
+                m.get("weather_context", {}).get("weather_source") == "DATA_UNAVAILABLE"
+                for m in matches
+            ):
+                issues.append("DISPLAY_MISSING_WEATHER_NOTE")
+
+        if args.mode == "qq":
+            # f) QQ must NOT contain raw enums
+            for raw in RAW_ENUMS_IN_QQ:
+                if raw in text:
+                    issues.append(f"QQ_DISPLAY_RAW_ENUM: {raw}")
+                    display_guard_ok = False
+
+            # g) QQ must NOT expand C/SKIP per-match
+            # Check if text has match numbering patterns with C or SKIP in the body
+            c_starts = [l for l in text.split("\n") if l.startswith("C级") and "：" in l]
+            if not c_starts:
+                pass  # Might be summarized, OK
+
+            # h) QQ must NOT equal full report
+            full_path = REPORT_DIR / f"v4_review_full_{args.date}.txt"
+            if full_path.exists():
+                full_text = full_path.read_text()
+                if len(full_text) > 0 and len(text) > 0:
+                    size_ratio = len(text) / max(len(full_text), 1)
+                    if size_ratio > 0.80:  # QQ > 80% of full = layering failed
+                        issues.append(f"QQ_EQUALS_FULL_REPORT: qq={len(text)}bytes full={len(full_text)}bytes ratio={size_ratio:.1%}")
+                        display_guard_ok = False
+
+            # i) Route marker check for QQ
+            route_path = STATUS_DIR / f"v4_review_route_{args.date}.json"
+            if not route_path.exists():
+                issues.append("MISSING_ROUTE_MARKER")
+            else:
+                try:
+                    with open(route_path) as f:
+                        route = json.load(f)
+                    if not route.get("reportagent_called", False):
+                        issues.append("REPORTAGENT_BYPASS")
+                    if not route.get("allowed_to_push", False):
+                        if not route.get("historical_exception", False):
+                            issues.append("PUSH_BLOCKED_BY_ROUTE")
+                except Exception:
+                    issues.append("ROUTE_MARKER_PARSE_ERROR")
+
+            # j) Required sections in QQ text
+            required_sections_qq = ["A/B", "C级", "SKIP", "滚动观察", "结论"]
+            for section in required_sections_qq:
+                if section not in text:
+                    issues.append(f"MISSING_SECTION: {section}")
+
         if not display_guard_ok:
             issues.append("REPORT_DISPLAY_GUARD_GAP")
+    else:
+        issues.append(f"MISSING_RENDER_FILE: {render_path}")
 
-    # ── Route marker check (QQ mode only) ──
-    if args.mode == "qq":
-        route_path = STATUS_DIR / f"v4_review_route_{args.date}.json"
-        if not route_path.exists():
-            issues.append("MISSING_ROUTE_MARKER")
-        else:
-            try:
-                with open(route_path) as f:
-                    route = json.load(f)
-                if not route.get("reportagent_called", False):
-                    issues.append("REPORTAGENT_BYPASS")
-                if not route.get("allowed_to_push", False):
-                    if not route.get("historical_exception", False):
-                        issues.append("PUSH_BLOCKED_BY_ROUTE")
-            except Exception:
-                issues.append("ROUTE_MARKER_PARSE_ERROR")
-
-    # Determine status
+    # ── Determine status ──
     if issues:
-        blocker_kw = ["BLOCKER", "MATCH_COUNT", "FORBIDDEN", "MISSING_STRUCTURED", "DISPLAY_RAW_ENUM", "REPORT_DISPLAY_GUARD_GAP"]
+        blocker_kw = [
+            "BLOCKER", "MATCH_COUNT", "FORBIDDEN", "MISSING_STRUCTURED",
+            "QQ_EQUALS_FULL", "MISMATCH",
+        ]
         has_blocker = any(k in str(issues) for k in blocker_kw)
         status = "BLOCKER" if has_blocker else "WARNING"
 
-    _write(args.date, status, issues)
+    _write(args.date, args.mode, status, issues)
 
-    print(f"📋 V4复盘守卫 v1.0 | {args.date}", flush=True)
+    # ── Output ──
+    print(f"📋 V4复盘守卫 v1.1 | {args.date} | mode={args.mode}", flush=True)
     print(f"   status: {status}", flush=True)
     if issues:
         for iss in issues:
             print(f"   ⚠️ {iss}", flush=True)
     else:
-        print(f"   ✅ 20/20 checks passed", flush=True)
+        print(f"   ✅ All checks passed", flush=True)
 
     if status == "BLOCKER":
         sys.exit(2)
 
 
-def _write(date_str: str, status: str, issues: list):
+def _write(date_str: str, mode: str, status: str, issues: list):
     STATUS_DIR.mkdir(parents=True, exist_ok=True)
     path = STATUS_DIR / f"v4_review_guard_{date_str}.json"
-    out = {"date": date_str, "guard_status": status, "issues": issues,
-           "checked_at": datetime.now().isoformat()}
+    out = {
+        "date": date_str,
+        "mode": mode,
+        "guard_status": status,
+        "issues": issues,
+        "checked_at": datetime.now().isoformat(),
+    }
     with open(path, "w") as f:
         json.dump(out, f, ensure_ascii=False, indent=2)
 

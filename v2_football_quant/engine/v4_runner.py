@@ -25,7 +25,7 @@ sys.path.insert(0, str(BASE_DIR))
 
 from config.secrets import API_KEY, API_HOST
 from engine.data_sources.api_coverage import evaluate_fixture_coverage
-from engine.net_utils import _rpm_wait
+from engine.net_utils import _rpm_wait, api_get as _net_api_get
 from engine.task_watchdog import v4_scan_watchdog
 from engine.data_sources.h2h_engine import (
     evaluate_h2h_edge,
@@ -90,19 +90,8 @@ def _load_league_status_map() -> dict[str, dict]:
 
 
 def api_get(endpoint: str):
-    _rpm_wait()  # RPM 限流保护 (480次/分钟)
-    url = f"{API_HOST}/{endpoint}"
-    req = urllib.request.Request(url, headers={
-        "x-apisports-key": API_KEY,
-        "User-Agent": "V2-Football-Quant/1.0"
-    })
-    for attempt in range(3):
-        try:
-            with urllib.request.urlopen(req, context=ctx, timeout=15) as resp:
-                return json.loads(resp.read())
-        except Exception:
-            if attempt < 2: time.sleep(0.5)
-    return None
+    """API请求 → net_utils.api_get (urllib + curl兜底, 防IPv6卡死)"""
+    return _net_api_get(endpoint, api_key=API_KEY, api_host=API_HOST, retries=3)
 
 
 def _cached_api_client(base_client):
