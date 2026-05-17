@@ -30,6 +30,7 @@ sys.path.insert(0, str(BASE_DIR))
 from engine import net_utils
 
 REPORT_DIR = BASE_DIR / "data" / "daily_reports"
+ARCHIVE_DIR = BASE_DIR / "data" / "v4_archive"
 
 
 def _safe_int(v, default=0):

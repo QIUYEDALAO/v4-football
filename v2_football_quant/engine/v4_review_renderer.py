@@ -71,7 +71,7 @@ def _strip_fid(url_or_num):
 
 
 def _match_row_full(m: dict, idx: int) -> str:
-    """Full per-match rendering (used in full report)."""
+    """Full per-match rendering (used in 完整报告)."""
     home = m.get("home", "?")
     away = m.get("away", "?")
     league = m.get("league", "?")
@@ -86,7 +86,7 @@ def _match_row_full(m: dict, idx: int) -> str:
     result = m.get("model_result", "数据缺失")
     diag = m.get("diagnosis", "数据缺失")
     ds = m.get("data_source", "数据缺失")
-    script_check = m.get("script_check", "SCRIPT_NOT_AVAILABLE")
+    script_check = m.get("script_check", "SCRIPT_MISSING")
     risk_review = m.get("risk_review", "风险数据未存档")
 
     diag_cn = _lbl(diag, _DIAG_LABELS)
@@ -98,7 +98,7 @@ def _match_row_full(m: dict, idx: int) -> str:
         goals_text = "无"
 
     # Clean up script/risk
-    if script_check in ("SCRIPT_NOT_AVAILABLE", "False", False, None):
+    if script_check in ("SCRIPT_MISSING", "False", False, None):
         script_text = "剧本未存档"
     else:
         script_text = str(script_check)
@@ -128,7 +128,7 @@ def _ab_detail_qq(ab_matches: list) -> str:
     """Generate A/B detail section for QQ report.
     - Show unhit/abnormal matches first
     - Show up to 5 representative hits
-    - Then '其余A/B已入库，详见full report'
+    - Then '其余A/B已入库，详见完整报告'
     """
     if not ab_matches:
         return ""
@@ -144,7 +144,7 @@ def _ab_detail_qq(ab_matches: list) -> str:
 
     # First: misses/abnormal
     if misses:
-        lines.append("\n--- 未命中 / 异常 ---")
+        lines.append("\n--- ❌ 未命中 / 异常 ---")
         for i, m in enumerate(misses[:], 1):
             g = "无" if not m.get("first_half_goal_minutes") else "、".join(f"{g}′" for g in m["first_half_goal_minutes"])
             diag = _lbl(m.get("diagnosis", ""), _DIAG_LABELS)
@@ -168,9 +168,9 @@ def _ab_detail_qq(ab_matches: list) -> str:
             )
 
     # Remaining hits count
-    remaining_hits = len(hits) - len(representative_hits)
-    if remaining_hits > 0:
-        lines.append(f"\n其余{remaining_hits}场A/B已入库，详见full report。")
+    _unused_remaining = len(hits) - len(representative_hits)
+    if False:  # disabled - all matches shown in full list
+        pass  # all matches shown above
 
     return "\n".join(lines)
 
@@ -318,7 +318,7 @@ def _render_qq(data, args):
     """Render QQ daily brief.
     - A/B summary with limited detail (unhits first + up to 5 rep hits)
     - C/SKIP summary only (no per-match)
-    - No full report sections
+    - No 完整报告 sections
     """
     oc = data.get("official_counts", {})
     a = oc.get("A", 0)

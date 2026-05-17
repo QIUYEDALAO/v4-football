@@ -8,7 +8,10 @@ SIGKILL 时父进程存活并记录状态。
 from __future__ import annotations
 
 import argparse
+import hashlib
+import json
 import os
+import re
 import subprocess
 import sys
 import time
@@ -156,7 +159,7 @@ def main():
         brief_path = REPORT_DIR / f"v4_openclaw_brief_{today_key}.txt"
         brief_path.write_text(brief_text, encoding="utf-8")
         
-        qq_text = format_qq(args.date)
+        qq_text = format_qq(args.date, window=args.window)
         qq_path = REPORT_DIR / f"v4_openclaw_brief_qq_{today_key}.txt"
         qq_path.write_text(qq_text, encoding="utf-8")
 
@@ -165,20 +168,63 @@ def main():
             wd.finish(status="FAILED", error="内容守卫拦截")
             return
 
+        # ── 解析A/B数量 ──
+        ab_count = 0
+        import re
+        a_match = re.search(r'A级.*?[：:]\s*(\d+)', qq_text)
+        b_match = re.search(r'B级.*?[：:]\s*(\d+)', qq_text)
+        if a_match:
+            ab_count += int(a_match.group(1))
+        if b_match:
+            ab_count += int(b_match.group(1))
+        # Fallback: check QQ brief text
+        if ab_count == 0:
+            m = re.search(r'A0\s*B(\d+)', qq_text)
+            if m:
+                ab_count = int(m.group(1))
+
+        # ── 写入 push marker（无论delivery如何）──
+        import hashlib
+        marker_dir = REPORT_DIR / ".." / "data" / "runtime" / "status"
+        marker_dir = marker_dir.resolve()
+        marker_dir.mkdir(parents=True, exist_ok=True)
+        now_ts = datetime.now(LOCAL_TZ).isoformat()
+        msg_hash = hashlib.md5(qq_text.encode()).hexdigest()[:16]
+
+        push_marker = {
+            "date": today_key,
+            "window": args.window,
+            "template_id": "v4_scan_brief_qq_v1",
+            "ab_count": ab_count,
+            "status": "GENERATED",
+            "ab_gt_zero": ab_count > 0,
+            "message_hash": msg_hash,
+            "brief_file": str(brief_path.name),
+            "qq_file": str(qq_path.name),
+            "generated_at": now_ts,
+            "pushed": False,
+            "reason": "pending_push" if ab_count > 0 else "no_ab",
+        }
+        push_marker_path = marker_dir / f"v4_scan_push_{today_key}_{args.window}.json"
+        with open(push_marker_path, "w") as f:
+            json.dump(push_marker, f, ensure_ascii=False, indent=2)
+
         # Push logic: 推送 QQ 版
         if args.push == "never":
             print("[WATCHDOG] brief generated, push skipped (never)", flush=True)
         elif args.push == "conditional":
             has_ab = "今日 V4 有 " in qq_text and "上半场推荐" in qq_text
             if has_ab:
+                print(f"[PUSH] A/B={ab_count}>0, 简报已生成, push marker: {push_marker_path.name}", flush=True)
                 print(qq_text, flush=True)
             else:
                 print("[WATCHDOG] brief generated, push skipped (conditional: no A/B)", flush=True)
         else:
+            print(f"[PUSH] A/B={ab_count}>0, 简报已生成, push marker: {push_marker_path.name}", flush=True)
             print(qq_text, flush=True)
 
         GLOBAL_LOCK.unlink(missing_ok=True)
-        wd.finish(status="DONE", output_files={"scout": str(scout_path), "brief": str(brief_path), "brief_qq": str(qq_path), "scan_log": str(log_path)})
+        wd.finish(status="DONE", output_files={"scout": str(scout_path), "brief": str(brief_path), "brief_qq": str(qq_path), "scan_push": str(push_marker_path), "scan_log": str(log_path)})
 
     except Exception as e:
         GLOBAL_LOCK.unlink(missing_ok=True)

@@ -5,28 +5,122 @@
 
 ---
 
+## 📋 2026-05-17 日终状态
+
+### V2
+- DAILY_POOL: 手动补跑成功 ✅ pool=155, BET_LOCKED=2(过期未推), WATCH_EARLY=135, CANDIDATE=1
+- 窗口检查器: 正常运行 ✅
+- 结算(05-16): NO_SETTLEMENT_NEEDED
+
+### V4扫描
+- 凌晨(01:20): CHAIN_INCOMPLETE ❌ 独立日志缺失，产物被早场覆盖
+- 早场(07:20): PIPELINE_READY ⚠️ 旧QQ模板历史（已被覆盖）
+- 午间(14:05): PIPELINE_READY ⚠️ 旧QQ模板历史
+- 傍晚(16:20): CODE_READY ⚠️ 旧QQ模板
+- 晚间(22:20): CODE_READY（未到时间）
+- **QQ模板已永久修复** ✅ v4_qq_formatter.py v2.0 — A/B全量/开赛时间/分布/分隔线/C/SKIP摘要
+- **Push marker已自动写入** ✅ 每个窗口独立marker
+- **窗口独立日志已配置** ✅ late/morning/noon/evening/night
+- **当前非PRODUCTION_VERIFIED** — 明日首次cron触发后方可验证
+
+### V4复盘(20260516)
+- 手动链路已验证通过 ✅ structured 49场 / full 18KB / qq 1.3KB / guard PASS / ReportAgent PASS
+- **非cron生产验证** — renderer/guard/marker已纳入v4_review_with_watchdog.py
+- 待明日12:35自然触发验证
+
+### V4盘中快照
+- cron ID 8e7abfa6, 每3分钟
+- 今日文件 ✅ 39KB
+- max-fixtures已部署
+- dangerous_attacks=UNSUPPORTED_BY_API, 仅记录不参与评级
+
+### 临时cron
+- acaa39be (14:45): TEMP_VALIDATION_CRON
+- 本轮未删除，建议明日12:35复盘自然PASS后处理
+
+### Cron修复
+- V2建池: model=null ✅ (运行层待明日13:15验证)
+- V2结算补跑: 15:35→15:37 ✅
+
+### 异常
+- P1_SCHEDULER_STATE_INCONSISTENCY
+- P1_DAILY_POOL_AGENTTURN_MODEL_NULL_NEEDS_RUNTIME_VERIFY
+- P2_SYS_CHAIN_GUARD_GAP
+- ✅ 今日无BLOCKER
+
+---
+
 ## 0. 更新时间
 
-- 更新时间：2026-05-16 20:16
+- 更新时间：2026-05-17 17:26
 - 更新人：ClawOps
 - GitHub 仓库：whoerixxz/v2-football-quant
-- 最新 commit：`a95ff34` → qqbot_safe_send.py + V4复盘QQ摘要版最终SENT + Alert测试SENT
+- 最新 commit：`13446c7` → V4: 修复每日复盘生产链路与QQ分层
 - 当前运行环境：生产
 - 当前阶段：纸盘验证，生产观察期
-- 本周末：周六高比赛量重点观察
-- **P0 safe outbound 已打通**：openclaw message send --channel qqbot --account report 已验证可用
-- **20项 cron 已确认**，冗余清理完成（删除旧 V2每日结算 `258c4286`）
-- **V4复盘 QQ摘要版最终版已 SENT**：2026-05-15，8cf16b62，✅ 命中标记
-- **Alert 测试已 SENT**（test_only=true），不接入真实 Alert
-- **V2建池摘要 SENT**（b4883e0a）
-- **SYS每日汇总上趟 Message failed**（agentTurn路径），已改为 openclaw message send 直推，待下次自然触发验证
-- **V4复盘日期语义问题已修复**：secrets.py + net_utils + watchdog env 显式传递
-- **V2建池摘要已 SENT**（openclaw message send 直推，hash=b4883e0a）
-- **Scheduler 文件态异常**（MEDIUM_CONTROL_PLANE_STORE_DRIFT）
-  - 内存 timerArmed=true，13:15 V2建池自然触发正常
-  - 但 jobs.json 上 22/22 的 nextRunAt 全部为 None（序列化异常）
-  - 非 P0，暂不重启 Gateway
-  - 观察 14:05 V4午间扫描是否自然触发
+- **V2 DAILY_POOL cron 稳定性已修复（配置层）**
+  - cron ID: 73ef5647
+  - model=null（已移除不必要LLM依赖）
+  - kind=agentTurn / sessionTarget=isolated（OpenClaw不支持纯command job）
+  - delivery.mode=none
+  - 日志路径：data/runtime/logs/v2_daily_pool_YYYYMMDD.log（含START/END/ERROR/exit_code）
+  - 明天13:15后需核验运行层（P1_DAILY_POOL_AGENTTURN_MODEL_NULL_NEEDS_RUNTIME_VERIFY）
+- **V2结算补跑时间错开**：15:35 → 15:37
+- **今日V2 DAILY_POOL手动补跑成功**（13:15真实cron因LLM模型超时导致STALLED_RUNNING）
+  - pool_count=155扫描
+  - BET_LOCKED=2 | WATCH_EARLY=135 | CANDIDATE=1
+  - BET_LOCKED=2未推QQ，根因：DAILY_POOL手动补跑时间过晚(14:11)，
+    窗口检查器再次运行时比赛已开赛(SKIPPED_STARTED_OR_CLOSED)，非窗口检查器自身问题
+- **V4午间扫描已完成**：78场，A7/B16/C34/SKIP21
+- **V4扫描QQ模板已固化**：A/B完整展开+联赛/开赛/评分/分布/C/SKIP只汇总
+- **20260516 V4复盘链路已修复**：full/qq分层、guard、QQ显示层
+- **20260517 V4复盘QQ显示层已推送 corrected_v2**
+- **V4复盘 cron 链路已补全**：renderer→guard→route→sent 已进入 watchdog 脚本
+  - 等明日12:35自然cron触发验证
+- **Scheduler 文件态异常**（P1_SCHEDULER_STATE_INCONSISTENCY）
+  - 内存 timerArmed=true，但 jobs.json 中20/20的 nextRunAt=None
+  - 不重启Gateway，不重建scheduler
+  - cron固定表达式任务重启后由wall clock恢复，风险可控
+
+## P2_SYS_CHAIN_GUARD_GAP（持续开放）
+SYS守卫需覆盖（待BOSS确认后实现）：
+- V2建池 pool文件 existence check
+- V2 task_status RUNNING卡住检测
+- V2 API_NO_KEY
+- V4 scan scout/brief/QQ brief存在性
+- V4 A/B>0推送状态
+- V4 scan push marker
+- 旧口径污染
+
+**当前不实现，仅记录。**
+
+## P1_DAILY_POOL_AGENTTURN_MODEL_NULL_NEEDS_RUNTIME_VERIFY
+- DAILY_POOL cron 已移除LLM model依赖(model=null)
+- OpenClaw cron 不支持纯command job，只能保留agentTurn/isolated
+- agentTurn+model=null 运行时是否仍初始化默认LLM，需明日13:15后核验
+- 若仍出现STALLED_RUNNING或LLM初始化，需改为systemEvent+外部调度
+
+## P1_SCHEDULER_STATE_INCONSISTENCY（持续）
+- jobs.json 中20/20 nextRunAt=None（序列化异常）
+- 此前报告22/22，现为20/20。原因是历史清理删除了2个废弃job（旧V2每日结算等），非新增问题
+- DAILY_POOL (73ef5647) 仍在jobs.json中 ✅
+- DAILY_POOL 仍在内存cron列表中，下次触发显示为in 20h ✅
+- 内存timerArmed=true，当前不影响触发
+- Gateway重启后存在文件态恢复风险，但固定cron表达式可基于wall clock重算
+- 不重启Gateway，不重建scheduler，不删除jobs
+
+## 明日(2026-05-18) 13:15 验收清单
+DAILY_POOL cron自动触发后检查：
+1. cron 73ef5647 是否自动触发
+2. 日志 data/runtime/logs/v2_daily_pool_20260518.log 是否存在
+3. 日志含：V2 DAILY_POOL START / exit_code= / V2 DAILY_POOL END 或 ERROR
+4. exit_code=0
+5. selected_fixtures_20260518.json 生成
+6. cron状态不再出现STALLED_RUNNING
+7. 无LLM/model初始化痕迹
+8. V2窗口检查器05/35正常
+9. 未发生QQ推送
+10. 策略未改
 
 ---
 

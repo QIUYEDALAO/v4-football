@@ -87,8 +87,16 @@ def main():
 
     for fid_str, fstate in fixtures.items():
         # 已锁定或已取消锁定 → 跳过
-        if fstate.get("locked_stage") or fstate.get("lock_cancelled"):
-            continue
+        already_locked = fstate.get("locked_stage") and fstate.get("lock_owner") == "window_checker"
+        if already_locked or fstate.get("lock_cancelled"):
+            # 正式确认的锁才跳过；DAILY_POOL的候选锁不跳过
+            if fstate.get("lock_owner") == "window_checker":
+                continue
+        # 检查 DAILY_POOL 预写字段 → 标记PRELOCK冲突但继续处理
+        if fstate.get("locked_stage") and fstate.get("lock_owner") != "window_checker":
+            fstate["lock_owner_conflict_detected"] = True
+            fstate["conflict_reason"] = f"prelocked_by_{fstate.get('lock_owner', 'unknown')}"
+            print(f"PRELOCK_OWNERSHIP_CONFLICT: fid={fid_str} prelocked_by={fstate.get('lock_owner', 'unknown')}", flush=True)
 
         ko_str = fstate.get("kickoff_time") or fstate.get("last_seen_time", "")
         if not ko_str:
@@ -122,6 +130,11 @@ def main():
                 fstate["lock_cancel_reason"] = None
                 fstate["final_observed_odds_D"] = odds_D
                 fstate["final_odds_status"] = "LOCKED_IN_BAND"
+                fstate["lock_owner"] = "window_checker"
+                fstate["lock_source"] = "v2_window_checker"
+                fstate["official_bet_locked"] = True
+                fstate["qq_required"] = True
+                fstate["settlement_required"] = True
                 selected.add(fid_str)
                 new_locks.append(fid_str)
 

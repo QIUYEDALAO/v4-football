@@ -178,19 +178,91 @@ def main():
                 issues.append("DISPLAY_MISSING_WEATHER_NOTE")
 
         if args.mode == "qq":
-            # f) QQ must NOT contain raw enums
+            # f) QQ must NOT contain DATA_UNAVAILABLE
+            if "DATA_UNAVAILABLE" in text:
+                issues.append(f"QQ_DISPLAY_DATA_UNAVAILABLE: found in text")
+                display_guard_ok = False
+            
+            # g1) Forbidden league names
+            forbidden_leagues = ["Pro League", "Segunda División", "J1 League", "Czech Liga", "NB I", "Super League", "Süper Lig"]
+            for lg in forbidden_leagues:
+                if lg in text:
+                    issues.append(f"QQ_FORBIDDEN_ENGLISH_LEAGUE: {lg}")
+                    display_guard_ok = False
+            
+            # g2) Forbidden patterns: "情报\d+级", "B\d+级", "C\d+级", "跳过\d+"
+            import re
+            bad_patterns = [
+                (r'情报\d+级', 'QQ_BAD_STATS_FORMAT: 情报X级'),
+                (r'B\d+级', 'QQ_BAD_STATS_FORMAT: BX级'),
+                (r'C\d+级', 'QQ_BAD_STATS_FORMAT: CX级'),
+                (r'跳过\d+[^场]', 'QQ_BAD_STATS_FORMAT: 跳过X'),
+                (r'重点A级前2', 'QQ_FORBIDDEN_TOP2'),
+                (r'^\s+HT\d+', 'QQ_INDENTED_HT_LINE'),
+            ]
+            for pat, msg in bad_patterns:
+                if re.search(pat, text, re.MULTILINE):
+                    issues.append(msg)
+                    display_guard_ok = False
+            
+            # g3) Data unavailable + model overconfident proximity
+            if "数据缺失" in text and "模型过度自信" in text:
+                import re as _re2
+                lines_t = text.split('\n')
+                for i, l in enumerate(lines_t):
+                    if '数据缺失' in l and i > 0:
+                        nearby = ' '.join(lines_t[i:i+3])
+                        if '模型过度自信' in nearby:
+                            issues.append("QQ_DATA_UNAVAILABLE_NEAR_OVERCONFIDENT")
+                            display_guard_ok = False
+            
+            # g4) Review guard: forbidden terms
+            review_forbidden = [
+                "existing artifact", "existingartifact", "source=existingartifact",
+                "DATAUNAVAILABLE", "DATAMISSINGMARKER",
+                "full report", "reviewdate",
+            ]
+            for term in review_forbidden:
+                if term in text:
+                    issues.append(f"QQ_REVIEW_FORBIDDEN_TERM: {term}")
+                    display_guard_ok = False
+            
+            # g5) Review guard: must have end marker
+            if "—— V4复盘模板验收TEST结束 ——" not in text:
+                # For non-TEST texts, check for "——" as minimal end marker
+                has_end = "——" in text or "⚠️" in text[-100:]
+                if not has_end:
+                    issues.append("QQ_REVIEW_MISSING_END_MARKER")
+                    display_guard_ok = False
+
+            # g) QQ must NOT contain raw enums
             for raw in RAW_ENUMS_IN_QQ:
                 if raw in text:
                     issues.append(f"QQ_DISPLAY_RAW_ENUM: {raw}")
                     display_guard_ok = False
 
-            # g) QQ must NOT expand C/SKIP per-match
-            # Check if text has match numbering patterns with C or SKIP in the body
-            c_starts = [l for l in text.split("\n") if l.startswith("C级") and "：" in l]
-            if not c_starts:
-                pass  # Might be summarized, OK
+            # h) QQ C/SKIP summary must show percentage (not 'x/y · x/y')
+            for line in text.split("\n"):
+                if "C级：" in line or "C级" in line and "：" in line:
+                    # Check for '· x/y' pattern (duplicate ratio)
+                    parts = line.split("·")
+                    if len(parts) >= 2:
+                        right_side = parts[-1].strip()
+                        if "/" in right_side:
+                            issues.append(f"QQ_C_SUMMARY_RATIO_NOT_PCT: '{line.strip()}'")
+                            display_guard_ok = False
+                if "SKIP反杀：" in line or "SKIP" in line and "反杀" in line and "：" in line:
+                    parts = line.split("·")
+                    if len(parts) >= 2:
+                        right_side = parts[-1].strip()
+                        if "/" in right_side:
+                            issues.append(f"QQ_SKIP_SUMMARY_RATIO_NOT_PCT: '{line.strip()}'")
+                            display_guard_ok = False
 
-            # h) QQ must NOT equal full report
+            # i) QQ must NOT expand C/SKIP per-match
+            # Check if text has match numbering patterns with C or SKIP in the body
+
+            # j) QQ must NOT equal full report
             full_path = REPORT_DIR / f"v4_review_full_{args.date}.txt"
             if full_path.exists():
                 full_text = full_path.read_text()
