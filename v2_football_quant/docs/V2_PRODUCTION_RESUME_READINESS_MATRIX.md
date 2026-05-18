@@ -47,3 +47,4 @@ Each row includes:
 - This matrix does not authorize execution.
 - This matrix does not authorize production resume.
 - Phase E remains forbidden.
+- Current level remains `CODE_READY` (not `PIPELINE_READY`, not `PRODUCTION_VERIFIED`).

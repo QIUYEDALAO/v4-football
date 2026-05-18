@@ -48,3 +48,10 @@
 - D.8.29 is not production resume.
 - D.8.29 does not enter Phase E.
 - D.8.30 still requires explicit BOSS instruction.
+- Remaining unproven items stay open:
+  - `real_state_present_case`
+  - `active_window_mutation_path`
+  - `production_cron_path`
+  - `production_qq_path`
+  - `production_verified_path`
+  - `formal_state_write_path`

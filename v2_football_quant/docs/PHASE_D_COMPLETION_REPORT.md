@@ -250,7 +250,7 @@ Phase D 工程链路完成（engineering_complete=true），但 business_pass=fa
 | D.8.26 | `876df65` | Final boss approval gate |
 | D.8.27 | `8e1a9ab` | Controlled execution simulation plan |
 | D.8.28 | `cc9ca05` | Production resume readiness matrix |
-| D.8.29 | `TBD` | Phase D final decision packet |
+| D.8.29 | `a4c4244` | Phase D final decision packet |
 
 **D.8.13 结论：** approval_packet_status=READY_FOR_BOSS_REVIEW，guarded_live_observe_approved=false，D.8.14 需 BOSS 单独指令。
 
@@ -290,6 +290,27 @@ Phase D 工程链路完成（engineering_complete=true），但 business_pass=fa
   - `PIPELINE_READY=false`
   - `PRODUCTION_VERIFIED=false`
   - 不恢复生产，不进入 Phase E。
+
+## 17. D.8-BB Final Closure
+
+- D.8.26-D.8.29 已全部完成且已独立提交。
+- 当前结论保持不变：
+  - `current_level=CODE_READY`
+  - `PIPELINE_READY=false`
+  - `PRODUCTION_VERIFIED=false`
+  - `production_resume_allowed_now=false`
+  - `cron_enable_allowed=false`
+  - `qq_push_allowed=false`
+  - `verified_write_allowed=false`
+  - `state_write_allowed=false`
+- Phase E 仍未进入，production resume 仍未执行。
+- 仍未证明项保留：
+  - `real_state_present_case`
+  - `active_window_mutation_path`
+  - `production_cron_path`
+  - `production_qq_path`
+  - `production_verified_path`
+  - `formal_state_write_path`
 
 <!-- D.8.16.3 closure: v2_football_quant/docs/PHASE_D_COMPLETION_REPORT.md -->
 
