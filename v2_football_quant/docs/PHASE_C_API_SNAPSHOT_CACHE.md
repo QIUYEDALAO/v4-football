@@ -178,3 +178,28 @@ python3 tools/api_snapshot_cache_dryrun.py --date 20260517 --module all --check
 ### 下一阶段边界
 - C.7 才考虑非关键模块只读灰度；
 - V2/V4 正式接 cache 仍需单独 BOSS 指令与生产验证阶段。
+
+## Phase C.7：Non-critical Shadow Consumer（本轮）
+### 目标
+- 仅允许非关键模块通过 shadow consumer 旁路读取 cache；
+- 允许范围：`dashboard / replay / audit`；
+- 禁止范围：`v2_daily_pool / v2_window_checker / v2_settlement / v4_scan / v4_review / qq_sender`；
+- 正式 V2/V4 链路继续使用原数据源；
+- 保留 fallback 到原始来源能力；
+- 不调用 API、不读取 API key、不改 cache、不接 cron、不推QQ、不写 `PRODUCTION_VERIFIED`。
+
+### 核心边界
+- `production_dependency=false`
+- `production_verified=false`
+- `production_path_untouched=true`
+- `fallback_to_original_source=true`
+- `cache_reader_used_as_primary=false`（replay 仅展示 shadow 状态，不替换主源）
+
+### 当前业务范围说明
+- 当前 cache 业务样本仍以 `status` endpoint 为主；
+- C.7 只能证明“非关键旁路消费机制可用”，不能证明 V2/V4 业务数据一致；
+- 任何把 shadow consumer 升级为生产主源的行为均不在本阶段范围内。
+
+### 下一阶段边界
+- C.8 才考虑非关键模块实际页面灰度；
+- V2/V4 正式接 cache 仍需单独 BOSS 指令。

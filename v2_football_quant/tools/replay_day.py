@@ -29,12 +29,15 @@ def _load_json(path: Path, default: Any) -> Any:
 def main() -> None:
     parser = argparse.ArgumentParser(description="Replay Day v1 (read-only)")
     parser.add_argument("--date", required=True, help="YYYYMMDD")
-    parser.add_argument("--module", required=True, choices=sorted(ALLOWED_MODULES))
+    parser.add_argument("--module", required=False, choices=sorted(ALLOWED_MODULES))
+    parser.add_argument("--target", required=False, choices=sorted(ALLOWED_MODULES))
     parser.add_argument("--mode", required=True, choices=sorted(ALLOWED_MODES))
     args = parser.parse_args()
 
     date_key = args.date.strip().replace("-", "")
-    module = args.module
+    module = args.module or args.target
+    if not module:
+        raise SystemExit("one of --module/--target is required")
     mode = args.mode
 
     ledger_path = LEDGER_DIR / f"{date_key}.json"
@@ -50,6 +53,9 @@ def main() -> None:
     elif module == "v4_review":
         module_data = ledger.get("v4_review", {})
 
+    shadow_consumer_path = STATUS_DIR / f"api_shadow_consumer_dryrun_{date_key}.json"
+    shadow_consumer = _load_json(shadow_consumer_path, {})
+
     result = {
         "date": date_key,
         "module": module,
@@ -64,6 +70,12 @@ def main() -> None:
             "ledger_exists": ledger_path.exists(),
             "module_data_present": bool(module_data),
             "module_summary_keys": sorted(list(module_data.keys()))[:12] if isinstance(module_data, dict) else [],
+            "replay_primary_source": "original_artifact",
+            "cache_reader_used_as_primary": False,
+            "shadow_consumer_visible": shadow_consumer_path.exists(),
+            "shadow_consumer_status": str((shadow_consumer.get("status", "MISSING") if isinstance(shadow_consumer, dict) else "MISSING")).upper(),
+            "shadow_consumer_marker": str(shadow_consumer_path),
+            "production_dependency": False,
         },
         "generated_at": datetime.now(CN_TZ).isoformat(),
     }
@@ -75,4 +87,3 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
-

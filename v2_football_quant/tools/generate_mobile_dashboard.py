@@ -1356,6 +1356,8 @@ def _compute_api_cache(date_key: str) -> dict[str, Any]:
     reader_check_path = STATUS_DIR / f"api_cache_reader_check_{date_key}.json"
     shadow_dryrun_path = STATUS_DIR / f"api_shadow_read_dryrun_{date_key}.json"
     shadow_check_path = STATUS_DIR / f"api_shadow_read_check_{date_key}.json"
+    shadow_consumer_dryrun_path = STATUS_DIR / f"api_shadow_consumer_dryrun_{date_key}.json"
+    shadow_consumer_check_path = STATUS_DIR / f"api_shadow_consumer_check_{date_key}.json"
     dryrun = _load_json(dryrun_path, {})
     bundle = _load_json(bundle_path, {})
     check = _load_json(check_path, {})
@@ -1368,6 +1370,8 @@ def _compute_api_cache(date_key: str) -> dict[str, Any]:
     reader_check = _load_json(reader_check_path, {})
     shadow_dryrun = _load_json(shadow_dryrun_path, {})
     shadow_check = _load_json(shadow_check_path, {})
+    shadow_consumer_dryrun = _load_json(shadow_consumer_dryrun_path, {})
+    shadow_consumer_check = _load_json(shadow_consumer_check_path, {})
     safety_dry = dryrun if isinstance(dryrun, dict) else {}
     boundaries = bundle.get("boundaries", {}) if isinstance(bundle.get("boundaries", {}), dict) else {}
     safety_bundle = bundle.get("safety", {}) if isinstance(bundle.get("safety", {}), dict) else {}
@@ -1440,6 +1444,8 @@ def _compute_api_cache(date_key: str) -> dict[str, Any]:
         "reader_check_path": reader_check_path,
         "shadow_dryrun_path": shadow_dryrun_path,
         "shadow_check_path": shadow_check_path,
+        "shadow_consumer_dryrun_path": shadow_consumer_dryrun_path,
+        "shadow_consumer_check_path": shadow_consumer_check_path,
         "dryrun_found": dryrun_path.exists(),
         "bundle_found": bundle_path.exists(),
         "check_found": check_path.exists(),
@@ -1548,6 +1554,28 @@ def _compute_api_cache(date_key: str) -> dict[str, Any]:
         "shadow_check_secret_safe": bool(shadow_check.get("secret_safe", False)) if isinstance(shadow_check, dict) else False,
         "shadow_check_warnings": shadow_check.get("warnings", []) if isinstance(shadow_check.get("warnings", []), list) else [],
         "shadow_check_errors": shadow_check.get("errors", []) if isinstance(shadow_check.get("errors", []), list) else [],
+        "shadow_consumer_dryrun_found": shadow_consumer_dryrun_path.exists(),
+        "shadow_consumer_check_found": shadow_consumer_check_path.exists(),
+        "shadow_consumer_status": str((shadow_consumer_dryrun.get("status", "MISSING") if isinstance(shadow_consumer_dryrun, dict) else "MISSING")).upper(),
+        "shadow_consumer_mode": str((shadow_consumer_dryrun.get("mode", "non_critical_shadow") if isinstance(shadow_consumer_dryrun, dict) else "non_critical_shadow")),
+        "shadow_consumer_no_api": bool(shadow_consumer_dryrun.get("no_api", False)) if isinstance(shadow_consumer_dryrun, dict) else False,
+        "shadow_consumer_no_key_read": bool(shadow_consumer_dryrun.get("no_key_read", False)) if isinstance(shadow_consumer_dryrun, dict) else False,
+        "shadow_consumer_production_path_untouched": bool(shadow_consumer_dryrun.get("production_path_untouched", False)) if isinstance(shadow_consumer_dryrun, dict) else False,
+        "shadow_consumer_fallback_enabled": bool(shadow_consumer_dryrun.get("fallback_to_original_source", False)) if isinstance(shadow_consumer_dryrun, dict) else False,
+        "shadow_consumer_threshold": shadow_consumer_dryrun.get("threshold", 1.0) if isinstance(shadow_consumer_dryrun, dict) else 1.0,
+        "shadow_consumer_matched": int(shadow_consumer_dryrun.get("matched", 0) or 0) if isinstance(shadow_consumer_dryrun, dict) else 0,
+        "shadow_consumer_mismatch": int(shadow_consumer_dryrun.get("mismatch", 0) or 0) if isinstance(shadow_consumer_dryrun, dict) else 0,
+        "shadow_consumer_missing": int(shadow_consumer_dryrun.get("missing", 0) or 0) if isinstance(shadow_consumer_dryrun, dict) else 0,
+        "shadow_consumer_not_comparable": int(shadow_consumer_dryrun.get("not_comparable", 0) or 0) if isinstance(shadow_consumer_dryrun, dict) else 0,
+        "shadow_consumer_allowed": shadow_consumer_dryrun.get("allowed_consumers", []) if isinstance(shadow_consumer_dryrun.get("allowed_consumers", []), list) else [],
+        "shadow_consumer_blocked": shadow_consumer_dryrun.get("blocked_consumers", []) if isinstance(shadow_consumer_dryrun.get("blocked_consumers", []), list) else [],
+        "shadow_consumer_check_status": str((shadow_consumer_check.get("status", "MISSING") if isinstance(shadow_consumer_check, dict) else "MISSING")).upper(),
+        "shadow_consumer_check_schema_valid": bool(shadow_consumer_check.get("schema_valid", False)) if isinstance(shadow_consumer_check, dict) else False,
+        "shadow_consumer_check_boundary_valid": bool(shadow_consumer_check.get("boundary_valid", False)) if isinstance(shadow_consumer_check, dict) else False,
+        "shadow_consumer_check_scope_valid": bool(shadow_consumer_check.get("consumer_scope_valid", False)) if isinstance(shadow_consumer_check, dict) else False,
+        "shadow_consumer_check_secret_safe": bool(shadow_consumer_check.get("secret_safe", False)) if isinstance(shadow_consumer_check, dict) else False,
+        "shadow_consumer_check_warnings": shadow_consumer_check.get("warnings", []) if isinstance(shadow_consumer_check.get("warnings", []), list) else [],
+        "shadow_consumer_check_errors": shadow_consumer_check.get("errors", []) if isinstance(shadow_consumer_check.get("errors", []), list) else [],
         "bundle_preview": {
             "module_keys": sorted(
                 list((bundle.get("modules", {}) if isinstance(bundle.get("modules", {}), dict) else {}).keys())
@@ -1773,6 +1801,16 @@ def _render_index(
                 ("shadow not_comparable", str(api_cache.get("shadow_not_comparable", 0))),
                 ("V2正式链路对账", _status_tag("NO" if not api_cache.get("shadow_v2_production_compared") else "FAIL")),
                 ("V4正式链路对账", _status_tag("NO" if not api_cache.get("shadow_v4_production_compared") else "FAIL")),
+                ("Shadow Consumer", _status_tag(api_cache.get("shadow_consumer_status"))),
+                ("consumer checker", _status_tag(api_cache.get("shadow_consumer_check_status"))),
+                ("consumer 模式", "非关键旁路"),
+                ("允许消费者", escape("/".join(api_cache.get("shadow_consumer_allowed", [])) or "缺失")),
+                ("禁止消费者", "V2正式链路 / V4正式链路 / QQ sender"),
+                ("fallback", _status_tag("PASS" if api_cache.get("shadow_consumer_fallback_enabled") else "FAIL")),
+                ("threshold", escape(str(api_cache.get("shadow_consumer_threshold", 1.0)))),
+                ("consumer matched/mismatch", f"{api_cache.get('shadow_consumer_matched', 0)}/{api_cache.get('shadow_consumer_mismatch', 0)}"),
+                ("consumer missing/not_comparable", f"{api_cache.get('shadow_consumer_missing', 0)}/{api_cache.get('shadow_consumer_not_comparable', 0)}"),
+                ("consumer 生产依赖", _status_tag("NO")),
                 ("runtime root", escape(api_runtime_root_view)),
                 ("下一步", "C.7 非关键模块只读灰度需 BOSS 单独确认"),
             ],
@@ -1830,6 +1868,10 @@ def _render_index(
         f"<div class='k'>shadow checker marker</div><div class='v'><span class='mono'>{escape(str(api_cache.get('shadow_check_path')))}</span></div>"
         f"<div class='k'>shadow checker warnings</div><div class='v'>{escape('；'.join(api_cache.get('shadow_check_warnings', [])) if api_cache.get('shadow_check_warnings') else '无')}</div>"
         f"<div class='k'>shadow checker errors</div><div class='v'>{escape('；'.join(api_cache.get('shadow_check_errors', [])) if api_cache.get('shadow_check_errors') else '无')}</div>"
+        f"<div class='k'>shadow consumer dryrun marker</div><div class='v'><span class='mono'>{escape(str(api_cache.get('shadow_consumer_dryrun_path')))}</span></div>"
+        f"<div class='k'>shadow consumer checker marker</div><div class='v'><span class='mono'>{escape(str(api_cache.get('shadow_consumer_check_path')))}</span></div>"
+        f"<div class='k'>shadow consumer checker warnings</div><div class='v'>{escape('；'.join(api_cache.get('shadow_consumer_check_warnings', [])) if api_cache.get('shadow_consumer_check_warnings') else '无')}</div>"
+        f"<div class='k'>shadow consumer checker errors</div><div class='v'>{escape('；'.join(api_cache.get('shadow_consumer_check_errors', [])) if api_cache.get('shadow_consumer_check_errors') else '无')}</div>"
         "</div></details></section>"
     ]
 
@@ -2468,6 +2510,15 @@ def _render_system(date_key: str, system: dict[str, Any], api_cache: dict[str, A
                     ("shadow missing/not_comparable", f"{api_cache.get('shadow_missing', 0)}/{api_cache.get('shadow_not_comparable', 0)}"),
                     ("V2正式链路对账", _status_tag("NO" if not api_cache.get("shadow_v2_production_compared") else "FAIL")),
                     ("V4正式链路对账", _status_tag("NO" if not api_cache.get("shadow_v4_production_compared") else "FAIL")),
+                    ("Shadow Consumer", _status_tag(api_cache.get("shadow_consumer_status"))),
+                    ("consumer checker", _status_tag(api_cache.get("shadow_consumer_check_status"))),
+                    ("consumer API调用", _status_tag("NO" if api_cache.get("shadow_consumer_no_api") else "FAIL")),
+                    ("consumer 读取key", _status_tag("NO" if api_cache.get("shadow_consumer_no_key_read") else "FAIL")),
+                    ("consumer 正式链路受影响", _status_tag("NO" if api_cache.get("shadow_consumer_production_path_untouched") else "FAIL")),
+                    ("consumer fallback", _status_tag("PASS" if api_cache.get("shadow_consumer_fallback_enabled") else "FAIL")),
+                    ("consumer threshold", escape(str(api_cache.get("shadow_consumer_threshold", 1.0)))),
+                    ("consumer matched/mismatch", f"{api_cache.get('shadow_consumer_matched', 0)}/{api_cache.get('shadow_consumer_mismatch', 0)}"),
+                    ("consumer missing/not_comparable", f"{api_cache.get('shadow_consumer_missing', 0)}/{api_cache.get('shadow_consumer_not_comparable', 0)}"),
                 ],
             ),
             "<section class='card'><h2>API Cache 证据（折叠）</h2>"
@@ -2613,6 +2664,13 @@ def generate(date_str: str) -> dict[str, Any]:
         "cache_shadow_no_key_read": bool(api_cache.get("shadow_no_key_read")),
         "cache_shadow_production_dependency": False,
         "cache_shadow_production_path_untouched": bool(api_cache.get("shadow_production_path_untouched")),
+        "cache_shadow_consumer_visible": True,
+        "cache_shadow_consumer_dryrun_found": bool(api_cache.get("shadow_consumer_dryrun_found")),
+        "cache_shadow_consumer_check_found": bool(api_cache.get("shadow_consumer_check_found")),
+        "cache_shadow_consumer_no_api": bool(api_cache.get("shadow_consumer_no_api")),
+        "cache_shadow_consumer_no_key_read": bool(api_cache.get("shadow_consumer_no_key_read")),
+        "cache_shadow_consumer_production_dependency": False,
+        "cache_shadow_consumer_production_path_untouched": bool(api_cache.get("shadow_consumer_production_path_untouched")),
         "dashboard_updated": True,
         "strategy_changed": False,
         "qq_pushed": False,
