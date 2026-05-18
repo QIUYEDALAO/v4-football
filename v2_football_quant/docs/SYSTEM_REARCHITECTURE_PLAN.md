@@ -74,6 +74,15 @@ Replay/Backfill 扩展：
 > 近期不做 internal/public 双看板拆分。  
 > 主线改为“单套 Dashboard 产品化阅读层 + 单场比赛卡片”。
 
+对应问题项命名修正：
+- 当前统一使用：`P2_DASHBOARD_PRODUCT_READING_LAYER_GAP`
+- 旧拆分键已废弃，不再作为近期任务项。
+
+补充前置工程项：
+- `P1_RUNTIME_ROOT_CANONICALIZATION_REQUIRED`
+  - 在 Phase C（API Snapshot / Cache）前，必须确认 canonical runtime root，
+    避免 workspace 根 `data/runtime` 与项目内 `data/runtime` 写读漂移。
+
 ### 近期目标（Phase I）
 1. 当前只保留一套 Dashboard。  
 2. 默认展示产品化阅读内容。  
@@ -85,6 +94,7 @@ Replay/Backfill 扩展：
    - 比赛双方；
    - 联赛；
    - 开赛时间；
+   - V2/V4来源标记；
    - V4评级；
    - HT评分；
    - HT率；
@@ -105,4 +115,3 @@ Replay/Backfill 扩展：
 - 不接入支付；
 - 不开放公网；
 - 不写 PRODUCTION_VERIFIED。
-

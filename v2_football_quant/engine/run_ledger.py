@@ -137,13 +137,14 @@ def build_ledger(date_key: str) -> dict[str, Any]:
             "P1_API_SLOW_IMPACTS_CRON",
             "P1_CRON_FRAGMENTATION",
             "P1_RUNTIME_PATH_INCONSISTENCY",
+            "P1_RUNTIME_ROOT_CANONICALIZATION_REQUIRED",
             "P1_V2_LOCK_STAGE_OWNERSHIP_CONFLICT",
             "P1_V4_SCAN_WINDOW_EVIDENCE_GAP",
             "P1_V4_REVIEW_CHAIN_NATURAL_VALIDATION_GAP",
             "P1_REPORT_DASHBOARD_QQ_INCONSISTENCY",
         ],
         "p2": [
-            "P2_DASHBOARD_INTERNAL_PUBLIC_NOT_SPLIT",
+            "P2_DASHBOARD_PRODUCT_READING_LAYER_GAP",
             "P2_GITHUB_MAIN_LOCAL_WORKSPACE_DRIFT",
             "P2_STATE_TERMS_INCONSISTENT",
             "P2_MARKER_SCHEMA_INCONSISTENT",
@@ -155,11 +156,18 @@ def build_ledger(date_key: str) -> dict[str, Any]:
     }
 
     path_mismatch = _detect_path_mismatch(date_key)
+    runtime_root_policy = {
+        "canonical_runtime_root": str(RUNTIME_DIR),
+        "project_runtime_used_as_primary": True,
+        "workspace_root_runtime_allowed_as_primary": False,
+        "path_mismatch_warning_only": True,
+    }
 
     ledger = {
         "date": date_key,
         "generated_at": now.isoformat(),
         "source_root": str(RUNTIME_DIR),
+        "runtime_root_policy": runtime_root_policy,
         "warnings": path_mismatch,
         "v2": {
             "status": v2_status,
@@ -221,6 +229,13 @@ def build_ledger(date_key: str) -> dict[str, Any]:
             "pwa_local": (BASE_DIR / "data" / "runtime" / "dashboard" / "index.html").exists(),
             "production_verified": False,
             "ledger_source": "present",
+            "product_direction": {
+                "single_dashboard": True,
+                "default_layer": "product_reading",
+                "evidence_collapsed": True,
+                "single_match_card_future_core": True,
+                "internal_public_split_required": False,
+            },
         },
         "notifications": {
             "qq_enabled": False,
