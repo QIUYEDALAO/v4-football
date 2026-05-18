@@ -210,6 +210,23 @@ D.2.1 是 baseline evidence hardening，补强所有组件的证据读取。
 
 ---
 
+### D.3 DAILY_POOL Input Shadow Compare
+
+D.3 是 DAILY_POOL Input Shadow Compare，只读对照 DAILY_POOL 输入与 window_checker 输出。
+
+**功能：**
+- 只读追踪 candidate_stage → window_checker output 对应关系
+- 统计 matched / locked / missed / unmatched
+- 不生成 BET_LOCKED，不推 QQ，不结算
+- lock_owner 缺字段 → WARN，不伪造 PASS
+
+**新文件：**
+- `engine/v2_shadow_compare.py` — compare 核心模块
+- `tools/v2_shadow_compare_dryrun.py` — dry-run 入口
+- `tools/check_v2_shadow_compare.py` — compare checker
+
+---
+
 ## 7. 下一阶段计划
 
 | Phase | 内容 | 状态 |
