@@ -17,6 +17,10 @@
 | D.4.1 | `ac2f7c0` | Window guard semantics (not_applicable state) | ✅ |
 | D.5 | `e7f50e9` | Settlement shadow guard (detected FAIL) | ⚠️ |
 | D.5.1 | `83deae7` | Settlement conflict hardening (classified FAIL) | ⚠️ |
+| D.7 | `2f54627` | Settlement preflight gate (entry block) | ✅ |
+| D.7.1 | `df5a752` | Preflight entry fix (key + lock order) | ✅ |
+| D.7.2 | `afb0e88` | Preflight test coverage v1 | ✅ |
+| D.7.3 | `TBD` | Preflight coverage closure (strict wrapper/checker/docs) | ✅ |
 
 **新增 20+ 文件，0 次策略改动，0 次 API 调用，0 次 QQ 推送。**
 
@@ -60,10 +64,25 @@
 - ❌ 不得补记 BET_LOCKED
 - ❌ 不得重跑 settlement
 - ✅ 历史冲突已固化为 D.5.1 FAIL
+- ✅ D.7.3 preflight 已确保冲突日期同日 BLOCK（wrapper exit_code=2）
 
 ---
 
-## 4. Phase D 禁止事项
+## 4. D.7.3 收口结论（同日可验证）
+
+- self-test：6/6 PASS（含 count mismatch blocker）。
+- wrapper-level block test：PASS。
+- `exit_code=2`：强制检查通过。
+- verified 文件：`hash/mtime/size/exists` 均未变化。
+- 7 个主 blocker reason codes：全部命中。
+- watchdog：`BLOCKED_PREFLIGHT` 命中。
+- verify_date：未调用。
+
+这意味着 20260517 在同日即可通过工程回放判定为 BLOCK，**不需要等待明天**。
+
+---
+
+## 5. Phase D 禁止事项
 
 - 不接 cache 到 V2 正式链路
 - 不让 shadow 影响正式链路
@@ -74,12 +93,12 @@
 
 ---
 
-## 5. 下一阶段
+## 6. 下一阶段
 
-Phase D 工程链路完成。后续选项：
+Phase D 工程链路完成（engineering_complete=true），但 business_pass=false。后续选项：
 
-1. **Phase E**：V4 扫描五窗口标准化
-2. **恢复生产运行**：提前结束架构建设，等待明天自然验证
-3. **Phase D.7**：V2 production marker schema hardening
+1. **Phase D.8**：继续 V2 防误写与回放校验加固
+2. **Phase E**：V4 扫描五窗口标准化（需 BOSS 单独指令）
+3. **恢复生产运行**：需 BOSS 单独指令（不得自动执行）
 
 必须由 BOSS 单独确认。不得自动进入。

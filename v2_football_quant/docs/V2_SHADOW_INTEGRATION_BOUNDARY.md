@@ -258,7 +258,35 @@ D.4.1 修复 lock_owner gap 语义冲突。
 **修复后：** 新增 `not_applicable` 状态区分无锁场景。
 - new_locks=0 → not_applicable → gap_preserved=true, gap_is_warning=false
 - 有锁缺lock_owner → partial → WARN
-- 非window_checker → FAIL
+
+---
+
+## D.7.3 Settlement Preflight Coverage Closure
+
+### 本轮定位并收口
+
+- D.7.2 的 wrapper test 缺口已补齐：
+  - `exit_code` 必须严格等于 `2`
+  - verified `hash/mtime/size/exists` 变化即 FAIL
+  - 7 个主 blocker reason codes 强校验
+  - watchdog `BLOCKED_PREFLIGHT` 强校验
+  - wrapper marker 进入 preflight checker 统一校验
+
+### 当前语义（必须保留）
+
+- `phase_d_engineering_complete=true`
+- `phase_d_business_pass=false`
+- `known_historical_fail=true`
+- `settlement_preflight_gate_installed=true`
+- `wrapper_block_test_passed=true`
+- `PIPELINE_READY=false`
+- `PRODUCTION_VERIFIED=false`
+
+### 同日回放结论
+
+- 20260517 已可同日回放验证 BLOCK；
+- 不需要等待明天；
+- 该结论是工程链路闭合，不是生产恢复授权。
 
 ---
 
@@ -293,7 +321,7 @@ D.5.1 修正判定逻辑，固化历史冲突。
 
 D.6 是 Phase D 总验收。
 
-**结论：** 工程链路完成，业务 fail=false，20260517 历史 settlement 污染已归档。
+**结论：** 工程链路完成，`business_pass=false`，20260517 历史 settlement 污染已归档。
 - phase_d_engineering_complete=true
 - phase_d_business_pass=false
 - known_historical_fail=true
