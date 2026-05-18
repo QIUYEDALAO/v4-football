@@ -19,7 +19,7 @@ def main():
               "gate_scope":"controlled_resume_execution_gate_only","execution_performed":False,
               "production_resume_executed":False,"production_resume_allowed_now":False,
               "cron_enable_allowed":False,"qq_push_allowed":False,"verified_write_allowed":False,"state_write_allowed":False,
-              "d820_draft":{"allowed_to_generate":False,"allowed_to_execute":False},
+              "d820_draft":{"allowed_to_generate":True,"allowed_to_execute":False},
               "blockers":e,"generated_at":datetime.now(CN).isoformat()}
         print(json.dumps(out,ensure_ascii=False,indent=2)); raise SystemExit(2)
     if ap.get("production_verified") or m17.get("production_verified"): e.append("PV_LEAK")
