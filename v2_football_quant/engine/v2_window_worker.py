@@ -69,10 +69,35 @@ def main():
     no_push_mode = "--no-push" in sys.argv or os.environ.get("OPENCLAW_NO_PUSH") == "1"
     no_verified = "--no-verified-write" in sys.argv or observe_only
 
+    # ── Phase D.8.17: sandbox state file (only in guarded observe) ──
+    sandbox_state_path = None
+    for i, arg in enumerate(sys.argv):
+        if arg == "--sandbox-state-file" and i + 1 < len(sys.argv):
+            sandbox_state_path = sys.argv[i + 1]
+            break
+    if sandbox_state_path and not observe_only:
+        print("BLOCKER: --sandbox-state-file requires --observe-only", flush=True)
+        sys.exit(2)
+    if sandbox_state_path and (not no_formal_state_write or not no_push_mode or not no_verified):
+        print("BLOCKER: --sandbox-state-file requires --no-formal-state-write --no-push --no-verified-write", flush=True)
+        sys.exit(2)
+    if sandbox_state_path:
+        print(f"SANDBOX_STATE_FILE_USED=true", flush=True)
+        print(f"SANDBOX_STATE_PATH={sandbox_state_path}", flush=True)
+
     today_str = datetime.now(LOCAL_TZ).strftime("%Y%m%d")
     now_local = datetime.now(LOCAL_TZ)
 
-    selected, fixtures = load_state(today_str)
+    if sandbox_state_path:
+        try:
+            state_data = json.loads(Path(sandbox_state_path).read_text(encoding="utf-8"))
+            selected = set(state_data.get("selected", []))
+            fixtures = state_data.get("fixtures", {})
+        except Exception as e:
+            print(f"BLOCKER: sandbox state load failed: {e}", flush=True)
+            sys.exit(2)
+    else:
+        selected, fixtures = load_state(today_str)
 
     if not fixtures:
         print("WINDOW_STATUS=SKIPPED_NO_ACTIVE_WINDOW")
