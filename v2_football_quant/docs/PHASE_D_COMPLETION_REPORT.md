@@ -247,6 +247,7 @@ Phase D 工程链路完成（engineering_complete=true），但 business_pass=fa
 | D.8.23 | `7c31949` | No-op / shell-safe dry-run harness |
 | D.8.24 | `4ec368f` | Controlled worker dry-run wrapper |
 | D.8.25 | `2a7eb83` | Final controlled execution approval packet |
+| D.8.26 | `TBD` | Final boss approval gate |
 
 **D.8.13 结论：** approval_packet_status=READY_FOR_BOSS_REVIEW，guarded_live_observe_approved=false，D.8.14 需 BOSS 单独指令。
 
