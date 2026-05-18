@@ -40,3 +40,4 @@
 All production gates remain false. D.8.19 requires separate BOSS instruction.
 
 <!-- D.8.18.2 closure -->
+<!-- D.8.19 closure -->
