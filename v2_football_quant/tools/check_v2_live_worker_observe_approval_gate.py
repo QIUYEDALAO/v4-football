@@ -102,12 +102,20 @@ def main() -> None:
     # availability checks for future live observe safeguards
     no_push_hook_available = ("--no-push" in safety_wrapper_src and "missing_required_flag_no_push" in safety_wrapper_src)
 
-    # true live worker currently has no native no-formal-state-write hook
-    no_formal_state_write_hook_available = False
-
-    # from D.8.4 known risk
-    qq_route_risks = qq_route.get("risks", []) if isinstance(qq_route.get("risks", []), list) else []
-    safe_sender_guard_available = "safe_outbound_sender_guard_signature_missing" not in qq_route_risks
+    # ── Phase D.8.12.2: read hardening marker for real guard status ──
+    hardening_marker = STATUS_DIR / f"v2_live_observe_guard_hardening_{args.date}_{args.window}.json"
+    if hardening_marker.exists():
+        try:
+            h = json.loads(hardening_marker.read_text(encoding="utf-8"))
+            no_formal_state_write_hook_available = h.get("no_formal_state_write_hook_available", False)
+            safe_sender_guard_available = h.get("safe_sender_guard_available", False)
+            no_push_hook_available = h.get("no_push_hook_available", no_push_hook_available)
+        except Exception:
+            no_formal_state_write_hook_available = False
+            safe_sender_guard_available = False
+    else:
+        no_formal_state_write_hook_available = False
+        safe_sender_guard_available = False
 
     rollback_gate = approval_packet.get("rollback_gate", {}) if isinstance(approval_packet.get("rollback_gate"), dict) else {}
     watchdog_only_failure_available = bool(rollback_gate.get("report_watchdog_only", False))
