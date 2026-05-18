@@ -1588,6 +1588,7 @@ def _compute_api_cache(date_key: str) -> dict[str, Any]:
 def _nav(date_key: str, active: str) -> str:
     tabs = [
         ("index.html", "总控台"),
+        ("api_cache.html", "API缓存"),
         ("v2_today.html", "V2今日"),
         ("v4_scan.html", "V4扫描"),
         ("v4_review.html", "V4复盘"),
@@ -1811,6 +1812,7 @@ def _render_index(
                 ("consumer matched/mismatch", f"{api_cache.get('shadow_consumer_matched', 0)}/{api_cache.get('shadow_consumer_mismatch', 0)}"),
                 ("consumer missing/not_comparable", f"{api_cache.get('shadow_consumer_missing', 0)}/{api_cache.get('shadow_consumer_not_comparable', 0)}"),
                 ("consumer 生产依赖", _status_tag("NO")),
+                ("查看 API缓存诊断", "<a href='api_cache.html'>打开诊断页</a>"),
                 ("runtime root", escape(api_runtime_root_view)),
                 ("下一步", "C.7 非关键模块只读灰度需 BOSS 单独确认"),
             ],
@@ -2539,6 +2541,126 @@ def _render_system(date_key: str, system: dict[str, Any], api_cache: dict[str, A
     return _shell("系统健康", body, date_key, "system.html")
 
 
+def _render_api_cache_diag(date_key: str, api_cache: dict[str, Any]) -> str:
+    def _done(found: bool) -> str:
+        return _status_tag("PASS" if found else "MISSING")
+
+    phase_rows = [
+        ("C.1 Dashboard状态卡", _done(bool(api_cache.get("dryrun_found")))),
+        ("C.2 Schema Checker", _done(bool(api_cache.get("check_found")))),
+        ("C.3 Controlled Simulation", _done(bool(api_cache.get("ingest_sim_found")))),
+        ("C.4 Real Smoke", _done(bool(api_cache.get("real_ingest_found") and api_cache.get("real_ingest_check_found")))),
+        ("C.5 Cache Reader", _done(bool(api_cache.get("reader_dryrun_found") and api_cache.get("reader_check_found")))),
+        ("C.6 Shadow Read", _done(bool(api_cache.get("shadow_dryrun_found") and api_cache.get("shadow_check_found")))),
+        ("C.7 Shadow Consumer", _done(bool(api_cache.get("shadow_consumer_dryrun_found") and api_cache.get("shadow_consumer_check_found")))),
+        ("C.8 Page Gray", _status_tag("PASS")),
+    ]
+
+    overview = _kv_card(
+        "总览",
+        [
+            ("当前等级", _status_tag("CODE_READY")),
+            ("production_verified", _status_tag("NO")),
+            ("production_dependency", _status_tag("NO")),
+            ("正式链路接入", _status_tag("NO")),
+            ("API调用", _status_tag("NO")),
+            ("读取key", _status_tag("NO")),
+            ("推QQ", _status_tag("NO")),
+            ("接cron", _status_tag("NO")),
+        ],
+    )
+
+    phase_card = _kv_card("Phase C 阶段状态", phase_rows)
+
+    reader_card = _kv_card(
+        "Reader 状态",
+        [
+            ("状态", _status_tag(api_cache.get("reader_status"))),
+            ("mode", escape(str(api_cache.get("reader_mode", "read_only")))),
+            ("no_api", _status_tag("PASS" if api_cache.get("reader_no_api") else "FAIL")),
+            ("no_key_read", _status_tag("PASS" if api_cache.get("reader_no_key_read") else "FAIL")),
+            ("snapshot_count", str(api_cache.get("reader_snapshot_count", 0))),
+            ("bundle_found", _status_tag("PASS" if api_cache.get("reader_bundle_found") else "MISSING")),
+            ("real_ingest_snapshot_found", _status_tag("PASS" if api_cache.get("reader_real_snapshot_found") else "MISSING")),
+            ("checker", _status_tag(api_cache.get("reader_check_status"))),
+            ("secret_safe", _status_tag("PASS" if api_cache.get("reader_check_secret_safe") else "FAIL")),
+        ],
+    )
+
+    shadow_read_card = _kv_card(
+        "Shadow Read 状态",
+        [
+            ("状态", _status_tag(api_cache.get("shadow_status"))),
+            ("comparison_count", str(api_cache.get("shadow_comparison_count", 0))),
+            ("matched", str(api_cache.get("shadow_matched", 0))),
+            ("mismatch", str(api_cache.get("shadow_mismatch", 0))),
+            ("missing", str(api_cache.get("shadow_missing", 0))),
+            ("not_comparable", str(api_cache.get("shadow_not_comparable", 0))),
+            ("production_path_untouched", _status_tag("PASS" if api_cache.get("shadow_production_path_untouched") else "FAIL")),
+            ("V2正式链路对账", _status_tag("NO" if not api_cache.get("shadow_v2_production_compared") else "FAIL")),
+            ("V4正式链路对账", _status_tag("NO" if not api_cache.get("shadow_v4_production_compared") else "FAIL")),
+        ],
+    )
+
+    shadow_consumer_card = _kv_card(
+        "Shadow Consumer 状态",
+        [
+            ("状态", _status_tag(api_cache.get("shadow_consumer_status"))),
+            ("allowed_consumers", escape("/".join(api_cache.get("shadow_consumer_allowed", [])) or "缺失")),
+            ("blocked_consumers", "V2正式链路 / V4正式链路 / QQ sender"),
+            ("fallback_to_original_source", _status_tag("PASS" if api_cache.get("shadow_consumer_fallback_enabled") else "FAIL")),
+            ("threshold", escape(str(api_cache.get("shadow_consumer_threshold", 1.0)))),
+            ("production_dependency", _status_tag("NO")),
+            ("production_verified", _status_tag("NO")),
+            ("checker", _status_tag(api_cache.get("shadow_consumer_check_status"))),
+        ],
+    )
+
+    real_card = _kv_card(
+        "Real Ingest Smoke 状态",
+        [
+            ("状态", _status_tag(api_cache.get("real_ingest_status"))),
+            ("endpoint", "status"),
+            ("request_count", str(api_cache.get("real_ingest_request_count", 0))),
+            ("timeout", f"{api_cache.get('real_ingest_timeout', 0)}s"),
+            ("retry_count", str(api_cache.get("real_ingest_retry_count", 0))),
+            ("http_status", escape(str((_load_json(Path(str(api_cache.get('real_ingest_path'))), {}) if api_cache.get("real_ingest_path") else {}).get("response", {}).get("http_status", "缺失")))),
+            ("secret_safe", _status_tag("PASS" if api_cache.get("real_ingest_check_secret_safe") else "FAIL")),
+            ("raw snapshot", _status_tag("PASS" if api_cache.get("real_ingest_raw_snapshot_path") else "MISSING")),
+            ("raw response", "不展示"),
+            ("key", "不展示"),
+        ],
+    )
+
+    risk_card = (
+        "<section class='card'><h2>风险提示</h2><ul>"
+        "<li>本页只读，不触发API，不触发任务。</li>"
+        "<li>本页不推QQ，不接cron，不写PRODUCTION_VERIFIED。</li>"
+        "<li>本页仅工程灰度诊断，不代表V2/V4已接入cache。</li>"
+        "<li>当前结果不代表V2/V4业务一致性结论。</li>"
+        "</ul></section>"
+    )
+
+    evidence = (
+        "<section class='card'><h2>证据路径（折叠）</h2>"
+        "<details><summary>查看证据路径</summary><div class='kv'>"
+        f"<div class='k'>bundle</div><div class='v'><span class='mono'>{escape(str(api_cache.get('bundle_path')))}</span></div>"
+        f"<div class='k'>dryrun marker</div><div class='v'><span class='mono'>{escape(str(api_cache.get('dryrun_path')))}</span></div>"
+        f"<div class='k'>reader dryrun</div><div class='v'><span class='mono'>{escape(str(api_cache.get('reader_dryrun_path')))}</span></div>"
+        f"<div class='k'>reader checker</div><div class='v'><span class='mono'>{escape(str(api_cache.get('reader_check_path')))}</span></div>"
+        f"<div class='k'>shadow dryrun</div><div class='v'><span class='mono'>{escape(str(api_cache.get('shadow_dryrun_path')))}</span></div>"
+        f"<div class='k'>shadow checker</div><div class='v'><span class='mono'>{escape(str(api_cache.get('shadow_check_path')))}</span></div>"
+        f"<div class='k'>consumer dryrun</div><div class='v'><span class='mono'>{escape(str(api_cache.get('shadow_consumer_dryrun_path')))}</span></div>"
+        f"<div class='k'>consumer checker</div><div class='v'><span class='mono'>{escape(str(api_cache.get('shadow_consumer_check_path')))}</span></div>"
+        f"<div class='k'>real ingest marker</div><div class='v'><span class='mono'>{escape(str(api_cache.get('real_ingest_path')))}</span></div>"
+        f"<div class='k'>real ingest checker</div><div class='v'><span class='mono'>{escape(str(api_cache.get('real_ingest_check_path')))}</span></div>"
+        "</div></details></section>"
+    )
+
+    body = "".join([overview, phase_card, reader_card, shadow_read_card, shadow_consumer_card, real_card, risk_card, evidence])
+    return _shell("API Snapshot / Cache 诊断页｜只读灰度", body, date_key, "api_cache.html")
+
+
 def _write_assets() -> None:
     ASSET_DIR.mkdir(parents=True, exist_ok=True)
     css = """*{box-sizing:border-box}body{margin:0;font-family:-apple-system,BlinkMacSystemFont,'SF Pro Text','PingFang SC','Microsoft YaHei',sans-serif;background:#0c1220;color:#e8eefc}
@@ -2587,7 +2709,7 @@ pre.mono{white-space:pre-wrap;word-break:break-word;max-height:260px;overflow:au
     (OUT_DIR / "manifest.json").write_text(json.dumps(manifest, ensure_ascii=False, indent=2), encoding="utf-8")
 
     sw = """const CACHE='v2v4-dashboard-phase1-v1';
-const ASSETS=['./','./index.html','./v2_today.html','./v4_scan.html','./v4_review.html','./system.html','./assets/style.css','./manifest.json'];
+const ASSETS=['./','./index.html','./api_cache.html','./v2_today.html','./v4_scan.html','./v4_review.html','./system.html','./assets/style.css','./manifest.json'];
 self.addEventListener('install',e=>{e.waitUntil(caches.open(CACHE).then(c=>c.addAll(ASSETS)).then(()=>self.skipWaiting()));});
 self.addEventListener('activate',e=>{e.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(k=>k!==CACHE).map(k=>caches.delete(k)))).then(()=>self.clients.claim()));});
 self.addEventListener('fetch',e=>{if(e.request.method!=='GET')return;e.respondWith(caches.match(e.request).then(r=>r||fetch(e.request).then(res=>{const cp=res.clone();caches.open(CACHE).then(c=>c.put(e.request,cp)).catch(()=>{});return res;}).catch(()=>caches.match('./index.html'))));});
@@ -2615,6 +2737,7 @@ def generate(date_str: str) -> dict[str, Any]:
 
     pages = {
         "index.html": _render_index(date_key, v2, scan, review, system, api_cache, ledger=ledger),
+        "api_cache.html": _render_api_cache_diag(date_key, api_cache),
         "v2_today.html": _render_v2(date_key, v2),
         "v4_scan.html": _render_scan(date_key, scan),
         "v4_review.html": _render_review(date_key, review),

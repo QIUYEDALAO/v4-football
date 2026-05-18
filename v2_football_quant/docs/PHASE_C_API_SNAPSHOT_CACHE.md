@@ -203,3 +203,25 @@ python3 tools/api_snapshot_cache_dryrun.py --date 20260517 --module all --check
 ### 下一阶段边界
 - C.8 才考虑非关键模块实际页面灰度；
 - V2/V4 正式接 cache 仍需单独 BOSS 指令。
+
+## Phase C.8：Non-critical Page-level Gray Display（本轮）
+### 目标
+- 新增 Dashboard 页面级灰度诊断页（API cache diagnostics）；
+- 仅只读展示 cache reader / shadow read / shadow consumer / real ingest smoke 状态；
+- 不改变 V2/V4 正式数据源；
+- 不调用 API；
+- 不读取 API key；
+- 不触发任务；
+- 不推QQ；
+- 不接 cron；
+- 不写 `PRODUCTION_VERIFIED`。
+
+### 边界
+- 本页属于工程诊断页，不代表生产接入通过；
+- 本页不得提供执行按钮（run/trigger/refresh/push）；
+- 正式 V2/V4 卡片继续走原来源；
+- 当前仍不能说明 V2/V4 业务数据一致性。
+
+### 下一阶段
+- C.9 才考虑非关键模块“辅助展示级”使用 cache 数据（仍不接生产链路）；
+- V2/V4 正式接 cache 仍需单独 BOSS 指令。
