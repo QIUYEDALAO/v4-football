@@ -23,16 +23,16 @@
 | D.7.3 | `1eea1c5` | Preflight coverage closure (strict wrapper/checker/docs) | ✅ |
 | D.8 | `c7a7213` | Production resume readiness gate (read-only) | ✅ |
 | D.8.1 | `5ba5113` | Controlled resume plan (plan-only, no execution) | ✅ |
-| D.8.2 | `TBD` | Controlled cron dry-run validation (read-only) | ✅ |
-| D.8.3 | `TBD` | Controlled no-push production dry-run (read-only) | ✅ |
-| D.8.4 | `TBD` | QQ route dry-run validation (read-only) | ✅ |
-| D.8.5 | `TBD` | Single-window live observe plan (plan-only) | ✅ |
-| D.8.6 | `TBD` | Settlement preflight live guard observe plan (plan-only) | ✅ |
+| D.8.2 | `7e77a24` | Controlled cron dry-run validation (read-only) | ✅ |
+| D.8.3 | `7e77a24` | Controlled no-push production dry-run (read-only) | ✅ |
+| D.8.4 | `7e77a24` | QQ route dry-run validation (read-only) | ✅ |
+| D.8.5 | `7e77a24` | Single-window live observe plan (plan-only) | ✅ |
+| D.8.6 | `7e77a24` | Settlement preflight live guard observe plan (plan-only) | ✅ |
 | D.8.8 | `a3b47c5` | Controlled preflight observe (single-window, not live worker) | ✅ |
 | D.8.9 | `8c94cca` | Controlled resume post-run review & scope correction | ✅ |
 | D.8.10 | `45957e7` | Window worker sandbox observe (no supervisor/no formal write) | ✅ |
 | D.8.11 | `152406b` | Live worker safety wrapper (plan-only gate) | ✅ |
-| D.8.12 | `TBD` | Live worker observe approval gate (approval-only) | ✅ |
+| D.8.12 | `c50b191` | Live worker observe approval gate (approval-only) | ✅ |
 
 **新增 20+ 文件，0 次策略改动，0 次 API 调用，0 次 QQ 推送。**
 
@@ -242,7 +242,11 @@ Phase D 工程链路完成（engineering_complete=true），但 business_pass=fa
 | D.8.13.1 | (docs) | Docs closure |
 | D.8.20 | `e9dd8f8` | Controlled resume risk acceptance gate |
 | D.8.20.1 | `054f3ab` | Risk acceptance gate fail-closed hardening |
-| D.8.21 | `TBD` | Single-window controlled execution draft gate |
+| D.8.21 | `89c51e0` | Single-window controlled execution draft gate |
+| D.8.22 | `baee165` | Controlled command review / dry-run gate |
+| D.8.23 | `7c31949` | No-op / shell-safe dry-run harness |
+| D.8.24 | `4ec368f` | Controlled worker dry-run wrapper |
+| D.8.25 | `2a7eb83` | Final controlled execution approval packet |
 
 **D.8.13 结论：** approval_packet_status=READY_FOR_BOSS_REVIEW，guarded_live_observe_approved=false，D.8.14 需 BOSS 单独指令。
 
@@ -267,6 +271,21 @@ Phase D 工程链路完成（engineering_complete=true），但 business_pass=fa
   - 已证明：`no_state_case_proven=true`、`synthetic_state_file_read_proven=true`、`synthetic_state_present_no_write_proven=true`
   - 未证明：`real_state_present_case_proven=false`、`synthetic_active_window_mutation_proven=false`
 - D.8.22 仍需 BOSS 单独指令；不得自动进入，Phase E 仍不得自动进入。
+
+## 16. D.8.22-D.8.25 Pre-execution Work Package
+
+- D.8.22：只做 proposed command review，不执行命令。
+- D.8.23：只做 no-op harness，打印命令、严格校验 flags，`command_executed=false`。
+- D.8.24：只做 dry-run wrapper，默认 `dry_run_only`，缺 guard 即 FAIL/BLOCKER。
+- D.8.25：汇总 D.8.22/23/24 证据，输出 final approval packet（仍非执行）。
+- D.8.26 口径固定：
+  - `allowed_to_generate=true`
+  - `allowed_to_execute=false`
+- 当前全链路仍保持：
+  - `current_level=CODE_READY`
+  - `PIPELINE_READY=false`
+  - `PRODUCTION_VERIFIED=false`
+  - 不恢复生产，不进入 Phase E。
 
 <!-- D.8.16.3 closure: v2_football_quant/docs/PHASE_D_COMPLETION_REPORT.md -->
 

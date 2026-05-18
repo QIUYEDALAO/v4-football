@@ -73,3 +73,14 @@ D.8.21 still requires separate BOSS instruction.
 - D.8.22 draft generation can be reviewed, but execution remains forbidden by default.
 - Any `production_resume_allowed_now/cron_enable_allowed/qq_push_allowed/verified_write_allowed/state_write_allowed=true` must fail-closed.
 - D.8.21 does not grant `PIPELINE_READY` and does not grant `PRODUCTION_VERIFIED`.
+
+## D.8-AA Follow-up Alignment
+
+- D.8.22 / D.8.23 / D.8.24 / D.8.25 都属于 **pre-execution review chain**。
+- 所有后续门禁都必须保持：
+  - `production_resume_allowed_now=false`
+  - `cron_enable_allowed=false`
+  - `qq_push_allowed=false`
+  - `verified_write_allowed=false`
+  - `state_write_allowed=false`
+- `accepted_risks_do_not_grant_execution=true` 持续有效，风险接受不等于恢复生产权限。

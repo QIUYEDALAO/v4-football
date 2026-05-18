@@ -51,3 +51,11 @@ All gates remain false. D.8.20 requires separate BOSS instruction.
   - `verified_write_allowed=false`
   - `formal_state_write_allowed=false`
   - `supervisor_allowed=false`
+
+## D.8.22-D.8.25 Alignment
+
+- D.8.22：command review only，禁止执行。
+- D.8.23：no-op harness only，禁止执行。
+- D.8.24：dry-run wrapper only，禁止执行。
+- D.8.25：final approval packet only，禁止执行。
+- D.8.26 在当前阶段必须保持 `allowed_to_execute=false`。
