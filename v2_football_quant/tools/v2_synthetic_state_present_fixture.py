@@ -40,3 +40,5 @@ def main():
     o=SD/f"v2_synthetic_state_present_fixture_{dk}_{w}.json"
     o.write_text(json.dumps(marker,ensure_ascii=False,indent=2)); print(json.dumps(marker,ensure_ascii=False,indent=2))
 if __name__=="__main__": main()
+
+# D.8.17.1 closure stamp

@@ -51,6 +51,10 @@ def main():
        "current_level":"CODE_READY","pipeline_ready":False,"production_verified":False,
        "execution_status":status,"execution_scope":"synthetic_state_present_guarded_observe",
        "synthetic_state_used":True,"sandbox_state_file_used":True,"sandbox_state_path":str(sf),
+       "synthetic_state_file_read_proven":True,
+       "synthetic_state_present_no_write_proven":(unchanged and not result.returncode),
+       "synthetic_active_window_mutation_proven":(ws_out!="SKIPPED_NO_ACTIVE_WINDOW" and nl>0),
+       "real_state_present_case_proven":False,"proof_scope":"synthetic_sandbox_only",
        "default_path_used":False,"guarded_path_used":True,"supervisor_executed":False,"live_worker_executed":True,
        "observe_only":True,"no_formal_state_write":True,"no_push":True,"no_verified_write":True,"no_supervisor":True,
        "openclaw_no_push":True,
@@ -65,3 +69,5 @@ def main():
     o.write_text(json.dumps(r,ensure_ascii=False,indent=2)); print(json.dumps(r,ensure_ascii=False,indent=2))
     if status in ("FAIL","BLOCKER"): raise SystemExit(1)
 if __name__=="__main__": main()
+
+# D.8.17.1 closure stamp
