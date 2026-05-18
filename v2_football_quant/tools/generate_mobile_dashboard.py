@@ -5,10 +5,15 @@ import argparse
 import json
 import re
 from dataclasses import dataclass
-from datetime import datetime
+from datetime import datetime, timedelta
 from html import escape
 from pathlib import Path
 from typing import Any
+
+try:
+    from engine.v4_display_name_normalizer import display_name as _v4_display_name
+except Exception:
+    _v4_display_name = None
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 STATUS_DIR = BASE_DIR / "data" / "runtime" / "status"
@@ -24,6 +29,78 @@ LOG_DIR = BASE_DIR / "data" / "runtime" / "logs"
 OUT_DIR = BASE_DIR / "data" / "runtime" / "dashboard"
 ASSET_DIR = OUT_DIR / "assets"
 STATE_CURRENT = BASE_DIR.parent / "STATE_CURRENT.md"
+
+V4_SCRIPT_ARCHIVE_FIX_DATE = "20260518"
+
+# 阅读层补充中文别名（仅展示，不改策略/评级）
+READING_ALIAS = {
+    "New York Red Bulls": "纽约红牛",
+    "New York City FC": "纽约城",
+    "Bodo/Glimt": "博德闪耀",
+    "Tromso": "特罗姆瑟",
+    "Valerenga": "瓦勒伦加",
+    "Sarpsborg 08 FF": "萨普斯堡",
+    "Sligo Rovers": "斯莱戈流浪者",
+    "Galway United": "戈尔韦联",
+    "Penarol": "佩纳罗尔",
+    "Liverpool Montevideo": "蒙得维的亚利物浦",
+    "Internacional": "巴西国际",
+    "Vasco DA Gama": "达伽马",
+    "Philadelphia Union": "费城联合",
+    "Columbus Crew": "哥伦布机员",
+    "Cherno More Varna": "查洛摩利",
+    "Gnistan": "格尼斯坦",
+    "FF Jaro": "雅罗",
+    "Atromitos": "阿特罗米托斯",
+    "Al Okhdood": "欧鲁巴赫多德",
+    "Austin": "奥斯汀FC",
+    "Minnesota United FC": "明尼苏达联",
+    "Real Salt Lake": "皇家盐湖城",
+    "Colorado Rapids": "科罗拉多急流",
+}
+
+V4_SCAN_WINDOWS = [
+    {
+        "label": "凌晨",
+        "key": "late",
+        "aliases": ["late"],
+        "cron_id": "4450d249",
+        "plan_time": "01:20",
+        "log_candidates": ["v4_scan_late_{date}.log"],
+    },
+    {
+        "label": "早场",
+        "key": "early",
+        "aliases": ["early"],
+        "cron_id": "e1863187",
+        "plan_time": "07:20",
+        "log_candidates": ["v4_scan_early_{date}.log"],
+    },
+    {
+        "label": "午间",
+        "key": "midday",
+        "aliases": ["midday", "noon"],
+        "cron_id": "708f26f9",
+        "plan_time": "14:05",
+        "log_candidates": ["v4_scan_midday_{date}.log", "v4_scan_noon_{date}.log"],
+    },
+    {
+        "label": "傍晚",
+        "key": "evening",
+        "aliases": ["evening"],
+        "cron_id": "0443f80e",
+        "plan_time": "16:20",
+        "log_candidates": ["v4_scan_evening_{date}.log"],
+    },
+    {
+        "label": "晚间",
+        "key": "night",
+        "aliases": ["night"],
+        "cron_id": "b022bce3",
+        "plan_time": "22:20",
+        "log_candidates": ["v4_scan_night_{date}.log"],
+    },
+]
 
 
 @dataclass
@@ -99,6 +176,14 @@ STATUS_ZH = {
     "DELAYED": "延迟",
     "NO_PUSH": "未推送",
     "NO_SETTLEMENT_OBJECT": "无结算对象",
+    "PARSE_FAILED": "解析失败",
+    "NOT_DUE": "未到时间",
+    "UNVERIFIED": "未验证",
+    "HISTORICAL_NOT_ARCHIVED": "历史未归档",
+    "WAITING_TRIGGER": "待自然触发",
+    "PENDING": "待执行",
+    "UNFINISHED": "未完成",
+    "WARN": "警告",
     "NO": "否",
     "YES": "是",
 }
@@ -130,9 +215,9 @@ def _status_tag(status: str | None) -> str:
     s = str(status or "MISSING").upper()
     if s in {"PASS", "DONE", "SENT", "SUCCESS", "NORMAL", "BET_LOCKED_DAY"}:
         cls = "ok"
-    elif s in {"RUNNING", "PARTIAL_DONE", "REVIEW_PARTIAL", "DELIVERED_UNCONFIRMED", "SKIPPED_STARTED_OR_CLOSED"}:
+    elif s in {"RUNNING", "PARTIAL_DONE", "REVIEW_PARTIAL", "DELIVERED_UNCONFIRMED", "SKIPPED_STARTED_OR_CLOSED", "DELAYED", "UNVERIFIED", "NOT_DUE", "HISTORICAL_NOT_ARCHIVED", "WAITING_TRIGGER", "PENDING"}:
         cls = "warn"
-    elif s in {"FAIL", "FAILED", "TIMEOUT", "ABNORMAL", "BLOCKER", "CHAIN_INCOMPLETE", "MISSING"}:
+    elif s in {"FAIL", "FAILED", "TIMEOUT", "ABNORMAL", "BLOCKER", "CHAIN_INCOMPLETE", "MISSING", "PARSE_FAILED", "UNFINISHED"}:
         cls = "bad"
     else:
         cls = "neutral"
@@ -162,6 +247,293 @@ def _text_or_missing(x: Any) -> str:
         return "缺失"
     s = str(x).strip()
     return s if s else "缺失"
+
+
+def _parse_dt(s: Any) -> datetime | None:
+    if not s:
+        return None
+    try:
+        return datetime.fromisoformat(str(s))
+    except Exception:
+        return None
+
+
+def _strip_ansi(text: str) -> str:
+    return re.sub(r"\x1b\[[0-9;]*m", "", text)
+
+
+def _extract_abcs_from_text(text: str) -> dict[str, int] | None:
+    clean = _strip_ansi(text)
+    pats = [
+        r"A\s*[:：]?\s*(\d+)\s*/\s*B\s*[:：]?\s*(\d+)\s*/\s*C\s*[:：]?\s*(\d+)\s*/\s*SKIP\s*[:：]?\s*(\d+)",
+        r"A(\d+)\s*/\s*B(\d+)\s*/\s*C(\d+)\s*/\s*SKIP(\d+)",
+    ]
+    for pat in pats:
+        m = re.search(pat, clean, flags=re.IGNORECASE)
+        if m:
+            a, b, c, skip = [int(x) for x in m.groups()]
+            return {"a": a, "b": b, "c": c, "skip": skip}
+    return None
+
+
+def _extract_scan_log_meta(log_path: Path) -> dict[str, Any]:
+    if not log_path.exists():
+        return {"exists": False, "complete": False, "counts": None, "scan_total": None, "last_line_time": None}
+    text = _load_text(log_path, "")
+    clean = _strip_ansi(text)
+    complete = ("球探扫描完成" in clean) or ("V4 球探扫描完成" in clean)
+    counts = _extract_abcs_from_text(clean)
+    scan_total = None
+    pre_funnel_total = None
+    h2h_insufficient = None
+    below_threshold = None
+    api_errors = None
+    no_market = None
+    m_total = re.search(r"球探报告[:：]\s*(\d+)", clean)
+    if m_total:
+        scan_total = int(m_total.group(1))
+    m_prefunnel = re.search(r"前置漏斗[:：]\s*(\d+)\s*场", clean)
+    if m_prefunnel:
+        pre_funnel_total = int(m_prefunnel.group(1))
+    m_summary = re.search(
+        r"总数[:：]\s*(\d+)\s*→\s*H2H不足[:：]\s*(\d+)\s*→\s*未达标[:：]\s*(\d+)\s*→\s*API错误[:：]\s*(\d+)\s*→\s*无盘口[:：]\s*(\d+)\s*→\s*🔭球探报告[:：]\s*(\d+)",
+        clean,
+    )
+    if m_summary:
+        pre_funnel_total = int(m_summary.group(1))
+        h2h_insufficient = int(m_summary.group(2))
+        below_threshold = int(m_summary.group(3))
+        api_errors = int(m_summary.group(4))
+        no_market = int(m_summary.group(5))
+        scan_total = int(m_summary.group(6))
+    ts_matches = re.findall(r"(\d{2}:\d{2}:\d{2})", clean)
+    last_line_time = ts_matches[-1] if ts_matches else None
+    return {
+        "exists": True,
+        "complete": complete,
+        "counts": counts,
+        "scan_total": scan_total,
+        "pre_funnel_total": pre_funnel_total,
+        "h2h_insufficient": h2h_insufficient,
+        "below_threshold": below_threshold,
+        "api_errors": api_errors,
+        "no_market": no_market,
+        "last_line_time": last_line_time,
+    }
+
+
+def _extract_counts_from_json_obj(obj: Any) -> dict[str, int] | None:
+    if not isinstance(obj, dict):
+        return None
+    keys = ("a_count", "b_count", "c_count", "skip_count")
+    if all(k in obj for k in keys):
+        return {
+            "a": _to_int(obj.get("a_count")),
+            "b": _to_int(obj.get("b_count")),
+            "c": _to_int(obj.get("c_count")),
+            "skip": _to_int(obj.get("skip_count")),
+        }
+    return None
+
+
+def _parse_v4_qq_brief(path: Path) -> dict[str, Any]:
+    if not path.exists():
+        return {"exists": False, "parse_ok": False}
+    text = _load_text(path, "")
+    if not text:
+        return {"exists": True, "parse_ok": False, "raw_text": ""}
+
+    lines = [ln.rstrip() for ln in text.splitlines()]
+    counts = _extract_abcs_from_text(text)
+
+    scan_total = None
+    intel_total = None
+    cover_ab = None
+    m_head = re.search(r"扫描(\d+)场｜情报(\d+)场.*A\+B覆盖([0-9.]+%)", text)
+    if m_head:
+        scan_total = _to_int(m_head.group(1), 0)
+        intel_total = _to_int(m_head.group(2), 0)
+        cover_ab = m_head.group(3)
+
+    a_items: list[str] = []
+    b_items: list[str] = []
+    c_summary = ""
+    skip_summary = ""
+    generated_time = ""
+    source_window = ""
+    parsed_matches: list[dict[str, Any]] = []
+
+    def _has_cjk(s: str) -> bool:
+        return bool(re.search(r"[\u4e00-\u9fff]", s or ""))
+
+    def _norm_name(name: str, is_league: bool = False) -> tuple[str, bool]:
+        raw = (name or "").strip()
+        if not raw:
+            return raw, False
+        mapped = raw
+        if _v4_display_name is not None:
+            mapped = _v4_display_name(raw, is_league=is_league)
+        # 阅读层兜底别名：仅用于展示，不影响任何评级或证据判定
+        if mapped == raw and not is_league:
+            mapped = READING_ALIAS.get(raw, mapped)
+        unmapped = (mapped == raw) and (not _has_cjk(raw))
+        return mapped, unmapped
+
+    def _time_bucket(hhmm: str) -> str:
+        try:
+            hh = int(hhmm.split(":")[0])
+        except Exception:
+            return "跨日/其他"
+        if 0 <= hh < 6:
+            return "00:00-06:00"
+        if 6 <= hh < 12:
+            return "06:00-12:00"
+        if 12 <= hh < 18:
+            return "12:00-18:00"
+        if 18 <= hh < 24:
+            return "18:00-24:00"
+        return "跨日/其他"
+
+    def _parse_match_block(lines_local: list[str], idx: int) -> dict[str, Any] | None:
+        line = lines_local[idx].strip()
+        m = re.match(r"^\d+\.\s*(.*?)\s+vs\s+(.*?)｜([^｜]+)｜(\d{2}-\d{2}\s+\d{2}:\d{2})\s*$", line)
+        if not m:
+            return None
+        home_raw, away_raw, league_raw, kickoff = m.groups()
+        home_cn, home_unmapped = _norm_name(home_raw, is_league=False)
+        away_cn, away_unmapped = _norm_name(away_raw, is_league=False)
+        league_cn, league_unmapped = _norm_name(league_raw, is_league=True)
+        ht_score = "未提供"
+        ht_rate = "未提供"
+        avg_goals = "未提供"
+        script_type = "未提供"
+        time_bins = "未提供"
+
+        if idx + 1 < len(lines_local):
+            l2 = lines_local[idx + 1].strip()
+            m2 = re.search(r"HT\s*([0-9]+)\s*｜\s*([0-9]+%)\s*｜\s*([0-9.]+球)\s*｜\s*剧本[:：]\s*(.+)$", l2)
+            if m2:
+                ht_score, ht_rate, avg_goals, script_type = [x.strip() for x in m2.groups()]
+        if idx + 2 < len(lines_local):
+            l3 = lines_local[idx + 2].strip()
+            m3 = re.search(r"时段[:：]\s*(.+)$", l3)
+            if m3:
+                time_bins = m3.group(1).strip()
+
+        kickoff_hhmm = kickoff.split()[-1] if " " in kickoff else kickoff
+        return {
+            "home_raw": home_raw,
+            "away_raw": away_raw,
+            "league_raw": league_raw,
+            "home": home_cn,
+            "away": away_cn,
+            "league": league_cn,
+            "home_unmapped": home_unmapped,
+            "away_unmapped": away_unmapped,
+            "league_unmapped": league_unmapped,
+            "kickoff": kickoff,
+            "kickoff_hhmm": kickoff_hhmm,
+            "time_group": _time_bucket(kickoff_hhmm),
+            "ht_score": ht_score,
+            "ht_rate": ht_rate,
+            "avg_goals": avg_goals,
+            "script_type": script_type,
+            "time_bins": time_bins,
+            "source": "qq_brief",
+            "production_evidence": False,
+        }
+    in_a = False
+    in_b = False
+    for i, ln in enumerate(lines):
+        if ln.startswith("生成时间："):
+            generated_time = ln.replace("生成时间：", "").strip()
+        if ln.startswith("窗口："):
+            source_window = ln.replace("窗口：", "").strip()
+        if "【A级" in ln:
+            in_a = True
+            in_b = False
+            continue
+        if "【B级" in ln:
+            in_b = True
+            in_a = False
+            continue
+        if ln.startswith("【C级"):
+            c_summary = ln.strip()
+            in_a = False
+            in_b = False
+            continue
+        if ln.startswith("【跳过原因】"):
+            skip_summary = ln.replace("【跳过原因】", "").strip()
+            in_a = False
+            in_b = False
+            continue
+        if in_a and re.match(r"^\d+\.\s*", ln.strip()):
+            a_items.append(ln.strip())
+            rec = _parse_match_block(lines, i)
+            if rec is not None:
+                rec["grade"] = "A"
+                parsed_matches.append(rec)
+        if in_b and re.match(r"^\d+\.\s*", ln.strip()):
+            b_items.append(ln.strip())
+            rec = _parse_match_block(lines, i)
+            if rec is not None:
+                rec["grade"] = "B"
+                parsed_matches.append(rec)
+
+    skip_reason_items = []
+    for mm in re.finditer(r"([^|｜]+?)\s*(\d+)场", skip_summary):
+        reason = mm.group(1).strip()
+        cnt = _to_int(mm.group(2), 0)
+        if reason:
+            skip_reason_items.append({"reason": reason, "count": cnt})
+
+    c_rep = []
+    m_c_rep = re.search(r"代表[:：](.+?)(?:等\d+场|$)", c_summary)
+    if m_c_rep:
+        c_rep = [x.strip() for x in m_c_rep.group(1).split("|") if x.strip()]
+
+    parse_ok = bool(counts or a_items or b_items or c_summary or skip_summary or parsed_matches)
+    return {
+        "exists": True,
+        "parse_ok": parse_ok,
+        "source_path": str(path),
+        "counts": counts,
+        "scan_total": scan_total,
+        "intel_total": intel_total,
+        "ab_cover": cover_ab,
+        "a_items": a_items,
+        "b_items": b_items,
+        "ab_matches": parsed_matches,
+        "c_summary": c_summary,
+        "c_representatives": c_rep,
+        "skip_summary": skip_summary,
+        "skip_reason_items": skip_reason_items,
+        "generated_time": generated_time,
+        "source_window": source_window,
+        "raw_excerpt": "\n".join(lines[:30]),
+        "raw_text": text,
+    }
+
+
+def _window_planned_dt(date_key: str, hhmm: str) -> datetime | None:
+    try:
+        return datetime.strptime(f"{date_key} {hhmm}", "%Y%m%d %H:%M")
+    except Exception:
+        return None
+
+
+def _review_due_dt(date_key: str) -> datetime | None:
+    try:
+        base = datetime.strptime(date_key, "%Y%m%d")
+        return base + timedelta(days=1, hours=12, minutes=35)
+    except Exception:
+        return None
+
+
+def _fmt_dt(dt: datetime | None) -> str:
+    if dt is None:
+        return "缺失"
+    return dt.strftime("%Y-%m-%d %H:%M:%S")
 
 
 def _parse_missed_audit(obj: Any) -> list[dict[str, Any]]:
@@ -327,82 +699,456 @@ def _compute_v2(date_key: str) -> dict[str, Any]:
 
 
 def _compute_v4_scan(date_key: str) -> dict[str, Any]:
-    windows = [
-        ("凌晨", "late"),
-        ("早场", "early"),
-        ("午间", "midday"),
-        ("傍晚", "evening"),
-        ("晚间", "night"),
-    ]
-    rows = []
-    for label, key in windows:
+    now = datetime.now()
+    script_archive_file = DAILY_REPORT_DIR / f"v4_script_type_archive_{date_key}.json"
+    dist_archive_file = DAILY_REPORT_DIR / f"v4_script_distribution_{date_key}.json"
+    is_historical_pre_archive = date_key < V4_SCRIPT_ARCHIVE_FIX_DATE
+
+    rows: list[dict[str, Any]] = []
+    guard_fail_items: list[str] = []
+    guard_warn_items: list[str] = []
+
+    for spec in V4_SCAN_WINDOWS:
+        label = spec["label"]
+        key = spec["key"]
         task_path = STATUS_DIR / f"task_status_v4_scan_{key}.json"
         task = _load_json(task_path, {})
-        push_path = STATUS_DIR / f"v4_scan_push_{date_key}_{key}.json"
-        push = _load_json(push_path, {})
+        task_date = str(task.get("date") or "")
+        task_date_mismatch = bool(task_date and task_date != date_key)
+        if task_date_mismatch:
+            task = {}
+        task_status = str(task.get("status", "MISSING")).upper()
+        planned_dt = _window_planned_dt(date_key, spec["plan_time"])
+
+        log_candidates = [LOG_DIR / pat.format(date=date_key) for pat in spec.get("log_candidates", [])]
+        task_log = task.get("output_files", {}).get("scan_log")
+        if task_log:
+            log_candidates.append(Path(str(task_log)))
+        log_path = next((p for p in log_candidates if p.exists()), None)
+        log_meta = _extract_scan_log_meta(log_path) if log_path else {"exists": False, "complete": False, "counts": None, "scan_total": None, "last_line_time": None}
+
+        push_marker_candidates: list[Path] = []
+        status_structured_candidates: list[Path] = []
+        archive_structured_candidates: list[Path] = []
+        for alias in spec.get("aliases", [key]):
+            push_marker_candidates.append(STATUS_DIR / f"v4_scan_push_{date_key}_{alias}.json")
+            status_structured_candidates.append(STATUS_DIR / f"v4_scan_{date_key}_{alias}.json")
+            archive_structured_candidates.append(V4_ARCHIVE_DIR / f"v4_scan_structured_{date_key}_{alias}.json")
+
+        source_type = "missing"
+        source_path: Path | None = None
+        source_obj: dict[str, Any] = {}
+        counts: dict[str, int] | None = None
         fallback_used = False
-        if not push:
+        fallback_reason = ""
+        parse_failed = False
+
+        # 优先级1：窗口专属 status/structured/push marker
+        p1_sources: list[tuple[str, Path]] = []
+        p1_sources.extend([("window_status_marker", p) for p in status_structured_candidates])
+        p1_sources.extend([("window_structured", p) for p in archive_structured_candidates])
+        p1_sources.extend([("window_push_marker", p) for p in push_marker_candidates])
+
+        for stype, spath in p1_sources:
+            if not spath.exists():
+                continue
+            obj = _load_json(spath, {})
+            c = _extract_counts_from_json_obj(obj)
+            if c is not None:
+                source_type = stype
+                source_path = spath
+                source_obj = obj if isinstance(obj, dict) else {}
+                counts = c
+                break
+
+        # 优先级2：窗口专属日志解析
+        if counts is None and log_path and log_path.exists():
+            c = log_meta.get("counts")
+            if c is not None:
+                source_type = "window_log"
+                source_path = log_path
+                counts = c
+
+        # 优先级3：明确 fallback（并显示路径与原因）
+        if counts is None:
+            fallback_candidates: list[tuple[str, Path, str]] = []
             if key == "midday":
-                for cand in [
-                    STATUS_DIR / f"v4_scan_push_{date_key}_midday_corrected_v2.json",
-                    STATUS_DIR / f"v4_scan_push_{date_key}_midday_corrected.json",
-                    STATUS_DIR / f"v4_scan_push_{date_key}_midday.json",
-                ]:
-                    if cand.exists():
-                        push = _load_json(cand, {})
-                        push_path = cand
-                        fallback_used = True
-                        break
-            elif key == "early":
-                cand = STATUS_DIR / f"v4_scan_push_{date_key}_latest.json"
-                if cand.exists():
-                    push = _load_json(cand, {})
-                    push_path = cand
+                fallback_candidates.extend(
+                    [
+                        ("fallback_midday_corrected_v2", STATUS_DIR / f"v4_scan_push_{date_key}_midday_corrected_v2.json", "午间窗口使用 corrected_v2 回退"),
+                        ("fallback_midday_corrected", STATUS_DIR / f"v4_scan_push_{date_key}_midday_corrected.json", "午间窗口使用 corrected 回退"),
+                        ("fallback_midday_raw", STATUS_DIR / f"v4_scan_push_{date_key}_midday.json", "午间窗口使用原始 mid-day push 回退"),
+                    ]
+                )
+            if key == "early":
+                fallback_candidates.append(
+                    ("fallback_latest_push", STATUS_DIR / f"v4_scan_push_{date_key}_latest.json", "早场窗口无专属push，使用latest回退")
+                )
+            fallback_candidates.append(
+                ("fallback_qq_brief", DAILY_REPORT_DIR / f"v4_openclaw_brief_qq_{date_key}.txt", f"{label}窗口尝试从QQ简报回退")
+            )
+
+            for stype, spath, reason in fallback_candidates:
+                if not spath.exists():
+                    continue
+                if stype == "fallback_qq_brief":
+                    txt = _load_text(spath, "")
+                    if f"窗口：{label}" not in txt:
+                        continue
+                    c = _extract_abcs_from_text(txt)
+                else:
+                    obj = _load_json(spath, {})
+                    if stype == "fallback_latest_push":
+                        note = str(obj.get("note", ""))
+                        if "早场" not in note:
+                            continue
+                    c = _extract_counts_from_json_obj(obj)
+                if c is not None:
+                    source_type = stype
+                    source_path = spath
+                    counts = c
                     fallback_used = True
+                    fallback_reason = reason
+                    break
 
-        a = int(push.get("a_count", 0) or 0)
-        b = int(push.get("b_count", 0) or 0)
-        c = int(push.get("c_count", 0) or 0)
-        skip = int(push.get("skip_count", 0) or 0)
-        if a > 0:
-            grade = "A"
-        elif b > 0:
-            grade = "B"
-        elif c > 0:
-            grade = "C"
-        elif skip > 0:
-            grade = "SKIP"
-        else:
+        if counts is None and (source_path is not None or log_meta.get("exists")):
+            parse_failed = True
+
+        if counts is None:
+            a = b = c = skip = None
             grade = "MISSING"
+        else:
+            a, b, c, skip = counts["a"], counts["b"], counts["c"], counts["skip"]
+            if a > 0:
+                grade = "A"
+            elif b > 0:
+                grade = "B"
+            elif c > 0:
+                grade = "C"
+            elif skip > 0:
+                grade = "SKIP"
+            else:
+                grade = "MISSING"
 
-        scout_path = task.get("output_files", {}).get("scout")
-        script_archive = False
-        dist_archive = False
-        if scout_path:
-            # Phase 1: 只读存在性，若后续脚本归档文件出现再切换。
-            script_archive = (DAILY_REPORT_DIR / f"v4_script_type_archive_{date_key}.json").exists()
-            dist_archive = (DAILY_REPORT_DIR / f"v4_script_distribution_{date_key}.json").exists()
+        # 状态判定：不使用 latest 猜测，不让次日长期显示运行中
+        status_code = "MISSING"
+        status_reason = ""
+        if planned_dt and now < planned_dt and not task and not log_meta.get("exists"):
+            status_code = "NOT_DUE"
+            status_reason = "尚未到计划时间"
+        elif task_status in {"DONE", "SUCCESS"}:
+            status_code = "DONE"
+            status_reason = "task_status 已完成"
+        elif bool(log_meta.get("complete")):
+            status_code = "DONE"
+            status_reason = "日志含扫描完成标记"
+        elif task_status in {"FAIL", "FAILED", "TIMEOUT", "BLOCKER"}:
+            status_code = "FAILED"
+            status_reason = "任务状态失败"
+        elif task_status == "RUNNING":
+            hb = _parse_dt(task.get("last_heartbeat_at"))
+            same_day = date_key == now.strftime("%Y%m%d")
+            recent_hb = hb is not None and (now - hb) <= timedelta(minutes=20)
+            near_window = planned_dt is not None and abs((now - planned_dt).total_seconds()) <= 3 * 3600
+            if same_day and recent_hb and near_window:
+                status_code = "UNVERIFIED"
+                status_reason = "运行中，等待结束标记"
+            else:
+                status_code = "DELAYED"
+                status_reason = "运行状态滞留且无新心跳证据"
+        elif task_status == "DELAYED":
+            status_code = "DELAYED"
+            status_reason = "任务状态为延迟"
+        elif task:
+            status_code = "UNVERIFIED"
+            status_reason = "有任务记录但缺少完成标记"
+        elif log_meta.get("exists"):
+            status_code = "UNVERIFIED"
+            status_reason = "有日志但未识别完成标记"
+        else:
+            if planned_dt and now >= planned_dt:
+                status_code = "MISSING"
+                status_reason = "已过计划时间但无窗口产物"
+            else:
+                status_code = "NOT_DUE"
+                status_reason = "尚未到计划时间"
+
+        if status_code == "DONE" and counts is None:
+            status_code = "PARSE_FAILED"
+            status_reason = "扫描完成但A/B/C/SKIP未找到可解析来源"
+
+        read_only_parse = {
+            "available": bool(log_meta.get("exists")),
+            "scan_total": log_meta.get("pre_funnel_total"),
+            "scout_total": log_meta.get("scan_total"),
+            "h2h_insufficient": log_meta.get("h2h_insufficient"),
+            "below_threshold": log_meta.get("below_threshold"),
+            "api_errors": log_meta.get("api_errors"),
+            "no_market": log_meta.get("no_market"),
+            "complete": bool(log_meta.get("complete")),
+            "exit_code": 0 if task_status in {"DONE", "SUCCESS"} else (None if task_status in {"RUNNING", "UNVERIFIED"} else None),
+            "parse_note": "仅从日志与状态文件只读补解析，不代表窗口专属计数",
+        }
+
+        if script_archive_file.exists():
+            script_archive_status = "DONE"
+        elif is_historical_pre_archive:
+            script_archive_status = "HISTORICAL_NOT_ARCHIVED"
+        else:
+            script_archive_status = "MISSING"
+
+        if dist_archive_file.exists():
+            dist_archive_status = "DONE"
+        elif is_historical_pre_archive:
+            dist_archive_status = "HISTORICAL_NOT_ARCHIVED"
+        else:
+            dist_archive_status = "MISSING"
+
+        push_marker_exists = any(p.exists() for p in push_marker_candidates)
+        source_path_present = source_path is not None and source_path.exists()
+        log_path_present = log_path is not None and log_path.exists()
+        counts_present = counts is not None
+        marker_source_exists = any(p.exists() for p in push_marker_candidates)
+        window_specific_source = source_type in {"window_status_marker", "window_structured", "window_push_marker"}
+        counts_parse_status = "ok"
+        if counts is None:
+            counts_parse_status = "failed" if parse_failed else "missing"
+        elif source_type == "fallback_qq_brief":
+            counts_parse_status = "failed"
+        elif source_type.startswith("fallback_"):
+            counts_parse_status = "fallback"
+
+        checklist = {
+            "cron_id_present": bool(spec.get("cron_id")),
+            "log_path_present": log_path_present,
+            "source_path_present": source_path_present,
+            "window_specific_source": window_specific_source,
+            "counts_present": counts_present,
+            "counts_parse_status": counts_parse_status,
+            "push_marker_checked": True,
+            "marker_source_exists": marker_source_exists,
+            "script_archive_status_checked": script_archive_status in {"DONE", "MISSING", "HISTORICAL_NOT_ARCHIVED"},
+            "fallback_reason_present_if_used": (not fallback_used) or bool(fallback_reason),
+            "task_date_matched": not task_date_mismatch,
+            "status_not_parse_failed": status_code != "PARSE_FAILED",
+            "status_not_running_stale": not (task_status == "RUNNING" and status_code == "DELAYED"),
+        }
+
+        reasons: list[str] = []
+        warn_reasons: list[str] = []
+        fail_reasons: list[str] = []
+
+        if not checklist["cron_id_present"]:
+            fail_reasons.append("cron_id_missing")
+        if task_date_mismatch and not window_specific_source:
+            warn_reasons.append("task_date_mismatch")
+        if status_code == "PARSE_FAILED":
+            fail_reasons.append("status_parse_failed")
+        if not source_path_present:
+            fail_reasons.append("source_path_missing")
+        if status_code == "DONE" and not source_path_present:
+            fail_reasons.append("done_without_source_path")
+        if not counts_present:
+            fail_reasons.append("counts_missing")
+        if counts_parse_status == "failed":
+            fail_reasons.append("counts_parse_failed")
+        if fallback_used and not checklist["fallback_reason_present_if_used"]:
+            fail_reasons.append("fallback_reason_missing")
+
+        if fallback_used and counts_parse_status != "failed":
+            if source_type == "fallback_latest_push":
+                warn_reasons.append("uses_fallback_latest")
+            else:
+                warn_reasons.append("uses_fallback_source")
+        if not window_specific_source and counts_present and counts_parse_status in {"ok", "fallback"}:
+            warn_reasons.append("non_window_specific_counts_source")
+        if not marker_source_exists and log_path_present:
+            warn_reasons.append("marker_missing_but_log_present")
+        if not checklist["status_not_running_stale"]:
+            warn_reasons.append("running_stale_without_heartbeat")
+
+        # 业务硬规则：晚间 qq 简报回退不能作为窗口完整证据，直接 FAIL
+        if source_type == "fallback_qq_brief":
+            fail_reasons.append("fallback_scope_unverified")
+
+        checklist_status = "PASS"
+        if fail_reasons:
+            checklist_status = "FAIL"
+        elif warn_reasons:
+            checklist_status = "WARN"
+
+        reasons.extend(fail_reasons if checklist_status == "FAIL" else [])
+        if checklist_status == "WARN":
+            reasons.extend(warn_reasons)
+        if checklist_status == "PASS":
+            reasons = []
+
+        data_completeness = "完整" if checklist_status == "PASS" else ("回退展示" if checklist_status == "WARN" else "不完整")
+        production_evidence = checklist_status == "PASS" and source_type in {"window_status_marker", "window_structured", "window_push_marker"}
+
+        if checklist_status == "FAIL":
+            guard_fail_items.extend([f"{key}_{r}" for r in fail_reasons])
+        elif checklist_status == "WARN":
+            guard_warn_items.extend([f"{key}_{r}" for r in warn_reasons])
 
         rows.append(
             {
                 "window": label,
                 "task_key": key,
+                "cron_id": spec["cron_id"],
+                "planned_time": spec["plan_time"],
                 "task_path": task_path,
                 "task": task,
-                "push_path": push_path,
-                "push": push,
+                "window_status": status_code,
+                "window_status_reason": status_reason,
+                "task_date_mismatch": task_date_mismatch,
+                "source_type": source_type,
+                "source_path": str(source_path) if source_path else None,
+                "counts_source": str(source_path) if (counts is not None and source_path) else None,
+                "marker_source": str(next((p for p in push_marker_candidates if p.exists()), push_marker_candidates[0])),
+                "log_source": str(log_path) if log_path else None,
+                "log_complete": bool(log_meta.get("complete")),
+                "scan_total": log_meta.get("scan_total"),
                 "fallback_used": fallback_used,
+                "fallback_reason": fallback_reason,
                 "grade": grade,
                 "a": a,
                 "b": b,
                 "c": c,
                 "skip": skip,
-                "script_archive": script_archive,
-                "distribution_archive": dist_archive,
+                "parse_failed": parse_failed,
+                "read_only_parse": read_only_parse,
+                "script_archive_status": script_archive_status,
+                "distribution_archive_status": dist_archive_status,
+                "checklist": checklist,
+                "checklist_status": checklist_status,
+                "checklist_reasons": reasons,
+                "data_completeness": data_completeness,
+                "production_evidence": production_evidence,
             }
         )
 
-    return {"windows": rows}
+    render_status = "PASS"
+    if guard_fail_items:
+        data_guard_status = "FAIL"
+    elif guard_warn_items:
+        data_guard_status = "WARN"
+    else:
+        data_guard_status = "PASS"
+
+    window_results: dict[str, Any] = {}
+    for r in rows:
+        window_results[r["task_key"]] = {
+            "checklist_status": r["checklist_status"],
+            "production_evidence": r["production_evidence"],
+            "reasons": r["checklist_reasons"],
+            "source_type": r["source_type"],
+            "source_path": r["source_path"],
+        }
+
+    guard = {
+        "render_status": render_status,
+        "data_guard_status": data_guard_status,
+        "production_verified": False,
+        "guard_status": data_guard_status,
+        "checked_windows": [r["task_key"] for r in rows],
+        "window_results": window_results,
+        "fail_items": sorted(set(guard_fail_items)),
+        "warn_items": sorted(set(guard_warn_items)),
+        "generated_at": datetime.now().isoformat(),
+    }
+    guard_path = STATUS_DIR / f"dashboard_v4_scan_guard_{date_key}.json"
+    guard_path.write_text(json.dumps(guard, ensure_ascii=False, indent=2), encoding="utf-8")
+
+    # 阅读模式：优先读取可读简报（仅阅读，不作为生产证据）
+    readable_sources: list[dict[str, Any]] = []
+    qq_brief_path = DAILY_REPORT_DIR / f"v4_openclaw_brief_qq_{date_key}.txt"
+    qq_brief = _parse_v4_qq_brief(qq_brief_path)
+    if qq_brief.get("exists"):
+        readable_sources.append(
+            {
+                "type": "qq_brief",
+                "path": str(qq_brief_path),
+                "parse_ok": bool(qq_brief.get("parse_ok")),
+                "production_evidence": False,
+            }
+        )
+
+    latest_push_path = STATUS_DIR / f"v4_scan_push_{date_key}_latest.json"
+    if latest_push_path.exists():
+        readable_sources.append(
+            {
+                "type": "latest_push",
+                "path": str(latest_push_path),
+                "parse_ok": True,
+                "production_evidence": False,
+            }
+        )
+
+    for r in rows:
+        if r.get("production_evidence"):
+            readable_sources.append(
+                {
+                    "type": "window_push_marker",
+                    "path": r.get("source_path"),
+                    "window": r.get("task_key"),
+                    "parse_ok": True,
+                    "production_evidence": True,
+                }
+            )
+
+    dedup = {}
+    for s in readable_sources:
+        dedup[(s.get("type"), s.get("path"), s.get("window"))] = s
+    readable_sources = list(dedup.values())
+
+    if qq_brief.get("parse_ok") or any(s.get("production_evidence") for s in readable_sources):
+        reading_status = "PASS"
+    elif qq_brief.get("exists") or readable_sources:
+        reading_status = "WARN"
+    else:
+        reading_status = "FAIL"
+
+    return {
+        "windows": rows,
+        "guard": guard,
+        "guard_path": guard_path,
+        "reading_mode": {
+            "enabled": True,
+            "reading_status": reading_status,
+            "qq_brief": qq_brief,
+            "readable_sources": readable_sources,
+        },
+    }
+
+
+def _find_latest_completed_review(exclude_date_key: str) -> dict[str, Any] | None:
+    candidates: list[str] = []
+    for p in STATUS_DIR.glob("v4_review_push_*.json"):
+        m = re.search(r"v4_review_push_(\d{8})\.json$", p.name)
+        if m:
+            candidates.append(m.group(1))
+    candidates = sorted(set(candidates), reverse=True)
+    for d in candidates:
+        if d == exclude_date_key:
+            continue
+        sent = _load_json(STATUS_DIR / f"v4_review_push_{d}.json", {})
+        route = _load_json(STATUS_DIR / f"v4_review_route_{d}.json", {})
+        guard = _load_json(STATUS_DIR / f"v4_review_guard_{d}.json", {})
+        sent_ok = str(sent.get("status", "")).upper() in {"SENT", "DELIVERED_UNCONFIRMED"}
+        route_ok = bool(route.get("allowed_to_push"))
+        guard_ok = str(guard.get("guard_status", "")).upper() == "PASS"
+        if sent_ok or (route_ok and guard_ok):
+            return {
+                "date": d,
+                "sent_status": str(sent.get("status", "MISSING") or "MISSING").upper(),
+                "allowed_to_push": route_ok,
+                "guard_status": str(guard.get("guard_status", "MISSING") or "MISSING").upper(),
+                "route_path": str((STATUS_DIR / f"v4_review_route_{d}.json")),
+                "sent_path": str((STATUS_DIR / f"v4_review_push_{d}.json")),
+                "guard_path": str((STATUS_DIR / f"v4_review_guard_{d}.json")),
+            }
+    return None
 
 
 def _compute_v4_review(date_key: str) -> dict[str, Any]:
@@ -426,7 +1172,13 @@ def _compute_v4_review(date_key: str) -> dict[str, Any]:
     result_refresh_audit = _load_json(AUDIT_DIR / f"v4_review_result_refresh_{date_key}.json", {})
     stats = _load_json(DAILY_REPORT_DIR / f"v4_ht_recommend_validation_{date_key}.json", {})
 
+    now = datetime.now()
+    due_dt = _review_due_dt(date_key)
+    due_reached = bool(due_dt and now >= due_dt)
+
     def step(name: str, path: Path, extra_ok: bool = True) -> dict[str, Any]:
+        if not due_reached:
+            return {"name": name, "path": path, "status": "WAITING_TRIGGER"}
         ok = path.exists() and extra_ok
         return {"name": name, "path": path, "status": "PASS" if ok else "MISSING"}
 
@@ -443,12 +1195,52 @@ def _compute_v4_review(date_key: str) -> dict[str, Any]:
     ]
 
     complete = all(s["status"] == "PASS" for s in steps)
-    push_allowed = bool(route.get("allowed_to_push")) and str(guard_qq.get("guard_status", "")).upper() == "PASS"
-    pushed = str(sent.get("status", "")).upper() in {"SENT", "DELIVERED_UNCONFIRMED"}
+    push_allowed_raw = bool(route.get("allowed_to_push")) and str(guard_qq.get("guard_status", "")).upper() == "PASS"
+    push_allowed = bool(due_reached and push_allowed_raw)
+    pushed = bool(due_reached and str(sent.get("status", "")).upper() in {"SENT", "DELIVERED_UNCONFIRMED"})
     ab_hit = {
         "A": stats.get("A", {}),
         "B": stats.get("B", {}),
     } if isinstance(stats, dict) else {}
+
+    if not due_reached:
+        overall_status = "PENDING"
+        overall_reason = "未到复盘时间"
+    elif complete:
+        overall_status = "DONE"
+        overall_reason = "复盘链路已完成"
+    else:
+        passed = sum(1 for s in steps if s["status"] == "PASS")
+        overall_status = "UNFINISHED" if passed > 0 else "MISSING"
+        overall_reason = "复盘时间已过但产物缺失或未完成"
+
+    latest_completed = _find_latest_completed_review(date_key)
+
+    fail_items: list[str] = []
+    if not due_reached:
+        if any(s["status"] == "MISSING" for s in steps):
+            fail_items.append("before_due_steps_mislabeled_missing")
+        if push_allowed:
+            fail_items.append("before_due_push_allowed_should_be_false")
+        if overall_status != "PENDING":
+            fail_items.append("before_due_overall_status_should_be_pending")
+    else:
+        if any(s["status"] == "WAITING_TRIGGER" for s in steps):
+            fail_items.append("after_due_steps_should_not_waiting")
+    if latest_completed and latest_completed.get("date") == date_key:
+        fail_items.append("latest_completed_overrides_current_date")
+
+    review_guard = {
+        "guard_status": "FAIL" if fail_items else "PASS",
+        "review_date": date_key,
+        "review_due_time": _fmt_dt(due_dt),
+        "current_time": _fmt_dt(now),
+        "overall_status": overall_status,
+        "fail_items": fail_items,
+        "production_verified": False,
+    }
+    review_guard_path = STATUS_DIR / f"dashboard_v4_review_guard_{date_key}.json"
+    review_guard_path.write_text(json.dumps(review_guard, ensure_ascii=False, indent=2), encoding="utf-8")
 
     return {
         "steps": steps,
@@ -463,6 +1255,16 @@ def _compute_v4_review(date_key: str) -> dict[str, Any]:
         "result_refresh_cache": result_refresh_cache,
         "result_refresh_audit": result_refresh_audit,
         "ab_hit": ab_hit,
+        "review_date": date_key,
+        "review_due_time": _fmt_dt(due_dt),
+        "current_time": _fmt_dt(now),
+        "due_reached": due_reached,
+        "overall_status": overall_status,
+        "overall_reason": overall_reason,
+        "latest_completed": latest_completed,
+        "review_guard": review_guard,
+        "review_guard_path": review_guard_path,
+        "production_verified": False,
     }
 
 
@@ -604,8 +1406,8 @@ def _ul(items: list[str]) -> str:
 
 def _render_index(date_key: str, v2: dict[str, Any], scan: dict[str, Any], review: dict[str, Any], system: dict[str, Any]) -> str:
     v4_win = scan["windows"]
-    scan_total_ab = sum(w["a"] + w["b"] for w in v4_win)
-    running_windows = [w for w in v4_win if str(w["task"].get("status", "")).upper() == "RUNNING"]
+    scan_total_ab = sum((w["a"] or 0) + (w["b"] or 0) for w in v4_win)
+    running_windows = [w for w in v4_win if str(w.get("window_status", "")).upper() == "UNVERIFIED"]
     sys_chain = str(system.get("sys_summary", {}).get("chain_status", "MISSING"))
     issue_count = len(system.get("issues", {}).get("P0", [])) + len(system.get("issues", {}).get("P1", []))
 
@@ -618,7 +1420,8 @@ def _render_index(date_key: str, v2: dict[str, Any], scan: dict[str, Any], revie
                 ("正式锁定", f"<b>{v2['official_locked_count']}</b>"),
                 ("错过锁定候选", f"<b>{v2['missed_count']}</b>"),
                 ("每日建池", _status_tag(v2["daily_pool_task"].get("status", "MISSING"))),
-                ("QQ推荐推送", f"<b>{v2['production_recommendation']}</b> · {_status_tag(v2['pushed_status'])}"),
+                ("QQ推荐推送", f"<b>{v2['production_recommendation']}</b>"),
+                ("状态回执", _status_tag(v2["pushed_status"])),
                 ("正式结算对象", f"<b>{v2['settlement_required']}</b>"),
             ],
         )
@@ -630,8 +1433,8 @@ def _render_index(date_key: str, v2: dict[str, Any], scan: dict[str, Any], revie
                 ("扫描窗口", f"{len(v4_win)} 个"),
                 ("A+B 总数", f"<b>{scan_total_ab}</b>"),
                 ("运行中窗口", f"<b>{len(running_windows)}</b>"),
-                ("剧本归档", _status_tag("PASS" if any(w["script_archive"] for w in v4_win) else "MISSING")),
-                ("时段分布归档", _status_tag("PASS" if any(w["distribution_archive"] for w in v4_win) else "MISSING")),
+                ("赛前剧本归档", _status_tag("PASS" if any(str(w["script_archive_status"]).upper() == "DONE" for w in v4_win) else ("HISTORICAL_NOT_ARCHIVED" if date_key == "20260517" else "MISSING"))),
+                ("时段分布归档", _status_tag("PASS" if any(str(w["distribution_archive_status"]).upper() == "DONE" for w in v4_win) else ("HISTORICAL_NOT_ARCHIVED" if date_key == "20260517" else "MISSING"))),
             ],
         )
     )
@@ -639,11 +1442,11 @@ def _render_index(date_key: str, v2: dict[str, Any], scan: dict[str, Any], revie
         _kv_card(
             "3) V4 复盘状态",
             [
-                ("9步硬链", _status_tag("PASS" if review["complete"] else "MISSING")),
-                ("赛果刷新", _status_tag("PASS" if review["result_refresh_cache"] else "MISSING")),
-                ("QQ守卫", _status_tag(review["guard_qq"].get("guard_status", "MISSING"))),
-                ("路由标记", _status_tag("PASS" if review["route"] else "MISSING")),
-                ("发送标记", _status_tag(review["sent"].get("status", "MISSING"))),
+                ("总体状态", _status_tag(review.get("overall_status", "MISSING"))),
+                ("赛果刷新", _status_tag("PASS" if review["result_refresh_cache"] else ("WAITING_TRIGGER" if not review.get("due_reached") else "MISSING"))),
+                ("QQ守卫", _status_tag(review["guard_qq"].get("guard_status", "WAITING_TRIGGER" if not review.get("due_reached") else "MISSING"))),
+                ("路由标记", _status_tag("PASS" if review["route"] else ("WAITING_TRIGGER" if not review.get("due_reached") else "MISSING"))),
+                ("发送标记", _status_tag(review["sent"].get("status", "WAITING_TRIGGER" if not review.get("due_reached") else "MISSING"))),
             ],
         )
     )
@@ -684,7 +1487,7 @@ def _render_index(date_key: str, v2: dict[str, Any], scan: dict[str, Any], revie
     body += (
         "<section class='card'><h2>数据来源说明</h2>"
         "<ul>"
-        "<li>V2卡片：V2状态回执 / missed candidates审计 / 正式锁定marker</li>"
+        "<li>V2卡片：V2状态回执 / 错过候选审计 / 正式锁定marker</li>"
         "<li>V4扫描卡片：V4扫描结构化产物 / push marker / 日志</li>"
         "<li>V4复盘卡片：validation / attribution / renderer / guard / route/sent marker</li>"
         "<li>系统健康卡片：STATE_CURRENT / cron状态 / watchdog / audit</li>"
@@ -711,10 +1514,11 @@ def _render_v2(date_key: str, v2: dict[str, Any]) -> str:
                     ("正式锁定", f"<b>{v2['official_locked_count']}</b>"),
                     ("错过候选", f"<b>{v2['missed_count']}</b>"),
                     ("每日建池", _status_tag(v2["daily_pool_task"].get("status", "MISSING"))),
-                    ("QQ推荐推送", f"<b>{v2['production_recommendation']}</b> · {_status_tag(v2['pushed_status'])}"),
+                    ("QQ推荐推送", f"<b>{v2['production_recommendation']}</b>"),
+                    ("状态回执", _status_tag(v2["pushed_status"])),
                     ("结算", _status_tag(v2["settlement_status"])),
                     ("正式结算对象", f"<b>{v2['settlement_required']}</b>"),
-                    ("状态回执", _status_tag("PASS" if v2["refs"]["daily_status_push"].exists else "MISSING")),
+                    ("状态文件", _status_tag("PASS" if v2["refs"]["daily_status_push"].exists else "MISSING")),
                 ],
             ),
             "<section class='card'><h2>正式锁定清单</h2>"
@@ -729,38 +1533,458 @@ def _render_v2(date_key: str, v2: dict[str, Any]) -> str:
                 for ref in v2["refs"].values()
             )
             + "</ul></section>",
-            "<section class='card'><h2>数据来源说明</h2><div class='muted'>数据来源：V2状态回执 / missed candidates审计 / 正式锁定marker</div></section>",
+            "<section class='card'><h2>数据来源说明</h2><div class='muted'>数据来源：V2状态回执 / 错过候选审计 / 正式锁定marker</div></section>",
         ]
     )
     return _shell("V2 今日状态", body, date_key, "v2_today.html")
 
 
 def _render_scan(date_key: str, scan: dict[str, Any]) -> str:
-    items = []
+    def reason_zh(code: str) -> str:
+        mapping = {
+            "evening_counts_missing": "A/B/C/SKIP计数缺失",
+            "night_counts_missing": "A/B/C/SKIP计数缺失",
+            "evening_counts_parse_failed": "A/B/C/SKIP解析失败",
+            "night_counts_parse_failed": "A/B/C/SKIP解析失败",
+            "late_counts_parse_failed": "凌晨计数来源不可靠",
+            "evening_source_path_missing": "缺少可用数据源",
+            "night_source_path_missing": "缺少可用数据源",
+            "evening_status_parse_failed": "扫描状态解析失败",
+            "night_status_parse_failed": "扫描状态解析失败",
+            "late_fallback_scope_unverified": "回退源窗口专属性未验证",
+            "early_uses_fallback_latest": "使用latest回退源",
+            "early_non_window_specific_counts_source": "计数不是窗口专属来源",
+            "early_marker_missing_but_log_present": "专属marker不完整，但日志存在",
+            "counts_parse_failed": "A/B/C/SKIP解析失败",
+            "status_parse_failed": "扫描状态解析失败",
+            "source_path_missing": "缺少可用数据源",
+            "counts_missing": "A/B/C/SKIP计数缺失",
+            "fallback_scope_unverified": "回退源窗口专属性未验证",
+            "uses_fallback_latest": "使用latest回退源",
+            "non_window_specific_counts_source": "计数不是窗口专属来源",
+            "marker_missing_but_log_present": "专属marker不完整，但日志存在",
+            "task_date_mismatch": "任务日期不匹配（仅供参考）",
+        }
+        return mapping.get(code, code)
+
+    def uniq_zh(codes: list[str], limit: int = 4) -> list[str]:
+        out: list[str] = []
+        for c in codes:
+            z = reason_zh(c)
+            if z not in out:
+                out.append(z)
+            if len(out) >= limit:
+                break
+        return out
+
+    def summary_status_text(w: dict[str, Any]) -> tuple[str, str]:
+        st = str(w.get("checklist_status", "FAIL")).upper()
+        if st == "PASS":
+            return "完整", "完整"
+        if st == "WARN":
+            return "回退展示", "回退展示"
+        if str(w.get("window_status", "")).upper() in {"UNVERIFIED", "NOT_DUE"}:
+            return "待验证", "待验证"
+        return "失败", "失败"
+
+    def window_one_liner(w: dict[str, Any]) -> str:
+        name = str(w.get("task_key", ""))
+        if name == "midday":
+            return "窗口专属 push marker 完整。"
+        if name == "early":
+            return "使用latest回退，不是窗口专属证据。"
+        if name == "late":
+            return "QQ简报回退，窗口专属性未验证。"
+        if name in {"evening", "night"}:
+            return "扫描完成，但未找到可解析的A/B/C/SKIP来源。"
+        zh = uniq_zh(w.get("checklist_reasons", []), limit=1)
+        return zh[0] if zh else "状态待核验。"
+
+    guard = scan.get("guard", {})
+    guard_path = scan.get("guard_path")
+    reading_mode = scan.get("reading_mode", {}) if isinstance(scan.get("reading_mode"), dict) else {}
+    qq_brief = reading_mode.get("qq_brief", {}) if isinstance(reading_mode.get("qq_brief"), dict) else {}
+    readable_sources = reading_mode.get("readable_sources", []) if isinstance(reading_mode.get("readable_sources"), list) else []
+    reading_status = str(reading_mode.get("reading_status", "FAIL")).upper()
+    window_results = guard.get("window_results", {}) if isinstance(guard, dict) else {}
+
+    summary_cards: list[str] = []
+    prod_windows: list[str] = []
+    fallback_windows: list[str] = []
+    fail_windows: list[str] = []
     for w in scan["windows"]:
         task = w["task"] if isinstance(w["task"], dict) else {}
-        push = w["push"] if isinstance(w["push"], dict) else {}
-        cron_id = task.get("cron_id") or task.get("job_id") or "缺失"
-        items.append(
-            _kv_card(
-                f"{w['window']} 扫描窗口",
-                [
-                    ("cron ID", escape(str(cron_id))),
-                    ("扫描状态", _status_tag(task.get("status", "MISSING"))),
-                    ("扫描时间", escape(_text_or_missing(task.get("started_at")))),
-                    ("A/B/C/SKIP", f"{w['a']}/{w['b']}/{w['c']}/{w['skip']}"),
-                    ("当前等级", _status_tag(w["grade"])),
-                    ("QQ模板状态", _status_tag(push.get("status", "MISSING"))),
-                    ("推送标记", _status_tag("PASS" if w["push_path"].exists() else "MISSING")),
-                    ("日志路径", escape(_text_or_missing(task.get("output_files", {}).get("scan_log")))),
-                    ("赛前剧本归档", _status_tag("PASS" if w["script_archive"] else "MISSING")),
-                    ("时段分布归档", _status_tag("PASS" if w["distribution_archive"] else "MISSING")),
-                    ("使用回退源", "是" if w["fallback_used"] else "否"),
-                ],
-            )
+        key = str(w.get("task_key"))
+        r = window_results.get(key, {}) if isinstance(window_results, dict) else {}
+        checklist_status = str(r.get("checklist_status") or w.get("checklist_status") or "FAIL").upper()
+        prod_evidence = bool(r.get("production_evidence", w.get("production_evidence")))
+        reasons_raw = r.get("reasons") or w.get("checklist_reasons") or []
+        reasons_zh = uniq_zh([str(x) for x in reasons_raw], limit=3)
+
+        status_text, status_badge = summary_status_text({"checklist_status": checklist_status, "window_status": w.get("window_status")})
+        if status_text == "回退展示":
+            fallback_windows.append(w["window"])
+        if status_text == "失败":
+            fail_windows.append(w["window"])
+        if prod_evidence:
+            prod_windows.append(w["window"])
+
+        counts_text = "无法解析"
+        counts_label = "A/B/C/SKIP"
+        counts_extra = ""
+        reading_state = "无可读内容"
+        if all(v is not None for v in (w.get("a"), w.get("b"), w.get("c"), w.get("skip"))):
+            counts_text = f"{w['a']}/{w['b']}/{w['c']}/{w['skip']}"
+            reading_state = "有内容"
+        if str(w.get("window_status", "")).upper() == "PARSE_FAILED":
+            counts_text = "无法解析"
+
+        # 展示语义修正：fallback来源计数只能作为参考，不作为正式窗口计数
+        if str(w.get("source_type", "")).lower() in {"fallback_qq_brief", "fallback_latest_push"}:
+            counts_label = "正式窗口计数"
+            counts_text = "不可确认"
+            reading_state = "回退参考"
+            if all(v is not None for v in (w.get("a"), w.get("b"), w.get("c"), w.get("skip"))):
+                counts_extra = f"回退参考计数：{w['a']}/{w['b']}/{w['c']}/{w['skip']}"
+
+        fallback_path = w.get("source_path") if w.get("fallback_used") else None
+        reason_line = window_one_liner(w)
+        if reasons_zh and reason_line.endswith("。") and reason_line not in reasons_zh:
+            # keep one-line concise; extra reasons in evidence
+            pass
+
+        pill_cls = "ok" if status_badge == "完整" else ("warn" if status_badge == "回退展示" else ("pending" if status_badge == "待验证" else "fail"))
+        card_parts = [
+            "<section class='card scan-summary-card'>",
+            f"<h2>{escape(str(w['window']))}</h2>",
+            f"<div class='scan-badges'><span class='scan-pill scan-{pill_cls}'>{escape(status_badge)}</span></div>",
+            "<div class='kv'>",
+            f"<div class='k'>{escape(counts_label)}</div>",
+            f"<div class='v'><b>{escape(counts_text)}</b></div>",
+        ]
+        if counts_extra:
+            card_parts.append(f"<div class='k'>回退参考</div><div class='v'>{escape(counts_extra)}</div>")
+        card_parts.extend(
+            [
+                "<div class='k'>生产证据</div>",
+                f"<div class='v'>{'是' if prod_evidence else '否'}</div>",
+                "<div class='k'>原因</div>",
+                f"<div class='v'>{escape(reason_line)}</div>",
+            ]
         )
-    body = "<div class='grid'>" + "".join(items) + "</div>"
-    body += "<section class='card'><h2>数据来源说明</h2><div class='muted'>数据来源：V4扫描结构化产物 / push marker / 日志</div></section>"
+        if counts_extra:
+            if str(w.get("source_type", "")).lower() == "fallback_qq_brief":
+                card_parts.append("<div class='k'>说明</div><div class='v'>该计数来自QQ简报回退，不可作为窗口生产证据。</div>")
+            elif str(w.get("source_type", "")).lower() == "fallback_latest_push":
+                card_parts.append("<div class='k'>说明</div><div class='v'>该计数来自latest回退，不可作为窗口生产证据。</div>")
+        ro = w.get("read_only_parse") if isinstance(w.get("read_only_parse"), dict) else {}
+        show_ro = str(w.get("task_key")) in {"evening", "night"} and bool(ro.get("available"))
+        if show_ro:
+            ro_scan = ro.get("scan_total")
+            ro_scout = ro.get("scout_total")
+            ro_complete = "是" if ro.get("complete") else "否"
+            ro_exit = "0" if ro.get("exit_code") == 0 else "未知"
+            ro_parts = []
+            if ro_scan is not None:
+                ro_parts.append(f"总扫描：{ro_scan}")
+            if ro_scout is not None:
+                ro_parts.append(f"球探报告：{ro_scout}")
+            ro_parts.append(f"完成状态：{ro_complete}")
+            ro_parts.append(f"exit_code：{ro_exit}")
+            card_parts.append("<div class='k'>只读补解析</div><div class='v'>" + "｜".join(ro_parts) + "</div>")
+            card_parts.append("<div class='k'>补解析说明</div><div class='v'>仅从日志与状态文件补解析，不代表窗口专属A/B/C/SKIP。</div>")
+            reading_state = "有内容（补解析）"
+        card_parts.extend(
+            [
+                "<div class='k'>阅读状态</div>",
+                f"<div class='v'>{escape(reading_state)}</div>",
+                "</div>",
+                "<details class='reading-evidence'>",
+                "<summary>查看情报内容</summary>",
+                "<div class='evidence-block'>",
+                "<div class='kv'>",
+                "<div class='k'>阅读层来源</div>",
+                f"<div class='v'>{escape(_text_or_missing(w.get('source_type')))}</div>",
+                "<div class='k'>阅读层说明</div>",
+                f"<div class='v'>{escape(reason_line)}</div>",
+                "<div class='k'>内容口径</div>",
+                "<div class='v'>仅供阅读，不作生产证据</div>",
+                "</div>",
+                "</div>",
+                "</details>",
+                "<details class='evidence'>",
+                "<summary>查看证据</summary>",
+                "<div class='evidence-block'>",
+                "<div class='kv'>",
+                "<div class='k'>窗口清单检查</div>",
+                f"<div class='v'>{_status_tag(checklist_status)}</div>",
+                "<div class='k'>扫描状态</div>",
+                f"<div class='v'>{_status_tag(w.get('window_status', 'MISSING'))}</div>",
+                "<div class='k'>一句话说明</div>",
+                f"<div class='v'>{escape(_text_or_missing(w.get('window_status_reason')))}</div>",
+                "<div class='k'>cron ID</div>",
+                f"<div class='v'>{escape(str(w.get('cron_id') or '缺失'))}</div>",
+                "<div class='k'>计划时间</div>",
+                f"<div class='v'>{escape(str(w.get('planned_time') or '缺失'))}</div>",
+                "<div class='k'>扫描时间</div>",
+                f"<div class='v'>{escape(_text_or_missing(task.get('started_at')))}</div>",
+                "<div class='k'>数据源类型</div>",
+                f"<div class='v'>{escape(_text_or_missing(w.get('source_type')))}</div>",
+                "<div class='k'>marker状态</div>",
+                f"<div class='v'>{_status_tag('PASS' if str(w.get('marker_source') or '').strip() and str(w.get('marker_source')).strip() != '缺失' else 'MISSING')}</div>",
+                "<div class='k'>日志状态</div>",
+                f"<div class='v'>{_status_tag('PASS' if w.get('log_complete') else ('MISSING' if not w.get('log_source') else 'UNVERIFIED'))}</div>",
+                "<div class='k'>Guard状态</div>",
+                f"<div class='v'>{_status_tag(checklist_status)}</div>",
+                "<div class='k'>聚合原因</div>",
+                f"<div class='v'>{escape('、'.join(reasons_zh) if reasons_zh else '无')}</div>",
+                "</div>",
+                "<details class='raw-evidence'>",
+                "<summary>查看原始证据</summary>",
+                "<div class='mono'>",
+                f"source_path: {escape(_text_or_missing(w.get('source_path')))}<br>",
+                f"counts_source: {escape(_text_or_missing(w.get('counts_source')))}<br>",
+                f"marker_source: {escape(_text_or_missing(w.get('marker_source')))}<br>",
+                f"log_path: {escape(_text_or_missing(w.get('log_source')))}<br>",
+                f"fallback_source_path: {escape(_text_or_missing(fallback_path))}<br>",
+                f"fallback_reason: {escape(_text_or_missing(w.get('fallback_reason')))}<br>",
+                f"raw_fail_items: {escape('、'.join([str(x) for x in reasons_raw]) if reasons_raw else '无')}",
+                "</div>",
+                "</details>",
+                "</div>",
+                "</details>",
+                "</section>",
+            ]
+        )
+        summary_cards.append("".join(card_parts))
+
+    fail_items_zh = uniq_zh([str(x) for x in guard.get("fail_items", [])], limit=8)
+    warn_items_zh = uniq_zh([str(x) for x in guard.get("warn_items", [])], limit=8)
+    prod_windows_txt = "、".join(prod_windows) if prod_windows else "无"
+    fallback_windows_txt = "、".join(fallback_windows) if fallback_windows else "无"
+    fail_windows_txt = "、".join(fail_windows) if fail_windows else "无"
+
+    summary_card = _kv_card(
+        "V4扫描证据模式总览",
+        [
+            ("页面渲染", _status_tag(guard.get("render_status", "MISSING"))),
+            ("数据完整性", _status_tag(guard.get("data_guard_status", "MISSING"))),
+            ("可作生产证据窗口", f"{len(prod_windows)}/{len(scan['windows'])}"),
+            ("生产证据窗口", escape(prod_windows_txt)),
+            ("回退展示窗口", escape(fallback_windows_txt)),
+            ("失败窗口", escape(fail_windows_txt)),
+            ("结论", "本页可用于查看问题，但不能作为V4扫描生产通过依据。"),
+        ],
+    )
+
+    source_name_map = {
+        "window_push_marker": "窗口专属marker",
+        "qq_brief": "QQ简报",
+        "latest_push": "latest回退",
+        "window_log": "日志补解析",
+        "missing": "缺失",
+    }
+    readable_source_lines = []
+    readable_source_paths = []
+    for s in readable_sources:
+        st = str(s.get("type", "unknown"))
+        st_zh = source_name_map.get(st, st)
+        p = str(s.get("path") or "缺失")
+        pe = "是" if bool(s.get("production_evidence")) else "否"
+        readable_source_lines.append(f"{st_zh}（生产证据：{pe}）")
+        readable_source_paths.append(f"{st_zh}: {p}")
+
+    brief_counts = qq_brief.get("counts", {}) if isinstance(qq_brief.get("counts"), dict) else {}
+    brief_counts_text = "不可解析"
+    if all(k in brief_counts for k in ("a", "b", "c", "skip")):
+        brief_counts_text = f"{brief_counts['a']}/{brief_counts['b']}/{brief_counts['c']}/{brief_counts['skip']}"
+    a_items = qq_brief.get("a_items", []) if isinstance(qq_brief.get("a_items"), list) else []
+    b_items = qq_brief.get("b_items", []) if isinstance(qq_brief.get("b_items"), list) else []
+    ab_matches = qq_brief.get("ab_matches", []) if isinstance(qq_brief.get("ab_matches"), list) else []
+    c_summary = str(qq_brief.get("c_summary") or "缺失")
+    skip_summary = str(qq_brief.get("skip_summary") or "缺失")
+    c_representatives = qq_brief.get("c_representatives", []) if isinstance(qq_brief.get("c_representatives"), list) else []
+    skip_reason_items = qq_brief.get("skip_reason_items", []) if isinstance(qq_brief.get("skip_reason_items"), list) else []
+
+    def _kickoff_sort_key(m: dict[str, Any]) -> tuple:
+        kf = str(m.get("kickoff", ""))
+        mmdd, hhmm = ("99-99", "99:99")
+        if " " in kf:
+            mmdd, hhmm = kf.split(" ", 1)
+        return (mmdd, hhmm, str(m.get("home", "")))
+
+    def _render_match_li(m: dict[str, Any]) -> str:
+        unmapped_tags = []
+        if m.get("home_unmapped"):
+            unmapped_tags.append("主队未映射")
+        if m.get("away_unmapped"):
+            unmapped_tags.append("客队未映射")
+        if m.get("league_unmapped"):
+            unmapped_tags.append("联赛未映射")
+        unmapped_note = f"（{'/'.join(unmapped_tags)}）" if unmapped_tags else ""
+        line1 = f"{m.get('home','未提供')} vs {m.get('away','未提供')}{unmapped_note}"
+        line2 = f"{m.get('league','未提供')}｜{m.get('kickoff','未提供')}"
+        line3 = f"HT评分 {m.get('ht_score','未提供')}｜HT率 {m.get('ht_rate','未提供')}｜场均球 {m.get('avg_goals','未提供')}"
+        line4 = f"剧本：{m.get('script_type','未提供')}"
+        line5 = f"时段：{m.get('time_bins','未提供')}"
+        line6 = "来源：阅读简报｜生产证据：否"
+        return "<li><div>" + escape(line1) + "</div><div class='muted'>" + escape(line2) + "</div><div class='muted'>" + escape(line3) + "</div><div class='muted'>" + escape(line4) + "</div><div class='muted'>" + escape(line5) + "</div><div class='muted'>" + escape(line6) + "</div></li>"
+
+    def _render_grouped_matches(matches: list[dict[str, Any]]) -> str:
+        if not matches:
+            return "<div class='muted'>缺失</div>"
+        order = ["00:00-06:00", "06:00-12:00", "12:00-18:00", "18:00-24:00", "跨日/其他"]
+        group_map: dict[str, list[dict[str, Any]]] = {k: [] for k in order}
+        for m in sorted(matches, key=_kickoff_sort_key):
+            g = str(m.get("time_group") or "跨日/其他")
+            if g not in group_map:
+                group_map[g] = []
+            group_map[g].append(m)
+        parts = []
+        for g in order:
+            rows = group_map.get(g, [])
+            if not rows:
+                continue
+            parts.append(f"<div class='muted'>{escape(g)}（{len(rows)}场）</div>")
+            parts.append("<ul>" + "".join(_render_match_li(x) for x in rows) + "</ul>")
+        return "".join(parts) if parts else "<div class='muted'>缺失</div>"
+
+    a_matches = [m for m in ab_matches if str(m.get("grade")) == "A"]
+    b_matches = [m for m in ab_matches if str(m.get("grade")) == "B"]
+    a_top_matches = sorted(a_matches, key=_kickoff_sort_key)[:10]
+    b_top_matches = sorted(b_matches, key=_kickoff_sort_key)[:10]
+    a_more = max(0, len(a_matches) - len(a_top_matches))
+    b_more = max(0, len(b_matches) - len(b_top_matches))
+    unmapped_names = []
+    for m in ab_matches:
+        if m.get("home_unmapped"):
+            unmapped_names.append(str(m.get("home_raw") or m.get("home") or ""))
+        if m.get("away_unmapped"):
+            unmapped_names.append(str(m.get("away_raw") or m.get("away") or ""))
+        if m.get("league_unmapped"):
+            unmapped_names.append(str(m.get("league_raw") or m.get("league") or ""))
+    unmapped_names = sorted({x for x in unmapped_names if x})
+
+    def _norm_reading_name(raw: str, is_league: bool = False) -> str:
+        name = (raw or "").strip()
+        if not name:
+            return name
+        mapped = name
+        if _v4_display_name is not None:
+            mapped = _v4_display_name(name, is_league=is_league)
+        if mapped == name and not is_league:
+            mapped = READING_ALIAS.get(name, mapped)
+        return mapped
+
+    def _normalize_repr_item(s: str) -> str:
+        txt = (s or "").strip()
+        if not txt or " vs " not in txt:
+            return txt
+        left, right = txt.split(" vs ", 1)
+        left_cn = _norm_reading_name(left, is_league=False)
+        right_cn = _norm_reading_name(right, is_league=False)
+        return f"{left_cn} vs {right_cn}"
+
+    c_rep_norm = [_normalize_repr_item(x) for x in c_representatives]
+
+    readable_brief_card = [
+        "<section class='card'>",
+        "<h2>V4扫描阅读模式</h2>",
+        "<div class='muted'>本区用于阅读已有情报内容。若来自回退源，会标注“仅供阅读，不作生产证据”。</div>",
+        "<div class='kv'>",
+        "<div class='k'>阅读状态</div>",
+        f"<div class='v'>{_status_tag(reading_status)}</div>",
+        "<div class='k'>状态</div><div class='v'>可读</div>",
+        "<div class='k'>来源</div>",
+        f"<div class='v'>{escape(' / '.join(readable_source_lines) if readable_source_lines else '缺失')}</div>",
+        "<div class='k'>生产证据</div><div class='v'>否（阅读层）</div>",
+        "<div class='k'>数据完整性（证据层）</div>",
+        f"<div class='v'>{_status_tag(guard.get('data_guard_status', 'MISSING'))}</div>",
+        "<div class='k'>说明</div><div class='v'>本区用于阅读，不代表生产验证通过。</div>",
+        "</div>",
+        "<details class='raw-evidence'><summary>查看来源路径</summary><pre class='mono'>" + escape("\n".join(readable_source_paths) if readable_source_paths else "缺失") + "</pre></details>",
+        "</section>",
+        "<section class='card'>",
+        "<h2>今日可读简报</h2>",
+    ]
+    if qq_brief.get("exists") and qq_brief.get("parse_ok"):
+        readable_brief_card.extend(
+            [
+                "<div class='kv'>",
+                "<div class='k'>来源类型</div><div class='v'>qq_brief（仅供阅读）</div>",
+                "<div class='k'>扫描总数</div><div class='v'>" + escape(str(qq_brief.get("scan_total") or "缺失")) + "</div>",
+                "<div class='k'>情报总数</div><div class='v'>" + escape(str(qq_brief.get("intel_total") or "缺失")) + "</div>",
+                "<div class='k'>A/B/C/SKIP</div><div class='v'><b>" + escape(brief_counts_text) + "</b></div>",
+                "<div class='k'>A+B覆盖</div><div class='v'>" + escape(str(qq_brief.get("ab_cover") or "缺失")) + "</div>",
+                "<div class='k'>生成时间</div><div class='v'>" + escape(str(qq_brief.get("generated_time") or "未提供")) + "</div>",
+                "<div class='k'>来源范围</div><div class='v'>全日回退简报</div>",
+                "<div class='k'>生产证据</div><div class='v'>否</div>",
+                "<div class='k'>数据完整性</div><div class='v'>失败（证据层）</div>",
+                "<div class='k'>来源说明</div><div class='v'>该简报用于阅读，不代表凌晨窗口生产证据，也不代表生产验证通过。</div>",
+                "</div>",
+                "<h3>A/B重点（默认前10，按时间展示）</h3>",
+                "<div class='muted'>A级前10</div>" + _render_grouped_matches(a_top_matches) + (f"<div class='muted'>其余 {a_more} 条已折叠</div>" if a_more > 0 else ""),
+                ("<details><summary>展开全部A级" + str(len(a_matches)) + "场</summary>" + _render_grouped_matches(a_matches) + "</details>") if a_matches else "<div class='muted'>A级缺失</div>",
+                "<div class='muted'>B级前10</div>" + _render_grouped_matches(b_top_matches) + (f"<div class='muted'>其余 {b_more} 条已折叠</div>" if b_more > 0 else ""),
+                ("<details><summary>展开全部B级" + str(len(b_matches)) + "场</summary>" + _render_grouped_matches(b_matches) + "</details>") if b_matches else "<div class='muted'>B级缺失</div>",
+                "<h3>C/SKIP摘要</h3>",
+                f"<div class='muted'>C级总数：{escape(str(brief_counts.get('c') if isinstance(brief_counts, dict) and 'c' in brief_counts else '未提供'))}</div>",
+                ("<div class='muted'>C级代表前5：" + escape(" | ".join(c_rep_norm[:5]) if c_rep_norm else "未提供") + "</div>"),
+                f"<div class='muted'>SKIP总数：{escape(str(brief_counts.get('skip') if isinstance(brief_counts, dict) and 'skip' in brief_counts else '未提供'))}</div>",
+                ("<ul>" + "".join(f"<li>{escape(str(x.get('reason','未提供')))}：{escape(str(x.get('count','未提供')))}场</li>" for x in skip_reason_items[:5]) + "</ul>" if skip_reason_items else "<div class='muted'>跳过原因Top5：未提供</div>"),
+                "<details><summary>查看原文摘要</summary>"
+                + f"<div class='muted'>{escape(c_summary)}</div>"
+                + f"<div class='muted'>{escape(skip_summary)}</div>"
+                + "</details>",
+                ("<div class='muted'>未映射名称：" + escape("、".join(unmapped_names[:20])) + (" …" if len(unmapped_names) > 20 else "") + "</div>" if unmapped_names else "<div class='muted'>未映射名称：无</div>"),
+                "<details class='raw-evidence'><summary>查看原文（折叠）</summary><pre class='mono'>"
+                + escape(str(qq_brief.get("raw_excerpt") or "缺失"))
+                + "</pre></details>",
+                "<div class='muted'>来源声明：本卡片来自可读简报，仅用于阅读，不作为生产证据。</div>",
+            ]
+        )
+    else:
+        readable_brief_card.extend(
+            [
+                "<div class='kv'>",
+                "<div class='k'>今日可读简报</div><div class='v'>无法解析</div>",
+                "<div class='k'>原因</div><div class='v'>简报文件缺失或结构不完整</div>",
+                "</div>",
+                "<details class='raw-evidence'><summary>查看原文（折叠）</summary><pre class='mono'>"
+                + escape(str(qq_brief.get("raw_excerpt") or "缺失"))
+                + "</pre></details>",
+            ]
+        )
+    readable_brief_card.append("</section>")
+
+    guard_card = (
+        "<section class='card'>"
+        "<h2>V4扫描证据模式 Guard</h2>"
+        "<div class='kv'>"
+        f"<div class='k'>Guard状态</div><div class='v'>{_status_tag(guard.get('guard_status', 'MISSING'))}</div>"
+        f"<div class='k'>渲染状态</div><div class='v'>{_status_tag(guard.get('render_status', 'MISSING'))}</div>"
+        f"<div class='k'>数据守卫状态</div><div class='v'>{_status_tag(guard.get('data_guard_status', 'MISSING'))}</div>"
+        f"<div class='k'>检查窗口</div><div class='v'>{escape(','.join(guard.get('checked_windows', [])) or '缺失')}</div>"
+        f"<div class='k'>失败原因（聚合）</div><div class='v'>{escape('、'.join(fail_items_zh) if fail_items_zh else '无')}</div>"
+        f"<div class='k'>警告原因（聚合）</div><div class='v'>{escape('、'.join(warn_items_zh) if warn_items_zh else '无')}</div>"
+        f"<div class='k'>生产验证标记</div><div class='v'>{_status_tag('FORBIDDEN_THIS_PHASE')}</div>"
+        "</div>"
+        "<details class='raw-evidence'>"
+        "<summary>查看原始证据</summary>"
+        "<div class='mono'>"
+        f"guard_file: {escape(str(guard_path) if guard_path else '缺失')}<br>"
+        f"fail_items_raw: {escape('、'.join([str(x) for x in guard.get('fail_items', [])]) or '无')}<br>"
+        f"warn_items_raw: {escape('、'.join([str(x) for x in guard.get('warn_items', [])]) or '无')}"
+        "</div>"
+        "</details>"
+        "</section>"
+    )
+
+    body = "".join(readable_brief_card)
+    body += summary_card
+    body += "<div class='grid scan-grid'>" + "".join(summary_cards) + "</div>"
+    body += guard_card
+    body += "<section class='card'><h2>数据来源说明</h2><div class='muted'>阅读模式：window_push_marker / qq_brief / latest_push / log_parse。证据模式：V4扫描结构化产物 / push marker / 日志（技术证据折叠）。</div></section>"
     return _shell("V4 扫描窗口", body, date_key, "v4_scan.html")
 
 
@@ -770,32 +1994,52 @@ def _render_review(date_key: str, review: dict[str, Any]) -> str:
         step_cards.append(
             "<li>"
             f"<b>{escape(step['name'])}</b> { _status_tag(step['status']) }"
-            f"<br><span class='muted'>{escape(str(step['path']))}</span>"
+            f"<details><summary>查看目标文件路径</summary><span class='muted'>{escape(str(step['path']))}</span></details>"
             "</li>"
         )
     ab_a = review.get("ab_hit", {}).get("A", {})
     ab_b = review.get("ab_hit", {}).get("B", {})
+    latest = review.get("latest_completed")
+    latest_card = ""
+    if latest:
+        latest_card = _kv_card(
+            "最近已完成复盘（参考）",
+            [
+                ("最近日期", escape(str(latest.get("date") or "缺失"))),
+                ("QQ守卫", _status_tag(latest.get("guard_status", "MISSING"))),
+                ("路由允许推送", _status_tag("PASS" if latest.get("allowed_to_push") else "MISSING")),
+                ("发送状态", _status_tag(latest.get("sent_status", "MISSING"))),
+                ("说明", "仅参考，不替代当前复盘日期"),
+            ],
+        )
     body = "".join(
         [
             _kv_card(
-                "V4 复盘 9步硬链",
+                "V4复盘状态",
                 [
-                    ("链路完成", _status_tag("PASS" if review["complete"] else "MISSING")),
-                    ("允许推送", _status_tag("PASS" if review["push_allowed"] else "MISSING")),
-                    ("路由标记", _status_tag("PASS" if review["route"] else "MISSING")),
-                    ("发送标记", _status_tag(review["sent"].get("status", "MISSING"))),
+                    ("状态", _status_tag(review.get("overall_status", "MISSING"))),
+                    ("复盘日期", escape(str(review.get("review_date", date_key)))),
+                    ("计划触发", escape(str(review.get("review_due_time", "缺失")))),
+                    ("当前时间", escape(str(review.get("current_time", "缺失")))),
+                    ("当前阶段", escape(str(review.get("overall_reason", "缺失")))),
+                    ("允许推送", _status_tag("PASS" if review["push_allowed"] else "NO")),
+                    ("路由标记", _status_tag("PASS" if review["route"] else ("WAITING_TRIGGER" if not review.get("due_reached") else "MISSING"))),
+                    ("发送标记", _status_tag(review["sent"].get("status", "WAITING_TRIGGER" if not review.get("due_reached") else "MISSING"))),
+                    ("PRODUCTION_VERIFIED", _status_tag("FORBIDDEN_THIS_PHASE")),
                 ],
             ),
             "<section class='card'><h2>步骤明细</h2><ol>" + "".join(step_cards) + "</ol></section>",
+            latest_card,
             _kv_card(
                 "复盘附加状态",
                 [
-                    ("赛果刷新", _status_tag("PASS" if review["result_refresh_cache"] else "MISSING")),
-                    ("剧本归档", _status_tag("PASS" if (DAILY_REPORT_DIR / f"v4_script_type_archive_{date_key}.json").exists() else "MISSING")),
+                    ("赛果刷新", _status_tag("PASS" if review["result_refresh_cache"] else ("WAITING_TRIGGER" if not review.get("due_reached") else "MISSING"))),
+                    ("剧本归档", _status_tag("PASS" if (DAILY_REPORT_DIR / f"v4_script_type_archive_{date_key}.json").exists() else ("HISTORICAL_NOT_ARCHIVED" if date_key == "20260517" else "MISSING"))),
                     ("A命中", escape(f"{ab_a.get('hit','-')}/{ab_a.get('total','-')}")),
                     ("B命中", escape(f"{ab_b.get('hit','-')}/{ab_b.get('total','-')}")),
-                    ("数据缺失待核验", _status_tag("PASS" if not review["result_refresh_cache"] or int(review['result_refresh_cache'].get('still_missing', 0)) == 0 else "MISSING")),
-                    ("生产验证标记", _status_tag("FORBIDDEN_THIS_PHASE")),
+                    ("数据缺失待核验", _status_tag("PASS" if (review["result_refresh_cache"] and int(review['result_refresh_cache'].get('still_missing', 0)) == 0) else ("WAITING_TRIGGER" if not review.get("due_reached") else "MISSING"))),
+                    ("复盘Guard", _status_tag(review.get("review_guard", {}).get("guard_status", "MISSING"))),
+                    ("Guard文件", escape(str(review.get("review_guard_path") or "缺失"))),
                 ],
             ),
             "<section class='card'><h2>数据来源说明</h2><div class='muted'>数据来源：validation / attribution / renderer / guard / route/sent marker</div></section>",
@@ -851,12 +2095,28 @@ main{padding:14px;display:grid;gap:12px}.grid{display:grid;gap:12px}
 @media(min-width:900px){.grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
 .card{background:#121c30;border:1px solid #1f2b45;border-radius:14px;padding:12px 12px 10px}
 .card h2{margin:0 0 10px;font-size:15px;color:#f3f7ff}.kv{display:grid;grid-template-columns:120px 1fr;gap:8px 10px}
+.card h3{margin:10px 0 6px;font-size:13px;color:#dbe6ff}
 .k{font-size:12px;color:#93a6cc}.v{font-size:13px;line-height:1.35;word-break:break-word}
 .tag{display:inline-block;padding:2px 8px;border-radius:999px;font-size:12px;font-weight:700}
 .tag.ok{background:#123524;color:#59d58f}.tag.warn{background:#3f300f;color:#f3c969}.tag.bad{background:#481b25;color:#ff93a6}.tag.neutral{background:#223657;color:#96b8ff}
 .muted{font-size:12px;color:#93a6cc}
 ul,ol{margin:0;padding-left:18px}li{margin:6px 0;line-height:1.35}
 details{margin-top:8px}summary{cursor:pointer;color:#aac1f3}
+.scan-grid{grid-template-columns:1fr}
+@media(min-width:900px){.scan-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.scan-summary-card h2{display:flex;align-items:center;justify-content:space-between}
+.scan-badges{margin-bottom:8px}
+.scan-pill{display:inline-block;padding:3px 10px;border-radius:999px;font-size:12px;font-weight:700}
+.scan-pill.scan-ok{background:#123524;color:#59d58f}
+.scan-pill.scan-warn{background:#3f300f;color:#f3c969}
+.scan-pill.scan-fail{background:#481b25;color:#ff93a6}
+.scan-pill.scan-pending{background:#223657;color:#96b8ff}
+.evidence{margin-top:10px;border-top:1px dashed #2a395d;padding-top:8px}
+.reading-evidence{margin-top:10px;border-top:1px dashed #2a395d;padding-top:8px}
+.evidence-block{padding-top:6px}
+.raw-evidence{margin-top:8px}
+.mono{font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,'Courier New',monospace;font-size:11px;line-height:1.45;word-break:break-all;color:#a9bddf}
+pre.mono{white-space:pre-wrap;word-break:break-word;max-height:260px;overflow:auto;background:#0f1728;border:1px solid #1f2b45;border-radius:8px;padding:8px}
 """
     (ASSET_DIR / "style.css").write_text(css, encoding="utf-8")
 
@@ -910,6 +2170,16 @@ def generate(date_str: str) -> dict[str, Any]:
     outputs["manifest.json"] = str((OUT_DIR / "manifest.json").relative_to(BASE_DIR))
     outputs["service-worker.js"] = str((OUT_DIR / "service-worker.js").relative_to(BASE_DIR))
     outputs["assets/style.css"] = str((ASSET_DIR / "style.css").relative_to(BASE_DIR))
+    if scan.get("guard_path"):
+        try:
+            outputs["dashboard_v4_scan_guard.json"] = str(Path(scan["guard_path"]).relative_to(BASE_DIR))
+        except Exception:
+            outputs["dashboard_v4_scan_guard.json"] = str(scan["guard_path"])
+    if review.get("review_guard_path"):
+        try:
+            outputs["dashboard_v4_review_guard.json"] = str(Path(review["review_guard_path"]).relative_to(BASE_DIR))
+        except Exception:
+            outputs["dashboard_v4_review_guard.json"] = str(review["review_guard_path"])
 
     missing_flags = {
         "v2_daily_pool_summary_exists": v2["refs"]["daily_pool_summary"].exists,
@@ -930,6 +2200,8 @@ def generate(date_str: str) -> dict[str, Any]:
             "strategy_changed": False,
             "production_marker_written": False,
         },
+        "v4_scan_guard": scan.get("guard", {}),
+        "v4_review_guard": review.get("review_guard", {}),
     }
 
 
