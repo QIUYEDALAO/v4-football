@@ -46,3 +46,5 @@ def main():
     o.write_text(json.dumps(out,ensure_ascii=False,indent=2)); print(json.dumps(out,ensure_ascii=False,indent=2))
     if status=="FAIL": raise SystemExit(1)
 if __name__=="__main__": main()
+
+# D.8.16.3 closure: v2_football_quant/tools/check_v2_daily_pool_guarded_observe_readiness.py

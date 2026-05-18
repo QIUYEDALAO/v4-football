@@ -36,3 +36,5 @@ DAILY_POOL did not run on 2026-05-19. No `selected_fixtures_20260519.json` exist
 2. **D.8.16** — DAILY_POOL guarded observe (requires BOSS instruction)
 
 Current level: **CODE_READY**.
+
+<!-- D.8.16.3 closure: v2_football_quant/docs/V2_GUARDED_LIVE_OBSERVE_REVIEW.md -->

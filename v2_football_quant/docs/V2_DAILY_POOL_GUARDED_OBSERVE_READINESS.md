@@ -32,3 +32,5 @@ D.8.17 requires a day with DAILY_POOL running.
 
 Pause until DAILY_POOL runs, then D.8.17 state-present guarded observe.
 D.8.17 requires separate BOSS instruction.
+
+<!-- D.8.16.3 closure: v2_football_quant/docs/V2_DAILY_POOL_GUARDED_OBSERVE_READINESS.md -->

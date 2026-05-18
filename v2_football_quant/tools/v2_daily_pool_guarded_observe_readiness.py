@@ -59,3 +59,5 @@ def main():
     if status in ("FAIL","BLOCKER"): raise SystemExit(1)
 
 if __name__=="__main__": main()
+
+# D.8.16.3 closure: v2_football_quant/tools/v2_daily_pool_guarded_observe_readiness.py

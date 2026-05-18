@@ -48,3 +48,5 @@ OPENCLAW_NO_PUSH=1
 D.8.15 requires separate BOSS instruction.
 This is NOT production resume.
 Current level: CODE_READY.
+
+<!-- D.8.16.3 closure: v2_football_quant/docs/V2_GUARDED_LIVE_OBSERVE_EXECUTION.md -->

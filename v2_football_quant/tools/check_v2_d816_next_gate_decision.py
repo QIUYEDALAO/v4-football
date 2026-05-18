@@ -37,3 +37,5 @@ def main():
     o=SD/f"v2_d816_next_gate_decision_{dk}.json"
     o.write_text(json.dumps(out,ensure_ascii=False,indent=2)); print(json.dumps(out,ensure_ascii=False,indent=2))
 if __name__=="__main__": main()
+
+# D.8.16.3 closure: v2_football_quant/tools/check_v2_d816_next_gate_decision.py
