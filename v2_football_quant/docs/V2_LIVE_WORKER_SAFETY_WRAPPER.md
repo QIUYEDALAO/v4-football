@@ -50,5 +50,6 @@
 
 ## 6. 下一步
 
-- 仅可进入 D.8.12 审批门禁（需 BOSS 单独指令）。
+- 已进入 D.8.12 审批门禁（approval gate only）。
+- D.8.12 不执行 live worker、不执行 supervisor，只做 readiness 审核。
 - Phase E 仍不得自动进入。

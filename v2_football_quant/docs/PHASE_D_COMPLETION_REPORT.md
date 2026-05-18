@@ -30,8 +30,9 @@
 | D.8.6 | `TBD` | Settlement preflight live guard observe plan (plan-only) | ✅ |
 | D.8.8 | `a3b47c5` | Controlled preflight observe (single-window, not live worker) | ✅ |
 | D.8.9 | `8c94cca` | Controlled resume post-run review & scope correction | ✅ |
-| D.8.10 | `TBD` | Window worker sandbox observe (no supervisor/no formal write) | ✅ |
-| D.8.11 | `TBD` | Live worker safety wrapper (plan-only gate) | ✅ |
+| D.8.10 | `45957e7` | Window worker sandbox observe (no supervisor/no formal write) | ✅ |
+| D.8.11 | `152406b` | Live worker safety wrapper (plan-only gate) | ✅ |
+| D.8.12 | `TBD` | Live worker observe approval gate (approval-only) | ✅ |
 
 **新增 20+ 文件，0 次策略改动，0 次 API 调用，0 次 QQ 推送。**
 
@@ -219,3 +220,11 @@ Phase D 工程链路完成（engineering_complete=true），但 business_pass=fa
 - 固定边界：`formal_state_written=false`、`qq_sent=false`、`verified_written=false`、`cron_modified=false`、`api_called=false`。
 - future live observe 必须继续 `boss_approval_required=true`。
 - 下一门禁仅允许 D.8.12，Phase E 仍不得自动进入。
+
+## 14. D.8.12 Live Worker Observe Approval Gate
+
+- D.8.12 仅做 approval gate / readiness 审核，不执行 live worker。
+- 固定值：`live_worker_execution_allowed=false`、`supervisor_execution_allowed=false`。
+- 固定边界：`formal_state_write_allowed=false`、`qq_push_allowed=false`、`verified_write_allowed=false`、`cron_enable_allowed=false`。
+- 若 no-push/no-formal-state-write/safe-sender guard 未闭合，必须输出 `WARN/NOT_READY`，不得硬跑。
+- 当前仍为 `CODE_READY`，不是 `PIPELINE_READY`，不是 `PRODUCTION_VERIFIED`。
