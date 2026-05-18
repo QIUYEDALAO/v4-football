@@ -74,3 +74,10 @@
   - `cron_enable_allowed=false`
   - `qq_push_allowed=false`
   - `production_verified=false`
+
+## 9. D.8.9 Scope Correction
+
+- D.8.8 实际执行为 `controlled preflight observe`。
+- 不是 `live window worker execution`。
+- 不是 `production resume execution`。
+- 审批包结论不变：仍需 BOSS 单独指令才能进入下一门禁（D.8.10）。

@@ -83,6 +83,14 @@ def main() -> None:
     if str(marker.get("window")) != window:
         errors.append("window_mismatch")
 
+    # Scope correction guard: D.8.8 should be preflight observe only.
+    if marker.get("execution_scope") != "preflight_observe_only":
+        errors.append("execution_scope_not_preflight_observe_only")
+    expect_true("controlled_preflight_observe_performed")
+    expect_false("live_window_worker_executed")
+    expect_false("production_resume_executed")
+    expect_false("production_task_triggered")
+
     expect_true("no_push")
     expect_true("no_settlement_write")
     expect_true("require_preflight")
@@ -98,6 +106,9 @@ def main() -> None:
     exec_performed = bool(marker.get("execution_performed", False))
     exec_status = str(marker.get("execution_status", "")).upper()
     watchdog_status = str(marker.get("watchdog_status") or "")
+
+    if exec_performed and "live_window_worker_executed" not in marker:
+        errors.append("live_window_worker_executed_missing_when_execution_performed")
 
     if exec_performed and not watchdog_status:
         errors.append("watchdog_status_missing_when_execution_performed")
@@ -133,6 +144,11 @@ def main() -> None:
         "status": status,
         "execution_status": exec_status,
         "execution_performed": exec_performed,
+        "execution_scope": marker.get("execution_scope"),
+        "controlled_preflight_observe_performed": marker.get("controlled_preflight_observe_performed"),
+        "live_window_worker_executed": marker.get("live_window_worker_executed"),
+        "production_resume_executed": marker.get("production_resume_executed"),
+        "production_task_triggered": marker.get("production_task_triggered"),
         "no_push": marker.get("no_push"),
         "no_settlement_write": marker.get("no_settlement_write"),
         "require_preflight": marker.get("require_preflight"),

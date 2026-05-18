@@ -6,6 +6,11 @@ This tool executes a strictly controlled single-window observe flow:
 - never enables cron, never sends QQ, never writes verified
 - runs preflight dry-run as execution evidence
 - records auditable marker for D.8.8
+
+Important scope:
+- this implementation performs controlled preflight observe only
+- it does not execute live window worker
+- it does not execute production resume
 """
 
 from __future__ import annotations
@@ -93,6 +98,11 @@ def main() -> None:
 
     # Controlled execution: preflight dry-run only (no production task trigger)
     execution_performed = False
+    controlled_preflight_observe_performed = False
+    live_window_worker_executed = False
+    production_resume_executed = False
+    production_task_triggered = False
+    execution_scope = "preflight_observe_only"
     preflight_status = "MISSING"
     reason_codes: list[str] = []
     preflight_rc = None
@@ -106,6 +116,7 @@ def main() -> None:
         ]
         preflight_rc, preflight_out, preflight_err = _run(preflight_cmd)
         execution_performed = True
+        controlled_preflight_observe_performed = True
         # dryrun returns 1 when blocked (expected for 20260517); 0 if allowed
         if preflight_rc not in (0, 1):
             blockers.append("preflight_dryrun_unexpected_exit")
@@ -159,7 +170,8 @@ def main() -> None:
     else:
         execution_status = "PASS"
 
-    # If we could not perform controlled observe, downgrade explicitly
+    # If we could not perform controlled observe, downgrade explicitly.
+    # We still do not escalate to live worker execution in this phase.
     if not execution_performed and not blockers:
         execution_status = "WARN"
         warnings.append("controlled_plan_only_no_safe_execution")
@@ -171,6 +183,11 @@ def main() -> None:
         "execution_status": execution_status,
         "execution_performed": execution_performed,
         "execution_mode": "controlled_single_window",
+        "execution_scope": execution_scope,
+        "controlled_preflight_observe_performed": controlled_preflight_observe_performed,
+        "live_window_worker_executed": live_window_worker_executed,
+        "production_resume_executed": production_resume_executed,
+        "production_task_triggered": production_task_triggered,
         "no_push": True,
         "no_settlement_write": True,
         "require_preflight": True,

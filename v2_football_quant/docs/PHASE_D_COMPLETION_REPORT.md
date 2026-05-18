@@ -28,7 +28,8 @@
 | D.8.4 | `TBD` | QQ route dry-run validation (read-only) | ✅ |
 | D.8.5 | `TBD` | Single-window live observe plan (plan-only) | ✅ |
 | D.8.6 | `TBD` | Settlement preflight live guard observe plan (plan-only) | ✅ |
-| D.8.8 | `TBD` | Controlled single-window resume execution (guarded observe) | ✅ |
+| D.8.8 | `a3b47c5` | Controlled preflight observe (single-window, not live worker) | ✅ |
+| D.8.9 | `TBD` | Controlled resume post-run review & scope correction | ✅ |
 
 **新增 20+ 文件，0 次策略改动，0 次 API 调用，0 次 QQ 推送。**
 
@@ -166,7 +167,7 @@ Phase D 工程链路完成（engineering_complete=true），但 business_pass=fa
   - safe_outbound_sender guard signature missing
   - single-window live observe still plan-only
   - validation pack status = WARN
-- D.8.8 仅允许草案，不允许执行。
+- D.8.8 已执行受控 preflight observe，但不等于真实 worker 执行。
 - rollback gate 要求：
   - disable cron immediately
   - keep preflight fail-closed
@@ -183,7 +184,11 @@ Phase D 工程链路完成（engineering_complete=true），但 business_pass=fa
 
 ## 11. D.8.8 Controlled Single-window Resume
 
-- D.8.8 是单窗口受控执行，不是全量恢复。
+- D.8.8 是单窗口受控观察，不是全量恢复。
+- D.8.8 实际执行范围：`preflight_observe_only`。
+- `execution_performed=true` 仅表示 preflight observe 已运行。
+- `live_window_worker_executed=false`。
+- `production_resume_executed=false`。
 - 固定禁止：
   - 不推 QQ
   - 不写 verified
@@ -191,4 +196,4 @@ Phase D 工程链路完成（engineering_complete=true），但 business_pass=fa
   - 不启用全局 cron
 - 若无法安全执行正式 worker，可降级为 plan-only WARN（必须可审计）。
 - 失败只报告 watchdog 状态；不允许 AI 自由 kill/retry。
-- 下一步仅允许 D.8.9 post-run review；Phase E 仍不得自动进入。
+- 下一步如要真实 single-window worker observe，必须单独进入 D.8.10 指令；Phase E 仍不得自动进入。
