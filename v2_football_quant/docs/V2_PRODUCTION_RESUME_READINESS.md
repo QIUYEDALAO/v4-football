@@ -56,3 +56,10 @@
 - `boss_approval_required=true`
 
 说明：D.8.1 只输出受控恢复计划与回滚方案，不执行恢复动作。
+
+## 8. D.8.2-D.8.6 Validation Pack 口径
+
+- D.8.2-D.8.6 仅做 dry-run/plan/validation。
+- 不恢复生产，不启用 cron，不推 QQ，不写 verified。
+- 不写 `PRODUCTION_VERIFIED`，不声明 `PIPELINE_READY`。
+- 下一步仅允许 `D.8.7_BOSS_APPROVAL_ONLY`。

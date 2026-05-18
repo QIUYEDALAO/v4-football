@@ -22,7 +22,12 @@
 | D.7.2 | `afb0e88` | Preflight test coverage v1 | ✅ |
 | D.7.3 | `1eea1c5` | Preflight coverage closure (strict wrapper/checker/docs) | ✅ |
 | D.8 | `c7a7213` | Production resume readiness gate (read-only) | ✅ |
-| D.8.1 | `TBD` | Controlled resume plan (plan-only, no execution) | ✅ |
+| D.8.1 | `5ba5113` | Controlled resume plan (plan-only, no execution) | ✅ |
+| D.8.2 | `TBD` | Controlled cron dry-run validation (read-only) | ✅ |
+| D.8.3 | `TBD` | Controlled no-push production dry-run (read-only) | ✅ |
+| D.8.4 | `TBD` | QQ route dry-run validation (read-only) | ✅ |
+| D.8.5 | `TBD` | Single-window live observe plan (plan-only) | ✅ |
+| D.8.6 | `TBD` | Settlement preflight live guard observe plan (plan-only) | ✅ |
 
 **新增 20+ 文件，0 次策略改动，0 次 API 调用，0 次 QQ 推送。**
 
@@ -127,3 +132,17 @@ Phase D 工程链路完成（engineering_complete=true），但 business_pass=fa
   - `production_verified=false`
 - 生产恢复必须走 D.8.2~D.8.7 分阶段审批流程。
 - 本阶段仍不进入 Phase E。
+
+---
+
+## 9. D.8.2-D.8.6 Validation Pack 结论
+
+- D.8.2-D.8.6 已完成受控验证总包（dry-run/plan/validation）。
+- 本轮未恢复生产，未启用 cron，未推 QQ，未写 verified。
+- 固定输出：
+  - `ready_for_boss_review=true`
+  - `resume_execution_allowed=false`
+  - `cron_enable_allowed=false`
+  - `qq_push_allowed=false`
+  - `production_verified=false`
+- 下一步仅允许：`D.8.7_BOSS_APPROVAL_ONLY`。

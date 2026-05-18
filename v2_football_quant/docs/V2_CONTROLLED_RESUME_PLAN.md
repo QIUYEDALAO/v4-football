@@ -51,3 +51,18 @@
 
 - D.8.1 是 Controlled Resume Plan，不是 Controlled Resume Execution。
 - 如需执行恢复，必须由 BOSS 另发 D.8.2+ 指令链。
+
+## 7. D.8.2-D.8.6 Validation Pack（只读）
+
+- D.8.2：cron dry-run validation（只读盘点，不改 cron）。
+- D.8.3：no-push production dry-run（只做路径与门禁校验，不执行任务）。
+- D.8.4：QQ route dry-run validation（只读检查，不发送消息）。
+- D.8.5：single-window live observe plan（仅计划，不执行 live）。
+- D.8.6：settlement preflight live guard observe plan（仅计划，不执行 live）。
+
+固定结论：
+- `resume_execution_allowed=false`
+- `cron_change_allowed=false`
+- `qq_push_allowed=false`
+- `production_verified=false`
+- 下一门禁：`D.8.7_BOSS_APPROVAL_ONLY`
