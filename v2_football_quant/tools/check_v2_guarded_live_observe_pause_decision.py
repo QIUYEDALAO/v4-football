@@ -16,11 +16,25 @@ def main():
 
     # Fail-closed: markers must exist
     if not m:
-        out={"decision_status":"BLOCKER","blockers":["d814_execution_marker_missing"],"date":dk}
+        out={"schema_version":"v2_guarded_live_observe_pause_decision.v1","decision_status":"BLOCKER",
+              "current_level":"CODE_READY","pipeline_ready":False,"production_verified":False,
+              "production_resume_allowed_now":False,"cron_enable_allowed":False,
+              "qq_push_allowed":False,"verified_write_allowed":False,"state_write_allowed":False,
+              "boss_approval_required":True,
+              "recommended_action":"cannot_determine_marker_missing",
+              "d816_draft":{"allowed_to_generate":False,"allowed_to_execute":False},
+              "blockers":["d814_execution_marker_missing"],"date":dk,"generated_at":datetime.now(CN).isoformat()}
         o=SD/f"v2_guarded_live_observe_pause_decision_{dk}_{w}.json"
         o.write_text(json.dumps(out,ensure_ascii=False,indent=2)); print(json.dumps(out,ensure_ascii=False,indent=2)); raise SystemExit(2)
     if not rv:
-        out={"decision_status":"BLOCKER","blockers":["d815_review_marker_missing"],"date":dk}
+        out={"schema_version":"v2_guarded_live_observe_pause_decision.v1","decision_status":"BLOCKER",
+              "current_level":"CODE_READY","pipeline_ready":False,"production_verified":False,
+              "production_resume_allowed_now":False,"cron_enable_allowed":False,
+              "qq_push_allowed":False,"verified_write_allowed":False,"state_write_allowed":False,
+              "boss_approval_required":True,
+              "recommended_action":"cannot_determine_marker_missing",
+              "d816_draft":{"allowed_to_generate":False,"allowed_to_execute":False},
+              "blockers":["d815_review_marker_missing"],"date":dk,"generated_at":datetime.now(CN).isoformat()}
         o=SD/f"v2_guarded_live_observe_pause_decision_{dk}_{w}.json"
         o.write_text(json.dumps(out,ensure_ascii=False,indent=2)); print(json.dumps(out,ensure_ascii=False,indent=2)); raise SystemExit(2)
 
