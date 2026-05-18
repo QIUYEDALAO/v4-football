@@ -267,3 +267,39 @@ python3 tools/api_snapshot_cache_dryrun.py --date 20260517 --module all --check
 ### 下一阶段边界
 - C.10 才考虑非关键页面局部读取 cache 数据作为辅助详情；
 - V2/V4 正式接 cache 必须另开 BOSS 指令。
+
+## Phase C.10：Non-critical Local Cache Detail Gray Display（本轮）
+### 目标
+- C.10 只做“局部 cache 辅助详情”展示；
+- 只允许 Dashboard / Replay / Audit 看到辅助详情状态；
+- 正式 V2/V4 卡片继续使用原来源；
+- 不影响推荐、结算、推送、评级。
+
+### 边界
+- 仅展示 metadata，不展示 raw response 全文；
+- `raw_response_hidden=true`，`raw_response_visible=false`；
+- `v2_formal_cards_use_cache=false`；
+- `v4_formal_cards_use_cache=false`；
+- `qq_uses_cache=false`；
+- 不调用 API；
+- 不读取 key；
+- 不替换正式 API 调用；
+- 不推 QQ；
+- 不接 cron；
+- 不写 `PRODUCTION_VERIFIED`。
+
+### 本轮新增
+- `engine/api_aux_detail.py`：局部辅助详情聚合；
+- `tools/api_aux_detail_dryrun.py`：局部详情 dry-run；
+- `tools/check_api_aux_detail.py`：局部详情边界与隐藏策略检查；
+- `api_cache.html` 增加局部详情卡（真实 smoke / reader / shadow）；
+- 首页 API Cache 卡增加 aux detail 状态；
+- replay marker 增加 `aux_detail_status`，仅展示，不改主源。
+
+### 当前限制
+- 当前仍不能说明 V2/V4 业务数据一致；
+- C.10 仅证明非关键局部辅助详情层可用。
+
+### 下一阶段边界
+- C.11 才考虑“非关键页面读 cache detail 作为辅助解释”；
+- V2/V4 正式接 cache 仍需另开 BOSS 指令。

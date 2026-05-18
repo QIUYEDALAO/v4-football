@@ -62,10 +62,23 @@ def main() -> None:
         errors.append("production_verified_bad_tag")
     if "production_verified</div><div class='v'><span class=\"tag neutral\">是</span>" in html:
         errors.append("production_verified_true")
-    if re.search(r"production_verified.*true", html, re.IGNORECASE):
+    # Avoid greedy cross-page false positives. Only flag clear "field => true/是" renderings.
+    if re.search(r"production_verified\s*[:=]\s*true", html, re.IGNORECASE):
         errors.append("production_verified_true_literal")
-    if re.search(r"production_dependency.*true", html, re.IGNORECASE):
+    if re.search(r"production_dependency\s*[:=]\s*true", html, re.IGNORECASE):
         errors.append("production_dependency_true_literal")
+    if re.search(
+        r"production_verified</div><div class='v'>\s*(?:true|是)\s*</div>",
+        html,
+        re.IGNORECASE,
+    ):
+        errors.append("production_verified_true_value")
+    if re.search(
+        r"production_dependency</div><div class='v'>\s*(?:true|是)\s*</div>",
+        html,
+        re.IGNORECASE,
+    ):
+        errors.append("production_dependency_true_value")
 
     secret_patterns = [
         r"APIFOOTBALL_KEY",
@@ -121,4 +134,3 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
-
