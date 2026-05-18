@@ -26,6 +26,11 @@ def main():
     if not unchanged and state_exists: e.append("STATE_CHANGED")
     if not state_exists and "NO_CURRENT_STATE" not in str(m.get("warnings",[])): ws.append("STATE_MISSING_NO_WARN")
     r=subprocess.run(["git","status","--short"],capture_output=True,text=True); st=r.stdout.strip()
+    runtime_staged = False
+    for line in st.split("\n"):
+        if "data/runtime/" in line and not line.startswith("??"):
+            runtime_staged = True
+            e.append("runtime_staged")
     if "data/state/" in st: e.append("state_staged")
     if "data/paper_trading/" in st: e.append("paper_trading_staged")
     sec=re.findall(r"sk-[A-Za-z0-9]{20,}",json.dumps(m,ensure_ascii=False))
@@ -35,6 +40,7 @@ def main():
        "supervisor_executed":m.get("supervisor_executed"),"formal_state_written":m.get("formal_state_written"),
        "formal_state_unchanged":unchanged,"qq_sent":m.get("qq_sent"),"production_verified":m.get("production_verified",True),
        "secret_safe":len(sec)==0,"execution_status":m.get("execution_status"),
+       "runtime_staged":runtime_staged,
        "warnings":ws,"errors":e,"date":dk,"generated_at":datetime.now(CN).isoformat()}
     o.write_text(json.dumps(r,ensure_ascii=False,indent=2)); print(json.dumps(r,ensure_ascii=False,indent=2))
     if status=="FAIL": raise SystemExit(1)
