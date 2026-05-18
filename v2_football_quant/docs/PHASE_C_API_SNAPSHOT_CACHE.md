@@ -337,3 +337,41 @@ python3 tools/api_snapshot_cache_dryrun.py --date 20260517 --module all --check
 ### 下一阶段边界
 - C.12 才做 Cache Health Daily Summary；
 - V2/V4 正式接 cache 必须另开 BOSS 指令。
+
+## Phase C.12：API Cache Health Daily Summary（本轮）
+### 目标
+- C.12 只做 API Cache 工程链路的每日健康摘要；
+- 汇总 C.1-C.11 的 dry-run/checker/灰度状态；
+- 统一 PASS/WARN/FAIL/BLOCKER 口径；
+- 持续确认正式链路隔离与安全边界。
+
+### 严格边界
+- 不调用 API；
+- 不读取 key；
+- 不替换正式 API 调用；
+- 不推 QQ；
+- 不接 cron；
+- 不写 `PRODUCTION_VERIFIED`；
+- 不代表 V2/V4 业务数据一致；
+- 不代表 cache 已生产接入。
+
+### 本轮新增
+- `engine/api_cache_health.py`
+  - 聚合 C.1-C.11 状态；
+  - 统一 `overall_status` 与计数；
+  - 输出 formal link / secret / raw-response 边界判定。
+- `tools/api_cache_health_summary.py`
+  - 生成每日健康摘要 marker：
+  - `data/runtime/status/api_cache_health_summary_YYYYMMDD.json`
+- `tools/check_api_cache_health.py`
+  - 校验 schema / boundary / counts / limitations / secret；
+  - 输出 checker marker：
+  - `data/runtime/status/api_cache_health_check_YYYYMMDD.json`
+- Dashboard `api_cache.html`、首页与 `system.html`
+  - 接入每日健康摘要总览；
+  - 展示 C.1-C.11 阶段状态汇总（只读）；
+  - 保持证据路径折叠，不展示 raw response 与 key。
+
+### 下一阶段边界
+- C.13 才做 Phase C 总验收 / PR / main 合并准备；
+- V2/V4 正式接 cache 必须另开 BOSS 指令。

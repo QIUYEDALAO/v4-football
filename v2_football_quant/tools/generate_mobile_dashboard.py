@@ -1364,6 +1364,8 @@ def _compute_api_cache(date_key: str) -> dict[str, Any]:
     aux_detail_check_path = STATUS_DIR / f"api_aux_detail_check_{date_key}.json"
     aux_explain_dryrun_path = STATUS_DIR / f"api_aux_explain_dryrun_{date_key}.json"
     aux_explain_check_path = STATUS_DIR / f"api_aux_explain_check_{date_key}.json"
+    health_summary_path = STATUS_DIR / f"api_cache_health_summary_{date_key}.json"
+    health_check_path = STATUS_DIR / f"api_cache_health_check_{date_key}.json"
     dryrun = _load_json(dryrun_path, {})
     bundle = _load_json(bundle_path, {})
     check = _load_json(check_path, {})
@@ -1384,6 +1386,8 @@ def _compute_api_cache(date_key: str) -> dict[str, Any]:
     aux_detail_check = _load_json(aux_detail_check_path, {})
     aux_explain_dryrun = _load_json(aux_explain_dryrun_path, {})
     aux_explain_check = _load_json(aux_explain_check_path, {})
+    health_summary = _load_json(health_summary_path, {})
+    health_check = _load_json(health_check_path, {})
     safety_dry = dryrun if isinstance(dryrun, dict) else {}
     boundaries = bundle.get("boundaries", {}) if isinstance(bundle.get("boundaries", {}), dict) else {}
     safety_bundle = bundle.get("safety", {}) if isinstance(bundle.get("safety", {}), dict) else {}
@@ -1464,6 +1468,8 @@ def _compute_api_cache(date_key: str) -> dict[str, Any]:
         "aux_detail_check_path": aux_detail_check_path,
         "aux_explain_dryrun_path": aux_explain_dryrun_path,
         "aux_explain_check_path": aux_explain_check_path,
+        "health_summary_path": health_summary_path,
+        "health_check_path": health_check_path,
         "dryrun_found": dryrun_path.exists(),
         "bundle_found": bundle_path.exists(),
         "check_found": check_path.exists(),
@@ -1678,6 +1684,118 @@ def _compute_api_cache(date_key: str) -> dict[str, Any]:
         "aux_explain_errors": aux_explain_dryrun.get("errors", []) if isinstance(aux_explain_dryrun.get("errors", []), list) else [],
         "aux_explain_check_warnings": aux_explain_check.get("warnings", []) if isinstance(aux_explain_check.get("warnings", []), list) else [],
         "aux_explain_check_errors": aux_explain_check.get("errors", []) if isinstance(aux_explain_check.get("errors", []), list) else [],
+        "health_summary_found": health_summary_path.exists(),
+        "health_check_found": health_check_path.exists(),
+        "health_summary_status": str((health_summary.get("status", "MISSING") if isinstance(health_summary, dict) else "MISSING")).upper(),
+        "health_check_status": str((health_check.get("status", "MISSING") if isinstance(health_check, dict) else "MISSING")).upper(),
+        "health_overall_status": str(
+            (
+                (
+                    (
+                        (health_summary.get("summary", {}) if isinstance(health_summary.get("summary", {}), dict) else {}).get("summary", {})
+                        if isinstance((health_summary.get("summary", {}) if isinstance(health_summary.get("summary", {}), dict) else {}).get("summary", {}), dict)
+                        else {}
+                    ).get("overall_status", "MISSING")
+                )
+                if isinstance(health_summary, dict)
+                else "MISSING"
+            )
+        ).upper(),
+        "health_pass_count": int(
+            (
+                (
+                    (
+                        (health_summary.get("summary", {}) if isinstance(health_summary.get("summary", {}), dict) else {}).get("summary", {})
+                        if isinstance((health_summary.get("summary", {}) if isinstance(health_summary.get("summary", {}), dict) else {}).get("summary", {}), dict)
+                        else {}
+                    ).get("pass_count", 0)
+                )
+                if isinstance(health_summary, dict)
+                else 0
+            )
+            or 0
+        ),
+        "health_warn_count": int(
+            (
+                (
+                    (
+                        (health_summary.get("summary", {}) if isinstance(health_summary.get("summary", {}), dict) else {}).get("summary", {})
+                        if isinstance((health_summary.get("summary", {}) if isinstance(health_summary.get("summary", {}), dict) else {}).get("summary", {}), dict)
+                        else {}
+                    ).get("warn_count", 0)
+                )
+                if isinstance(health_summary, dict)
+                else 0
+            )
+            or 0
+        ),
+        "health_fail_count": int(
+            (
+                (
+                    (
+                        (health_summary.get("summary", {}) if isinstance(health_summary.get("summary", {}), dict) else {}).get("summary", {})
+                        if isinstance((health_summary.get("summary", {}) if isinstance(health_summary.get("summary", {}), dict) else {}).get("summary", {}), dict)
+                        else {}
+                    ).get("fail_count", 0)
+                )
+                if isinstance(health_summary, dict)
+                else 0
+            )
+            or 0
+        ),
+        "health_missing_count": int(
+            (
+                (
+                    (
+                        (health_summary.get("summary", {}) if isinstance(health_summary.get("summary", {}), dict) else {}).get("summary", {})
+                        if isinstance((health_summary.get("summary", {}) if isinstance(health_summary.get("summary", {}), dict) else {}).get("summary", {}), dict)
+                        else {}
+                    ).get("missing_count", 0)
+                )
+                if isinstance(health_summary, dict)
+                else 0
+            )
+            or 0
+        ),
+        "health_blocker_count": int(
+            (
+                (
+                    (
+                        (health_summary.get("summary", {}) if isinstance(health_summary.get("summary", {}), dict) else {}).get("summary", {})
+                        if isinstance((health_summary.get("summary", {}) if isinstance(health_summary.get("summary", {}), dict) else {}).get("summary", {}), dict)
+                        else {}
+                    ).get("blocker_count", 0)
+                )
+                if isinstance(health_summary, dict)
+                else 0
+            )
+            or 0
+        ),
+        "health_secret_safe": bool((health_summary.get("secret_safe", False) if isinstance(health_summary, dict) else False)),
+        "health_formal_v2_uses_cache": bool((health_summary.get("formal_v2_uses_cache", False) if isinstance(health_summary, dict) else False)),
+        "health_formal_v4_uses_cache": bool((health_summary.get("formal_v4_uses_cache", False) if isinstance(health_summary, dict) else False)),
+        "health_qq_uses_cache": bool((health_summary.get("qq_uses_cache", False) if isinstance(health_summary, dict) else False)),
+        "health_raw_response_visible": bool((health_summary.get("raw_response_visible", False) if isinstance(health_summary, dict) else False)),
+        "health_phase_statuses": (
+            (health_summary.get("summary", {}) if isinstance(health_summary.get("summary", {}), dict) else {}).get("phase_statuses", {})
+            if isinstance((health_summary.get("summary", {}) if isinstance(health_summary.get("summary", {}), dict) else {}).get("phase_statuses", {}), dict)
+            else {}
+        ),
+        "health_limitations": (
+            (health_summary.get("summary", {}) if isinstance(health_summary.get("summary", {}), dict) else {}).get("limitations", [])
+            if isinstance((health_summary.get("summary", {}) if isinstance(health_summary.get("summary", {}), dict) else {}).get("limitations", []), list)
+            else []
+        ),
+        "health_checker_schema_valid": bool((health_check.get("schema_valid", False) if isinstance(health_check, dict) else False)),
+        "health_checker_boundary_valid": bool((health_check.get("boundary_valid", False) if isinstance(health_check, dict) else False)),
+        "health_checker_counts_valid": bool((health_check.get("counts_valid", False) if isinstance(health_check, dict) else False)),
+        "health_checker_limitations_valid": bool((health_check.get("limitations_valid", False) if isinstance(health_check, dict) else False)),
+        "health_checker_secret_safe": bool((health_check.get("secret_safe", False) if isinstance(health_check, dict) else False)),
+        "health_checker_formal_link_safe": bool((health_check.get("formal_link_safe", False) if isinstance(health_check, dict) else False)),
+        "health_warnings": health_summary.get("warnings", []) if isinstance(health_summary.get("warnings", []), list) else [],
+        "health_errors": health_summary.get("errors", []) if isinstance(health_summary.get("errors", []), list) else [],
+        "health_check_warnings": health_check.get("warnings", []) if isinstance(health_check.get("warnings", []), list) else [],
+        "health_check_errors": health_check.get("errors", []) if isinstance(health_check.get("errors", []), list) else [],
         "bundle_preview": {
             "module_keys": sorted(
                 list((bundle.get("modules", {}) if isinstance(bundle.get("modules", {}), dict) else {}).keys())
@@ -1868,6 +1986,18 @@ def _render_index(
                 ("是否推QQ", _status_tag("NO" if api_cache.get("no_push") else "FAIL")),
                 ("是否接入cron", _status_tag("NO" if api_cache.get("no_cron") else "FAIL")),
                 ("是否PRODUCTION_VERIFIED", _status_tag("NO" if not api_cache.get("production_verified") else "FAIL")),
+                ("Cache Health", _status_tag(api_cache.get("health_overall_status"))),
+                ("Health Summary", _status_tag(api_cache.get("health_summary_status"))),
+                ("Health Checker", _status_tag(api_cache.get("health_check_status"))),
+                ("health pass/warn", f"{api_cache.get('health_pass_count', 0)}/{api_cache.get('health_warn_count', 0)}"),
+                ("health fail/blocker", f"{api_cache.get('health_fail_count', 0)}/{api_cache.get('health_blocker_count', 0)}"),
+                ("health missing", str(api_cache.get("health_missing_count", 0))),
+                ("formal_v2_uses_cache", _status_tag("NO" if not api_cache.get("health_formal_v2_uses_cache") else "FAIL")),
+                ("formal_v4_uses_cache", _status_tag("NO" if not api_cache.get("health_formal_v4_uses_cache") else "FAIL")),
+                ("qq_uses_cache", _status_tag("NO" if not api_cache.get("health_qq_uses_cache") else "FAIL")),
+                ("raw_response_visible", _status_tag("NO" if not api_cache.get("health_raw_response_visible") else "FAIL")),
+                ("health secret_safe", _status_tag("PASS" if api_cache.get("health_secret_safe") else ("MISSING" if not api_cache.get("health_summary_found") else "FAIL"))),
+                ("正式链路使用cache", _status_tag("NO" if (not api_cache.get("health_formal_v2_uses_cache") and not api_cache.get("health_formal_v4_uses_cache") and not api_cache.get("health_qq_uses_cache")) else "FAIL")),
                 ("bundle", _status_tag("PASS" if api_cache.get("bundle_found") else "MISSING")),
                 ("schema校验", _status_tag("PASS" if api_cache.get("check_schema_valid") else ("MISSING" if not api_cache.get("check_found") else "FAIL"))),
                 ("integrity校验", _status_tag("PASS" if api_cache.get("check_integrity_valid") else ("MISSING" if not api_cache.get("check_found") else "FAIL"))),
@@ -2014,6 +2144,18 @@ def _render_index(
         f"<div class='k'>aux explain errors</div><div class='v'>{escape('；'.join(api_cache.get('aux_explain_errors', [])) if api_cache.get('aux_explain_errors') else '无')}</div>"
         f"<div class='k'>aux explain checker warnings</div><div class='v'>{escape('；'.join(api_cache.get('aux_explain_check_warnings', [])) if api_cache.get('aux_explain_check_warnings') else '无')}</div>"
         f"<div class='k'>aux explain checker errors</div><div class='v'>{escape('；'.join(api_cache.get('aux_explain_check_errors', [])) if api_cache.get('aux_explain_check_errors') else '无')}</div>"
+        f"<div class='k'>health summary marker</div><div class='v'><span class='mono'>{escape(str(api_cache.get('health_summary_path')))}</span></div>"
+        f"<div class='k'>health checker marker</div><div class='v'><span class='mono'>{escape(str(api_cache.get('health_check_path')))}</span></div>"
+        f"<div class='k'>health overall</div><div class='v'>{_status_tag(api_cache.get('health_overall_status'))}</div>"
+        f"<div class='k'>health pass/warn/fail</div><div class='v'>{api_cache.get('health_pass_count', 0)}/{api_cache.get('health_warn_count', 0)}/{api_cache.get('health_fail_count', 0)}</div>"
+        f"<div class='k'>health missing/blocker</div><div class='v'>{api_cache.get('health_missing_count', 0)}/{api_cache.get('health_blocker_count', 0)}</div>"
+        f"<div class='k'>health checker schema/boundary</div><div class='v'>{_status_tag('PASS' if api_cache.get('health_checker_schema_valid') else ('MISSING' if not api_cache.get('health_check_found') else 'FAIL'))} / {_status_tag('PASS' if api_cache.get('health_checker_boundary_valid') else ('MISSING' if not api_cache.get('health_check_found') else 'FAIL'))}</div>"
+        f"<div class='k'>health checker counts/limitations</div><div class='v'>{_status_tag('PASS' if api_cache.get('health_checker_counts_valid') else ('MISSING' if not api_cache.get('health_check_found') else 'FAIL'))} / {_status_tag('PASS' if api_cache.get('health_checker_limitations_valid') else ('MISSING' if not api_cache.get('health_check_found') else 'FAIL'))}</div>"
+        f"<div class='k'>health checker secret/formal_link</div><div class='v'>{_status_tag('PASS' if api_cache.get('health_checker_secret_safe') else ('MISSING' if not api_cache.get('health_check_found') else 'FAIL'))} / {_status_tag('PASS' if api_cache.get('health_checker_formal_link_safe') else ('MISSING' if not api_cache.get('health_check_found') else 'FAIL'))}</div>"
+        f"<div class='k'>health warnings</div><div class='v'>{escape('；'.join(api_cache.get('health_warnings', [])) if api_cache.get('health_warnings') else '无')}</div>"
+        f"<div class='k'>health errors</div><div class='v'>{escape('；'.join(api_cache.get('health_errors', [])) if api_cache.get('health_errors') else '无')}</div>"
+        f"<div class='k'>health checker warnings</div><div class='v'>{escape('；'.join(api_cache.get('health_check_warnings', [])) if api_cache.get('health_check_warnings') else '无')}</div>"
+        f"<div class='k'>health checker errors</div><div class='v'>{escape('；'.join(api_cache.get('health_check_errors', [])) if api_cache.get('health_check_errors') else '无')}</div>"
         "</div></details></section>"
     ]
 
@@ -2620,6 +2762,19 @@ def _render_system(date_key: str, system: dict[str, Any], api_cache: dict[str, A
                     ("是否接入cron", _status_tag("NO" if api_cache.get("no_cron") else "FAIL")),
                     ("production_dependency", _status_tag("NO")),
                     ("是否PRODUCTION_VERIFIED", _status_tag("NO" if not api_cache.get("production_verified") else "FAIL")),
+                    ("Cache Health", _status_tag(api_cache.get("health_overall_status"))),
+                    ("Health Summary", _status_tag(api_cache.get("health_summary_status"))),
+                    ("Health Checker", _status_tag(api_cache.get("health_check_status"))),
+                    ("health pass/warn", f"{api_cache.get('health_pass_count', 0)}/{api_cache.get('health_warn_count', 0)}"),
+                    ("health fail/blocker", f"{api_cache.get('health_fail_count', 0)}/{api_cache.get('health_blocker_count', 0)}"),
+                    ("health missing", str(api_cache.get("health_missing_count", 0))),
+                    ("health secret_safe", _status_tag("PASS" if api_cache.get("health_secret_safe") else ("MISSING" if not api_cache.get("health_summary_found") else "FAIL"))),
+                    ("health checker secret_safe", _status_tag("PASS" if api_cache.get("health_checker_secret_safe") else ("MISSING" if not api_cache.get("health_check_found") else "FAIL"))),
+                    ("health checker formal_link_safe", _status_tag("PASS" if api_cache.get("health_checker_formal_link_safe") else ("MISSING" if not api_cache.get("health_check_found") else "FAIL"))),
+                    ("formal_v2_uses_cache", _status_tag("NO" if not api_cache.get("health_formal_v2_uses_cache") else "FAIL")),
+                    ("formal_v4_uses_cache", _status_tag("NO" if not api_cache.get("health_formal_v4_uses_cache") else "FAIL")),
+                    ("qq_uses_cache", _status_tag("NO" if not api_cache.get("health_qq_uses_cache") else "FAIL")),
+                    ("raw_response_visible", _status_tag("NO" if not api_cache.get("health_raw_response_visible") else "FAIL")),
                     ("schema校验", _status_tag("PASS" if api_cache.get("check_schema_valid") else ("MISSING" if not api_cache.get("check_found") else "FAIL"))),
                     ("integrity校验", _status_tag("PASS" if api_cache.get("check_integrity_valid") else ("MISSING" if not api_cache.get("check_found") else "FAIL"))),
                     ("secret检查", _status_tag("PASS" if api_cache.get("check_secret_safe") else ("MISSING" if not api_cache.get("check_found") else "FAIL"))),
@@ -2715,18 +2870,25 @@ def _render_api_cache_diag(date_key: str, api_cache: dict[str, Any]) -> str:
     def _done(found: bool) -> str:
         return _status_tag("PASS" if found else "MISSING")
 
+    health_phase = api_cache.get("health_phase_statuses", {}) if isinstance(api_cache.get("health_phase_statuses", {}), dict) else {}
+
+    def _phase_status(phase_key: str, fallback_found: bool) -> str:
+        if phase_key in health_phase:
+            return _status_tag(health_phase.get(phase_key))
+        return _done(fallback_found)
+
     phase_rows = [
-        ("C.1 Dashboard状态卡", _done(bool(api_cache.get("dryrun_found")))),
-        ("C.2 Schema Checker", _done(bool(api_cache.get("check_found")))),
-        ("C.3 Controlled Simulation", _done(bool(api_cache.get("ingest_sim_found")))),
-        ("C.4 Real Smoke", _done(bool(api_cache.get("real_ingest_found") and api_cache.get("real_ingest_check_found")))),
-        ("C.5 Cache Reader", _done(bool(api_cache.get("reader_dryrun_found") and api_cache.get("reader_check_found")))),
-        ("C.6 Shadow Read", _done(bool(api_cache.get("shadow_dryrun_found") and api_cache.get("shadow_check_found")))),
-        ("C.7 Shadow Consumer", _done(bool(api_cache.get("shadow_consumer_dryrun_found") and api_cache.get("shadow_consumer_check_found")))),
-        ("C.8 Page Gray", _status_tag("PASS")),
-        ("C.9 Aux Display", _done(bool(api_cache.get("aux_dryrun_found") and api_cache.get("aux_check_found")))),
-        ("C.10 Aux Detail", _done(bool(api_cache.get("aux_detail_dryrun_found") and api_cache.get("aux_detail_check_found")))),
-        ("C.11 Aux Explain", _done(bool(api_cache.get("aux_explain_dryrun_found") and api_cache.get("aux_explain_check_found")))),
+        ("C.1 Dashboard状态卡", _phase_status("c1_dashboard_status_card", bool(api_cache.get("dryrun_found")))),
+        ("C.2 Schema Checker", _phase_status("c2_schema_checker", bool(api_cache.get("check_found")))),
+        ("C.3 Controlled Simulation", _phase_status("c3_controlled_sim", bool(api_cache.get("ingest_sim_found")))),
+        ("C.4 Real Smoke", _phase_status("c4_real_smoke", bool(api_cache.get("real_ingest_found") and api_cache.get("real_ingest_check_found")))),
+        ("C.5 Cache Reader", _phase_status("c5_reader", bool(api_cache.get("reader_dryrun_found") and api_cache.get("reader_check_found")))),
+        ("C.6 Shadow Read", _phase_status("c6_shadow_read", bool(api_cache.get("shadow_dryrun_found") and api_cache.get("shadow_check_found")))),
+        ("C.7 Shadow Consumer", _phase_status("c7_shadow_consumer", bool(api_cache.get("shadow_consumer_dryrun_found") and api_cache.get("shadow_consumer_check_found")))),
+        ("C.8 Page Gray", _phase_status("c8_gray_page", True)),
+        ("C.9 Aux Display", _phase_status("c9_aux_display", bool(api_cache.get("aux_dryrun_found") and api_cache.get("aux_check_found")))),
+        ("C.10 Aux Detail", _phase_status("c10_aux_detail", bool(api_cache.get("aux_detail_dryrun_found") and api_cache.get("aux_detail_check_found")))),
+        ("C.11 Aux Explain", _phase_status("c11_aux_explain", bool(api_cache.get("aux_explain_dryrun_found") and api_cache.get("aux_explain_check_found")))),
     ]
 
     overview = _kv_card(
@@ -2744,6 +2906,33 @@ def _render_api_cache_diag(date_key: str, api_cache: dict[str, Any]) -> str:
     )
 
     phase_card = _kv_card("Phase C 阶段状态", phase_rows)
+
+    health_phase_items = [f"{k}: {str(v)}" for k, v in health_phase.items()]
+    health_card = _kv_card(
+        "API Cache 每日健康摘要",
+        [
+            ("overall_status", _status_tag(api_cache.get("health_overall_status"))),
+            ("Health Summary", _status_tag(api_cache.get("health_summary_status"))),
+            ("Health Checker", _status_tag(api_cache.get("health_check_status"))),
+            ("pass_count", str(api_cache.get("health_pass_count", 0))),
+            ("warn_count", str(api_cache.get("health_warn_count", 0))),
+            ("fail_count", str(api_cache.get("health_fail_count", 0))),
+            ("missing_count", str(api_cache.get("health_missing_count", 0))),
+            ("blocker_count", str(api_cache.get("health_blocker_count", 0))),
+            ("secret_safe", _status_tag("PASS" if api_cache.get("health_secret_safe") else ("MISSING" if not api_cache.get("health_summary_found") else "FAIL"))),
+            ("production_dependency", _status_tag("NO")),
+            ("production_verified", _status_tag("NO")),
+            ("formal_v2_uses_cache", _status_tag("NO" if not api_cache.get("health_formal_v2_uses_cache") else "FAIL")),
+            ("formal_v4_uses_cache", _status_tag("NO" if not api_cache.get("health_formal_v4_uses_cache") else "FAIL")),
+            ("qq_uses_cache", _status_tag("NO" if not api_cache.get("health_qq_uses_cache") else "FAIL")),
+            ("raw_response_visible", _status_tag("NO" if not api_cache.get("health_raw_response_visible") else "FAIL")),
+            ("checker schema/boundary", f"{_status_tag('PASS' if api_cache.get('health_checker_schema_valid') else ('MISSING' if not api_cache.get('health_check_found') else 'FAIL'))} / {_status_tag('PASS' if api_cache.get('health_checker_boundary_valid') else ('MISSING' if not api_cache.get('health_check_found') else 'FAIL'))}"),
+            ("checker counts/limitations", f"{_status_tag('PASS' if api_cache.get('health_checker_counts_valid') else ('MISSING' if not api_cache.get('health_check_found') else 'FAIL'))} / {_status_tag('PASS' if api_cache.get('health_checker_limitations_valid') else ('MISSING' if not api_cache.get('health_check_found') else 'FAIL'))}"),
+            ("checker secret/formal_link", f"{_status_tag('PASS' if api_cache.get('health_checker_secret_safe') else ('MISSING' if not api_cache.get('health_check_found') else 'FAIL'))} / {_status_tag('PASS' if api_cache.get('health_checker_formal_link_safe') else ('MISSING' if not api_cache.get('health_check_found') else 'FAIL'))}"),
+            ("phase_statuses", "<br>".join(escape(item) for item in health_phase_items) if health_phase_items else "缺失"),
+            ("limitations", "<br>".join(escape(str(x)) for x in api_cache.get("health_limitations", [])) if api_cache.get("health_limitations") else "缺失"),
+        ],
+    )
 
     reader_card = _kv_card(
         "Reader 状态",
@@ -2959,6 +3148,12 @@ def _render_api_cache_diag(date_key: str, api_cache: dict[str, Any]) -> str:
         f"<div class='k'>aux detail checker</div><div class='v'><span class='mono'>{escape(str(api_cache.get('aux_detail_check_path')))}</span></div>"
         f"<div class='k'>aux explain dryrun</div><div class='v'><span class='mono'>{escape(str(api_cache.get('aux_explain_dryrun_path')))}</span></div>"
         f"<div class='k'>aux explain checker</div><div class='v'><span class='mono'>{escape(str(api_cache.get('aux_explain_check_path')))}</span></div>"
+        f"<div class='k'>health summary marker</div><div class='v'><span class='mono'>{escape(str(api_cache.get('health_summary_path')))}</span></div>"
+        f"<div class='k'>health checker marker</div><div class='v'><span class='mono'>{escape(str(api_cache.get('health_check_path')))}</span></div>"
+        f"<div class='k'>health warnings</div><div class='v'>{escape('；'.join(api_cache.get('health_warnings', [])) if api_cache.get('health_warnings') else '无')}</div>"
+        f"<div class='k'>health errors</div><div class='v'>{escape('；'.join(api_cache.get('health_errors', [])) if api_cache.get('health_errors') else '无')}</div>"
+        f"<div class='k'>health checker warnings</div><div class='v'>{escape('；'.join(api_cache.get('health_check_warnings', [])) if api_cache.get('health_check_warnings') else '无')}</div>"
+        f"<div class='k'>health checker errors</div><div class='v'>{escape('；'.join(api_cache.get('health_check_errors', [])) if api_cache.get('health_check_errors') else '无')}</div>"
         f"<div class='k'>real ingest marker</div><div class='v'><span class='mono'>{escape(str(api_cache.get('real_ingest_path')))}</span></div>"
         f"<div class='k'>real ingest checker</div><div class='v'><span class='mono'>{escape(str(api_cache.get('real_ingest_check_path')))}</span></div>"
         "</div></details></section>"
@@ -2968,6 +3163,7 @@ def _render_api_cache_diag(date_key: str, api_cache: dict[str, Any]) -> str:
         [
             overview,
             phase_card,
+            health_card,
             reader_card,
             shadow_read_card,
             shadow_consumer_card,
