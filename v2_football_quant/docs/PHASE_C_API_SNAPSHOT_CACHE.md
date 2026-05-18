@@ -60,6 +60,24 @@ python3 tools/api_snapshot_cache_dryrun.py --date 20260517 --module all --check
 
 ## 路线图约束
 - Phase C.2：仅做 schema/checker/只读展示增强（当前阶段）。
-- Phase C.3：可讨论 controlled ingest 设计（仍需 BOSS 单独确认，不落生产）。
-- Phase C.4：可讨论非关键模块只读接 cache（仍需 BOSS 单独确认）。
+- Phase C.3：controlled ingest **simulation**（本地模拟，不触发真实 API）。
+- Phase C.4：可讨论 controlled real ingest（必须 BOSS 单独确认）。
+- Phase C.5：可讨论非关键模块只读接 cache（仍需 BOSS 单独确认）。
 - **V2/V4 正式链路接 cache 必须另开 BOSS 确认，且不在当前阶段实施。**
+
+## Phase C.3（本轮）规则
+1. 只生成 `controlled_ingest_plan.json` 与 status/check marker。  
+2. 不调用真实 API。  
+3. 不读取真实 `APIFOOTBALL_KEY`。  
+4. 不写真实 snapshot。  
+5. 不更新生产 cache 索引。  
+6. 不让 V2/V4 正式链路依赖 cache。  
+7. 不推 QQ，不接 cron，不写 `PRODUCTION_VERIFIED`。  
+
+## C.4 预告（未开始）
+若进入 C.4，首次真实 API 调用必须满足：
+- 只允许最小 endpoint 与最小样本；
+- 明确 timeout / retry 上限；
+- 明确日志脱敏；
+- 明确 no-push/no-cron/no-strategy-change；
+- 先本地验证，再由 BOSS 决定是否继续。

@@ -1347,9 +1347,15 @@ def _compute_api_cache(date_key: str) -> dict[str, Any]:
     dryrun_path = STATUS_DIR / f"api_snapshot_cache_dryrun_{date_key}.json"
     bundle_path = CACHE_DIR / "api_snapshot" / date_key / "bundle.json"
     check_path = STATUS_DIR / f"api_snapshot_cache_check_{date_key}.json"
+    ingest_sim_path = STATUS_DIR / f"api_controlled_ingest_sim_{date_key}.json"
+    ingest_check_path = STATUS_DIR / f"api_controlled_ingest_check_{date_key}.json"
+    ingest_plan_path = CACHE_DIR / "api_snapshot" / date_key / "controlled_ingest_plan.json"
     dryrun = _load_json(dryrun_path, {})
     bundle = _load_json(bundle_path, {})
     check = _load_json(check_path, {})
+    ingest_sim = _load_json(ingest_sim_path, {})
+    ingest_check = _load_json(ingest_check_path, {})
+    ingest_plan = _load_json(ingest_plan_path, {})
     safety_dry = dryrun if isinstance(dryrun, dict) else {}
     boundaries = bundle.get("boundaries", {}) if isinstance(bundle.get("boundaries", {}), dict) else {}
     safety_bundle = bundle.get("safety", {}) if isinstance(bundle.get("safety", {}), dict) else {}
@@ -1413,6 +1419,9 @@ def _compute_api_cache(date_key: str) -> dict[str, Any]:
         "dryrun_path": dryrun_path,
         "bundle_path": bundle_path,
         "check_path": check_path,
+        "ingest_sim_path": ingest_sim_path,
+        "ingest_check_path": ingest_check_path,
+        "ingest_plan_path": ingest_plan_path,
         "dryrun_found": dryrun_path.exists(),
         "bundle_found": bundle_path.exists(),
         "check_found": check_path.exists(),
@@ -1430,6 +1439,21 @@ def _compute_api_cache(date_key: str) -> dict[str, Any]:
         "check_secret_safe": bool(check.get("secret_safe", False)) if isinstance(check, dict) else False,
         "check_warnings": check.get("warnings", []) if isinstance(check.get("warnings", []), list) else [],
         "check_errors": check.get("errors", []) if isinstance(check.get("errors", []), list) else [],
+        "ingest_sim_found": ingest_sim_path.exists(),
+        "ingest_check_found": ingest_check_path.exists(),
+        "ingest_plan_found": ingest_plan_path.exists(),
+        "ingest_status": str((ingest_sim.get("status", "MISSING") if isinstance(ingest_sim, dict) else "MISSING")).upper(),
+        "ingest_mode": str((ingest_sim.get("mode", "simulation") if isinstance(ingest_sim, dict) else "simulation")),
+        "ingest_api_called": bool(ingest_sim.get("api_called", False)) if isinstance(ingest_sim, dict) else False,
+        "ingest_api_allowed": bool(ingest_sim.get("api_allowed", False)) if isinstance(ingest_sim, dict) else False,
+        "ingest_no_api": bool(ingest_sim.get("no_api", False)) if isinstance(ingest_sim, dict) else False,
+        "ingest_check_status": str((ingest_check.get("status", "MISSING") if isinstance(ingest_check, dict) else "MISSING")).upper(),
+        "ingest_check_schema_valid": bool(ingest_check.get("schema_valid", False)) if isinstance(ingest_check, dict) else False,
+        "ingest_check_boundary_valid": bool(ingest_check.get("boundary_valid", False)) if isinstance(ingest_check, dict) else False,
+        "ingest_check_secret_safe": bool(ingest_check.get("secret_safe", False)) if isinstance(ingest_check, dict) else False,
+        "ingest_check_warnings": ingest_check.get("warnings", []) if isinstance(ingest_check.get("warnings", []), list) else [],
+        "ingest_check_errors": ingest_check.get("errors", []) if isinstance(ingest_check.get("errors", []), list) else [],
+        "ingest_plan_schema": str((ingest_plan.get("schema_version", "") if isinstance(ingest_plan, dict) else "")),
         "bundle_preview": {
             "module_keys": sorted(
                 list((bundle.get("modules", {}) if isinstance(bundle.get("modules", {}), dict) else {}).keys())
@@ -1623,8 +1647,12 @@ def _render_index(
                 ("schema校验", _status_tag("PASS" if api_cache.get("check_schema_valid") else ("MISSING" if not api_cache.get("check_found") else "FAIL"))),
                 ("integrity校验", _status_tag("PASS" if api_cache.get("check_integrity_valid") else ("MISSING" if not api_cache.get("check_found") else "FAIL"))),
                 ("secret检查", _status_tag("PASS" if api_cache.get("check_secret_safe") else ("MISSING" if not api_cache.get("check_found") else "FAIL"))),
+                ("Controlled ingest", _status_tag(api_cache.get("ingest_status"))),
+                ("ingest checker", _status_tag(api_cache.get("ingest_check_status"))),
+                ("api_allowed", _status_tag("NO" if not api_cache.get("ingest_api_allowed") else "FAIL")),
+                ("api_called", _status_tag("NO" if not api_cache.get("ingest_api_called") else "FAIL")),
                 ("runtime root", escape(api_runtime_root_view)),
-                ("下一步", "待 BOSS 确认后进入 Phase C.2"),
+                ("下一步", "C.4 controlled real ingest 需 BOSS 单独确认"),
             ],
         )
     )
@@ -1661,6 +1689,12 @@ def _render_index(
         f"<div class='k'>warnings</div><div class='v'>{escape('；'.join(api_cache.get('warnings', [])) if api_cache.get('warnings') else '无')}</div>"
         f"<div class='k'>checker warnings</div><div class='v'>{escape('；'.join(api_cache.get('check_warnings', [])) if api_cache.get('check_warnings') else '无')}</div>"
         f"<div class='k'>checker errors</div><div class='v'>{escape('；'.join(api_cache.get('check_errors', [])) if api_cache.get('check_errors') else '无')}</div>"
+        f"<div class='k'>controlled ingest sim marker</div><div class='v'><span class='mono'>{escape(str(api_cache.get('ingest_sim_path')))}</span></div>"
+        f"<div class='k'>controlled ingest checker marker</div><div class='v'><span class='mono'>{escape(str(api_cache.get('ingest_check_path')))}</span></div>"
+        f"<div class='k'>controlled ingest plan</div><div class='v'><span class='mono'>{escape(str(api_cache.get('ingest_plan_path')))}</span></div>"
+        f"<div class='k'>ingest schema</div><div class='v'>{escape(str(api_cache.get('ingest_plan_schema') or '缺失'))}</div>"
+        f"<div class='k'>ingest checker warnings</div><div class='v'>{escape('；'.join(api_cache.get('ingest_check_warnings', [])) if api_cache.get('ingest_check_warnings') else '无')}</div>"
+        f"<div class='k'>ingest checker errors</div><div class='v'>{escape('；'.join(api_cache.get('ingest_check_errors', [])) if api_cache.get('ingest_check_errors') else '无')}</div>"
         "</div></details></section>"
     ]
 
@@ -2270,6 +2304,10 @@ def _render_system(date_key: str, system: dict[str, Any], api_cache: dict[str, A
                     ("schema校验", _status_tag("PASS" if api_cache.get("check_schema_valid") else ("MISSING" if not api_cache.get("check_found") else "FAIL"))),
                     ("integrity校验", _status_tag("PASS" if api_cache.get("check_integrity_valid") else ("MISSING" if not api_cache.get("check_found") else "FAIL"))),
                     ("secret检查", _status_tag("PASS" if api_cache.get("check_secret_safe") else ("MISSING" if not api_cache.get("check_found") else "FAIL"))),
+                    ("Controlled ingest", _status_tag(api_cache.get("ingest_status"))),
+                    ("ingest checker", _status_tag(api_cache.get("ingest_check_status"))),
+                    ("api_allowed", _status_tag("NO" if not api_cache.get("ingest_api_allowed") else "FAIL")),
+                    ("api_called", _status_tag("NO" if not api_cache.get("ingest_api_called") else "FAIL")),
                 ],
             ),
             "<section class='card'><h2>API Cache 证据（折叠）</h2>"
