@@ -50,6 +50,11 @@ Settlement 必须先通过 preflight；任一条件不满足即 BLOCK：
   - `resume_allowed_now=false`
   - `boss_approval_required=true`
   - 不自动恢复生产
+- D.8.1 Controlled Resume Plan 仍要求：
+  - `resume_execution_allowed=false`
+  - `cron_change_allowed=false`
+  - `qq_push_allowed=false`
+  - 仅可提交计划，不可执行恢复
 
 ## 禁止事项
 

@@ -47,3 +47,12 @@
 1. D.8.1 Controlled Resume Plan  
 2. Phase E V4 Scan Standardization  
 3. Pause architecture and observe manually
+
+## 7. D.8.1 计划门禁固定值
+
+- `resume_execution_allowed=false`
+- `cron_change_allowed=false`
+- `qq_push_allowed=false`
+- `boss_approval_required=true`
+
+说明：D.8.1 只输出受控恢复计划与回滚方案，不执行恢复动作。

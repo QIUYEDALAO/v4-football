@@ -21,7 +21,8 @@
 | D.7.1 | `df5a752` | Preflight entry fix (key + lock order) | ✅ |
 | D.7.2 | `afb0e88` | Preflight test coverage v1 | ✅ |
 | D.7.3 | `1eea1c5` | Preflight coverage closure (strict wrapper/checker/docs) | ✅ |
-| D.8 | `TBD` | Production resume readiness gate (read-only) | ✅ |
+| D.8 | `c7a7213` | Production resume readiness gate (read-only) | ✅ |
+| D.8.1 | `TBD` | Controlled resume plan (plan-only, no execution) | ✅ |
 
 **新增 20+ 文件，0 次策略改动，0 次 API 调用，0 次 QQ 推送。**
 
@@ -113,3 +114,16 @@ Phase D 工程链路完成（engineering_complete=true），但 business_pass=fa
 - D.7.3 已证明 20260517 同日可 BLOCK，不需要等明天。
 - `known_historical_fail=true` 持续保留。
 - `resume_allowed_now=false`，`boss_approval_required=true`。
+
+---
+
+## 8. D.8.1 Controlled Resume Plan 结论
+
+- D.8.1 只做计划与门禁，不执行恢复。
+- 固定值：
+  - `resume_execution_allowed=false`
+  - `cron_change_allowed=false`
+  - `qq_push_allowed=false`
+  - `production_verified=false`
+- 生产恢复必须走 D.8.2~D.8.7 分阶段审批流程。
+- 本阶段仍不进入 Phase E。
