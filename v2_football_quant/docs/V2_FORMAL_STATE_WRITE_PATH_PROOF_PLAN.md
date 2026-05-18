@@ -56,3 +56,7 @@
 - D.8.37 does not write qq_required.
 - D.8.37 does not authorize production resume.
 - Phase E remains forbidden.
+
+## D.8-DD Closure Note
+
+- `formal_state_write_path` remains `UNPROVEN`; formal state write remains disabled.

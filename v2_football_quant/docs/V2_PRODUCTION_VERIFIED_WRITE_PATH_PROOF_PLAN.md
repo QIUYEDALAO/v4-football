@@ -55,3 +55,7 @@
 - D.8.36 does not modify historical verified.
 - D.8.36 does not authorize production resume.
 - Phase E remains forbidden.
+
+## D.8-DD Closure Note
+
+- `production_verified_path` remains `UNPROVEN`; verified write remains disabled.

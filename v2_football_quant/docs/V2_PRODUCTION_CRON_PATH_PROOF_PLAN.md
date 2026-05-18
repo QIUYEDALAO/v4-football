@@ -54,3 +54,7 @@
 - D.8.34 does not start scheduler jobs.
 - D.8.34 does not authorize production resume.
 - Phase E remains forbidden.
+
+## D.8-DD Closure Note
+
+- `production_cron_path` remains `UNPROVEN`; this plan does not grant cron execution permission.

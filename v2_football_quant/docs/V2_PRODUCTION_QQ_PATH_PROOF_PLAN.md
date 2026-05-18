@@ -55,3 +55,7 @@
 - D.8.35 does not call openclaw message send.
 - D.8.35 does not authorize production resume.
 - Phase E remains forbidden.
+
+## D.8-DD Closure Note
+
+- `production_qq_path` remains `UNPROVEN`; no-push and safe sender guard remain mandatory.
