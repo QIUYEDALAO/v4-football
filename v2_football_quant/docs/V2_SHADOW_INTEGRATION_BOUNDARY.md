@@ -183,6 +183,31 @@ D.2 是 V2 Shadow Read Baseline，只读聚合 V2 正式链路状态。
 - `tools/v2_shadow_baseline_dryrun.py` — dry-run 入口
 - `tools/check_v2_shadow_baseline.py` — baseline checker
 
+### D.2.1 Evidence Hardening
+
+D.2.1 是 baseline evidence hardening，补强所有组件的证据读取。
+
+**关键变更：**
+- settlement `only_window_checker_locks` 不再按设计假定 true
+- 必须从 verified 文件 / task status 中解析
+- 引入 `evidence_sources` / `evidence_quality` / `unknown_fields` / `assumptions`
+- lock_owner 字段缺失 → evidence_quality=partial → max WARN
+- no targets → evidence_quality=partial → max WARN（no_targets_to_verify）
+- 有 targets 但无 lock_owner → 标注 `lock_owner_unavailable`
+- hardcoded assumption → checker 判 FAIL
+
+**evidence_quality 语义：**
+
+| evidence_quality | 允许最高状态 |
+|:----------------|:----------|
+| strong | PASS |
+| partial | WARN |
+| missing | WARN (最低) |
+
+**unknown_fields 规则：**
+- 有 unknown_fields → 至少 WARN
+- 不能假 PASS
+
 ---
 
 ## 7. 下一阶段计划

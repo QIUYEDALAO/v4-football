@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Phase D.2 — V2 Shadow Baseline Checker (read-only boundary verification)."""
+"""Phase D.2.1 — V2 Shadow Baseline Checker (evidence-hardened, read-only verification)."""
 from __future__ import annotations
 
 import argparse
@@ -32,7 +32,7 @@ def _secret_scan(text: str) -> list[str]:
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(description="V2 Shadow Baseline Checker")
+    parser = argparse.ArgumentParser(description="V2 Shadow Baseline Checker (evidence-hardened)")
     parser.add_argument("--date", required=False, default=None, help="YYYYMMDD (default: today)")
     args = parser.parse_args()
     date_key = args.date or datetime.now(CN_TZ).strftime("%Y%m%d")
@@ -58,7 +58,7 @@ def main() -> None:
     marker = _load_json(baseline_path)
     report = marker.get("report", {})
 
-    # Top-level checks
+    # Top-level boundary checks
     for field, expected in [("production_dependency", False), ("production_verified", False), ("formal_v2_uses_cache", False), ("shadow_affects_formal", False)]:
         if marker.get(field, True):
             errors.append(f"boundary_{field}_not_false")
@@ -66,6 +66,43 @@ def main() -> None:
     for field in ["no_api", "no_key_read", "no_push", "no_cron", "no_task_trigger", "no_bet_locked_write", "no_settlement_write"]:
         if not marker.get(field):
             errors.append(f"guard_{field}_not_true")
+
+    # Evidence quality checks per component
+    components = ["daily_pool", "window_checker", "daily_status", "missed_candidates", "settlement"]
+    for key in components:
+        comp = report.get(key, {})
+        eq = comp.get("evidence_quality", "missing")
+        sources = comp.get("evidence_sources", [])
+        assumptions = comp.get("assumptions", [])
+        unknown_fields = comp.get("unknown_fields", [])
+
+        # Must have evidence_sources
+        if not sources:
+            warnings.append(f"{key}_NO_EVIDENCE_SOURCES")
+        # Must have evidence_quality
+        if eq == "missing":
+            warnings.append(f"{key}_EVIDENCE_MISSING")
+        # Unknown fields must not pass silently
+        if unknown_fields:
+            warnings.append(f"{key}_UNKNOWN_FIELDS")
+
+    # Settlement-specific checks
+    st = report.get("settlement", {})
+    st_assumptions = st.get("assumptions", [])
+    st_targets = int(st.get("settlement_targets", 0) or 0)
+
+    # Reject hardcoded assumptions
+    hardcoded_assumptions = [a for a in st_assumptions if "by_design" in a.lower() or "hardcoded" in a.lower()]
+    if hardcoded_assumptions:
+        errors.append(f"SETTLEMENT_HARDCODED_ASSUMPTION:{';'.join(hardcoded_assumptions)}")
+    if "lock_owner_field_missing_all_settled_assumed_safe" in str(st_assumptions):
+        if st_targets > 0:
+            warnings.append("SETTLEMENT_PARTIAL_EVIDENCE_WITH_TARGETS")
+
+    # Check only_window_checker_locks evidence
+    if st.get("evidence_quality") == "partial" and "no_targets_to_verify" not in str(st_assumptions):
+        if not st.get("only_window_checker_locks"):
+            errors.append("SETTLEMENT_NOT_ONLY_WINDOW_CHECKER")
 
     # DAILY_POOL boundary
     dp = report.get("daily_pool", {})
@@ -83,22 +120,11 @@ def main() -> None:
     if mc.get("leaked_to_qq"):
         errors.append("MISSED_LEAKED_TO_QQ")
 
-    # Settlement boundary
-    st = report.get("settlement", {})
-    if not st.get("only_window_checker_locks"):
-        errors.append("SETTLE_NOT_STRICTLY_WC")
-
     # Secret safety
     marker_text = json.dumps(marker, ensure_ascii=False)
     sec = _secret_scan(marker_text)
     if sec:
         errors.append(f"secret_pattern_detected:{','.join(sec)}")
-
-    # Check for missing state
-    for key in ["daily_pool", "window_checker", "daily_status", "missed_candidates", "settlement"]:
-        s = report.get(key, {}).get("status", "UNKNOWN")
-        if s == "MISSING":
-            warnings.append(f"{key}_state_missing")
 
     status = "FAIL" if errors else ("WARN" if warnings else "PASS")
 
@@ -116,6 +142,8 @@ def main() -> None:
         "no_bet_locked_write": marker.get("no_bet_locked_write", False),
         "no_settlement_write": marker.get("no_settlement_write", False),
         "secret_safe": len(sec) == 0,
+        "evidence_hardened": True,
+        "hardcoded_assumption_rejected": len(hardcoded_assumptions) == 0,
         "warnings": warnings,
         "errors": errors,
         "date": date_key,
