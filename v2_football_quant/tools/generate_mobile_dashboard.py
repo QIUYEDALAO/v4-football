@@ -1343,6 +1343,89 @@ def _compute_system(date_key: str, step1_local_only: bool) -> dict[str, Any]:
     }
 
 
+def _compute_api_cache(date_key: str) -> dict[str, Any]:
+    dryrun_path = STATUS_DIR / f"api_snapshot_cache_dryrun_{date_key}.json"
+    bundle_path = CACHE_DIR / "api_snapshot" / date_key / "bundle.json"
+    dryrun = _load_json(dryrun_path, {})
+    bundle = _load_json(bundle_path, {})
+    safety_dry = dryrun if isinstance(dryrun, dict) else {}
+    safety_bundle = bundle.get("safety", {}) if isinstance(bundle.get("safety", {}), dict) else {}
+
+    no_api = bool(safety_dry.get("no_api", safety_bundle.get("no_api", False)))
+    no_push = bool(safety_dry.get("no_push", safety_bundle.get("no_push", False)))
+    no_strategy_recompute = bool(
+        safety_dry.get("no_strategy_recompute", safety_bundle.get("no_strategy_recompute", False))
+    )
+    no_cron = bool(safety_dry.get("no_cron", safety_bundle.get("no_cron", False)))
+    production_verified = bool(
+        safety_dry.get("production_verified", safety_bundle.get("production_verified", False))
+    )
+    runtime_root = (
+        safety_dry.get("runtime_root")
+        or (bundle.get("runtime_root_policy", {}) if isinstance(bundle.get("runtime_root_policy", {}), dict) else {}).get(
+            "canonical_runtime_root"
+        )
+        or str(STATUS_DIR.parent)
+    )
+    module_list = safety_dry.get("modules", [])
+    if not isinstance(module_list, list):
+        module_list = []
+
+    warnings: list[str] = []
+    if not dryrun_path.exists():
+        warnings.append("dry-run 状态文件缺失")
+    if not bundle_path.exists():
+        warnings.append("bundle 文件缺失")
+    if not no_api:
+        warnings.append("no_api 标记异常")
+    if not no_push:
+        warnings.append("no_push 标记异常")
+    if not no_strategy_recompute:
+        warnings.append("no_strategy_recompute 标记异常")
+    if not no_cron:
+        warnings.append("no_cron 标记异常")
+    if production_verified:
+        warnings.append("production_verified 不应为 true")
+
+    if dryrun_path.exists() and bundle_path.exists() and not warnings:
+        status = "PASS"
+        status_label = "dry-run 已完成"
+    elif dryrun_path.exists() or bundle_path.exists():
+        status = "WARN"
+        status_label = "部分存在"
+    else:
+        status = "MISSING"
+        status_label = "缺失"
+
+    return {
+        "status": status,
+        "status_label": status_label,
+        "phase": safety_dry.get("phase", "Phase_C_Framework_DryRun"),
+        "module": safety_dry.get("module", "all"),
+        "modules": module_list,
+        "generated_at": safety_dry.get("generated_at") or bundle.get("generated_at"),
+        "bundle_date": bundle.get("date"),
+        "dryrun_path": dryrun_path,
+        "bundle_path": bundle_path,
+        "dryrun_found": dryrun_path.exists(),
+        "bundle_found": bundle_path.exists(),
+        "no_api": no_api,
+        "no_push": no_push,
+        "no_strategy_recompute": no_strategy_recompute,
+        "no_cron": no_cron,
+        "production_dependency": False,
+        "production_verified": production_verified,
+        "runtime_root": runtime_root,
+        "warnings": warnings,
+        "bundle_preview": {
+            "module_keys": sorted(
+                list((bundle.get("modules", {}) if isinstance(bundle.get("modules", {}), dict) else {}).keys())
+            ),
+            "path_mismatch_warning_count": len(bundle.get("path_mismatch_warnings", []) or []),
+        },
+    }
+
+
 def _nav(date_key: str, active: str) -> str:
     tabs = [
         ("index.html", "总控台"),
@@ -1411,6 +1494,7 @@ def _render_index(
     scan: dict[str, Any],
     review: dict[str, Any],
     system: dict[str, Any],
+    api_cache: dict[str, Any],
     ledger: dict[str, Any] | None = None,
 ) -> str:
     ledger = ledger or {}
@@ -1449,6 +1533,10 @@ def _render_index(
     if ledger_present:
         issue_count = len(lissues.get("p0", [])) + len(lissues.get("p1", []))
         sys_chain = str(lfinal.get("status", "CODE_READY"))
+
+    api_runtime_root = str(api_cache.get("runtime_root", "缺失"))
+    api_runtime_root_view = "项目内 data/runtime" if api_runtime_root.startswith(str(BASE_DIR / "data" / "runtime")) else api_runtime_root
+    api_cache_status_view = f"{escape(str(api_cache.get('status_label', '缺失')))} · {_status_tag(api_cache.get('status'))}"
 
     cards = []
     cards.append(
@@ -1509,7 +1597,24 @@ def _render_index(
     )
     cards.append(
         _kv_card(
-            "5) 明日/下一轮验证",
+            "5) API Snapshot / Cache",
+            [
+                ("状态", api_cache_status_view),
+                ("模式", "只读 dry-run"),
+                ("是否调用API", _status_tag("NO" if api_cache.get("no_api") else "FAIL")),
+                ("是否接入生产链路", _status_tag("NO")),
+                ("是否推QQ", _status_tag("NO" if api_cache.get("no_push") else "FAIL")),
+                ("是否接入cron", _status_tag("NO" if api_cache.get("no_cron") else "FAIL")),
+                ("是否PRODUCTION_VERIFIED", _status_tag("NO" if not api_cache.get("production_verified") else "FAIL")),
+                ("bundle", _status_tag("PASS" if api_cache.get("bundle_found") else "MISSING")),
+                ("runtime root", escape(api_runtime_root_view)),
+                ("下一步", "待 BOSS 确认后进入 Phase C.2"),
+            ],
+        )
+    )
+    cards.append(
+        _kv_card(
+            "6) 明日/下一轮验证",
             [
                 ("V2", "13:15 / 13:18 / 05/35"),
                 ("V4 扫描", "凌晨 / 早场 / 午间 / 傍晚 / 晚间"),
@@ -1527,6 +1632,16 @@ def _render_index(
         "<li>详细数据请进入各子页查看。</li>"
         f"<li>Ledger源：{'present' if ledger_present else 'missing'}（首页优先读取 ledger）。</li>"
         "</ul></section>"
+        "<section class='card'><h2>API Cache 证据（折叠）</h2>"
+        "<details><summary>查看证据</summary>"
+        "<div class='kv'>"
+        f"<div class='k'>status marker</div><div class='v'><span class='mono'>{escape(str(api_cache.get('dryrun_path')))}</span></div>"
+        f"<div class='k'>bundle</div><div class='v'><span class='mono'>{escape(str(api_cache.get('bundle_path')))}</span></div>"
+        f"<div class='k'>module</div><div class='v'>{escape(str(api_cache.get('module', 'all')))}</div>"
+        f"<div class='k'>modules</div><div class='v'>{escape(', '.join(api_cache.get('modules', [])) or '缺失')}</div>"
+        f"<div class='k'>生成时间</div><div class='v'>{escape(str(api_cache.get('generated_at') or '缺失'))}</div>"
+        f"<div class='k'>warnings</div><div class='v'>{escape('；'.join(api_cache.get('warnings', [])) if api_cache.get('warnings') else '无')}</div>"
+        "</div></details></section>"
     ]
 
     body = f"<div class='grid'>{''.join(cards)}</div>{''.join(details)}"
@@ -2094,7 +2209,7 @@ def _render_review(date_key: str, review: dict[str, Any]) -> str:
     return _shell("V4 复盘硬链", body, date_key, "v4_review.html")
 
 
-def _render_system(date_key: str, system: dict[str, Any]) -> str:
+def _render_system(date_key: str, system: dict[str, Any], api_cache: dict[str, Any]) -> str:
     cron_items = []
     for row in system["cron_rows"][:30]:
         cron_items.append(f"{row['task']} | {_status_zh(row['status'])} | {row['finished_at'] or '缺失'}")
@@ -2121,6 +2236,28 @@ def _render_system(date_key: str, system: dict[str, Any]) -> str:
             "".join(issue_sections),
             "<section class='card'><h2>今日已修复</h2>" + _ul(system["fixed"]) + "</section>",
             "<section class='card'><h2>明日待验证</h2>" + _ul(system["tomorrow"]) + "</section>",
+            _kv_card(
+                "API Snapshot / Cache",
+                [
+                    ("dry-run 状态", _status_tag(api_cache.get("status"))),
+                    ("bundle 状态", _status_tag("PASS" if api_cache.get("bundle_found") else "MISSING")),
+                    ("是否调用API", _status_tag("NO" if api_cache.get("no_api") else "FAIL")),
+                    ("是否推QQ", _status_tag("NO" if api_cache.get("no_push") else "FAIL")),
+                    ("是否重算策略", _status_tag("NO" if api_cache.get("no_strategy_recompute") else "FAIL")),
+                    ("是否接入cron", _status_tag("NO" if api_cache.get("no_cron") else "FAIL")),
+                    ("production_dependency", _status_tag("NO")),
+                    ("是否PRODUCTION_VERIFIED", _status_tag("NO" if not api_cache.get("production_verified") else "FAIL")),
+                ],
+            ),
+            "<section class='card'><h2>API Cache 证据（折叠）</h2>"
+            "<details><summary>查看证据</summary>"
+            "<div class='kv'>"
+            f"<div class='k'>status marker</div><div class='v'><span class='mono'>{escape(str(api_cache.get('dryrun_path')))}</span></div>"
+            f"<div class='k'>bundle</div><div class='v'><span class='mono'>{escape(str(api_cache.get('bundle_path')))}</span></div>"
+            f"<div class='k'>runtime root</div><div class='v'><span class='mono'>{escape(str(api_cache.get('runtime_root', '缺失')))}</span></div>"
+            f"<div class='k'>generated_at</div><div class='v'>{escape(str(api_cache.get('generated_at') or '缺失'))}</div>"
+            f"<div class='k'>warnings</div><div class='v'>{escape('；'.join(api_cache.get('warnings', [])) if api_cache.get('warnings') else '无')}</div>"
+            "</div></details></section>",
             "<section class='card'><h2>最近日志入口</h2><ul>"
             + "".join(f"<li>{escape(p.name)}<br><span class='muted'>{escape(str(p.relative_to(BASE_DIR)))}</span></li>" for p in system["logs"])
             + "</ul></section>",
@@ -2201,14 +2338,15 @@ def generate(date_str: str) -> dict[str, Any]:
     scan = _compute_v4_scan(date_key)
     review = _compute_v4_review(date_key)
     system = _compute_system(date_key, step1_local_only=step1_local_only)
+    api_cache = _compute_api_cache(date_key)
     ledger = _load_json(LEDGER_DIR / f"{date_key}.json", {})
 
     pages = {
-        "index.html": _render_index(date_key, v2, scan, review, system, ledger=ledger),
+        "index.html": _render_index(date_key, v2, scan, review, system, api_cache, ledger=ledger),
         "v2_today.html": _render_v2(date_key, v2),
         "v4_scan.html": _render_scan(date_key, scan),
         "v4_review.html": _render_review(date_key, review),
-        "system.html": _render_system(date_key, system),
+        "system.html": _render_system(date_key, system, api_cache),
     }
     for name, html in pages.items():
         (OUT_DIR / name).write_text(html, encoding="utf-8")
@@ -2227,6 +2365,27 @@ def generate(date_str: str) -> dict[str, Any]:
             outputs["dashboard_v4_review_guard.json"] = str(Path(review["review_guard_path"]).relative_to(BASE_DIR))
         except Exception:
             outputs["dashboard_v4_review_guard.json"] = str(review["review_guard_path"])
+
+    # Phase C.1 dashboard status marker (runtime artifact, not for git commit)
+    dashboard_api_cache_marker = {
+        "status": "CODE_READY",
+        "phase": "Phase_C_1_Dashboard_Status_Card",
+        "api_cache_framework_visible": True,
+        "dryrun_status_marker_found": bool(api_cache.get("dryrun_found")),
+        "bundle_found": bool(api_cache.get("bundle_found")),
+        "no_api": bool(api_cache.get("no_api")),
+        "no_push": bool(api_cache.get("no_push")),
+        "no_strategy_recompute": bool(api_cache.get("no_strategy_recompute")),
+        "no_cron": bool(api_cache.get("no_cron")),
+        "production_dependency": False,
+        "production_verified": False,
+        "dashboard_updated": True,
+        "strategy_changed": False,
+        "qq_pushed": False,
+        "cron_enabled": False,
+    }
+    marker_path = STATUS_DIR / f"dashboard_api_cache_status_card_{date_key}.json"
+    marker_path.write_text(json.dumps(dashboard_api_cache_marker, ensure_ascii=False, indent=2), encoding="utf-8")
 
     missing_flags = {
         "v2_daily_pool_summary_exists": v2["refs"]["daily_pool_summary"].exists,
@@ -2249,6 +2408,12 @@ def generate(date_str: str) -> dict[str, Any]:
         },
         "v4_scan_guard": scan.get("guard", {}),
         "v4_review_guard": review.get("review_guard", {}),
+        "api_cache": {
+            "status": api_cache.get("status"),
+            "dryrun_path": str(api_cache.get("dryrun_path")),
+            "bundle_path": str(api_cache.get("bundle_path")),
+            "marker_path": str(marker_path),
+        },
     }
 
 
