@@ -40,7 +40,13 @@ D.8.8 中的 `execution_performed=true` 仅表示受控 preflight observe 已执
 - D.8.8 不等于 `PIPELINE_READY`
 - D.8.8 不等于 `PRODUCTION_VERIFIED`
 
-## 5. 下一步门禁
+## 5. D.8.10 衔接口径
 
-- 若要进行真实 single-window worker observe，必须由 BOSS 单独下发 `D.8.10` 指令。
+- D.8.10 已定义为 `sandbox worker observe`，不是 live worker。
+- D.8.10 不执行 supervisor，不写正式 state，不推 QQ，不写 verified。
+- D.8.10 结果仍不等于 `PIPELINE_READY` / `PRODUCTION_VERIFIED`。
+
+## 6. 下一步门禁
+
+- 若要进行真实 single-window worker live observe，必须由 BOSS 单独下发 `D.8.11` 或 `D.8.12` 指令。
 - Phase E 仍不得自动进入。

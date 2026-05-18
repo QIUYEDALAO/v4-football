@@ -29,7 +29,8 @@
 | D.8.5 | `TBD` | Single-window live observe plan (plan-only) | ✅ |
 | D.8.6 | `TBD` | Settlement preflight live guard observe plan (plan-only) | ✅ |
 | D.8.8 | `a3b47c5` | Controlled preflight observe (single-window, not live worker) | ✅ |
-| D.8.9 | `TBD` | Controlled resume post-run review & scope correction | ✅ |
+| D.8.9 | `8c94cca` | Controlled resume post-run review & scope correction | ✅ |
+| D.8.10 | `TBD` | Window worker sandbox observe (no supervisor/no formal write) | ✅ |
 
 **新增 20+ 文件，0 次策略改动，0 次 API 调用，0 次 QQ 推送。**
 
@@ -196,4 +197,15 @@ Phase D 工程链路完成（engineering_complete=true），但 business_pass=fa
   - 不启用全局 cron
 - 若无法安全执行正式 worker，可降级为 plan-only WARN（必须可审计）。
 - 失败只报告 watchdog 状态；不允许 AI 自由 kill/retry。
-- 下一步如要真实 single-window worker observe，必须单独进入 D.8.10 指令；Phase E 仍不得自动进入。
+- D.8.9 已确认 scope correction：D.8.8 不等于 live worker / production resume。
+
+## 12. D.8.10 Window Worker Sandbox Observe
+
+- D.8.10 仅执行 `sandbox_worker_logic_only`。
+- 不执行 `v2_window_checker_with_watchdog.py` supervisor。
+- 不执行正式 live worker 子进程写回正式 state。
+- 正式 `data/state/selected_fixtures_YYYYMMDD.json` 必须保持不变。
+- `formal_state_written=false`、`formal_state_unchanged=true`。
+- `qq_sent=false`、`verified_written=false`、`cron_modified=false`、`api_called=false`。
+- D.8.10 不是生产恢复，不等于 `PIPELINE_READY` / `PRODUCTION_VERIFIED`。
+- 如需真实 live worker observe，必须单独进入 D.8.11 或 D.8.12 指令；Phase E 仍不得自动进入。

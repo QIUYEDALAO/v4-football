@@ -53,6 +53,7 @@
 
 ## 6. 下一步
 
-- D.8.9 才能进入 post-run review。
-- 如需真实 single-window worker observe，必须单独进入 D.8.10 指令。
+- D.8.9 已完成 post-run scope correction。
+- D.8.10 对 worker 逻辑只允许 sandbox observe，不允许 live worker/supervisor。
+- 如需真实 single-window worker live observe，必须单独进入 D.8.11 或 D.8.12 指令。
 - Phase E 仍不得自动进入。
