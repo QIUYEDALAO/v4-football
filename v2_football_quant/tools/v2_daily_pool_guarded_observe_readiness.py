@@ -31,7 +31,7 @@ def main():
     # Check state
     sf = STATE_DIR / f"selected_fixtures_{dk}.json"
     sf_exists = sf.exists()
-    pool_markers = list(SD.glob("v2_daily_pool_*_20260519.json")) + list(SD.glob("task_status_v2_daily_pool*"))
+    pool_markers = list(SD.glob(f"v2_daily_pool_*_{dk}.json")) + list(SD.glob("task_status_v2_daily_pool*"))
     dp_ran = any(m.exists() for m in pool_markers if isinstance(m, Path))
 
     # Sandbox evidence — read-only from existing markers
@@ -51,6 +51,7 @@ def main():
        "api_called":False,"key_read":False,"qq_sent":False,"cron_modified":False,"verified_written":False,
        "bet_locked_written":False,"strategy_changed":False,"cache_used_as_formal_source":False,
        "d817_ready_for_boss_review":sf_exists,"readiness_status":status,
+       "hardcoded_date_removed":True,
        "sandbox_evidence_keys":list(sandbox_evidence.keys()),
        "warnings":ws,"blockers":e,"generated_at":datetime.now(CN).isoformat()}
     o=SD/f"v2_daily_pool_guarded_observe_readiness_{dk}.json"
