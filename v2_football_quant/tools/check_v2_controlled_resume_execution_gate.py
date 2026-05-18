@@ -14,9 +14,22 @@ def main():
     if not ap: e.append("d818_marker_missing")
     if not m17: e.append("d817_marker_missing")
     if e:
-        out={"execution_gate_status":"BLOCKER","blockers":e,"d820_draft":{"allowed_to_execute":False}}; print(json.dumps(out)); raise SystemExit(2)
+        out={"schema_version":"v2_controlled_resume_execution_gate.v1","execution_gate_status":"BLOCKER",
+              "ready_for_boss_review":False,"current_level":"CODE_READY","pipeline_ready":False,"production_verified":False,
+              "gate_scope":"controlled_resume_execution_gate_only","execution_performed":False,
+              "production_resume_executed":False,"production_resume_allowed_now":False,
+              "cron_enable_allowed":False,"qq_push_allowed":False,"verified_write_allowed":False,"state_write_allowed":False,
+              "d820_draft":{"allowed_to_generate":False,"allowed_to_execute":False},
+              "blockers":e,"generated_at":datetime.now(CN).isoformat()}
+        print(json.dumps(out,ensure_ascii=False,indent=2)); raise SystemExit(2)
     if ap.get("production_verified") or m17.get("production_verified"): e.append("PV_LEAK")
-    if ap.get("production_resume_allowed_now") or m17.get("production_resume_allowed_now") if "resume" in str(m17.keys()) else False: e.append("RESUME_LEAK")
+    # Explicit resume check — no ambiguous inline ternary
+    ap_resume = bool(ap.get("production_resume_allowed_now", False))
+    m17_resume = bool(m17.get("production_resume_allowed_now", False))
+    if ap_resume or m17_resume: e.append("RESUME_LEAK")
+    # Explicit gate checks
+    for fld,label in [("cron_enable_allowed","CRON"),("qq_push_allowed","QQ"),("verified_write_allowed","VERIFIED"),("state_write_allowed","STATE")]:
+        if ap.get(fld) or m17.get(fld): e.append(f"GATE_LEAK:{label}")
     no_state=ap.get("no_state_case_proven",False)
     syn_read=ap.get("synthetic_state_file_read_proven",False)
     syn_nw=ap.get("synthetic_state_present_no_write_proven",False)
