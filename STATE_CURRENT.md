@@ -10,7 +10,7 @@
 ### V2
 - DAILY_POOL(20260518): ❌ **未运行** — 上次成功 20260517 14:23
   - P0 marker 已写入 `data/runtime/status/P0_DAILY_POOL_MISSING_20260518.json`
-  - 当前分支 codex/phase-c-api-snapshot-cache，cron 因开发期未激活
+  - 发生时分支 codex/phase-c-api-snapshot-cache，现已合并 main
 - DAILY_SETTLE(20260518): ✅ DONE（20260517 赛后验证）
   - 无 BET_LOCKED 可结算
 - V2 窗口检查器: 未触发（无 pool 源）
@@ -39,9 +39,20 @@ SKIP 原因：H2H HT率 0.4~0.7，未达 0.8 阈值。
 - 当前未推 QQ，未接 cron
 
 ### 系统状态
-- 当前分支: `codex/phase-c-api-snapshot-cache`
+- 当前分支: `main` ✅
+- **Phase C 已合并 main** ✅ — merge commit: `0c91fe0`
+- STATE_CURRENT restore commit: `be18d61`
 - Phase C.4.1 Real Ingest Smoke: ✅ PASS（1次status endpoint）
-- Phase A/B 已合并 main
+- Phase A/B 已合并 main ✅
+- stash remainder 已隔离 ✅ — STATE_CURRENT.md 不再在 stash
+  - v4_review_with_watchdog.py：保留在 remainder stash，建议 Phase F 处理
+  - Excel：保留在 remainder stash，等待人工判断
 - 生产验证: ❌ PRODUCTION_VERIFIED = false
+- PIPELINE_READY: ❌ false
+- V2/V4 正式链路未接 cache
+- QQ 未接 cache
+- cron 未接 cache（仅 */2 pre_match_reminder 活跃）
 - 推 QQ: ❌ 否
-- 接 cron: ❌ 否（仅 */2 pre_match_reminder 活跃）
+- 未进入 Phase D
+- 未进入 Phase F
+- 当前等级: **CODE_READY**
