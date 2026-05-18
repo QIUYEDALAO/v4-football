@@ -102,3 +102,13 @@
 - Phase G：Dashboard 产品化
 - Phase I：远程静态发布
 - Dashboard Review Pack：暂缓，待 BOSS 指令
+
+## C.14 合并前最终复核（Merge Readiness）
+- 新增 `tools/check_phase_c_merge_readiness.py`，用于合并前最终边界复核。
+- 新增 `docs/PHASE_C_MERGE_READINESS.md`，固化“可评审、不可直接合并”口径。
+- 复核重点：
+  - 当前分支与远端同步状态；
+  - C.1-C.13 完整性与 C.12/C.13 WARN 语义保留；
+  - secret/runtme artifact/dashboard html/raw snapshot staged 风险；
+  - 生产边界仍为 `production_dependency=false`、`production_verified=false`。
+- 当前仍不允许直接合并 main，需 BOSS 单独批准。

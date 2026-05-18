@@ -415,3 +415,34 @@ python3 tools/api_snapshot_cache_dryrun.py --date 20260517 --module all --check
 ### 下一阶段边界
 - 后续是否 PR/main 合并，必须 BOSS 明确确认；
 - V2/V4 正式接 cache 必须另开 BOSS 指令。
+
+## Phase C.14：API Snapshot / Cache 分支 PR/main 合并前最终复核（本轮）
+### 目标
+- 复跑 C.1-C.13 关键 checker，形成最终 merge readiness 结论；
+- 确认分支、PWA、Dashboard、文档、secret、runtime artifact 全部在安全边界内；
+- 输出“可评审、不可直接合并”口径。
+
+### 严格边界
+- 不新增功能；
+- 不接入 V2/V4 正式链路；
+- 不调用 API；
+- 不读取 key；
+- 不推 QQ；
+- 不接 cron；
+- 不写 `PRODUCTION_VERIFIED`；
+- 不合并 main（仅做合并准备）。
+
+### 本轮新增
+- `tools/check_phase_c_merge_readiness.py`
+  - 分支/远端状态校验；
+  - C.13 completion 与 C.12 health 复核；
+  - staged runtime/html/snapshot/zip/.env 审计；
+  - secret 与越级文案检查；
+  - 输出 `phase_c_merge_readiness_check_YYYYMMDD.json`。
+- `docs/PHASE_C_MERGE_READINESS.md`
+  - 固化当前合并建议、禁止事项、回滚策略。
+
+### 当前口径
+- `CODE_READY`（不是 `PIPELINE_READY`，不是 `PRODUCTION_VERIFIED`）；
+- `merge_ready_for_boss_review=true` 仅代表“可评审”；
+- `merge_to_main_allowed_now=false`，需 BOSS 单独批准后方可执行合并。
