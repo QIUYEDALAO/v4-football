@@ -16,7 +16,14 @@ def main():
     if not m17: e.append("d817_marker_missing")
     if not m816: e.append("d816_marker_missing")
     if e:
-        out={"approval_packet_status":"BLOCKER","blockers":e}; print(json.dumps(out)); raise SystemExit(2)
+        out={"schema_version":"v2_controlled_resume_approval_packet.v1","approval_packet_status":"BLOCKER",
+              "ready_for_boss_review":False,"current_level":"CODE_READY","pipeline_ready":False,"production_verified":False,
+              "approval_scope":"controlled_resume_approval_packet_only","execution_performed":False,
+              "production_resume_executed":False,"production_resume_allowed_now":False,
+              "cron_enable_allowed":False,"qq_push_allowed":False,"verified_write_allowed":False,"state_write_allowed":False,
+              "d819_draft":{"allowed_to_generate":False,"allowed_to_execute":False},
+              "blockers":e,"generated_at":datetime.now(CN).isoformat()}
+        print(json.dumps(out,ensure_ascii=False,indent=2)); raise SystemExit(2)
     no_state = m14.get("warnings") and "NO_CURRENT_STATE" in str(m14.get("warnings",[]))
     syn_read = m17.get("synthetic_state_file_read_proven",False)
     syn_nw = m17.get("synthetic_state_present_no_write_proven",False)
@@ -28,8 +35,9 @@ def main():
     proven=["no_state_guarded_skip_safe","synthetic_state_file_read_safe","synthetic_state_present_no_write_safe"]
     not_proven=["real_state_present_case","active_window_mutation_path","production_cron_path","production_qq_path","production_verified_path"]
     blocked=["default_live_path","supervisor_direct_path","formal_state_write","qq_push","verified_write","cron_enable"]
-    status="FAIL" if e else ("WARN" if not syn_aw or real_sp else "READY_FOR_BOSS_REVIEW" if syn_nw else "WARN")
+    status="FAIL" if e else ("WARN" if (not syn_aw or real_sp) else "WARN")
     out={"schema_version":"v2_controlled_resume_approval_packet.v1","approval_packet_status":status,
+         "ready_for_boss_review":True,
          "current_level":"CODE_READY","pipeline_ready":False,"production_verified":False,
          "approval_scope":"controlled_resume_approval_packet_only","execution_performed":False,
          "production_resume_executed":False,"formal_daily_pool_executed":False,

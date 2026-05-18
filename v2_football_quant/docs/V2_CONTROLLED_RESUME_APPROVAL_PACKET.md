@@ -6,7 +6,7 @@
 
 | Field | Value |
 |:-----|:------|
-| Approval Packet | READY_FOR_BOSS_REVIEW |
+| Approval Packet | ⚠️ WARN |
 | Execution Performed | ❌ false |
 | Production Resume | ❌ false |
 | PRODUCTION_VERIFIED | ❌ false |
