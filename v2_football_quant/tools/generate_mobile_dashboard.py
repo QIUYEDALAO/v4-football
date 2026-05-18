@@ -1350,12 +1350,16 @@ def _compute_api_cache(date_key: str) -> dict[str, Any]:
     ingest_sim_path = STATUS_DIR / f"api_controlled_ingest_sim_{date_key}.json"
     ingest_check_path = STATUS_DIR / f"api_controlled_ingest_check_{date_key}.json"
     ingest_plan_path = CACHE_DIR / "api_snapshot" / date_key / "controlled_ingest_plan.json"
+    real_ingest_path = STATUS_DIR / f"api_controlled_ingest_real_{date_key}.json"
+    real_ingest_check_path = STATUS_DIR / f"api_real_ingest_check_{date_key}.json"
     dryrun = _load_json(dryrun_path, {})
     bundle = _load_json(bundle_path, {})
     check = _load_json(check_path, {})
     ingest_sim = _load_json(ingest_sim_path, {})
     ingest_check = _load_json(ingest_check_path, {})
     ingest_plan = _load_json(ingest_plan_path, {})
+    real_ingest = _load_json(real_ingest_path, {})
+    real_ingest_check = _load_json(real_ingest_check_path, {})
     safety_dry = dryrun if isinstance(dryrun, dict) else {}
     boundaries = bundle.get("boundaries", {}) if isinstance(bundle.get("boundaries", {}), dict) else {}
     safety_bundle = bundle.get("safety", {}) if isinstance(bundle.get("safety", {}), dict) else {}
@@ -1422,6 +1426,8 @@ def _compute_api_cache(date_key: str) -> dict[str, Any]:
         "ingest_sim_path": ingest_sim_path,
         "ingest_check_path": ingest_check_path,
         "ingest_plan_path": ingest_plan_path,
+        "real_ingest_path": real_ingest_path,
+        "real_ingest_check_path": real_ingest_check_path,
         "dryrun_found": dryrun_path.exists(),
         "bundle_found": bundle_path.exists(),
         "check_found": check_path.exists(),
@@ -1454,6 +1460,46 @@ def _compute_api_cache(date_key: str) -> dict[str, Any]:
         "ingest_check_warnings": ingest_check.get("warnings", []) if isinstance(ingest_check.get("warnings", []), list) else [],
         "ingest_check_errors": ingest_check.get("errors", []) if isinstance(ingest_check.get("errors", []), list) else [],
         "ingest_plan_schema": str((ingest_plan.get("schema_version", "") if isinstance(ingest_plan, dict) else "")),
+        "real_ingest_found": real_ingest_path.exists(),
+        "real_ingest_check_found": real_ingest_check_path.exists(),
+        "real_ingest_status": str((real_ingest.get("status", "MISSING") if isinstance(real_ingest, dict) else "MISSING")).upper(),
+        "real_ingest_mode": str((real_ingest.get("mode", "controlled_real_smoke") if isinstance(real_ingest, dict) else "controlled_real_smoke")),
+        "real_ingest_api_called": int(
+            (
+                (real_ingest.get("request", {}) if isinstance(real_ingest.get("request", {}), dict) else {}).get("request_count", 0)
+                or 0
+            )
+        )
+        > 0,
+        "real_ingest_request_count": int(
+            (
+                (real_ingest.get("request", {}) if isinstance(real_ingest.get("request", {}), dict) else {}).get("request_count", 0)
+                or 0
+            )
+        ),
+        "real_ingest_timeout": int(
+            (
+                (real_ingest.get("request", {}) if isinstance(real_ingest.get("request", {}), dict) else {}).get("timeout_seconds", 0)
+                or 0
+            )
+        ),
+        "real_ingest_retry_count": int(
+            (
+                (real_ingest.get("request", {}) if isinstance(real_ingest.get("request", {}), dict) else {}).get("retry_count", 0)
+                or 0
+            )
+        ),
+        "real_ingest_raw_snapshot_path": (
+            (real_ingest.get("response", {}) if isinstance(real_ingest.get("response", {}), dict) else {}).get("raw_snapshot_path")
+        ),
+        "real_ingest_secret_safe": bool(
+            (real_ingest.get("safety", {}) if isinstance(real_ingest.get("safety", {}), dict) else {}).get("secret_safe", False)
+        ),
+        "real_ingest_check_status": str((real_ingest_check.get("status", "MISSING") if isinstance(real_ingest_check, dict) else "MISSING")).upper(),
+        "real_ingest_check_secret_safe": bool(real_ingest_check.get("secret_safe", False)) if isinstance(real_ingest_check, dict) else False,
+        "real_ingest_check_boundary_valid": bool(real_ingest_check.get("boundary_valid", False)) if isinstance(real_ingest_check, dict) else False,
+        "real_ingest_check_errors": real_ingest_check.get("errors", []) if isinstance(real_ingest_check.get("errors", []), list) else [],
+        "real_ingest_check_warnings": real_ingest_check.get("warnings", []) if isinstance(real_ingest_check.get("warnings", []), list) else [],
         "bundle_preview": {
             "module_keys": sorted(
                 list((bundle.get("modules", {}) if isinstance(bundle.get("modules", {}), dict) else {}).keys())
@@ -1651,8 +1697,13 @@ def _render_index(
                 ("ingest checker", _status_tag(api_cache.get("ingest_check_status"))),
                 ("api_allowed", _status_tag("NO" if not api_cache.get("ingest_api_allowed") else "FAIL")),
                 ("api_called", _status_tag("NO" if not api_cache.get("ingest_api_called") else "FAIL")),
+                ("Controlled real ingest", _status_tag(api_cache.get("real_ingest_status"))),
+                ("real ingest checker", _status_tag(api_cache.get("real_ingest_check_status"))),
+                ("real ingest 请求次数", str(api_cache.get("real_ingest_request_count", 0))),
+                ("real ingest secret检查", _status_tag("PASS" if api_cache.get("real_ingest_check_secret_safe") else ("MISSING" if not api_cache.get("real_ingest_check_found") else "FAIL"))),
+                ("real ingest 生产依赖", _status_tag("NO")),
                 ("runtime root", escape(api_runtime_root_view)),
-                ("下一步", "C.4 controlled real ingest 需 BOSS 单独确认"),
+                ("下一步", "不得接生产链路，需 BOSS 单独确认"),
             ],
         )
     )
@@ -1695,6 +1746,11 @@ def _render_index(
         f"<div class='k'>ingest schema</div><div class='v'>{escape(str(api_cache.get('ingest_plan_schema') or '缺失'))}</div>"
         f"<div class='k'>ingest checker warnings</div><div class='v'>{escape('；'.join(api_cache.get('ingest_check_warnings', [])) if api_cache.get('ingest_check_warnings') else '无')}</div>"
         f"<div class='k'>ingest checker errors</div><div class='v'>{escape('；'.join(api_cache.get('ingest_check_errors', [])) if api_cache.get('ingest_check_errors') else '无')}</div>"
+        f"<div class='k'>real ingest marker</div><div class='v'><span class='mono'>{escape(str(api_cache.get('real_ingest_path')))}</span></div>"
+        f"<div class='k'>real ingest checker marker</div><div class='v'><span class='mono'>{escape(str(api_cache.get('real_ingest_check_path')))}</span></div>"
+        f"<div class='k'>real ingest raw snapshot</div><div class='v'><span class='mono'>{escape(str(api_cache.get('real_ingest_raw_snapshot_path') or '缺失'))}</span></div>"
+        f"<div class='k'>real ingest checker warnings</div><div class='v'>{escape('；'.join(api_cache.get('real_ingest_check_warnings', [])) if api_cache.get('real_ingest_check_warnings') else '无')}</div>"
+        f"<div class='k'>real ingest checker errors</div><div class='v'>{escape('；'.join(api_cache.get('real_ingest_check_errors', [])) if api_cache.get('real_ingest_check_errors') else '无')}</div>"
         "</div></details></section>"
     ]
 
@@ -2308,6 +2364,11 @@ def _render_system(date_key: str, system: dict[str, Any], api_cache: dict[str, A
                     ("ingest checker", _status_tag(api_cache.get("ingest_check_status"))),
                     ("api_allowed", _status_tag("NO" if not api_cache.get("ingest_api_allowed") else "FAIL")),
                     ("api_called", _status_tag("NO" if not api_cache.get("ingest_api_called") else "FAIL")),
+                    ("Controlled real ingest", _status_tag(api_cache.get("real_ingest_status"))),
+                    ("real ingest checker", _status_tag(api_cache.get("real_ingest_check_status"))),
+                    ("real ingest 请求次数", str(api_cache.get("real_ingest_request_count", 0))),
+                    ("real ingest api调用", _status_tag("YES" if api_cache.get("real_ingest_api_called") else "NO")),
+                    ("real ingest secret检查", _status_tag("PASS" if api_cache.get("real_ingest_check_secret_safe") else ("MISSING" if not api_cache.get("real_ingest_check_found") else "FAIL"))),
                 ],
             ),
             "<section class='card'><h2>API Cache 证据（折叠）</h2>"

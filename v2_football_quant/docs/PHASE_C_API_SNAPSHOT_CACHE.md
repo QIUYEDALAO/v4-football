@@ -75,9 +75,28 @@ python3 tools/api_snapshot_cache_dryrun.py --date 20260517 --module all --check
 7. 不推 QQ，不接 cron，不写 `PRODUCTION_VERIFIED`。  
 
 ## C.4 预告（未开始）
-若进入 C.4，首次真实 API 调用必须满足：
+## C.4 Controlled Real Ingest（Smoke Test 口径）
+首次真实 API 调用必须满足：
 - 只允许最小 endpoint 与最小样本；
 - 明确 timeout / retry 上限；
 - 明确日志脱敏；
 - 明确 no-push/no-cron/no-strategy-change；
 - 先本地验证，再由 BOSS 决定是否继续。
+
+本仓 C.4 约束：
+- 只允许 1 次请求（`max_requests=1`）；
+- `timeout <= 10s`；
+- `retry_count = 0`；
+- 仅 smoke test，禁止批量抓取；
+- 不接生产链路；
+- 不改策略；
+- 不推QQ；
+- 不接 cron；
+- 不写 `PRODUCTION_VERIFIED`；
+- 不提交 runtime 产物；
+- 真实响应仅落项目内 `data/runtime/cache/api_snapshot/YYYYMMDD/real_ingest/`；
+- 严禁在 marker/log/snapshot 中泄露 API key。
+
+## C.5（后续，未开始）
+- 可讨论非关键模块只读读取 cache；
+- V2/V4 正式接 cache 仍需单独 BOSS 指令与生产验证阶段。

@@ -21,6 +21,7 @@ CN_TZ = timezone(timedelta(hours=8))
 SUPPORTED_MODULES = {"v2", "v4_scan", "v4_review", "dashboard", "ledger"}
 SCHEMA_VERSION = "api_snapshot_cache.v1"
 CONTROLLED_INGEST_SCHEMA_VERSION = "controlled_ingest.v1"
+REAL_INGEST_SCHEMA_VERSION = "real_ingest.v1"
 
 
 def canonical_runtime_root() -> Path:
@@ -287,3 +288,52 @@ def write_controlled_ingest_plan(plan: dict[str, Any]) -> Path:
     out = out_dir / "controlled_ingest_plan.json"
     out.write_text(json.dumps(plan, ensure_ascii=False, indent=2), encoding="utf-8")
     return out
+
+
+def build_real_ingest_result(
+    date_key: str,
+    endpoint_name: str,
+    endpoint_path: str,
+    timeout_seconds: int = 10,
+    max_requests: int = 1,
+) -> dict[str, Any]:
+    return {
+        "schema_version": REAL_INGEST_SCHEMA_VERSION,
+        "date": date_key,
+        "generated_at": datetime.now(CN_TZ).isoformat(),
+        "mode": "controlled_real_smoke",
+        "runtime_root": str(canonical_runtime_root()),
+        "production_dependency": False,
+        "production_verified": False,
+        "boundaries": {
+            "api_allowed": True,
+            "max_requests": max_requests,
+            "no_push": True,
+            "no_strategy_recompute": True,
+            "no_cron": True,
+            "no_production_dependency": True,
+        },
+        "request": {
+            "endpoint_name": endpoint_name,
+            "endpoint_path": endpoint_path,
+            "method": "GET",
+            "params_redacted": {},
+            "timeout_seconds": timeout_seconds,
+            "retry_count": 0,
+            "request_count": 0,
+        },
+        "response": {
+            "http_status": None,
+            "ok": False,
+            "duration_ms": 0,
+            "raw_snapshot_path": None,
+            "response_size_bytes": 0,
+        },
+        "safety": {
+            "api_key_logged": False,
+            "secret_safe": True,
+            "raw_response_redacted": True,
+        },
+        "warnings": [],
+        "errors": [],
+    }
