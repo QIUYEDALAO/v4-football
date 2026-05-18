@@ -254,6 +254,7 @@ Phase D 工程链路完成（engineering_complete=true），但 business_pass=fa
 | D.8.30 | `TBD` | Final command authorization gate |
 | D.8.31 | `TBD` | Controlled execution decision packet |
 | D.8.32 | `TBD` | Real state-present proof plan |
+| D.8.33 | `TBD` | Active-window mutation proof plan |
 
 **D.8.13 结论：** approval_packet_status=READY_FOR_BOSS_REVIEW，guarded_live_observe_approved=false，D.8.14 需 BOSS 单独指令。
 
@@ -348,6 +349,23 @@ Phase D 工程链路完成（engineering_complete=true），但 business_pass=fa
   - `formal_daily_pool_executed=false`
   - `selected_fixtures_written=false`
   - `state_write_allowed=false`
+- 下一步仅允许：
+  - `d834_allowed_to_generate=true`
+  - `d834_allowed_to_execute=false`
+
+## 21. D.8.33 Active-window Mutation Proof Plan
+
+- D.8.33 仅做 `active_window_mutation_path` 的证明规划，不做执行。
+- 当前状态保持：
+  - `proof_current_status=UNPROVEN`
+- synthetic active-window 只允许用于预检查，不得替代真实证据：
+  - `synthetic_active_window_allowed_for_precheck=true`
+  - `synthetic_active_window_replaces_real=false`
+- 本阶段固定禁止：
+  - `live_worker_executed=false`
+  - `bet_locked_written=false`
+  - `formal_state_written=false`
+  - `qq_sent=false`
 - 下一步仅允许：
   - `d834_allowed_to_generate=true`
   - `d834_allowed_to_execute=false`
