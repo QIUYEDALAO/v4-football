@@ -289,6 +289,19 @@ D.5.1 修正判定逻辑，固化历史冲突。
 
 ---
 
+### D.6 Completion Audit & Risk Archive
+
+D.6 是 Phase D 总验收。
+
+**结论：** 工程链路完成，业务 fail=false，20260517 历史 settlement 污染已归档。
+- phase_d_engineering_complete=true
+- phase_d_business_pass=false
+- known_historical_fail=true
+- 当前 CODE_READY
+- 下一阶段需 BOSS 单独指令
+
+---
+
 ## 7. 下一阶段计划
 
 | Phase | 内容 | 状态 |
