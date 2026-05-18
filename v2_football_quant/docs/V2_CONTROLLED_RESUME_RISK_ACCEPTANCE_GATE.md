@@ -1,6 +1,6 @@
 # V2 Controlled Resume Risk Acceptance Gate
 
-> Phase D.8.20 — risk acceptance ONLY, NOT execution
+> Phase D.8.20 / D.8.20.1 — risk acceptance ONLY, NOT execution
 
 ## Status
 
@@ -9,6 +9,25 @@
 | Risk Acceptance | **READY_FOR_BOSS_REVIEW** |
 | Accepted Risks ≠ Execution | ✅ true |
 | D.8.21 Execution | ❌ false |
+
+## D.8.20.1 Hardening
+
+- 本轮是 **fail-closed checker hardening**，不是执行。
+- checker 不再只覆盖输出 false，而是显式验证上游 marker 输入必须为 false。
+- 上游任一泄漏会直接触发 FAIL/BLOCKER：
+  - `production_resume_allowed_now=true`
+  - `cron_enable_allowed=true`
+  - `qq_push_allowed=true`
+  - `verified_write_allowed=true`
+  - `state_write_allowed=true`
+  - `execution_performed=true`
+  - `production_resume_executed=true`
+  - `cron_modified/qq_sent/verified_written/formal_state_written=true`
+  - `pipeline_ready=true`
+  - `production_verified=true`
+- proof guard：
+  - `real_state_present_case_proven` 本轮必须 false（true 则 FAIL）
+  - `synthetic_active_window_mutation_proven` 本轮必须 false（true 则 FAIL）
 
 ## Accepted Risks (6)
 
@@ -28,6 +47,19 @@
 - allowed_to_generate: true
 - allowed_to_execute: **false** ← BOSS must flip
 - 10 required guards
+
+## Fixed Gate Values
+
+- `production_resume_allowed_now=false`
+- `cron_enable_allowed=false`
+- `qq_push_allowed=false`
+- `verified_write_allowed=false`
+- `state_write_allowed=false`
+- `accepted_risks_do_not_grant_execution=true`
+- `d821_draft.allowed_to_generate=true`
+- `d821_draft.allowed_to_execute=false`
+- `PIPELINE_READY=false`
+- `PRODUCTION_VERIFIED=false`
 
 ## NOT Execution
 

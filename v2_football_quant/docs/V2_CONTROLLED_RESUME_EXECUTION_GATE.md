@@ -30,3 +30,10 @@
 All gates remain false. D.8.20 requires separate BOSS instruction.
 <!-- D.8.19.2 closure -->
 <!-- D.8.20 closure -->
+
+## D.8.20.1 Alignment
+
+- D.8.20.1 对 risk acceptance checker 增加了上游 leak fail-closed 校验。
+- 本文档口径保持不变：execution gate 只做门禁，不做执行。
+- `execution_performed=false`、`production_resume_executed=false`、`production_resume_allowed_now=false` 仍为硬约束。
+- 任何 pipeline/production 权限泄漏都不得进入 D.8.21 自动执行。
