@@ -36,10 +36,14 @@ def main():
     if not sup_no_push: e.append("supervisor_no_push_guard")
     if not sup_push_suppress: e.append("supervisor_no_push_suppress_field")
 
-    # Safe sender checks  
-    send_ok = (sender_p.exists() and (
-        _has_code(sender_p, r'allowed_to_send') or _has_code(sender_p, r'dry.run') or _has_code(sender_p, r'is_dry_run')))
+    # Safe sender checks — must verify actual enforcement
+    send_ok = sender_p.exists()
     allowed_field = _has_code(sender_p, r'allowed_to_send')
+    allowed_guard_used = _has_code(sender_p, r'if not allowed_to_send')
+    no_push_suppress = _has_code(sender_p, r'push_suppressed.*true|push_suppressed=true')
+    
+    # Only true if enforcement exists, not just field declaration
+    safe_sender = send_ok and allowed_guard_used and no_push_suppress
 
     # Secret check
     for fp in [worker_p, supervisor_p, sender_p]:
@@ -57,6 +61,9 @@ def main():
          "safe_sender_guard_available":safe_sender,"no_verified_write_hook_available":no_verify_ok,
          "supervisor_direct_push_guarded":sup_no_push,"worker_default_behavior_preserved":def_ok,
          "allowed_to_send_false_supported":allowed_field,
+         "allowed_to_send_guard_used":allowed_guard_used,
+         "no_push_suppressed":no_push_suppress,
+         "subprocess_send_guarded":allowed_guard_used,
          "production_verified":False,"pipeline_ready":False,
          "remaining_risks":[],"warnings":w,"blockers":e,
          "date":dk,"generated_at":datetime.now(CN).isoformat()}

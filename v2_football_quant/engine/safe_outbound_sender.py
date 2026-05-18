@@ -162,6 +162,15 @@ def main():
         print(f"  message_hash: {msg_hash}")
         return
 
+    # ── Phase D.8.12.1.1: no-push enforcement ──
+    if not allowed_to_send:
+        print(f"\n🛑 [NO_PUSH] push_suppressed=true allowed_to_send=false")
+        print(f"  no_push: {no_push}")
+        print(f"  dry_run: {is_dry_run}")
+        print(f"  sent: false")
+        print(f"  qq_delivered: false")
+        return
+
     # Build CLI command
     cmd = [
         GATEWAY_CLI, "message", "send",
