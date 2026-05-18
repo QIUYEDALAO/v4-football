@@ -20,7 +20,8 @@
 | D.7 | `2f54627` | Settlement preflight gate (entry block) | ✅ |
 | D.7.1 | `df5a752` | Preflight entry fix (key + lock order) | ✅ |
 | D.7.2 | `afb0e88` | Preflight test coverage v1 | ✅ |
-| D.7.3 | `TBD` | Preflight coverage closure (strict wrapper/checker/docs) | ✅ |
+| D.7.3 | `1eea1c5` | Preflight coverage closure (strict wrapper/checker/docs) | ✅ |
+| D.8 | `TBD` | Production resume readiness gate (read-only) | ✅ |
 
 **新增 20+ 文件，0 次策略改动，0 次 API 调用，0 次 QQ 推送。**
 
@@ -97,8 +98,18 @@
 
 Phase D 工程链路完成（engineering_complete=true），但 business_pass=false。后续选项：
 
-1. **Phase D.8**：继续 V2 防误写与回放校验加固
+1. **Phase D.8.1**：Controlled Resume Plan（需 BOSS 单独审批）
 2. **Phase E**：V4 扫描五窗口标准化（需 BOSS 单独指令）
 3. **恢复生产运行**：需 BOSS 单独指令（不得自动执行）
 
 必须由 BOSS 单独确认。不得自动进入。
+
+---
+
+## 7. D.8 Readiness Gate 结论
+
+- D.8 只做 readiness gate，不恢复生产。
+- D.8 不启用 cron，不推 QQ，不写 `PRODUCTION_VERIFIED`。
+- D.7.3 已证明 20260517 同日可 BLOCK，不需要等明天。
+- `known_historical_fail=true` 持续保留。
+- `resume_allowed_now=false`，`boss_approval_required=true`。

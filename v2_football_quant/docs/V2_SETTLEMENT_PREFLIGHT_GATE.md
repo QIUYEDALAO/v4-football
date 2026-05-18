@@ -46,6 +46,10 @@ Settlement 必须先通过 preflight；任一条件不满足即 BLOCK：
 - `PIPELINE_READY=false`
 - `PRODUCTION_VERIFIED=false`
 - 该 gate 是工程链路防误写保护，不等于业务通过。
+- D.8 readiness gate 仍要求：
+  - `resume_allowed_now=false`
+  - `boss_approval_required=true`
+  - 不自动恢复生产
 
 ## 禁止事项
 
