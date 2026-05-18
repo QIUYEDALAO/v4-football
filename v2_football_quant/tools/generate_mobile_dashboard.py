@@ -26,6 +26,7 @@ STATE_DIR = BASE_DIR / "data" / "state"
 OPS_SUMMARY_DIR = BASE_DIR / "data" / "ops" / "daily_ops_summary"
 CAPTURE_AUDIT_DIR = BASE_DIR / "data" / "capture_audit"
 LOG_DIR = BASE_DIR / "data" / "runtime" / "logs"
+LEDGER_DIR = BASE_DIR / "data" / "runtime" / "ledger"
 OUT_DIR = BASE_DIR / "data" / "runtime" / "dashboard"
 ASSET_DIR = OUT_DIR / "assets"
 STATE_CURRENT = BASE_DIR.parent / "STATE_CURRENT.md"
@@ -1404,25 +1405,63 @@ def _ul(items: list[str]) -> str:
     return "<ul>" + "".join(f"<li>{escape(i)}</li>" for i in items) + "</ul>"
 
 
-def _render_index(date_key: str, v2: dict[str, Any], scan: dict[str, Any], review: dict[str, Any], system: dict[str, Any]) -> str:
+def _render_index(
+    date_key: str,
+    v2: dict[str, Any],
+    scan: dict[str, Any],
+    review: dict[str, Any],
+    system: dict[str, Any],
+    ledger: dict[str, Any] | None = None,
+) -> str:
+    ledger = ledger or {}
+    ledger_present = bool(ledger)
+    lv2 = ledger.get("v2", {}) if isinstance(ledger.get("v2", {}), dict) else {}
+    lscan = ledger.get("v4_scan", {}) if isinstance(ledger.get("v4_scan", {}), dict) else {}
+    lreview = ledger.get("v4_review", {}) if isinstance(ledger.get("v4_review", {}), dict) else {}
+    lissues = ledger.get("issues", {}) if isinstance(ledger.get("issues", {}), dict) else {}
+    lfinal = ledger.get("final_status", {}) if isinstance(ledger.get("final_status", {}), dict) else {}
+
     v4_win = scan["windows"]
     scan_total_ab = sum((w["a"] or 0) + (w["b"] or 0) for w in v4_win)
     running_windows = [w for w in v4_win if str(w.get("window_status", "")).upper() == "UNVERIFIED"]
     sys_chain = str(system.get("sys_summary", {}).get("chain_status", "MISSING"))
     issue_count = len(system.get("issues", {}).get("P0", [])) + len(system.get("issues", {}).get("P1", []))
 
+    v2_status_val = _status_tag(lv2.get("status", v2["final_status"])) if ledger_present else _status_tag(v2["final_status"])
+    v2_official_locked_val = int(lv2.get("official_bet_locked", v2["official_locked_count"])) if ledger_present else int(v2["official_locked_count"])
+    v2_missed_val = int(lv2.get("missed_candidates", v2["missed_count"])) if ledger_present else int(v2["missed_count"])
+    v2_settle_obj_val = int(lv2.get("settlement_objects", v2["settlement_required"])) if ledger_present else int(v2["settlement_required"])
+    v2_push_val = "<b>1</b>" if bool(lv2.get("qq_recommendation_pushed")) else "<b>0</b>" if ledger_present else f"<b>{v2['production_recommendation']}</b>"
+
+    scan_reading_val = _status_tag(lscan.get("reading_status", "MISSING")) if ledger_present else _status_tag(scan.get("reading_mode", {}).get("reading_status", "MISSING"))
+    scan_guard_val = _status_tag(lscan.get("data_guard_status", "MISSING")) if ledger_present else _status_tag(scan.get("guard", {}).get("data_guard_status", "MISSING"))
+    prod_windows = lscan.get("production_evidence_windows", []) if ledger_present else [w.get("task_key") for w in v4_win if w.get("production_evidence")]
+    prod_windows_text = "、".join(prod_windows) if prod_windows else "无"
+    scan_total_ab_val = scan_total_ab
+    if ledger_present and isinstance(lscan.get("readable_summary", {}), dict):
+        rs = lscan.get("readable_summary", {})
+        scan_total_ab_val = int(rs.get("A", 0) or 0) + int(rs.get("B", 0) or 0)
+
+    review_status_val = _status_tag(lreview.get("status", review.get("overall_status", "MISSING"))) if ledger_present else _status_tag(review.get("overall_status", "MISSING"))
+    review_due_val = str(lreview.get("due_time", review.get("review_due_time", "缺失"))) if ledger_present else str(review.get("review_due_time", "缺失"))
+    review_nine_step = str(lreview.get("nine_step", "缺失")) if ledger_present else str(review.get("nine_step_display", "缺失"))
+
+    if ledger_present:
+        issue_count = len(lissues.get("p0", [])) + len(lissues.get("p1", []))
+        sys_chain = str(lfinal.get("status", "CODE_READY"))
+
     cards = []
     cards.append(
         _kv_card(
             "1) V2 今日状态",
             [
-                ("状态", _status_tag(v2["final_status"])),
-                ("正式锁定", f"<b>{v2['official_locked_count']}</b>"),
-                ("错过锁定候选", f"<b>{v2['missed_count']}</b>"),
+                ("状态", v2_status_val),
+                ("正式锁定", f"<b>{v2_official_locked_val}</b>"),
+                ("错过锁定候选", f"<b>{v2_missed_val}</b>"),
                 ("每日建池", _status_tag(v2["daily_pool_task"].get("status", "MISSING"))),
-                ("QQ推荐推送", f"<b>{v2['production_recommendation']}</b>"),
+                ("QQ推荐推送", v2_push_val),
                 ("状态回执", _status_tag(v2["pushed_status"])),
-                ("正式结算对象", f"<b>{v2['settlement_required']}</b>"),
+                ("正式结算对象", f"<b>{v2_settle_obj_val}</b>"),
             ],
         )
     )
@@ -1431,8 +1470,11 @@ def _render_index(date_key: str, v2: dict[str, Any], scan: dict[str, Any], revie
             "2) V4 扫描状态",
             [
                 ("扫描窗口", f"{len(v4_win)} 个"),
-                ("A+B 总数", f"<b>{scan_total_ab}</b>"),
+                ("A+B 总数", f"<b>{scan_total_ab_val}</b>"),
                 ("运行中窗口", f"<b>{len(running_windows)}</b>"),
+                ("阅读状态", scan_reading_val),
+                ("数据守卫", scan_guard_val),
+                ("生产证据窗口", escape(prod_windows_text)),
                 ("赛前剧本归档", _status_tag("PASS" if any(str(w["script_archive_status"]).upper() == "DONE" for w in v4_win) else ("HISTORICAL_NOT_ARCHIVED" if date_key == "20260517" else "MISSING"))),
                 ("时段分布归档", _status_tag("PASS" if any(str(w["distribution_archive_status"]).upper() == "DONE" for w in v4_win) else ("HISTORICAL_NOT_ARCHIVED" if date_key == "20260517" else "MISSING"))),
             ],
@@ -1442,7 +1484,9 @@ def _render_index(date_key: str, v2: dict[str, Any], scan: dict[str, Any], revie
         _kv_card(
             "3) V4 复盘状态",
             [
-                ("总体状态", _status_tag(review.get("overall_status", "MISSING"))),
+                ("总体状态", review_status_val),
+                ("计划触发", escape(review_due_val)),
+                ("九步链状态", _status_tag(review_nine_step)),
                 ("赛果刷新", _status_tag("PASS" if review["result_refresh_cache"] else ("WAITING_TRIGGER" if not review.get("due_reached") else "MISSING"))),
                 ("QQ守卫", _status_tag(review["guard_qq"].get("guard_status", "WAITING_TRIGGER" if not review.get("due_reached") else "MISSING"))),
                 ("路由标记", _status_tag("PASS" if review["route"] else ("WAITING_TRIGGER" if not review.get("due_reached") else "MISSING"))),
@@ -1459,6 +1503,7 @@ def _render_index(date_key: str, v2: dict[str, Any], scan: dict[str, Any], revie
                 ("定时器文件态", _status_tag(system["jobs_anomaly"])),
                 ("状态文件", _status_tag("PASS" if system["state_current_exists"] else "MISSING")),
                 ("本地与main同步", _status_tag("P2_DASHBOARD_LOCAL_ONLY_NOT_VERSIONED" if system["step1_local_only"] else "PASS")),
+                ("Ledger源", _status_tag("PASS" if ledger_present else "MISSING")),
             ],
         )
     )
@@ -1480,6 +1525,7 @@ def _render_index(date_key: str, v2: dict[str, Any], scan: dict[str, Any], revie
         "<li>本页面只读，不触发任务，不调用外部 API，不推送 QQ。</li>"
         "<li>当状态文件缺失时，统一显示“缺失”，不做假通过。</li>"
         "<li>详细数据请进入各子页查看。</li>"
+        f"<li>Ledger源：{'present' if ledger_present else 'missing'}（首页优先读取 ledger）。</li>"
         "</ul></section>"
     ]
 
@@ -1487,10 +1533,10 @@ def _render_index(date_key: str, v2: dict[str, Any], scan: dict[str, Any], revie
     body += (
         "<section class='card'><h2>数据来源说明</h2>"
         "<ul>"
-        "<li>V2卡片：V2状态回执 / 错过候选审计 / 正式锁定marker</li>"
+        "<li>V2卡片：V2状态回执 / 错过候选审计 / 正式锁定marker（首页优先ledger）</li>"
         "<li>V4扫描卡片：V4扫描结构化产物 / push marker / 日志</li>"
         "<li>V4复盘卡片：validation / attribution / renderer / guard / route/sent marker</li>"
-        "<li>系统健康卡片：STATE_CURRENT / cron状态 / watchdog / audit</li>"
+        "<li>系统健康卡片：STATE_CURRENT / cron状态 / watchdog / audit / ledger</li>"
         "</ul></section>"
     )
     return _shell("足球量化总控台", body, date_key, "index.html")
@@ -2155,9 +2201,10 @@ def generate(date_str: str) -> dict[str, Any]:
     scan = _compute_v4_scan(date_key)
     review = _compute_v4_review(date_key)
     system = _compute_system(date_key, step1_local_only=step1_local_only)
+    ledger = _load_json(LEDGER_DIR / f"{date_key}.json", {})
 
     pages = {
-        "index.html": _render_index(date_key, v2, scan, review, system),
+        "index.html": _render_index(date_key, v2, scan, review, system, ledger=ledger),
         "v2_today.html": _render_v2(date_key, v2),
         "v4_scan.html": _render_scan(date_key, scan),
         "v4_review.html": _render_review(date_key, review),
