@@ -25,7 +25,15 @@ def main():
     parser.add_argument("--mode", default="main", choices=["main", "retry"])
     args = parser.parse_args()
 
+    key = str(args.date).replace("-", "")
     wd = v2_settle_watchdog()
+
+    if not wd.acquire_lock():
+        print("【V2 量化系统】", flush=True)
+        print(f"[WATCHDOG] V2结算 已有实例运行，跳过", flush=True)
+        return
+
+    wd.start(total_items=0)
 
     # ── Phase D.7 Preflight Gate: block settlement if no valid official locks ──
     try:
@@ -46,24 +54,14 @@ def main():
     except Exception as e:
         wd.finish(status="FAILED", error=f"preflight exception: {e}")
         raise
-    if not wd.acquire_lock():
-        print("【V2 量化系统】", flush=True)
-        print(f"[WATCHDOG] V2结算 已有实例运行，跳过", flush=True)
-        return
-
-    wd.start(total_items=0)
 
     try:
         from engine import paper_trading
 
-        # 转换日期格式 20260514 → 2026-05-14
         date_str = str(args.date).replace("-", "")
         formatted_date = f"{date_str[:4]}-{date_str[4:6]}-{date_str[6:8]}"
 
         paper_trading.verify_date(formatted_date)
-
-        # 检查结算文件并判断 pending
-        key = str(args.date).replace("-", "")
         verified_path = BASE_DIR / "data" / "paper_trading" / f"verified_{key}.json"
         if not verified_path.exists() or verified_path.stat().st_size == 0:
             wd.finish(status="PARTIAL_DONE", error="verified文件缺失",
