@@ -86,8 +86,13 @@ def evaluate_settlement_allowed(dk: str, ds: dict, wc: dict, mc: dict, st_overri
     if not conditions["lock_owner_present"]:
         if st["settlement_targets"] > 0:
             blockers.append("LOCK_OWNER_MISSING")
-    if st["missed_in_targets"] > 0:
+    if not conditions["no_missed_candidates_in_targets"]:
         blockers.append("MISSED_CANDIDATES_PRESENT")
+    # Quantity mismatch blocks
+    if st["settlement_targets"] != ob and ob > 0:
+        blockers.append("SETTLEMENT_TARGETS_OFFICIAL_LOCKS_MISMATCH")
+    if st["settlement_targets"] != nl and nl > 0:
+        blockers.append("SETTLEMENT_TARGETS_WINDOW_LOCKS_MISMATCH")
     if not conditions["all_targets_from_window_checker"] and st["lock_owner_present"]:
         blockers.append("NON_WINDOW_CHECKER_LOCK_OWNER")
     if st["settlement_targets"] > 0 and ob == 0:

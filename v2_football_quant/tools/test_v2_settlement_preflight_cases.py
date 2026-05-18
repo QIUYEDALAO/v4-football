@@ -51,5 +51,15 @@ st4 = {"settlement_targets": 1, "target_keys": ["9999|Bad|Guy"], "missed_in_targ
        "lock_owner_present": True, "all_window_checker": True}
 test("Case4: target in missed", ds4, wc4, mc4, st4, True, ["MISSED_CANDIDATES_PRESENT"])
 
+# Case 5: count mismatch — 2 official/2 window locks but only 1 target
+st5 = {"settlement_targets": 1, "target_keys": ["100|A|B"], "missed_in_targets": 0,
+       "lock_owner_present": True, "all_window_checker": True}
+test("Case5: targets < official/window locks", ds2, wc2, mc2, st5, True, ["SETTLEMENT_TARGETS_OFFICIAL_LOCKS_MISMATCH", "SETTLEMENT_TARGETS_WINDOW_LOCKS_MISMATCH"])
+
+# Case 6: count mismatch — 1 official/2 window locks but 2 targets
+st6 = {"settlement_targets": 2, "target_keys": ["100|A|B", "200|C|D"], "missed_in_targets": 0,
+       "lock_owner_present": True, "all_window_checker": True}
+test("Case6: targets > official locks", ds3, wc2, mc3, st6, True, ["SETTLEMENT_TARGETS_OFFICIAL_LOCKS_MISMATCH"])
+
 print(f"\nResults: {PASS} PASS / {FAIL} FAIL")
 if FAIL > 0: raise SystemExit(1)
