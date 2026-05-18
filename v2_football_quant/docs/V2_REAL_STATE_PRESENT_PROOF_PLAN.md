@@ -52,3 +52,8 @@
 - D.8.32 does not write state.
 - D.8.32 does not authorize production resume.
 - Phase E remains forbidden.
+
+## D.8-CC Closure Note
+
+- `real_state_present_case` remains `UNPROVEN`.
+- Synthetic evidence cannot be treated as real-state proof.

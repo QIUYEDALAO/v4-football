@@ -45,3 +45,8 @@
 - D.8.31 is not execution.
 - D.8.31 does not authorize production resume.
 - D.8.31 does not enter Phase E.
+
+## D.8-CC Closure Note
+
+- Decision output stays `REAL_PROOF_PLANS_OR_PAUSE`.
+- No execution permission is granted in this packet.

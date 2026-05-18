@@ -43,3 +43,8 @@
 - D.8.30 does not grant production resume.
 - Any command template is review-only and must not execute.
 - Phase E remains forbidden.
+
+## D.8-CC Closure Note
+
+- This gate remains review-only after D.8-CC closure.
+- It does not grant execution and does not change `CODE_READY` baseline.

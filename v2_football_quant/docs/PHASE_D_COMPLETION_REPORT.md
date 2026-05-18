@@ -251,10 +251,10 @@ Phase D 工程链路完成（engineering_complete=true），但 business_pass=fa
 | D.8.27 | `8e1a9ab` | Controlled execution simulation plan |
 | D.8.28 | `cc9ca05` | Production resume readiness matrix |
 | D.8.29 | `a4c4244` | Phase D final decision packet |
-| D.8.30 | `TBD` | Final command authorization gate |
-| D.8.31 | `TBD` | Controlled execution decision packet |
-| D.8.32 | `TBD` | Real state-present proof plan |
-| D.8.33 | `TBD` | Active-window mutation proof plan |
+| D.8.30 | `144cef8` | Final command authorization gate |
+| D.8.31 | `39243a2` | Controlled execution decision packet |
+| D.8.32 | `5abfb28` | Real state-present proof plan |
+| D.8.33 | `02b1e1a` | Active-window mutation proof plan |
 
 **D.8.13 结论：** approval_packet_status=READY_FOR_BOSS_REVIEW，guarded_live_observe_approved=false，D.8.14 需 BOSS 单独指令。
 
@@ -369,6 +369,22 @@ Phase D 工程链路完成（engineering_complete=true），但 business_pass=fa
 - 下一步仅允许：
   - `d834_allowed_to_generate=true`
   - `d834_allowed_to_execute=false`
+
+## 22. D.8-CC Final Closure
+
+- D.8.30-D.8.33 已全部完成并提交。
+- 当前状态保持：
+  - `current_level=CODE_READY`
+  - `PIPELINE_READY=false`
+  - `PRODUCTION_VERIFIED=false`
+- Phase E 未进入，production resume 未执行。
+- remaining blockers 仍存在，且未证明项不变：
+  - `real_state_present_case`
+  - `active_window_mutation_path`
+  - `production_cron_path`
+  - `production_qq_path`
+  - `production_verified_path`
+  - `formal_state_write_path`
 
 <!-- D.8.16.3 closure: v2_football_quant/docs/PHASE_D_COMPLETION_REPORT.md -->
 

@@ -55,3 +55,8 @@
 - D.8.33 does not write formal state.
 - D.8.33 does not authorize production resume.
 - Phase E remains forbidden.
+
+## D.8-CC Closure Note
+
+- `active_window_mutation_path` remains `UNPROVEN`.
+- Synthetic precheck can support preparation only, not real-proof replacement.
