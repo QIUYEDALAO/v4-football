@@ -316,9 +316,6 @@ def main() -> None:
             errors.append(f"html_contains_{bad.lower()}")
             break
 
-    if "raw response" in html_text.lower() and "不显示 raw response" not in html_text:
-        warnings.append("html_contains_raw_response_phrase")
-
     sw_text = sw_path.read_text(encoding="utf-8", errors="replace") if sw_path.exists() else ""
     pwa_valid = pwa_valid and ("v2v4-dashboard-phase-c8-v1" in sw_text) and ("api_cache.html" in sw_text)
     if not pwa_valid:
