@@ -40,5 +40,6 @@
 ## 5. 后续门禁
 
 - D.8.10 通过后仅进入评审门禁，不自动进入 live。
-- 若要真实 live worker observe，必须由 BOSS 单独下发 D.8.11 或 D.8.12 指令。
+- D.8.11 已建立 live worker safety wrapper（plan-only）。
+- 若要真实 live worker observe，必须由 BOSS 单独下发 D.8.12 审批指令。
 - Phase E 仍不得自动进入。

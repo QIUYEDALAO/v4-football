@@ -48,5 +48,6 @@ D.8.8 中的 `execution_performed=true` 仅表示受控 preflight observe 已执
 
 ## 6. 下一步门禁
 
-- 若要进行真实 single-window worker live observe，必须由 BOSS 单独下发 `D.8.11` 或 `D.8.12` 指令。
+- D.8.11 已补齐 safety wrapper（plan-only），明确禁止直接执行 supervisor/live worker。
+- 若要进行真实 single-window worker live observe，必须由 BOSS 单独下发 `D.8.12` 指令。
 - Phase E 仍不得自动进入。
