@@ -65,3 +65,11 @@
 
 BOSS may review risks but accepting risks does NOT grant execution.
 D.8.21 still requires separate BOSS instruction.
+
+## D.8.21 Draft Gate Alignment
+
+- D.8.21 only produces a single-window controlled execution draft gate.
+- `d821_draft.allowed_to_generate=true`, `d821_draft.allowed_to_execute=false`.
+- D.8.22 draft generation can be reviewed, but execution remains forbidden by default.
+- Any `production_resume_allowed_now/cron_enable_allowed/qq_push_allowed/verified_write_allowed/state_write_allowed=true` must fail-closed.
+- D.8.21 does not grant `PIPELINE_READY` and does not grant `PRODUCTION_VERIFIED`.

@@ -37,3 +37,17 @@ All gates remain false. D.8.20 requires separate BOSS instruction.
 - 本文档口径保持不变：execution gate 只做门禁，不做执行。
 - `execution_performed=false`、`production_resume_executed=false`、`production_resume_allowed_now=false` 仍为硬约束。
 - 任何 pipeline/production 权限泄漏都不得进入 D.8.21 自动执行。
+
+## D.8.21 Alignment
+
+- D.8.21 是 `single_window_controlled_execution_draft_only`，不是执行。
+- 仅允许生成 D.8.22 review-only 命令草案。
+- 必须保持：
+  - `single_window_only=true`
+  - `full_day_resume_allowed=false`
+  - `multi_window_resume_allowed=false`
+  - `cron_resume_allowed=false`
+  - `qq_push_allowed=false`
+  - `verified_write_allowed=false`
+  - `formal_state_write_allowed=false`
+  - `supervisor_allowed=false`

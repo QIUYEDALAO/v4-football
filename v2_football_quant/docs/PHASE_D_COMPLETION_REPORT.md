@@ -241,11 +241,32 @@ Phase D 工程链路完成（engineering_complete=true），但 business_pass=fa
 | D.8.13 | `3040356` | Approval packet checker |
 | D.8.13.1 | (docs) | Docs closure |
 | D.8.20 | `e9dd8f8` | Controlled resume risk acceptance gate |
-| D.8.20.1 | `TBD` | Risk acceptance gate fail-closed hardening |
+| D.8.20.1 | `054f3ab` | Risk acceptance gate fail-closed hardening |
+| D.8.21 | `TBD` | Single-window controlled execution draft gate |
 
 **D.8.13 结论：** approval_packet_status=READY_FOR_BOSS_REVIEW，guarded_live_observe_approved=false，D.8.14 需 BOSS 单独指令。
 
 **D.8.20.1 口径：** checker 必须显式验证上游 gate 字段均为 false，任一 production/cron/QQ/verified/state/pipeline 泄漏直接 FAIL/BLOCKER，且 `d821_draft.allowed_to_execute=false` 不变。
+
+## 15. D.8.21 Single-window Controlled Execution Draft Gate
+
+- D.8.21 只做 draft gate，不做 execution，不做 production resume。
+- 本轮仅生成 D.8.22 review-only 命令草案，且默认：
+  - `d822_allowed_to_generate=true`
+  - `d822_allowed_to_execute=false`
+- 单窗口边界固定：
+  - `single_window_only=true`
+  - `full_day_resume_allowed=false`
+  - `multi_window_resume_allowed=false`
+  - `cron_resume_allowed=false`
+  - `qq_push_allowed=false`
+  - `verified_write_allowed=false`
+  - `formal_state_write_allowed=false`
+  - `supervisor_allowed=false`
+- 证据口径：
+  - 已证明：`no_state_case_proven=true`、`synthetic_state_file_read_proven=true`、`synthetic_state_present_no_write_proven=true`
+  - 未证明：`real_state_present_case_proven=false`、`synthetic_active_window_mutation_proven=false`
+- D.8.22 仍需 BOSS 单独指令；不得自动进入，Phase E 仍不得自动进入。
 
 <!-- D.8.16.3 closure: v2_football_quant/docs/PHASE_D_COMPLETION_REPORT.md -->
 
