@@ -1346,22 +1346,27 @@ def _compute_system(date_key: str, step1_local_only: bool) -> dict[str, Any]:
 def _compute_api_cache(date_key: str) -> dict[str, Any]:
     dryrun_path = STATUS_DIR / f"api_snapshot_cache_dryrun_{date_key}.json"
     bundle_path = CACHE_DIR / "api_snapshot" / date_key / "bundle.json"
+    check_path = STATUS_DIR / f"api_snapshot_cache_check_{date_key}.json"
     dryrun = _load_json(dryrun_path, {})
     bundle = _load_json(bundle_path, {})
+    check = _load_json(check_path, {})
     safety_dry = dryrun if isinstance(dryrun, dict) else {}
+    boundaries = bundle.get("boundaries", {}) if isinstance(bundle.get("boundaries", {}), dict) else {}
     safety_bundle = bundle.get("safety", {}) if isinstance(bundle.get("safety", {}), dict) else {}
+    boundary_src = boundaries if boundaries else safety_bundle
 
-    no_api = bool(safety_dry.get("no_api", safety_bundle.get("no_api", False)))
-    no_push = bool(safety_dry.get("no_push", safety_bundle.get("no_push", False)))
+    no_api = bool(safety_dry.get("no_api", boundary_src.get("no_api", False)))
+    no_push = bool(safety_dry.get("no_push", boundary_src.get("no_push", False)))
     no_strategy_recompute = bool(
-        safety_dry.get("no_strategy_recompute", safety_bundle.get("no_strategy_recompute", False))
+        safety_dry.get("no_strategy_recompute", boundary_src.get("no_strategy_recompute", False))
     )
-    no_cron = bool(safety_dry.get("no_cron", safety_bundle.get("no_cron", False)))
+    no_cron = bool(safety_dry.get("no_cron", boundary_src.get("no_cron", False)))
     production_verified = bool(
-        safety_dry.get("production_verified", safety_bundle.get("production_verified", False))
+        safety_dry.get("production_verified", boundary_src.get("production_verified", False))
     )
     runtime_root = (
         safety_dry.get("runtime_root")
+        or bundle.get("runtime_root")
         or (bundle.get("runtime_root_policy", {}) if isinstance(bundle.get("runtime_root_policy", {}), dict) else {}).get(
             "canonical_runtime_root"
         )
@@ -1407,8 +1412,10 @@ def _compute_api_cache(date_key: str) -> dict[str, Any]:
         "bundle_date": bundle.get("date"),
         "dryrun_path": dryrun_path,
         "bundle_path": bundle_path,
+        "check_path": check_path,
         "dryrun_found": dryrun_path.exists(),
         "bundle_found": bundle_path.exists(),
+        "check_found": check_path.exists(),
         "no_api": no_api,
         "no_push": no_push,
         "no_strategy_recompute": no_strategy_recompute,
@@ -1417,6 +1424,12 @@ def _compute_api_cache(date_key: str) -> dict[str, Any]:
         "production_verified": production_verified,
         "runtime_root": runtime_root,
         "warnings": warnings,
+        "check_status": str((check.get("status", "MISSING") if isinstance(check, dict) else "MISSING")).upper(),
+        "check_schema_valid": bool(check.get("schema_valid", False)) if isinstance(check, dict) else False,
+        "check_integrity_valid": bool(check.get("integrity_valid", False)) if isinstance(check, dict) else False,
+        "check_secret_safe": bool(check.get("secret_safe", False)) if isinstance(check, dict) else False,
+        "check_warnings": check.get("warnings", []) if isinstance(check.get("warnings", []), list) else [],
+        "check_errors": check.get("errors", []) if isinstance(check.get("errors", []), list) else [],
         "bundle_preview": {
             "module_keys": sorted(
                 list((bundle.get("modules", {}) if isinstance(bundle.get("modules", {}), dict) else {}).keys())
@@ -1607,6 +1620,9 @@ def _render_index(
                 ("是否接入cron", _status_tag("NO" if api_cache.get("no_cron") else "FAIL")),
                 ("是否PRODUCTION_VERIFIED", _status_tag("NO" if not api_cache.get("production_verified") else "FAIL")),
                 ("bundle", _status_tag("PASS" if api_cache.get("bundle_found") else "MISSING")),
+                ("schema校验", _status_tag("PASS" if api_cache.get("check_schema_valid") else ("MISSING" if not api_cache.get("check_found") else "FAIL"))),
+                ("integrity校验", _status_tag("PASS" if api_cache.get("check_integrity_valid") else ("MISSING" if not api_cache.get("check_found") else "FAIL"))),
+                ("secret检查", _status_tag("PASS" if api_cache.get("check_secret_safe") else ("MISSING" if not api_cache.get("check_found") else "FAIL"))),
                 ("runtime root", escape(api_runtime_root_view)),
                 ("下一步", "待 BOSS 确认后进入 Phase C.2"),
             ],
@@ -1637,10 +1653,14 @@ def _render_index(
         "<div class='kv'>"
         f"<div class='k'>status marker</div><div class='v'><span class='mono'>{escape(str(api_cache.get('dryrun_path')))}</span></div>"
         f"<div class='k'>bundle</div><div class='v'><span class='mono'>{escape(str(api_cache.get('bundle_path')))}</span></div>"
+        f"<div class='k'>checker marker</div><div class='v'><span class='mono'>{escape(str(api_cache.get('check_path')))}</span></div>"
+        f"<div class='k'>checker状态</div><div class='v'>{_status_tag(api_cache.get('check_status'))}</div>"
         f"<div class='k'>module</div><div class='v'>{escape(str(api_cache.get('module', 'all')))}</div>"
         f"<div class='k'>modules</div><div class='v'>{escape(', '.join(api_cache.get('modules', [])) or '缺失')}</div>"
         f"<div class='k'>生成时间</div><div class='v'>{escape(str(api_cache.get('generated_at') or '缺失'))}</div>"
         f"<div class='k'>warnings</div><div class='v'>{escape('；'.join(api_cache.get('warnings', [])) if api_cache.get('warnings') else '无')}</div>"
+        f"<div class='k'>checker warnings</div><div class='v'>{escape('；'.join(api_cache.get('check_warnings', [])) if api_cache.get('check_warnings') else '无')}</div>"
+        f"<div class='k'>checker errors</div><div class='v'>{escape('；'.join(api_cache.get('check_errors', [])) if api_cache.get('check_errors') else '无')}</div>"
         "</div></details></section>"
     ]
 
@@ -2247,6 +2267,9 @@ def _render_system(date_key: str, system: dict[str, Any], api_cache: dict[str, A
                     ("是否接入cron", _status_tag("NO" if api_cache.get("no_cron") else "FAIL")),
                     ("production_dependency", _status_tag("NO")),
                     ("是否PRODUCTION_VERIFIED", _status_tag("NO" if not api_cache.get("production_verified") else "FAIL")),
+                    ("schema校验", _status_tag("PASS" if api_cache.get("check_schema_valid") else ("MISSING" if not api_cache.get("check_found") else "FAIL"))),
+                    ("integrity校验", _status_tag("PASS" if api_cache.get("check_integrity_valid") else ("MISSING" if not api_cache.get("check_found") else "FAIL"))),
+                    ("secret检查", _status_tag("PASS" if api_cache.get("check_secret_safe") else ("MISSING" if not api_cache.get("check_found") else "FAIL"))),
                 ],
             ),
             "<section class='card'><h2>API Cache 证据（折叠）</h2>"

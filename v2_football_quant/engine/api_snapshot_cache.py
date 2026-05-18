@@ -19,6 +19,7 @@ DAILY_REPORT_DIR = BASE_DIR / "data" / "daily_reports"
 CN_TZ = timezone(timedelta(hours=8))
 
 SUPPORTED_MODULES = {"v2", "v4_scan", "v4_review", "dashboard", "ledger"}
+SCHEMA_VERSION = "api_snapshot_cache.v1"
 
 
 def canonical_runtime_root() -> Path:
@@ -168,14 +169,49 @@ def build_snapshot_bundle(date_key: str, modules: list[str]) -> dict[str, Any]:
     chosen = [m for m in modules if m in SUPPORTED_MODULES]
     if not chosen:
         chosen = sorted(SUPPORTED_MODULES)
-    module_snaps = {m: snapshot_module(m, date_key) for m in chosen}
+    module_reports = {m: snapshot_module(m, date_key) for m in chosen}
     mismatch = _detect_path_mismatch(date_key)
+    module_manifest: dict[str, dict[str, Any]] = {}
+    for module in sorted(SUPPORTED_MODULES):
+        report = module_reports.get(module, {})
+        enabled = module in chosen
+        source_count = int(report.get("source_count", 0) or 0) if enabled else 0
+        # Phase C.2 dry-run schema: modules are metadata-only and must not imply API ingest.
+        module_manifest[module] = {
+            "enabled": enabled,
+            "source": "existing_artifact" if source_count > 0 else "dryrun_placeholder",
+            "snapshot_count": 0,
+            "api_called": False,
+        }
+
+    warnings = []
+    for w in mismatch:
+        warnings.append(
+            f"path_mismatch:{w.get('project_path')}|{w.get('workspace_root_path')}"
+        )
+
     return {
+        "schema_version": SCHEMA_VERSION,
         "date": date_key,
         "generated_at": datetime.now(CN_TZ).isoformat(),
+        "mode": "dry_run",
+        "runtime_root": str(canonical_runtime_root()),
+        "production_dependency": False,
+        "boundaries": {
+            "no_api": True,
+            "no_push": True,
+            "no_strategy_recompute": True,
+            "no_cron": True,
+            "production_verified": False,
+        },
+        "modules": module_manifest,
+        "snapshots": [],
+        "warnings": warnings,
+        "errors": [],
+        # Legacy/trace fields retained for compatibility and evidence inspection.
         "runtime_root_policy": runtime_root_policy(),
         "path_mismatch_warnings": mismatch,
-        "modules": module_snaps,
+        "module_reports": module_reports,
         "safety": {
             "no_api": True,
             "no_push": True,
@@ -193,4 +229,3 @@ def write_snapshot_bundle(bundle: dict[str, Any]) -> Path:
     out = out_dir / "bundle.json"
     out.write_text(json.dumps(bundle, ensure_ascii=False, indent=2), encoding="utf-8")
     return out
-
