@@ -55,6 +55,8 @@ def main() -> None:
 
     shadow_consumer_path = STATUS_DIR / f"api_shadow_consumer_dryrun_{date_key}.json"
     shadow_consumer = _load_json(shadow_consumer_path, {})
+    aux_display_path = STATUS_DIR / f"api_aux_display_dryrun_{date_key}.json"
+    aux_display = _load_json(aux_display_path, {})
 
     result = {
         "date": date_key,
@@ -75,6 +77,9 @@ def main() -> None:
             "shadow_consumer_visible": shadow_consumer_path.exists(),
             "shadow_consumer_status": str((shadow_consumer.get("status", "MISSING") if isinstance(shadow_consumer, dict) else "MISSING")).upper(),
             "shadow_consumer_marker": str(shadow_consumer_path),
+            "aux_display_visible": aux_display_path.exists(),
+            "aux_display_status": str((aux_display.get("status", "MISSING") if isinstance(aux_display, dict) else "MISSING")).upper(),
+            "aux_display_marker": str(aux_display_path),
             "production_dependency": False,
         },
         "generated_at": datetime.now(CN_TZ).isoformat(),

@@ -231,3 +231,39 @@ python3 tools/api_snapshot_cache_dryrun.py --date 20260517 --module all --check
   1. Safari 下拉刷新；
   2. 关闭页面后重新打开；
   3. 如仍为旧版，删除主屏幕图标后重新添加。
+
+## Phase C.9：Non-critical Auxiliary Display Gray Consumer（本轮）
+### 目标
+- C.9 只做“辅助展示”消费层；
+- 只允许 Dashboard / Replay / Audit 展示 cache 辅助状态；
+- 不替换任何正式数据源；
+- 不影响推荐、结算、推送、评级。
+
+### 严格边界
+- 正式 V2/V4 卡片继续使用原来源；
+- `v2_formal_cards_use_cache=false`；
+- `v4_formal_cards_use_cache=false`；
+- `qq_uses_cache=false`；
+- 不调用 API；
+- 不读取 API key；
+- 不替换正式 API 调用；
+- 不推 QQ；
+- 不接 cron；
+- 不写 `PRODUCTION_VERIFIED`。
+
+### 本轮新增
+- `engine/api_aux_display.py`：辅助展示报告聚合；
+- `tools/api_aux_display_dryrun.py`：辅助展示 dry-run；
+- `tools/check_api_aux_display.py`：辅助展示边界与标签检查；
+- Dashboard `api_cache.html` 增加辅助展示卡片（标记“辅助展示，不作生产证据”）；
+- 首页 API 缓存卡显示 aux 状态；
+- Replay marker 增加 `aux_display_status`，仅展示，不改主源。
+
+### 当前能力说明
+- C.9 仅证明“非关键辅助展示层可用”；
+- 当前结果仍不能说明 V2/V4 业务数据一致；
+- 生产链路继续严格隔离。
+
+### 下一阶段边界
+- C.10 才考虑非关键页面局部读取 cache 数据作为辅助详情；
+- V2/V4 正式接 cache 必须另开 BOSS 指令。
