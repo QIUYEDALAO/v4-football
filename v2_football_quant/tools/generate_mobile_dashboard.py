@@ -1354,6 +1354,8 @@ def _compute_api_cache(date_key: str) -> dict[str, Any]:
     real_ingest_check_path = STATUS_DIR / f"api_real_ingest_check_{date_key}.json"
     reader_dryrun_path = STATUS_DIR / f"api_cache_reader_dryrun_{date_key}.json"
     reader_check_path = STATUS_DIR / f"api_cache_reader_check_{date_key}.json"
+    shadow_dryrun_path = STATUS_DIR / f"api_shadow_read_dryrun_{date_key}.json"
+    shadow_check_path = STATUS_DIR / f"api_shadow_read_check_{date_key}.json"
     dryrun = _load_json(dryrun_path, {})
     bundle = _load_json(bundle_path, {})
     check = _load_json(check_path, {})
@@ -1364,6 +1366,8 @@ def _compute_api_cache(date_key: str) -> dict[str, Any]:
     real_ingest_check = _load_json(real_ingest_check_path, {})
     reader_dryrun = _load_json(reader_dryrun_path, {})
     reader_check = _load_json(reader_check_path, {})
+    shadow_dryrun = _load_json(shadow_dryrun_path, {})
+    shadow_check = _load_json(shadow_check_path, {})
     safety_dry = dryrun if isinstance(dryrun, dict) else {}
     boundaries = bundle.get("boundaries", {}) if isinstance(bundle.get("boundaries", {}), dict) else {}
     safety_bundle = bundle.get("safety", {}) if isinstance(bundle.get("safety", {}), dict) else {}
@@ -1434,6 +1438,8 @@ def _compute_api_cache(date_key: str) -> dict[str, Any]:
         "real_ingest_check_path": real_ingest_check_path,
         "reader_dryrun_path": reader_dryrun_path,
         "reader_check_path": reader_check_path,
+        "shadow_dryrun_path": shadow_dryrun_path,
+        "shadow_check_path": shadow_check_path,
         "dryrun_found": dryrun_path.exists(),
         "bundle_found": bundle_path.exists(),
         "check_found": check_path.exists(),
@@ -1522,6 +1528,26 @@ def _compute_api_cache(date_key: str) -> dict[str, Any]:
         "reader_check_secret_safe": bool(reader_check.get("secret_safe", False)) if isinstance(reader_check, dict) else False,
         "reader_check_warnings": reader_check.get("warnings", []) if isinstance(reader_check.get("warnings", []), list) else [],
         "reader_check_errors": reader_check.get("errors", []) if isinstance(reader_check.get("errors", []), list) else [],
+        "shadow_dryrun_found": shadow_dryrun_path.exists(),
+        "shadow_check_found": shadow_check_path.exists(),
+        "shadow_status": str((shadow_dryrun.get("status", "MISSING") if isinstance(shadow_dryrun, dict) else "MISSING")).upper(),
+        "shadow_mode": str((shadow_dryrun.get("mode", "shadow_read") if isinstance(shadow_dryrun, dict) else "shadow_read")),
+        "shadow_no_api": bool(shadow_dryrun.get("no_api", False)) if isinstance(shadow_dryrun, dict) else False,
+        "shadow_no_key_read": bool(shadow_dryrun.get("no_key_read", False)) if isinstance(shadow_dryrun, dict) else False,
+        "shadow_production_path_untouched": bool(shadow_dryrun.get("production_path_untouched", False)) if isinstance(shadow_dryrun, dict) else False,
+        "shadow_comparison_count": int(shadow_dryrun.get("comparison_count", 0) or 0) if isinstance(shadow_dryrun, dict) else 0,
+        "shadow_matched": int(shadow_dryrun.get("matched", 0) or 0) if isinstance(shadow_dryrun, dict) else 0,
+        "shadow_mismatch": int(shadow_dryrun.get("mismatch", 0) or 0) if isinstance(shadow_dryrun, dict) else 0,
+        "shadow_missing": int(shadow_dryrun.get("missing", 0) or 0) if isinstance(shadow_dryrun, dict) else 0,
+        "shadow_not_comparable": int(shadow_dryrun.get("not_comparable", 0) or 0) if isinstance(shadow_dryrun, dict) else 0,
+        "shadow_v2_production_compared": bool((shadow_dryrun.get("business_scope", {}) if isinstance(shadow_dryrun.get("business_scope", {}), dict) else {}).get("v2_production_compared", False)),
+        "shadow_v4_production_compared": bool((shadow_dryrun.get("business_scope", {}) if isinstance(shadow_dryrun.get("business_scope", {}), dict) else {}).get("v4_production_compared", False)),
+        "shadow_check_status": str((shadow_check.get("status", "MISSING") if isinstance(shadow_check, dict) else "MISSING")).upper(),
+        "shadow_check_schema_valid": bool(shadow_check.get("schema_valid", False)) if isinstance(shadow_check, dict) else False,
+        "shadow_check_boundary_valid": bool(shadow_check.get("boundary_valid", False)) if isinstance(shadow_check, dict) else False,
+        "shadow_check_secret_safe": bool(shadow_check.get("secret_safe", False)) if isinstance(shadow_check, dict) else False,
+        "shadow_check_warnings": shadow_check.get("warnings", []) if isinstance(shadow_check.get("warnings", []), list) else [],
+        "shadow_check_errors": shadow_check.get("errors", []) if isinstance(shadow_check.get("errors", []), list) else [],
         "bundle_preview": {
             "module_keys": sorted(
                 list((bundle.get("modules", {}) if isinstance(bundle.get("modules", {}), dict) else {}).keys())
@@ -1734,8 +1760,21 @@ def _render_index(
                 ("reader real snapshot", _status_tag("PASS" if api_cache.get("reader_real_snapshot_found") else "MISSING")),
                 ("reader secret检查", _status_tag("PASS" if api_cache.get("reader_check_secret_safe") else ("MISSING" if not api_cache.get("reader_check_found") else "FAIL"))),
                 ("reader 生产依赖", _status_tag("NO")),
+                ("Cache Shadow Read", _status_tag(api_cache.get("shadow_status"))),
+                ("shadow checker", _status_tag(api_cache.get("shadow_check_status"))),
+                ("shadow 模式", "旁路对账"),
+                ("shadow API调用", _status_tag("NO" if api_cache.get("shadow_no_api") else "FAIL")),
+                ("shadow 读取key", _status_tag("NO" if api_cache.get("shadow_no_key_read") else "FAIL")),
+                ("shadow 正式链路受影响", _status_tag("NO" if api_cache.get("shadow_production_path_untouched") else "FAIL")),
+                ("shadow comparison_count", str(api_cache.get("shadow_comparison_count", 0))),
+                ("shadow matched", str(api_cache.get("shadow_matched", 0))),
+                ("shadow mismatch", str(api_cache.get("shadow_mismatch", 0))),
+                ("shadow missing", str(api_cache.get("shadow_missing", 0))),
+                ("shadow not_comparable", str(api_cache.get("shadow_not_comparable", 0))),
+                ("V2正式链路对账", _status_tag("NO" if not api_cache.get("shadow_v2_production_compared") else "FAIL")),
+                ("V4正式链路对账", _status_tag("NO" if not api_cache.get("shadow_v4_production_compared") else "FAIL")),
                 ("runtime root", escape(api_runtime_root_view)),
-                ("下一步", "不得接生产链路，需 BOSS 单独确认"),
+                ("下一步", "C.7 非关键模块只读灰度需 BOSS 单独确认"),
             ],
         )
     )
@@ -1787,6 +1826,10 @@ def _render_index(
         f"<div class='k'>cache reader checker marker</div><div class='v'><span class='mono'>{escape(str(api_cache.get('reader_check_path')))}</span></div>"
         f"<div class='k'>cache reader checker warnings</div><div class='v'>{escape('；'.join(api_cache.get('reader_check_warnings', [])) if api_cache.get('reader_check_warnings') else '无')}</div>"
         f"<div class='k'>cache reader checker errors</div><div class='v'>{escape('；'.join(api_cache.get('reader_check_errors', [])) if api_cache.get('reader_check_errors') else '无')}</div>"
+        f"<div class='k'>shadow dryrun marker</div><div class='v'><span class='mono'>{escape(str(api_cache.get('shadow_dryrun_path')))}</span></div>"
+        f"<div class='k'>shadow checker marker</div><div class='v'><span class='mono'>{escape(str(api_cache.get('shadow_check_path')))}</span></div>"
+        f"<div class='k'>shadow checker warnings</div><div class='v'>{escape('；'.join(api_cache.get('shadow_check_warnings', [])) if api_cache.get('shadow_check_warnings') else '无')}</div>"
+        f"<div class='k'>shadow checker errors</div><div class='v'>{escape('；'.join(api_cache.get('shadow_check_errors', [])) if api_cache.get('shadow_check_errors') else '无')}</div>"
         "</div></details></section>"
     ]
 
@@ -2415,6 +2458,16 @@ def _render_system(date_key: str, system: dict[str, Any], api_cache: dict[str, A
                     ("reader real snapshot", _status_tag("PASS" if api_cache.get("reader_real_snapshot_found") else "MISSING")),
                     ("reader secret检查", _status_tag("PASS" if api_cache.get("reader_check_secret_safe") else ("MISSING" if not api_cache.get("reader_check_found") else "FAIL"))),
                     ("reader 生产依赖", _status_tag("NO")),
+                    ("Cache Shadow Read", _status_tag(api_cache.get("shadow_status"))),
+                    ("shadow checker", _status_tag(api_cache.get("shadow_check_status"))),
+                    ("shadow API调用", _status_tag("NO" if api_cache.get("shadow_no_api") else "FAIL")),
+                    ("shadow 读取key", _status_tag("NO" if api_cache.get("shadow_no_key_read") else "FAIL")),
+                    ("shadow 正式链路受影响", _status_tag("NO" if api_cache.get("shadow_production_path_untouched") else "FAIL")),
+                    ("shadow comparison_count", str(api_cache.get("shadow_comparison_count", 0))),
+                    ("shadow matched/mismatch", f"{api_cache.get('shadow_matched', 0)}/{api_cache.get('shadow_mismatch', 0)}"),
+                    ("shadow missing/not_comparable", f"{api_cache.get('shadow_missing', 0)}/{api_cache.get('shadow_not_comparable', 0)}"),
+                    ("V2正式链路对账", _status_tag("NO" if not api_cache.get("shadow_v2_production_compared") else "FAIL")),
+                    ("V4正式链路对账", _status_tag("NO" if not api_cache.get("shadow_v4_production_compared") else "FAIL")),
                 ],
             ),
             "<section class='card'><h2>API Cache 证据（折叠）</h2>"
@@ -2553,6 +2606,13 @@ def generate(date_str: str) -> dict[str, Any]:
         "cache_reader_no_api": bool(api_cache.get("reader_no_api")),
         "cache_reader_no_key_read": bool(api_cache.get("reader_no_key_read")),
         "cache_reader_production_dependency": False,
+        "cache_shadow_visible": True,
+        "cache_shadow_dryrun_found": bool(api_cache.get("shadow_dryrun_found")),
+        "cache_shadow_check_found": bool(api_cache.get("shadow_check_found")),
+        "cache_shadow_no_api": bool(api_cache.get("shadow_no_api")),
+        "cache_shadow_no_key_read": bool(api_cache.get("shadow_no_key_read")),
+        "cache_shadow_production_dependency": False,
+        "cache_shadow_production_path_untouched": bool(api_cache.get("shadow_production_path_untouched")),
         "dashboard_updated": True,
         "strategy_changed": False,
         "qq_pushed": False,

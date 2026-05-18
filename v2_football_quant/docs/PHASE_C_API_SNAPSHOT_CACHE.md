@@ -141,3 +141,40 @@ python3 tools/api_snapshot_cache_dryrun.py --date 20260517 --module all --check
 - Phase C.6：shadow read（只读对照，不影响生产路径）
 - Phase C.7：非关键链路灰度评估
 - **V2/V4 正式接 cache 仍需单独 BOSS 指令 + 生产验证阶段**
+
+## Phase C.6：Cache Shadow Read Baseline（本轮）
+### 目标
+- 建立 cache 只读旁路对账基线（shadow read）；
+- 正式链路继续使用原数据源；
+- 不接 V2/V4，不替换正式 API 调用；
+- 不调用 API，不读取 API key；
+- 不修改 cache，不写生产 sent marker；
+- 不推QQ，不接 cron，不写 `PRODUCTION_VERIFIED`。
+
+### 新增组件
+- `engine/api_shadow_read.py`
+  - 读取 cache reader summary / bundle / real ingest marker / real snapshot；
+  - 输出 `api_shadow_read.v1` 对账报告；
+  - 对账状态仅限 `MATCH / MISMATCH / MISSING / NOT_COMPARABLE`；
+  - 明确 `business_scope.v2_production_compared=false`、
+    `business_scope.v4_production_compared=false`。
+
+- `tools/api_shadow_read_dryrun.py`
+  - 生成 shadow 对账 dry-run marker：
+  - `data/runtime/status/api_shadow_read_dryrun_YYYYMMDD.json`
+
+- `tools/check_api_shadow_read.py`
+  - 校验 shadow schema / boundary / secret；
+  - 校验源码无网络调用、无 key 读取；
+  - 写 checker marker：
+  - `data/runtime/status/api_shadow_read_check_YYYYMMDD.json`
+
+### 当前限制
+- 当前真实 cache 业务面仅有最小 `status` endpoint；
+- 只能做 cache 元数据与可用性对账；
+- 不能代表 V2/V4 业务策略级对账结果；
+- 因此 `NOT_COMPARABLE` / `WARN` 在当前阶段可接受（非边界失败）。
+
+### 下一阶段边界
+- C.7 才考虑非关键模块只读灰度；
+- V2/V4 正式接 cache 仍需单独 BOSS 指令与生产验证阶段。
