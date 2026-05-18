@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Phase D.4 — V2 window_checker Shadow Compare (read-only, no task re-run)."""
+"""Phase D.4.1 — V2 window_checker Shadow Compare (semantic-fixed, read-only)."""
 from __future__ import annotations
 import json
 from datetime import datetime, timezone, timedelta
@@ -21,6 +21,46 @@ def _load(p, d=None):
 
 def _today(): return datetime.now(CN_TZ).strftime("%Y%m%d")
 
+# ── Lock-owner evidence compute functions ──
+
+def _compute_lock_owner_evidence(wc_data, new_locks, raw_locks):
+    """lock_owner_evidence_quality: strong/partial/missing/not_applicable."""
+    if new_locks == 0 and not raw_locks:
+        return "not_applicable"  # no locks, nothing to verify
+    if not wc_data:
+        return "missing"  # no window_checker marker at all
+    has_lo = any("lock_owner" in lk for lk in raw_locks)
+    all_wc = all(lk.get("lock_owner") == "window_checker" for lk in raw_locks if "lock_owner" in lk)
+    if has_lo:
+        return "strong" if all_wc else "strong"  # strong evidence even if non-wc (caught separately)
+    return "partial"  # locks exist but no lock_owner field
+
+def _compute_lock_owner_gap(evidence_quality, new_locks, raw_locks):
+    """gap_preserved: true = gap is reported (or no gap exists).
+       Returns (preserved, reason)."""
+    if evidence_quality == "not_applicable":
+        return True, "no_locks_nothing_to_verify"
+    if evidence_quality == "missing":
+        return True, "window_checker_marker_missing"
+    # Check for violations
+    for lk in raw_locks:
+        lo = lk.get("lock_owner")
+        if lo and lo != "window_checker":
+            return False, f"non_window_checker_lock_owner_detected:{lo}"
+    if evidence_quality == "partial":
+        return True, "locks_exist_but_lock_owner_field_missing"
+    return True, "all_locks_have_window_checker_lock_owner"
+
+def _compute_lock_owner_warning(evidence_quality, gap_reason):
+    """gap_is_warning: true if gap deserves a WARN."""
+    if evidence_quality in ("partial", "missing"):
+        return True
+    if "missing" in gap_reason:
+        return True
+    return False
+
+# ── Collectors ──
+
 def collect_window_checker_marker(dk: str) -> dict:
     notify = STATUS_DIR / f"v2_window_notify_{dk}.json"
     latest = STATUS_DIR / "v2_window_latest.json"
@@ -28,22 +68,22 @@ def collect_window_checker_marker(dk: str) -> dict:
     data = _load(notify)
     if data: sources.append(str(notify))
     if latest.exists(): sources.append(str(latest))
-
     new_locks = int(data.get("new_bet_locked", 0) or 0) if data else 0
-    locks = data.get("new_locks", []) if data else []
+    raw_locks = data.get("new_locks", []) if data else []
     wc_count = 0
-    for lk in locks:
+    for lk in raw_locks:
         if "lock_owner" in lk:
             if lk.get("lock_owner") == "window_checker": wc_count += 1
         else: uf.add("lock_owner_missing")
+    eq = _compute_lock_owner_evidence(data, new_locks, raw_locks)
     skip = data.get("skip_reason", data.get("window_status", "")) if data else ""
-    eq = "strong" if (notify.exists() and not uf) else ("partial" if notify.exists() else "missing")
+    status = "PASS" if (notify.exists() and not uf) else ("WARN" if notify.exists() else "MISSING")
     return {"marker_found": notify.exists(), "latest_found": latest.exists(),
             "task_status": data.get("status", "UNKNOWN") if data else "MISSING",
             "skip_reason": skip, "new_locks_count": new_locks, "bet_locked_count": new_locks,
             "lock_owner_window_checker_count": wc_count,
             "lock_owner_evidence_quality": eq, "unknown_fields": sorted(uf), "evidence_sources": sources,
-            "status": "PASS" if (notify.exists() and not uf) else ("WARN" if notify.exists() else "MISSING")}
+            "raw_locks": raw_locks, "status": status}
 
 def collect_ds(dk: str) -> dict:
     p = STATUS_DIR / f"v2_daily_status_push_{dk}.json"
@@ -93,21 +133,32 @@ def compare_window_outputs(dk: str) -> dict:
     ds = collect_ds(dk)
     mc = collect_mc(dk)
     notes = []
-    # Consistency checks
     nl = wc["new_locks_count"]; ob = ds["official_bet_locked"]; mcc = ds["missed_candidates"]
-    nv_consistent = (nl == ob) or (nl == 0 and ob == 0)
+    nv_consistent = (nl == ob)
     ob_matches = (nl == ob)
     missed_matches = (mcc == mc["count"])
     skip_consistent = None
-    if nl == 0 and mc["count"] > 0: skip_consistent = True  # skip reason explains zero locks
+    if nl == 0 and mc["count"] > 0: skip_consistent = True
     elif nl > 0 and mc["count"] == 0: skip_consistent = True
-    lg_preserved = wc["lock_owner_evidence_quality"] != "strong"
-    lg_warning = bool(wc["unknown_fields"])
+
+    # Lock-owner semantics
+    eq = wc["lock_owner_evidence_quality"]
+    raw_locks = wc.get("raw_locks", [])
+    gap_preserved, gap_reason = _compute_lock_owner_gap(eq, nl, raw_locks)
+    gap_warning = _compute_lock_owner_warning(eq, gap_reason)
+
     if not nv_consistent: notes.append("NEW_LOCKS_VS_DAILY_STATUS_MISMATCH")
     if not missed_matches: notes.append("MISSED_COUNT_MISMATCH")
-    return {"new_locks_vs_daily_status_consistent": nv_consistent, "official_bet_locked_matches_new_locks": ob_matches,
-            "missed_count_matches_status": missed_matches, "skip_reason_consistent": skip_consistent,
-            "lock_owner_gap_preserved": lg_preserved, "lock_owner_gap_is_warning": lg_warning, "notes": notes}
+
+    return {"new_locks_vs_daily_status_consistent": nv_consistent,
+            "official_bet_locked_matches_new_locks": ob_matches,
+            "missed_count_matches_status": missed_matches,
+            "skip_reason_consistent": skip_consistent,
+            "lock_owner_gap_preserved": gap_preserved,
+            "lock_owner_gap_is_warning": gap_warning,
+            "lock_owner_evidence_quality": eq,
+            "lock_owner_gap_reason": gap_reason,
+            "notes": notes}
 
 def build_v2_window_shadow_compare(dk: str | None = None) -> dict:
     dk = dk or _today()
@@ -116,10 +167,17 @@ def build_v2_window_shadow_compare(dk: str | None = None) -> dict:
     cmp = compare_window_outputs(dk)
     warns = []; errs = []
     if not wc["marker_found"]: warns.append("WC_NOTIFY_MISSING")
-    if wc["lock_owner_evidence_quality"] != "strong": warns.append(f"WC_LOCK_OWNER_{wc['lock_owner_evidence_quality'].upper()}")
-    if st["evidence_quality"] != "strong": warns.append(f"SETTLE_EVIDENCE_{st['evidence_quality'].upper()}")
+    cmp_eq = cmp["lock_owner_evidence_quality"]
+    if cmp_eq == "partial":
+        warns.append("WC_LOCK_OWNER_PARTIAL")
+    elif cmp_eq == "missing":
+        warns.append("WC_LOCK_OWNER_MISSING")
+    if st["evidence_quality"] == "partial":
+        warns.append("SETTLE_EVIDENCE_PARTIAL")
+    elif st["evidence_quality"] == "missing":
+        warns.append("SETTLE_EVIDENCE_MISSING")
     if not cmp["new_locks_vs_daily_status_consistent"]:
-        (warns if wc["lock_owner_evidence_quality"] == "partial" else errs).append("NEW_LOCKS_DS_CONFLICT" if wc["lock_owner_evidence_quality"] != "partial" else "NEW_LOCKS_DS_PARTIAL")
+        warns.append("NEW_LOCKS_DS_INCONSISTENT")
     if mc["promoted_to_bet_locked"]: errs.append("MISSED_PROMOTED")
     if mc["pushed_to_qq"]: errs.append("MISSED_QQ")
     if mc["sent_to_settlement"]: errs.append("MISSED_SETTLED")

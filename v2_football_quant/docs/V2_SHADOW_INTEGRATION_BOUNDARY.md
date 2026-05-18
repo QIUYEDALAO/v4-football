@@ -249,6 +249,19 @@ D.4 是 window_checker Shadow Compare，只读对照 window_checker 输出与 da
 
 ---
 
+### D.4.1 Guard Semantics Fix
+
+D.4.1 修复 lock_owner gap 语义冲突。
+
+**修复前：** `gap_preserved = evidence_quality != "strong"`（no-locks 场景下 evidence=strong 导致 gap=false）
+
+**修复后：** 新增 `not_applicable` 状态区分无锁场景。
+- new_locks=0 → not_applicable → gap_preserved=true, gap_is_warning=false
+- 有锁缺lock_owner → partial → WARN
+- 非window_checker → FAIL
+
+---
+
 ## 7. 下一阶段计划
 
 | Phase | 内容 | 状态 |
