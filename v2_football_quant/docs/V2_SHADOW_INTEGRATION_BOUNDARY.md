@@ -238,6 +238,17 @@ D.3.1 修复 compare guard 中 `lock_owner_gap_preserved` 恒 true 表达式。
 
 ---
 
+### D.4 window_checker Shadow Compare
+
+D.4 是 window_checker Shadow Compare，只读对照 window_checker 输出与 daily status / missed audit / settlement guard 一致性。
+
+- 不重跑 window_checker
+- 不模拟策略
+- 不生成 BET_LOCKED
+- lock_owner 缺字段 → WARN
+
+---
+
 ## 7. 下一阶段计划
 
 | Phase | 内容 | 状态 |
