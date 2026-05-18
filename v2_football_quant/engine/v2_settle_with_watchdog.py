@@ -26,6 +26,26 @@ def main():
     args = parser.parse_args()
 
     wd = v2_settle_watchdog()
+
+    # ── Phase D.7 Preflight Gate: block settlement if no valid official locks ──
+    try:
+        from engine.v2_settlement_preflight_guard import build_v2_settlement_preflight
+        preflight = build_v2_settlement_preflight(key)
+        preflight_path = BASE_DIR / "data" / "runtime" / "status" / f"v2_settlement_preflight_{key}.json"
+        preflight_path.parent.mkdir(parents=True, exist_ok=True)
+        preflight_path.write_text(json.dumps(preflight, ensure_ascii=False, indent=2), encoding="utf-8")
+        if not preflight.get("settlement_allowed"):
+            reason = ";".join(preflight.get("summary",{}).get("blockers",[]))
+            wd.finish(status="BLOCKED_PREFLIGHT", error=f"settlement blocked: {reason}",
+                      output_files={"preflight": str(preflight_path)})
+            print(f"[PREFLIGHT BLOCK] {reason}", flush=True)
+            raise SystemExit(2)
+        print(f"[PREFLIGHT ALLOW] settlement proceeding", flush=True)
+    except SystemExit:
+        raise
+    except Exception as e:
+        wd.finish(status="FAILED", error=f"preflight exception: {e}")
+        raise
     if not wd.acquire_lock():
         print("【V2 量化系统】", flush=True)
         print(f"[WATCHDOG] V2结算 已有实例运行，跳过", flush=True)
