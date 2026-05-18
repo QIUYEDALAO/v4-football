@@ -227,6 +227,17 @@ D.3 是 DAILY_POOL Input Shadow Compare，只读对照 DAILY_POOL 输入与 wind
 
 ---
 
+### D.3.1 Compare Guard Hardening
+
+D.3.1 修复 compare guard 中 `lock_owner_gap_preserved` 恒 true 表达式。
+
+**修复：** 通过 `_compute_lg_preserved/is_warning/evidence_quality()` 三函数计算真实 guard 值。
+- `gap_preserved=true` = 缺口被保留上报，不代表证据完整
+- `evidence_quality=partial/missing` → max WARN
+- 非 window_checker lock_owner → FAIL
+
+---
+
 ## 7. 下一阶段计划
 
 | Phase | 内容 | 状态 |

@@ -152,6 +152,48 @@ def collect_missed_candidates(date_key: str) -> dict[str, Any]:
     }
 
 
+def _compute_lg_preserved(pool: dict, wc: dict, ds: dict) -> bool:
+    """lock_owner_gap_preserved: true means gap is reported, not that evidence is complete."""
+    # If there's lock_owner evidence and it's NOT window_checker → not preserved (violation)
+    # Otherwise the gap IS preserved (i.e., we're aware and reporting it)
+    raw_locks = wc.get("raw_locks", [])
+    for lk in raw_locks:
+        if "lock_owner" in lk and lk.get("lock_owner") != "window_checker":
+            return False  # violation detected
+    return True  # gap preserved (no violation found, even if evidence missing)
+
+
+def _compute_lg_is_warning(pool: dict, wc: dict, ds: dict) -> bool:
+    """Returns True if lock_owner gap deserves a warning."""
+    raw_locks = wc.get("raw_locks", [])
+    if wc.get("new_locks_count", 0) > 0 and raw_locks:
+        for lk in raw_locks:
+            if "lock_owner" not in lk:
+                return True  # locks exist but no lock_owner field
+    # Also warn if pool candidates have unknown_fields about lock_owner
+    if any("lock_owner" in f for f in pool.get("unknown_fields", [])):
+        return True
+    if any("lock_owner" in f for f in wc.get("unknown_fields", [])):
+        return True
+    return False
+
+
+def _compute_lg_evidence_quality(pool: dict, wc: dict, ds: dict) -> str:
+    """lock_owner evidence quality: strong/partial/missing."""
+    raw_locks = wc.get("raw_locks", [])
+    has_locks = wc.get("new_locks_count", 0) > 0
+    if not has_locks and not raw_locks:
+        return "partial"  # no locks to verify, no evidence needed
+    has_lock_owner_fields = all("lock_owner" in lk for lk in raw_locks) if raw_locks else False
+    if has_lock_owner_fields:
+        return "strong"
+    if raw_locks:
+        return "partial"  # locks exist but missing lock_owner field
+    if wc.get("window_checker_found"):
+        return "partial"  # checker ran but no lock detail
+    return "missing"
+
+
 def compare_candidates_to_outputs(date_key: str) -> dict[str, Any]:
     notes: list[str] = []
 
@@ -218,7 +260,9 @@ def compare_candidates_to_outputs(date_key: str) -> dict[str, Any]:
         "no_qq_push": True,
         "no_settlement_write": True,
         "missed_not_promoted": True,
-        "lock_owner_gap_preserved": all(pool.get("unknown_fields", [])) is False or True,  # preserved
+        "lock_owner_gap_preserved": _compute_lg_preserved(pool, wc, ds),
+        "lock_owner_gap_is_warning": _compute_lg_is_warning(pool, wc, ds),
+        "lock_owner_evidence_quality": _compute_lg_evidence_quality(pool, wc, ds),
     }
 
     # Missed check
@@ -318,7 +362,9 @@ def build_v2_shadow_compare(date_key: str | None = None) -> dict[str, Any]:
             "no_qq_push": True,
             "no_settlement_write": True,
             "missed_not_promoted": True,
-            "lock_owner_gap_preserved": True,
+            "lock_owner_gap_preserved": _compute_lg_preserved(pool, wc, ds),
+            "lock_owner_gap_is_warning": _compute_lg_is_warning(pool, wc, ds),
+            "lock_owner_evidence_quality": _compute_lg_evidence_quality(pool, wc, ds),
         },
     }
 
