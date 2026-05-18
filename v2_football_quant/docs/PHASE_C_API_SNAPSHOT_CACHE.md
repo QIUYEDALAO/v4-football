@@ -375,3 +375,43 @@ python3 tools/api_snapshot_cache_dryrun.py --date 20260517 --module all --check
 ### 下一阶段边界
 - C.13 才做 Phase C 总验收 / PR / main 合并准备；
 - V2/V4 正式接 cache 必须另开 BOSS 指令。
+
+## Phase C.13：API Snapshot / Cache 总验收与合并准备（本轮）
+### 目标
+- 对 C.1-C.12 做一次总验收（工程口径）；
+- 输出 Phase C completion checker 与收口文档；
+- 完成 main 合并前准备信息；
+- 明确本阶段仍为 `CODE_READY`。
+
+### 严格边界
+- 不新增功能；
+- 不接 V2/V4 正式链路；
+- 不替换正式 API 调用；
+- 不调用外部 API；
+- 不读取 key；
+- 不推 QQ；
+- 不接 cron；
+- 不写 `PRODUCTION_VERIFIED`；
+- 不合并 main。
+
+### 本轮新增
+- `tools/check_phase_c_completion.py`
+  - 汇总 C.1-C.12 marker/checker；
+  - 校验 secret / formal link / raw response / PWA / staged artifact 风险；
+  - 输出 `phase_c_completion_check_YYYYMMDD.json`。
+- `docs/PHASE_C_COMPLETION_REPORT.md`
+  - 固化 C.1-C.12 阶段结论、边界与后续建议。
+- Dashboard 只读补充
+  - 首页/API缓存页/system 页展示 Phase C 总验收状态；
+  - 明确“非生产接入”“不代表业务一致”。
+
+### 当前结论口径
+- Phase C 当前仅可声明：`CODE_READY`；
+- `PIPELINE_READY=false`；
+- `PRODUCTION_VERIFIED=false`；
+- 仍不能代表 V2/V4 业务一致；
+- 仍不能作为正式链路主源。
+
+### 下一阶段边界
+- 后续是否 PR/main 合并，必须 BOSS 明确确认；
+- V2/V4 正式接 cache 必须另开 BOSS 指令。

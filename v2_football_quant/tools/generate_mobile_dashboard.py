@@ -1366,6 +1366,7 @@ def _compute_api_cache(date_key: str) -> dict[str, Any]:
     aux_explain_check_path = STATUS_DIR / f"api_aux_explain_check_{date_key}.json"
     health_summary_path = STATUS_DIR / f"api_cache_health_summary_{date_key}.json"
     health_check_path = STATUS_DIR / f"api_cache_health_check_{date_key}.json"
+    phase_c_completion_path = STATUS_DIR / f"phase_c_completion_check_{date_key}.json"
     dryrun = _load_json(dryrun_path, {})
     bundle = _load_json(bundle_path, {})
     check = _load_json(check_path, {})
@@ -1388,6 +1389,7 @@ def _compute_api_cache(date_key: str) -> dict[str, Any]:
     aux_explain_check = _load_json(aux_explain_check_path, {})
     health_summary = _load_json(health_summary_path, {})
     health_check = _load_json(health_check_path, {})
+    phase_c_completion = _load_json(phase_c_completion_path, {})
     safety_dry = dryrun if isinstance(dryrun, dict) else {}
     boundaries = bundle.get("boundaries", {}) if isinstance(bundle.get("boundaries", {}), dict) else {}
     safety_bundle = bundle.get("safety", {}) if isinstance(bundle.get("safety", {}), dict) else {}
@@ -1470,6 +1472,7 @@ def _compute_api_cache(date_key: str) -> dict[str, Any]:
         "aux_explain_check_path": aux_explain_check_path,
         "health_summary_path": health_summary_path,
         "health_check_path": health_check_path,
+        "phase_c_completion_path": phase_c_completion_path,
         "dryrun_found": dryrun_path.exists(),
         "bundle_found": bundle_path.exists(),
         "check_found": check_path.exists(),
@@ -1796,6 +1799,29 @@ def _compute_api_cache(date_key: str) -> dict[str, Any]:
         "health_errors": health_summary.get("errors", []) if isinstance(health_summary.get("errors", []), list) else [],
         "health_check_warnings": health_check.get("warnings", []) if isinstance(health_check.get("warnings", []), list) else [],
         "health_check_errors": health_check.get("errors", []) if isinstance(health_check.get("errors", []), list) else [],
+        "phase_c_completion_found": phase_c_completion_path.exists(),
+        "phase_c_completion_status": str((phase_c_completion.get("status", "MISSING") if isinstance(phase_c_completion, dict) else "MISSING")).upper(),
+        "phase_c_completion_overall": str((phase_c_completion.get("overall_status", "MISSING") if isinstance(phase_c_completion, dict) else "MISSING")).upper(),
+        "phase_c_completion_code_ready": bool((phase_c_completion.get("phase_c_code_ready", False) if isinstance(phase_c_completion, dict) else False)),
+        "phase_c_completion_pipeline_ready": bool((phase_c_completion.get("pipeline_ready", False) if isinstance(phase_c_completion, dict) else False)),
+        "phase_c_completion_production_verified": bool((phase_c_completion.get("production_verified", False) if isinstance(phase_c_completion, dict) else False)),
+        "phase_c_completion_pass_count": int((phase_c_completion.get("pass_count", 0) if isinstance(phase_c_completion, dict) else 0) or 0),
+        "phase_c_completion_warn_count": int((phase_c_completion.get("warn_count", 0) if isinstance(phase_c_completion, dict) else 0) or 0),
+        "phase_c_completion_fail_count": int((phase_c_completion.get("fail_count", 0) if isinstance(phase_c_completion, dict) else 0) or 0),
+        "phase_c_completion_missing_count": int((phase_c_completion.get("missing_count", 0) if isinstance(phase_c_completion, dict) else 0) or 0),
+        "phase_c_completion_blocker_count": int((phase_c_completion.get("blocker_count", 0) if isinstance(phase_c_completion, dict) else 0) or 0),
+        "phase_c_completion_secret_safe": bool((phase_c_completion.get("secret_safe", False) if isinstance(phase_c_completion, dict) else False)),
+        "phase_c_completion_pwa_valid": bool((phase_c_completion.get("pwa_valid", False) if isinstance(phase_c_completion, dict) else False)),
+        "phase_c_completion_runtime_artifacts_staged": bool((phase_c_completion.get("runtime_artifacts_staged", False) if isinstance(phase_c_completion, dict) else False)),
+        "phase_c_completion_dashboard_html_staged": bool((phase_c_completion.get("dashboard_html_staged", False) if isinstance(phase_c_completion, dict) else False)),
+        "phase_c_completion_raw_snapshot_staged": bool((phase_c_completion.get("raw_snapshot_staged", False) if isinstance(phase_c_completion, dict) else False)),
+        "phase_c_completion_phase_statuses": (
+            phase_c_completion.get("phase_statuses", {})
+            if isinstance(phase_c_completion.get("phase_statuses", {}), dict)
+            else {}
+        ),
+        "phase_c_completion_warnings": phase_c_completion.get("warnings", []) if isinstance(phase_c_completion.get("warnings", []), list) else [],
+        "phase_c_completion_errors": phase_c_completion.get("errors", []) if isinstance(phase_c_completion.get("errors", []), list) else [],
         "bundle_preview": {
             "module_keys": sorted(
                 list((bundle.get("modules", {}) if isinstance(bundle.get("modules", {}), dict) else {}).keys())
@@ -1998,6 +2024,11 @@ def _render_index(
                 ("raw_response_visible", _status_tag("NO" if not api_cache.get("health_raw_response_visible") else "FAIL")),
                 ("health secret_safe", _status_tag("PASS" if api_cache.get("health_secret_safe") else ("MISSING" if not api_cache.get("health_summary_found") else "FAIL"))),
                 ("正式链路使用cache", _status_tag("NO" if (not api_cache.get("health_formal_v2_uses_cache") and not api_cache.get("health_formal_v4_uses_cache") and not api_cache.get("health_qq_uses_cache")) else "FAIL")),
+                ("Phase C总验收", _status_tag(api_cache.get("phase_c_completion_overall"))),
+                ("Phase C completion checker", _status_tag(api_cache.get("phase_c_completion_status"))),
+                ("main合并准备", "待确认"),
+                ("Pipeline Ready", _status_tag("NO" if not api_cache.get("phase_c_completion_pipeline_ready") else "FAIL")),
+                ("Production Verified", _status_tag("NO" if not api_cache.get("phase_c_completion_production_verified") else "FAIL")),
                 ("bundle", _status_tag("PASS" if api_cache.get("bundle_found") else "MISSING")),
                 ("schema校验", _status_tag("PASS" if api_cache.get("check_schema_valid") else ("MISSING" if not api_cache.get("check_found") else "FAIL"))),
                 ("integrity校验", _status_tag("PASS" if api_cache.get("check_integrity_valid") else ("MISSING" if not api_cache.get("check_found") else "FAIL"))),
@@ -2775,6 +2806,11 @@ def _render_system(date_key: str, system: dict[str, Any], api_cache: dict[str, A
                     ("formal_v4_uses_cache", _status_tag("NO" if not api_cache.get("health_formal_v4_uses_cache") else "FAIL")),
                     ("qq_uses_cache", _status_tag("NO" if not api_cache.get("health_qq_uses_cache") else "FAIL")),
                     ("raw_response_visible", _status_tag("NO" if not api_cache.get("health_raw_response_visible") else "FAIL")),
+                    ("Phase C总验收", _status_tag(api_cache.get("phase_c_completion_overall"))),
+                    ("Phase C completion checker", _status_tag(api_cache.get("phase_c_completion_status"))),
+                    ("main合并准备", "待确认"),
+                    ("Pipeline Ready", _status_tag("NO" if not api_cache.get("phase_c_completion_pipeline_ready") else "FAIL")),
+                    ("Production Verified", _status_tag("NO" if not api_cache.get("phase_c_completion_production_verified") else "FAIL")),
                     ("schema校验", _status_tag("PASS" if api_cache.get("check_schema_valid") else ("MISSING" if not api_cache.get("check_found") else "FAIL"))),
                     ("integrity校验", _status_tag("PASS" if api_cache.get("check_integrity_valid") else ("MISSING" if not api_cache.get("check_found") else "FAIL"))),
                     ("secret检查", _status_tag("PASS" if api_cache.get("check_secret_safe") else ("MISSING" if not api_cache.get("check_found") else "FAIL"))),
@@ -2853,6 +2889,9 @@ def _render_system(date_key: str, system: dict[str, Any], api_cache: dict[str, A
             f"<div class='k'>aux detail checker</div><div class='v'><span class='mono'>{escape(str(api_cache.get('aux_detail_check_path')))}</span></div>"
             f"<div class='k'>aux explain dryrun</div><div class='v'><span class='mono'>{escape(str(api_cache.get('aux_explain_dryrun_path')))}</span></div>"
             f"<div class='k'>aux explain checker</div><div class='v'><span class='mono'>{escape(str(api_cache.get('aux_explain_check_path')))}</span></div>"
+            f"<div class='k'>phase c completion checker</div><div class='v'><span class='mono'>{escape(str(api_cache.get('phase_c_completion_path')))}</span></div>"
+            f"<div class='k'>phase c completion warnings</div><div class='v'>{escape('；'.join(api_cache.get('phase_c_completion_warnings', [])) if api_cache.get('phase_c_completion_warnings') else '无')}</div>"
+            f"<div class='k'>phase c completion errors</div><div class='v'>{escape('；'.join(api_cache.get('phase_c_completion_errors', [])) if api_cache.get('phase_c_completion_errors') else '无')}</div>"
             f"<div class='k'>runtime root</div><div class='v'><span class='mono'>{escape(str(api_cache.get('runtime_root', '缺失')))}</span></div>"
             f"<div class='k'>generated_at</div><div class='v'>{escape(str(api_cache.get('generated_at') or '缺失'))}</div>"
             f"<div class='k'>warnings</div><div class='v'>{escape('；'.join(api_cache.get('warnings', [])) if api_cache.get('warnings') else '无')}</div>"
@@ -2931,6 +2970,32 @@ def _render_api_cache_diag(date_key: str, api_cache: dict[str, Any]) -> str:
             ("checker secret/formal_link", f"{_status_tag('PASS' if api_cache.get('health_checker_secret_safe') else ('MISSING' if not api_cache.get('health_check_found') else 'FAIL'))} / {_status_tag('PASS' if api_cache.get('health_checker_formal_link_safe') else ('MISSING' if not api_cache.get('health_check_found') else 'FAIL'))}"),
             ("phase_statuses", "<br>".join(escape(item) for item in health_phase_items) if health_phase_items else "缺失"),
             ("limitations", "<br>".join(escape(str(x)) for x in api_cache.get("health_limitations", [])) if api_cache.get("health_limitations") else "缺失"),
+        ],
+    )
+
+    completion_phase_items = [f"{k}: {str(v)}" for k, v in (api_cache.get("phase_c_completion_phase_statuses", {}) or {}).items()]
+    completion_card = _kv_card(
+        "Phase C 总验收",
+        [
+            ("当前等级", _status_tag("CODE_READY")),
+            ("Phase C completion checker", _status_tag(api_cache.get("phase_c_completion_status"))),
+            ("Phase C overall", _status_tag(api_cache.get("phase_c_completion_overall"))),
+            ("phase_c_code_ready", _status_tag("PASS" if api_cache.get("phase_c_completion_code_ready") else "FAIL")),
+            ("pipeline_ready", _status_tag("NO" if not api_cache.get("phase_c_completion_pipeline_ready") else "FAIL")),
+            ("production_verified", _status_tag("NO" if not api_cache.get("phase_c_completion_production_verified") else "FAIL")),
+            ("secret_safe", _status_tag("PASS" if api_cache.get("phase_c_completion_secret_safe") else ("MISSING" if not api_cache.get("phase_c_completion_found") else "FAIL"))),
+            ("pwa_valid", _status_tag("PASS" if api_cache.get("phase_c_completion_pwa_valid") else ("MISSING" if not api_cache.get("phase_c_completion_found") else "FAIL"))),
+            ("runtime_artifacts_staged", _status_tag("NO" if not api_cache.get("phase_c_completion_runtime_artifacts_staged") else "FAIL")),
+            ("dashboard_html_staged", _status_tag("NO" if not api_cache.get("phase_c_completion_dashboard_html_staged") else "FAIL")),
+            ("raw_snapshot_staged", _status_tag("NO" if not api_cache.get("phase_c_completion_raw_snapshot_staged") else "FAIL")),
+            ("正式 V2 使用 cache", _status_tag("NO" if not api_cache.get("health_formal_v2_uses_cache") else "FAIL")),
+            ("正式 V4 使用 cache", _status_tag("NO" if not api_cache.get("health_formal_v4_uses_cache") else "FAIL")),
+            ("QQ 使用 cache", _status_tag("NO" if not api_cache.get("health_qq_uses_cache") else "FAIL")),
+            ("pass/warn/fail", f"{api_cache.get('phase_c_completion_pass_count', 0)}/{api_cache.get('phase_c_completion_warn_count', 0)}/{api_cache.get('phase_c_completion_fail_count', 0)}"),
+            ("missing/blocker", f"{api_cache.get('phase_c_completion_missing_count', 0)}/{api_cache.get('phase_c_completion_blocker_count', 0)}"),
+            ("main合并准备", "等待 BOSS 确认"),
+            ("下一阶段建议", "D / E / F / G / I"),
+            ("phase_statuses", "<br>".join(escape(item) for item in completion_phase_items) if completion_phase_items else "缺失"),
         ],
     )
 
@@ -3154,6 +3219,9 @@ def _render_api_cache_diag(date_key: str, api_cache: dict[str, Any]) -> str:
         f"<div class='k'>health errors</div><div class='v'>{escape('；'.join(api_cache.get('health_errors', [])) if api_cache.get('health_errors') else '无')}</div>"
         f"<div class='k'>health checker warnings</div><div class='v'>{escape('；'.join(api_cache.get('health_check_warnings', [])) if api_cache.get('health_check_warnings') else '无')}</div>"
         f"<div class='k'>health checker errors</div><div class='v'>{escape('；'.join(api_cache.get('health_check_errors', [])) if api_cache.get('health_check_errors') else '无')}</div>"
+        f"<div class='k'>phase c completion checker</div><div class='v'><span class='mono'>{escape(str(api_cache.get('phase_c_completion_path')))}</span></div>"
+        f"<div class='k'>phase c completion warnings</div><div class='v'>{escape('；'.join(api_cache.get('phase_c_completion_warnings', [])) if api_cache.get('phase_c_completion_warnings') else '无')}</div>"
+        f"<div class='k'>phase c completion errors</div><div class='v'>{escape('；'.join(api_cache.get('phase_c_completion_errors', [])) if api_cache.get('phase_c_completion_errors') else '无')}</div>"
         f"<div class='k'>real ingest marker</div><div class='v'><span class='mono'>{escape(str(api_cache.get('real_ingest_path')))}</span></div>"
         f"<div class='k'>real ingest checker</div><div class='v'><span class='mono'>{escape(str(api_cache.get('real_ingest_check_path')))}</span></div>"
         "</div></details></section>"
@@ -3164,6 +3232,7 @@ def _render_api_cache_diag(date_key: str, api_cache: dict[str, Any]) -> str:
             overview,
             phase_card,
             health_card,
+            completion_card,
             reader_card,
             shadow_read_card,
             shadow_consumer_card,
