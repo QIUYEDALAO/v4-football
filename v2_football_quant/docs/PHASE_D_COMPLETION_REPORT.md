@@ -255,6 +255,7 @@ Phase D 工程链路完成（engineering_complete=true），但 business_pass=fa
 | D.8.31 | `39243a2` | Controlled execution decision packet |
 | D.8.32 | `5abfb28` | Real state-present proof plan |
 | D.8.33 | `02b1e1a` | Active-window mutation proof plan |
+| D.8.34 | `TBD` | Production cron path proof plan |
 
 **D.8.13 结论：** approval_packet_status=READY_FOR_BOSS_REVIEW，guarded_live_observe_approved=false，D.8.14 需 BOSS 单独指令。
 
@@ -385,6 +386,21 @@ Phase D 工程链路完成（engineering_complete=true），但 business_pass=fa
   - `production_qq_path`
   - `production_verified_path`
   - `formal_state_write_path`
+
+## 23. D.8.34 Production Cron Path Proof Plan
+
+- D.8.34 仅做 `production_cron_path` 的证明规划，不做执行。
+- 当前状态保持：
+  - `proof_current_status=UNPROVEN`
+- cron 路径固定禁止：
+  - `cron_enable_allowed=false`
+  - `cron_modified=false`
+  - `cron_installed=false`
+  - `cron_started=false`
+  - `cron_write_allowed=false`
+- 下一步仅允许：
+  - `d838_allowed_to_generate=true`
+  - `d838_allowed_to_execute=false`
 
 <!-- D.8.16.3 closure: v2_football_quant/docs/PHASE_D_COMPLETION_REPORT.md -->
 
