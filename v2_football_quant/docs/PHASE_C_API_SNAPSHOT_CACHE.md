@@ -225,3 +225,9 @@ python3 tools/api_snapshot_cache_dryrun.py --date 20260517 --module all --check
 ### 下一阶段
 - C.9 才考虑非关键模块“辅助展示级”使用 cache 数据（仍不接生产链路）；
 - V2/V4 正式接 cache 仍需单独 BOSS 指令。
+
+### iPhone 刷新提示（C.8.1）
+- 若手机端看不到 `API缓存` 导航入口：
+  1. Safari 下拉刷新；
+  2. 关闭页面后重新打开；
+  3. 如仍为旧版，删除主屏幕图标后重新添加。

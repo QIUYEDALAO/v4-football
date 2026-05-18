@@ -2638,6 +2638,7 @@ def _render_api_cache_diag(date_key: str, api_cache: dict[str, Any]) -> str:
         "<li>本页不推QQ，不接cron，不写PRODUCTION_VERIFIED。</li>"
         "<li>本页仅工程灰度诊断，不代表V2/V4已接入cache。</li>"
         "<li>当前结果不代表V2/V4业务一致性结论。</li>"
+        "<li>若手机端看不到 API缓存入口：Safari 下拉刷新；关闭后重开；仍旧版可删除主屏幕图标后重新添加。</li>"
         "</ul></section>"
     )
 
@@ -2708,7 +2709,7 @@ pre.mono{white-space:pre-wrap;word-break:break-word;max-height:260px;overflow:au
     }
     (OUT_DIR / "manifest.json").write_text(json.dumps(manifest, ensure_ascii=False, indent=2), encoding="utf-8")
 
-    sw = """const CACHE='v2v4-dashboard-phase1-v1';
+    sw = """const CACHE='v2v4-dashboard-phase-c8-v1';
 const ASSETS=['./','./index.html','./api_cache.html','./v2_today.html','./v4_scan.html','./v4_review.html','./system.html','./assets/style.css','./manifest.json'];
 self.addEventListener('install',e=>{e.waitUntil(caches.open(CACHE).then(c=>c.addAll(ASSETS)).then(()=>self.skipWaiting()));});
 self.addEventListener('activate',e=>{e.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(k=>k!==CACHE).map(k=>caches.delete(k)))).then(()=>self.clients.claim()));});
