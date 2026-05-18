@@ -165,6 +165,15 @@ def main() -> None:
     verified_write_allowed = False
     cron_enable_allowed = False
 
+    # ── D.8.12.3: default path vs guarded path split ──
+    default_live_path_ready = False  # always blocked
+    guarded_live_path_ready = bool(
+        no_formal_state_write_hook_available
+        and no_push_hook_available
+        and safe_sender_guard_available
+        and watchdog_only_failure_available
+    )
+
     production_verified = False
     pipeline_ready = False
 
@@ -231,6 +240,8 @@ def main() -> None:
             "safe_sender_guard_available": safe_sender_guard_available,
             "watchdog_only_failure_available": watchdog_only_failure_available,
             "live_ready_now": live_ready_now,
+            "default_live_path_ready": default_live_path_ready,
+            "guarded_live_path_ready": guarded_live_path_ready,
         },
         "risk_classification": {
             "blocking_risks": sorted(set(blocking_risks)),
