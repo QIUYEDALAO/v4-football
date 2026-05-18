@@ -36,3 +36,5 @@ D.8.17 requires separate BOSS instruction.
 <!-- D.8.16.3 closure: v2_football_quant/docs/V2_DAILY_POOL_GUARDED_OBSERVE_READINESS.md -->
 
 <!-- D.8.17.1 closure -->
+
+<!-- D.8.18.2 closure -->

@@ -48,3 +48,5 @@
 D.8.18 can be a controlled resume approval packet ONLY.
 D.8.18 still requires separate BOSS instruction.
 Current level: CODE_READY.
+
+<!-- D.8.18.2 closure -->

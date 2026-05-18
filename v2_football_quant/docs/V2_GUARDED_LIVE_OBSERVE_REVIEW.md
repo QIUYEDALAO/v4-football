@@ -40,3 +40,5 @@ Current level: **CODE_READY**.
 <!-- D.8.16.3 closure: v2_football_quant/docs/V2_GUARDED_LIVE_OBSERVE_REVIEW.md -->
 
 <!-- D.8.17.1 closure -->
+
+<!-- D.8.18.2 closure -->
