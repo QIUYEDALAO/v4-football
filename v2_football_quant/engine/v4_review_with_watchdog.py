@@ -88,7 +88,7 @@ def main():
         # Step 1: 赛后验证
         result_val = subprocess.run(
             [sys.executable, "-u", str(BASE_DIR / "engine" / "v4_ht_result_validator.py"), "--date", args.date],
-            capture_output=True, text=True, timeout=300,
+            capture_output=True, text=True, timeout=900,
             cwd=str(BASE_DIR), env=_env,
         )
         if result_val.returncode != 0:
@@ -98,7 +98,7 @@ def main():
         # Step 2: 归因分析
         result_att = subprocess.run(
             [sys.executable, "-u", str(BASE_DIR / "engine" / "v4_result_attribution.py"), "--date", args.date],
-            capture_output=True, text=True, timeout=300,
+            capture_output=True, text=True, timeout=600,
             cwd=str(BASE_DIR), env=_env,
         )
         if result_att.returncode != 0:
@@ -110,7 +110,7 @@ def main():
         if val_exists:
             result_struct = subprocess.run(
                 [sys.executable, "-u", str(BASE_DIR / "engine" / "gen_structured.py"), "--date", args.date],
-                capture_output=True, text=True, timeout=600,
+                capture_output=True, text=True, timeout=1200,
                 cwd=str(BASE_DIR), env=_env,
             )
             if result_struct.returncode != 0:
@@ -202,12 +202,13 @@ def main():
         _hash = ""
         if _qq_path.exists():
             _hash = hashlib.md5(_qq_path.read_bytes()).hexdigest()
+        _guard_label = "PASS" if _overall_pass else "BLOCKER"
         sent = {
             "date": key,
             "status": "NOT_SENT",
             "delivery_result": "not_executed",
             "pushed": False,
-            "reason": f"guard {"PASS" if _overall_pass else "BLOCKER"}, allowed_to_push=False, waiting BOSS confirm",
+            "reason": f"guard {_guard_label}, allowed_to_push=False, waiting BOSS confirm",
             "template_id": "v4_daily_review_qq_v1",
             "message_hash": _hash,
             "version": "qq_daily_v1.0",
