@@ -59,6 +59,8 @@ def main() -> None:
     aux_display = _load_json(aux_display_path, {})
     aux_detail_path = STATUS_DIR / f"api_aux_detail_dryrun_{date_key}.json"
     aux_detail = _load_json(aux_detail_path, {})
+    aux_explain_path = STATUS_DIR / f"api_aux_explain_dryrun_{date_key}.json"
+    aux_explain = _load_json(aux_explain_path, {})
 
     result = {
         "date": date_key,
@@ -85,6 +87,9 @@ def main() -> None:
             "aux_detail_visible": aux_detail_path.exists(),
             "aux_detail_status": str((aux_detail.get("status", "MISSING") if isinstance(aux_detail, dict) else "MISSING")).upper(),
             "aux_detail_marker": str(aux_detail_path),
+            "aux_explain_visible": aux_explain_path.exists(),
+            "aux_explain_status": str((aux_explain.get("status", "MISSING") if isinstance(aux_explain, dict) else "MISSING")).upper(),
+            "aux_explain_marker": str(aux_explain_path),
             "raw_response_visible": False,
             "production_dependency": False,
         },

@@ -303,3 +303,37 @@ python3 tools/api_snapshot_cache_dryrun.py --date 20260517 --module all --check
 ### 下一阶段边界
 - C.11 才考虑“非关键页面读 cache detail 作为辅助解释”；
 - V2/V4 正式接 cache 仍需另开 BOSS 指令。
+
+## Phase C.11：Non-critical Cache Detail Explanation Layer（本轮）
+### 目标
+- C.11 只做 cache detail 辅助解释层；
+- 只允许 Dashboard / Replay / Audit 查看解释状态；
+- 正式 V2/V4 卡片继续使用原来源；
+- 不影响推荐、结算、推送、评级。
+
+### 边界
+- 不调用 API；
+- 不读取 key；
+- 不替换正式 API 调用；
+- 不推 QQ；
+- 不接 cron；
+- 不写 `PRODUCTION_VERIFIED`；
+- 只展示解释文本与 metadata，不展示 raw response 全文；
+- 明确“不能代表 V2/V4 业务一致，不能替换正式链路”。
+
+### 本轮新增
+- `engine/api_aux_explain.py`：辅助解释报告聚合（能力/限制/边界卡）；
+- `tools/api_aux_explain_dryrun.py`：解释层 dry-run；
+- `tools/check_api_aux_explain.py`：解释层边界/文案/secret 校验；
+- `api_cache.html` 增加 cache 辅助解释区域（能证明什么/不能证明什么/生产边界/下一步缺口）；
+- 首页 API Cache 卡增加 aux explain 状态；
+- replay marker 增加 `aux_explain_status`，仅展示，不改主源。
+
+### 当前限制
+- 当前只能解释 cache 工程能力，不代表 V2/V4 业务一致；
+- 正式 V2/V4 仍禁用 cache 作为主数据源；
+- 正式链路接 cache 仍需独立生产验证阶段。
+
+### 下一阶段边界
+- C.12 才做 Cache Health Daily Summary；
+- V2/V4 正式接 cache 必须另开 BOSS 指令。
