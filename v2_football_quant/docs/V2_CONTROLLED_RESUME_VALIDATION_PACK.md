@@ -52,3 +52,12 @@
   - `production_verified=false`
 - WARN 风险需在审批包中分类呈现，不得弱化为 PASS。
 - D.8.8 仅可作为执行草案，不得自动执行。
+
+## 7. D.8.8 对接说明
+
+- D.8.8 可在 BOSS 单独批准后执行单窗口受控观察。
+- 执行仍必须满足：
+  - `no-push`
+  - `no-settlement-write`
+  - `require-preflight`
+- D.8.8 结果不得改写为 `PRODUCTION_VERIFIED`。

@@ -28,6 +28,7 @@
 | D.8.4 | `TBD` | QQ route dry-run validation (read-only) | ✅ |
 | D.8.5 | `TBD` | Single-window live observe plan (plan-only) | ✅ |
 | D.8.6 | `TBD` | Settlement preflight live guard observe plan (plan-only) | ✅ |
+| D.8.8 | `TBD` | Controlled single-window resume execution (guarded observe) | ✅ |
 
 **新增 20+ 文件，0 次策略改动，0 次 API 调用，0 次 QQ 推送。**
 
@@ -177,3 +178,17 @@ Phase D 工程链路完成（engineering_complete=true），但 business_pass=fa
 - `phase-d8 workspace isolation: excel only`
 - `post-phase-c remainder: excel only`
 - `phase-d87 workspace isolation: net_utils only`
+
+---
+
+## 11. D.8.8 Controlled Single-window Resume
+
+- D.8.8 是单窗口受控执行，不是全量恢复。
+- 固定禁止：
+  - 不推 QQ
+  - 不写 verified
+  - 不写 `PRODUCTION_VERIFIED`
+  - 不启用全局 cron
+- 若无法安全执行正式 worker，可降级为 plan-only WARN（必须可审计）。
+- 失败只报告 watchdog 状态；不允许 AI 自由 kill/retry。
+- 下一步仅允许 D.8.9 post-run review；Phase E 仍不得自动进入。

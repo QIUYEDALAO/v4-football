@@ -63,3 +63,14 @@
 
 - 当前仅可提交给 BOSS 审批。
 - 下一门禁：`D.8.8`（需 BOSS 单独指令）。
+
+## 8. D.8.8 执行批准后口径
+
+- D.8.8 仅允许单窗口 controlled resume execution。
+- 不允许全量恢复，不允许 QQ 推送，不允许写 verified。
+- 仍保持：
+  - `limited_resume_approved=false`（审批包自身不改写）
+  - `resume_execution_allowed=false`（审批包自身不改写）
+  - `cron_enable_allowed=false`
+  - `qq_push_allowed=false`
+  - `production_verified=false`
