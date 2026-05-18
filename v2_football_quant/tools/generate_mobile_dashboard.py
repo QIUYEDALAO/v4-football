@@ -1352,6 +1352,8 @@ def _compute_api_cache(date_key: str) -> dict[str, Any]:
     ingest_plan_path = CACHE_DIR / "api_snapshot" / date_key / "controlled_ingest_plan.json"
     real_ingest_path = STATUS_DIR / f"api_controlled_ingest_real_{date_key}.json"
     real_ingest_check_path = STATUS_DIR / f"api_real_ingest_check_{date_key}.json"
+    reader_dryrun_path = STATUS_DIR / f"api_cache_reader_dryrun_{date_key}.json"
+    reader_check_path = STATUS_DIR / f"api_cache_reader_check_{date_key}.json"
     dryrun = _load_json(dryrun_path, {})
     bundle = _load_json(bundle_path, {})
     check = _load_json(check_path, {})
@@ -1360,6 +1362,8 @@ def _compute_api_cache(date_key: str) -> dict[str, Any]:
     ingest_plan = _load_json(ingest_plan_path, {})
     real_ingest = _load_json(real_ingest_path, {})
     real_ingest_check = _load_json(real_ingest_check_path, {})
+    reader_dryrun = _load_json(reader_dryrun_path, {})
+    reader_check = _load_json(reader_check_path, {})
     safety_dry = dryrun if isinstance(dryrun, dict) else {}
     boundaries = bundle.get("boundaries", {}) if isinstance(bundle.get("boundaries", {}), dict) else {}
     safety_bundle = bundle.get("safety", {}) if isinstance(bundle.get("safety", {}), dict) else {}
@@ -1428,6 +1432,8 @@ def _compute_api_cache(date_key: str) -> dict[str, Any]:
         "ingest_plan_path": ingest_plan_path,
         "real_ingest_path": real_ingest_path,
         "real_ingest_check_path": real_ingest_check_path,
+        "reader_dryrun_path": reader_dryrun_path,
+        "reader_check_path": reader_check_path,
         "dryrun_found": dryrun_path.exists(),
         "bundle_found": bundle_path.exists(),
         "check_found": check_path.exists(),
@@ -1500,6 +1506,22 @@ def _compute_api_cache(date_key: str) -> dict[str, Any]:
         "real_ingest_check_boundary_valid": bool(real_ingest_check.get("boundary_valid", False)) if isinstance(real_ingest_check, dict) else False,
         "real_ingest_check_errors": real_ingest_check.get("errors", []) if isinstance(real_ingest_check.get("errors", []), list) else [],
         "real_ingest_check_warnings": real_ingest_check.get("warnings", []) if isinstance(real_ingest_check.get("warnings", []), list) else [],
+        "reader_dryrun_found": reader_dryrun_path.exists(),
+        "reader_check_found": reader_check_path.exists(),
+        "reader_status": str((reader_dryrun.get("status", "MISSING") if isinstance(reader_dryrun, dict) else "MISSING")).upper(),
+        "reader_mode": str((reader_dryrun.get("mode", "read_only") if isinstance(reader_dryrun, dict) else "read_only")),
+        "reader_no_api": bool(reader_dryrun.get("no_api", False)) if isinstance(reader_dryrun, dict) else False,
+        "reader_no_key_read": bool(reader_dryrun.get("no_key_read", False)) if isinstance(reader_dryrun, dict) else False,
+        "reader_snapshot_count": int(reader_dryrun.get("snapshot_count", 0) or 0) if isinstance(reader_dryrun, dict) else 0,
+        "reader_bundle_found": bool(reader_dryrun.get("bundle_found", False)) if isinstance(reader_dryrun, dict) else False,
+        "reader_real_snapshot_found": bool(reader_dryrun.get("real_ingest_snapshot_found", False)) if isinstance(reader_dryrun, dict) else False,
+        "reader_secret_safe": bool(reader_dryrun.get("secret_safe", False)) if isinstance(reader_dryrun, dict) else False,
+        "reader_check_status": str((reader_check.get("status", "MISSING") if isinstance(reader_check, dict) else "MISSING")).upper(),
+        "reader_check_schema_valid": bool(reader_check.get("schema_valid", False)) if isinstance(reader_check, dict) else False,
+        "reader_check_boundary_valid": bool(reader_check.get("boundary_valid", False)) if isinstance(reader_check, dict) else False,
+        "reader_check_secret_safe": bool(reader_check.get("secret_safe", False)) if isinstance(reader_check, dict) else False,
+        "reader_check_warnings": reader_check.get("warnings", []) if isinstance(reader_check.get("warnings", []), list) else [],
+        "reader_check_errors": reader_check.get("errors", []) if isinstance(reader_check.get("errors", []), list) else [],
         "bundle_preview": {
             "module_keys": sorted(
                 list((bundle.get("modules", {}) if isinstance(bundle.get("modules", {}), dict) else {}).keys())
@@ -1702,6 +1724,16 @@ def _render_index(
                 ("real ingest 请求次数", str(api_cache.get("real_ingest_request_count", 0))),
                 ("real ingest secret检查", _status_tag("PASS" if api_cache.get("real_ingest_check_secret_safe") else ("MISSING" if not api_cache.get("real_ingest_check_found") else "FAIL"))),
                 ("real ingest 生产依赖", _status_tag("NO")),
+                ("Cache Reader", _status_tag(api_cache.get("reader_status"))),
+                ("reader checker", _status_tag(api_cache.get("reader_check_status"))),
+                ("reader 模式", escape(str(api_cache.get("reader_mode", "read_only")))),
+                ("reader API调用", _status_tag("NO" if api_cache.get("reader_no_api") else "FAIL")),
+                ("reader 读取key", _status_tag("NO" if api_cache.get("reader_no_key_read") else "FAIL")),
+                ("reader snapshot数量", str(api_cache.get("reader_snapshot_count", 0))),
+                ("reader bundle", _status_tag("PASS" if api_cache.get("reader_bundle_found") else "MISSING")),
+                ("reader real snapshot", _status_tag("PASS" if api_cache.get("reader_real_snapshot_found") else "MISSING")),
+                ("reader secret检查", _status_tag("PASS" if api_cache.get("reader_check_secret_safe") else ("MISSING" if not api_cache.get("reader_check_found") else "FAIL"))),
+                ("reader 生产依赖", _status_tag("NO")),
                 ("runtime root", escape(api_runtime_root_view)),
                 ("下一步", "不得接生产链路，需 BOSS 单独确认"),
             ],
@@ -1751,6 +1783,10 @@ def _render_index(
         f"<div class='k'>real ingest raw snapshot</div><div class='v'><span class='mono'>{escape(str(api_cache.get('real_ingest_raw_snapshot_path') or '缺失'))}</span></div>"
         f"<div class='k'>real ingest checker warnings</div><div class='v'>{escape('；'.join(api_cache.get('real_ingest_check_warnings', [])) if api_cache.get('real_ingest_check_warnings') else '无')}</div>"
         f"<div class='k'>real ingest checker errors</div><div class='v'>{escape('；'.join(api_cache.get('real_ingest_check_errors', [])) if api_cache.get('real_ingest_check_errors') else '无')}</div>"
+        f"<div class='k'>cache reader dryrun marker</div><div class='v'><span class='mono'>{escape(str(api_cache.get('reader_dryrun_path')))}</span></div>"
+        f"<div class='k'>cache reader checker marker</div><div class='v'><span class='mono'>{escape(str(api_cache.get('reader_check_path')))}</span></div>"
+        f"<div class='k'>cache reader checker warnings</div><div class='v'>{escape('；'.join(api_cache.get('reader_check_warnings', [])) if api_cache.get('reader_check_warnings') else '无')}</div>"
+        f"<div class='k'>cache reader checker errors</div><div class='v'>{escape('；'.join(api_cache.get('reader_check_errors', [])) if api_cache.get('reader_check_errors') else '无')}</div>"
         "</div></details></section>"
     ]
 
@@ -2369,6 +2405,16 @@ def _render_system(date_key: str, system: dict[str, Any], api_cache: dict[str, A
                     ("real ingest 请求次数", str(api_cache.get("real_ingest_request_count", 0))),
                     ("real ingest api调用", _status_tag("YES" if api_cache.get("real_ingest_api_called") else "NO")),
                     ("real ingest secret检查", _status_tag("PASS" if api_cache.get("real_ingest_check_secret_safe") else ("MISSING" if not api_cache.get("real_ingest_check_found") else "FAIL"))),
+                    ("Cache Reader", _status_tag(api_cache.get("reader_status"))),
+                    ("reader checker", _status_tag(api_cache.get("reader_check_status"))),
+                    ("reader 模式", escape(str(api_cache.get("reader_mode", "read_only")))),
+                    ("reader API调用", _status_tag("NO" if api_cache.get("reader_no_api") else "FAIL")),
+                    ("reader 读取key", _status_tag("NO" if api_cache.get("reader_no_key_read") else "FAIL")),
+                    ("reader snapshot数量", str(api_cache.get("reader_snapshot_count", 0))),
+                    ("reader bundle", _status_tag("PASS" if api_cache.get("reader_bundle_found") else "MISSING")),
+                    ("reader real snapshot", _status_tag("PASS" if api_cache.get("reader_real_snapshot_found") else "MISSING")),
+                    ("reader secret检查", _status_tag("PASS" if api_cache.get("reader_check_secret_safe") else ("MISSING" if not api_cache.get("reader_check_found") else "FAIL"))),
+                    ("reader 生产依赖", _status_tag("NO")),
                 ],
             ),
             "<section class='card'><h2>API Cache 证据（折叠）</h2>"
@@ -2501,6 +2547,12 @@ def generate(date_str: str) -> dict[str, Any]:
         "no_cron": bool(api_cache.get("no_cron")),
         "production_dependency": False,
         "production_verified": False,
+        "cache_reader_visible": True,
+        "cache_reader_dryrun_found": bool(api_cache.get("reader_dryrun_found")),
+        "cache_reader_check_found": bool(api_cache.get("reader_check_found")),
+        "cache_reader_no_api": bool(api_cache.get("reader_no_api")),
+        "cache_reader_no_key_read": bool(api_cache.get("reader_no_key_read")),
+        "cache_reader_production_dependency": False,
         "dashboard_updated": True,
         "strategy_changed": False,
         "qq_pushed": False,

@@ -97,6 +97,47 @@ python3 tools/api_snapshot_cache_dryrun.py --date 20260517 --module all --check
 - 真实响应仅落项目内 `data/runtime/cache/api_snapshot/YYYYMMDD/real_ingest/`；
 - 严禁在 marker/log/snapshot 中泄露 API key。
 
-## C.5（后续，未开始）
-- 可讨论非关键模块只读读取 cache；
-- V2/V4 正式接 cache 仍需单独 BOSS 指令与生产验证阶段。
+## Phase C.5：Cache Read Adapter（本轮）
+### 目标
+- 仅新增只读读取层（reader/adapter），读取已有 `api_snapshot` 缓存产物；
+- 不调用 API；
+- 不读取 `APIFOOTBALL_KEY`；
+- 不修改 cache/snapshot；
+- 不接入 V2/V4 正式链路；
+- 不替换正式 API 调用；
+- 不推 QQ；
+- 不接 cron；
+- 不写 `PRODUCTION_VERIFIED`。
+
+### 新增组件
+- `engine/api_cache_reader.py`
+  - 只读读取 `data/runtime/cache/api_snapshot/YYYYMMDD/`；
+  - 输出 `api_cache_reader.v1` summary；
+  - 提供边界校验（`no_api/no_key_read/no_push/no_strategy_recompute/no_cron`）。
+
+- `tools/api_cache_reader_dryrun.py`
+  - 运行 reader 并写 marker：
+  - `data/runtime/status/api_cache_reader_dryrun_YYYYMMDD.json`
+
+- `tools/check_api_cache_reader.py`
+  - 校验 reader dryrun schema / boundary / secret；
+  - 额外静态检查 reader 源码是否包含网络调用与 key 读取；
+  - 写 checker marker：
+  - `data/runtime/status/api_cache_reader_check_YYYYMMDD.json`
+
+### Dashboard 展示
+- API Snapshot / Cache 卡片增加 Cache Reader 状态（只读）：
+  - reader 状态；
+  - reader checker；
+  - API调用=否；
+  - 读取key=否；
+  - snapshot 数量；
+  - bundle / real snapshot 存在性；
+  - secret 检查；
+  - production_dependency=false；
+  - production_verified=false。
+
+## 后续路线（仍需 BOSS 单独确认）
+- Phase C.6：shadow read（只读对照，不影响生产路径）
+- Phase C.7：非关键链路灰度评估
+- **V2/V4 正式接 cache 仍需单独 BOSS 指令 + 生产验证阶段**
