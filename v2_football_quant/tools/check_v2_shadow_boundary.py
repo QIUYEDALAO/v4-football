@@ -2,6 +2,7 @@
 """Phase D.1 — V2 Shadow Boundary Checker (read-only, no production impact)."""
 from __future__ import annotations
 
+import argparse
 import json
 import re
 from datetime import datetime, timezone, timedelta
@@ -42,6 +43,11 @@ SETTLE_REQUIRED = [
 
 
 def main() -> None:
+    parser = argparse.ArgumentParser(description="V2 Shadow Boundary Checker")
+    parser.add_argument("--date", required=False, default=None, help="YYYYMMDD (default: today)")
+    args = parser.parse_args()
+    date_key = args.date or datetime.now(CN_TZ).strftime("%Y%m%d")
+
     warnings: list[str] = []
     errors: list[str] = []
 
@@ -133,7 +139,7 @@ def main() -> None:
         "generated_at": datetime.now(CN_TZ).isoformat(),
     }
 
-    out_path = STATUS_DIR / "v2_shadow_boundary_check_20260517.json"
+    out_path = STATUS_DIR / f"v2_shadow_boundary_check_{date_key}.json"
     out_path.write_text(json.dumps(result, ensure_ascii=False, indent=2), encoding="utf-8")
 
     print(json.dumps(result, ensure_ascii=False, indent=2))

@@ -153,7 +153,39 @@ daily status push
 
 ---
 
-## 6. 下一阶段计划
+## 6. Phase D.2：V2 Shadow Read Baseline
+
+D.2 是 V2 Shadow Read Baseline，只读聚合 V2 正式链路状态。
+
+### 覆盖范围
+
+| 组件 | 只读源 | 输出字段 |
+|:-----|:-------|:--------|
+| DAILY_POOL | summary / push marker | candidate_count, writes_bet_locked |
+| window_checker | notify marker | new_locks_count, bet_locked_count |
+| daily_status | status push marker | official_bet_locked, missed_candidates |
+| missed_candidates | audit file | count, leaked checks |
+| settlement | settle push / task status | targets, only_window_checker |
+
+### 硬边界
+
+- baseline 只读聚合，不替代正式源
+- baseline 不推 QQ
+- baseline 不结算
+- baseline 不写 BET_LOCKED
+- baseline 不接 cron
+- baseline 不调用 API
+- baseline 不写入正式 marker
+
+### 新文件
+
+- `engine/v2_shadow_baseline.py` — 核心只读聚合模块
+- `tools/v2_shadow_baseline_dryrun.py` — dry-run 入口
+- `tools/check_v2_shadow_baseline.py` — baseline checker
+
+---
+
+## 7. 下一阶段计划
 
 | Phase | 内容 | 状态 |
 |:------|:-----|:----:|
