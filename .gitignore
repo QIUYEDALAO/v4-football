@@ -39,7 +39,22 @@ v2_football_quant/data/
 v2_football_quant/data/deep/
 memory/
 data/
-投注资金日报表.*
+# Fund reports / bankroll reports - never upload
+*投注资金日报表*
+*资金日报表*
+*资金报表*
+*bankroll*
+*fund_report*
+*funds_report*
+*capital_report*
+*stake_report*
+*betting_fund*
+*betting_bankroll*
+*.xlsx
+*.xls
+*.xlsm
+*.ods
+*.numbers
 *.pdf
 ebooks/
 book*.pdf
