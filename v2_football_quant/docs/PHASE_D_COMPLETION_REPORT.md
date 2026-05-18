@@ -256,6 +256,7 @@ Phase D 工程链路完成（engineering_complete=true），但 business_pass=fa
 | D.8.32 | `5abfb28` | Real state-present proof plan |
 | D.8.33 | `02b1e1a` | Active-window mutation proof plan |
 | D.8.34 | `TBD` | Production cron path proof plan |
+| D.8.35 | `TBD` | Production QQ path proof plan |
 
 **D.8.13 结论：** approval_packet_status=READY_FOR_BOSS_REVIEW，guarded_live_observe_approved=false，D.8.14 需 BOSS 单独指令。
 
@@ -398,6 +399,22 @@ Phase D 工程链路完成（engineering_complete=true），但 business_pass=fa
   - `cron_installed=false`
   - `cron_started=false`
   - `cron_write_allowed=false`
+- 下一步仅允许：
+  - `d838_allowed_to_generate=true`
+  - `d838_allowed_to_execute=false`
+
+## 24. D.8.35 Production QQ Path Proof Plan
+
+- D.8.35 仅做 `production_qq_path` 的证明规划，不做执行。
+- 当前状态保持：
+  - `proof_current_status=UNPROVEN`
+- QQ 路径固定禁止：
+  - `openclaw_no_push_required=true`
+  - `safe_sender_guard_required=true`
+  - `qq_push_allowed=false`
+  - `qq_sent=false`
+  - `outbound_sender_called=false`
+  - `openclaw_message_send_called=false`
 - 下一步仅允许：
   - `d838_allowed_to_generate=true`
   - `d838_allowed_to_execute=false`
