@@ -251,6 +251,7 @@ Phase D 工程链路完成（engineering_complete=true），但 business_pass=fa
 | D.8.27 | `8e1a9ab` | Controlled execution simulation plan |
 | D.8.28 | `cc9ca05` | Production resume readiness matrix |
 | D.8.29 | `a4c4244` | Phase D final decision packet |
+| D.8.30 | `TBD` | Final command authorization gate |
 
 **D.8.13 结论：** approval_packet_status=READY_FOR_BOSS_REVIEW，guarded_live_observe_approved=false，D.8.14 需 BOSS 单独指令。
 
@@ -311,6 +312,16 @@ Phase D 工程链路完成（engineering_complete=true），但 business_pass=fa
   - `production_qq_path`
   - `production_verified_path`
   - `formal_state_write_path`
+
+## 18. D.8.30 Final Command Authorization Gate
+
+- D.8.30 仅为 final command authorization gate，不是 execution。
+- `command_authorization_grants_execution=false` 固定。
+- 仅允许 review-only command template：`command_must_not_execute=true`。
+- 下一步草案仅允许：
+  - `d831_allowed_to_generate=true`
+  - `d831_allowed_to_execute=false`
+- 当前仍为 `CODE_READY`，且 `PIPELINE_READY=false`、`PRODUCTION_VERIFIED=false`。
 
 <!-- D.8.16.3 closure: v2_football_quant/docs/PHASE_D_COMPLETION_REPORT.md -->
 
