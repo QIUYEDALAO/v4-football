@@ -257,6 +257,7 @@ Phase D 工程链路完成（engineering_complete=true），但 business_pass=fa
 | D.8.33 | `02b1e1a` | Active-window mutation proof plan |
 | D.8.34 | `TBD` | Production cron path proof plan |
 | D.8.35 | `TBD` | Production QQ path proof plan |
+| D.8.36 | `TBD` | Production verified write path proof plan |
 
 **D.8.13 结论：** approval_packet_status=READY_FOR_BOSS_REVIEW，guarded_live_observe_approved=false，D.8.14 需 BOSS 单独指令。
 
@@ -415,6 +416,21 @@ Phase D 工程链路完成（engineering_complete=true），但 business_pass=fa
   - `qq_sent=false`
   - `outbound_sender_called=false`
   - `openclaw_message_send_called=false`
+- 下一步仅允许：
+  - `d838_allowed_to_generate=true`
+  - `d838_allowed_to_execute=false`
+
+## 25. D.8.36 Production Verified Write Path Proof Plan
+
+- D.8.36 仅做 `production_verified_path` 的证明规划，不做执行。
+- 当前状态保持：
+  - `proof_current_status=UNPROVEN`
+- verified 写入路径固定禁止：
+  - `verified_write_allowed=false`
+  - `verified_written=false`
+  - `paper_trading_verify_date_called=false`
+  - `settlement_rerun=false`
+  - `historical_verified_modified=false`
 - 下一步仅允许：
   - `d838_allowed_to_generate=true`
   - `d838_allowed_to_execute=false`
