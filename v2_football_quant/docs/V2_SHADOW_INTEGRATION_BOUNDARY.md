@@ -262,6 +262,16 @@ D.4.1 修复 lock_owner gap 语义冲突。
 
 ---
 
+### D.5 Settlement Shadow Guard Reinforcement
+
+D.5 是 Settlement Shadow Guard，只读核对 settlement 与 window_checker/daily_status/missed_audit 的边界一致性。
+- 不重跑 settlement
+- 不写 verified
+- missed candidates 进入 settlement → FAIL
+- lock_owner 缺字段 → WARN
+
+---
+
 ## 7. 下一阶段计划
 
 | Phase | 内容 | 状态 |
