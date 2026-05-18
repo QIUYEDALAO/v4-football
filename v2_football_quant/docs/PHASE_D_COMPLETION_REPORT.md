@@ -228,3 +228,17 @@ Phase D 工程链路完成（engineering_complete=true），但 business_pass=fa
 - 固定边界：`formal_state_write_allowed=false`、`qq_push_allowed=false`、`verified_write_allowed=false`、`cron_enable_allowed=false`。
 - 若 no-push/no-formal-state-write/safe-sender guard 未闭合，必须输出 `WARN/NOT_READY`，不得硬跑。
 - 当前仍为 `CODE_READY`，不是 `PIPELINE_READY`，不是 `PRODUCTION_VERIFIED`。
+
+## Phase D.8.x — Live Observe Guards (2026-05-19)
+
+| Step | Commit | 内容 |
+|:----:|:------|:-----|
+| D.8.12 | `c50b191` | Live worker observe approval gate |
+| D.8.12.1 | `255a069` | No-write / no-push guard hardening |
+| D.8.12.1.1 | `09f0519` | Safe sender no-push enforcement fix |
+| D.8.12.2 | `0ecd16a` | Gate re-evaluation (reads hardening marker) |
+| D.8.12.3 | `7b1767a` | Guarded live observe contract (default vs guarded path) |
+| D.8.13 | `3040356` | Approval packet checker |
+| D.8.13.1 | (docs) | Docs closure |
+
+**D.8.13 结论：** approval_packet_status=READY_FOR_BOSS_REVIEW，guarded_live_observe_approved=false，D.8.14 需 BOSS 单独指令。
