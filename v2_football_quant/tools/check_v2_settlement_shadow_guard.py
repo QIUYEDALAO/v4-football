@@ -40,9 +40,14 @@ def main():
     elif lo_eq == "missing":
         w.append("SETTLE_LO_MISSING")
     # Settlement guard checks
-    if cmp.get("only_window_checker_locks") is False: e.append("NON_WC_IN_SETTLEMENT")
-    if cmp.get("official_lock_only") is False: e.append("NON_OFFICIAL_IN_SETTLEMENT")
+    # Conflict checks
+    t_match_ob = cmp.get("settlement_targets_match_official_locks")
+    if t_match_ob is False: e.append("SETTLE_TARGETS_OFFICIAL_LOCKS_CONFLICT")
+    t_match_wl = cmp.get("settlement_targets_match_window_locks")
+    if t_match_wl is False: e.append("SETTLE_TARGETS_WINDOW_LOCKS_CONFLICT")
     if cmp.get("missed_candidates_absent_from_settlement") is False: e.append("MISSED_IN_SETTLEMENT")
+    if cmp.get("official_lock_only") is False: e.append("OFFICIAL_LOCK_ONLY_FALSE")
+    if cmp.get("only_window_checker_locks") is False: e.append("NON_WC_IN_SETTLEMENT")
     if cmp.get("settlement_gap_preserved") is False: e.append("SETTLE_GAP_NOT_PRESERVED")
     sec=re.findall(r"sk-[A-Za-z0-9]{20,}|x-apisports-key",json.dumps(m,ensure_ascii=False))
     if sec: e.append("secret")

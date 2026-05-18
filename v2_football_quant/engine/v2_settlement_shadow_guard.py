@@ -82,30 +82,69 @@ def compare_settlement_guard(dk: str) -> dict:
     st = collect_settle(dk); ds = collect_ds(dk); wc = collect_wc(dk); mc = collect_mc(dk)
     notes = []
     targets = st["settlement_targets"]; ob = ds["official_bet_locked"]; nl = wc["new_locks_count"]
-    zlzs = (targets == 0 and ob == 0)  # zero locks zero settlement
-    # Compare
-    t_match = None
-    if targets == 0 and ob == 0: t_match = True
-    elif targets > 0 and st.get("target_keys"): t_match = True  # can't fully verify without ob per-target
-    wl_match = True if (targets == 0 and nl == 0) else (True if targets == nl else (None if st.get("lock_owner_evidence_quality")=="partial" else False)) if targets > 0 else None
-    missed_absent = None
+    zlzs = (targets == 0 and ob == 0)
+
+    # ── Numeric conflict checks (cannot be true when numbers contradict) ──
+    t_match_ob = None
+    if targets == ob:
+        t_match_ob = True
+    elif ob == 0 and targets > 0:
+        t_match_ob = False
+        notes.append("SETTLEMENT_TARGETS_EXCEED_OFFICIAL_LOCKS")
+    elif targets == 0 and ob > 0:
+        t_match_ob = False
+        notes.append("OFFICIAL_LOCKS_EXCEED_SETTLEMENT_TARGETS")
+
+    wl_match = None
+    if targets == nl:
+        wl_match = True
+    elif targets > 0 and nl == 0:
+        wl_match = False
+        notes.append("SETTLEMENT_TARGETS_EXCEED_WINDOW_LOCKS")
+    elif nl > 0 and targets == 0:
+        wl_match = False
+        notes.append("WINDOW_LOCKS_EXCEED_SETTLEMENT_TARGETS")
+
+    # ── missed candidates cross-reference ──
     mckeys = set(mc.get("candidate_keys", []))
     stkeys = set(st.get("target_keys", []))
-    if not mckeys or not stkeys: missed_absent = None
-    else: missed_absent = len(mckeys & stkeys) == 0
-    if missed_absent is False: notes.append("MISSED_CANDIDATE_IN_SETTLEMENT_TARGETS")
-    # lock_owner semantics
+    missed_absent = None
+    if mckeys and stkeys:
+        intersection = mckeys & stkeys
+        missed_absent = len(intersection) == 0
+        if not missed_absent:
+            notes.append(f"MISSED_CANDIDATE_IN_SETTLEMENT_TARGETS:{len(intersection)}_matches")
+
+    # ── lock_owner semantics ──
     lo_eq = st["lock_owner_evidence_quality"]
-    has_lo = "lock_owner_missing" not in st.get("unknown_fields",[])
+    has_lo = "lock_owner_missing" not in st.get("unknown_fields", [])
     only_wc = None
-    if lo_eq == "not_applicable": only_wc = None  # no targets
-    elif lo_eq == "partial": only_wc = None  # can't verify, field missing
-    elif lo_eq == "strong": only_wc = True
-    elif lo_eq == "missing": only_wc = None
-    official_only = None if lo_eq in ("partial","missing","not_applicable") else True
+    if lo_eq == "not_applicable" or targets == 0:
+        only_wc = None
+    elif lo_eq == "partial":
+        only_wc = None  # can't verify, field missing → null not true
+    elif lo_eq == "strong" and has_lo:
+        only_wc = True
+    else:
+        only_wc = None
+
+    # ── official_lock_only ──
+    ob_eq = st["official_lock_evidence_quality"]
+    official_only = None
+    if lo_eq == "not_applicable" or targets == 0:
+        official_only = None
+    elif t_match_ob is False:
+        official_only = False
+    elif t_match_ob is True and ob_eq == "strong":
+        official_only = True
+    else:
+        official_only = None  # can't verify
+
+    # ── gap semantics ──
     eq, gap_preserved, gap_reason = _settle_evidence_quality(targets, has_lo, True, True)
-    sg_warn = lo_eq in ("partial","missing")
-    return {"settlement_targets_match_official_locks": t_match,
+    sg_warn = lo_eq in ("partial", "missing")
+
+    return {"settlement_targets_match_official_locks": t_match_ob,
             "settlement_targets_match_window_locks": wl_match,
             "missed_candidates_absent_from_settlement": missed_absent,
             "only_window_checker_locks": only_wc,
@@ -127,6 +166,10 @@ def build_v2_settlement_shadow_guard(dk: str | None = None) -> dict:
     elif lo_eq == "missing": warns.append("SETTLE_LOCK_OWNER_EVIDENCE_MISSING")
     if ob_eq == "partial": warns.append("SETTLE_OFFICIAL_LOCK_EVIDENCE_PARTIAL")
     if cmp["missed_candidates_absent_from_settlement"] is False: errs.append("MISSED_IN_SETTLEMENT")
+    if cmp["settlement_targets_match_official_locks"] is False: errs.append("SETTLEMENT_TARGETS_OFFICIAL_LOCKS_CONFLICT")
+    if cmp["settlement_targets_match_window_locks"] is False: errs.append("SETTLEMENT_TARGETS_WINDOW_LOCKS_CONFLICT")
+    if cmp["official_lock_only"] is False: errs.append("OFFICIAL_LOCK_ONLY_CONFLICT")
+    if cmp["only_window_checker_locks"] is False: errs.append("NON_WINDOW_CHECKER_IN_SETTLEMENT")
     if st["settlement_targets"] > 0 and not st["verified_found"]: warns.append("SETTLE_VERIFIED_MISSING")
     overall = "FAIL" if errs else ("WARN" if warns else "PASS")
     report = {"schema_version": SCHEMA_VERSION, "date": dk, "mode": "settlement_shadow_guard",

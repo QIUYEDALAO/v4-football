@@ -272,6 +272,23 @@ D.5 是 Settlement Shadow Guard，只读核对 settlement 与 window_checker/dai
 
 ---
 
+### D.5.1 Settlement Guard Conflict Hardening
+
+D.5.1 修正判定逻辑，固化历史冲突。
+
+**修正前：** targets=2 vs official=0 仍写 match=true ❌
+**修正后：** 数量对比直接判定 false + FAIL
+
+**20260517 冲突归类：**
+- MISSED_IN_SETTLEMENT：2 missed candidates 出现在 verified targets
+- SETTLEMENT_TARGETS_OFFICIAL_LOCKS_CONFLICT：2 targets vs 0 official
+- SETTLEMENT_TARGETS_WINDOW_LOCKS_CONFLICT：2 targets vs 0 window locks
+- lock_owner 缺字段 → evidence partial
+
+**该冲突不得修历史数据，不得补推/补记/重跑。**
+
+---
+
 ## 7. 下一阶段计划
 
 | Phase | 内容 | 状态 |
