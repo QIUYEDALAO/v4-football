@@ -259,6 +259,7 @@ Phase D 工程链路完成（engineering_complete=true），但 business_pass=fa
 | D.8.35 | `5f96c14` | Production QQ path proof plan |
 | D.8.36 | `5198513` | Production verified write path proof plan |
 | D.8.37 | `9eebd50` | Formal state write path proof plan |
+| D.8.38 | `TBD` | Production path proof pack consolidation |
 
 **D.8.13 结论：** approval_packet_status=READY_FOR_BOSS_REVIEW，guarded_live_observe_approved=false，D.8.14 需 BOSS 单独指令。
 
@@ -467,6 +468,17 @@ Phase D 工程链路完成（engineering_complete=true），但 business_pass=fa
   - `production_qq_path`
   - `production_verified_path`
   - `formal_state_write_path`
+
+## 28. D.8.38 Production Path Proof Pack Consolidation
+
+- D.8.38 仅做六条 proof plan 统一汇总，不做执行。
+- 固定约束：
+  - `all_six_plans_present=true`
+  - `all_six_proof_status=UNPROVEN`
+  - `any_proof_marked_proven=false`
+- 下一步仅允许：
+  - `d839_allowed_to_generate=true`
+  - `d839_allowed_to_execute=false`
 
 <!-- D.8.16.3 closure: v2_football_quant/docs/PHASE_D_COMPLETION_REPORT.md -->
 
