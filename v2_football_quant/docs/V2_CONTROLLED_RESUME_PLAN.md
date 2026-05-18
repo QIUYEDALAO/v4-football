@@ -66,3 +66,15 @@
 - `qq_push_allowed=false`
 - `production_verified=false`
 - 下一门禁：`D.8.7_BOSS_APPROVAL_ONLY`
+
+## 8. D.8.7 审批包约束
+
+- D.8.7 仅生成 BOSS 审批包，不执行恢复。
+- 不得启用 cron，不得推 QQ，不得重跑 V2 任务，不得写 verified。
+- 审批包内必须明确：
+  - `limited_resume_approved=false`
+  - `resume_execution_allowed=false`
+  - `cron_enable_allowed=false`
+  - `qq_push_allowed=false`
+  - `production_verified=false`
+- D.8.8 仅可生成执行草案，需单独 BOSS 指令后才可进入。

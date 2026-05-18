@@ -146,3 +146,34 @@ Phase D 工程链路完成（engineering_complete=true），但 business_pass=fa
   - `qq_push_allowed=false`
   - `production_verified=false`
 - 下一步仅允许：`D.8.7_BOSS_APPROVAL_ONLY`。
+
+---
+
+## 10. D.8.7 Limited Resume Approval Packet
+
+- D.8.7 只做审批包，不执行恢复。
+- 固定口径：
+  - `current_level=CODE_READY`
+  - `PIPELINE_READY=false`
+  - `PRODUCTION_VERIFIED=false`
+  - `limited_resume_approved=false`
+  - `resume_execution_allowed=false`
+  - `cron_enable_allowed=false`
+  - `qq_push_allowed=false`
+- WARN 风险分类必须保留：
+  - manual QQ push path exists
+  - safe_outbound_sender guard signature missing
+  - single-window live observe still plan-only
+  - validation pack status = WARN
+- D.8.8 仅允许草案，不允许执行。
+- rollback gate 要求：
+  - disable cron immediately
+  - keep preflight fail-closed
+  - no AI kill/retry
+  - report watchdog only
+  - preserve logs
+
+隔离项说明（非审批包执行范围）：
+- `phase-d8 workspace isolation: excel only`
+- `post-phase-c remainder: excel only`
+- `phase-d87 workspace isolation: net_utils only`

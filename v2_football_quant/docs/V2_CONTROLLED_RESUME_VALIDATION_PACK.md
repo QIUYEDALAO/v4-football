@@ -41,3 +41,14 @@
 - D.5.1 历史污染 FAIL 必须持续保留（归档语义，不得抹平）
 - D.7.3 preflight/wrapper 通过仅代表拦截能力验证完成
 - 不代表业务通过，不代表生产恢复完成
+
+## 6. D.8.7 审批包对接
+
+- D.8.7 审批包继续保持：
+  - `limited_resume_approved=false`
+  - `resume_execution_allowed=false`
+  - `cron_enable_allowed=false`
+  - `qq_push_allowed=false`
+  - `production_verified=false`
+- WARN 风险需在审批包中分类呈现，不得弱化为 PASS。
+- D.8.8 仅可作为执行草案，不得自动执行。
