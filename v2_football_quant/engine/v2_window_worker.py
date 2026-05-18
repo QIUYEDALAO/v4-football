@@ -62,6 +62,13 @@ def write_state(today_str: str, selected: set, fixtures: dict) -> None:
 
 
 def main():
+    # ── Phase D.8.12.1: observe-only guard ──
+    import os
+    observe_only = "--observe-only" in sys.argv or os.environ.get("V2_OBSERVE_ONLY") == "1"
+    no_formal_state_write = observe_only or "--no-formal-state-write" in sys.argv
+    no_push_mode = "--no-push" in sys.argv or os.environ.get("OPENCLAW_NO_PUSH") == "1"
+    no_verified = "--no-verified-write" in sys.argv or observe_only
+
     today_str = datetime.now(LOCAL_TZ).strftime("%Y%m%d")
     now_local = datetime.now(LOCAL_TZ)
 
@@ -143,8 +150,19 @@ def main():
             fstate["final_odds_status"] = "FINAL_RECORD"
             fstate["final_observed_odds_D"] = fstate.get("last_seen_odds_D")
 
-    # ── 写回状态文件 ──
-    write_state(today_str, selected, fixtures)
+    # ── 写回状态文件（observe-only时跳过） ──
+    if no_formal_state_write:
+        print(f"OBSERVE_ONLY=true", flush=True)
+        print(f"NO_FORMAL_STATE_WRITE=true", flush=True)
+        print(f"FORMAL_STATE_WRITTEN=false", flush=True)
+        print(f"OFFICIAL_BET_LOCKED_WOULD_WRITE_COUNT={len(new_locks)}", flush=True)
+        print(f"QQ_REQUIRED_WOULD_WRITE_COUNT={len(new_locks)}", flush=True)
+        print(f"SETTLEMENT_REQUIRED_WOULD_WRITE_COUNT={len(new_locks)}", flush=True)
+        print(f"LIVE_WORKER_LOGIC_LOADED=true", flush=True)
+        print(f"WORKER_OUTPUT_AVAILABLE=true", flush=True)
+        print(f"PRODUCTION_VERIFIED=false", flush=True)
+    else:
+        write_state(today_str, selected, fixtures)
 
     # ── 判定 WINDOW_STATUS ──
     has_early = (window_summary["T_MINUS_12H"] + window_summary["T_MINUS_6H"]) > 0

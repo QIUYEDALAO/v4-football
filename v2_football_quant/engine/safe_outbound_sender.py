@@ -114,7 +114,9 @@ def main():
 
     template_id = args.template
     date_str = args.date
-    is_dry_run = args.dry_run
+    is_dry_run = args.dry_run or os.environ.get("SAFE_SENDER_DRY_RUN") == "1"
+    no_push = os.environ.get("OPENCLAW_NO_PUSH") == "1" or "--no-push" in sys.argv
+    allowed_to_send = not is_dry_run and not no_push
     invoked_by = args.invoked_by
 
     print(f"S⬡ SafeOutboundSender | {template_id} | {date_str}")

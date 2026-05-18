@@ -148,14 +148,22 @@ def _write_notify_marker(window_status: str, new_locks: list, pushed: bool,
 
 def _push_system_event(window_status: str, watches: int, candidates: int,
                        finals: int, odds_out: int, new_locks: list,
-                       locked_total: int, reason: str = "") -> bool:
+                       locked_total: int, reason: str = "",
+                       no_push: bool = False) -> bool:
     """
     条件推送 systemEvent 到 QQ。
     仅 Must-push 状态才推送；静默状态不推。
+    支持 no_push guard。
     返回是否实际发送。
     """
     today = _today_str()
     run_id = _generate_run_id(window_status, new_locks, reason)
+
+    # ── Phase D.8.12.1: no_push guard ──
+    if no_push:
+        print(f"[NO_PUSH] push_suppressed=true window_status={window_status}", flush=True)
+        _write_notify_marker(window_status, new_locks, False, run_id)
+        return False
 
     # 防重复推送
     if _check_already_pushed(run_id):
@@ -308,6 +316,13 @@ def _parse_worker_output(worker_stdout: str) -> dict:
 
 
 def main():
+    # ── Phase D.8.12.1: no_push guard ──
+    no_push = "--no-push" in sys.argv or os.environ.get("OPENCLAW_NO_PUSH") == "1"
+    dry_run_route = "--dry-run-route" in sys.argv or os.environ.get("OPENCLAW_DRY_RUN_ROUTE") == "1"
+    if no_push:
+        print("[GUARD] no_push=true push_suppressed=true allowed_to_send=false", flush=True)
+    _no_push = no_push or dry_run_route
+
     _ensure_dirs()
 
     if not _acquire_lock():
@@ -341,7 +356,8 @@ def main():
                 _emit_output("TIMEOUT", 0, 0, 0, 0, [], 0, 0,
                              reason=f"worker 超过 {HARD_TIMEOUT_S}s 硬超时")
                 _push_system_event("TIMEOUT", 0, 0, 0, 0, [], 0,
-                                   reason=f"worker 超过 {HARD_TIMEOUT_S}s 硬超时")
+                                   reason=f"worker 超过 {HARD_TIMEOUT_S}s 硬超时",
+                                   no_push=_no_push)
                 return
             if elapsed > SOFT_TIMEOUT_S and not delayed_flagged:
                 delayed_flagged = True
@@ -358,7 +374,8 @@ def main():
             _emit_output(status, 0, 0, 0, 0, [], 0, 0,
                          reason=f"worker 被信号 {sig_name} 杀死，不生成推荐")
             _push_system_event(status, 0, 0, 0, 0, [], 0,
-                               reason=f"worker 被信号 {sig_name} 杀死")
+                               reason=f"worker 被信号 {sig_name} 杀死",
+                               no_push=_no_push)
             return
 
         # ── 异常退出 ──
@@ -368,7 +385,8 @@ def main():
             _emit_output("FAILED", 0, 0, 0, 0, [], 0, 0,
                          reason=f"worker 退出码 {proc.returncode}")
             _push_system_event("FAILED", 0, 0, 0, 0, [], 0,
-                               reason=f"worker 退出码 {proc.returncode}")
+                               reason=f"worker 退出码 {proc.returncode}",
+                               no_push=_no_push)
             return
 
         # ── 正常完成 ──
@@ -397,7 +415,8 @@ def main():
                            odds_out=result["odds_out"],
                            new_locks=result["new_locks"],
                            locked_total=result["locked_total"],
-                           reason=result.get("reason", ""))
+                           reason=result.get("reason", ""),
+                           no_push=_no_push)
 
     finally:
         _release_lock()
