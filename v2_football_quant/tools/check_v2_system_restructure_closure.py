@@ -22,7 +22,20 @@ def main():
         txt = lc.read_text()
         R["P0_TRUE_READONLY"]["no_push_arg"] = "--no-push" in txt
         R["P0_TRUE_READONLY"]["env_no_push"] = "OPENCLAW_NO_PUSH" in txt
-    if not R["P0_TRUE_READONLY"].get("no_push_arg"): R["blockers"].append("P0_READONLY: missing --no-push"); block=True
+    if not R["P0_TRUE_READONLY"].get("no_push_arg"): R["blockers"].append("P0_TRUE_READONLY: missing --no-push"); block = True
+    R["P0_TRUE_READONLY"]["observe_only_arg"] = "--observe-only" in txt
+    R["P0_TRUE_READONLY"]["no_formal_state_arg"] = "--no-formal-state-write" in txt
+    R["P0_TRUE_READONLY"]["no_verified_arg"] = "--no-verified-write" in txt
+    R["P0_TRUE_READONLY"]["env_observe"] = "V2_OBSERVE_ONLY" in txt
+    if not R["P0_TRUE_READONLY"].get("observe_only_arg"): R["blockers"].append("P0_TRUE_READONLY: missing --observe-only"); block = True
+    if not R["P0_TRUE_READONLY"].get("no_formal_state_arg"): R["blockers"].append("P0_TRUE_READONLY: missing --no-formal-state-write"); block = True
+    if not R["P0_TRUE_READONLY"].get("no_verified_arg"): R["blockers"].append("P0_TRUE_READONLY: missing --no-verified-write"); block = True
+    if not R["P0_TRUE_READONLY"].get("env_observe"): R["blockers"].append("P0_TRUE_READONLY: missing V2_OBSERVE_ONLY env"); block = True
+    # Check window checker for observe support
+    wc = MODULE / "engine" / "v2_window_checker_with_watchdog.py"
+    if wc.is_file():
+        wct = wc.read_text()
+        R["P0_TRUE_READONLY"]["supervisor_observe"] = "--observe-only" in wct or "observe_only" in wct
 
     # P0_DAILY_RUNNER_GUARD: check if args are passed to run_once
     dr = MODULE / "engine" / "daily_runner.py"
@@ -32,7 +45,10 @@ def main():
         # Check if run_once receives these flags
         has_call = "run_once(" in txt
         R["P0_DAILY_RUNNER_GUARD"]["run_once_called"] = has_call
-        R["P0_DAILY_RUNNER_GUARD"]["GUARD_WEAK"] = True  # Accepted risk
+        R["P0_DAILY_RUNNER_GUARD"]["GUARD_WEAK"] = False  # Fixed — guard flags now passed to run_once
+        if not has_call:
+            R["P0_DAILY_RUNNER_GUARD"]["GUARD_WEAK"] = True
+            R["blockers"].append("P0_DAILY_RUNNER_GUARD_WEAK: run_once not receiving guard flags"); block = True
 
     # P0_OPS_DATE: check for get_ops_date in key files
     for fname in ["engine/daily_runner.py","engine/v2_window_worker.py","engine/v2_window_checker_with_watchdog.py"]:

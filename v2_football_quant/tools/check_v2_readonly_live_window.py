@@ -19,8 +19,8 @@ def main():
     # Run window checker to see if active window exists
     win_chk = MODULE / "engine" / "v2_window_checker_with_watchdog.py"
     if win_chk.is_file():
-        env = {**__import__('os').environ, "OPENCLAW_NO_PUSH": "1"}
-        r = subprocess.run(["python3", str(win_chk), "--no-push"],
+        env = {**__import__('os').environ, "OPENCLAW_NO_PUSH": "1", "V2_OBSERVE_ONLY": "1"}
+        r = subprocess.run(["python3", str(win_chk), "--no-push", "--observe-only", "--no-formal-state-write", "--no-verified-write"],
                           capture_output=True, text=True, timeout=60, cwd=str(MODULE), env=env)
         out = r.stdout
         if "SKIPPED" not in out and "NO_ACTIVE" not in out:

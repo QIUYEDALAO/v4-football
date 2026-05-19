@@ -387,7 +387,7 @@ def generate_report(fixtures: list[dict], bets: list[dict], stats: dict, all_can
     return "\n".join(lines)
 
 
-def run_once(run_tag="DEFAULT", quick_mode=False):
+def run_once(run_tag="DEFAULT", quick_mode=False, dry_run=False, no_push=False, no_state_write=False, no_verified_write=False, no_cron=False, no_supervisor=False):
     """quick_mode: 只刷新赔率，跳过 Predictions 和矩阵重建"""
 
     # ── 硬阻断：HOURLY 已废弃 ──
@@ -1075,6 +1075,13 @@ def run_once(run_tag="DEFAULT", quick_mode=False):
     logger.info(f"\n预测数据: {pred_path}")
 
     # 🌟 写入状态机，把锁定的比赛传给下一个 Cron
+    # ── GUARD: dry-run / no-state-write forces sandbox-only ──
+    if dry_run or no_state_write:
+        sandbox_file = SANDBOX_DIR / f"selected_fixtures_{today_str}.json"
+        SANDBOX_DIR.mkdir(parents=True, exist_ok=True)
+        state_file = sandbox_file
+        print(f"[GUARD] dry_run/no_state_write → sandbox only: {state_file}", flush=True)
+    
     with open(state_file, "w") as f:
         json.dump(
             {
@@ -1119,4 +1126,4 @@ if __name__ == "__main__":
             sched.run_pending()
             time.sleep(60)
     else:
-        run_once(run_tag=args.run_tag, quick_mode=args.quick)
+        run_once(run_tag=args.run_tag, quick_mode=args.quick, dry_run=args.dry_run, no_push=args.no_push, no_state_write=args.no_state_write, no_verified_write=args.no_verified_write, no_cron=args.no_cron, no_supervisor=args.no_supervisor)

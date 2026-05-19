@@ -318,9 +318,14 @@ def _parse_worker_output(worker_stdout: str) -> dict:
 def main():
     # ── Phase D.8.12.1: no_push guard ──
     no_push = "--no-push" in sys.argv or os.environ.get("OPENCLAW_NO_PUSH") == "1"
+    observe_only = "--observe-only" in sys.argv or os.environ.get("V2_OBSERVE_ONLY") == "1"
+    no_formal_state_write = "--no-formal-state-write" in sys.argv or observe_only
+    no_verified_write = "--no-verified-write" in sys.argv
     dry_run_route = "--dry-run-route" in sys.argv or os.environ.get("OPENCLAW_DRY_RUN_ROUTE") == "1"
     if no_push:
         print("[GUARD] no_push=true push_suppressed=true allowed_to_send=false", flush=True)
+    if observe_only:
+        print("[GUARD] observe_only=true readonly_enforced=true formal_state_write=blocked", flush=True)
     _no_push = no_push or dry_run_route
 
     _ensure_dirs()
@@ -336,10 +341,19 @@ def main():
 
         env = os.environ.copy()
         env["NO_PROXY"] = "*"
+        
+        # ── GUARD: propagate observe-only to worker subprocess ──
+        worker_args = [sys.executable, str(WORKER_SCRIPT)]
+        if observe_only:
+            worker_args.extend(["--observe-only", "--no-formal-state-write", "--no-verified-write"])
+            env["V2_OBSERVE_ONLY"] = "1"
+        if no_push:
+            worker_args.append("--no-push")
+            env["OPENCLAW_NO_PUSH"] = "1"
 
         worker_start = time.time()
         proc = subprocess.Popen(
-            [sys.executable, str(WORKER_SCRIPT)],
+            worker_args,
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
             env=env,
