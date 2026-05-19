@@ -221,6 +221,20 @@ def main():
         if not v["execution_allowed_now_false"]: flags["all_six_execution_allowed_now_false"] = False
         if not v["command_draft_exists_true"]: flags["all_six_command_draft_exists"] = False
         if not v["runner_recorded"]: flags["all_six_runner_status_recorded"] = False
+    # Aggregate runner status
+    runner_missing = []
+    runner_invalid = []
+    for t in SIX_PROOF_TARGETS:
+        td = mx["targets"].get(t, {})
+        rv = td.get("runner_exists", "")
+        if not rv:
+            runner_missing.append(t)
+        elif rv not in ["true","false","unknown","NOT_EXECUTABLE_UNTIL_RUNNER_DEFINED"]:
+            runner_invalid.append(t)
+    R["runner_status_missing_targets"] = runner_missing
+    R["runner_status_invalid_targets"] = runner_invalid
+    if runner_missing: R["blockers"].append(f"Runner status missing: {runner_missing}"); block = True
+    if runner_invalid: R["blockers"].append(f"Runner status invalid: {runner_invalid}"); block = True
         if not v["rollback_required_true"]: flags["all_six_rollback_required"] = False
         if not v["watchdog_required_true"]: flags["all_six_watchdog_required"] = False
         if not v["no_ai_kill_required_true"]: flags["all_six_no_ai_kill_retry_required"] = False
@@ -281,7 +295,7 @@ def main():
     if block: R["check_status"] = "BLOCKER"
     elif R["warnings"]: R["check_status"] = "WARN"
 
-    print("=" * 50); print("V2 D11.2 MATRIX HEADER & FLAG BLOCKER CHECKER"); print("=" * 50)
+    print("=" * 50); print("V2 D11 CONTROLLED PROOF AUTHORIZATION CHECKER"); print("=" * 50)
     print(f"Status: {R['check_status']}  Docs: {R['docs_required_present']}  D10: {'PASS' if R['d10_checker_pass'] else 'FAIL'}")
     for k in ["d11_matrix_header_fields_complete", "d11_missing_headers", "d11_proof_targets_count",
         "all_six_targets_present", "all_matrix_flags_blocker_enforced",
