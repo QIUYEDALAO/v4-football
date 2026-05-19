@@ -564,6 +564,18 @@ Phase D 工程链路完成（engineering_complete=true），但 business_pass=fa
   - `verified_write_allowed=false`
   - `state_write_allowed=false`
 
+## 34. D.9.2 Production Proof Evidence Schema
+
+- D.9.2 定义统一 proof evidence schema，不做执行。
+- 本阶段固定默认值：
+  - `proof_result_default=UNPROVEN`
+  - `proof_current_status_default=UNPROVEN`
+  - `schema_execution_performed=false`
+- 下一步仅允许：
+  - `d9_3_allowed_to_generate=true`
+  - `d9_3_allowed_to_execute=false`
+- 生产权限保持关闭，不得进入 Phase E。
+
 <!-- D.8.16.3 closure: v2_football_quant/docs/PHASE_D_COMPLETION_REPORT.md -->
 
 <!-- D.8.17.1 closure -->
