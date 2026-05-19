@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta http-equiv="Cache-Control" content="no-store,no-cache,must-revalidate,max-age=0">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
+<title>V2 生产状态</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,sans-serif;background:#0c1220;color:#e0e0e0;padding:8px;max-width:540px;margin:0 auto}
+h1{font-size:15px;color:#fff;margin:4px 0}h2{font-size:13px;color:#4fc3f7;margin:10px 0 2px;border-bottom:1px solid #1a2a3a;padding-bottom:2px}
+.card{background:#111a2a;border-radius:8px;padding:8px;margin:4px 0;font-size:12px}
+.r{display:flex;justify-content:space-between;padding:2px 0}
+.l{color:#8899aa}.v{color:#e0e0e0;font-weight:600}
+.t{display:inline-block;padding:1px 5px;border-radius:3px;font-size:10px;margin:1px}
+.g{background:#1a3a1a;color:#4caf50}.y{background:#3a3a1a;color:#ff9800}.n{background:#1a2a3a;color:#8899aa}
+.m{font-size:10px;color:#556}
+.history{background:#0c1218;border:1px dashed #1a2a3a;border-radius:6px;padding:6px;margin:4px 0;font-size:11px}
+</style></head><body>
+<h1>🏆 V2 生产状态</h1>
+<div class="m">生成: 2026-05-20 01:13 | dashboard=INTEL_UNIFIED_CURRENT_202605</div>
+
+<h2>当前状态</h2>
+<div class="card">
+<div class="r"><span class="l">PRODUCTION_VERIFIED</span><span class="v"><span class="t g">true</span></span></div>
+<div class="r"><span class="l">PIPELINE_READY</span><span class="v"><span class="t g">true</span></span></div>
+<div class="r"><span class="l">QQ_ENABLED</span><span class="v"><span class="t g">true</span> (V2_QQ_SEND_ENABLED=1)</span></div>
+<div class="r"><span class="l">CRON_ENABLED</span><span class="v"><span class="t g">true</span></span></div>
+<div class="r"><span class="l">VERIFIED_WRITTEN</span><span class="v"><span class="t g">true</span> (scope=V2_ONLY)</span></div>
+<div class="r"><span class="l">D13 / V33 / HOURLY</span><span class="v"><span class="t n">false</span></span></div>
+<div class="r"><span class="l">real_bet_execution</span><span class="v"><span class="t n">false</span></span></div>
+</div>
+
+<h2>BET_LOCKED</h2>
+<div class="card">
+<div class="r"><span class="l">last lock</span><span class="v">Ried vs Wolfsberger AC #1545407</span></div>
+<div class="r"><span class="l">stage</span><span class="v">T_MINUS_90M</span></div>
+<div class="r"><span class="l">odds_D</span><span class="v">2.28 (IN_BAND)</span></div>
+<div class="r"><span class="l">old resend</span><span class="v"><span class="t n">blocked</span></span></div>
+</div>
+
+<h2>V4 今日</h2>
+<div class="card">
+<div class="r"><span class="l">A / B / C / SKIP</span><span class="v"><b>0 / 0 / 3 / 2</b></span></div>
+<div class="r"><span class="l">正式推荐</span><span class="v"><span class="t n">0</span></span></div>
+<div class="r"><span class="l">V4 QQ</span><span class="v"><span class="t n">not enabled</span></span></div>
+<div class="r"><span class="l">next V4 scan</span><span class="v">late 01:20 CST</span></div>
+<div class="r"><span class="l">OPS checker</span><span class="v">42/43 PASS + 1 WARN</span></div>
+</div>
+
+<h2>历史事件 (审计)</h2>
+<div class="history">
+<b>⚠️ QQ unauthorized incident</b> — 2026-05-19 23:09<br>
+_fpush_system_event 无 V2_QQ_SEND_ENABLED gate → QQ 真实发送<br>
+✅ 已修复: V2_QQ_SEND_ENABLED hard gate + incident block<br>
+✅ BOSS 已签收 (23:24)<br><br>
+
+<b>🔒 T90 BET_LOCKED proof</b> — 2026-05-19 23:00<br>
+Ried vs Wolfsberger AC, odds_D=2.28 IN_BAND<br>
+observe-only proof → incident caused real state write<br><br>
+
+<b>📋 Shadow gates</b> — 2026-05-19<br>
+formal state shadow PASS · QQ route shadow PASS · cron shadow PASS · verified precheck PASS<br><br>
+
+<i>以上为历史审计记录，非当前状态。</i>
+</div>
+
+<h2>🔧 操作</h2>
+<div class="card">
+<span class="t g">V2 PRODUCTION_VERIFIED</span>
+<span class="t y">V4 QQ: wait A/B>0</span>
+<span class="t n">D13 prohibited</span>
+</div>
+<div class="m" style="text-align:center;margin-top:10px">V2 Production · commit 3351f7a · INTEL_UNIFIED_CURRENT_202605</div>
+</body></html>
