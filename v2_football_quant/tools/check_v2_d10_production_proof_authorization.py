@@ -229,23 +229,50 @@ def main():
     if R["forbidden_staged_files"]: R["blockers"].append(f"Forbidden staged: {R['forbidden_staged_files']}"); block = True
 
     # E. Permission guards
-    for n, v in [("d10_allowed_to_execute", R["d10_allowed_to_execute"]),
-                 ("PIPELINE_READY", R["PIPELINE_READY"]), ("PRODUCTION_VERIFIED", R["PRODUCTION_VERIFIED"]),
-                 ("phase_e_allowed", R["phase_e_allowed"])]:
-        if v: R["blockers"].append(f"{n} is true"); block = True
-
-    # F. Permission guard self-test: count fields that should all be False
-    _danger = ["d10_allowed_to_execute", "d11_allowed_to_execute",
-               "production_proof_execution_authorized", "PIPELINE_READY",
-               "PRODUCTION_VERIFIED", "phase_e_allowed",
-               "cron_enable_allowed", "qq_push_allowed", "state_write_allowed",
-               "verified_write_allowed", "v4_controlled_observe_execution_allowed"]
-    R["permission_guard_fields_present"] = sum(1 for f in _danger if f in R)
-    R["permission_guard_danger_fields"] = len(_danger)
-    R["all_permission_guards_enforced"] = R["permission_guard_fields_present"] == len(_danger)
-    if not R["all_permission_guards_enforced"]:
-        R["blockers"].append(f"Permission guard incomplete: {R['permission_guard_fields_present']}/{len(_danger)}")
+    # E. Actual permission BLOCKER enforcement (11 danger + 3 required-true)
+    DANGER_FALSE = [
+        "d10_allowed_to_execute", "d11_allowed_to_execute",
+        "production_proof_execution_authorized",
+        "PIPELINE_READY", "PRODUCTION_VERIFIED", "phase_e_allowed",
+        "cron_enable_allowed", "qq_push_allowed", "state_write_allowed",
+        "verified_write_allowed", "v4_controlled_observe_execution_allowed",
+    ]
+    REQUIRED_TRUE = ["d10_allowed_to_generate", "d11_allowed_to_generate", "v4_frozen_at_j3"]
+    
+    missing_fields = []
+    unenforced_fields = []
+    
+    # Check every danger field: must be present AND False
+    for f in DANGER_FALSE:
+        if f not in R:
+            missing_fields.append(f)
+        elif R[f] is not False:
+            unenforced_fields.append(f)
+            R["blockers"].append(f"{f} is true (must be False)")
+            block = True
+    
+    # Check every required-true field: must be present AND True
+    for f in REQUIRED_TRUE:
+        if f not in R:
+            missing_fields.append(f)
+        elif R[f] is not True:
+            unenforced_fields.append(f)
+            R["blockers"].append(f"{f} is false (must be True)")
+            block = True
+    
+    # Missing fields are BLOCKERS too
+    if missing_fields:
+        R["blockers"].append(f"Permission fields missing: {missing_fields}")
         block = True
+    
+    # Guard stats
+    R["permission_guard_danger_fields"] = len(DANGER_FALSE)
+    R["permission_guard_required_true_fields"] = len(REQUIRED_TRUE)
+    R["permission_guard_fields_blocker_enforced"] = len(DANGER_FALSE) - len([f for f in DANGER_FALSE if f in unenforced_fields or f in missing_fields])
+    R["permission_guard_required_true_enforced"] = len(REQUIRED_TRUE) - len([f for f in REQUIRED_TRUE if f in unenforced_fields or f in missing_fields])
+    R["permission_guard_missing_fields"] = missing_fields
+    R["permission_guard_unenforced_fields"] = unenforced_fields
+    R["all_permission_guards_enforced"] = not missing_fields and not unenforced_fields
 
     if block: R["check_status"] = "BLOCKER"
     elif R["warnings"]: R["check_status"] = "WARN"
