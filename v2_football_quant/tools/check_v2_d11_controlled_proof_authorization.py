@@ -225,12 +225,12 @@ def main():
     runner_missing = []
     runner_invalid = []
     for t in SIX_PROOF_TARGETS:
-        td = mx["targets"].get(t, {})
-        rv = td.get("runner_exists", "")
+    td = mx["targets"].get(t, {})
+    rv = td.get("runner_exists", "")
         if not rv:
-            runner_missing.append(t)
+    runner_missing.append(t)
         elif rv not in ["true","false","unknown","NOT_EXECUTABLE_UNTIL_RUNNER_DEFINED"]:
-            runner_invalid.append(t)
+    runner_invalid.append(t)
     R["runner_status_missing_targets"] = runner_missing
     R["runner_status_invalid_targets"] = runner_invalid
     if runner_missing: R["blockers"].append(f"Runner status missing: {runner_missing}"); block = True
