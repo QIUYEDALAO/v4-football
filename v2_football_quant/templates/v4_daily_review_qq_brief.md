@@ -1,5 +1,6 @@
 【V4 情报系统】
 📌 昨日V4复盘 · {{review_date}}
+Schema Guard：{{schema_guard_status}}
 
 【正式推荐】
 A：{{a_count}}｜B：{{b_count}}

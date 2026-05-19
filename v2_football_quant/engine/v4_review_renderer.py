@@ -16,6 +16,7 @@ mode=qq:
 
 import argparse
 import json
+import re
 import sys
 from collections import Counter
 from pathlib import Path
@@ -25,6 +26,7 @@ FULL_TEMPLATE = BASE_DIR / "templates" / "v4_daily_review_full_template.md"
 QQ_TEMPLATE = BASE_DIR / "templates" / "v4_daily_review_qq_template.md"
 QQ_BRIEF_TEMPLATE = BASE_DIR / "templates" / "v4_daily_review_qq_brief.md"
 REPORT_DIR = BASE_DIR / "data" / "daily_reports"
+ALLOWED_GRADES = {"A", "B", "C", "SKIP"}
 
 
 # ── Display label mapping ──
@@ -68,6 +70,42 @@ def _strip_fid(url_or_num):
     if s.startswith("?"):
         return s[1:]
     return s
+
+
+def _validate_structured_payload(data: dict) -> None:
+    """Fail-closed guard: enforce V4 output contract before rendering."""
+    matches = data.get("matches", []) or []
+    violations: list[str] = []
+
+    for idx, m in enumerate(matches, 1):
+        grade = str(m.get("official_bucket") or "").strip().upper()
+        if grade and grade not in ALLOWED_GRADES:
+            violations.append(f"M{idx}_INVALID_GRADE:{grade}")
+            continue
+
+        # SKIP must never be described as recommendation
+        if grade == "SKIP":
+            text = " ".join(
+                str(m.get(k) or "")
+                for k in ("decisionSummary", "summary", "tradeAction", "matchProfile", "reason")
+            )
+            if re.search(r"推荐|主推|强推|投注", text):
+                violations.append(f"M{idx}_SKIP_RECOMMENDATION_TEXT")
+
+        # C cannot be positioned as main recommendation
+        if grade == "C":
+            text = " ".join(
+                str(m.get(k) or "")
+                for k in ("decisionSummary", "summary", "tradeAction", "matchProfile", "reason")
+            )
+            if re.search(r"主推|强推|重注|必选", text):
+                violations.append(f"M{idx}_C_MAIN_RECOMMENDATION_TEXT")
+
+    if violations:
+        print("[RENDERER] BLOCKER: output contract violation(s)", flush=True)
+        for item in violations[:20]:
+            print(f"[RENDERER] - {item}", flush=True)
+        sys.exit(2)
 
 
 def _match_row_full(m: dict, idx: int) -> str:
@@ -232,6 +270,7 @@ def _render_full(data, args):
         "{{ab_count}}": str(ab_count),
         "{{recommendation_summary}}": data.get("recommendation_summary", ""),
         "{{official_brief_file}}": data.get("official_source", f"v4_openclaw_brief_{args.date}.txt"),
+        "{{schema_guard_status}}": "PASS(A/B/C/SKIP only)",
         "{{match_rows}}": match_rows,
         "{{a_hit}}": str(summary.get("a", {}).get("hit", 0)),
         "{{a_total}}": str(summary.get("a", {}).get("total", 0)),
@@ -342,6 +381,7 @@ def _render_qq(data, args):
 
         r = {
             "{{review_date}}": data.get("review_date", args.date),
+            "{{schema_guard_status}}": "PASS(A/B/C/SKIP only)",
             "{{a_count}}": "0",
             "{{b_count}}": "0",
             "{{ab_summary}}": "无 A/B 主推荐，不计算 A/B 命中率",
@@ -386,6 +426,7 @@ def _render_qq(data, args):
 
         r = {
             "{{review_date}}": data.get("review_date", args.date),
+            "{{schema_guard_status}}": "PASS(A/B/C/SKIP only)",
             "{{a_count}}": str(a),
             "{{b_count}}": str(b),
             "{{ab_summary}}": f"A：{a_hit}/{a} · B：{b_hit}/{b} · A+B：{ab_hit}/{ab_count}",
@@ -424,6 +465,8 @@ def main():
 
     with open(struct_path) as f:
         data = json.load(f)
+
+    _validate_structured_payload(data)
 
     if args.mode == "full":
         _render_full(data, args)

@@ -1,5 +1,6 @@
 【V4 情报系统】
 📌 {{review_date}} V4正式复盘
+Schema Guard：{{schema_guard_status}}
 ━━━━━━━━━━━━━━
 【正式输出】
 A：{{a_count}}｜B：{{b_count}}｜C：{{c_count}}｜SKIP：{{skip_count}}

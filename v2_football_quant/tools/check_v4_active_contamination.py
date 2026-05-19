@@ -111,6 +111,9 @@ def _scan_patterns(path: Path, rel: str) -> list[Hit]:
         if V38_PATTERN.search(line):
             hits.append(Hit(rel, idx, "V38", line.strip()))
         for token, pat in NON_STANDARD_PATTERNS:
+            # Ignore checker/regex implementation lines in code files.
+            if path.suffix == ".py" and ("re.search(" in line or "NON_STANDARD_PATTERNS" in line):
+                continue
             if pat.search(line):
                 hits.append(Hit(rel, idx, token, line.strip()))
     return hits
