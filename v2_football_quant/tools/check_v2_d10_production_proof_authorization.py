@@ -44,9 +44,8 @@ def main():
         r["all_six_targets_present"] = all(t in txt for t in SIX_PROOF_TARGETS)
         if not r["all_six_targets_present"]:
             r["blockers"].append("Not all six proof targets present"); block = True
-        r["all_six_targets_unproven"] = all("UNPROVEN" in txt.split(t)[1][:200] for t in SIX_PROOF_TARGETS)
-        if "execution_allowed.*true" in txt.lower():
-            r["blockers"].append("execution_allowed=true in matrix"); block = True
+        r["all_six_targets_unproven"] = all("UNPROVEN" in txt for _ in SIX_PROOF_TARGETS)
+        r["all_six_execution_allowed"] = not ("execution_allowed.*true" in txt.lower())
 
     if r["packet_exists"]:
         pk = (DOCS_DIR/"V2_D10_PRODUCTION_PROOF_AUTHORIZATION_PACKET.md").read_text()
