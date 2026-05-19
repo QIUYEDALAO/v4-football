@@ -185,6 +185,7 @@ def main():
     # Per-target full validation
     pv = {}
     flags = {f: True for f in MATRIX_REQUIRED_TRUE_FLAGS}
+    flag_keys = [
         ("all_six_targets_unproven", "unproven"),
         ("all_six_execution_authorization_review_only", "exec_auth_ro"),
         ("all_six_execution_allowed_now_false", "exec_now_false"),
