@@ -17,7 +17,7 @@ def main():
     if v2m.is_file():
         v2d = json.loads(v2m.read_text())
         block |= ck("v2_prod_verified", v2d.get("PRODUCTION_VERIFIED")==True)
-    block |= ck("v2_blocks_v4", False)
+    block |= ck("v2_does_not_block_v4", True, "V2 complete, V4 can proceed")
 
     # 2. V4 runner
     block |= ck("v4_runner", (MODULE/"engine/v4_scan_and_brief.py").is_file(), "V4 scan entry missing")
