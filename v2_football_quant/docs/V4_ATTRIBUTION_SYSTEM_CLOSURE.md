@@ -20,10 +20,12 @@ This phase established the V4 attribution system contract:
 | Attribution schema doc | ✅ CREATED (V4_ATTRIBUTION_SCHEMA.md) |
 | Attribution guard doc | ✅ CREATED (V4_ATTRIBUTION_GUARD.md) |
 | Sample contract doc | ✅ CREATED (V4_ATTRIBUTION_SAMPLE_CONTRACT.md) |
-| Engine attribution module | ✅ EXISTS (v4_result_attribution.py - pre-existing, 791 lines) |
+| Engine attribution module | ✅ EXISTS (v4_result_attribution.py - pre-existing, ~800 lines) |
 | --validate-only flag | ✅ ADDED |
 | --dry-run flag | ✅ ADDED |
-| Guard markers in module | ✅ ADDED (NO_VERIFIED_WRITE, NO_RULE_CHANGE, NO_QQ_PUSH, NO_STATE_WRITE) |
+| --allow-api flag | ✅ ADDED (default false, V4-E.1) |
+| API guard hardening | ✅ ADDED (V4-E.1: --dry-run no-API, --allow-api required) |
+| Guard markers in module | ✅ ADDED (NO_VERIFIED_WRITE, NO_RULE_CHANGE, NO_QQ_PUSH, NO_STATE_WRITE, NO_API_DEFAULT, DRY_RUN_NO_API) |
 
 ## Phase Constraints
 
@@ -34,7 +36,7 @@ This phase established the V4 attribution system contract:
 | Rolling triggered | false |
 | QQ pushed | false |
 | Rules changed | false |
-| API called (production) | false (--validate-only and --dry-run prevent) |
+| API called (production) | false (--allow-api required and default false) |
 | State written | false |
 
 ## Production Guards

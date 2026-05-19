@@ -49,5 +49,19 @@ Status: FINAL
 | Attribution writes PRODUCTION_VERIFIED | Scope breach |
 | Attribution triggers QQ push | Delivery breach |
 | Attribution calls API with keys | Security breach |
+| API calls without --allow-api | Guard violation |
+| --dry-run calls API | Guard violation |
+| --validate-only calls run() | Guard violation |
+
+## 5. No-API Guard (V4-E.1)
+
+- `--allow-api` flag required for any API call (default: false)
+- `--validate-only` MUST NOT enter `run()` — no API, no writes, no side effects
+- `--dry-run` MUST default `allow_api=false` — no API, generates UNKNOWN attribution
+- When API disabled: attribution_status MUST be UNKNOWN, NOT HIT/MISS
+- This phase: `--allow-api` is forbidden for production runs
+- V4-F: review allow_api execution before allowing
+- All API calls are guarded by `if allow_api:` block
+- `net_utils.api_get()` only called within `allow_api=True` code path
 | Attribution writes state files | State breach |
 | Attribution modifies strategy algorithm | Strategy breach |

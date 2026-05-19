@@ -14,6 +14,8 @@ Guard markers:
   NO_RULE_CHANGE = true      (does NOT modify strategy rules)
   NO_QQ_PUSH = true          (does NOT push to QQ)
   NO_STATE_WRITE = true      (does NOT write state files)
+  NO_API_DEFAULT = true      (API calls require --allow-api; default is NO_API)
+  DRY_RUN_NO_API = true      (--dry-run defaults allow_api=false)
 """
 
 from __future__ import annotations
@@ -606,7 +608,7 @@ def _format_single(row: dict) -> str:
     )
 
 
-def run(date_str: str, fixture_id: int | None = None, sleep_ms: int = 120, dry_run: bool = False) -> dict[str, Any]:
+def run(date_str: str, fixture_id: int | None = None, sleep_ms: int = 120, dry_run: bool = False, allow_api: bool = False) -> dict[str, Any]:
     key = _date_key(date_str)
     scout_path = REPORT_DIR / f"scout_v4_{key}.json"
     scout = _load_json(scout_path, [])
@@ -640,27 +642,37 @@ def run(date_str: str, fixture_id: int | None = None, sleep_ms: int = 120, dry_r
         lineup_dimension = _lineup_dimension(rec)
         match_flow_dimension = _match_flow_dimension(fid, stats_index)
 
-        f_resp = _api_get(f"fixtures?id={fid}")
-        f_rows = f_resp.get("response") or []
-        if not f_rows:
-            continue
-        item = f_rows[0]
-        score = item.get("score") or {}
-        ht = score.get("halftime") or {}
-        ft = score.get("fulltime") or {}
-        ht_home = _safe_int(ht.get("home"), 0)
-        ht_away = _safe_int(ht.get("away"), 0)
-        ft_home = _safe_int(ft.get("home"), 0)
-        ft_away = _safe_int(ft.get("away"), 0)
-        ht_goal = (ht_home + ht_away) > 0
+        if allow_api:
+            f_resp = _api_get(f"fixtures?id={fid}")
+            f_rows = f_resp.get("response") or []
+            if not f_rows:
+                continue
+            item = f_rows[0]
+            score = item.get("score") or {}
+            ht = score.get("halftime") or {}
+            ft = score.get("fulltime") or {}
+            ht_home = _safe_int(ht.get("home"), 0)
+            ht_away = _safe_int(ht.get("away"), 0)
+            ft_home = _safe_int(ft.get("home"), 0)
+            ft_away = _safe_int(ft.get("away"), 0)
+            ht_goal = (ht_home + ht_away) > 0
 
-        e_resp = _api_get(f"fixtures/events?fixture={fid}")
-        events = e_resp.get("response") or []
-        first_min, hit_bucket = _first_ht_goal_minute(events)
-        bucket_hit = bool(ht_goal and first_min is not None and hit_bucket == predicted_top_bucket)
-        event_noise = _event_noise_tags(events, first_min)
-        event_noise_detail = _event_noise_detail(events, first_min)
-        context_noise = _context_noise_tags(rec, weather_dimension=weather_dimension)
+            e_resp = _api_get(f"fixtures/events?fixture={fid}")
+            events = e_resp.get("response") or []
+            first_min, hit_bucket = _first_ht_goal_minute(events)
+            bucket_hit = bool(ht_goal and first_min is not None and hit_bucket == predicted_top_bucket)
+            event_noise = _event_noise_tags(events, first_min)
+            event_noise_detail = _event_noise_detail(events, first_min)
+            context_noise = _context_noise_tags(rec, weather_dimension=weather_dimension)
+        else:
+            # API disabled — cannot fetch live results. Mark as UNKNOWN.
+            ht_goal = False
+            ht_home = ht_away = ft_home = ft_away = 0
+            first_min = hit_bucket = bucket_hit = None
+            events = []
+            event_noise = []
+            event_noise_detail = {}
+            context_noise = []
 
         model_result = _model_result(pre_grade, ht_goal)
         diagnosis = _diagnosis(
@@ -803,6 +815,7 @@ def main() -> None:
     parser.add_argument("--sleep-ms", type=int, default=120, help="API节流毫秒")
     parser.add_argument("--validate-only", action="store_true", help="仅验证输入，不执行归因")
     parser.add_argument("--dry-run", action="store_true", help="执行归因但不写文件")
+    parser.add_argument("--allow-api", action="store_true", default=False, help="允许调用API（默认false，本阶段禁止）")
     args = parser.parse_args()
     
     if args.validate_only:
@@ -811,7 +824,13 @@ def main() -> None:
         print("[VALIDATE-ONLY] No writes, no API calls, no side effects.")
         return
     
-    result = run(args.date, fixture_id=args.fixture, sleep_ms=args.sleep_ms, dry_run=args.dry_run)
+    if not args.allow_api:
+        print("[WARN] --allow-api not set. API calls will be SKIPPED.")
+        print("[WARN] Attribution results will be UNKNOWN.")
+        print("[WARN] To perform full attribution with live results,")
+        print("[WARN] re-run with --allow-api (not allowed in V4-E.1).")
+    
+    result = run(args.date, fixture_id=args.fixture, sleep_ms=args.sleep_ms, dry_run=args.dry_run, allow_api=args.allow_api)
     if result.get("single_report"):
         print(result["single_report"])
         print("\n" + "-" * 50 + "\n")
@@ -820,6 +839,11 @@ def main() -> None:
     if args.dry_run:
         print(f"\n[DRY-RUN] Attribution calculated but NOT written to disk.")
         print("[DRY-RUN] To persist, re-run without --dry-run.")
+    
+    if args.allow_api:
+        print("\n[API] API calls were ENABLED.")
+        print("[API] V4-E.1: --allow-api is allowed for testing only.")
+        print("[API] V4-F: review allow_api execution before production.")
 
 
 if __name__ == "__main__":
