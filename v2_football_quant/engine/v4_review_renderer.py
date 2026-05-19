@@ -16,6 +16,7 @@ mode=qq:
 
 import argparse
 import json
+import os
 import re
 import sys
 from collections import Counter
@@ -367,6 +368,9 @@ def _render_qq(data, args):
     ab_count = a + b
     summary = data.get("summary", {})
     rs = data.get("rolling_stats", {})
+    no_push = os.environ.get("OPENCLAW_NO_PUSH") == "1"
+    no_push_status = "ENFORCED(OPENCLAW_NO_PUSH=1)" if no_push else "REQUIRED_BUT_NOT_SET"
+    guard_status = "PENDING_QQ_GUARD"
 
     # If no A/B, use brief template
     if a == 0 and b == 0:
@@ -382,6 +386,8 @@ def _render_qq(data, args):
         r = {
             "{{review_date}}": data.get("review_date", args.date),
             "{{schema_guard_status}}": "PASS(A/B/C/SKIP only)",
+            "{{guard_status}}": guard_status,
+            "{{no_push_status}}": no_push_status,
             "{{a_count}}": "0",
             "{{b_count}}": "0",
             "{{ab_summary}}": "无 A/B 主推荐，不计算 A/B 命中率",
@@ -427,6 +433,8 @@ def _render_qq(data, args):
         r = {
             "{{review_date}}": data.get("review_date", args.date),
             "{{schema_guard_status}}": "PASS(A/B/C/SKIP only)",
+            "{{guard_status}}": guard_status,
+            "{{no_push_status}}": no_push_status,
             "{{a_count}}": str(a),
             "{{b_count}}": str(b),
             "{{ab_summary}}": f"A：{a_hit}/{a} · B：{b_hit}/{b} · A+B：{ab_hit}/{ab_count}",

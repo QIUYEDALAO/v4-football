@@ -1,6 +1,8 @@
 【V4 情报系统】
 📌 昨日V4复盘 · {{review_date}}
 Schema Guard：{{schema_guard_status}}
+Guard：{{guard_status}}
+No-Push：{{no_push_status}}
 
 【A/B正式推荐】
 {{ab_summary}}

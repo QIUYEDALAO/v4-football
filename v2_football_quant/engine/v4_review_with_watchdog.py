@@ -180,6 +180,7 @@ def main():
         _full_pass = _guard_file_data.get("guard_status") == "PASS" if _guard_file_data.get("mode") == "full" else False
         _qq_pass = _guard_file_data.get("guard_status") == "PASS" if _guard_file_data.get("mode") == "qq" else False
         _overall_pass = _full_pass and _qq_pass
+        _no_push = True
 
         route = {
             "date": key,
@@ -187,7 +188,20 @@ def main():
             "reportagent_status": "PENDING",
             "full_guard": _full_pass,
             "qq_guard": _qq_pass,
+            "guard_status": _guard_file_data.get("guard_status", "UNKNOWN"),
+            "schema_guard_status": "PASS(A/B/C/SKIP only)",
+            "renderer_guard_status": "PASS" if _overall_pass else "BLOCKER",
+            "qq_guard_status": "PASS" if _qq_pass else "BLOCKER",
+            "route_allowed": False,
             "allowed_to_push": False,
+            "route_marker_required": True,
+            "route_marker_written": True,
+            "sent_marker_required": True,
+            "sent_marker_written": False,
+            "no_push": _no_push,
+            "qq_sent": False,
+            "production_verified": False,
+            "phase_e_allowed": False,
             "reason": "PENDING_SAFE_QQ_OUTBOUND + BOSS_CONFIRM" if _overall_pass else f"guard BLOCKER ({_guard_file_data.get('guard_status', 'UNKNOWN')})",
             "created_at": datetime.now(LOCAL_TZ).isoformat(),
         }
@@ -208,11 +222,22 @@ def main():
             "status": "NOT_SENT",
             "delivery_result": "not_executed",
             "pushed": False,
+            "guard_status": _guard_label,
+            "schema_guard_status": "PASS(A/B/C/SKIP only)",
+            "renderer_guard_status": "PASS" if _overall_pass else "BLOCKER",
+            "qq_guard_status": "PASS" if _qq_pass else "BLOCKER",
+            "route_allowed": False,
+            "route_marker_written": True,
+            "sent_marker_written": False,
+            "no_push": _no_push,
+            "qq_sent": False,
             "reason": f"guard {_guard_label}, allowed_to_push=False, waiting BOSS confirm",
             "template_id": "v4_daily_review_qq_v1",
             "message_hash": _hash,
             "version": "qq_daily_v1.0",
             "qq_delivered": False,
+            "production_verified": False,
+            "phase_e_allowed": False,
             "created_at": datetime.now(LOCAL_TZ).isoformat(),
         }
         sent_path = STATUS_DIR / f"v4_review_push_{key}.json"
