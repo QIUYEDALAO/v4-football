@@ -160,6 +160,10 @@ def _push_system_event(window_status: str, watches: int, candidates: int,
     run_id = _generate_run_id(window_status, new_locks, reason)
 
     # ── Phase D.8.12.1: no_push guard ──
+    # ── PRODUCTION GATE: only allow if explicitly enabled ──
+    if not os.environ.get("V2_QQ_SEND_ENABLED") == "1":
+        print(f"[GATE] V2_QQ_SEND_ENABLED != 1 — push suppressed", flush=True)
+        return False
     if no_push:
         print(f"[NO_PUSH] push_suppressed=true window_status={window_status}", flush=True)
         _write_notify_marker(window_status, new_locks, False, run_id)
@@ -327,6 +331,16 @@ def main():
     if observe_only:
         print("[GUARD] observe_only=true readonly_enforced=true formal_state_write=blocked", flush=True)
     _no_push = no_push or dry_run_route
+
+    # ── INCIDENT: emergency push block ──
+    incident_marker = BASE_DIR / "data" / "runtime" / "status" / "v2_qq_unauthorized_send_incident_202605.json"
+    if incident_marker.exists():
+        try:
+            inc = json.loads(incident_marker.read_text())
+            if inc.get("incident"):
+                _no_push = True
+                print("[INCIDENT] QQ unauthorized send incident active — all pushes BLOCKED", flush=True)
+        except: pass
 
     _ensure_dirs()
 
