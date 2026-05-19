@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""V2 D11.2: Controlled Proof Authorization Checker (Strict Header + Full Flag Blocker)"""
+"""V2 D11: Controlled Proof Authorization Checker"""
 import json, subprocess, sys
 from pathlib import Path
 
