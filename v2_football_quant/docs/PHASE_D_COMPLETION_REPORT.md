@@ -547,6 +547,23 @@ Phase D 工程链路完成（engineering_complete=true），但 business_pass=fa
   - `production_verified_path`
   - `formal_state_write_path`
 
+## 33. D.9.1 Production Proof Execution Scope Matrix
+
+- D.9.1 将 6 条 `UNPROVEN` 目标收敛为执行前 scope matrix。
+- 本阶段仅规划，不执行 proof command。
+- 固定口径：
+  - `all_six_targets_present=true`
+  - `all_six_status_unproven=true`
+  - `any_execution_allowed=false`
+  - `d9_2_allowed_to_generate=true`
+  - `d9_2_allowed_to_execute=false`
+- 生产权限保持关闭：
+  - `production_resume_allowed_now=false`
+  - `cron_enable_allowed=false`
+  - `qq_push_allowed=false`
+  - `verified_write_allowed=false`
+  - `state_write_allowed=false`
+
 <!-- D.8.16.3 closure: v2_football_quant/docs/PHASE_D_COMPLETION_REPORT.md -->
 
 <!-- D.8.17.1 closure -->
