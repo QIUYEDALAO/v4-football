@@ -103,10 +103,14 @@ def main():
          "d10_allowed_to_generate": True, "d10_allowed_to_execute": False,
          "d11_allowed_to_generate": True, "d11_allowed_to_execute": False,
          "PIPELINE_READY": False, "PRODUCTION_VERIFIED": False, "phase_e_allowed": False,
+         "production_proof_execution_authorized": False,
+         "cron_enable_allowed": False, "qq_push_allowed": False,
+         "state_write_allowed": False, "verified_write_allowed": False,
          "v4_frozen_at_j3": True, "v4_controlled_observe_execution_allowed": False,
          "stash_checked": False, "stash_allowed_only": False, "unknown_stash_found": False,
          "forbidden_dirty_files": [], "forbidden_staged_files": [],
-         "blockers": [], "warnings": []}
+         "blockers": [], "warnings": [],
+         "permission_guard_fields_present": 0, "permission_guard_danger_fields": 0, "all_permission_guards_enforced": False}
     block = False
 
     # A. Docs
@@ -230,6 +234,19 @@ def main():
                  ("phase_e_allowed", R["phase_e_allowed"])]:
         if v: R["blockers"].append(f"{n} is true"); block = True
 
+    # F. Permission guard self-test: count fields that should all be False
+    _danger = ["d10_allowed_to_execute", "d11_allowed_to_execute",
+               "production_proof_execution_authorized", "PIPELINE_READY",
+               "PRODUCTION_VERIFIED", "phase_e_allowed",
+               "cron_enable_allowed", "qq_push_allowed", "state_write_allowed",
+               "verified_write_allowed", "v4_controlled_observe_execution_allowed"]
+    R["permission_guard_fields_present"] = sum(1 for f in _danger if f in R)
+    R["permission_guard_danger_fields"] = len(_danger)
+    R["all_permission_guards_enforced"] = R["permission_guard_fields_present"] == len(_danger)
+    if not R["all_permission_guards_enforced"]:
+        R["blockers"].append(f"Permission guard incomplete: {R['permission_guard_fields_present']}/{len(_danger)}")
+        block = True
+
     if block: R["check_status"] = "BLOCKER"
     elif R["warnings"]: R["check_status"] = "WARN"
 
@@ -246,7 +263,11 @@ def main():
         "all_six_execution_allowed_false", "all_six_production_allowed_false",
         "all_six_production_risk_valid", "all_six_blocker_if_missing_true",
         "all_six_command_draft_required_true", "all_six_proof_result_required_before_pipeline_ready",
-        "d10_allowed_to_execute", "d11_allowed_to_execute", "PIPELINE_READY",
+        "d10_allowed_to_execute", "d11_allowed_to_execute",
+    "production_proof_execution_authorized",
+    "cron_enable_allowed", "qq_push_allowed", "state_write_allowed", "verified_write_allowed",
+    "v4_controlled_observe_execution_allowed",
+    "PIPELINE_READY", "PRODUCTION_VERIFIED", "phase_e_allowed",
         "PRODUCTION_VERIFIED", "phase_e_allowed", "v4_frozen_at_j3",
         "stash_allowed_only", "unknown_stash_found",
         "forbidden_dirty_files", "forbidden_staged_files",
