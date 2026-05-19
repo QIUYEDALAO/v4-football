@@ -1,2 +1,2 @@
 # V2 DAILY_POOL Readonly Safety — Closure
-Phase INTEL-OPS-0.1 | replay enabled, single-line JSON, checkers complete
+INTEL-OPS-0.1: --from-date/--to-date replay, single-line JSON stdout, builder robust parse, checkers completed.

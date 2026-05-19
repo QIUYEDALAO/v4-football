@@ -1,2 +1,2 @@
 # Intel Desk Local Dashboard — Closure
-Phase INTEL-OPS-0.1 | checks complete, no QQ/state/verified, D13 prohibited
+Local only. No QQ, no state, no verified. V2 BET_LOCKED only. V4 A/B/C/SKIP.
