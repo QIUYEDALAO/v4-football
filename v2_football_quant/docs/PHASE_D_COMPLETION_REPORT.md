@@ -612,6 +612,24 @@ Phase D 工程链路完成（engineering_complete=true），但 business_pass=fa
   - `phase_e_allowed=false`
 - 六条 proof target 仍需保持 `UNPROVEN`，不得写成 `PROVEN`。
 
+## 38. D.9-A Planning Closure
+
+| Step | Commit | 内容 |
+|:----:|:------:|:-----|
+| D.9.1 | `62a13d7` | Production proof execution scope matrix |
+| D.9.2 | `4c53977` | Production proof evidence schema |
+| D.9.3 | `2f9fed4` | Controlled proof runbook draft |
+| D.9.4 | `2548462` | Proof execution stop & rollback gate |
+| D.9.5 | `3ece2c1` | D10 authorization pre-gate |
+
+- D.9-A 已完成执行前规划收口（planning only）。
+- 当前状态保持：
+  - `current_level=CODE_READY`
+  - `PIPELINE_READY=false`
+  - `PRODUCTION_VERIFIED=false`
+  - `phase_e_allowed=false`
+- production resume 仍未执行，六条 proof 仍 `UNPROVEN`。
+
 <!-- D.8.16.3 closure: v2_football_quant/docs/PHASE_D_COMPLETION_REPORT.md -->
 
 <!-- D.8.17.1 closure -->

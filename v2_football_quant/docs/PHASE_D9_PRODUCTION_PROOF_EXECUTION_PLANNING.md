@@ -2,6 +2,16 @@
 
 > Scope: D.9.1-D.9.5 planning chain only
 
+## D9-A Commits
+
+| Step | Commit | Scope |
+|:----:|:------:|:------|
+| D.9.1 | `62a13d7` | Proof execution scope matrix |
+| D.9.2 | `4c53977` | Proof evidence schema |
+| D.9.3 | `2f9fed4` | Controlled proof runbook draft |
+| D.9.4 | `2548462` | Proof stop/rollback gate |
+| D.9.5 | `3ece2c1` | D10 authorization pre-gate |
+
 ## Current Gate Level
 
 - `current_level=CODE_READY`
@@ -39,3 +49,11 @@
 - `d10_allowed_to_execute=false`
 - `production_proof_execution_authorized=false`
 - `boss_approval_required=true`
+
+## D9-A Closure
+
+- D.9-A completed as planning package only.
+- `current_level=CODE_READY`
+- `PIPELINE_READY=false`
+- `PRODUCTION_VERIFIED=false`
+- `phase_e_allowed=false`

@@ -34,3 +34,8 @@
 - D.9.5 is pre-gate review only.
 - D.9.5 does not authorize production proof execution.
 - D.9.5 does not allow Phase E entry.
+
+## D9-A Closure Note
+
+- D.9-A ends at planning and pre-gate readiness only.
+- Any D10 proof execution still requires explicit BOSS authorization.
