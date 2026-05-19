@@ -262,6 +262,7 @@ Phase D 工程链路完成（engineering_complete=true），但 business_pass=fa
 | D.8.38 | `TBD` | Production path proof pack consolidation |
 | D.8.39 | `TBD` | Phase D terminal readiness gate |
 | D.8.40 | `TBD` | Phase D terminal report |
+| D.8.41 | `TBD` | Next phase decision gate |
 
 **D.8.13 结论：** approval_packet_status=READY_FOR_BOSS_REVIEW，guarded_live_observe_approved=false，D.8.14 需 BOSS 单独指令。
 
@@ -515,6 +516,20 @@ Phase D 工程链路完成（engineering_complete=true），但 business_pass=fa
 - 下一步仅允许：
   - `d841_allowed_to_generate=true`
   - `d841_allowed_to_execute=false`
+
+## 31. D.8.41 Next Phase Decision Gate
+
+- D.8.41 仅做下一阶段决策门，不做执行。
+- 允许决策选项仅限：
+  - `pause`
+  - `D9_PRODUCTION_PROOF_EXECUTION_PLANNING`
+  - `DEFER_PHASE_E`
+- 固定口径：
+  - `recommended_next=D9_OR_PAUSE`
+  - `phase_e_allowed=false`
+  - `d9_allowed_to_generate=true`
+  - `d9_allowed_to_execute=false`
+- 本阶段不授予任何生产权限，不得进入 Phase E。
 
 <!-- D.8.16.3 closure: v2_football_quant/docs/PHASE_D_COMPLETION_REPORT.md -->
 
