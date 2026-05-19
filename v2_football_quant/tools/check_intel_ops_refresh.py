@@ -64,6 +64,13 @@ def main():
             if not (idir / f).is_file(): R["blockers"].append(f"Missing: {f}"); block = True
 
         R["per_date"] = v2h.get("per_date", {})
+        # Verify dashboard was generated this run
+        dk = args.date.replace("-","")
+        mdf = MODULE / "reports" / "intel_desk" / f"INTEL_DASHBOARD_{dk}.md"
+        if mdf.is_file():
+            import os as _os, time as _time
+            if mdf.stat().st_mtime < _time.time() - 180:
+                R["warnings"].append(f"Dashboard mtime may be stale")
         R["attribution_dates"] = list(d.get("v4_attribution", {}).keys())
         R["history_days"] = d.get("history_days")
         R["v4_attribution_days"] = d.get("v4_attribution_days")

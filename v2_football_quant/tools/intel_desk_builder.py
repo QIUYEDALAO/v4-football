@@ -139,7 +139,7 @@ def build(args):
     print(json.dumps({"status": "OK", "md": str(mdf), "json": str(jf),
                       "latest": str(latest), "v2_current_parsed": ok_c,
                       "v2_historical_parsed": ok_h, "attribution_dates": sorted(v4_summary.keys())},
-                     indent=2, ensure_ascii=False))
+                     ensure_ascii=False))
     return 0
 
 

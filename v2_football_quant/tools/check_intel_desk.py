@@ -62,10 +62,10 @@ def main():
                 for k in ["total_matches", "A_count", "B_count", "C_count", "SKIP_count"]:
                     if v4t.get(k) is not None and v4t.get(k) != 0:
                         R["blockers"].append(f"v4_today.{k}={v4t[k]} but source_missing"); block = True
-            c_note = v4t.get("C_note", "")
-            s_note = v4t.get("SKIP_note", "")
-            R["c_observation_text"] = "observation-only" in c_note.lower() or "观察" in c_note
-            R["skip_not_recommendation_text"] = "not recommendation" in s_note.lower() or "非推荐" in s_note
+            c_note = v4t.get("C_observation_only", False)
+            s_note = v4t.get("SKIP_not_recommendation", False)
+            R["c_observation_text"] = c_note or "observation-only" in str(v4t.get("C_note","")).lower()
+            R["skip_not_recommendation_text"] = s_note or "not recommendation" in str(v4t.get("SKIP_note","")).lower()
             if not R["c_observation_text"]: R["warnings"].append("C observation-only missing")
             if not R["skip_not_recommendation_text"]: R["warnings"].append("SKIP not-recommendation missing")
 
