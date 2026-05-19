@@ -33,3 +33,8 @@
 - D.8.39 does not execute production path.
 - D.8.39 does not resume production.
 - D.8.39 does not enter Phase E.
+
+## D.8-EE Closure Note
+
+- D.8.39 confirms engineering closure only.
+- Production readiness remains blocked and unresolved proof items remain.

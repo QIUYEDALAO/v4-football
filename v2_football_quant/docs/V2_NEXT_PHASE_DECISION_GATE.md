@@ -43,3 +43,8 @@
 
 - D.8.41 is not execution and does not grant production permissions.
 - Engineering chain completion is tracked separately from production verification.
+
+## D.8-EE Closure Note
+
+- The only recommended direction remains `D9_OR_PAUSE`.
+- Phase E remains deferred and cannot be entered automatically from this gate.

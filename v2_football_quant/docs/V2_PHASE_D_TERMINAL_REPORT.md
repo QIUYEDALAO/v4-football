@@ -50,3 +50,8 @@
 - D.8.40 does not execute production paths.
 - D.8.40 does not authorize production resume.
 - D.8.40 does not enter Phase E.
+
+## D.8-EE Closure Note
+
+- Terminal report remains decision-support only.
+- Current level remains `CODE_READY`; production verification remains pending.

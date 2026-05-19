@@ -259,10 +259,10 @@ Phase D 工程链路完成（engineering_complete=true），但 business_pass=fa
 | D.8.35 | `5f96c14` | Production QQ path proof plan |
 | D.8.36 | `5198513` | Production verified write path proof plan |
 | D.8.37 | `9eebd50` | Formal state write path proof plan |
-| D.8.38 | `TBD` | Production path proof pack consolidation |
-| D.8.39 | `TBD` | Phase D terminal readiness gate |
-| D.8.40 | `TBD` | Phase D terminal report |
-| D.8.41 | `TBD` | Next phase decision gate |
+| D.8.38 | `759af0b` | Production path proof pack consolidation |
+| D.8.39 | `d71eeda` | Phase D terminal readiness gate |
+| D.8.40 | `1bb6b07` | Phase D terminal report |
+| D.8.41 | `2b88142` | Next phase decision gate |
 
 **D.8.13 结论：** approval_packet_status=READY_FOR_BOSS_REVIEW，guarded_live_observe_approved=false，D.8.14 需 BOSS 单独指令。
 
@@ -530,6 +530,22 @@ Phase D 工程链路完成（engineering_complete=true），但 business_pass=fa
   - `d9_allowed_to_generate=true`
   - `d9_allowed_to_execute=false`
 - 本阶段不授予任何生产权限，不得进入 Phase E。
+
+## 32. D.8-EE Terminal Closure
+
+- D.8.38-D.8.41 已全部完成并提交。
+- 当前状态保持：
+  - `current_level=CODE_READY`
+  - `PIPELINE_READY=false`
+  - `PRODUCTION_VERIFIED=false`
+- Phase E 未进入，production resume 未执行。
+- 六条未证明项仍为 `UNPROVEN`：
+  - `real_state_present_case`
+  - `active_window_mutation_path`
+  - `production_cron_path`
+  - `production_qq_path`
+  - `production_verified_path`
+  - `formal_state_write_path`
 
 <!-- D.8.16.3 closure: v2_football_quant/docs/PHASE_D_COMPLETION_REPORT.md -->
 
