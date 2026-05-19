@@ -602,6 +602,16 @@ Phase D 工程链路完成（engineering_complete=true），但 business_pass=fa
   - `d9_5_allowed_to_execute=false`
 - 生产权限保持关闭，不得进入 Phase E。
 
+## 37. D.9.5 D10 Authorization Pre-Gate
+
+- D.9.5 仅做 D10 授权前置门，不授予执行权限。
+- 固定口径：
+  - `d10_allowed_to_generate=true`
+  - `d10_allowed_to_execute=false`
+  - `production_proof_execution_authorized=false`
+  - `phase_e_allowed=false`
+- 六条 proof target 仍需保持 `UNPROVEN`，不得写成 `PROVEN`。
+
 <!-- D.8.16.3 closure: v2_football_quant/docs/PHASE_D_COMPLETION_REPORT.md -->
 
 <!-- D.8.17.1 closure -->
