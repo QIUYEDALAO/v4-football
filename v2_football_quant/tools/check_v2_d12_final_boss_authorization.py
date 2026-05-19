@@ -190,7 +190,16 @@ def main():
             if td.get("command_must_not_execute","false") != "true": runner_flags["all_runner_command_must_not_execute"] = False
             for flag in ["no_push","no_cron","no_state_write","no_verified_write","no_api","no_key_read","no_supervisor"]:
                 if td.get(flag,"false") != "true": runner_flags["all_runner_required_no_flags_recorded"] = False
+        # Individual runner flags (beyond all_runner_required_no_flags_recorded)
+        indv_flags = {"all_runner_watchdog_only_failure_recorded":True,"all_runner_no_ai_kill_retry_recorded":True,"all_runner_preserve_logs_recorded":True,"all_runner_manifest_required_recorded":True}
+        for t in EXPECTED_ORDER:
+            td = rtargs.get(t, {})
+            for hdr, flag in [("watchdog_only_failure","all_runner_watchdog_only_failure_recorded"),("no_ai_kill_retry","all_runner_no_ai_kill_retry_recorded"),("preserve_logs","all_runner_preserve_logs_recorded"),("manifest_required","all_runner_manifest_required_recorded")]:
+                if td.get(hdr,"false") != "true": indv_flags[flag] = False
         for k,v in runner_flags.items():
+            R[k] = v
+            if not v: R["blockers"].append(f"Runner: {k} is False"); block = True
+        for k,v in indv_flags.items():
             R[k] = v
             if not v: R["blockers"].append(f"Runner: {k} is False"); block = True
 
