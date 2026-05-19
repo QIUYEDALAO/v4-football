@@ -1,8 +1,8 @@
 # V4 Controlled Observe Runner Contract
 
-Phase: V4-I.1.1
+Phase: V4-I.1.2
 Date: 2026-05-19
-Status: HARDENED (runner defined, no-exec harness only)
+Status: HARDENED (window choices locked, no-exec harness only)
 
 ## Runner Identity
 
@@ -31,7 +31,15 @@ Status: HARDENED (runner defined, no-exec harness only)
 | `--manifest-required` | yes | Manifest gate required |
 | `--review-only` | yes | Review/approval mode only |
 | `--date` | yes (required) | Run date |
-| `--window` | yes (required) | Window (early/midday/evening/night) |
+| `--window` | yes (required + choices) | Window (`early`/`midday`/`evening`/`night`) |
+
+### Window Choices Contract
+
+- Allowed windows are strictly: `early`, `midday`, `evening`, `night`.
+- Any invalid window (e.g. `invalid`) must be rejected by argparse with exit code `2`.
+- Legal window (e.g. `midday`) keeps runner status as `REVIEW_ONLY_READY`.
+- Observe execution remains forbidden (`observe_execution_allowed=false`).
+- Command remains non-executable (`command_must_not_execute=true`).
 
 ## Prohibited Actions
 

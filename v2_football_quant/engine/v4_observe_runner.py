@@ -18,6 +18,7 @@ import argparse
 import json
 import sys
 
+ALLOWED_WINDOWS = ["early", "midday", "evening", "night"]
 
 REQUIRED_BOOLEAN_FLAGS = [
     "observe_only", "dry_run", "single_window_only",
@@ -59,7 +60,12 @@ def main():
     parser.add_argument("--manifest-required", action="store_true")
     parser.add_argument("--review-only", action="store_true")
     parser.add_argument("--date", required=True, help="YYYYMMDD or YYYY-MM-DD")
-    parser.add_argument("--window", required=True, help="observe window")
+    parser.add_argument(
+        "--window",
+        required=True,
+        choices=ALLOWED_WINDOWS,
+        help="observe window",
+    )
 
     args = parser.parse_args()
     missing = check_required_flags(args)
@@ -74,6 +80,7 @@ def main():
         "runner_execution_authorization_required": True,
         "date": args.date,
         "window": args.window,
+        "allowed_windows": ALLOWED_WINDOWS,
         "observe_execution_allowed": False,
         "command_must_not_execute": True,
         "observe_only": args.observe_only,

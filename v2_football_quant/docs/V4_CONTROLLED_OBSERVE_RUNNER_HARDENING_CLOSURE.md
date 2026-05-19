@@ -1,25 +1,31 @@
 # V4 Controlled Observe Runner Hardening Closure
 
-Phase: V4-I.1.1  
+Phase: V4-I.1.1 / V4-I.1.2  
 Date: 2026-05-19  
-Status: CLOSED (hardening complete, no execution)
+Status: CLOSED (hardening complete, window choices locked, no execution)
 
 ## Hardening Scope
 
-- Fixed legacy phase fields in runner output:
-  - `v4_12_allowed_to_generate` -> `v4_i2_allowed_to_generate`
-  - `v4_12_allowed_to_execute` -> `v4_i2_allowed_to_execute`
+- Fixed legacy wrong-phase fields in runner output to the V4-I.2 namespace:
+  - `v4_i2_allowed_to_generate`
+  - `v4_i2_allowed_to_execute`
 - Preserved phase safety gates:
   - `v4_i2_allowed_to_generate=true`
   - `v4_i2_allowed_to_execute=false`
   - `v4_j_allowed_to_generate=true`
   - `v4_j_allowed_to_execute=false`
 - Enforced `--date` and `--window` as required inputs in runner.
+- Locked `--window` choices to:
+  - `early`
+  - `midday`
+  - `evening`
+  - `night`
 - Hardened runner checker from static-only scan to:
   - execute runner preview command,
   - parse runner JSON output,
   - verify phase/safety fields in runtime output,
-  - verify missing `--date` or `--window` fails as expected.
+  - verify missing `--date` or `--window` fails as expected,
+  - verify invalid `--window` is rejected with exit code `2`.
 - Clarified command draft phase wording:
   - `runner_defined=true`
   - `runner_exists=true`
@@ -34,6 +40,7 @@ Status: CLOSED (hardening complete, no execution)
 - verified write: false
 - production_verified: false
 - phase_e_allowed: false
+- command_must_not_execute: true
 
 ## Next-Phase Gate
 

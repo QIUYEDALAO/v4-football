@@ -1,8 +1,8 @@
 # V4 Controlled Observe Runner — Phase Closure
 
-Phase: V4-I.1 / V4-I.1.1
+Phase: V4-I.1 / V4-I.1.1 / V4-I.1.2
 Date: 2026-05-19
-Status: CLOSED (runner hardened; ready for V4-I.2 generation only; V4-J still blocked)
+Status: CLOSED (runner hardened + window choices locked; ready for V4-I.2 generation only; V4-J still blocked)
 
 ## Scope
 
@@ -18,9 +18,11 @@ This phase defined the V4 controlled observe no-exec runner:
 |------|--------|
 | Runner defined | ✅ (engine/v4_observe_runner.py) |
 | All required flags | ✅ 17/17 (`--date` and `--window` are required) |
+| Window choices | ✅ `early/midday/evening/night` only |
+| Invalid window negative test | ✅ PASS (exit code 2) |
 | Runner no-exec | ✅ (observe_execution_allowed=false) |
 | No API/key/QQ/state/verified | ✅ |
-| Runner checker | ✅ CREATED + preview execution JSON parse |
+| Runner checker | ✅ CREATED + preview execution JSON parse + invalid-window negative test |
 
 ## Safety Verification
 
