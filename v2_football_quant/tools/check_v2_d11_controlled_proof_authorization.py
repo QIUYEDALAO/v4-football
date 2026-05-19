@@ -221,20 +221,6 @@ def main():
         if not v["execution_allowed_now_false"]: flags["all_six_execution_allowed_now_false"] = False
         if not v["command_draft_exists_true"]: flags["all_six_command_draft_exists"] = False
         if not v["runner_recorded"]: flags["all_six_runner_status_recorded"] = False
-    # Aggregate runner status
-    runner_missing = []
-    runner_invalid = []
-    for t in SIX_PROOF_TARGETS:
-    td = mx["targets"].get(t, {})
-    rv = td.get("runner_exists", "")
-        if not rv:
-    runner_missing.append(t)
-        elif rv not in ["true","false","unknown","NOT_EXECUTABLE_UNTIL_RUNNER_DEFINED"]:
-    runner_invalid.append(t)
-    R["runner_status_missing_targets"] = runner_missing
-    R["runner_status_invalid_targets"] = runner_invalid
-    if runner_missing: R["blockers"].append(f"Runner status missing: {runner_missing}"); block = True
-    if runner_invalid: R["blockers"].append(f"Runner status invalid: {runner_invalid}"); block = True
         if not v["rollback_required_true"]: flags["all_six_rollback_required"] = False
         if not v["watchdog_required_true"]: flags["all_six_watchdog_required"] = False
         if not v["no_ai_kill_required_true"]: flags["all_six_no_ai_kill_retry_required"] = False
@@ -243,6 +229,25 @@ def main():
         if not v["stop_conditions_present"]: flags["all_six_stop_conditions_present"] = False
         if not v["evidence_present"]: flags["all_six_evidence_present"] = False
         pv[t] = v
+
+    # Runner status aggregation
+    runner_missing = []
+    runner_invalid = []
+    for t in SIX_PROOF_TARGETS:
+        td = mx["targets"].get(t, {})
+        rv = td.get("runner_exists", "")
+        if not rv:
+            runner_missing.append(t)
+        elif rv not in ["true", "false", "unknown", "NOT_EXECUTABLE_UNTIL_RUNNER_DEFINED"]:
+            runner_invalid.append(t)
+    R["runner_status_missing_targets"] = runner_missing
+    R["runner_status_invalid_targets"] = runner_invalid
+    if runner_missing:
+        R["blockers"].append(f"Runner status missing: {runner_missing}")
+        block = True
+    if runner_invalid:
+        R["blockers"].append(f"Runner status invalid: {runner_invalid}")
+        block = True
 
     R["per_target_validation"] = pv
     for fk, fv in flags.items():
