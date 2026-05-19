@@ -576,6 +576,18 @@ Phase D 工程链路完成（engineering_complete=true），但 business_pass=fa
   - `d9_3_allowed_to_execute=false`
 - 生产权限保持关闭，不得进入 Phase E。
 
+## 35. D.9.3 Controlled Proof Runbook Draft
+
+- D.9.3 仅生成 runbook draft，不执行 proof command。
+- 6 条 proof target 均输出 `review_only` 模板，且必须：
+  - `command_must_not_execute=true`
+  - `execution_allowed_now=false`
+  - `REVIEW_ONLY_DO_NOT_EXECUTE` 前缀存在
+- 下一步仅允许：
+  - `d9_4_allowed_to_generate=true`
+  - `d9_4_allowed_to_execute=false`
+- 生产权限保持关闭，不得进入 Phase E。
+
 <!-- D.8.16.3 closure: v2_football_quant/docs/PHASE_D_COMPLETION_REPORT.md -->
 
 <!-- D.8.17.1 closure -->
