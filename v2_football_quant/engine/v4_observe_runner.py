@@ -19,19 +19,24 @@ import json
 import sys
 
 
-REQUIRED_FLAGS = [
+REQUIRED_BOOLEAN_FLAGS = [
     "observe_only", "dry_run", "single_window_only",
     "no_push", "no_state_write", "no_verified_write",
     "no_cron", "no_api", "no_key_read", "no_supervisor",
     "watchdog_only_failure", "no_ai_kill_retry",
     "preserve_logs", "manifest_required", "review_only",
 ]
+REQUIRED_VALUE_FLAGS = ["date", "window"]
 
 
 def check_required_flags(args) -> list[str]:
     missing = []
-    for flag in REQUIRED_FLAGS:
+    for flag in REQUIRED_BOOLEAN_FLAGS:
         if not getattr(args, flag, False):
+            missing.append(f"--{flag.replace('_', '-')}")
+    for flag in REQUIRED_VALUE_FLAGS:
+        value = getattr(args, flag, "")
+        if not str(value).strip():
             missing.append(f"--{flag.replace('_', '-')}")
     return missing
 
@@ -53,8 +58,8 @@ def main():
     parser.add_argument("--preserve-logs", action="store_true")
     parser.add_argument("--manifest-required", action="store_true")
     parser.add_argument("--review-only", action="store_true")
-    parser.add_argument("--date", default="")
-    parser.add_argument("--window", default="")
+    parser.add_argument("--date", required=True, help="YYYYMMDD or YYYY-MM-DD")
+    parser.add_argument("--window", required=True, help="observe window")
 
     args = parser.parse_args()
     missing = check_required_flags(args)
@@ -64,10 +69,16 @@ def main():
         "command_type": "REVIEW_ONLY_DRAFT",
         "runner": "engine/v4_observe_runner.py (no-exec harness)",
         "version": "0.1.0",
+        "runner_defined": True,
+        "runner_exists": True,
+        "runner_execution_authorization_required": True,
         "date": args.date,
         "window": args.window,
         "observe_execution_allowed": False,
         "command_must_not_execute": True,
+        "observe_only": args.observe_only,
+        "dry_run": args.dry_run,
+        "single_window_only": args.single_window_only,
         "required_flags_present": not bool(missing),
         "missing_required_flags": missing,
         "no_push": args.no_push,
@@ -89,8 +100,10 @@ def main():
         "verified_written": False,
         "production_verified": False,
         "phase_e_allowed": False,
-        "v4_12_allowed_to_generate": True,
-        "v4_12_allowed_to_execute": False,
+        "v4_i2_allowed_to_generate": True,
+        "v4_i2_allowed_to_execute": False,
+        "v4_j_allowed_to_generate": True,
+        "v4_j_allowed_to_execute": False,
     }
 
     print(json.dumps(result, indent=2, ensure_ascii=False))
@@ -99,7 +112,7 @@ def main():
         print(f"\n[BLOCKER] Missing required flags: {missing}", file=sys.stderr)
         sys.exit(2)
 
-    print("\n[INFO] No observe executed. Review-only harness.")
+    print("\n[INFO] No observe executed. Review-only harness.", file=sys.stderr)
 
 
 if __name__ == "__main__":

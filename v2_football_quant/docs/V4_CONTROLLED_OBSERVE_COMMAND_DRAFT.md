@@ -10,10 +10,12 @@ Status: REVIEW_ONLY_DRAFT — NOT EXECUTABLE
 |-------|-------|
 | command_type | REVIEW_ONLY_DRAFT |
 | command_must_not_execute | true |
+| runner_defined | true |
 | runner_exists | true (V4-I.1) |
-| runner_required_before_execution | true |
+| runner_execution_authorization_required | true |
 | observe_execution_allowed | false |
 | execution_allowed | false |
+| execution_marker | NOT_EXECUTABLE |
 
 ## Proposed Command (REVIEW ONLY — STILL NOT EXECUTABLE)
 
@@ -35,20 +37,19 @@ OPENCLAW_NO_PUSH=1 python3 engine/v4_observe_runner.py \
   --watchdog-only-failure \
   --no-ai-kill-retry \
   --preserve-logs \
-  --manifest-required
+  --manifest-required \
+  --review-only \
+  --date 20260519 \
+  --window midday
 ```
 
 ## Notes
 
-- No `engine/v4_observe_runner.py` exists at this stage.
-- Command draft defines ALL required flags for future runner implementation.
-- Flags marked as `NOT_EXECUTABLE_UNTIL_RUNNER_DEFINED`.
+- `engine/v4_observe_runner.py` is already defined as a no-exec runner.
+- `--date` and `--window` are required runner inputs.
+- Command draft remains review-only and must not be executed.
+- Legacy marker retained for compatibility: `NOT_EXECUTABLE_UNTIL_RUNNER_DEFINED`.
 - Route and sent markers are NOT created in this phase.
 - No lock is acquired.
 - No state is written.
 - No QQ is sent.
-
-## Required Runner Capabilities
-
-Future `engine/v4_observe_runner.py` must support ALL flags listed above.
-The checker `check_v4_controlled_observe_approval.py` will validate flag coverage.

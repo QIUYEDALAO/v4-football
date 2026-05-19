@@ -50,6 +50,8 @@ command draft, and approval checker. No observe was executed.
 | State written | false |
 | Production verified | false |
 | Phase E allowed | false |
+| V4-I.2 allowed_to_generate | true |
+| V4-I.2 allowed_to_execute | false |
 | V4-J allowed_to_generate | true |
 | V4-J allowed_to_execute | false |
 

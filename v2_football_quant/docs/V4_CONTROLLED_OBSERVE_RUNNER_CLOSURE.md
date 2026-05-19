@@ -1,8 +1,8 @@
 # V4 Controlled Observe Runner — Phase Closure
 
-Phase: V4-I.1
+Phase: V4-I.1 / V4-I.1.1
 Date: 2026-05-19
-Status: CLOSED (ready for V4-I.2 execution review; V4-J still blocked)
+Status: CLOSED (runner hardened; ready for V4-I.2 generation only; V4-J still blocked)
 
 ## Scope
 
@@ -17,10 +17,10 @@ This phase defined the V4 controlled observe no-exec runner:
 | Item | Status |
 |------|--------|
 | Runner defined | ✅ (engine/v4_observe_runner.py) |
-| All required flags | ✅ 17/17 |
+| All required flags | ✅ 17/17 (`--date` and `--window` are required) |
 | Runner no-exec | ✅ (observe_execution_allowed=false) |
 | No API/key/QQ/state/verified | ✅ |
-| Runner checker | ✅ CREATED |
+| Runner checker | ✅ CREATED + preview execution JSON parse |
 
 ## Safety Verification
 
@@ -55,5 +55,5 @@ This phase defined the V4 controlled observe no-exec runner:
 - `tools/check_v4_controlled_observe_runner.py` (new)
 - `docs/V4_CONTROLLED_OBSERVE_RUNNER_CONTRACT.md` (new)
 - `docs/V4_CONTROLLED_OBSERVE_RUNNER_CLOSURE.md` (this file)
-- `docs/V4_CONTROLLED_OBSERVE_COMMAND_DRAFT.md` (updated: runner_exists=true)
-- `docs/V4_CONTROLLED_OBSERVE_APPROVAL_CLOSURE.md` (updated: V4-J still blocked)
+- `docs/V4_CONTROLLED_OBSERVE_COMMAND_DRAFT.md` (updated: runner execution authorization wording)
+- `docs/V4_CONTROLLED_OBSERVE_APPROVAL_CLOSURE.md` (updated: V4-I.2 generate-only + V4-J still blocked)

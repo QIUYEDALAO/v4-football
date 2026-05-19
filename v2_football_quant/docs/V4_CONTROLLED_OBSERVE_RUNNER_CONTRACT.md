@@ -1,8 +1,8 @@
 # V4 Controlled Observe Runner Contract
 
-Phase: V4-I.1
+Phase: V4-I.1.1
 Date: 2026-05-19
-Status: FINAL (runner defined, no-exec harness only)
+Status: HARDENED (runner defined, no-exec harness only)
 
 ## Runner Identity
 
@@ -30,8 +30,8 @@ Status: FINAL (runner defined, no-exec harness only)
 | `--preserve-logs` | yes | Preserve all logs |
 | `--manifest-required` | yes | Manifest gate required |
 | `--review-only` | yes | Review/approval mode only |
-| `--date` | yes | Run date |
-| `--window` | yes | Window (early/midday/evening/night) |
+| `--date` | yes (required) | Run date |
+| `--window` | yes (required) | Window (early/midday/evening/night) |
 
 ## Prohibited Actions
 
@@ -59,6 +59,8 @@ Status: FINAL (runner defined, no-exec harness only)
 |-------|-------|
 | production_verified | false |
 | phase_e_allowed | false |
-| v4_12_allowed_to_generate | true |
-| v4_12_allowed_to_execute | false |
+| v4_i2_allowed_to_generate | true |
+| v4_i2_allowed_to_execute | false |
+| v4_j_allowed_to_generate | true |
+| v4_j_allowed_to_execute | false |
 | observe_executed | false |
