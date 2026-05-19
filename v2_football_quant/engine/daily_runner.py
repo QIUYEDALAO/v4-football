@@ -608,6 +608,12 @@ def run_once(run_tag="DEFAULT", quick_mode=False):
             # persist final state
             fixture_state[fid_key] = {
                 **fstate,
+                "kickoff_time": fx.get("date", ""),
+                "time_bj": fx.get("time_bj", ""),
+                "home": fx.get("home", ""),
+                "away": fx.get("away", ""),
+                "league_id": fx.get("league", ""),
+                "league_name": fx.get("league_name", ""),
                 "seen_in_band": bool(fstate.get("seen_in_band", False)),
                 "last_seen_time": datetime.now(timezone.utc).isoformat(),
                 "final_observed_odds_D": None,
@@ -648,6 +654,12 @@ def run_once(run_tag="DEFAULT", quick_mode=False):
         final_status = "IN_BAND" if in_band_now else ("ABOVE_BAND" if odds_D >= 2.90 else "BELOW_BAND")
         fixture_state[fid_key] = {
             **fstate,
+            "kickoff_time": fx.get("date", ""),
+            "time_bj": fx.get("time_bj", ""),
+            "home": fx.get("home", ""),
+            "away": fx.get("away", ""),
+            "league_id": fx.get("league", ""),
+            "league_name": fx.get("league_name", ""),
             "seen_in_band": seen_in_band,
             "last_seen_time": now_utc,
             "last_seen_stage": scan_stage,

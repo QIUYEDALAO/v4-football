@@ -114,6 +114,7 @@ def main():
         "T_MINUS_15M": 0,
         "FAR_FUTURE": 0,
         "STARTED_OR_CLOSED": 0,
+        "MISSING_KICKOFF_TIME": 0,
     }
     new_locks = []
 
@@ -130,9 +131,10 @@ def main():
             fstate["conflict_reason"] = f"prelocked_by_{fstate.get('lock_owner', 'unknown')}"
             print(f"PRELOCK_OWNERSHIP_CONFLICT: fid={fid_str} prelocked_by={fstate.get('lock_owner', 'unknown')}", flush=True)
 
-        ko_str = fstate.get("kickoff_time") or fstate.get("last_seen_time", "")
+        ko_str = fstate.get("kickoff_time", "")
         if not ko_str:
-            continue
+            window_summary["MISSING_KICKOFF_TIME"] = window_summary.get("MISSING_KICKOFF_TIME", 0) + 1
+            continue  # skip this fixture — cannot determine stage without kickoff_time
 
         try:
             ko_str_clean = ko_str.replace("Z", "+00:00")
