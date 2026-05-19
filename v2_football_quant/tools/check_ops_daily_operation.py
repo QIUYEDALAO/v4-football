@@ -98,6 +98,9 @@ def main():
         log_files = list(log_dir.glob("v2_quant_2026-05-19.log"))
         R["logs_checked"] = len(log_files) > 0
         warn("logs_v2", R["logs_checked"], "no v2 log")
+    v4_log_dir = log_dir / ".." / ".." / "v2_football_quant" / "data" / "runtime" / "logs"
+    v4_logs = list(MODULE.glob("data/runtime/logs/v4_scan_*.log"))
+    warn("v4_logs", len(v4_logs) > 0, "no v4 scan logs")
 
     # ── STALE CHECK (real file hash) ──
     dash = MODULE / "data" / "runtime" / "dashboard" / "v2_today.html"
@@ -115,6 +118,15 @@ def main():
         warn("intel_v4_visible", "SKIP" in html or "C" in html, "V4 status not in intel desk")
 
     # Final
+    
+    # ── OPS HEARTBEAT ──
+    hb_html = MODULE / "data" / "runtime" / "dashboard" / "ops_heartbeat.html"
+    hb_json = MODULE / f"data/runtime/status/ops_heartbeat_center_{ops_date}.json"
+    if not hb_json.is_file():
+        hb_json = MODULE / "data" / "runtime" / "status" / "ops_heartbeat_center_202605.json"
+    warn("ops_heartbeat_html", hb_html.is_file(), "no OPS heartbeat html")
+    warn("ops_heartbeat_status", hb_json.is_file(), "no OPS heartbeat status")
+
     if block: R["check_status"]="BLOCKER"
     elif R["warnings"]: R["check_status"]="WARN"
     
