@@ -308,7 +308,7 @@ def build_brief(date_str: str) -> str:
         lines.append("今日 V4 无A/B上半场主推荐。")
     lines.append("")
     lines.append("---")
-    lines.append("⚠️ 本简报为V4最终结论。禁止追加任何V33/旧口径/交叉参考/独立分析。")
+    lines.append("⚠️ 本简报为V4最终结论。禁止追加任何旧口径/交叉参考/独立分析。")
 
     out_path = REPORT_DIR / f"v4_openclaw_brief_{key}.txt"
     out_path.parent.mkdir(parents=True, exist_ok=True)

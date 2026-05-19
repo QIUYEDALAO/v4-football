@@ -55,6 +55,7 @@ V4 执行链路必须可审计并具备 marker：
 
 ## 5) V4 Prohibitions
 
+- 说明：本节出现的历史词仅用于 `forbidden` 示例，不得进入正式输出。
 - 不得把 WATCH / CANDIDATE 写成正式推荐。
 - 不得把 SKIP 推成投注建议。
 - 不得使用 V33 结论或口径。

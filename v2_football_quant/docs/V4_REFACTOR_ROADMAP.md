@@ -54,7 +54,7 @@
 ## V4-G daily / weekly / monthly reports
 
 - 目标：日报/周报/月报统一模板与一致性校验。
-- 禁止项：不得混入口径外字段，不得引用 V33。
+- 禁止项：不得混入口径外字段，不得引用 V33（仅可在 deprecated/forbidden 说明中出现）。
 - 验收标准：report schema + guard checker 通过。
 - qq_push_allowed=false
 - production_allowed=false
