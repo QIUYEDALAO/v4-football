@@ -63,7 +63,7 @@ def main():
               "v4_matches": v4_matches, "rolling": rolling,
               "qq_sent": False, "state_written": False, "verified_written": False,
               "proof_executed": False}
-    print(json.dumps(result, indent=2, ensure_ascii=False))
+    print(json.dumps(result, ensure_ascii=False))
     return 0
 
 if __name__=="__main__": sys.exit(main())
