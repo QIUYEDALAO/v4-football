@@ -21,7 +21,7 @@ SIX_PROOF_TARGETS = [
 
 REQUIRED_MATRIX_HEADERS = [
     "proof_id", "current_status", "execution_authorization_status",
-    "execution_allowed_now", "command_draft_exists",
+    "execution_allowed_now", "command_draft_exists", "runner_exists",
     "required_preconditions", "stop_conditions",
     "rollback_required", "watchdog_only_failure_required",
     "no_ai_kill_retry_required", "evidence_required_after_execution",
@@ -50,10 +50,10 @@ REQUIRED_TRUE = ["d11_allowed_to_generate","d12_allowed_to_generate",
 MATRIX_REQUIRED_TRUE_FLAGS = [
     "all_six_targets_present","all_six_targets_unproven",
     "all_six_execution_authorization_review_only","all_six_execution_allowed_now_false",
-    "all_six_command_draft_exists","all_six_rollback_required",
+    "all_six_command_draft_exists","all_six_runner_status_recorded","all_six_rollback_required",
     "all_six_watchdog_required","all_six_no_ai_kill_retry_required",
     "all_six_allowed_to_mark_proven_now_false","all_six_preconditions_present",
-    "all_six_stop_conditions_present","all_six_evidence_present",
+    "all_six_stop_conditions_present","all_six_evidence_present","all_six_runner_status_recorded",
 ]
 
 STASH_ALLOWED = ["phase-d101","phase-v4a1","phase-d87"]
@@ -113,6 +113,7 @@ def _parse_matrix():
             "exec_auth_status": _f("execution_authorization_status"),
             "execution_allowed_now": _f("execution_allowed_now"),
             "command_draft_exists": _f("command_draft_exists"),
+            "runner_exists": _f("runner_exists"),
             "required_preconditions": _f("required_preconditions"),
             "stop_conditions": _f("stop_conditions"),
             "rollback_required": _f("rollback_required"),
@@ -181,14 +182,14 @@ def main():
         ("all_six_targets_unproven", "unproven"),
         ("all_six_execution_authorization_review_only", "exec_auth_ro"),
         ("all_six_execution_allowed_now_false", "exec_now_false"),
-        ("all_six_command_draft_exists", "cmd_exists"),
+        ("all_six_command_draft_exists","all_six_runner_status_recorded", "cmd_exists"),
         ("all_six_rollback_required", "rollback"),
         ("all_six_watchdog_required", "watchdog"),
         ("all_six_no_ai_kill_retry_required", "no_ai"),
         ("all_six_allowed_to_mark_proven_now_false", "mark_proven"),
         ("all_six_preconditions_present", "precond"),
         ("all_six_stop_conditions_present", "stop"),
-        ("all_six_evidence_present", "ev"),
+        ("all_six_evidence_present","all_six_runner_status_recorded", "ev"),
     ]
 
     for t in SIX_PROOF_TARGETS:
@@ -198,6 +199,7 @@ def main():
         v["exec_auth_review_only"] = td.get("exec_auth_status", "?") == "REVIEW_ONLY"
         v["execution_allowed_now_false"] = td.get("execution_allowed_now", "true") == "false"
         v["command_draft_exists_true"] = td.get("command_draft_exists", "false") == "true"
+        v["runner_recorded"] = bool(td.get("runner_exists","")) and td.get("runner_exists","") in ["true","false","unknown","NOT_EXECUTABLE_UNTIL_RUNNER_DEFINED"]
         v["rollback_required_true"] = td.get("rollback_required", "false") == "true"
         v["watchdog_required_true"] = td.get("watchdog_required", "false") == "true"
         v["no_ai_kill_required_true"] = td.get("no_ai_kill_required", "false") == "true"
@@ -211,6 +213,8 @@ def main():
         if not v["exec_auth_review_only"]: flags["all_six_execution_authorization_review_only"] = False
         if not v["execution_allowed_now_false"]: flags["all_six_execution_allowed_now_false"] = False
         if not v["command_draft_exists_true"]: flags["all_six_command_draft_exists"] = False
+        if not v["runner_recorded"]: flags["all_six_runner_status_recorded"] = False
+        v["runner_recorded"] = bool(td.get("runner_exists","")) and td.get("runner_exists","") in ["true","false","unknown","NOT_EXECUTABLE_UNTIL_RUNNER_DEFINED"]
         if not v["rollback_required_true"]: flags["all_six_rollback_required"] = False
         if not v["watchdog_required_true"]: flags["all_six_watchdog_required"] = False
         if not v["no_ai_kill_required_true"]: flags["all_six_no_ai_kill_retry_required"] = False
