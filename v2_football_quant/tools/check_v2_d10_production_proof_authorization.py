@@ -65,22 +65,26 @@ def _parse_matrix_targets() -> dict:
         if not in_table or not line.startswith("|"):
             continue
         cols = [c.strip() for c in line.split("|")[1:-1]]
-        if len(cols) < 5:
+        if len(cols) < 11:
             continue
-        pid = cols[0]
-        if pid == "---" or pid.startswith("#"):
+        # Identify the row: first col is #, second is proof_id
+        if cols[0] == "---" or cols[0].startswith("#"):
             continue
-        # Columns: #, proof_id, proof_name, current_status, required_evidence,
-        #   allowed_action_now, execution_allowed, production_allowed,
-        #   production_risk, blocker_if_missing, command_draft_required,
-        #   proof_result_required_before_PIPELINE_READY
-        _val = lambda i, d: cols[i] if len(cols) > i else d
+        pid = cols[1]  # proof_id is column 2 (index 1)
+        if not pid or pid.isdigit():
+            continue
+        # Column indices (after #, proof_id, proof_name):
+        # col[3]=current_status, col[5]=allowed_action_now,
+        # col[6]=execution_allowed, col[7]=production_allowed,
+        # col[8]=production_risk, col[9]=blocker_if_missing,
+        # col[10]=command_draft_required, col[11]=proof_result_required
+        def _v(i, d): return cols[i] if len(cols) > i else d
         targets[pid] = {
-            "current_status": _val(3, "UNKNOWN"),
-            "execution_allowed": _val(6, "true") == "false",
-            "production_allowed": _val(7, "true") == "false",
-            "blocker_if_missing": _val(9, "false") == "true",
-            "proof_result_required": _val(11, "false") == "true",
+            "current_status": _v(3, "UNKNOWN"),
+            "execution_allowed": _v(6, "true") == "false",
+            "production_allowed": _v(7, "true") == "false",
+            "blocker_if_missing": _v(9, "false") == "true",
+            "proof_result_required": _v(11, "false") == "true",
         }
     return targets
 
