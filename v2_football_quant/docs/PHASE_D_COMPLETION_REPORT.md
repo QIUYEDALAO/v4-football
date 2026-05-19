@@ -261,6 +261,7 @@ Phase D 工程链路完成（engineering_complete=true），但 business_pass=fa
 | D.8.37 | `9eebd50` | Formal state write path proof plan |
 | D.8.38 | `TBD` | Production path proof pack consolidation |
 | D.8.39 | `TBD` | Phase D terminal readiness gate |
+| D.8.40 | `TBD` | Phase D terminal report |
 
 **D.8.13 结论：** approval_packet_status=READY_FOR_BOSS_REVIEW，guarded_live_observe_approved=false，D.8.14 需 BOSS 单独指令。
 
@@ -496,6 +497,24 @@ Phase D 工程链路完成（engineering_complete=true），但 business_pass=fa
 - 下一步仅允许：
   - `d840_allowed_to_generate=true`
   - `d840_allowed_to_execute=false`
+
+## 30. D.8.40 Phase D Terminal Report
+
+- D.8.40 仅做终态汇总报告，不做执行。
+- 终态口径固定：
+  - `current_level=CODE_READY`
+  - `phase_d_engineering_complete=true`
+  - `phase_d_business_pass=false`
+  - `production_resume_ready=false`
+  - `PIPELINE_READY=false`
+  - `PRODUCTION_VERIFIED=false`
+- 同步记录：
+  - production resume 未执行
+  - Phase E 未进入
+  - 六条 proof 仍 `UNPROVEN`
+- 下一步仅允许：
+  - `d841_allowed_to_generate=true`
+  - `d841_allowed_to_execute=false`
 
 <!-- D.8.16.3 closure: v2_football_quant/docs/PHASE_D_COMPLETION_REPORT.md -->
 
