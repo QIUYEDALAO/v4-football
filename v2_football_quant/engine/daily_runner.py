@@ -1088,6 +1088,13 @@ if __name__ == "__main__":
     parser.add_argument("--run_tag", type=str, default="MANUAL", help="运行时段标识")
     parser.add_argument("--quick", action="store_true", help="快速模式：只刷新赔率，跳过Predictions")
     parser.add_argument("--watch", action="store_true")
+    parser.add_argument("--dry-run", action="store_true", help="Do not write state or push QQ")
+    parser.add_argument("--review-only", action="store_true", help="Review only, no side effects")
+    parser.add_argument("--no-push", action="store_true", help="Suppress QQ push")
+    parser.add_argument("--no-state-write", action="store_true", help="Do not write formal state")
+    parser.add_argument("--no-verified-write", action="store_true", help="Do not write verified markers")
+    parser.add_argument("--no-cron", action="store_true", help="Do not modify cron")
+    parser.add_argument("--no-supervisor", action="store_true", help="No supervisor/worker start")
     args = parser.parse_args()
 
     if args.watch:
