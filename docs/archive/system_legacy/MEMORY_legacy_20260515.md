@@ -1,3 +1,8 @@
+> **DEPRECATED** — NOT_PRODUCTION — DO_NOT_EXECUTE — HISTORICAL_REFERENCE_ONLY
+> Archived by Phase SYSTEM-LEGACY-0.
+> This file is kept for historical reference only and must not be used as
+> formal V4 entrypoint, configuration, or production reference.
+
 # MEMORY.md — 长期记忆
 
 ## 🫡 BOSS操作宪法 (2026-05-15 生效)

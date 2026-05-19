@@ -74,7 +74,8 @@ firoapi/
 reports/
 
 # Local backup directories - not committed
-archive/
+/archive/
 v2_football_quant/archive/
 *.bak
 *.current-bak
+!docs/archive/system_legacy/*
