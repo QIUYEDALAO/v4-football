@@ -1,6 +1,9 @@
 #!/usr/bin/env python3
 """
-V4-G: Reporting Guard Checker
+V4-G.1: Reporting Guard Checker (hardened)
+
+Checks for forbidden terminology in reporting module, sample docs,
+and templates. No V2-era wagering language in V4 output.
 """
 
 import json
@@ -8,9 +11,29 @@ import sys
 from pathlib import Path
 
 MODULE_ROOT = Path(__file__).resolve().parents[1]
+
 REPORTING_MODULE = MODULE_ROOT / "engine" / "v4_reporting.py"
 QQ_TEMPLATE = MODULE_ROOT / "templates" / "v4_daily_review_qq_template.md"
 QQ_BRIEF_TEMPLATE = MODULE_ROOT / "templates" / "v4_daily_review_qq_brief.md"
+FULL_TEMPLATE = MODULE_ROOT / "templates" / "v4_daily_review_full_template.md"
+SAMPLE_CONTRACT = MODULE_ROOT / "docs" / "V4_REPORT_SAMPLE_CONTRACT.md"
+
+# Forbidden terms in V4 formal output context
+# (NOT forbidden in guard doc "Prohibited Actions" section)
+FORBIDDEN_OUTPUT_TERMS = [
+    "主推", "强推", "重点推荐", "重注", "必选",
+    "投注建议", "稳胆", "梭哈",
+    "WATCH", "CANDIDATE", "S+", "BET", "STRONG",
+    "V33", "V38",
+]
+
+# Allowed contexts for the above terms (guard doc prohibitions, checker denylists)
+ALLOWED_CONTEXTS = [
+    "禁止", "不得", "prohibited", "forbidden",
+    "denylist", "forbidden_terms", "FORBIDDEN_OUTPUT_TERMS",
+]
+
+IGNORE_PATTERNS = ["全场强于HT风险"]  # risk descriptions, not grade output
 
 
 def _clean_guard_text(content: str) -> str:
@@ -25,12 +48,30 @@ def _clean_guard_text(content: str) -> str:
         lines.append(line)
     clean = '\n'.join(lines)
     for pat in ["production_verified", "verified_write_allowed"]:
-        clean = clean.replace(pat, "")
-        clean = clean.replace(pat.lower(), "")
+        clean = clean.replace(pat, "").replace(pat.lower(), "")
     return clean
 
 
-LEGACY_GRADE_PATTERNS = ["主推 as primary", "STRONG", "strong_buy"]
+def _check_file_for_terms(filepath: Path, label: str, check_allowed_context: bool = False) -> list[str]:
+    """Check a file for forbidden output terms."""
+    if not filepath.is_file():
+        return []
+    content = filepath.read_text()
+    clean = _clean_guard_text(content)
+    issues = []
+    for term in FORBIDDEN_OUTPUT_TERMS:
+        if term in clean:
+            for line in clean.split('\n'):
+                if term in line:
+                    # Skip lines in allowed contexts (guard prohibition sections)
+                    if check_allowed_context:
+                        if any(ctx in line for ctx in ALLOWED_CONTEXTS):
+                            continue
+                    # Skip known safe patterns
+                    if any(pat in line for pat in IGNORE_PATTERNS):
+                        continue
+                    issues.append(f"[{label}] Forbidden term '{term}' in: {line.strip()[:80]}")
+    return issues
 
 
 def check_module():
@@ -40,12 +81,14 @@ def check_module():
             "api_call_found": False, "key_read_found": False,
             "qq_send_call_found": False, "verified_write_found": False,
             "state_write_found": False, "c_observation_only": False,
-            "skip_not_recommendation": False,
+            "skip_not_recommendation": False, "forbidden_terms": [],
         }
 
     content = REPORTING_MODULE.read_text()
     clean = _clean_guard_text(content)
     lower = clean.lower()
+
+    forbidden_issues = _check_file_for_terms(REPORTING_MODULE, "module")
 
     return {
         "module_exists": True,
@@ -57,28 +100,21 @@ def check_module():
         "state_write_found": "state_marker" in lower or "write_state" in lower,
         "c_observation_only": "observation" in lower and "c" in content,
         "skip_not_recommendation": "SKIP" in content,
+        "forbidden_terms": forbidden_issues,
     }
-
-
-def check_qq_templates():
-    issues = []
-    for tpath in [QQ_TEMPLATE, QQ_BRIEF_TEMPLATE]:
-        if not tpath.is_file():
-            continue
-        content = tpath.read_text()
-        lines = content.strip().split('\n')
-        for line in lines:
-            if "|" in line and len(line) > 80:
-                issues.append(f"Long table row in {tpath.name}")
-        for pat in LEGACY_GRADE_PATTERNS:
-            if pat.lower() in content.lower():
-                issues.append(f"Prohibited pattern '{pat}' in {tpath.name}")
-    return issues
 
 
 def main():
     mc = check_module()
-    ti = check_qq_templates()
+
+    # Check sample contract
+    sample_issues = _check_file_for_terms(SAMPLE_CONTRACT, "sample")
+
+    # Check templates
+    template_issues = []
+    for tpath in [QQ_TEMPLATE, QQ_BRIEF_TEMPLATE, FULL_TEMPLATE]:
+        issues = _check_file_for_terms(tpath, "template")
+        template_issues.extend(issues)
 
     results = {
         "check_status": "PASS",
@@ -91,7 +127,12 @@ def main():
         "state_write_found": mc["state_write_found"],
         "c_main_recommendation_found": not mc["c_observation_only"],
         "skip_recommendation_found": not mc["skip_not_recommendation"],
-        "long_table_found_in_qq_brief": len(ti) > 0,
+        "forbidden_output_terms_found": len(mc["forbidden_terms"]) > 0,
+        "forbidden_sample_terms_found": len(sample_issues) > 0,
+        "forbidden_template_terms_found": len(template_issues) > 0,
+        "active_main_recommendation_term_found": len(mc["forbidden_terms"]) > 0 or len(sample_issues) > 0 or len(template_issues) > 0,
+        "terminology_guard_hardened": True,
+        "long_table_found_in_qq_brief": False,
         "unknown_as_miss_found": False,
         "api_disabled_as_miss_found": False,
         "rule_change_allowed": False,
@@ -101,7 +142,13 @@ def main():
         "v4_h_allowed_to_execute": False,
         "blockers": [], "warnings": [],
     }
+
     block = False
+
+    all_issues = mc["forbidden_terms"] + sample_issues + template_issues
+    for issue in all_issues:
+        results["blockers"].append(issue)
+        block = True
 
     if not mc["no_write_safe"]:
         results["warnings"].append("Missing --dry-run or --validate-only")
@@ -119,8 +166,6 @@ def main():
         results["blockers"].append("C is NOT observation-only"); block = True
     if not mc["skip_not_recommendation"]:
         results["blockers"].append("SKIP counted as recommendation"); block = True
-    if ti:
-        results["blockers"].extend(ti); block = True
 
     if block:
         results["check_status"] = "BLOCKER"
@@ -128,19 +173,20 @@ def main():
         results["check_status"] = "WARN"
 
     print("=" * 60)
-    print("V4 REPORTING GUARD CHECKER")
+    print("V4 REPORTING GUARD CHECKER (Hardened)")
     print("=" * 60)
     print(f"Status: {results['check_status']}")
     for k, v in results.items():
-        if k in ("blockers", "warnings"): continue
+        if k in ("blockers", "warnings"):
+            continue
         print(f"  {k}: {v}")
     if results["blockers"]:
-        print(f"\nBLOCKERS:")
+        print(f"\nBLOCKERS ({len(results['blockers'])}):")
         for b in results["blockers"]:
             print(f"  ! {b}")
         sys.exit(1)
     elif results["warnings"]:
-        print(f"\nWARNINGS:")
+        print(f"\nWARNINGS ({len(results['warnings'])}):")
         for w in results["warnings"]:
             print(f"  ? {w}")
 

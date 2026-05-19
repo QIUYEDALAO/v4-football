@@ -82,7 +82,7 @@ def build_mobile_qq_brief(payload: dict) -> str:
         "",
         "【正式推荐】",
         f"A：{a_cnt}｜B：{b_cnt}",
-        f"A/B主推：{ab_total}场（命中{ab_hit}/{ab_total} · {ab_rate}）",
+        f"A/B正式结论：{ab_total}场（命中{ab_hit}/{ab_total} · {ab_rate}）",
         "",
         "【C/SKIP汇总】",
         f"C级（观察）：{c_cnt}场",

@@ -4,7 +4,7 @@ Schema Guard：{{schema_guard_status}}
 ━━━━━━━━━━━━━━
 【正式输出】
 A：{{a_count}}｜B：{{b_count}}｜C：{{c_count}}｜SKIP：{{skip_count}}
-A+B主推荐：{{ab_count}}场
+A+B正式结论：{{ab_count}}场
 正式推荐：{{recommendation_summary}}
 
 数据源：{{official_brief_file}}
