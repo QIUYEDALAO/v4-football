@@ -62,9 +62,6 @@ def build(args):
             v4_data = json.loads(r.stdout.strip().split("\n")[0])
         except:
             pass
-    dash["v4_today"] = v4_data or {"source_mode": "SOURCE_MISSING", "hardcoded": False,
-                                    "source_freshness": "MISSING", "blocker_reason": "V4_TODAY_SOURCE_MISSING",
-                                    "C_observation_only": True, "SKIP_not_recommendation": True}
 
     dash = {
         "generated_at": time.strftime("%Y-%m-%dT%H:%M:%S+08:00"),

@@ -54,6 +54,14 @@ def main():
 
             v4t = d.get("v4_today", {})
             R["v4_section"] = bool(v4t)
+            R["v4_source_mode"] = v4t.get("source_mode", "MISSING")
+            if v4t.get("hardcoded", True):
+                R["blockers"].append("v4_today.hardcoded=true!"); block = True
+            if R["v4_source_mode"] == "SOURCE_MISSING":
+                # Must NOT have old grade counts when source missing
+                for k in ["total_matches", "A_count", "B_count", "C_count", "SKIP_count"]:
+                    if v4t.get(k) is not None and v4t.get(k) != 0:
+                        R["blockers"].append(f"v4_today.{k}={v4t[k]} but source_missing"); block = True
             c_note = v4t.get("C_note", "")
             s_note = v4t.get("SKIP_note", "")
             R["c_observation_text"] = "observation-only" in c_note.lower() or "观察" in c_note
