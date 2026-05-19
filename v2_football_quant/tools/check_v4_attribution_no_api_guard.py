@@ -55,7 +55,7 @@ def main():
 
         # Check that API disabled doesn't force HIT/MISS
         no_hit_miss = "attribution_status" not in content.split("API disabled")[1][:200] if "API disabled" in content else False
-        results["api_disabled_no_hit_miss"] = "--allow-api" in content
+        results["api_disabled_no_hit_miss"] = "MODEL_RESULT_UNKNOWN" in content and "RESULT_UNKNOWN_API_DISABLED" in content
 
         block = False
 

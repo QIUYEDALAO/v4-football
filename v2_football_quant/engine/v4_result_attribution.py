@@ -665,15 +665,63 @@ def run(date_str: str, fixture_id: int | None = None, sleep_ms: int = 120, dry_r
             event_noise_detail = _event_noise_detail(events, first_min)
             context_noise = _context_noise_tags(rec, weather_dimension=weather_dimension)
         else:
-            # API disabled — cannot fetch live results. Mark as UNKNOWN.
-            ht_goal = False
-            ht_home = ht_away = ft_home = ft_away = 0
-            first_min = hit_bucket = bucket_hit = None
-            events = []
-            event_noise = []
-            event_noise_detail = {}
-            context_noise = []
+            # API disabled — cannot fetch live results.
+            # Must NOT set ht_goal=False (that would generate MODEL_MISS).
+            # Must NOT call _model_result / _diagnosis / _root_cause.
+            # Must output UNKNOWN only.
+            out_rows.append({
+                "fixture_id": fid,
+                "date": datetime.strptime(key, "%Y%m%d").strftime("%Y-%m-%d"),
+                "home": rec.get("home"),
+                "away": rec.get("away"),
+                "league": rec.get("league"),
+                "pre_grade": pre_grade,
+                "pre_ht_score": round(pre_ht_score, 1),
+                "model_skip_cause": model_skip_cause,
+                "pre_market_focus": rec.get("market_focus") or "",
+                "time_bin_source": time_bin_source,
+                "script_type": rec.get("script_type") or "",
+                "ht_goal": False,
+                "ht_goal_observed": "unknown",
+                "result_known": False,
+                "ht_scoreline": None,
+                "ft_scoreline": None,
+                "first_ht_goal_minute": None,
+                "hit_bucket": None,
+                "bucket_hit": None,
+                "event_noise": [],
+                "event_noise_detail": {},
+                "context_noise": [],
+                "weather_dimension": weather_dimension,
+                "market_dimension": market_dimension,
+                "motivation_dimension": motivation_dimension,
+                "lineup_dimension": lineup_dimension,
+                "match_flow_dimension": match_flow_dimension,
+                "model_result": "MODEL_RESULT_UNKNOWN",
+                "diagnosis": "RESULT_UNKNOWN_API_DISABLED",
+                "diag_summary": "API disabled — attribution unavailable. No HIT/MISS calculation.",
+                "root_cause_dimension": "UNKNOWN",
+                "root_cause_secondary": [],
+                "root_cause_confidence": 0.0,
+                "variance_dimension": {},
+                "attribution_status": "UNKNOWN",
+                "attribution_bucket": None,
+                "attribution_reason_codes": ["API_DISABLED"],
+                "failure_category": "unknown_result",
+                "data_quality": "API_DISABLED",
+                "source_quality": "API_DISABLED",
+                "result_source": "API_DISABLED",
+                "result_source_trace": "no_api",
+                "api_called": False,
+                "key_read": False,
+                "guard_status": "API_DISABLED",
+                "attribution_allowed": False,
+                "verified_write_allowed": False,
+                "rule_change_allowed": False,
+            })
+            continue  # Skip HIT/MISS computation
 
+        # === allow_api=True: full attribution with live results ===
         model_result = _model_result(pre_grade, ht_goal)
         diagnosis = _diagnosis(
             pre_grade=pre_grade,
@@ -766,6 +814,18 @@ def run(date_str: str, fixture_id: int | None = None, sleep_ms: int = 120, dry_r
         out_rows.append(row)
         time.sleep(max(sleep_ms, 0) / 1000.0)
 
+    # Compute summary counts (from HIT/MISS path or API-disabled UNKNOWN rows)
+    _mrc: dict[str, int] = {}
+    _dc: dict[str, int] = {}
+    _rcc: dict[str, int] = {}
+    for row in out_rows:
+        mr = str(row.get("model_result") or "MODEL_RESULT_UNKNOWN")
+        dg = str(row.get("diagnosis") or "RESULT_UNKNOWN")
+        rcd = str(row.get("root_cause_dimension") or "UNKNOWN")
+        _mrc[mr] = _mrc.get(mr, 0) + 1
+        _dc[dg] = _dc.get(dg, 0) + 1
+        _rcc[rcd] = _rcc.get(rcd, 0) + 1
+
     out_path: Path | None = None
     if fixture_id is None:
         if dry_run:
@@ -776,9 +836,9 @@ def run(date_str: str, fixture_id: int | None = None, sleep_ms: int = 120, dry_r
                 "output_path": str(out_path) if out_path else None,
                 "main_file_written": False,
                 "dry_run": True,
-                "model_result_counts": {},
-                "diagnosis_counts": {},
-                "root_cause_counts": {},
+                "model_result_counts": _mrc,
+                "diagnosis_counts": _dc,
+                "root_cause_counts": _rcc,
                 "model_quality_summary": {},
             }
             return summary
@@ -793,15 +853,10 @@ def run(date_str: str, fixture_id: int | None = None, sleep_ms: int = 120, dry_r
         "rows": len(out_rows),
         "output_path": str(out_path) if out_path else None,
         "main_file_written": fixture_id is None,
-        "model_result_counts": {},
-        "diagnosis_counts": {},
-        "root_cause_counts": {},
+        "model_result_counts": _mrc,
+        "diagnosis_counts": _dc,
+        "root_cause_counts": _rcc,
     }
-    for row in out_rows:
-        summary["model_result_counts"][row["model_result"]] = summary["model_result_counts"].get(row["model_result"], 0) + 1
-        summary["diagnosis_counts"][row["diagnosis"]] = summary["diagnosis_counts"].get(row["diagnosis"], 0) + 1
-        rcd = str(row.get("root_cause_dimension") or "UNKNOWN")
-        summary["root_cause_counts"][rcd] = summary["root_cause_counts"].get(rcd, 0) + 1
 
     if fixture_id is not None and out_rows:
         summary["single_report"] = _format_single(out_rows[0])

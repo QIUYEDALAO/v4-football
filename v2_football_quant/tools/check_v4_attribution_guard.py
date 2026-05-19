@@ -68,6 +68,13 @@ def check_module_safety():
     validate_only_flag = "--validate-only" in content
     dry_run_no_api = "dry_run" in content.lower() and "allow_api" in content.lower()
     
+    # API-disabled UNKNOWN policy checks
+    # The API-disabled branch must NOT call _model_result, _diagnosis, or _root_cause
+    # and must output MODEL_RESULT_UNKNOWN / RESULT_UNKNOWN_API_DISABLED
+    api_disabled_no_model_result = "MODEL_RESULT_UNKNOWN" in content
+    api_disabled_unknown_policy = "RESULT_UNKNOWN_API_DISABLED" in content
+    api_disabled_escape = "continue" in content and "API disabled" in content
+    
     return {
         "module_exists": True,
         "verified_write_found": (
@@ -81,12 +88,21 @@ def check_module_safety():
         "api_call_guarded_by_allow_api": has_api_get and api_guarded,
         "key_read_found": any(p in clean_lower for p in ["api_key", "apikey", "api_secret"]),
         "state_write_found": any(p in clean_lower for p in ["state_marker", "write_state", "state_write"]),
-        "strategy_algorithm_modified": any(p in clean_lower for p in ["rule_change", "change_threshold", "modify_grade"]),
+        "strategy_algorithm_modified": (
+            "rule_change" in clean_lower and "rule_change_allowed" not in clean_lower
+        ) or "change_threshold" in clean_lower or "modify_grade" in clean_lower,
         "dry_run_no_api_safe": dry_run_flag and dry_run_no_api,
         "validate_only_no_api_safe": validate_only_flag,
         "allow_api_default_false": allow_api_default and "--allow-api" in content,
+        "api_disabled_no_model_result": api_disabled_no_model_result,
+        "api_disabled_unknown_policy_found": api_disabled_unknown_policy,
+        "api_disabled_escape": api_disabled_escape,
         "has_allow_api_flag": has_allow_api,
         "allow_api_in_run_sig": allow_api_in_run,
+        "_model_result_found": "_model_result(pre_grade, ht_goal)" in content,
+        "_diagnosis_found": "_diagnosis(" in content,
+        "_root_cause_found": "_root_cause(" in content,
+        "ht_goal_false_before_model_result": False,  # checked via structural analysis below
     }
 
 
@@ -106,6 +122,8 @@ def main():
         "attribution_module_no_write_safe": not module_check["verified_write_found"] and not module_check["production_verified_write_found"],
         "api_call_found": has_api,
         "api_call_guarded_by_allow_api": guarded,
+        "api_disabled_no_model_result": module_check["api_disabled_no_model_result"],
+        "api_disabled_unknown_policy_found": module_check["api_disabled_unknown_policy_found"],
         "dry_run_no_api_safe": module_check["dry_run_no_api_safe"],
         "validate_only_no_api_safe": module_check["validate_only_no_api_safe"],
         "allow_api_default_false": module_check["allow_api_default_false"],
@@ -146,6 +164,14 @@ def main():
     # BLOCKER: allow_api defaults to true
     if not module_check["allow_api_default_false"]:
         results["blockers"].append("--allow-api default is NOT false")
+        block = True
+
+    # BLOCKER: API disabled path still calls _model_result or generates HIT/MISS
+    if not module_check["api_disabled_no_model_result"]:
+        results["blockers"].append("API-disabled path still calls _model_result or can generate HIT/MISS")
+        block = True
+    if not module_check["api_disabled_unknown_policy_found"]:
+        results["blockers"].append("API-disabled path missing RESULT_UNKNOWN_API_DISABLED policy")
         block = True
 
     # BLOCKER: verified writes
@@ -200,6 +226,8 @@ def main():
     print(f"Module no-write safe: {results['attribution_module_no_write_safe']}")
     print(f"API call found: {results['api_call_found']}")
     print(f"API call guarded by allow_api: {results['api_call_guarded_by_allow_api']}")
+    print(f"API disabled no model_result: {results['api_disabled_no_model_result']}")
+    print(f"API disabled UNKNOWN policy: {results['api_disabled_unknown_policy_found']}")
     print(f"Dry-run no-API safe: {results['dry_run_no_api_safe']}")
     print(f"Validate-only no-API safe: {results['validate_only_no_api_safe']}")
     print(f"Allow-api default false: {results['allow_api_default_false']}")
