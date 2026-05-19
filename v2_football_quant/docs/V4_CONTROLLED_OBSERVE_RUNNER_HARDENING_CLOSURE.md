@@ -1,8 +1,8 @@
 # V4 Controlled Observe Runner Hardening Closure
 
-Phase: V4-I.1.1 / V4-I.1.2  
+Phase: V4-I.1.1 / V4-I.1.2 / V4-I.2  
 Date: 2026-05-19  
-Status: CLOSED (hardening complete, window choices locked, no execution)
+Status: CLOSED (hardening complete, four-window preview review generated, no execution)
 
 ## Hardening Scope
 
@@ -31,6 +31,10 @@ Status: CLOSED (hardening complete, window choices locked, no execution)
   - `runner_exists=true`
   - `runner_execution_authorization_required=true`
   - `observe_execution_allowed=false`
+- Added V4-I.2 review boundary:
+  - four-window preview matrix defined (`early/midday/evening/night`),
+  - review generation allowed,
+  - execution remains blocked.
 
 ## Safety Status (Still Locked)
 
@@ -49,4 +53,5 @@ Status: CLOSED (hardening complete, window choices locked, no execution)
 - V4-J allowed_to_generate: true
 - V4-J allowed_to_execute: false
 
+Any real observe execution still requires a separate explicit BOSS instruction.
 No real observe execution was performed in this phase.

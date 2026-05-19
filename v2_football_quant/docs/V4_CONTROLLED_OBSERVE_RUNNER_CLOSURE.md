@@ -1,8 +1,8 @@
 # V4 Controlled Observe Runner — Phase Closure
 
-Phase: V4-I.1 / V4-I.1.1 / V4-I.1.2
+Phase: V4-I.1 / V4-I.1.1 / V4-I.1.2 / V4-I.2
 Date: 2026-05-19
-Status: CLOSED (runner hardened + window choices locked; ready for V4-I.2 generation only; V4-J still blocked)
+Status: CLOSED (runner hardened + I.2 review package generated; V4-J execute still blocked)
 
 ## Scope
 
@@ -23,6 +23,7 @@ This phase defined the V4 controlled observe no-exec runner:
 | Runner no-exec | ✅ (observe_execution_allowed=false) |
 | No API/key/QQ/state/verified | ✅ |
 | Runner checker | ✅ CREATED + preview execution JSON parse + invalid-window negative test |
+| Four-window preview review | ✅ early/midday/evening/night all REVIEW_ONLY_READY |
 
 ## Safety Verification
 
@@ -50,6 +51,13 @@ This phase defined the V4 controlled observe no-exec runner:
 | V4-I.2 allowed_to_execute | false |
 | V4-J allowed_to_generate | true |
 | V4-J allowed_to_execute | false |
+
+## V4-I.2 Review Boundary
+
+- V4-I.2 generated execution review artifacts only.
+- No real observe execution was performed.
+- `command_must_not_execute=true` remains enforced.
+- V4-J remains generate-only for now (`allowed_to_execute=false`).
 
 ## Modified Files (this phase)
 

@@ -1,6 +1,6 @@
 # V4 Controlled Observe Command Draft
 
-Phase: V4-I
+Phase: V4-I / V4-I.2
 Date: 2026-05-19
 Status: REVIEW_ONLY_DRAFT — NOT EXECUTABLE
 
@@ -16,6 +16,8 @@ Status: REVIEW_ONLY_DRAFT — NOT EXECUTABLE
 | observe_execution_allowed | false |
 | execution_allowed | false |
 | execution_marker | NOT_EXECUTABLE |
+| v4_i2_allowed_to_execute | false |
+| v4_j_allowed_to_execute | false |
 
 ## Proposed Command (REVIEW ONLY — STILL NOT EXECUTABLE)
 
@@ -47,9 +49,12 @@ OPENCLAW_NO_PUSH=1 python3 engine/v4_observe_runner.py \
 
 - `engine/v4_observe_runner.py` is already defined as a no-exec runner.
 - `--date` and `--window` are required runner inputs.
+- V4-I.2 defines four-window preview review (`early/midday/evening/night`) as evidence generation only.
+- V4-I.2 is generate-only; execution stays blocked.
 - Command draft remains review-only and must not be executed.
 - Legacy marker retained for compatibility: `NOT_EXECUTABLE_UNTIL_RUNNER_DEFINED`.
 - Route and sent markers are NOT created in this phase.
 - No lock is acquired.
 - No state is written.
 - No QQ is sent.
+- Any real observe execution requires separate explicit BOSS instruction.
