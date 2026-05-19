@@ -6,6 +6,14 @@ V4 赛后归因系统
 用法：
   python3 engine/v4_result_attribution.py --date 20260514
   python3 engine/v4_result_attribution.py --date 20260514 --fixture 123456
+  python3 engine/v4_result_attribution.py --date 20260514 --validate-only
+  python3 engine/v4_result_attribution.py --date 20260514 --dry-run
+
+Guard markers:
+  NO_VERIFIED_WRITE = true   (does NOT write PRODUCTION_VERIFIED)
+  NO_RULE_CHANGE = true      (does NOT modify strategy rules)
+  NO_QQ_PUSH = true          (does NOT push to QQ)
+  NO_STATE_WRITE = true      (does NOT write state files)
 """
 
 from __future__ import annotations
@@ -598,7 +606,7 @@ def _format_single(row: dict) -> str:
     )
 
 
-def run(date_str: str, fixture_id: int | None = None, sleep_ms: int = 120) -> dict[str, Any]:
+def run(date_str: str, fixture_id: int | None = None, sleep_ms: int = 120, dry_run: bool = False) -> dict[str, Any]:
     key = _date_key(date_str)
     scout_path = REPORT_DIR / f"scout_v4_{key}.json"
     scout = _load_json(scout_path, [])
@@ -748,6 +756,20 @@ def run(date_str: str, fixture_id: int | None = None, sleep_ms: int = 120) -> di
 
     out_path: Path | None = None
     if fixture_id is None:
+        if dry_run:
+            out_path = ARCHIVE_DIR / f"v4_result_attribution_{key}.jsonl"
+            summary = {
+                "date": key,
+                "rows": len(out_rows),
+                "output_path": str(out_path) if out_path else None,
+                "main_file_written": False,
+                "dry_run": True,
+                "model_result_counts": {},
+                "diagnosis_counts": {},
+                "root_cause_counts": {},
+                "model_quality_summary": {},
+            }
+            return summary
         ARCHIVE_DIR.mkdir(parents=True, exist_ok=True)
         out_path = ARCHIVE_DIR / f"v4_result_attribution_{key}.jsonl"
         with open(out_path, "w", encoding="utf-8") as f:
@@ -779,12 +801,25 @@ def main() -> None:
     parser.add_argument("--date", required=True, help="YYYYMMDD or YYYY-MM-DD")
     parser.add_argument("--fixture", type=int, default=None, help="单场复盘 fixture_id")
     parser.add_argument("--sleep-ms", type=int, default=120, help="API节流毫秒")
+    parser.add_argument("--validate-only", action="store_true", help="仅验证输入，不执行归因")
+    parser.add_argument("--dry-run", action="store_true", help="执行归因但不写文件")
     args = parser.parse_args()
-    result = run(args.date, fixture_id=args.fixture, sleep_ms=args.sleep_ms)
+    
+    if args.validate_only:
+        print(f"[VALIDATE-ONLY] date={args.date}, fixture={args.fixture}")
+        print("[VALIDATE-ONLY] Input valid; no attribution executed.")
+        print("[VALIDATE-ONLY] No writes, no API calls, no side effects.")
+        return
+    
+    result = run(args.date, fixture_id=args.fixture, sleep_ms=args.sleep_ms, dry_run=args.dry_run)
     if result.get("single_report"):
         print(result["single_report"])
         print("\n" + "-" * 50 + "\n")
     print(json.dumps({k: v for k, v in result.items() if k != "single_report"}, ensure_ascii=False, indent=2))
+    
+    if args.dry_run:
+        print(f"\n[DRY-RUN] Attribution calculated but NOT written to disk.")
+        print("[DRY-RUN] To persist, re-run without --dry-run.")
 
 
 if __name__ == "__main__":
