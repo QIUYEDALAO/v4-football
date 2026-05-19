@@ -4,6 +4,11 @@
 用法:
   python3 engine/v4_review_with_watchdog.py --date 20260514 --mode main
   python3 engine/v4_review_with_watchdog.py --date 20260514 --mode retry
+
+Guard markers:
+  NO_AI_KILL_RETRY = true  (watchdog reports only, no auto-kill/retry)
+  FAIL_CLOSED = true       (any failure stops pipeline, reports to user)
+  REPORT_ONLY = true       (watchdog does NOT execute kills)
 """
 
 from __future__ import annotations

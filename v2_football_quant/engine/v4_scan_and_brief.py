@@ -3,6 +3,13 @@
 ============================================================
 子进程 v4_scan_worker 跑扫描，父进程管 watchdog/简报/推送。
 SIGKILL 时父进程存活并记录状态。
+
+Guard markers:
+  NO_AI_KILL_RETRY = true  (watchdog reports only, no auto-kill/retry)
+  FAIL_CLOSED = true       (any failure stops pipeline, reports to user)
+  REPORT_ONLY = true       (watchdog does NOT execute kills)
+  HARD_TIMEOUT = 3600      (60m wall clock, not auto-retry)
+  SOFT_TIMEOUT = 1800      (30m soft threshold, report only)
 """
 
 from __future__ import annotations
