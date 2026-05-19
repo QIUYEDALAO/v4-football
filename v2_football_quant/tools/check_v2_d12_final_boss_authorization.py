@@ -172,33 +172,60 @@ def main():
     if not R["execution_order_unique"]: R["blockers"].append("Proof execution order not unique"); block = True
     if not R["proof_order_matches_expected_sequence"]: R["blockers"].append("Proof order wrong sequence"); block = True
 
-    # E. Runner readiness (simplified - check doc content for key markers)
-    rdoc = DOCS_DIR / "V2_D12_RUNNER_READINESS_AUDIT.md"
-    R["runner_readiness_parser_exists"] = rdoc.is_file()
-    if rdoc.is_file():
-        rt = rdoc.read_text().lower()
-        R["all_runner_status_recorded"] = "runner_exists" in rt and "not_executable" in rt
-        R["all_runner_execution_allowed_now_false"] = "false" in rt and "execution_allowed_now" in rt
-        R["all_runner_command_must_not_execute"] = "command_must_not_execute" in rt
-        R["all_runner_required_no_flags_recorded"] = "no_push" in rt and "no_cron" in rt
-    else: R["warnings"].append("Runner readiness doc referenced but simplified check")
+    # E. Runner readiness (header-based table parser)
+    rmx = _parse_markdown_table("V2_D12_RUNNER_READINESS_AUDIT.md",
+        ["proof_id","runner_exists","command_must_not_execute","no_push","no_cron",
+         "no_state_write","no_verified_write","no_api","no_key_read","no_supervisor",
+         "watchdog_only_failure","no_ai_kill_retry","preserve_logs","manifest_required",
+         "execution_allowed_now"])
+    R["runner_readiness_parser_exists"] = rmx["header_complete"]
+    rtargs = rmx["targets"]
+    if rmx["header_complete"] and len(rtargs) >= 6:
+        runner_flags = {k:True for k in ["all_runner_status_recorded","all_runner_execution_allowed_now_false",
+            "all_runner_command_must_not_execute","all_runner_required_no_flags_recorded"]}
+        for t in EXPECTED_ORDER:
+            td = rtargs.get(t, {})
+            if not td.get("runner_exists",""): runner_flags["all_runner_status_recorded"] = False
+            if td.get("execution_allowed_now","true") != "false": runner_flags["all_runner_execution_allowed_now_false"] = False
+            if td.get("command_must_not_execute","false") != "true": runner_flags["all_runner_command_must_not_execute"] = False
+            for flag in ["no_push","no_cron","no_state_write","no_verified_write","no_api","no_key_read","no_supervisor"]:
+                if td.get(flag,"false") != "true": runner_flags["all_runner_required_no_flags_recorded"] = False
+        for k,v in runner_flags.items():
+            R[k] = v
+            if not v: R["blockers"].append(f"Runner: {k} is False"); block = True
 
-    # F. Command review
-    cdoc = DOCS_DIR / "V2_D12_FINAL_COMMAND_REVIEW.md"
-    R["command_review_parser_exists"] = cdoc.is_file()
-    if cdoc.is_file():
-        ct = cdoc.read_text().lower()
-        R["all_command_must_not_execute"] = "command_must_not_execute" in ct
-        R["all_commands_review_only"] = "review_only" in ct
-        R["all_commands_no_push"] = "no_push" in ct; R["all_commands_no_cron"] = "no_cron" in ct
-        R["all_commands_no_state_write"] = "no_state_write" in ct; R["all_commands_no_verified_write"] = "no_verified_write" in ct
-        R["all_commands_no_api"] = "no_api" in ct; R["all_commands_no_key_read"] = "no_key_read" in ct
-        R["all_commands_no_supervisor"] = "no_supervisor" in ct
-        R["all_commands_watchdog_only_failure"] = "watchdog_only_failure" in ct
-        R["all_commands_no_ai_kill_retry"] = "no_ai_kill_retry" in ct
-        R["all_commands_preserve_logs"] = "preserve_logs" in ct
-        R["all_commands_manifest_required"] = "manifest_required" in ct
-        R["all_commands_boss_d13_required"] = "not_executable_without_boss" in ct
+    # F. Command review (header-based table parser)
+    cmx = _parse_markdown_table("V2_D12_FINAL_COMMAND_REVIEW.md",
+        ["proof_id","command_must_not_execute","review_only","no_push","no_cron",
+         "no_state_write","no_verified_write","no_api","no_key_read","no_supervisor",
+         "watchdog_only_failure","no_ai_kill_retry","preserve_logs","manifest_required",
+         "boss_d13_required"])
+    R["command_review_parser_exists"] = cmx["header_complete"]
+    ctargs = cmx["targets"]
+    if cmx["header_complete"] and len(ctargs) >= 6:
+        cmd_flags = True
+        for t in EXPECTED_ORDER:
+            td = ctargs.get(t, {})
+            if td.get("command_must_not_execute","false") != "true": cmd_flags = False
+            if td.get("review_only","false") != "true": cmd_flags = False
+            for flag in ["no_push","no_cron","no_state_write","no_verified_write","no_api","no_key_read","no_supervisor",
+                         "watchdog_only_failure","no_ai_kill_retry","preserve_logs","manifest_required","boss_d13_required"]:
+                if td.get(flag,"false") != "true": cmd_flags = False
+        R["all_command_must_not_execute"] = cmd_flags
+        R["all_commands_review_only"] = cmd_flags
+        R["all_commands_no_push"] = cmd_flags
+        R["all_commands_no_cron"] = cmd_flags
+        R["all_commands_no_state_write"] = cmd_flags
+        R["all_commands_no_verified_write"] = cmd_flags
+        R["all_commands_no_api"] = cmd_flags
+        R["all_commands_no_key_read"] = cmd_flags
+        R["all_commands_no_supervisor"] = cmd_flags
+        R["all_commands_watchdog_only_failure"] = cmd_flags
+        R["all_commands_no_ai_kill_retry"] = cmd_flags
+        R["all_commands_preserve_logs"] = cmd_flags
+        R["all_commands_manifest_required"] = cmd_flags
+        R["all_commands_boss_d13_required"] = cmd_flags
+        if not cmd_flags: R["blockers"].append("Command review: some proofs missing required flags"); block = True
 
     # G. Permission blocker
     for f in DANGER_FALSE:
