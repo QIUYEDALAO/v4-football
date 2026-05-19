@@ -6,6 +6,19 @@ from pathlib import Path
 MODULE = Path(__file__).resolve().parents[1]
 
 def main():
+    import argparse
+    from datetime import datetime, timezone, timedelta
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--date", default="")
+    args, _ = ap.parse_known_args()
+    
+    # Dynamic ops_date
+    if args.date:
+        ops_date = args.date
+    else:
+        tz_cn = timezone(timedelta(hours=8))
+        ops_date = datetime.now(tz_cn).strftime("%Y%m%d")
+
     R = {"check_status":"PASS","blockers":[],"warnings":[],"tests":{},
          "markers_read":0,"hardcoded_true_count":0,"windows_checked":0,
          "api_checked":False,"task_checked":False,"logs_checked":False}
@@ -32,12 +45,12 @@ def main():
     block |= ck("V2_HOURLY", vf["HOURLY_ENABLED"]==False)
 
     # ── V4 REAL MARKERS (EXACT VALUES) ──
-    v4 = json.loads((MODULE/"data/daily_reports/v4_review_structured_20260519.json").read_text())
-    freeze = json.loads((MODULE/"data/runtime/status/v4_review_freeze_20260519.json").read_text())
-    guard = json.loads((MODULE/"data/runtime/status/v4_review_guard_20260519.json").read_text())
-    guard_f = json.loads((MODULE/"data/runtime/status/v4_review_guard_20260519_full.json").read_text())
-    route = json.loads((MODULE/"data/runtime/status/v4_review_route_20260519.json").read_text())
-    push = json.loads((MODULE/"data/runtime/status/v4_review_push_20260519.json").read_text())
+    v4 = json.loads((MODULE/f"data/daily_reports/v4_review_structured_{ops_date}.json").read_text())
+    freeze = json.loads((MODULE/f"data/runtime/status/v4_review_freeze_{ops_date}.json").read_text())
+    guard = json.loads((MODULE/f"data/runtime/status/v4_review_guard_{ops_date}.json").read_text())
+    guard_f = json.loads((MODULE/f"data/runtime/status/v4_review_guard_{ops_date}_full.json").read_text())
+    route = json.loads((MODULE/f"data/runtime/status/v4_review_route_{ops_date}.json").read_text())
+    push = json.loads((MODULE/f"data/runtime/status/v4_review_push_{ops_date}.json").read_text())
 
     block |= ck("V4_A0", v4["A"] == 0, f"expected 0, got {v4['A']}")
     block |= ck("V4_B0", v4["B"] == 0, f"expected 0, got {v4['B']}")
