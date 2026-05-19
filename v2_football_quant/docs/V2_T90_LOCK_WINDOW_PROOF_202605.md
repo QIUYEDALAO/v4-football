@@ -1,33 +1,20 @@
-# V2 T-90 Lock Window Proof — 2026-05-19 22:02
+# V2 T-90 Lock Window Proof — 2026-05-19 22:30
 
-## Step 1: System State
+## Step 1: System
 - PIPELINE_READY: true ✅
-- PRODUCTION_VERIFIED: false
-- QQ/cron/D13/verified: all false
-**PASS**
+- PRODUCTION/QQ/cron/D13/verified: all false
 
 ## Step 2: Lock Window Check
-- target_fixture: Ried vs Wolfsberger AC
-- kickoff_time: 2026-05-20 00:29 CST
-- minutes_to_ko: 147 min
-- stage: **T_MINUS_3H** (NOT T-90M or T-45M)
-- T-90 time: **2026-05-19 22:59 CST**
-- T-90 remaining: 57 min
-**WAIT — T-90 lock window not yet active**
+- target: Ried vs Wolfsberger AC
+- kickoff: 2026-05-20 00:30 CST
+- remaining: ~118 min to KO
+- stage: **T_MINUS_3H** (NOT T-90M/T-45M)
+- T-90M estimated: ~23:00 CST (30 min from now)
 
-## Step 3-4: Readonly Checker + Window Status
-- window_status: DONE_WATCH_ONLY
-- T-90M: 0, T-45M: 0
-- lock_window_active: false
-- bet_lockable: false
-- BET_LOCKED_count: 0
-- formal_state_written: false
-- qq_sent: false
-
-## Step 5: Lock Window Result
-- BET_LOCKED_count: 0
-- reason: **NO_T90_T45_FIXTURE**
-- Ried vs Wolfsberger AC at T-3H, not in lock range
+## Step 3-4: Readonly + Window
+- readonly: PASS, BL=0, formal_state_written=false
+- window: DONE_WATCH_ONLY, T-90M=0, T-45M=0, T-3H=1
 
 ## Conclusion
-**T90_LOCK_WINDOW_WAIT** — Re-run at 22:59 CST
+**T90_LOCK_WINDOW_WAIT** — ~30 min to T-90 window
+Re-run at ~23:00 CST.
