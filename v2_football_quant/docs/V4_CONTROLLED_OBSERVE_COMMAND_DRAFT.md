@@ -2,7 +2,7 @@
 
 Phase: V4-I
 Date: 2026-05-19
-Status: REVIEW_ONLY_DRAFT — NOT EXECUTABLE UNTIL RUNNER DEFINED
+Status: REVIEW_ONLY_DRAFT — NOT EXECUTABLE
 
 ## Command Classification
 
@@ -10,14 +10,16 @@ Status: REVIEW_ONLY_DRAFT — NOT EXECUTABLE UNTIL RUNNER DEFINED
 |-------|-------|
 | command_type | REVIEW_ONLY_DRAFT |
 | command_must_not_execute | true |
-| runner_exists | false |
+| runner_exists | true (V4-I.1) |
 | runner_required_before_execution | true |
+| observe_execution_allowed | false |
+| execution_allowed | false |
 
-## Proposed Command (Placeholder — NOT EXECUTABLE)
+## Proposed Command (REVIEW ONLY — STILL NOT EXECUTABLE)
 
 ```
 # V4 controlled observe single-window command
-# NOT_EXECUTABLE_UNTIL_RUNNER_DEFINED
+# STILL NOT EXECUTABLE (V4-I.1 runner defined but execution blocked)
 
 OPENCLAW_NO_PUSH=1 python3 engine/v4_observe_runner.py \
   --observe-only \
