@@ -51,7 +51,8 @@ def main():
     if vf.is_file():
         vd = json.loads(vf.read_text())
         block |= ck("verified_shadow", vd.get("verified_written")==False)
-    block |= ck("verified_missing", not (MODULE/"data/runtime/status").glob("*verified*true*").__next__() if True else True)
+    verified_files = list((MODULE/"data/runtime/status").glob("*verified*"))
+    block |= ck("verified_not_written", len(verified_files) == 0 or all("true" not in f.name.lower() for f in verified_files))
     
     # 9. Dashboard
     dash = (MODULE/"data/runtime/dashboard/v2_today.html").read_text()
