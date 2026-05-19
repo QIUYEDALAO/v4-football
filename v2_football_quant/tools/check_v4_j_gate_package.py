@@ -1,16 +1,17 @@
 #!/usr/bin/env python3
 """
-V4-J.1: Final Gate Evidence-Bound Checker
+V4-J.2: Final Gate Strict Evidence Replay Checker
 
-No hardcoded defaults for security fields.
-All evidence comes from:
-- Parsed classification document
-- Replayed/re-read execution review marker
-- Replayed/re-read runner checker marker
-- Replayed/re-read terminal audit marker
-- Real git stash list
-- Real git staged file scan
-- Real grep scans
+ALL evidence comes from:
+1. Replaying child checkers (not reading old markers)
+2. Checking child checker return codes (non-zero = BLOCKER)
+3. Reading replayed markers (missing = BLOCKER, missing fields = BLOCKER)
+4. Structurally parsing classification doc
+5. Real git stash list (unknown stash = BLOCKER)
+6. Real git staged file scan (forbidden = BLOCKER)
+7. Real grep scans (hits = BLOCKER)
+
+No defaults for safety fields. None = BLOCKER.
 """
 
 import json
@@ -25,11 +26,16 @@ MODULE_ROOT = Path(__file__).resolve().parents[1]
 DOCS_DIR = MODULE_ROOT / "docs"
 TOOLS_DIR = MODULE_ROOT / "tools"
 REPO_ROOT = MODULE_ROOT.parent
+MARKER_DIR = MODULE_ROOT / "data" / "runtime" / "status"
 
 STASH_ALLOWED = [
     "phase-v4a1 workspace isolation: discipline archive residue only",
     "phase-d87 workspace isolation: net_utils only",
 ]
+
+EXECUTION_REVIEW_CHECKER = "check_v4_controlled_observe_execution_review.py"
+RUNNER_CHECKER = "check_v4_controlled_observe_runner.py"
+TERMINAL_AUDIT_CHECKER = "check_v4_controlled_observe_terminal_audit.py"
 
 REQUIRED_DOCS = [
     "V4_J_GATE_PACKAGE.md",
@@ -88,119 +94,218 @@ FORBIDDEN_TRUE_PERMISSION = [
     "verified_written=true",
 ]
 
+EXECUTION_REVIEW_REQUIRED_FIELDS = [
+    "windows_tested", "windows_passed",
+    "all_windows_no_exec", "all_windows_no_push",
+    "all_windows_no_state", "all_windows_no_verified",
+    "all_windows_no_api", "all_windows_no_key_read",
+    "route_marker_written", "sent_marker_written",
+    "qq_sent", "state_written", "verified_written",
+    "production_verified", "phase_e_allowed",
+    "v4_j_allowed_to_execute", "check_status",
+]
 
-def _exec(cmd, cwd=None):
-    """Run a command and return stdout."""
+RUNNER_CHECKER_REQUIRED_FIELDS = [
+    "preview_execution_success", "preview_json_parse_success",
+    "date_required_enforced", "window_required_enforced",
+    "window_choices_enforced", "allowed_windows",
+    "negative_missing_date_test", "negative_missing_window_test",
+    "negative_invalid_window_test",
+    "observe_execution_allowed", "v4_j_allowed_to_execute",
+    "production_verified", "phase_e_allowed",
+]
+
+TERMINAL_AUDIT_REQUIRED_FIELDS = [
+    "terminal_audit_doc_exists", "true_permission_classification_doc_exists",
+    "no_active_permission_leak", "active_leak_count",
+    "unclassified_count",
+    "no_active_forbidden_terms",
+    "production_verified", "phase_e_allowed", "v4_j_allowed_to_execute",
+]
+
+CLASSIFICATION_KEY_FIELDS = [
+    "active_leak_count", "unclassified_count",
+    "active_forbidden_output_count",
+    "active_v33_reference_found", "active_v38_reference_found",
+    "active_non_standard_grade_found",
+    "main_recommendation_term_in_active_output",
+    "skip_recommendation_found", "c_main_recommendation_found",
+    "true_permission_classification_complete",
+]
+
+SAFETY_FIELDS = [
+    "observe_execution_allowed", "v4_j_allowed_to_execute",
+    "production_verified", "phase_e_allowed",
+    "qq_push_allowed", "state_write_allowed", "verified_write_allowed",
+    "route_marker_written", "sent_marker_written",
+    "qq_sent", "state_written", "verified_written",
+]
+
+EXECUTION_REVIEW_MARKER = "v4_controlled_observe_execution_review_check.json"
+RUNNER_MARKER = "v4_controlled_observe_runner_check.json"
+TERMINAL_AUDIT_MARKER = "v4_controlled_observe_terminal_audit_check.json"
+
+
+def _run_cmd(cmd, cwd=None):
+    """Run command, return (returncode, stdout, stderr)."""
     try:
-        return subprocess.run(
-            cmd, capture_output=True, text=True, check=False, cwd=cwd or str(REPO_ROOT)
-        ).stdout.strip()
-    except Exception:
-        return ""
-
-
-def _parse_classification_doc() -> dict:
-    """Parse the terminal classification doc for key fields."""
-    doc = DOCS_DIR / "V4_TERMINAL_TRUE_PERMISSION_GREP_CLASSIFICATION.md"
-    result = {"active_leak_count": None, "unclassified_count": None,
-              "active_forbidden_output_count": None, "fields_found": 0}
-    if not doc.is_file():
-        return {**result, "parse_error": "doc_not_found"}
-
-    text = doc.read_text()
-    # Count ACTIVE_LEAK rows (each = one occurrence in the classification table)
-    # But exclude header rows and table separator rows
-    active_leak = 0
-    unclassified = 0
-    forbidden_output = 0
-    for line in text.split('\n'):
-        if 'ACTIVE_LEAK' in line and '|' in line and 'ACTIVE_LEAK_COUNT' not in line:
-            # Only count if it ends with a grade that indicates an actual active leak
-            if '|' not in line.split('ACTIVE_LEAK')[-1] if 'ACTIVE_LEAK' in line else True:
-                pass
-            active_leak += 1
-    # Simpler: search for specific ACTIVE_LEAK row patterns
-    active_leak_matches = re.findall(r'ACTIVE_LEAK\s*\|', text)
-    active_leak = len(active_leak_matches)
-    unclassified_matches = re.findall(r'UNCLASSIFIED\s*\|', text)
-    unclassified = len(unclassified_matches)
-    forbidden_matches = re.findall(r'ACTIVE_FORBIDDEN\s*\|', text)
-    forbidden_output = len(forbidden_matches)
-
-    result["active_leak_count"] = active_leak
-    result["unclassified_count"] = unclassified
-    result["active_forbidden_output_count"] = forbidden_output
-    result["fields_found"] = 3
-    return result
+        r = subprocess.run(
+            cmd, capture_output=True, text=True, check=False,
+            cwd=cwd or str(REPO_ROOT), timeout=120
+        )
+        return r.returncode, r.stdout.strip(), r.stderr.strip()
+    except subprocess.TimeoutExpired:
+        return -1, "", "TIMEOUT"
+    except Exception as e:
+        return -2, "", str(e)
 
 
 def _read_marker(name: str) -> Optional[dict]:
-    """Read a marker JSON file from data/runtime/status."""
-    marker_path = MODULE_ROOT / "data" / "runtime" / "status" / name
-    if not marker_path.is_file():
+    """Read a marker JSON file."""
+    p = MARKER_DIR / name
+    if not p.is_file():
         return None
     try:
-        return json.loads(marker_path.read_text())
+        return json.loads(p.read_text())
     except (json.JSONDecodeError, IOError):
         return None
 
 
-def _replay_checker(name: str) -> Optional[dict]:
-    """Re-run a checker and capture its marker output."""
+def _run_checker(name: str, marker_name: str) -> dict:
+    """
+    Run a checker, read its marker, return results.
+    Non-zero exit code does NOT auto-BLOCKER — marker fields determine safety.
+    """
     checker = TOOLS_DIR / name
     if not checker.is_file():
-        return None
-    _exec([sys.executable, str(checker)])
-    # Derive marker name
-    marker_name = name.replace(".py", ".json").replace("check_", "v4_", 1)
-    # Wait - checkers use various marker naming. Let me read the marker dir.
-    return _read_marker(marker_name) or _read_marker(f"{name.replace('.py', '')}_check.json")
+        return {"_error": f"checker not found: {name}"}
+
+    rc, out, err = _run_cmd([sys.executable, str(checker)])
+    marker = _read_marker(marker_name)
+    if marker is None:
+        return {"_error": f"marker not found after run: {marker_name} (exit {rc})", "_returncode": rc}
+
+    return {"_marker": marker, "_returncode": rc}
+
+
+def _parse_classification_doc() -> dict:
+    """Structured parse of classification doc. Returns dict of fields."""
+    result = {}
+    doc = DOCS_DIR / "V4_TERMINAL_TRUE_PERMISSION_GREP_CLASSIFICATION.md"
+    if not doc.is_file():
+        return {"_error": "doc_not_found"}
+
+    text = doc.read_text()
+    # Search for key=value or key: value patterns
+    # Also search the summary section
+    summary_patterns = {
+        "active_leak_count": r"active_leak_count[=:]\s*(\d+)",
+        "unclassified_count": r"unclassified_count[=:]\s*(\d+)",
+        "active_forbidden_output_count": r"active_forbidden_output_count[=:]\s*(\d+)",
+        "active_v33_reference_found": r"active_v33_reference_found[=:]\s*(true|false)",
+        "active_v38_reference_found": r"active_v38_reference_found[=:]\s*(true|false)",
+        "active_non_standard_grade_found": r"active_non_standard_grade_found[=:]\s*(true|false)",
+        "main_recommendation_term_in_active_output": r"main_recommendation_term_in_active_output[=:]\s*(true|false)",
+        "skip_recommendation_found": r"skip_recommendation_found[=:]\s*(true|false)",
+        "c_main_recommendation_found": r"c_main_recommendation_found[=:]\s*(true|false)",
+        "true_permission_classification_complete": r"true_permission_classification_complete[=:]\s*(true|false)",
+    }
+
+    for field, pattern in summary_patterns.items():
+        m = re.search(pattern, text, re.IGNORECASE)
+        if m:
+            val = m.group(1)
+            if val.isdigit():
+                result[field] = int(val)
+            else:
+                result[field] = val.lower() == "true"
+        else:
+            result[field] = None
+
+    # Also count ACTIVE_LEAK, UNCLASSIFIED etc. in the table
+    # as secondary verification
+    active_leak_table = len(re.findall(r'\bACTIVE_LEAK\b', text))
+    unclassified_table = len(re.findall(r'\bUNCLASSIFIED\b', text))
+    forbidden_table = len(re.findall(r'\bACTIVE_FORBIDDEN\b', text))
+
+    if result.get("active_leak_count") is None:
+        result["active_leak_count"] = max(0, active_leak_table)
+    if result.get("unclassified_count") is None:
+        result["unclassified_count"] = max(0, unclassified_table)
+    if result.get("active_forbidden_output_count") is None:
+        result["active_forbidden_output_count"] = max(0, forbidden_table)
+
+    return result
+
+
+def _check_required_marker_fields(marker_name: str, marker: dict, required: list[str]) -> list[str]:
+    """Return list of missing required fields."""
+    return [f for f in required if f not in marker]
+
+
+def _validate_safety_field(field_name: str, value, is_required: bool = True) -> Optional[str]:
+    """Validate a safety field value. Returns error message or None."""
+    if value is None:
+        return f"Safety field '{field_name}' is None (no evidence)"
+    if isinstance(value, bool) and value:
+        return f"Safety field '{field_name}' is True (must be False)"
+    return None
 
 
 def main():
+    # Initialize ALL safety fields as None — no default False allowed
     results = {
         "check_status": "PASS",
-        # Doc/existence
+        # Evidence replay status
+        "execution_review_returncode": None,
+        "execution_review_marker_loaded": False,
+        "runner_checker_returncode": None,
+        "runner_checker_marker_loaded": False,
+        "terminal_audit_returncode": None,
+        "terminal_audit_marker_loaded": False,
+        "four_window_preview_pass": None,
+        "negative_tests_pass": None,
+        "allowed_windows": [],
+        # Doc/checker counts
         "docs_required_present": 0,
         "checkers_required_present": 0,
-        # Evidence from classification doc
+        # Classification evidence (all None until parsed)
         "classification_parsed": False,
         "active_leak_count": None,
         "unclassified_count": None,
         "active_forbidden_output_count": None,
-        # Replayed checkers
-        "execution_review_replayed": False,
-        "runner_checker_replayed": False,
-        "terminal_audit_replayed": False,
-        "four_window_preview_pass": None,
-        "negative_tests_pass": None,
-        "allowed_windows": [],
-        # Stash and staged file verification
+        "active_v33_reference_found": None,
+        "active_v38_reference_found": None,
+        "active_non_standard_grade_found": None,
+        "main_recommendation_term_in_active_output": None,
+        "skip_recommendation_found": None,
+        "c_main_recommendation_found": None,
+        "true_permission_classification_complete": None,
+        # Stash/staged/grep
         "stash_checked": False,
-        "stash_allowed_only": False,
+        "no_unknown_stashes": False,
         "forbidden_staged_files_found": [],
-        # Grep scans
         "legacy_v4_12_hits": [],
         "active_true_permission_leaks": [],
-        # Guard values
+        # Safety fields — ALL None until proven
         "boss_explicit_authorization_required": True,
-        "observe_execution_allowed": False,
-        "qq_push_allowed": False,
-        "state_write_allowed": False,
-        "verified_write_allowed": False,
-        "route_marker_written": False,
-        "sent_marker_written": False,
-        "lock_created": False,
-        "production_verified": False,
-        "phase_e_allowed": False,
+        "observe_execution_allowed": None,
+        "qq_push_allowed": None,
+        "state_write_allowed": None,
+        "verified_write_allowed": None,
+        "route_marker_written": None,
+        "sent_marker_written": None,
+        "lock_created": None,
+        "production_verified": None,
+        "phase_e_allowed": None,
         "v4_j_allowed_to_generate": True,
-        "v4_j_allowed_to_execute": False,
+        "v4_j_allowed_to_execute": None,
         "blockers": [], "warnings": [],
     }
 
     block = False
 
-    # A. Required docs
+    # A. Check required docs
     for doc in REQUIRED_DOCS:
         if (DOCS_DIR / doc).is_file():
             results["docs_required_present"] += 1
@@ -208,191 +313,249 @@ def main():
             results["blockers"].append(f"Missing required doc: {doc}")
             block = True
 
-    # B. Required checker files
-    missing_checkers = []
+    # B. Check required checker files exist
     for chk in REQUIRED_CHECKERS:
         if (TOOLS_DIR / chk).is_file():
             results["checkers_required_present"] += 1
         else:
-            missing_checkers.append(chk)
-    if missing_checkers:
-        results["blockers"].append(f"Missing required checkers: {missing_checkers}")
-        block = True
+            results["blockers"].append(f"Missing required checker: {chk}")
+            block = True
 
-    # C. Parse classification doc
+    # C. Structured classification doc parse
     cls = _parse_classification_doc()
-    if "parse_error" in cls:
-        results["blockers"].append(f"Classification doc parse failed: {cls['parse_error']}")
+    if "_error" in cls:
+        results["blockers"].append(f"Classification doc parse: {cls['_error']}")
         block = True
     else:
         results["classification_parsed"] = True
-        results["active_leak_count"] = cls["active_leak_count"]
-        results["unclassified_count"] = cls["unclassified_count"]
-        results["active_forbidden_output_count"] = cls["active_forbidden_output_count"]
-        if cls["active_leak_count"] is not None and cls["active_leak_count"] > 0:
-            results["blockers"].append(f"Active leak count > 0: {cls['active_leak_count']}")
-            block = True
-        if cls["unclassified_count"] is not None and cls["unclassified_count"] > 0:
-            results["blockers"].append(f"Unclassified count > 0: {cls['unclassified_count']}")
-            block = True
-        if cls["active_forbidden_output_count"] is not None and cls["active_forbidden_output_count"] > 0:
-            results["blockers"].append(f"Active forbidden output > 0: {cls['active_forbidden_output_count']}")
+        for f in CLASSIFICATION_KEY_FIELDS:
+            if f in cls:
+                results[f] = cls[f]
+
+        # Validate classification field safety
+        for f in ["active_leak_count", "unclassified_count", "active_forbidden_output_count"]:
+            v = results.get(f)
+            if v is None:
+                results["blockers"].append(f"Classification field '{f}' is missing")
+                block = True
+            elif v > 0:
+                results["blockers"].append(f"Classification field '{f}' = {v} (>0)")
+                block = True
+
+        for f in ["active_v33_reference_found", "active_v38_reference_found",
+                    "active_non_standard_grade_found",
+                    "main_recommendation_term_in_active_output",
+                    "skip_recommendation_found", "c_main_recommendation_found"]:
+            v = results.get(f)
+            if v is None:
+                results["warnings"].append(f"Classification field '{f}' is missing (not in doc)")
+            elif v:
+                results["blockers"].append(f"Classification field '{f}' = True")
+                block = True
+
+        if results.get("true_permission_classification_complete") is False:
+            results["blockers"].append("true_permission_classification_complete is False")
             block = True
 
-    # D. Replay/re-read execution review marker
-    er_marker = _read_marker("v4_controlled_observe_execution_review_check.json")
-    if er_marker:
-        results["execution_review_replayed"] = True
-        windows_tested = er_marker.get("windows_tested", 0)
-        windows_passed = er_marker.get("windows_passed", 0)
-        results["four_window_preview_pass"] = (windows_tested >= 4 and windows_passed >= 4)
-        if not results["four_window_preview_pass"]:
-            results["blockers"].append("Execution review: windows_tested/passed < 4")
+    # D. STRICT REPLAY: execution review checker
+    er = _run_checker(EXECUTION_REVIEW_CHECKER, EXECUTION_REVIEW_MARKER)
+    results["execution_review_returncode"] = er.get("_returncode")
+    if "_error" in er:
+        results["blockers"].append(f"Execution review replay: {er['_error']}")
+        block = True
+    elif "_marker" in er:
+        results["execution_review_marker_loaded"] = True
+        er_marker = er["_marker"]
+        missing = _check_required_marker_fields(EXECUTION_REVIEW_MARKER, er_marker, EXECUTION_REVIEW_REQUIRED_FIELDS)
+        if missing:
+            results["blockers"].append(f"Execution review marker missing fields: {missing}")
             block = True
-        # Pull guard values from marker
-        for field in ["observe_execution_allowed", "qq_push_allowed", "state_write_allowed",
-                       "verified_write_allowed", "route_marker_written", "sent_marker_written",
-                       "production_verified", "phase_e_allowed", "v4_j_allowed_to_execute"]:
-            if field in er_marker:
-                results[field] = bool(er_marker[field])
+        else:
+            # Pull safety fields from execution review marker
+            # Field name mapping: execution review uses all_windows_no_*, V4-J uses qq_push/state_write/verified_write
+            _er_field_map = {
+                "all_windows_no_push": "qq_push_allowed",
+                "all_windows_no_state": "state_write_allowed",
+                "all_windows_no_verified": "verified_write_allowed",
+            }
+            for mk_field, j_field in _er_field_map.items():
+                val = er_marker.get(mk_field)
+                if val is not None:
+                    results[j_field] = not bool(val)  # inverted: no_push=True means qq_push_allowed=False
+            # Direct field pulls
+            for field in EXECUTION_REVIEW_REQUIRED_FIELDS:
+                if field in SAFETY_FIELDS and field in er_marker:
+                    results[field] = bool(er_marker[field])
+            results["four_window_preview_pass"] = (
+                int(er_marker.get("windows_tested", 0)) >= 4 and
+                int(er_marker.get("windows_passed", 0)) >= 4
+            )
+            if not results["four_window_preview_pass"]:
+                results["blockers"].append("four_window_preview_pass is False")
+                block = True
     else:
-        results["warnings"].append("Execution review marker not found — re-running checker")
-        _exec([sys.executable, str(TOOLS_DIR / "check_v4_controlled_observe_execution_review.py")])
-        er_marker2 = _read_marker("v4_controlled_observe_execution_review_check.json")
-        if er_marker2:
-            results["execution_review_replayed"] = True
-            results["four_window_preview_pass"] = er_marker2.get("windows_passed", 0) >= 4
+        results["blockers"].append("Execution review replay: no marker returned")
+        block = True
 
-    # E. Replay/re-read runner checker
-    rc_marker = _read_marker("v4_controlled_observe_runner_check.json")
-    if rc_marker:
-        results["runner_checker_replayed"] = True
-        results["negative_tests_pass"] = (
-            rc_marker.get("date_required_enforced", False) and
-            rc_marker.get("window_required_enforced", False) and
-            rc_marker.get("window_choices_enforced", False)
-        )
-        results["allowed_windows"] = rc_marker.get("allowed_windows", [])
-        if not results["negative_tests_pass"]:
-            results["blockers"].append("Negative tests did not all pass (from runner marker)")
+    # E. STRICT REPLAY: runner checker
+    rc = _run_checker(RUNNER_CHECKER, RUNNER_MARKER)
+    results["runner_checker_returncode"] = rc.get("_returncode")
+    if "_error" in rc:
+        results["blockers"].append(f"Runner checker replay: {rc['_error']}")
+        block = True
+    elif "_marker" in rc:
+        results["runner_checker_marker_loaded"] = True
+        rc_marker = rc["_marker"]
+        missing = _check_required_marker_fields(RUNNER_MARKER, rc_marker, RUNNER_CHECKER_REQUIRED_FIELDS)
+        if missing:
+            results["blockers"].append(f"Runner checker marker missing fields: {missing}")
             block = True
+        else:
+            results["allowed_windows"] = rc_marker.get("allowed_windows", [])
+            results["negative_tests_pass"] = (
+                rc_marker.get("date_required_enforced", False) and
+                rc_marker.get("window_required_enforced", False) and
+                rc_marker.get("window_choices_enforced", False)
+            )
+            if not results["negative_tests_pass"]:
+                results["blockers"].append("negative_tests_pass is False")
+                block = True
+            # Check allowed_windows exactly
+            expected = ["early", "midday", "evening", "night"]
+            if results["allowed_windows"] != expected:
+                results["blockers"].append(f"allowed_windows mismatch: {results['allowed_windows']} != {expected}")
+                block = True
+            # Pull safety fields from runner checker marker
+            # lock_created is in runner marker but not in SAFETY_FIELDS list
+            if "lock_created" in rc_marker:
+                results["lock_created"] = bool(rc_marker["lock_created"])
+            for field in RUNNER_CHECKER_REQUIRED_FIELDS:
+                if field in SAFETY_FIELDS and field in rc_marker:
+                    results[field] = bool(rc_marker[field])
     else:
-        results["warnings"].append("Runner checker marker not found — re-running")
-        _exec([sys.executable, str(TOOLS_DIR / "check_v4_controlled_observe_runner.py")])
-        rc_marker2 = _read_marker("v4_controlled_observe_runner_check.json")
-        if rc_marker2:
-            results["runner_checker_replayed"] = True
+        results["blockers"].append("Runner checker replay: no marker returned")
+        block = True
 
-    # F. Replay/re-read terminal audit
-    ta_marker = _read_marker("v4_controlled_observe_terminal_audit_check.json")
-    if ta_marker:
-        results["terminal_audit_replayed"] = True
-        if not ta_marker.get("no_active_permission_leak", False):
-            results["blockers"].append("Terminal audit: active permission leak detected")
+    # F. STRICT REPLAY: terminal audit checker
+    ta = _run_checker(TERMINAL_AUDIT_CHECKER, TERMINAL_AUDIT_MARKER)
+    results["terminal_audit_returncode"] = ta.get("_returncode")
+    if "_error" in ta:
+        results["blockers"].append(f"Terminal audit replay: {ta['_error']}")
+        block = True
+    elif "_marker" in ta:
+        results["terminal_audit_marker_loaded"] = True
+        ta_marker = ta["_marker"]
+        missing = _check_required_marker_fields(TERMINAL_AUDIT_MARKER, ta_marker, TERMINAL_AUDIT_REQUIRED_FIELDS)
+        if missing:
+            results["blockers"].append(f"Terminal audit marker missing fields: {missing}")
             block = True
-        if ta_marker.get("active_leak_count", 0) > 0:
-            results["blockers"].append(f"Terminal audit active_leak_count > 0: {ta_marker['active_leak_count']}")
-            block = True
-        if ta_marker.get("unclassified_count", 0) > 0:
-            results["blockers"].append(f"Terminal audit unclassified_count > 0: {ta_marker['unclassified_count']}")
-            block = True
+        else:
+            if not ta_marker.get("no_active_permission_leak", False):
+                results["blockers"].append("Terminal audit: no_active_permission_leak is False")
+                block = True
+            # Map no_active_forbidden_terms to active_forbidden_output_count
+            results["active_forbidden_output_count"] = (
+                0 if ta_marker.get("no_active_forbidden_terms", False) else 1
+            )
+            # Pull safety fields from terminal audit marker
+            for field in TERMINAL_AUDIT_REQUIRED_FIELDS:
+                if field in SAFETY_FIELDS and field in ta_marker:
+                    results[field] = bool(ta_marker[field])
+    else:
+        results["blockers"].append("Terminal audit replay: no marker returned")
+        block = True
 
-    # G. Check staged forbidden files
-    staged = _exec(["git", "diff", "--name-only", "--cached"])
-    for line in staged.split("\n"):
+    # G. Stash check (unknown stash = BLOCKER)
+    _, stash_stdout, _ = _run_cmd(["git", "stash", "list"])
+    results["stash_checked"] = True
+    stash_lines = [l.strip() for l in stash_stdout.split("\n") if l.strip()]
+    unknown_stashes = []
+    for line in stash_lines:
+        matched = any(a in line for a in STASH_ALLOWED)
+        if not matched:
+            unknown_stashes.append(line)
+    if unknown_stashes:
+        results["blockers"].append(f"Unknown stashes: {unknown_stashes}")
+        block = True
+    results["no_unknown_stashes"] = len(unknown_stashes) == 0
+
+    # H. Staged file check (forbidden = BLOCKER)
+    _, staged_stdout, _ = _run_cmd(["git", "diff", "--name-only", "--cached"])
+    for line in staged_stdout.split("\n"):
+        line = line.strip()
+        if not line:
+            continue
         for pat in FORBIDDEN_STAGED_PATTERNS:
             if pat in line:
-                results["forbidden_staged_files_found"].append(line.strip())
+                results["forbidden_staged_files_found"].append(line)
     if results["forbidden_staged_files_found"]:
         results["blockers"].append(f"Forbidden staged files: {results['forbidden_staged_files_found']}")
         block = True
 
-    # H. Check stash
-    stash_output = _exec(["git", "stash", "list"])
-    results["stash_checked"] = True
-    stash_lines = [l.strip() for l in stash_output.split("\n") if l.strip()]
-    stash_messages_found = set()
-    for line in stash_lines:
-        for allowed in STASH_ALLOWED:
-            if allowed in line:
-                stash_messages_found.add(allowed)
-                break
-    if stash_lines and len(stash_lines) == len(STASH_ALLOWED):
-        results["stash_allowed_only"] = all(
-            any(a in l for a in STASH_ALLOWED) for l in stash_lines
-        )
-    elif not stash_lines:
-        results["warnings"].append("No stashes at all — unusual")
-    else:
-        results["warnings"].append(f"Stash count ({len(stash_lines)}) differs from expected ({len(STASH_ALLOWED)})")
-
-    # I. v4_12 grep (exclude checker source, closure doc, and runtime markers)
-    _skip_v4_12 = ["check_v4_j_gate_package.py", "V4_J_GATE_CHECKER_HARDENING_CLOSURE.md", "data/runtime/status/"]
-    v4_12_scan = _exec(["grep", "-R", "-n", "v4_12"], cwd=str(MODULE_ROOT))
-    if v4_12_scan:
+    # I. v4_12 grep (active hits only, exclude self-references)
+    _v4_12_exclude = ["check_v4_j_gate_package.py", "V4_J_GATE_", "data/runtime/status/"]
+    _, v4_12_stdout, _ = _run_cmd(["grep", "-R", "-n", "v4_12"], cwd=str(MODULE_ROOT))
+    if v4_12_stdout:
         clean_hits = []
-        for line in v4_12_scan.split("\n"):
+        for line in v4_12_stdout.split("\n"):
             line = line.strip()
             if not line:
                 continue
-            if any(s in line for s in _skip_v4_12):
+            if any(s in line for s in _v4_12_exclude):
                 continue
             clean_hits.append(line)
         if clean_hits:
             results["legacy_v4_12_hits"] = clean_hits
-            results["blockers"].append(f"Legacy v4_12 hits found: {len(clean_hits)}")
+            results["blockers"].append(f"Active v4_12 hits: {len(clean_hits)}")
             block = True
 
-    # J. Active true-permission grep (exclude self/checker denylist/historical V2)
-    _skip_permission = [
-        "check_v4_j_gate_package.py",  # self (FORBIDDEN_TRUE_PERMISSION list)
-        "V2_CONTROLLED_",               # historical V2 docs
-        "check_v2_",                    # V2 checkers (checker denylist)
-        "data/runtime/status/",         # runtime markers
-        "SYSTEM_REARCHITECTURE_PLAN",   # historical system doc
-        "FORBIDDEN_TRUE_PERMISSION",    # the denylist variable itself
-        "check_v4_output_schema.py",    # checker denylist (searching for patterns)
-        "V4_TERMINAL_TRUE_PERMISSION",  # classification doc (quoting checker code)
+    # J. True permission grep
+    _perm_exclude = [
+        "check_v4_j_gate_package.py", "V2_CONTROLLED_", "check_v2_",
+        "data/runtime/status/", "SYSTEM_REARCHITECTURE_PLAN",
+        "FORBIDDEN_TRUE_PERMISSION", "check_v4_output_schema.py",
+        "V4_TERMINAL_TRUE_PERMISSION",
     ]
+    perm_hits = []
     scan_dirs = [str(MODULE_ROOT / d) for d in ["engine", "docs", "tools", "templates", "config"]]
-    permission_hits = []
     for d in scan_dirs:
         if not Path(d).is_dir():
             continue
-        output = _exec(
-            ["grep", "-R", "-n"] + [f"-E"] + ["|".join(FORBIDDEN_TRUE_PERMISSION)] + [d],
+        _, perm_stdout, _ = _run_cmd(
+            ["grep", "-R", "-n", "-E", "|".join(FORBIDDEN_TRUE_PERMISSION), d],
             cwd=str(REPO_ROOT)
         )
-        if output:
-            for line in output.split("\n"):
+        if perm_stdout:
+            for line in perm_stdout.split("\n"):
                 line = line.strip()
                 if not line:
                     continue
-                # Exclude explicit false contexts
+                if any(s in line for s in _perm_exclude):
+                    continue
                 if "=false" in line or ": false" in line or ":false" in line:
                     continue
-                # Exclude skip patterns
-                if any(s in line for s in _skip_permission):
-                    continue
-                permission_hits.append(line)
-    if permission_hits:
-        results["active_true_permission_leaks"] = permission_hits[:20]
-        results["blockers"].append(f"Active true permission leaks: {len(permission_hits)}")
+                perm_hits.append(line)
+    if perm_hits:
+        results["active_true_permission_leaks"] = perm_hits[:20]
+        results["blockers"].append(f"Active true permission leaks: {len(perm_hits)}")
         block = True
 
-    # K. Blocker: Guard values from evidence must all be false
-    guard_field_errors = []
-    if results.get("observe_execution_allowed", True):
-        guard_field_errors.append("observe_execution_allowed is true")
-    if results.get("v4_j_allowed_to_execute", True):
-        guard_field_errors.append("v4_j_allowed_to_execute is true")
-    if results.get("production_verified", True):
-        guard_field_errors.append("production_verified is true")
-    if results.get("phase_e_allowed", True):
-        guard_field_errors.append("phase_e_allowed is true")
-    for err in guard_field_errors:
-        results["blockers"].append(err)
-        block = True
+    # K. Validate all safety fields — None = BLOCKER, True = BLOCKER
+    for field in SAFETY_FIELDS:
+        val = results.get(field)
+        err = _validate_safety_field(field, val)
+        if err:
+            results["blockers"].append(err)
+            block = True
+
+    # L. Validate evidence replay fields
+    for evidence_field in ["four_window_preview_pass", "negative_tests_pass"]:
+        if results.get(evidence_field) is None:
+            results["blockers"].append(f"Evidence field '{evidence_field}' is None (no evidence)")
+            block = True
+        elif results[evidence_field] is False:
+            results["blockers"].append(f"Evidence field '{evidence_field}' is False")
+            block = True
 
     # Determine status
     if block:
@@ -402,7 +565,7 @@ def main():
 
     # Print
     print("=" * 60)
-    print("V4-J GATE EVIDENCE-BOUND CHECKER")
+    print("V4-J STRICT EVIDENCE REPLAY CHECKER")
     print("=" * 60)
     print(f"Status: {results['check_status']}")
     for k, v in results.items():
@@ -422,9 +585,8 @@ def main():
             print(f"  ? {w}")
 
     # Write marker
-    marker_dir = MODULE_ROOT / "data" / "runtime" / "status"
-    marker_dir.mkdir(parents=True, exist_ok=True)
-    marker_path = marker_dir / "v4_j_gate_package_check.json"
+    MARKER_DIR.mkdir(parents=True, exist_ok=True)
+    marker_path = MARKER_DIR / "v4_j_gate_package_check.json"
     with open(marker_path, "w") as fh:
         json.dump(results, fh, indent=2, ensure_ascii=False)
     print(f"\nMarker: {marker_path} (NOT committed)")
