@@ -79,3 +79,18 @@ Status: FINAL (not yet in production)
 | Phase E allowed | false |
 | V4-I allowed_to_generate | true |
 | V4-I allowed_to_execute | false |
+
+## Phase Coverage Keys (Checker Alignment)
+
+- V4_A - Boundary and Contract
+- V4_A.1 - Active Contamination
+- V4_B - Output Schema and Renderer Guard
+- V4_C - QQ Guard and No-Push
+- V4_D - Watchdog State Lock
+- V4_D.1 - Path Canonicalization
+- V4_E - Attribution Schema and Guard
+- V4_E.1 - No-API Guard Hardening
+- V4_E.2 - UNKNOWN Policy Hardening
+- V4_F - Rolling Validation
+- V4_G - Reporting Schema and Guard
+- V4_G.1 - Terminology Guard Hardening

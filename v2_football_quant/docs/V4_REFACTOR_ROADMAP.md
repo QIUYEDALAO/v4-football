@@ -74,6 +74,16 @@
 - 目标：在严格边界下进行受控观察计划。
 - 禁止项：不得自动进入真实生产路径。
 - 验收标准：observe plan 审批化、可回滚、可阻断。
+- 当前状态：V4-I.2 execution review package 完成；V4-I.3 terminal audit 进行中。
+- qq_push_allowed=false
+- production_allowed=false
+- production_verified=false
+
+## V4-I.3 controlled observe terminal audit
+
+- 目标：复盘 V4-A 至 V4-I.2 全链路、收口 true-permission 命中分类、生成 V4-J gate package。
+- 禁止项：不得执行 observe，不得打开 V4-J execute，不得进入 Phase E。
+- 验收标准：terminal audit checker PASS/WARN 且 `active_leak_count=0`。
 - qq_push_allowed=false
 - production_allowed=false
 - production_verified=false
@@ -83,6 +93,7 @@
 - 目标：建立最终 PRODUCTION_VERIFIED 审批门。
 - 禁止项：不得自动写 PRODUCTION_VERIFIED。
 - 验收标准：仅在全量证据满足且 BOSS 批准后可进入候选态。
+- 当前状态：V4-J gate package 仅允许 generate，不允许 execute。
 - qq_push_allowed=false
 - production_allowed=false
 - production_verified=false
