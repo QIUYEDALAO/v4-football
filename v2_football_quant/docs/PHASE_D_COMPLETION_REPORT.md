@@ -588,6 +588,20 @@ Phase D 工程链路完成（engineering_complete=true），但 business_pass=fa
   - `d9_4_allowed_to_execute=false`
 - 生产权限保持关闭，不得进入 Phase E。
 
+## 36. D.9.4 Proof Execution Stop & Rollback Gate
+
+- D.9.4 固化 proof 执行停止/回滚规则，不做执行。
+- 关键规则固定：
+  - `no_ai_kill_retry=true`
+  - `report_watchdog_only=true`
+  - `preserve_logs=true`
+  - `stop_on_any_marker_mismatch=true`
+  - `rollback_requires_boss=true`
+- 下一步仅允许：
+  - `d9_5_allowed_to_generate=true`
+  - `d9_5_allowed_to_execute=false`
+- 生产权限保持关闭，不得进入 Phase E。
+
 <!-- D.8.16.3 closure: v2_football_quant/docs/PHASE_D_COMPLETION_REPORT.md -->
 
 <!-- D.8.17.1 closure -->
