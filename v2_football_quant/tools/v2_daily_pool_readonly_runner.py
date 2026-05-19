@@ -97,7 +97,7 @@ def _find_evidence(dt_str: str, dt_dashed: str) -> dict:
 
 def _current_check(dt: str) -> dict:
     """Run live window checker for current date only."""
-    r = subprocess.run(["python3", str(WIN_CHK)], capture_output=True, text=True, timeout=60, cwd=str(MODULE))
+    r = subprocess.run(["python3", str(WIN_CHK), "--no-push", "--observe-only", "--no-formal-state-write", "--no-verified-write"], capture_output=True, text=True, timeout=60, cwd=str(MODULE))
     out = r.stdout
     result = {"date": dt, "evidence_mode": "CURRENT_WINDOW_CHECKER",
               "window_checker_status": "UNKNOWN",
