@@ -112,11 +112,38 @@ def refresh(args):
             v4_summary[dd] = {"AB": ab, "HIT": hit, "MISS": miss}
     summary["v4_attribution"] = v4_summary
 
-    # 6. V4 today (from scan if available)
-    summary["v4_today"] = {"total": 5, "A": 0, "B": 0, "C": 3, "SKIP": 2,
-                           "C_note": "observation-only", "SKIP_note": "not recommendation"}
+    # 6. V4 today from resolver (dynamic)
+    v4r = str(MODULE / "tools" / "v4_today_source_resolver.py")
+    r = subprocess.run(["python3", v4r, "--date", args.date,
+                        "--no-push", "--no-state-write", "--no-verified-write"],
+                       capture_output=True, text=True, timeout=30, cwd=str(MODULE))
+    try:
+        v4d = json.loads(r.stdout.strip().split("\n")[0])
+        summary["v4_today_source_mode"] = v4d.get("source_mode")
+        summary["v4_today_source_file"] = v4d.get("source_file")
+        summary["v4_today_source_freshness"] = v4d.get("source_freshness")
+        summary["v4_today_total"] = v4d.get("total_matches")
+        summary["v4_A"] = v4d.get("A_count")
+        summary["v4_B"] = v4d.get("B_count")
+        summary["v4_C"] = v4d.get("C_count")
+        summary["v4_SKIP"] = v4d.get("SKIP_count")
+        summary["v4_today_degraded"] = v4d.get("status") == "DEGRADED"
+        summary["v4_today_hardcoded"] = v4d.get("hardcoded", True)
+        v4d_full = v4d
+    except:
+        v4d_full = {"source_mode": "SOURCE_MISSING", "hardcoded": False}
+        summary["v4_today_degraded"] = True
+        summary["v4_today_hardcoded"] = False
+    summary["v4_today"] = v4d_full
 
     # 7. Generate QQ preview (local file only, NO send)
+    if v4d_full.get("source_mode") == "SOURCE_MISSING":
+        v4_today_line = "源缺失 (不使用硬编码快照)"
+    else:
+        t, a, b, c, s = v4d_full.get("total_matches"), v4d_full.get("A_count"), v4d_full.get("B_count"), v4d_full.get("C_count"), v4d_full.get("SKIP_count")
+        src = v4d_full.get("source_mode", "?")
+        v4_today_line = f"总: {t if t is not None else '?'} | A={a if a is not None else '?'} B={b if b is not None else '?'} C={c if c is not None else '?'} SKIP={s if s is not None else '?'} | 源: {src}"
+
     preview = f"""# 📊 情报台简报 (PREVIEW) {output_date.strftime('%Y-%m-%d')}
 
 ## 系统
@@ -127,7 +154,7 @@ CODE_READY | PIPELINE=false | Phase E=false
 历史({summary['history_from'][-5:]}~{summary['history_to'][-5:]}): {summary['v2_historical'].get('per_date',{})}
 
 ## V4 今日
-5场 A=0 B=0 C=3 SKIP=2
+{v4_today_line}
 C: observation-only | SKIP: not recommendation
 
 ## 赛后

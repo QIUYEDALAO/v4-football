@@ -50,6 +50,22 @@ def build(args):
             miss = sum(1 for r in rows if r.get("pre_grade") in ("A", "B") and r.get("model_result") == "MODEL_MISS")
             v4_summary[dd] = {"AB": ab, "HIT": hit, "MISS": miss, "total": len(rows)}
 
+    
+    # Resolve V4 today source (dynamic, no hardcoding)
+    v4_resolver = MODULE / "tools" / "v4_today_source_resolver.py"
+    v4_data = None
+    if v4_resolver.is_file():
+        r = subprocess.run(["python3", str(v4_resolver), "--date", args.date,
+                            "--no-push", "--no-state-write", "--no-verified-write"],
+                           capture_output=True, text=True, timeout=30, cwd=str(MODULE))
+        try:
+            v4_data = json.loads(r.stdout.strip().split("\n")[0])
+        except:
+            pass
+    dash["v4_today"] = v4_data or {"source_mode": "SOURCE_MISSING", "hardcoded": False,
+                                    "source_freshness": "MISSING", "blocker_reason": "V4_TODAY_SOURCE_MISSING",
+                                    "C_observation_only": True, "SKIP_not_recommendation": True}
+
     dash = {
         "generated_at": time.strftime("%Y-%m-%dT%H:%M:%S+08:00"),
         "dashboard_version": "INTEL_OPS_1_1",
@@ -69,9 +85,9 @@ def build(args):
             if v2_historical and v2_historical.get("per_date") else {},
         } if v2_historical else None,
         "v2_historical_parse_ok": ok_h, "v2_historical_rc": rc_h,
-        "v4_today": {"total": 5, "A": 0, "B": 0, "C": 3, "SKIP": 2,
-                     "C_note": "C = observation-only, not primary recommendation",
-                     "SKIP_note": "SKIP = not recommendation"},
+        "v4_today": v4_data or {"source_mode": "SOURCE_MISSING", "hardcoded": False,
+                     "source_freshness": "MISSING", "C_observation_only": True,
+                     "SKIP_not_recommendation": True},
         "v4_attribution": v4_summary,
         "risk": ["cron_removed", "D13_prohibited", "phase_e_prohibited"],
         "actions": ["await_boss", "readonly_only", "no_formal_daily_pool", "no_cron_recovery"],
@@ -99,9 +115,14 @@ def build(args):
         md_dates = v2_historical.get("missing_daily_pool_dates", [])
         if md_dates:
             md += f"\n⚠️ DAILY_POOL 缺失: {', '.join(md_dates)} [调度未运行，非策略失败]\n"
-    md += "\n## V4 今日\n5场 A=0 B=0 C=3 SKIP=2\n"
-    md += "C (observation-only): 成都vs海港, 奥尔格里特vs哥德堡, 伯恩茅斯vs曼城\n"
-    md += "SKIP (not recommendation): Monza vs Juve Stabia, Chelsea vs Tottenham\n\n"
+    # V4 today from resolver (dynamic, no hardcoded)
+    if v4_data and v4_data.get("source_mode") != "SOURCE_MISSING":
+        t, a, b, c, s = v4_data.get("total_matches"), v4_data.get("A_count"), v4_data.get("B_count"), v4_data.get("C_count"), v4_data.get("SKIP_count")
+        md += f"\n## V4 今日\n总: {t if t is not None else '?'} | A={a if a is not None else '?'} B={b if b is not None else '?'} C={c if c is not None else '?'} SKIP={s if s is not None else '?'}\n"
+        md += f"源: {v4_data.get('source_mode','?')} | 新鲜度: {v4_data.get('source_freshness','?')}\n"
+        md += "C (observation-only) | SKIP (not recommendation)\n\n"
+    else:
+        md += "\n## V4 今日\n源缺失 (不使用硬编码快照)\nC (observation-only) | SKIP (not recommendation)\n\n"
 
     if v4_summary:
         md += f"## V4 赛后验证 (最近{args.v4_attribution_days}天)\n"
