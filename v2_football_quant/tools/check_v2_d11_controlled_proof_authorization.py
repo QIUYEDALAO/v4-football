@@ -48,12 +48,19 @@ REQUIRED_TRUE = ["d11_allowed_to_generate","d12_allowed_to_generate",
     "v4_frozen_at_j3"]
 
 MATRIX_REQUIRED_TRUE_FLAGS = [
-    "all_six_targets_present","all_six_targets_unproven",
-    "all_six_execution_authorization_review_only","all_six_execution_allowed_now_false",
-    "all_six_command_draft_exists","all_six_runner_status_recorded","all_six_rollback_required",
-    "all_six_watchdog_required","all_six_no_ai_kill_retry_required",
-    "all_six_allowed_to_mark_proven_now_false","all_six_preconditions_present",
-    "all_six_stop_conditions_present","all_six_evidence_present","all_six_runner_status_recorded",
+    "all_six_targets_present",
+    "all_six_targets_unproven",
+    "all_six_execution_authorization_review_only",
+    "all_six_execution_allowed_now_false",
+    "all_six_command_draft_exists",
+    "all_six_runner_status_recorded",
+    "all_six_rollback_required",
+    "all_six_watchdog_required",
+    "all_six_no_ai_kill_retry_required",
+    "all_six_allowed_to_mark_proven_now_false",
+    "all_six_preconditions_present",
+    "all_six_stop_conditions_present",
+    "all_six_evidence_present",
 ]
 
 STASH_ALLOWED = ["phase-d101","phase-v4a1","phase-d87"]
@@ -146,7 +153,7 @@ def main():
         "matrix_required_true_flags_blocker_enforced": 0,
         "matrix_required_true_flags_missing": [], "all_matrix_flags_blocker_enforced": False,
         "forbidden_dirty": [], "forbidden_staged": [],
-        "blockers": [], "warnings": []}
+        "matrix_required_true_flags_unique_count": 0, "matrix_required_true_flags_expected_count": 13, "matrix_required_true_flags_duplicate_items": [], "blockers": [], "warnings": []}
     block = False
 
     for doc in REQUIRED_DOCS:
@@ -178,7 +185,6 @@ def main():
     # Per-target full validation
     pv = {}
     flags = {f: True for f in MATRIX_REQUIRED_TRUE_FLAGS}
-    flag_keys = [
         ("all_six_targets_unproven", "unproven"),
         ("all_six_execution_authorization_review_only", "exec_auth_ro"),
         ("all_six_execution_allowed_now_false", "exec_now_false"),
@@ -214,7 +220,6 @@ def main():
         if not v["execution_allowed_now_false"]: flags["all_six_execution_allowed_now_false"] = False
         if not v["command_draft_exists_true"]: flags["all_six_command_draft_exists"] = False
         if not v["runner_recorded"]: flags["all_six_runner_status_recorded"] = False
-        v["runner_recorded"] = bool(td.get("runner_exists","")) and td.get("runner_exists","") in ["true","false","unknown","NOT_EXECUTABLE_UNTIL_RUNNER_DEFINED"]
         if not v["rollback_required_true"]: flags["all_six_rollback_required"] = False
         if not v["watchdog_required_true"]: flags["all_six_watchdog_required"] = False
         if not v["no_ai_kill_required_true"]: flags["all_six_no_ai_kill_retry_required"] = False
@@ -238,6 +243,16 @@ def main():
             block = True
         else:
             enforced += 1
+    unique = list(set(MATRIX_REQUIRED_TRUE_FLAGS))
+    R["matrix_required_true_flags_unique_count"] = len(unique)
+    R["matrix_required_true_flags_expected_count"] = 13
+    R["matrix_required_true_flags_duplicate_items"] = [x for x in set(MATRIX_REQUIRED_TRUE_FLAGS) if MATRIX_REQUIRED_TRUE_FLAGS.count(x) > 1]
+    if R["matrix_required_true_flags_duplicate_items"]:
+        R["blockers"].append(f"Duplicate matrix flags: {R['matrix_required_true_flags_duplicate_items']}")
+        block = True
+    if len(unique) != 13:
+        R["blockers"].append(f"Matrix flags unique count {len(unique)} != 13")
+        block = True
     R["matrix_required_true_flags_blocker_enforced"] = enforced
     R["matrix_required_true_flags_missing"] = missing_flags
     R["all_matrix_flags_blocker_enforced"] = enforced == len(MATRIX_REQUIRED_TRUE_FLAGS)
