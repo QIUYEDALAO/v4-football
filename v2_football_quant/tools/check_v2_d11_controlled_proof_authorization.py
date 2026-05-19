@@ -188,14 +188,14 @@ def main():
         ("all_six_targets_unproven", "unproven"),
         ("all_six_execution_authorization_review_only", "exec_auth_ro"),
         ("all_six_execution_allowed_now_false", "exec_now_false"),
-        ("all_six_command_draft_exists","all_six_runner_status_recorded", "cmd_exists"),
+        ("all_six_command_draft_exists", "cmd_exists"),
         ("all_six_rollback_required", "rollback"),
         ("all_six_watchdog_required", "watchdog"),
         ("all_six_no_ai_kill_retry_required", "no_ai"),
         ("all_six_allowed_to_mark_proven_now_false", "mark_proven"),
         ("all_six_preconditions_present", "precond"),
         ("all_six_stop_conditions_present", "stop"),
-        ("all_six_evidence_present","all_six_runner_status_recorded", "ev"),
+        ("all_six_evidence_present", "ev"),
     ]
 
     for t in SIX_PROOF_TARGETS:
