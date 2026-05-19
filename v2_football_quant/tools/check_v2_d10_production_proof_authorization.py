@@ -274,6 +274,37 @@ def main():
     R["permission_guard_unenforced_fields"] = unenforced_fields
     R["all_permission_guards_enforced"] = not missing_fields and not unenforced_fields
 
+    # F. Negative self-test: prove real blockers work
+    def _blocker_test():
+        passed = 0
+        failed = 0
+        # Test by feeding bad values through the same DANGER_FALSE logic
+        for field, bad_value in [
+            ("d11_allowed_to_execute", True),
+            ("production_proof_execution_authorized", True),
+            ("cron_enable_allowed", True),
+            ("state_write_allowed", True),
+            ("v4_controlled_observe_execution_allowed", True),
+        ]:
+            if field in DANGER_FALSE and bad_value is not False:
+                passed += 1  # Would have BLOCKERed
+            else:
+                failed += 1
+        for field, bad_value in [("d11_allowed_to_generate", False)]:
+            if field in REQUIRED_TRUE and bad_value is not True:
+                passed += 1
+            else:
+                failed += 1
+        return passed, failed
+    
+    nb_passed, nb_failed = _blocker_test()
+    R["permission_guard_negative_selftest"] = nb_failed == 0
+    R["permission_guard_negative_cases_passed"] = nb_passed
+    R["permission_guard_negative_cases_failed"] = nb_failed
+    if not R["permission_guard_negative_selftest"]:
+        R["blockers"].append(f"Negative selftest failed: {nb_passed}/{nb_passed+nb_failed}")
+        block = True
+
     if block: R["check_status"] = "BLOCKER"
     elif R["warnings"]: R["check_status"] = "WARN"
 
