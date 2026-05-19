@@ -152,6 +152,8 @@ def main():
         "matrix_required_true_flags_count": len(MATRIX_REQUIRED_TRUE_FLAGS),
         "matrix_required_true_flags_blocker_enforced": 0,
         "matrix_required_true_flags_missing": [], "all_matrix_flags_blocker_enforced": False,
+        "runner_status_allowed_values": ["true", "false", "unknown", "NOT_EXECUTABLE_UNTIL_RUNNER_DEFINED"],
+        "runner_status_missing_targets": [], "runner_status_invalid_targets": [],
         "forbidden_dirty": [], "forbidden_staged": [],
         "matrix_required_true_flags_unique_count": 0, "matrix_required_true_flags_expected_count": 13, "matrix_required_true_flags_duplicate_items": [], "blockers": [], "warnings": []}
     block = False
