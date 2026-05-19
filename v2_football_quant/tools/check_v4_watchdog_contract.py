@@ -7,27 +7,26 @@ and current production guards are in place.
 """
 
 import json
-import os
 import sys
+from pathlib import Path
 
-WORKSPACE = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-V4_REPO = os.path.join(WORKSPACE, "v2_football_quant")
+MODULE_ROOT = Path(__file__).resolve().parents[1]  # v2_football_quant/
+REPO_ROOT = MODULE_ROOT.parent                     # repo root
 
-DOC_WATCHDOG = os.path.join(WORKSPACE, "docs", "V4_WATCHDOG_STATE_LOCK.md")
-DOC_LIFECYCLE = os.path.join(WORKSPACE, "docs", "V4_STATE_LIFECYCLE_CONTRACT.md")
-ENGINE_WATCHDOG = os.path.join(V4_REPO, "engine", "v4_review_with_watchdog.py")
+DOC_WATCHDOG = MODULE_ROOT / "docs" / "V4_WATCHDOG_STATE_LOCK.md"
+DOC_LIFECYCLE = MODULE_ROOT / "docs" / "V4_STATE_LIFECYCLE_CONTRACT.md"
+ENGINE_WATCHDOG = MODULE_ROOT / "engine" / "v4_review_with_watchdog.py"
 
 
 def check_doc_exists(path, label):
-    exists = os.path.isfile(path)
-    if not exists:
+    if not path.is_file():
         return {"valid": False, "error": f"{label}: {path} not found"}
     return {"valid": True, "error": None}
 
 
 def check_watchdog_entry_exists():
     """Check that the watchdog wrapper exists and has basic contract fields."""
-    if not os.path.isfile(ENGINE_WATCHDOG):
+    if not ENGINE_WATCHDOG.is_file():
         return {"valid": False, "error": "v4_review_with_watchdog.py not found"}
     
     with open(ENGINE_WATCHDOG, "r") as fh:
@@ -140,10 +139,10 @@ def main():
         for w in results["warnings"]:
             print(f"  ? {w}")
     
-    # Write marker
-    marker_dir = os.path.join(WORKSPACE, "data", "runtime", "status")
-    os.makedirs(marker_dir, exist_ok=True)
-    marker_path = os.path.join(marker_dir, "v4_watchdog_contract_check.json")
+    # Write marker to module data/runtime/status (NOT committed)
+    marker_dir = MODULE_ROOT / "data" / "runtime" / "status"
+    marker_dir.mkdir(parents=True, exist_ok=True)
+    marker_path = marker_dir / "v4_watchdog_contract_check.json"
     with open(marker_path, "w") as fh:
         json.dump(results, fh, indent=2, ensure_ascii=False)
     print(f"\nMarker: {marker_path} (NOT committed)")

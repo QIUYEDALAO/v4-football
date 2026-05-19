@@ -7,20 +7,20 @@ and current production guards are in place.
 """
 
 import json
-import os
 import sys
+from pathlib import Path
 
-WORKSPACE = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-V4_REPO = os.path.join(WORKSPACE, "v2_football_quant")
+MODULE_ROOT = Path(__file__).resolve().parents[1]  # v2_football_quant/
+REPO_ROOT = MODULE_ROOT.parent                     # repo root
 
-SCAN_BRIEF = os.path.join(V4_REPO, "engine", "v4_scan_and_brief.py")
-REVIEW_WD = os.path.join(V4_REPO, "engine", "v4_review_with_watchdog.py")
-LOCK_DIR = os.path.join(V4_REPO, "data", "runtime", "locks")
+SCAN_BRIEF = MODULE_ROOT / "engine" / "v4_scan_and_brief.py"
+REVIEW_WD = MODULE_ROOT / "engine" / "v4_review_with_watchdog.py"
+LOCK_DIR = MODULE_ROOT / "data" / "runtime" / "locks"
 
 
 def check_lock_usage():
     """Verify that key V4 engine files use locks."""
-    if not os.path.isfile(SCAN_BRIEF):
+    if not SCAN_BRIEF.is_file():
         return {"valid": False, "error": "v4_scan_and_brief.py not found"}
     
     with open(SCAN_BRIEF, "r") as fh:
@@ -32,7 +32,7 @@ def check_lock_usage():
     checks["scan_has_stale_check"] = "stale" in scan_content.lower()
     checks["scan_has_concurrent_blocker"] = "exists()" in scan_content and "LOCK" in scan_content
     
-    if not os.path.isfile(REVIEW_WD):
+    if not REVIEW_WD.is_file():
         return {"valid": False, "error": "v4_review_with_watchdog.py not found"}
     
     with open(REVIEW_WD, "r") as fh:
@@ -130,9 +130,9 @@ def main():
             print(f"  ? {w}")
     
     # Write marker
-    marker_dir = os.path.join(WORKSPACE, "data", "runtime", "status")
-    os.makedirs(marker_dir, exist_ok=True)
-    marker_path = os.path.join(marker_dir, "v4_lock_timeout_contract_check.json")
+    marker_dir = MODULE_ROOT / "data" / "runtime" / "status"
+    marker_dir.mkdir(parents=True, exist_ok=True)
+    marker_path = marker_dir / "v4_lock_timeout_contract_check.json"
     with open(marker_path, "w") as fh:
         json.dump(results, fh, indent=2, ensure_ascii=False)
     print(f"\nMarker: {marker_path} (NOT committed)")
