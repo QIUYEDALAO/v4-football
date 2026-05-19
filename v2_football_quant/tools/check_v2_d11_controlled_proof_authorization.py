@@ -131,6 +131,12 @@ def main():
     flags = {"unproven":True,"exec_auth_ro":True,"exec_now":True,"cmd_exist":True,
         "rollback":True,"watchdog":True,"no_ai":True,"mark_proven":True,
         "precond":True,"stop":True,"ev":True}
+    flag_map = {"unproven":"all_six_targets_unproven","exec_auth_ro":"all_six_execution_authorization_review_only",
+        "exec_now":"all_six_execution_allowed_now_false","cmd_exist":"all_six_command_draft_exists",
+        "rollback":"all_six_rollback_required","watchdog":"all_six_watchdog_required",
+        "no_ai":"all_six_no_ai_kill_retry_required","mark_proven":"all_six_allowed_to_mark_proven_now_false",
+        "precond":"all_six_preconditions_present","stop":"all_six_stop_conditions_present",
+        "ev":"all_six_evidence_present"}
     for t in SIX_PROOF_TARGETS:
         td = mx["targets"].get(t, {})
         if td.get("current_status","?") != "UNPROVEN": flags["unproven"]=False
@@ -145,7 +151,7 @@ def main():
         if not td.get("stop_conditions",""): flags["stop"]=False
         if not td.get("evidence_required",""): flags["ev"]=False
     for k in flags:
-        R[f"all_six_{k if k!='unproven' else 'targets_unproven' if k!='exec_auth_ro' else 'execution_authorization_review_only' if k!='exec_now' else 'execution_allowed_now_false' if k!='cmd_exist' else 'command_draft_exists' if k!='rollback' else 'rollback_required' if k!='watchdog' else 'watchdog_required' if k!='no_ai' else 'no_ai_kill_retry_required' if k!='mark_proven' else 'allowed_to_mark_proven_now_false' if k!='precond' else 'preconditions_present' if k!='stop' else 'stop_conditions_present' if k!='ev' else 'evidence_present'}"] = flags[k]
+        R[flag_map[k]] = flags[k]
     if not flags["unproven"]: R["blockers"].append("Some targets not UNPROVEN"); block = True
     if not flags["exec_now"]: R["blockers"].append("Some targets execution_allowed_now true"); block = True
     if not flags["mark_proven"]: R["blockers"].append("Some targets allowed_to_mark_proven_now true"); block = True
