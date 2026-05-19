@@ -181,9 +181,14 @@ def _run_checker(name: str, marker_name: str) -> dict:
         return {"_error": f"checker not found: {name}"}
 
     rc, out, err = _run_cmd([sys.executable, str(checker)])
+    # Non-zero returncode is BLOCKER — do not continue with marker
+    if rc != 0:
+        return {"_error": f"checker exit {rc}: {name} (non-zero returncode is BLOCKER)", "_returncode": rc}
+
+    # Checker passed — read its marker
     marker = _read_marker(marker_name)
     if marker is None:
-        return {"_error": f"marker not found after run: {marker_name} (exit {rc})", "_returncode": rc}
+        return {"_error": f"marker not found after run: {marker_name}", "_returncode": rc}
 
     return {"_marker": marker, "_returncode": rc}
 

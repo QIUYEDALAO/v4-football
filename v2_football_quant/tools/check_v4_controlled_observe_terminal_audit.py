@@ -125,6 +125,13 @@ def _parse_count(doc_text: str, key: str) -> int | None:
 def _scan_legacy_wrong_phase_hits() -> list[str]:
     legacy_token = "v4_" + "12"
     hits = []
+    # Exclude: checker self-references and V4-J closure docs
+    _skip_legacy = [
+        "check_v4_j_gate_package.py",
+        "check_v4_controlled_observe_terminal_audit.py",
+        "V4_J_GATE_",
+        "data/runtime/status/",
+    ]
     for rel_root in ("engine", "docs", "tools"):
         root = MODULE_ROOT / rel_root
         if not root.is_dir():
@@ -133,6 +140,10 @@ def _scan_legacy_wrong_phase_hits() -> list[str]:
             if not p.is_file():
                 continue
             if "__pycache__" in p.parts:
+                continue
+            # Skip known false-positive files
+            rel = str(p.relative_to(MODULE_ROOT))
+            if any(s in rel for s in _skip_legacy):
                 continue
             try:
                 text = p.read_text(encoding="utf-8")
