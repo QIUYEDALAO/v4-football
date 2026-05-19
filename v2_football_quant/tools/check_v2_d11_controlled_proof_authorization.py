@@ -34,7 +34,7 @@ def _scan_forbidden(paths): return [p for p in paths for pat in FORBIDDEN if pat
 
 def main():
     R = {"check_status":"PASS","docs_required_present":0,
-        "d10_checker_pass":False,"v4_frozen":True,
+        "d10_checker_pass":False,"v4_frozen_at_j3":True,
         "current_level":"CODE_READY","PIPELINE_READY":False,
         "d11_allowed_to_generate":True,"d11_allowed_to_execute":False,
         "d12_allowed_to_generate":True,"d12_allowed_to_execute":False,
