@@ -1,0 +1,215 @@
+{
+  "phase": "LOCAL-REPO-ACTIVE-SINGLETON-QUARANTINE-EXECUTION-20260521",
+  "generated_at": "2026-05-21T13:56+08:00",
+  "moved_files": 23,
+  "deleted_files": 0,
+  "records": [
+    {
+      "original_path": "engine/v3_dashboard.py",
+      "new_path": "data/archive/v3_wc2026_module_20260521/v3_dashboard.py",
+      "sha256_before": "e5efd8aa851fe353531f4af5d7a9c0993065f6252360cbbd1396ab9d0ba44ae6",
+      "file_size": 7221,
+      "category": "V3 WC2026 legacy",
+      "move_reason": "V3 WC2026 legacy",
+      "rollback_command": "mv v2_football_quant/data/archive/v3_wc2026_module_20260521/v3_dashboard.py v2_football_quant/engine/v3_dashboard.py"
+    },
+    {
+      "original_path": "engine/v3_router_guard.py",
+      "new_path": "data/archive/v3_wc2026_module_20260521/v3_router_guard.py",
+      "sha256_before": "7acb8006472aee8f0cfb230159a85c805109486d0a700df39b0678bd4822c131",
+      "file_size": 6934,
+      "category": "V3 WC2026 legacy",
+      "move_reason": "V3 WC2026 legacy",
+      "rollback_command": "mv v2_football_quant/data/archive/v3_wc2026_module_20260521/v3_router_guard.py v2_football_quant/engine/v3_router_guard.py"
+    },
+    {
+      "original_path": "engine/v3_signal_builder.py",
+      "new_path": "data/archive/v3_wc2026_module_20260521/v3_signal_builder.py",
+      "sha256_before": "3e08f821d535172778a04dbca33d43aaf8948638af049445fcc1277b0c32f9be",
+      "file_size": 17181,
+      "category": "V3 WC2026 legacy",
+      "move_reason": "V3 WC2026 legacy",
+      "rollback_command": "mv v2_football_quant/data/archive/v3_wc2026_module_20260521/v3_signal_builder.py v2_football_quant/engine/v3_signal_builder.py"
+    },
+    {
+      "original_path": "engine/v3_clv_audit.py",
+      "new_path": "data/archive/v3_wc2026_module_20260521/v3_clv_audit.py",
+      "sha256_before": "aaab9e35a915adb89314c76bd0d0a7c30ad8630926e8ea9f07c46d84deb5c61a",
+      "file_size": 4149,
+      "category": "V3 WC2026 legacy",
+      "move_reason": "V3 WC2026 legacy",
+      "rollback_command": "mv v2_football_quant/data/archive/v3_wc2026_module_20260521/v3_clv_audit.py v2_football_quant/engine/v3_clv_audit.py"
+    },
+    {
+      "original_path": "engine/v3_gap_bucket_audit.py",
+      "new_path": "data/archive/v3_wc2026_module_20260521/v3_gap_bucket_audit.py",
+      "sha256_before": "1017f7dbf3cf2c4a67c55d213f3118ddfe4a6cd361cf941495295076fb334a70",
+      "file_size": 3491,
+      "category": "V3 WC2026 legacy",
+      "move_reason": "V3 WC2026 legacy",
+      "rollback_command": "mv v2_football_quant/data/archive/v3_wc2026_module_20260521/v3_gap_bucket_audit.py v2_football_quant/engine/v3_gap_bucket_audit.py"
+    },
+    {
+      "original_path": "engine/v3_wc_stage_resolver.py",
+      "new_path": "data/archive/v3_wc2026_module_20260521/v3_wc_stage_resolver.py",
+      "sha256_before": "a1176336082218bc6712da80adf5f5c301ca9b0a6c47d297ff24c7dd760736dd",
+      "file_size": 8741,
+      "category": "V3 WC2026 legacy",
+      "move_reason": "V3 WC2026 legacy",
+      "rollback_command": "mv v2_football_quant/data/archive/v3_wc2026_module_20260521/v3_wc_stage_resolver.py v2_football_quant/engine/v3_wc_stage_resolver.py"
+    },
+    {
+      "original_path": "tools/v3_sandbox_audit.py",
+      "new_path": "data/archive/v3_wc2026_module_20260521/v3_sandbox_audit.py",
+      "sha256_before": "25765cc18c670a012eccf49c78676ade7397af476deab91ee5354d21b585db33",
+      "file_size": 5797,
+      "category": "V3 WC2026 legacy",
+      "move_reason": "V3 WC2026 legacy",
+      "rollback_command": "mv v2_football_quant/data/archive/v3_wc2026_module_20260521/v3_sandbox_audit.py v2_football_quant/tools/v3_sandbox_audit.py"
+    },
+    {
+      "original_path": "data_pipeline/analyze_v3_bubble.py",
+      "new_path": "data/archive/v3_wc2026_module_20260521/analyze_v3_bubble.py",
+      "sha256_before": "1a9c4f09618b589e117462276fd66dc1405768df39ec85eb487d3046923bcf79",
+      "file_size": 6744,
+      "category": "V3 WC2026 legacy",
+      "move_reason": "V3 WC2026 legacy",
+      "rollback_command": "mv v2_football_quant/data/archive/v3_wc2026_module_20260521/analyze_v3_bubble.py v2_football_quant/data_pipeline/analyze_v3_bubble.py"
+    },
+    {
+      "original_path": "data_pipeline/intl_big4/ingest_fd_csv.py",
+      "new_path": "data/archive/v3_wc2026_module_20260521/ingest_fd_csv.py",
+      "sha256_before": "b4d3aa5c849ae105152b5d68dac2480c6c42e900393d95ed928ab0bb9c31e8a5",
+      "file_size": 7850,
+      "category": "V3 WC2026 legacy",
+      "move_reason": "V3 WC2026 legacy",
+      "rollback_command": "mv v2_football_quant/data/archive/v3_wc2026_module_20260521/ingest_fd_csv.py v2_football_quant/data_pipeline/intl_big4/ingest_fd_csv.py"
+    },
+    {
+      "original_path": "data_pipeline/intl_big4/ingest_kaggle_csv.py",
+      "new_path": "data/archive/v3_wc2026_module_20260521/ingest_kaggle_csv.py",
+      "sha256_before": "5cfc1fa800e14b63310c6c20b5bc53f3e15f05cb616950219dd8fa2fbf2fa943",
+      "file_size": 18723,
+      "category": "V3 WC2026 legacy",
+      "move_reason": "V3 WC2026 legacy",
+      "rollback_command": "mv v2_football_quant/data/archive/v3_wc2026_module_20260521/ingest_kaggle_csv.py v2_football_quant/data_pipeline/intl_big4/ingest_kaggle_csv.py"
+    },
+    {
+      "original_path": "data_pipeline/intl_big4/v3_survivorship_audit.py",
+      "new_path": "data/archive/v3_wc2026_module_20260521/v3_survivorship_audit.py",
+      "sha256_before": "cbda85b0a6bb2dc2408688e3f08bc3813089106d3bcfd65db2837cdff6c903d9",
+      "file_size": 2228,
+      "category": "V3 WC2026 legacy",
+      "move_reason": "V3 WC2026 legacy",
+      "rollback_command": "mv v2_football_quant/data/archive/v3_wc2026_module_20260521/v3_survivorship_audit.py v2_football_quant/data_pipeline/intl_big4/v3_survivorship_audit.py"
+    },
+    {
+      "original_path": "config/v3_wc_config.json",
+      "new_path": "data/archive/v3_wc2026_module_20260521/v3_wc_config.json",
+      "sha256_before": "6f1d2d69c7053415ea0712bf7893410aa9ed5432735243ecb7b46b2b98d0a484",
+      "file_size": 466,
+      "category": "V3 WC2026 legacy",
+      "move_reason": "V3 WC2026 legacy",
+      "rollback_command": "mv v2_football_quant/data/archive/v3_wc2026_module_20260521/v3_wc_config.json v2_football_quant/config/v3_wc_config.json"
+    },
+    {
+      "original_path": "engine/backtest_pipeline_v0.py",
+      "new_path": "data/archive/v0_prototypes_20260521/backtest_pipeline_v0.py",
+      "sha256_before": "ce499453757edc296671ded98777f3c8a7666bf4a46710b24fb0e00f95ecb4b2",
+      "file_size": 7029,
+      "category": "V0 prototype",
+      "move_reason": "V0 prototype",
+      "rollback_command": "mv v2_football_quant/data/archive/v0_prototypes_20260521/backtest_pipeline_v0.py v2_football_quant/engine/backtest_pipeline_v0.py"
+    },
+    {
+      "original_path": "engine/scoring_engine_v0.py",
+      "new_path": "data/archive/v0_prototypes_20260521/scoring_engine_v0.py",
+      "sha256_before": "87b5a065907cf338e9fca7bf32851663e197f385831a448d2d3a732572bc932e",
+      "file_size": 9210,
+      "category": "V0 prototype",
+      "move_reason": "V0 prototype",
+      "rollback_command": "mv v2_football_quant/data/archive/v0_prototypes_20260521/scoring_engine_v0.py v2_football_quant/engine/scoring_engine_v0.py"
+    },
+    {
+      "original_path": "engine/gen_structured_20260516.py",
+      "new_path": "engine/archive/20260521/gen_structured_20260516.py",
+      "sha256_before": "1e43565000db153a68d71f86c50adb4fbacb1769d561a27991c299044a21c29f",
+      "file_size": 8900,
+      "category": "One-off date-specific",
+      "move_reason": "One-off date-specific",
+      "rollback_command": "mv v2_football_quant/engine/archive/20260521/gen_structured_20260516.py v2_football_quant/engine/gen_structured_20260516.py"
+    },
+    {
+      "original_path": "engine/run_historical_paper.py",
+      "new_path": "engine/archive/20260521/run_historical_paper.py",
+      "sha256_before": "fdd2d656a051d3f85762477cae22892eee7d1ba16751f0c291d9ba8a03ba9fc4",
+      "file_size": 8197,
+      "category": "Historical paper run",
+      "move_reason": "Historical paper run",
+      "rollback_command": "mv v2_football_quant/engine/archive/20260521/run_historical_paper.py v2_football_quant/engine/run_historical_paper.py"
+    },
+    {
+      "original_path": "tools/tmp_reformat_b_cards.py",
+      "new_path": "tools/archive/20260521/tmp_reformat_b_cards.py",
+      "sha256_before": "da1ad264061a4d95dcb651f7bfdc114b4ff3ec2749eef74c719cc0ecb7423b87",
+      "file_size": 7372,
+      "category": "Temp UI reformat",
+      "move_reason": "Temp UI reformat",
+      "rollback_command": "mv v2_football_quant/tools/archive/20260521/tmp_reformat_b_cards.py v2_football_quant/tools/tmp_reformat_b_cards.py"
+    },
+    {
+      "original_path": "tools/tmp_verify_clean_ui.py",
+      "new_path": "tools/archive/20260521/tmp_verify_clean_ui.py",
+      "sha256_before": "746769a6581c59c907e643e583df1c7d7639aa899ba0878e8af4f23a6fac2ba4",
+      "file_size": 2902,
+      "category": "Temp UI verify",
+      "move_reason": "Temp UI verify",
+      "rollback_command": "mv v2_football_quant/tools/archive/20260521/tmp_verify_clean_ui.py v2_football_quant/tools/tmp_verify_clean_ui.py"
+    },
+    {
+      "original_path": "tools/test_v2_settlement_preflight_cases.py",
+      "new_path": "tools/archive/20260521/test_v2_settlement_preflight_cases.py",
+      "sha256_before": "55febcdc2ea2e4f1c534639bedf5c1bf0d962a333bf3481758b664cecfe2d636",
+      "file_size": 3950,
+      "category": "Test file",
+      "move_reason": "Test file",
+      "rollback_command": "mv v2_football_quant/tools/archive/20260521/test_v2_settlement_preflight_cases.py v2_football_quant/tools/test_v2_settlement_preflight_cases.py"
+    },
+    {
+      "original_path": "tools/test_v2_settlement_preflight_wrapper_block.py",
+      "new_path": "tools/archive/20260521/test_v2_settlement_preflight_wrapper_block.py",
+      "sha256_before": "7dd17f715e9de47aa1d676dd5d6aa07c1b83db081aad472f5b07ce154097b3cd",
+      "file_size": 7235,
+      "category": "Test file",
+      "move_reason": "Test file",
+      "rollback_command": "mv v2_football_quant/tools/archive/20260521/test_v2_settlement_preflight_wrapper_block.py v2_football_quant/tools/test_v2_settlement_preflight_wrapper_block.py"
+    },
+    {
+      "original_path": "tools/regenerate_intel_ops_console.py",
+      "new_path": "tools/archive/20260521/regenerate_intel_ops_console.py",
+      "sha256_before": "4f8f9673507cd9395daa6855565254c5423cdda1887035886a82ba3e54e1b0ad",
+      "file_size": 7889,
+      "category": "One-off generator",
+      "move_reason": "One-off generator",
+      "rollback_command": "mv v2_football_quant/tools/archive/20260521/regenerate_intel_ops_console.py v2_football_quant/tools/regenerate_intel_ops_console.py"
+    },
+    {
+      "original_path": "tools/surgically_update_ops_console.py",
+      "new_path": "tools/archive/20260521/surgically_update_ops_console.py",
+      "sha256_before": "ba5527142c50575c5cd5bd7241b20a50466d7de9af054f2f21c65600123f4493",
+      "file_size": 8231,
+      "category": "One-off surgical update",
+      "move_reason": "One-off surgical update",
+      "rollback_command": "mv v2_football_quant/tools/archive/20260521/surgically_update_ops_console.py v2_football_quant/tools/surgically_update_ops_console.py"
+    },
+    {
+      "original_path": "tools/gen_intel_ops_console.py",
+      "new_path": "tools/archive/20260521/gen_intel_ops_console.py",
+      "sha256_before": "c81dc5f9caa47d91d3ca55af180c01f0bda6f479e985c8a9e580f49d0582f9cf",
+      "file_size": 6076,
+      "category": "One-off generator",
+      "move_reason": "One-off generator",
+      "rollback_command": "mv v2_football_quant/tools/archive/20260521/gen_intel_ops_console.py v2_football_quant/tools/gen_intel_ops_console.py"
+    }
+  ]
+}

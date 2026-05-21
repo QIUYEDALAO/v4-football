@@ -1,0 +1,51 @@
+{
+  "active_singletons_engine": {
+    "engine/daily_runner.py": "V2 daily auto-run HT 1X2",
+    "engine/v4_runner.py": "V4 daily scout scanner",
+    "engine/v4_master_run.py": "V4 pipeline orchestrator",
+    "engine/v2_window_checker_with_watchdog.py": "V2 window checker supervisor",
+    "engine/v2_window_worker.py": "V2 window checker subprocess",
+    "engine/v4_review_with_watchdog.py": "V4 review wrapper with watchdog",
+    "engine/v2_settle_with_watchdog.py": "V2 settlement wrapper with watchdog",
+    "engine/v4_scan_worker.py": "V4 scan subprocess worker",
+    "engine/v4_live_capture_scheduler.py": "V4 live capture scheduler",
+    "engine/v4_review_report.py": "V4 daily review report"
+  },
+  "active_singletons_tools": {
+    "tools/generate_intel_desk_html.py": "Intel desk dashboard HTML generator (CANONICAL)",
+    "tools/intel_ops_refresh.py": "Intel ops one-command refresh",
+    "tools/v4_build_candidate_view.py": "V4 candidate view builder",
+    "tools/v4_today_source_resolver.py": "V4 today source resolver",
+    "tools/v4_script_classifier.py": "V4 script classifier",
+    "tools/v2_daily_pool_readonly_runner.py": "V2 daily pool readonly runner",
+    "tools/serve_dashboard.py": "Dashboard HTTP server",
+    "tools/build_cloud_publish_bundle.py": "Cloud publish bundle builder",
+    "tools/publish_cloud_bundle.py": "Cloud publish via rsync"
+  },
+  "active_singletons_checkers": {
+    "tools/check_cloud_autosync_guard.py": "Cloud autosync guard",
+    "tools/check_gateway_cron_policy_hardening.py": "Gateway cron hardening",
+    "tools/check_v2_validation_caliber_audit.py": "V2 caliber audit",
+    "tools/check_v4_review_report_only_mode.py": "V4 REPORT_ONLY",
+    "tools/check_sys_audit_notification_policy.py": "System audit notification",
+    "tools/check_intel_refresh_trigger_policy.py": "Intel refresh trigger",
+    "tools/check_intel_scheduler_migration.py": "Intel scheduler migration",
+    "tools/check_ops_daily_operation.py": "Ops daily operation",
+    "tools/check_cloud_publish_pipeline.py": "Cloud publish pipeline",
+    "tools/check_cloud_publish_status.py": "Cloud publish status"
+  },
+  "key_support_files": [
+    "engine/net_utils.py",
+    "engine/logger.py",
+    "engine/task_watchdog.py",
+    "engine/safe_outbound_sender.py",
+    "engine/team_cn_map.py",
+    "engine/v4_review_guard.py",
+    "engine/v4_result_attribution.py",
+    "engine/paper_trading.py",
+    "engine/bankroll.py",
+    "engine/v2_settlement_preflight_guard.py",
+    "engine/v2_settlement_shadow_guard.py"
+  ],
+  "post_quarantine_singleton_count": 29
+}

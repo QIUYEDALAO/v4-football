@@ -1,0 +1,29 @@
+{
+  "status": "EXECUTED_20260521",
+  "moved_files": 23,
+  "deleted_files": 0,
+  "rollback_map": "data/runtime/status/local_repo_quarantine_rollback_map_20260521.json",
+  "execution_record": "data/runtime/status/local_repo_active_singleton_quarantine_execution_20260521.json",
+  "groups_executed": [
+    {
+      "group": "V3 WC2026 Module",
+      "files": 12,
+      "destination": "data/archive/v3_wc2026_module_20260521/"
+    },
+    {
+      "group": "V0 Prototypes",
+      "files": 2,
+      "destination": "data/archive/v0_prototypes_20260521/"
+    },
+    {
+      "group": "One-off Scripts + Temp",
+      "files": 7,
+      "destination": "tools/archive/20260521/"
+    },
+    {
+      "group": "Engine One-off",
+      "files": 2,
+      "destination": "engine/archive/20260521/"
+    }
+  ]
+}
