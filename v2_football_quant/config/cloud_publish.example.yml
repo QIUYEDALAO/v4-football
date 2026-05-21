@@ -1,0 +1,38 @@
+# cloud_publish.example.yml — Cloud read-only mirror publish configuration
+# Copy to cloud_publish.yml and fill in real values.
+# NEVER commit cloud_publish.yml to version control.
+
+# ---- Remote host ----
+cloud_host: "your-cloud-server.example.com"
+cloud_user: "deploy"
+cloud_port: 22
+
+# ---- Remote paths ----
+remote_base_dir: /srv/intel-desk
+remote_staging_dir: /srv/intel-desk/staging
+remote_releases_dir: /srv/intel-desk/releases
+remote_current_symlink: /srv/intel-desk/current
+
+# ---- SSH ----
+ssh_key_path: "~/.ssh/id_ed25519"
+
+# ---- Rsync ----
+rsync_bwlimit: 2048  # KBps, 0 = unlimited
+
+# ---- Release retention ----
+keep_releases: 20
+
+# ---- Publish mode ----
+# readonly_static_mirror: cloud serves static files only.
+# No capture, no scan, no strategy, no push, no review runs on cloud.
+publish_mode: readonly_static_mirror
+
+# ---- Allowed sync paths (relative to repo root) ----
+sync_allowlist:
+  - data/runtime/dashboard/
+  - data/runtime/status/public/
+  - data/daily_reports/
+  - docs/
+
+# ---- Excluded patterns (in addition to built-in blacklist) ----
+sync_exclude_extra: []
