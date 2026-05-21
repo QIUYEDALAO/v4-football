@@ -12,7 +12,9 @@ v2变更(2026-05-17): 升级为中午链路完整性守卫。
 用法:
   python3 engine/sys_daily_settlement_summary.py --date 20260515
   python3 engine/sys_daily_settlement_summary.py --date 20260515 --dry-run
-  python3 engine/sys_daily_settlement_summary.py --date 20260515 --push
+  python3 engine/sys_daily_settlement_summary.py --date 20260515 --push              # mode=exception_only (默认安全: 仅异常推QQ)
+  python3 engine/sys_daily_settlement_summary.py --date 20260515 --push --mode announce  # 全推(需显式)
+  python3 engine/sys_daily_settlement_summary.py --date 20260515 --mode silent          # 只写文件不推QQ
 """
 
 from __future__ import annotations
@@ -299,6 +301,50 @@ def check_v4_chain(date_key: str) -> dict:
 
 
 # ──────────────────────
+# V33 审计结果解读
+# ──────────────────────
+
+def check_v33_audit(date_key: str) -> dict:
+    """读取 V33 residual audit 结果并分类严重级别。
+    historical_doc 和 allowed_guard → INFO（status_only）
+    active_v33_path → BLOCKER（exception_alert）
+    """
+    v33_path = STATUS_DIR / f"v33_residual_audit_{date_key}.json"
+    if not v33_path.is_file():
+        # Try without date (old hardcoded path)
+        v33_path = STATUS_DIR / "v33_residual_audit_20260520.json"
+    if not v33_path.is_file():
+        return {
+            "available": False,
+            "severity": "status_only",
+            "detail": "V33 audit result not found",
+        }
+
+    v33 = _load_json(v33_path)
+    active = v33.get("active_v33_path_count", 0)
+    allowed = v33.get("allowed_guard_count", 0)
+    historical = v33.get("historical_doc_count", 0)
+    check_status = v33.get("check_status", "PASS")
+
+    if check_status == "BLOCKER" or active > 0:
+        severity = "exception_alert"
+        note = f"active_v33_path={active} — MUST be 0"
+    else:
+        severity = "status_only"
+        note = f"allowed_guard={allowed} historical_doc={historical} — informational only, no QQ push"
+
+    return {
+        "available": True,
+        "severity": severity,
+        "check_status": check_status,
+        "active_v33_path_count": active,
+        "allowed_guard_count": allowed,
+        "historical_doc_count": historical,
+        "detail": note,
+    }
+
+
+# ──────────────────────
 # 汇总构建
 # ──────────────────────
 
@@ -306,6 +352,7 @@ def build_summary(date_key: str) -> dict:
     """生成汇总文本 + 链路完整性检查"""
     v2 = check_v2_chain(date_key)
     v4 = check_v4_chain(date_key)
+    v33 = check_v33_audit(date_key)
 
     # 判断整体链路完整性
     v2_ok = v2["status"] == "COMPLETE"
@@ -373,11 +420,25 @@ def build_summary(date_key: str) -> dict:
     lines.append("")
     lines.append("【V4昨日复盘】")
     lines.extend(v4_lines)
+    # ── V33 审计 ──
+    v33_lines = []
+    if v33["available"]:
+        severity_tag = "🔴 exception_alert" if v33["severity"] == "exception_alert" else "🟢 status_only (INFO)"
+        v33_lines.append(f"V33审计：{v33['check_status']} | {severity_tag}")
+        v33_lines.append(f"  active_v33_path={v33['active_v33_path_count']} (must=0)")
+        v33_lines.append(f"  allowed_guard={v33['allowed_guard_count']} (guard/checker files — INFO, no push)")
+        v33_lines.append(f"  historical_doc={v33['historical_doc_count']} (docs/archive refs — INFO, no push)")
+    else:
+        v33_lines.append(f"V33审计：结果文件未找到")
+
     lines.append("")
     lines.append("【今日准备】")
     lines.append(f"V2建池：13:15待执行")
     lines.append(f"V4午间扫描：14:05待执行")
     lines.append(f"SYS汇总：{chain_status}")
+    lines.append("")
+    lines.append("【V33审计】")
+    lines.extend(v33_lines)
 
     summary_text = "\n".join(lines)
 
@@ -387,6 +448,7 @@ def build_summary(date_key: str) -> dict:
         "summary": summary_text,
         "v2": v2,
         "v4": v4,
+        "v33_audit": v33,
         "checked_at": now.isoformat(),
     }
 
@@ -415,8 +477,13 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--date", required=True, help="YYYYMMDD")
     parser.add_argument("--dry-run", action="store_true", help="仅输出，不推")
-    parser.add_argument("--push", action="store_true", help="推送（写文件 + sessions_send）")
+    parser.add_argument("--push", action="store_true", help="推送（写文件 + sessions_send）— 等同 --mode exception_only")
+    parser.add_argument("--mode", default="exception_only", choices=["announce", "exception_only", "silent"],
+                        help="推送模式：exception_only=仅异常推(默认) / announce=全推(需显式) / silent=只写文件不推")
     args = parser.parse_args()
+
+    # --push flag uses default mode (exception_only); only explicit --mode announce pushes everything
+    # No override — --push alone means exception_only, which is now the safe default
 
     date_key = str(args.date).replace("-", "")
     result = build_summary(date_key)
@@ -427,8 +494,18 @@ def main():
     status_path.write_text(json.dumps(result, ensure_ascii=False, indent=2), encoding="utf-8")
 
     print(result["summary"])
+    print(f"[SYS] mode={args.mode} chain_status={result['chain_status']}")
 
-    if args.push:
+    should_push = False
+    if args.mode == "announce":
+        should_push = True
+    elif args.mode == "exception_only":
+        # Only push on CHAIN_INCOMPLETE or MISSING — not on COMPLETE
+        should_push = result["chain_status"] in ("CHAIN_INCOMPLETE", "MISSING")
+    elif args.mode == "silent":
+        should_push = False
+
+    if should_push:
         ok = push_via_system_event(result["summary"], date_key)
         if ok:
             print(f"[SYS] ✅ push file written: {status_path}")
@@ -437,6 +514,8 @@ def main():
     elif args.dry_run:
         print()
         print("--- dry-run (no push) ---")
+    else:
+        print(f"[SYS] ⏭️  push suppressed: mode={args.mode} chain_status={result['chain_status']}")
 
 
 if __name__ == "__main__":

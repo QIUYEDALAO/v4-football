@@ -12,6 +12,8 @@ def main():
     p.add_argument("--window", required=True, choices=["late","early","midday","evening","night"])
     p.add_argument("--scan-date", required=True)
     p.add_argument("--preflight", action="store_true")
+    p.add_argument("--run-readonly-runner", action="store_true",
+                   help="Explicitly allow running the readonly wrapper. Without this flag, checker only inspects — never executes.")
     p.add_argument("--no-push", action="store_true", default=True)
     p.add_argument("--no-d13", action="store_true", default=True)
     p.add_argument("--no-v33", action="store_true", default=True)
@@ -37,6 +39,8 @@ def main():
         "formal_recommendation_count": 0, "future_ab_trigger": False,
         "actual_send": False, "qq_sent": False, "fallback_used": False,
         "no_push": True, "no_d13": True, "no_v33": True, "no_hourly": True,
+        "run_readonly_runner_requested": args.run_readonly_runner,
+        "auto_runner_disabled": True,  # checker never auto-runs; only explicit --run-readonly-runner
         "status": "WAIT", "blockers": [], "warnings": []
     }
 
@@ -72,8 +76,23 @@ def main():
     # Verify window-specific files belong to THIS window
     win_evidence_ok = False
     if has_win_log:
-        log_content = win_log.read_text()[:500]
+        # Read full log (safe: max ~100KB typical, use tail 20KB for large files)
+        try:
+            log_size = win_log.stat().st_size
+            if log_size > 200_000:
+                # Large file: read last 20KB + first 2KB
+                with open(win_log, "r") as f:
+                    f.seek(max(0, log_size - 20_000))
+                    log_tail = f.read()
+                    f.seek(0)
+                    log_head = f.read(2000)
+                log_content = log_head + "\n...\n" + log_tail
+            else:
+                log_content = win_log.read_text()
+        except Exception:
+            log_content = win_log.read_text()
         win_evidence_ok = f"scan_{args.window}" in log_content or args.window in log_content.lower()
+        result["log_bytes_scanned"] = len(log_content)
     if has_win_status and not win_evidence_ok:
         try:
             ws = json.loads(win_status.read_text())
@@ -131,27 +150,32 @@ def main():
         print(json.dumps(result, ensure_ascii=False))
         return 0
 
-    # No evidence at all → try runner or BLOCKER
-    if SCAN_RUNNER.is_file() and minutes_past <= 30:
-        env = {**os.environ, "OPENCLAW_NO_PUSH": "1", "V2_OBSERVE_ONLY": "1"}
-        r = subprocess.run(["python3", str(SCAN_RUNNER)], capture_output=True, text=True,
-                          timeout=120, cwd=str(MODULE), env=env)
-        result["capture_ran"] = True
-        result["scan_runner_rc"] = r.returncode
-        # Re-check after runner
-        if scout_path.is_file():
-            result["status"] = "WARN"
-            result["warnings"].append("runner_ran_but_no_window_specific_marker_yet")
-        else:
-            result["status"] = "WARN"
-            result["warnings"].append("runner_ran_no_output")
+    # No evidence at all → classify without auto-executing
+    if minutes_past > 30:
+        result["status"] = "BLOCKER"
+        result["blockers"].append(f"{args.window} {int(minutes_past)}min past window, no window-specific evidence found")
+    elif minutes_past >= 0:
+        result["status"] = "WARN"
+        result["warnings"].append(f"{args.window} window due ({int(minutes_past)}min past), no window-specific evidence yet")
     else:
-        if minutes_past > 30:
-            result["status"] = "BLOCKER"
-            result["blockers"].append(f"{args.window} {int(minutes_past)}min past, no evidence")
+        # Shouldn't reach here (window_due check above) but safety:
+        result["status"] = "WAIT"
+        result["warnings"].append("window not yet due, no evidence expected")
+
+    # Only run readonly runner if explicitly requested AND window is past due AND within 30min
+    if args.run_readonly_runner and window_due and minutes_past <= 30:
+        WRAPPER = MODULE / "tools" / "run_v4_window_scan_capture_readonly.py"
+        if WRAPPER.is_file():
+            env = {**os.environ, "OPENCLAW_NO_PUSH": "1", "V2_OBSERVE_ONLY": "1"}
+            r = subprocess.run(["python3", str(WRAPPER),
+                "--window", args.window, "--scan-date", args.scan_date,
+                "--no-push", "--no-d13", "--no-v33", "--no-hourly"],
+                capture_output=True, text=True, timeout=300, cwd=str(MODULE), env=env)
+            result["readonly_runner_rc"] = r.returncode
+            result["readonly_runner_ran"] = True
+            result["warnings"].append("readonly runner executed via --run-readonly-runner flag")
         else:
-            result["status"] = "WARN"
-            result["warnings"].append("no evidence, runner not available")
+            result["warnings"].append("--run-readonly-runner requested but wrapper not found")
 
     print(json.dumps(result, ensure_ascii=False))
     return 0 if result["status"] in ("PASS","WARN","WAIT") else (2 if result["status"]=="BLOCKER" else 1)

@@ -75,14 +75,59 @@ def _sigmask_push(window: str, date: str, status: str, progress: str, reason: st
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument("--date", required=True)
+    parser.add_argument("--date", default=None, help="Scan date YYYYMMDD (legacy, prefer --scan-date)")
+    parser.add_argument("--scan-date", default=None, help="Scan date YYYYMMDD")
     parser.add_argument("--window", default="midday", choices=["midday","evening","night","late","early","manual"])
     parser.add_argument("--lookahead-hours", type=float, default=24.0)
-    parser.add_argument("--push", default="always", choices=["always","conditional","never"])
+    parser.add_argument("--push", default="never", choices=["always","conditional","never"],
+                        help="Push mode. Default never. Must be explicit to enable push.")
+    parser.add_argument("--no-push", action="store_true", default=True,
+                        help="Disable all push paths (default True)")
+    parser.add_argument("--no-d13", action="store_true", default=True,
+                        help="Prohibit D13 execution")
+    parser.add_argument("--no-v33", action="store_true", default=True,
+                        help="Prohibit V33 execution")
+    parser.add_argument("--no-hourly", action="store_true", default=True,
+                        help="Prohibit hourly execution")
+    parser.add_argument("--preflight", action="store_true",
+                        help="Preflight only — validate paths, do not execute")
     parser.add_argument("--scan-mode", default="fast", choices=["fast","full"])
     args = parser.parse_args()
 
+    # Resolve scan_date: --scan-date takes priority over --date
+    scan_date = args.scan_date or args.date
+    if not scan_date:
+        parser.error("--scan-date (or --date) is required")
+
     from engine.task_watchdog import v4_scan_watchdog
+
+    # ── Preflight: paths check only, no execution ──
+    if args.preflight:
+        print(json.dumps({
+            "status": "PREFLIGHT_OK",
+            "window": args.window,
+            "scan_date": scan_date,
+            "runner_exists": True,
+            "no_push": args.no_push,
+            "no_d13": args.no_d13,
+            "no_v33": args.no_v33,
+            "no_hourly": args.no_hourly,
+            "push_mode": args.push,
+            "V4_QQ_ENABLED": False,
+        }, ensure_ascii=False))
+        return
+
+    # ── Hard push gate: env var + --no-push must both allow push ──
+    env_no_push = os.environ.get("OPENCLAW_NO_PUSH", "") == "1"
+    effective_no_push = args.no_push or env_no_push
+    if effective_no_push:
+        # Override push to never regardless of --push flag
+        args_push_effective = "never"
+    else:
+        args_push_effective = args.push
+
+    # ── V4_QQ_ENABLED hard gate: QQ push is DISABLED ──
+    V4_QQ_ENABLED = False  # hardcoded false — BOSS controlled
 
     # Global lock
     LOCK_DIR.mkdir(parents=True, exist_ok=True)
@@ -102,7 +147,7 @@ def main():
     wd = v4_scan_watchdog(args.window)
     wd.start(total_items=0)
     now = datetime.now(LOCAL_TZ)
-    today_key = str(args.date).replace("-", "")
+    today_key = str(scan_date).replace("-", "")
 
     LOG_DIR.mkdir(parents=True, exist_ok=True)
     log_path = LOG_DIR / f"v4_scan_{args.window}_{today_key}.log"
@@ -111,7 +156,7 @@ def main():
         with open(str(log_path), "w") as log_fh:
             child = subprocess.Popen(
                 [sys.executable, "-u", str(BASE_DIR / "engine" / "v4_scan_worker.py"),
-                 "--date", args.date, "--window", args.window,
+                 "--date", scan_date, "--window", args.window,
                  "--lookahead-hours", str(args.lookahead_hours),
                  "--scan-mode", args.scan_mode],
                 stdout=log_fh, stderr=subprocess.STDOUT,
@@ -191,9 +236,7 @@ def main():
                 ab_count = int(m.group(1))
 
         # ── 写入 push marker（无论delivery如何）──
-        import hashlib
-        marker_dir = REPORT_DIR / ".." / "data" / "runtime" / "status"
-        marker_dir = marker_dir.resolve()
+        marker_dir = BASE_DIR / "data" / "runtime" / "status"
         marker_dir.mkdir(parents=True, exist_ok=True)
         now_ts = datetime.now(LOCAL_TZ).isoformat()
         msg_hash = hashlib.md5(qq_text.encode()).hexdigest()[:16]
@@ -201,6 +244,7 @@ def main():
         push_marker = {
             "date": today_key,
             "window": args.window,
+            "scan_date": scan_date,
             "template_id": "v4_scan_brief_qq_v1",
             "ab_count": ab_count,
             "status": "GENERATED",
@@ -210,25 +254,48 @@ def main():
             "qq_file": str(qq_path.name),
             "generated_at": now_ts,
             "pushed": False,
+            "actual_send": False,
+            "qq_sent": False,
+            "no_push": effective_no_push,
+            "shadow_only": True,
             "reason": "pending_push" if ab_count > 0 else "no_ab",
+            "V4_QQ_ENABLED": V4_QQ_ENABLED,
+            "runner_exit_code": rc,
+            "source_paths": {
+                "scout": str(scout_path),
+                "brief": str(brief_path),
+                "brief_qq": str(qq_path),
+                "log": str(log_path),
+            },
+            "safety_gates": {
+                "V4_QQ_ENABLED": V4_QQ_ENABLED,
+                "effective_no_push": effective_no_push,
+                "push_mode": args_push_effective,
+                "env_no_push": env_no_push,
+            },
         }
-        push_marker_path = marker_dir / f"v4_scan_push_{today_key}_{args.window}.json"
+        push_marker_path = marker_dir / f"v4_scan_{args.window}_push_{scan_date}.json"
         with open(push_marker_path, "w") as f:
             json.dump(push_marker, f, ensure_ascii=False, indent=2)
 
         # Push logic: 推送 QQ 版
-        if args.push == "never":
-            print("[WATCHDOG] brief generated, push skipped (never)", flush=True)
-        elif args.push == "conditional":
+        # Hard gate: V4_QQ_ENABLED=false → QQ push is always blocked
+        if V4_QQ_ENABLED is False:
+            print("[PUSH] BLOCKED: V4_QQ_ENABLED=false, QQ push disabled by BOSS directive", flush=True)
+        elif args_push_effective == "never":
+            print("[WATCHDOG] brief generated, push skipped (--no-push or OPENCLAW_NO_PUSH=1)", flush=True)
+        elif args_push_effective == "conditional":
             has_ab = "今日 V4 有 " in qq_text and "上半场推荐" in qq_text
             if has_ab:
                 print(f"[PUSH] A/B={ab_count}>0, 简报已生成, push marker: {push_marker_path.name}", flush=True)
                 print(qq_text, flush=True)
             else:
                 print("[WATCHDOG] brief generated, push skipped (conditional: no A/B)", flush=True)
-        else:
+        elif args_push_effective == "always" and not effective_no_push:
             print(f"[PUSH] A/B={ab_count}>0, 简报已生成, push marker: {push_marker_path.name}", flush=True)
             print(qq_text, flush=True)
+        else:
+            print("[WATCHDOG] brief generated, push skipped (safety gate)", flush=True)
 
         GLOBAL_LOCK.unlink(missing_ok=True)
         wd.finish(status="DONE", output_files={"scout": str(scout_path), "brief": str(brief_path), "brief_qq": str(qq_path), "scan_push": str(push_marker_path), "scan_log": str(log_path)})

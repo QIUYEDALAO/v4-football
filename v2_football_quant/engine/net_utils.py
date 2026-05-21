@@ -16,6 +16,7 @@
 
 import json
 import os
+import socket
 import ssl
 import time
 import logging
@@ -65,15 +66,44 @@ def _rpm_wait():
     _rpm_window.append(time.time())
 
 
+class _IPv4HTTPHandler(urllib.request.HTTPSHandler):
+    """Force IPv4 for HTTPS connections to work around IPv6 connectivity issues."""
+    def https_open(self, req):
+        return self.do_open(self._ipv4_connection, req)
+
+    @staticmethod
+    def _ipv4_connection(host, **kwargs):
+        import http.client
+        # Resolve to IPv4 only, fall back to original host on failure
+        try:
+            addrs = socket.getaddrinfo(host, 443, socket.AF_INET, socket.SOCK_STREAM)
+            ipv4 = addrs[0][4][0]
+            # Create SSL context with SNI hostname set properly
+            context = _SSL_CTX
+            conn = http.client.HTTPSConnection(ipv4, context=context, **kwargs)
+            # Store host for SNI - urllib will use conn.host for SNI after connect
+            conn._saved_host = conn.host
+            conn.host = host
+            _orig_connect = conn.connect
+            def _connect_with_sni():
+                _orig_connect()
+            conn.connect = _connect_with_sni
+            return conn
+        except Exception:
+            return http.client.HTTPSConnection(host, **kwargs)
+
+_IPV4_OPENER = urllib.request.build_opener(_IPv4HTTPHandler, urllib.request.ProxyHandler({}))
+
+
 def _urllib_get(endpoint: str, api_key: str, api_host: str = "https://v3.football.api-sports.io") -> Optional[dict]:
-    """Python urllib 请求 (可能被 403)"""
+    """Python urllib 请求 (可能被 403, 强制IPv4防卡死)"""
     url = f"{api_host}/{endpoint}"
     req = urllib.request.Request(url, headers={
         "x-apisports-key": api_key,
         "User-Agent": "V2-Football-Quant/1.0"
     })
     try:
-        with urllib.request.urlopen(req, context=_SSL_CTX, timeout=15) as resp:
+        with _IPV4_OPENER.open(req, timeout=15) as resp:
             return json.loads(resp.read())
     except urllib.error.HTTPError as e:
         if e.code == 403:
@@ -91,7 +121,7 @@ def _curl_get(endpoint: str, api_key: str, api_host: str = "https://v3.football.
     url = f"{api_host}/{endpoint}"
     try:
         result = subprocess.run(
-            ["curl", "-s", "--max-time", "15",
+            ["curl", "-4", "-s", "--max-time", "15",
              "-H", f"x-apisports-key: {api_key}",
              "-H", "User-Agent: V2-Football-Quant/1.0", url],
             capture_output=True, text=True, timeout=20

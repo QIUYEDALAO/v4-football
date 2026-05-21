@@ -1,0 +1,138 @@
+{
+  "version": "1.0",
+  "created_at": "2026-05-21T00:00:00+08:00",
+  "description": "SYS notification severity routing map — determines which checker results trigger QQ push vs status-only write.",
+  "severity_levels": {
+    "exception_alert": {
+      "description": "Must push to QQ — true production exception",
+      "qq_push": true,
+      "criteria": [
+        "scan window missed or interrupted",
+        "one-shot execution not triggered",
+        "cloud publish version mismatch detected",
+        "D13 enabled or executed",
+        "V33 enabled (active runtime path, not historical doc)",
+        "HOURLY enabled or executed",
+        "chain status = MISSING",
+        "production_verified = false",
+        "real_bet_execution = true",
+        "synthetic_evidence = true",
+        "active_v33_path_count > 0"
+      ]
+    },
+    "status_only": {
+      "description": "Write status file only, no QQ push — normal audit result",
+      "qq_push": false,
+      "criteria": [
+        "chain status = COMPLETE",
+        "daily summary normal",
+        "checker PASS with 0 BLOCKER",
+        "V33 historical_doc references (docs, archive, comments)",
+        "V33 allowed_guard references (checker/guard files)",
+        "scan window future/pending (not yet due)",
+        "api snapshot healthy",
+        "dashboard up to date"
+      ]
+    }
+  },
+  "checker_routing": {
+    "check_v33_residual_audit": {
+      "route": "status_only",
+      "exception_when": "active_v33_path_count > 0",
+      "note": "historical_doc_count and allowed_guard_count are always status_only; only active_v33_path blocks"
+    },
+    "check_ops_daily_operation": {
+      "route": "exception_alert",
+      "exception_when": "check_status = BLOCKER",
+      "note": "BLOCKER on any production guard (V2_VERIFIED, V4_A0, V4_B0, etc.) triggers QQ push"
+    },
+    "sys_daily_settlement_summary": {
+      "route": "status_only",
+      "exception_when": "chain_status = MISSING or chain_status = CHAIN_INCOMPLETE",
+      "note": "Only MISSING or CHAIN_INCOMPLETE triggers QQ; COMPLETE is always status_only"
+    },
+    "check_v2_prod_automation_closure": {
+      "route": "exception_alert",
+      "exception_when": "check_status = BLOCKER",
+      "note": "Production automation failure is always critical"
+    },
+    "check_v4_next_scan_window_capture": {
+      "route": "exception_alert",
+      "exception_when": "synthetic_evidence = true or window missed > 30min",
+      "note": "Window capture failures are critical; future windows are status_only"
+    },
+    "v4_review_guard": {
+      "route": "exception_alert",
+      "exception_when": "guard_status != PASS",
+      "note": "Guard failure on formal output blocks QQ send. File in engine/v4_review_guard.py"
+    },
+    "check_v4_post_review_to_intel_mvp": {
+      "route": "status_only",
+      "exception_when": "qq_sent = true (push marker shows actual send)",
+      "note": "Review-to-intel sync is informational unless QQ was actually sent"
+    },
+    "check_cloud_publish_pipeline": {
+      "route": "exception_alert",
+      "exception_when": "check_status != PASS",
+      "note": "Cloud publish mismatch is critical"
+    },
+    "check_v2_cron_dryrun_validation": {
+      "route": "status_only",
+      "exception_when": "qq_push_path_present = true",
+      "note": "Cron dry-run is informational unless QQ push path is active"
+    },
+    "check_intel_ops_console": {
+      "route": "status_only",
+      "exception_when": "check_status = BLOCKER",
+      "note": "Console checker is informational; only BLOCKER triggers QQ"
+    },
+    "check_intel_ops_console_post_night_state": {
+      "route": "status_only",
+      "note": "Post-night state check is informational"
+    },
+    "check_intel_ops_console_candidate_folding_ux": {
+      "route": "status_only",
+      "note": "UX folding check is informational"
+    },
+    "check_intel_ops_console_readability_ux": {
+      "route": "status_only",
+      "note": "Readability UX check is informational"
+    },
+    "check_intel_ops_console_no_notify_clean_ui": {
+      "route": "status_only",
+      "note": "Clean UI check is informational"
+    },
+    "check_intel_ops_console_chinese_ux": {
+      "route": "status_only",
+      "note": "Chinese UX check is informational"
+    },
+    "check_validation_ab133_forensic_recount": {
+      "route": "status_only",
+      "note": "Forensic recount check is informational"
+    },
+    "check_v4_goal_distribution_source_trace": {
+      "route": "status_only",
+      "note": "Goal distribution source trace is informational"
+    },
+    "check_v4_script_goal_distribution": {
+      "route": "status_only",
+      "note": "Script goal distribution is informational"
+    }
+  },
+  "qq_push_criteria_global": {
+    "always_push": [
+      "check_status = BLOCKER with V2/V4 production impact",
+      "D13/V33/HOURLY active detection",
+      "scan window missed > 30min",
+      "real_bet_execution = true",
+      "production_verified = false"
+    ],
+    "never_push": [
+      "historical_doc V33 references in docs/",
+      "allowed_guard V33 references in checker/guard files",
+      "chain status COMPLETE",
+      "future/pending scan windows",
+      "dashboard console UX-only issues"
+    ]
+  }
+}

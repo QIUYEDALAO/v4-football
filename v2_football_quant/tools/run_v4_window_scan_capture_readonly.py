@@ -53,7 +53,11 @@ def main():
 
     if SCAN_RUNNER.is_file():
         env = {**os.environ, "OPENCLAW_NO_PUSH":"1","V2_OBSERVE_ONLY":"1","NO_PROXY":"*"}
-        r = subprocess.run(["python3",str(SCAN_RUNNER),"--window",args.window],
+        r = subprocess.run(["python3",str(SCAN_RUNNER),
+            "--window",args.window,
+            "--scan-date",args.scan_date,
+            "--date",args.scan_date,
+            "--no-push","--no-d13","--no-v33","--no-hourly"],
             capture_output=True,text=True,timeout=300,cwd=str(MODULE),env=env)
         result["runner_rc"] = r.returncode
     else:
@@ -72,6 +76,7 @@ def main():
         result["production_evidence"] = True
         result["evidence_source"] = "real_runner_output"
         result["evidence_bound_to_this_run"] = True
+        result["real_runner_output"] = True
         try:
             scout = json.loads(scout_path.read_text())
             matches = scout if isinstance(scout,list) else scout.get("matches",[])
@@ -94,23 +99,63 @@ def main():
         result["status"] = "WARN"
         result["warnings"] = ["no_scout_after_runner"]
 
-    # Write markers
-    win_log.parent.mkdir(parents=True, exist_ok=True)
-    win_log.write_text(f"V4 {args.window} scan {args.scan_date} | {runner_started_at} | "
-        f"before={scout_before_hash[:12] if scout_before_hash else 'NONE'} "
-        f"after={scout_after_hash[:12] if scout_after_hash else 'NONE'} | "
-        f"updated={scout_updated} | evidence={result['production_evidence']} | synthetic=false\n")
+    # Write markers — absolute paths, exception-safe
+    generated_at = datetime.now(tz).strftime("%Y-%m-%dT%H:%M:%S+08:00")
+    marker_errors = []
 
-    win_status.parent.mkdir(parents=True, exist_ok=True)
-    win_status.write_text(json.dumps(result, indent=2, ensure_ascii=False))
+    try:
+        win_log.parent.mkdir(parents=True, exist_ok=True)
+        win_log.write_text(f"V4 {args.window} scan {args.scan_date} | {runner_started_at} | "
+            f"before={scout_before_hash[:12] if scout_before_hash else 'NONE'} "
+            f"after={scout_after_hash[:12] if scout_after_hash else 'NONE'} | "
+            f"updated={scout_updated} | evidence={result['production_evidence']} | synthetic=false\n")
+    except Exception as e:
+        marker_errors.append(f"log_write: {e}")
 
-    win_push.parent.mkdir(parents=True, exist_ok=True)
-    win_push.write_text(json.dumps({
-        "window":args.window,"scan_date":args.scan_date,"shadow_only":True,
-        "actual_send":False,"qq_sent":False,"scout_after_hash":scout_after_hash
-    }, indent=2))
+    try:
+        result["generated_at"] = generated_at
+        result["V4_QQ_ENABLED"] = False
+        result["no_push"] = True
+        result["source_paths"] = {
+            "scout": str(scout_path),
+            "wrapper": str(Path(__file__).resolve()),
+            "engine": str(SCAN_RUNNER),
+        }
+        win_status.parent.mkdir(parents=True, exist_ok=True)
+        win_status.write_text(json.dumps(result, indent=2, ensure_ascii=False))
+    except Exception as e:
+        marker_errors.append(f"status_write: {e}")
 
-    result["status"] = "PASS" if result["production_evidence"] else "WARN"
+    try:
+        push_data = {
+            "window": args.window,
+            "scan_date": args.scan_date,
+            "shadow_only": True,
+            "actual_send": False,
+            "qq_sent": False,
+            "no_push": True,
+            "V4_QQ_ENABLED": False,
+            "runner_exit_code": result.get("runner_rc", -1),
+            "scout_after_hash": scout_after_hash,
+            "generated_at": generated_at,
+            "source_paths": {
+                "scout": str(scout_path),
+                "wrapper": str(Path(__file__).resolve()),
+                "engine": str(SCAN_RUNNER),
+            },
+        }
+        win_push.parent.mkdir(parents=True, exist_ok=True)
+        win_push.write_text(json.dumps(push_data, indent=2, ensure_ascii=False))
+    except Exception as e:
+        marker_errors.append(f"push_write: {e}")
+
+    if marker_errors:
+        result["marker_errors"] = marker_errors
+        result["status"] = "WARN"
+
+    result["status"] = result.get("status", "WARN") if not result.get("production_evidence") else "PASS"
+    if marker_errors:
+        result["status"] = "WARN"
     print(json.dumps(result, ensure_ascii=False, indent=2))
     return 0
 

@@ -1,6 +1,18 @@
 #!/usr/bin/env python3
-"""V4 Today Source Resolver — reads real V4 scan output, never hardcodes"""
-import argparse, json, os, re, sys, time
+"""V4 Today Source Resolver — reads real V4 scan output, never hardcodes.
+
+Permanent time_bins extraction with source priority:
+  1. factors.recent_time_bins (primary — real historical distribution data)
+  2. factors.time_bins (fallback — only if non-zero and complete)
+  3. explicit goal_time_distribution (already present in source)
+  4. available=false + source_missing_reason (no data)
+
+Hard rules:
+  - factors.time_bins all-zero → MUST NOT override recent_time_bins.
+  - Every entry with available=false MUST have source_missing_reason.
+  - Never derive time distribution from QQ output text.
+"""
+import argparse, hashlib, json, os, re, sys, time
 from pathlib import Path
 
 MODULE = Path(__file__).resolve().parents[1]
@@ -30,6 +42,133 @@ def _parse_brief_text(text):
     else:
         result["total"] = sum(result[k] for k in ["A","B","C","SKIP"])
     return result
+
+def extract_goal_time_distribution(match: dict, scout_file_path: str) -> dict:
+    """Extract goal_time_distribution from a scout_v4 match record with source priority.
+
+    Priority:
+      1. factors.recent_time_bins (primary — real historical data)
+      2. factors.time_bins (fallback — only if non-zero and all three fields present)
+      3. existing goal_time_distribution in match
+      4. available=false with source_missing_reason
+
+    Returns dict with: m0_15, m16_30, m31_45, available, source_file, source_field, source_priority, source_missing_reason
+    """
+    factors = match.get("factors", {}) or {}
+    rtb = factors.get("recent_time_bins", {}) or {}
+    tb = factors.get("time_bins", {}) or {}
+    existing_gtd = match.get("goal_time_distribution", {}) or {}
+
+    # Priority 1: factors.recent_time_bins
+    rtb_vals = {
+        "m0_15": rtb.get("0_15") if rtb.get("0_15") is not None else None,
+        "m16_30": rtb.get("16_30") if rtb.get("16_30") is not None else None,
+        "m31_45": rtb.get("31_45") if rtb.get("31_45") is not None else None,
+    }
+    rtb_complete = all(v is not None for v in rtb_vals.values())
+    rtb_any_nonzero = any(float(v) > 0 for v in rtb_vals.values() if v is not None)
+
+    if rtb_complete and rtb_any_nonzero:
+        return {
+            "m0_15": round(float(rtb_vals["m0_15"]), 4),
+            "m16_30": round(float(rtb_vals["m16_30"]), 4),
+            "m31_45": round(float(rtb_vals["m31_45"]), 4),
+            "available": True,
+            "source_file": scout_file_path,
+            "source_field": "factors.recent_time_bins",
+            "source_priority": 1,
+            "source_missing_reason": None,
+        }
+
+    # Priority 2: factors.time_bins (only if non-zero and complete)
+    tb_vals = {
+        "m0_15": tb.get("0_15") if tb.get("0_15") is not None else None,
+        "m16_30": tb.get("16_30") if tb.get("16_30") is not None else None,
+        "m31_45": tb.get("31_45") if tb.get("31_45") is not None else None,
+    }
+    tb_complete = all(v is not None for v in tb_vals.values())
+    tb_any_nonzero = any(float(v) > 0 for v in tb_vals.values() if v is not None)
+    tb_all_zero = all(float(v) == 0 for v in tb_vals.values() if v is not None)
+
+    if tb_complete and tb_any_nonzero and not tb_all_zero:
+        return {
+            "m0_15": round(float(tb_vals["m0_15"]), 4),
+            "m16_30": round(float(tb_vals["m16_30"]), 4),
+            "m31_45": round(float(tb_vals["m31_45"]), 4),
+            "available": True,
+            "source_file": scout_file_path,
+            "source_field": "factors.time_bins",
+            "source_priority": 2,
+            "source_missing_reason": None,
+        }
+
+    # Priority 3: existing goal_time_distribution
+    if existing_gtd.get("available"):
+        return {
+            "m0_15": existing_gtd.get("m0_15"),
+            "m16_30": existing_gtd.get("m16_30"),
+            "m31_45": existing_gtd.get("m31_45"),
+            "available": True,
+            "source_file": existing_gtd.get("source_file", scout_file_path),
+            "source_field": existing_gtd.get("source_field", "goal_time_distribution"),
+            "source_priority": 3,
+            "source_missing_reason": None,
+        }
+
+    # Priority 4: unavailable — document WHY
+    reasons = []
+    if not rtb_complete:
+        reasons.append("factors.recent_time_bins 不完整或缺失")
+    elif not rtb_any_nonzero:
+        reasons.append("factors.recent_time_bins 所有字段为0")
+    if tb_all_zero:
+        reasons.append("factors.time_bins 所有字段为0（未来比赛无历史数据）")
+    elif not tb_complete:
+        reasons.append("factors.time_bins 不完整")
+
+    return {
+        "m0_15": None,
+        "m16_30": None,
+        "m31_45": None,
+        "available": False,
+        "source_file": scout_file_path,
+        "source_field": None,
+        "source_priority": 4,
+        "source_missing_reason": "; ".join(reasons) if reasons else "无可用时间段分布数据",
+    }
+
+
+def extract_candidate_entries(scout_data: list, scout_file_path: str) -> list:
+    """Extract candidate-level entries from scout_v4 JSON with goal_time_distribution.
+
+    Each entry includes: fixture_id, home, away, league, kickoff_time, match_date,
+    market_focus, market_type, ht_score, best_score, best_focus_by_score,
+    goal_time_distribution (with source tracing), grade.
+    """
+    entries = []
+    for m in scout_data:
+        if not isinstance(m, dict):
+            continue
+        gtd = extract_goal_time_distribution(m, scout_file_path)
+        factors = m.get("factors", {}) or {}
+        entry = {
+            "fixture_id": m.get("fixture_id"),
+            "home": m.get("home"),
+            "away": m.get("away"),
+            "league": m.get("league"),
+            "kickoff_time": m.get("kickoff"),
+            "match_date": m.get("date"),
+            "market_focus": m.get("market_focus"),
+            "market_type": m.get("market_type"),
+            "ht_score": factors.get("ht_score"),
+            "best_score": m.get("best_score"),
+            "best_focus_by_score": m.get("best_focus_by_score"),
+            "grade": m.get("grade") or m.get("pre_grade") or m.get("ht_recommendation", ""),
+            "goal_time_distribution": gtd,
+        }
+        entries.append(entry)
+    return entries
+
 
 def resolve(args):
     dt = args.date[:10].replace("/", "-")
@@ -73,10 +212,13 @@ def resolve(args):
                 result["source_file"] = str(fp.relative_to(MODULE))
                 result["source_mtime"] = time.strftime("%Y-%m-%dT%H:%M:%S", time.localtime(fp.stat().st_mtime))
                 try:
-                    data = json.loads(fp.read_text())
+                    raw_bytes = fp.read_bytes()
+                    result["source_hash"] = hashlib.md5(raw_bytes).hexdigest()[:12]
+                    data = json.loads(raw_bytes.decode())
+                    match_list = data if isinstance(data, list) else data.get("matches", [])
                     # Extract grade counts
                     grades = {}
-                    for m in (data if isinstance(data, list) else data.get("matches", [])):
+                    for m in match_list:
                         g = m.get("grade", m.get("pre_grade", m.get("ht_recommendation", "")))
                         grades[g] = grades.get(g, 0) + 1
                     result["A_count"] = grades.get("A", 0)
@@ -84,6 +226,15 @@ def resolve(args):
                     result["C_count"] = grades.get("C", 0)
                     result["SKIP_count"] = grades.get("SKIP", 0) + grades.get("HT_SKIP", 0)
                     result["total_matches"] = sum(grades.values())
+                    # Extract per-match candidate entries with goal_time_distribution
+                    scout_path_str = str(fp.relative_to(MODULE))
+                    candidate_entries = extract_candidate_entries(match_list, scout_path_str)
+                    result["candidate_entries"] = candidate_entries
+                    result["candidate_entry_count"] = len(candidate_entries)
+                    result["time_bins_available_count"] = sum(
+                        1 for e in candidate_entries
+                        if e.get("goal_time_distribution", {}).get("available", False)
+                    )
                     result["source_freshness"] = "FRESH"
                     result["status"] = "DONE"
                     return result

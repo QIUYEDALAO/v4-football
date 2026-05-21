@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""engine/v4_review_guard.py — V4复盘推送前守卫 v1.1
+"""engine/v4_review_guard.py — V4复盘守卫 v2.0 (REPORT_ONLY mode)
 
 检查 v4_review_structured_YYYYMMDD.json 和渲染后的文本是否符合规范。
 
@@ -9,11 +9,9 @@ mode=full:
   - 允许合法缺失降级
 
 mode=qq:
-  - A/B可以展示，C/SKIP不得逐场展开
-  - qq report不等于full report (长度差异 > 20%)
-  - qq不含raw enum
-  - qq不含V2/V33字段
-  - route marker required, ReportAgent required
+  - QQ guard permanently deprecated per BOSS directive (REPORT_ONLY)
+  - mode=qq returns NO_QQ_GUARD status, does not block pipeline
+  - Historical QQ checks preserved as reference only
 
 输出：data/runtime/status/v4_review_guard_YYYYMMDD.json（单个文件，标注mode）
 """
@@ -131,6 +129,13 @@ def main():
         issues.append("NO_PRE_MATCH_SIGNAL")
 
     # ── Mode-specific checks ──
+    if args.mode == "qq":
+        # QQ guard permanently deprecated — BOSS directive: V4 review is REPORT_ONLY
+        _write(args.date, args.mode, "NO_QQ_GUARD", ["QQ_GUARD_PERMANENTLY_DEPRECATED: BOSS directive — V4 review is REPORT_ONLY, QQ push not required"])
+        print(f"[V4] V4复盘守卫 v2.0 | {args.date} | mode=qq", flush=True)
+        print(f"   status: NO_QQ_GUARD — QQ guard permanently deprecated", flush=True)
+        return
+
     if render_path.exists():
         text = render_path.read_text()
 

@@ -496,7 +496,640 @@
     "Al Wahda FC": "瓦赫达",
     "Al-Wasl FC": "瓦斯尔"
   },
-  "unknown": [],
-  "updated_at": "2026-05-13T04:04:16.901964",
+  "unknown": [
+    {
+      "name": "AEK Athens FC",
+      "count": 2,
+      "sources": [
+        "v4_capture_tasks_20260513.json"
+      ],
+      "last_seen_date": "20260513"
+    },
+    {
+      "name": "Al Najma",
+      "count": 2,
+      "sources": [
+        "v4_capture_tasks_20260513.json"
+      ],
+      "last_seen_date": "20260513"
+    },
+    {
+      "name": "Austin",
+      "count": 2,
+      "sources": [
+        "v4_capture_tasks_20260513.json"
+      ],
+      "last_seen_date": "20260513"
+    },
+    {
+      "name": "Botev Vratsa",
+      "count": 2,
+      "sources": [
+        "v4_capture_tasks_20260513.json"
+      ],
+      "last_seen_date": "20260513"
+    },
+    {
+      "name": "CF Montreal",
+      "count": 2,
+      "sources": [
+        "v4_capture_tasks_20260513.json"
+      ],
+      "last_seen_date": "20260513"
+    },
+    {
+      "name": "Charlotte",
+      "count": 2,
+      "sources": [
+        "v4_capture_tasks_20260513.json"
+      ],
+      "last_seen_date": "20260513"
+    },
+    {
+      "name": "Colorado Rapids",
+      "count": 2,
+      "sources": [
+        "v4_capture_tasks_20260513.json"
+      ],
+      "last_seen_date": "20260513"
+    },
+    {
+      "name": "Columbus Crew",
+      "count": 2,
+      "sources": [
+        "v4_capture_tasks_20260513.json"
+      ],
+      "last_seen_date": "20260513"
+    },
+    {
+      "name": "Cruz Azul",
+      "count": 2,
+      "sources": [
+        "v4_capture_tasks_20260513.json"
+      ],
+      "last_seen_date": "20260513"
+    },
+    {
+      "name": "Difai Ağsu",
+      "count": 2,
+      "sources": [
+        "v4_capture_tasks_20260513.json"
+      ],
+      "last_seen_date": "20260513"
+    },
+    {
+      "name": "El Geish",
+      "count": 2,
+      "sources": [
+        "v4_capture_tasks_20260513.json"
+      ],
+      "last_seen_date": "20260513"
+    },
+    {
+      "name": "FC Cincinnati",
+      "count": 2,
+      "sources": [
+        "v4_capture_tasks_20260513.json"
+      ],
+      "last_seen_date": "20260513"
+    },
+    {
+      "name": "FC Dallas",
+      "count": 2,
+      "sources": [
+        "v4_capture_tasks_20260513.json"
+      ],
+      "last_seen_date": "20260513"
+    },
+    {
+      "name": "Gimnasia L.P.",
+      "count": 2,
+      "sources": [
+        "v4_capture_tasks_20260513.json"
+      ],
+      "last_seen_date": "20260513"
+    },
+    {
+      "name": "Guadalajara Chivas",
+      "count": 2,
+      "sources": [
+        "v4_capture_tasks_20260513.json"
+      ],
+      "last_seen_date": "20260513"
+    },
+    {
+      "name": "Houston Dynamo",
+      "count": 2,
+      "sources": [
+        "v4_capture_tasks_20260513.json"
+      ],
+      "last_seen_date": "20260513"
+    },
+    {
+      "name": "Inter Miami",
+      "count": 2,
+      "sources": [
+        "v4_capture_tasks_20260513.json"
+      ],
+      "last_seen_date": "20260513"
+    },
+    {
+      "name": "Los Angeles FC",
+      "count": 2,
+      "sources": [
+        "v4_capture_tasks_20260513.json"
+      ],
+      "last_seen_date": "20260513"
+    },
+    {
+      "name": "Minnesota United FC",
+      "count": 2,
+      "sources": [
+        "v4_capture_tasks_20260513.json"
+      ],
+      "last_seen_date": "20260513"
+    },
+    {
+      "name": "Montana",
+      "count": 2,
+      "sources": [
+        "v4_capture_tasks_20260513.json"
+      ],
+      "last_seen_date": "20260513"
+    },
+    {
+      "name": "National Bank of Egypt",
+      "count": 2,
+      "sources": [
+        "v4_capture_tasks_20260513.json"
+      ],
+      "last_seen_date": "20260513"
+    },
+    {
+      "name": "New York City FC",
+      "count": 2,
+      "sources": [
+        "v4_capture_tasks_20260513.json"
+      ],
+      "last_seen_date": "20260513"
+    },
+    {
+      "name": "New York Red Bulls",
+      "count": 2,
+      "sources": [
+        "v4_capture_tasks_20260513.json"
+      ],
+      "last_seen_date": "20260513"
+    },
+    {
+      "name": "Olympiakos Piraeus",
+      "count": 2,
+      "sources": [
+        "v4_capture_tasks_20260513.json"
+      ],
+      "last_seen_date": "20260513"
+    },
+    {
+      "name": "Orlando City SC",
+      "count": 2,
+      "sources": [
+        "v4_capture_tasks_20260513.json"
+      ],
+      "last_seen_date": "20260513"
+    },
+    {
+      "name": "PAOK",
+      "count": 2,
+      "sources": [
+        "v4_capture_tasks_20260513.json"
+      ],
+      "last_seen_date": "20260513"
+    },
+    {
+      "name": "Panathinaikos",
+      "count": 2,
+      "sources": [
+        "v4_capture_tasks_20260513.json"
+      ],
+      "last_seen_date": "20260513"
+    },
+    {
+      "name": "Petrojet",
+      "count": 2,
+      "sources": [
+        "v4_capture_tasks_20260513.json"
+      ],
+      "last_seen_date": "20260513"
+    },
+    {
+      "name": "Philadelphia Union",
+      "count": 2,
+      "sources": [
+        "v4_capture_tasks_20260513.json"
+      ],
+      "last_seen_date": "20260513"
+    },
+    {
+      "name": "Portland Timbers",
+      "count": 2,
+      "sources": [
+        "v4_capture_tasks_20260513.json"
+      ],
+      "last_seen_date": "20260513"
+    },
+    {
+      "name": "Racing Club",
+      "count": 2,
+      "sources": [
+        "v4_capture_tasks_20260513.json"
+      ],
+      "last_seen_date": "20260513"
+    },
+    {
+      "name": "Real Salt Lake",
+      "count": 2,
+      "sources": [
+        "v4_capture_tasks_20260513.json"
+      ],
+      "last_seen_date": "20260513"
+    },
+    {
+      "name": "River Plate",
+      "count": 2,
+      "sources": [
+        "v4_capture_tasks_20260513.json"
+      ],
+      "last_seen_date": "20260513"
+    },
+    {
+      "name": "Rosario Central",
+      "count": 2,
+      "sources": [
+        "v4_capture_tasks_20260513.json"
+      ],
+      "last_seen_date": "20260513"
+    },
+    {
+      "name": "San Diego",
+      "count": 2,
+      "sources": [
+        "v4_capture_tasks_20260513.json"
+      ],
+      "last_seen_date": "20260513"
+    },
+    {
+      "name": "Septemvri Sofia",
+      "count": 2,
+      "sources": [
+        "v4_capture_tasks_20260513.json"
+      ],
+      "last_seen_date": "20260513"
+    },
+    {
+      "name": "Spartak Varna",
+      "count": 2,
+      "sources": [
+        "v4_capture_tasks_20260513.json"
+      ],
+      "last_seen_date": "20260513"
+    },
+    {
+      "name": "St. Louis City",
+      "count": 2,
+      "sources": [
+        "v4_capture_tasks_20260513.json"
+      ],
+      "last_seen_date": "20260513"
+    },
+    {
+      "name": "Vancouver Whitecaps",
+      "count": 2,
+      "sources": [
+        "v4_capture_tasks_20260513.json"
+      ],
+      "last_seen_date": "20260513"
+    },
+    {
+      "name": "Şimal",
+      "count": 2,
+      "sources": [
+        "v4_capture_tasks_20260513.json"
+      ],
+      "last_seen_date": "20260513"
+    },
+    {
+      "name": "ABB",
+      "count": 1,
+      "sources": [
+        "v4_capture_tasks_20260513.json"
+      ],
+      "last_seen_date": "20260513"
+    },
+    {
+      "name": "Adelaide United",
+      "count": 1,
+      "sources": [
+        "v4_capture_tasks_20260513.json"
+      ],
+      "last_seen_date": "20260513"
+    },
+    {
+      "name": "Al-Hazm",
+      "count": 1,
+      "sources": [
+        "v4_capture_tasks_20260513.json"
+      ],
+      "last_seen_date": "20260513"
+    },
+    {
+      "name": "Arema FC",
+      "count": 1,
+      "sources": [
+        "v4_capture_tasks_20260513.json"
+      ],
+      "last_seen_date": "20260513"
+    },
+    {
+      "name": "Auckland",
+      "count": 1,
+      "sources": [
+        "v4_capture_tasks_20260513.json"
+      ],
+      "last_seen_date": "20260513"
+    },
+    {
+      "name": "Baku Sportinq",
+      "count": 1,
+      "sources": [
+        "v4_capture_tasks_20260513.json"
+      ],
+      "last_seen_date": "20260513"
+    },
+    {
+      "name": "Beijing Guoan",
+      "count": 1,
+      "sources": [
+        "v4_capture_tasks_20260513.json"
+      ],
+      "last_seen_date": "20260513"
+    },
+    {
+      "name": "Beroe",
+      "count": 1,
+      "sources": [
+        "v4_capture_tasks_20260513.json"
+      ],
+      "last_seen_date": "20260513"
+    },
+    {
+      "name": "CF Pachuca",
+      "count": 1,
+      "sources": [
+        "v4_capture_tasks_20260513.json"
+      ],
+      "last_seen_date": "20260513"
+    },
+    {
+      "name": "Chengdu Better City",
+      "count": 1,
+      "sources": [
+        "v4_capture_tasks_20260513.json"
+      ],
+      "last_seen_date": "20260513"
+    },
+    {
+      "name": "Cəbrayıl",
+      "count": 1,
+      "sources": [
+        "v4_capture_tasks_20260513.json"
+      ],
+      "last_seen_date": "20260513"
+    },
+    {
+      "name": "Dalian Zhixing",
+      "count": 1,
+      "sources": [
+        "v4_capture_tasks_20260513.json"
+      ],
+      "last_seen_date": "20260513"
+    },
+    {
+      "name": "Guabirá",
+      "count": 1,
+      "sources": [
+        "v4_capture_tasks_20260513.json"
+      ],
+      "last_seen_date": "20260513"
+    },
+    {
+      "name": "Hangzhou Greentown",
+      "count": 1,
+      "sources": [
+        "v4_capture_tasks_20260513.json"
+      ],
+      "last_seen_date": "20260513"
+    },
+    {
+      "name": "Henan Jianye",
+      "count": 1,
+      "sources": [
+        "v4_capture_tasks_20260513.json"
+      ],
+      "last_seen_date": "20260513"
+    },
+    {
+      "name": "Hibernian",
+      "count": 1,
+      "sources": [
+        "v4_capture_tasks_20260513.json"
+      ],
+      "last_seen_date": "20260513"
+    },
+    {
+      "name": "Kazincbarcikai",
+      "count": 1,
+      "sources": [
+        "v4_capture_tasks_20260513.json"
+      ],
+      "last_seen_date": "20260513"
+    },
+    {
+      "name": "Lokomotiv Sofia",
+      "count": 1,
+      "sources": [
+        "v4_capture_tasks_20260513.json"
+      ],
+      "last_seen_date": "20260513"
+    },
+    {
+      "name": "MOIK",
+      "count": 1,
+      "sources": [
+        "v4_capture_tasks_20260513.json"
+      ],
+      "last_seen_date": "20260513"
+    },
+    {
+      "name": "Mingəçevir",
+      "count": 1,
+      "sources": [
+        "v4_capture_tasks_20260513.json"
+      ],
+      "last_seen_date": "20260513"
+    },
+    {
+      "name": "Mohammedan",
+      "count": 1,
+      "sources": [
+        "v4_capture_tasks_20260513.json"
+      ],
+      "last_seen_date": "20260513"
+    },
+    {
+      "name": "Mumbai City",
+      "count": 1,
+      "sources": [
+        "v4_capture_tasks_20260513.json"
+      ],
+      "last_seen_date": "20260513"
+    },
+    {
+      "name": "Nyiregyhaza",
+      "count": 1,
+      "sources": [
+        "v4_capture_tasks_20260513.json"
+      ],
+      "last_seen_date": "20260513"
+    },
+    {
+      "name": "Oriente Petrolero",
+      "count": 1,
+      "sources": [
+        "v4_capture_tasks_20260513.json"
+      ],
+      "last_seen_date": "20260513"
+    },
+    {
+      "name": "PSBS Biak Numfor",
+      "count": 1,
+      "sources": [
+        "v4_capture_tasks_20260513.json"
+      ],
+      "last_seen_date": "20260513"
+    },
+    {
+      "name": "Persebaya Surabaya",
+      "count": 1,
+      "sources": [
+        "v4_capture_tasks_20260513.json"
+      ],
+      "last_seen_date": "20260513"
+    },
+    {
+      "name": "Qingdao Jonoon",
+      "count": 1,
+      "sources": [
+        "v4_capture_tasks_20260513.json"
+      ],
+      "last_seen_date": "20260513"
+    },
+    {
+      "name": "Qingdao Youth Island",
+      "count": 1,
+      "sources": [
+        "v4_capture_tasks_20260513.json"
+      ],
+      "last_seen_date": "20260513"
+    },
+    {
+      "name": "Rangers",
+      "count": 1,
+      "sources": [
+        "v4_capture_tasks_20260513.json"
+      ],
+      "last_seen_date": "20260513"
+    },
+    {
+      "name": "Real Potosí",
+      "count": 1,
+      "sources": [
+        "v4_capture_tasks_20260513.json"
+      ],
+      "last_seen_date": "20260513"
+    },
+    {
+      "name": "SHANGHAI SIPG",
+      "count": 1,
+      "sources": [
+        "v4_capture_tasks_20260513.json"
+      ],
+      "last_seen_date": "20260513"
+    },
+    {
+      "name": "Safa Baku",
+      "count": 1,
+      "sources": [
+        "v4_capture_tasks_20260513.json"
+      ],
+      "last_seen_date": "20260513"
+    },
+    {
+      "name": "Semen Padang",
+      "count": 1,
+      "sources": [
+        "v4_capture_tasks_20260513.json"
+      ],
+      "last_seen_date": "20260513"
+    },
+    {
+      "name": "Sichuan Jiuniu",
+      "count": 1,
+      "sources": [
+        "v4_capture_tasks_20260513.json"
+      ],
+      "last_seen_date": "20260513"
+    },
+    {
+      "name": "Səbail",
+      "count": 1,
+      "sources": [
+        "v4_capture_tasks_20260513.json"
+      ],
+      "last_seen_date": "20260513"
+    },
+    {
+      "name": "Tianjin Teda",
+      "count": 1,
+      "sources": [
+        "v4_capture_tasks_20260513.json"
+      ],
+      "last_seen_date": "20260513"
+    },
+    {
+      "name": "U.N.A.M. - Pumas",
+      "count": 1,
+      "sources": [
+        "v4_capture_tasks_20260513.json"
+      ],
+      "last_seen_date": "20260513"
+    },
+    {
+      "name": "Zaqatala",
+      "count": 1,
+      "sources": [
+        "v4_capture_tasks_20260513.json"
+      ],
+      "last_seen_date": "20260513"
+    },
+    {
+      "name": "Şahdağ",
+      "count": 1,
+      "sources": [
+        "v4_capture_tasks_20260513.json"
+      ],
+      "last_seen_date": "20260513"
+    }
+  ],
+  "updated_at": "2026-05-21T13:29:00.351436",
   "note": "unknown 为待人工补充的英文队名；请把确认后的映射补到 exact。"
 }
