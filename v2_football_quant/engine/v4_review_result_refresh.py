@@ -15,15 +15,16 @@
 
 import argparse
 import json
-import os
-import ssl
-import certifi
+import sys
 import time
-import urllib.request
 from pathlib import Path
 from datetime import datetime, timezone, timedelta
 
 BASE_DIR = Path(__file__).resolve().parent.parent
+sys.path.insert(0, str(BASE_DIR))
+
+from engine import net_utils
+
 REPORT_DIR = BASE_DIR / "data" / "daily_reports"
 CACHE_DIR = BASE_DIR / "data" / "runtime" / "cache"
 AUDIT_DIR = BASE_DIR / "data" / "runtime" / "audit"
@@ -33,24 +34,22 @@ CACHE_DIR.mkdir(parents=True, exist_ok=True)
 AUDIT_DIR.mkdir(parents=True, exist_ok=True)
 
 
-def _api_get(endpoint: str, api_key: str) -> dict:
-    """Single API call with SSL context."""
-    ctx = ssl.create_default_context(cafile=certifi.where())
-    url = f"https://v3.football.api-sports.io/{endpoint}"
-    req = urllib.request.Request(url, headers={
-        'x-rapidapi-key': api_key,
-        'x-rapidapi-host': 'v3.football.api-sports.io'
-    })
-    resp = urllib.request.urlopen(req, context=ctx, timeout=15)
-    return json.loads(resp.read())
+def _api_get(endpoint: str) -> dict:
+    """Provider-aware Direct API call through engine.net_utils.
+
+    The shared client owns provider routing, x-apisports-key headers, preflight,
+    request budget, negative cache, and subscription-403 fail-fast behavior.
+    This layer must not hand-roll headers or print secrets.
+    """
+    return net_utils.api_get(endpoint) or {}
 
 
-def refresh_fixture(fid: int, api_key: str) -> dict:
+def refresh_fixture(fid: int) -> dict:
     """Refresh a single fixture: get HT/FT scores and goal minutes.
     Returns None on error."""
     try:
         # Get fixture results
-        data = _api_get(f"fixtures?id={fid}", api_key)
+        data = _api_get(f"fixtures?id={fid}")
         rows = data.get('response', [])
         if not rows:
             return {"error": "empty_response", "ht": "DATA_UNAVAILABLE", "ft": "DATA_UNAVAILABLE"}
@@ -72,7 +71,7 @@ def refresh_fixture(fid: int, api_key: str) -> dict:
 
         # Get events for goal minutes
         time.sleep(0.15)
-        ev_data = _api_get(f"fixtures/events?fixture={fid}", api_key)
+        ev_data = _api_get(f"fixtures/events?fixture={fid}")
         ev_rows = ev_data.get('response', [])
         ht_goals = []
         for ev in ev_rows:
@@ -94,23 +93,77 @@ def refresh_fixture(fid: int, api_key: str) -> dict:
         return {"error": str(e)[:200], "ht": "DATA_UNAVAILABLE", "ft": "DATA_UNAVAILABLE"}
 
 
+def _write_route_marker(key: str, payload: dict) -> Path:
+    status_dir = BASE_DIR / "data" / "runtime" / "status"
+    status_dir.mkdir(parents=True, exist_ok=True)
+    path = status_dir / f"v4_review_result_refresh_route_audit_{key}.json"
+    path.write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
+    return path
+
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--date", required=True, help="YYYYMMDD")
+    parser.add_argument("--dry-run", action="store_true", help="Route audit only; no fixture refresh and no file mutation")
+    parser.add_argument("--strict", action="store_true", help="Exit non-zero if preflight blocks validation")
     args = parser.parse_args()
 
     key = str(args.date).replace("-", "")
     struct_path = REPORT_DIR / f"v4_review_structured_{key}.json"
+
+    preflight = net_utils.api_preflight(key, strict=args.strict, write_status=True)
+    route_marker = {
+        "schema_version": "v4_review_result_refresh_route_audit.v1",
+        "date": key,
+        "generated_at": datetime.now(LOCAL_TZ).isoformat(),
+        "provider": preflight.get("active_provider"),
+        "endpoint": preflight.get("endpoint_host"),
+        "header": "x-apisports-key",
+        "rapidapi_active": False,
+        "x_rapidapi_key_active": False,
+        "x_rapidapi_host_active": False,
+        "preflight_required": True,
+        "safe_to_validate": bool(preflight.get("safe_to_scan")),
+        "validation_uses_match_date": True,
+        "scan_date_used_for_validation": False,
+        "brief_used_for_hit_rate": False,
+        "dry_run": bool(args.dry_run),
+        "attribution_mutated": False,
+        "QQ_push": False,
+        "cloud_publish": False,
+        "secrets_printed": False,
+        "api_status": preflight.get("api_status"),
+        "http_status": preflight.get("http_status"),
+        "key_fingerprint": preflight.get("key_fingerprint"),
+        "structured_file_exists": struct_path.exists(),
+        "postmatch_api_request_started": False,
+    }
+    _write_route_marker(key, route_marker)
+    if args.dry_run:
+        route_marker = route_marker | {
+            "status": "ROUTE_AUDIT_ONLY" if not struct_path.exists() else "DRY_RUN_READY",
+            "structured_path": str(struct_path),
+            "structured_review_mutated": False,
+            "attribution_mutated": False,
+        }
+        _write_route_marker(key, route_marker)
+        print(json.dumps(route_marker, ensure_ascii=False, indent=2), flush=True)
+        return 0
     if not struct_path.exists():
         print(f"[REFRESH] ERROR: structured file not found: {struct_path}", flush=True)
-        return
+        return 2 if args.strict else None
+    if not preflight.get("safe_to_scan"):
+        blocked = route_marker | {
+            "status": "API_BLOCKED",
+            "refresh_started": False,
+            "per_fixture_loop_started": False,
+            "curl_fallback_on_403": False,
+        }
+        _write_route_marker(key, blocked)
+        print(json.dumps(blocked, ensure_ascii=False, indent=2), flush=True)
+        return 2 if args.strict else None
 
-    api_key = os.environ.get('APIFOOTBALL_KEY') or os.environ.get('OPENCLAW_APIFOOTBALL_KEY')
-    if not api_key:
-        print("[REFRESH] ERROR: no API key available", flush=True)
-        return
-
-    with open(struct_path) as f:
+    with open(struct_path, encoding="utf-8") as f:
         data = json.load(f)
 
     matches = data.get("matches", [])
@@ -133,7 +186,7 @@ def main():
         if old_ht not in ("DATA_UNAVAILABLE", "N/A", "") and "?" not in old_ht:
             continue  # Already has data
 
-        result = refresh_fixture(fid, api_key)
+        result = refresh_fixture(fid)
         refreshed += 1
 
         entry = {
@@ -221,6 +274,15 @@ def main():
     # Write cache
     cache_path = CACHE_DIR / f"v4_result_refresh_{key}.json"
     cache_path.write_text(json.dumps(audit, ensure_ascii=False, indent=2))
+    _write_route_marker(key, route_marker | {
+        "status": "DONE",
+        "refreshed": refreshed,
+        "changed": changed,
+        "still_missing": still_missing,
+        "errors": errors,
+        "attribution_mutated": False,
+        "structured_review_mutated": changed > 0,
+    })
 
     print(f"\n[REFRESH] Done: total={total} refreshed={refreshed} changed={changed} still_missing={still_missing} errors={errors}", flush=True)
     print(f"[REFRESH] Updated structured: {struct_path.name}", flush=True)

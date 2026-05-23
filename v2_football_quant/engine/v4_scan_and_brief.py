@@ -98,8 +98,44 @@ def main():
     scan_date = args.scan_date or args.date
     if not scan_date:
         parser.error("--scan-date (or --date) is required")
+    today_key = str(scan_date).replace("-", "")
 
     from engine.task_watchdog import v4_scan_watchdog
+    from engine.net_utils import api_preflight, get_api_guard_snapshot
+    from config.secrets import API_KEY, API_HOST
+
+    api_preflight_result = api_preflight(today_key, api_key=API_KEY, api_host=API_HOST, strict=False, write_status=True)
+    if not api_preflight_result.get("safe_to_scan"):
+        marker_dir = BASE_DIR / "data" / "runtime" / "status"
+        marker_dir.mkdir(parents=True, exist_ok=True)
+        blocked = {
+            "schema_version": "v4_scan_supervisor_api_blocked.v1",
+            "date": today_key,
+            "window": args.window,
+            "scan_status": "API_BLOCKED",
+            "generated_at": datetime.now(LOCAL_TZ).isoformat(),
+            "preflight_required": True,
+            "preflight_api_status": api_preflight_result.get("api_status"),
+            "active_provider": api_preflight_result.get("active_provider"),
+            "endpoint_host": api_preflight_result.get("endpoint_host"),
+            "key_fingerprint": api_preflight_result.get("key_fingerprint"),
+            "safe_to_scan": False,
+            "worker_started": False,
+            "per_fixture_loop_started": False,
+            "curl_fallback_on_403": False,
+            "last_good_preserved": True,
+            "dashboard_message": "API数据源异常，候选未刷新，保留 last_good。",
+            "capture_ran": False,
+            "QQ_push": False,
+            "cloud_publish": False,
+            "auto_retry": False,
+            "auto_kill": False,
+            "timeout_change": False,
+            "api_guard": get_api_guard_snapshot(),
+        }
+        (marker_dir / f"v4_scan_api_blocked_{today_key}.json").write_text(json.dumps(blocked, ensure_ascii=False, indent=2), encoding="utf-8")
+        print(json.dumps(blocked, ensure_ascii=False, indent=2), flush=True)
+        return
 
     # ── Preflight: paths check only, no execution ──
     if args.preflight:
@@ -147,8 +183,6 @@ def main():
     wd = v4_scan_watchdog(args.window)
     wd.start(total_items=0)
     now = datetime.now(LOCAL_TZ)
-    today_key = str(scan_date).replace("-", "")
-
     LOG_DIR.mkdir(parents=True, exist_ok=True)
     log_path = LOG_DIR / f"v4_scan_{args.window}_{today_key}.log"
 

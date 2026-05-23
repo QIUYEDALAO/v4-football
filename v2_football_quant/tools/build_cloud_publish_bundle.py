@@ -91,6 +91,20 @@ STATUS_NEVER_ALLOW = [
 ]
 
 
+# V2 decommission: public current bundles are V3/V4-only. V2 historical
+# evidence belongs in archive and must not be copied into bundle_current.
+V2_ACTIVE_NAME_PATTERNS = [
+    "v2", "bet_locked", "production_verified", "pipeline_ready"
+]
+
+
+def is_v2_decommission_excluded(name: str, rel_path: str = "") -> bool:
+    lowered = (name + " " + rel_path).lower()
+    if "v4" in lowered and not lowered.startswith("v2") and "v2_v4" not in lowered:
+        # V4 files may include A/B/C/SKIP and are active, but V2/V4 bridge files are not.
+        return "v2_v4" in lowered
+    return any(token in lowered for token in V2_ACTIVE_NAME_PATTERNS)
+
 def is_secret_filename(name: str) -> bool:
     for pattern in SECRET_FILENAME_PATTERNS:
         if pattern.startswith("*"):
@@ -111,6 +125,8 @@ def is_secret_filename(name: str) -> bool:
 
 def is_status_public(filename: str) -> bool:
     """Check if a status file is in the public allowlist."""
+    if is_v2_decommission_excluded(filename):
+        return False
     name_no_ext = filename.replace(".json", "")
     for allowed in STATUS_PUBLIC_ALLOWLIST:
         if allowed in name_no_ext:
@@ -205,6 +221,9 @@ def build_bundle(dry_run: bool = False):
                 if is_secret_filename(f.name):
                     excluded_files.append({"path": str(f.relative_to(MODULE)), "reason": "secret_filename"})
                     continue
+                if is_v2_decommission_excluded(f.name, str(f.relative_to(MODULE))):
+                    excluded_files.append({"path": str(f.relative_to(MODULE)), "reason": "v2_decommission_excluded"})
+                    continue
                 if not dry_run:
                     dest = BUNDLE_DIR / "dashboard" / f.name
                     dest.parent.mkdir(parents=True, exist_ok=True)
@@ -241,7 +260,7 @@ def build_bundle(dry_run: bool = False):
     if DAILY_DIR.is_dir():
         for f in sorted(DAILY_DIR.iterdir()):
             if f.is_file():
-                if TODAY in f.name or f.name.startswith("daily_"):
+                if TODAY in f.name and ("v4" in f.name.lower() or f.name.startswith("scan_perf_v4") or f.name.startswith("scout_v4")):
                     if is_secret_filename(f.name):
                         excluded_files.append({"path": str(f.relative_to(MODULE)), "reason": "secret_filename"})
                         continue
@@ -261,6 +280,9 @@ def build_bundle(dry_run: bool = False):
         for f in sorted(DOCS_DIR.iterdir()):
             if f.is_file() and (f.suffix == ".md" or f.suffix == ".json"):
                 if TODAY in f.name:
+                    if is_v2_decommission_excluded(f.name, str(f.relative_to(MODULE))):
+                        excluded_files.append({"path": str(f.relative_to(MODULE)), "reason": "v2_decommission_excluded"})
+                        continue
                     if is_secret_filename(f.name):
                         excluded_files.append({"path": str(f.relative_to(MODULE)), "reason": "secret_filename"})
                         continue
