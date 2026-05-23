@@ -151,7 +151,7 @@ def _parse_goal_events(api_client, fixture_id: int) -> dict:
     return bins
 
 
-def _query_recent_goal_profile(api_client, team_id: int, last_n: int = 5, include_events: bool = True) -> dict:
+def _query_recent_goal_profile(api_client, team_id: int, last_n: int = 3, include_events: bool = True) -> dict:
     """查询某队最近 N 场完赛的上下半场进球画像。"""
     cache_key = (int(team_id), int(last_n), bool(include_events))
     if cache_key in _RECENT_PROFILE_CACHE:
@@ -275,7 +275,7 @@ def warm_recent_goal_profiles(
     api_client,
     team_ids: list[int] | set[int] | tuple[int, ...],
     *,
-    last_n: int = 5,
+    last_n: int = 3,
     include_events: bool = False,
 ) -> dict:
     """预热近期画像缓存，减少扫描过程中的临场调用抖动。"""
@@ -440,7 +440,7 @@ def evaluate_h2h_edge(home_id: int, away_id: int, api_client, mode: str = "full"
     )
 
     # 近期战绩（含场均进球）
-    recent_last_n = 5
+    recent_last_n = 3
     home_recent = _query_recent_goal_profile(
         api_client,
         home_id,

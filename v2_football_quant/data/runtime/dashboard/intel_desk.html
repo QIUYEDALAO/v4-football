@@ -1,94 +1,193 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="zh-CN">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta http-equiv="Cache-Control" content="no-store,no-cache,must-revalidate,max-age=0">
-<meta http-equiv="Pragma" content="no-cache">
-<meta http-equiv="Expires" content="0">
-<title>Intel Desk</title>
+<title>情报决策总台 — V3/V4</title>
 <style>
-*{margin:0;padding:0;box-sizing:border-box}
-body{font-family:-apple-system,sans-serif;background:#0c1220;color:#e0e0e0;padding:8px;max-width:540px;margin:0 auto}
-h1{font-size:15px;color:#fff;margin:4px 0}h2{font-size:13px;color:#4fc3f7;margin:10px 0 2px;border-bottom:1px solid #1a2a3a;padding-bottom:2px}
-.card{background:#111a2a;border-radius:8px;padding:8px;margin:4px 0;font-size:12px}
-.r{display:flex;justify-content:space-between;padding:2px 0}
-.l{color:#8899aa}.v{color:#e0e0e0;font-weight:600}
-.t{display:inline-block;padding:1px 5px;border-radius:3px;font-size:10px;margin:1px}
-.g{background:#1a3a1a;color:#4caf50}.y{background:#3a3a1a;color:#ff9800}.n{background:#1a2a3a;color:#8899aa}.r2{background:#3a1a1a;color:#f44336}
-.m{font-size:10px;color:#556}.m2{font-size:11px;color:#4fc3f7;margin:2px 0}
-.bcard{background:#0d1a2a;border:1px solid #1a3a3a;border-radius:8px;padding:8px 10px;margin:6px 0;font-size:12px}
-.bcard .bl{font-size:10px;color:#4fc3f7;font-weight:700;margin-bottom:2px}
-.bcard .bn{font-size:13px;color:#fff;font-weight:600;margin-bottom:1px}
-.bcard .bs{font-size:10px;color:#8899aa}
-.bcard .bt{display:flex;flex-wrap:wrap;gap:3px;margin-top:4px}
-.bcard .bi{font-size:10px;color:#ff9800;margin-top:2px}
-.ccard{background:#0d1a2a;border:1px solid #1a2a2a;border-radius:6px;padding:6px 8px;margin:3px 0;font-size:11px}
-.history{background:#0c1218;border:1px dashed #1a2a3a;border-radius:6px;padding:6px;margin:6px 0;font-size:10px;color:#667}
-.footer{text-align:center;margin:16px 0 8px;font-size:10px;color:#556}
-</style></head><body>
-<h1>Intel Desk</h1>
+:root{--bg:#07101d;--panel:#101b2c;--panel2:#15243a;--ink:#eef5ff;--muted:#91a2b8;--line:#26384f;--blue:#58b7ff;--green:#47d18c;--amber:#e7b84e;--red:#ff6b72;--violet:#a9a1ff}
+*{box-sizing:border-box}body{margin:0;background:radial-gradient(circle at 15% 0%,#173558 0,#07101d 34%,#050912 100%);color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;padding:16px;max-width:1060px;margin-inline:auto;line-height:1.42}
+header{padding:10px 2px 16px}h1{margin:0;font-size:26px;letter-spacing:.02em}.sub{color:var(--muted);font-size:13px;margin-top:5px}.notice{background:rgba(231,184,78,.13);border:1px solid rgba(231,184,78,.42);border-radius:14px;padding:10px 12px;margin:4px 0 14px;color:#ffe3a2;font-weight:700}.kpi-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin:8px 0 14px}.kpi{background:linear-gradient(155deg,var(--panel),#0c1727);border:1px solid var(--line);border-radius:16px;padding:12px;min-height:94px;box-shadow:0 12px 30px rgba(0,0,0,.22)}.kpi .label{color:var(--muted);font-size:12px}.kpi .value{font-size:22px;font-weight:800;margin-top:8px}.kpi .foot{font-size:12px;color:var(--muted);margin-top:4px}.layout{display:grid;grid-template-columns:1.25fr .75fr;gap:12px}.panel,.candidate-group{background:rgba(16,27,44,.92);border:1px solid var(--line);border-radius:16px;padding:14px;margin-bottom:12px;box-shadow:0 10px 28px rgba(0,0,0,.18)}h2{font-size:16px;margin:0 0 10px;color:var(--blue)}h3{font-size:14px;margin:10px 0 8px;color:#cfe8ff}.row{display:flex;justify-content:space-between;gap:16px;border-top:1px solid rgba(255,255,255,.07);padding:8px 0}.row:first-of-type{border-top:0}.row span{color:var(--muted)}.ok{color:var(--green)}.warn{color:var(--amber)}.danger{color:var(--red)}summary{cursor:pointer;display:flex;justify-content:space-between;align-items:center;gap:12px;font-weight:800}details>summary::-webkit-details-marker{display:none}.group-note,.hint{color:var(--muted);font-size:13px;margin:8px 0}.candidate-list{display:grid;gap:9px;margin-top:10px}.candidate-card{background:linear-gradient(155deg,var(--panel2),#0b1422);border:1px solid rgba(255,255,255,.08);border-left:4px solid var(--line);border-radius:14px;padding:12px}.candidate-card.grade-A{border-left-color:var(--green)}.candidate-card.grade-B{border-left-color:var(--blue)}.candidate-card.grade-C{border-left-color:var(--amber)}.card-r1{display:flex;align-items:center;gap:8px;color:var(--muted);font-size:12px}.card-r1 span:nth-child(2){flex:1}.grade-badge{border-radius:999px;padding:3px 9px;font-size:12px;color:#08111f}.grade-badge-A{background:var(--green)}.grade-badge-B{background:var(--blue)}.grade-badge-C{background:var(--amber)}.match-line{font-size:17px;font-weight:800;margin-top:7px}.match-line span{font-weight:500;color:var(--muted);font-size:13px}.card-r3,.time-bins,.english-line,.missing-fields{font-size:13px;color:var(--muted);margin-top:6px}.script-label{color:var(--muted)}.script-value{color:var(--amber);font-weight:800}.missing-fields{display:none}.english-line{display:none}.lineage{margin-top:10px;border-top:1px dashed rgba(255,255,255,.12);padding-top:8px;color:var(--muted);font-size:12px}.validation-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}.validation-col{border-top:1px solid rgba(255,255,255,.08);padding-top:6px}.validation-metric{display:grid;grid-template-columns:38px 1fr;gap:5px;padding:4px 0;font-size:13px;align-items:center}.validation-metric span{color:var(--muted);font-style:normal}.validation-metric b{font-size:13px;white-space:nowrap}.script-validation-lite{margin-top:10px;padding:8px 10px;border:1px solid rgba(255,255,255,.10);border-radius:12px;background:rgba(255,255,255,.035);display:grid;grid-template-columns:auto 1fr;gap:4px 8px;align-items:center;font-size:12px}.script-validation-lite .script-lite-title{color:var(--muted);font-weight:800}.script-validation-lite>b{color:#f2d27a;font-weight:800}.script-validation-lite>em{grid-column:1/-1;color:var(--muted);font-style:normal}.script-validation-chip{display:inline-flex;gap:4px;align-items:center;border:1px solid rgba(255,255,255,.09);border-radius:999px;padding:3px 7px;background:rgba(255,255,255,.04)}.script-validation-chip i{font-style:normal;color:var(--muted)}.script-validation-chip b{color:var(--amber);font-weight:800}.compact-validation{padding-bottom:10px}.validation-audit{margin-top:8px;border-top:1px dashed rgba(255,255,255,.12);padding-top:8px}.next-list{margin:0;padding-left:18px;color:var(--muted)}.audit-code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12px;color:var(--muted);word-break:break-all}@media(max-width:760px){body{padding:12px}.kpi-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.layout{grid-template-columns:1fr}h1{font-size:23px}.kpi .value{font-size:20px}.validation-metric{grid-template-columns:38px 1fr}}
+</style>
+</head>
+<body>
+<header>
+  <h1>情报决策总台 — V3/V4</h1>
+  <div class="sub">generated=2026-05-24T00:50:35+08:00 · source_window=daily_1200 · no capture · no push · no cloud publish</div>
+</header>
 
-<div class="m2">next_window=night 22:20 | V4_QQ_ENABLED=false | A=1 B=3 C=5 SKIP=0 | future_ab_trigger=true | BOSS approval required</div>
-<div class="m">生成: 2026-05-20T14:51:00+08:00 | source: night window | source_hash: 549b0f23608c | hardening=INTEL-DESK-CANDIDATE-VIEW-SOURCE-BINDING</div>
+<section class="kpi-grid" aria-label="top status cards">
+  <div class="kpi"><div class="label">数据状态</div><div class="value ok">今日已更新</div><div class="foot">今日候选 · last_good preserved</div></div>
+  <div class="kpi"><div class="label">候选结构</div><div class="value">A3 / B9</div><div class="foot">SKIP 12</div></div>
+  <div class="kpi"><div class="label">复盘状态</div><div class="value warn">REPORT_ONLY</div><div class="foot">等待赛果 / 可复盘</div></div>
+  <div class="kpi"><div class="label">阻断</div><div class="value ok">0</div><div class="foot">active blocker count</div></div>
+</section>
+<div class="layout">
+<main>
 
-<h2>CURRENT: V2 状态</h2>
-<div class="card">
-<div class="r"><span class="l">PRODUCTION_VERIFIED</span><span class="v"><span class="t g">true</span></span></div>
-<div class="r"><span class="l">PIPELINE_READY</span><span class="v"><span class="t g">true</span></span></div>
-<div class="r"><span class="l">QQ_ENABLED</span><span class="v"><span class="t g">true</span> V2 only</span></div>
-<div class="r"><span class="l">CRON_ENABLED</span><span class="v"><span class="t g">true</span></span></div>
-<div class="r"><span class="l">VERIFIED_WRITTEN</span><span class="v"><span class="t g">true</span> scope=V2_ONLY</span></div>
-<div class="r"><span class="l">real_bet / D13 / V33 / HOURLY</span><span class="v"><span class="t n">false</span></span></div>
+<section class="panel validation-panel compact-validation two-column-validation-card">
+  <h2>V3/V4 比赛验证</h2>
+  <p class="hint">只展示昨日验证与累计验证；数据来自正式 V4 attribution / validation / review，不从 brief 反推命中率。</p>
+  <div class="validation-grid">
+    <div class="validation-col validation-yesterday"><h3>昨日验证</h3><div class='validation-metric validation-row-A'><span>A</span><b>N/A</b></div><div class='validation-metric validation-row-B'><span>B</span><b>N/A</b></div><div class='validation-metric validation-row-AplusB'><span>A+B</span><b>N/A</b></div></div>
+    <div class="validation-col validation-cumulative"><h3>累计验证</h3><div class='validation-metric validation-row-A'><span>A</span><b>39/46 · 84.8%</b></div><div class='validation-metric validation-row-B'><span>B</span><b>85/94 · 90.4%</b></div><div class='validation-metric validation-row-AplusB'><span>A+B</span><b>124/140 · 88.6%</b></div></div>
+  </div>
+  <div class="script-validation-lite">
+    <span class="script-lite-title">剧本验证（辅助）</span>
+    <b>累计 A+B：69/124 · 55.6%</b>
+    <em>走势吻合率，不影响 A/B 结果命中率</em>
+  </div>
+  <p class="hint script-validation-reason">走势吻合率，不影响 A/B 结果命中率。</p>
+  <p class="hint validation-empty-reason">累计验证已从本地 match_date attribution 历史恢复；昨日暂无可信已结算样本，显示 N/A。</p>
+  <p class="hint v3-validation-row">V3：战备预留 / N/A</p>
+  <details class="validation-audit"><summary><span>展开：验证审计</span><b>audit</b></summary><p class="audit-code">source_files=<br>data/v4_archive/v4_result_attribution_20260513.jsonl<br>data/v4_archive/v4_result_attribution_20260514.jsonl<br>data/v4_archive/v4_result_attribution_20260515.jsonl<br>data/v4_archive/v4_result_attribution_20260516.jsonl<br>data/v4_archive/v4_result_attribution_20260517.jsonl<br>data/v4_archive/v4_result_attribution_20260518.jsonl<br>data/v4_archive/v4_result_attribution_20260520.jsonl<br>unknown_count_yesterday=0<br>unknown_count_cumulative=0<br>latest_validation_date=2026-05-21<br>api_enabled=false<br>brief_used_for_hit_rate=false<br>C_observation_deprecated=true<br>last_7d_removed=true</p></details>
+  <details class="validation-audit script-validation-audit"><summary><span>展开：剧本验证明细</span><b>script</b></summary><p class="audit-code">昨日：N/A（暂无可信已结算样本）<br>A：22/39 · 56.4% · SCRIPT_UNKNOWN=7<br>B：47/85 · 55.3% · SCRIPT_UNKNOWN=12<br>A+B：69/124 · 55.6% · SCRIPT_UNKNOWN=19<br>SCRIPT_UNKNOWN：19，不进分母<br>数据源：正式 attribution 事件时间<br>script_source_files=<br>data/v4_archive/v4_result_attribution_20260513.jsonl<br>data/v4_archive/v4_result_attribution_20260514.jsonl<br>data/v4_archive/v4_result_attribution_20260515.jsonl<br>data/v4_archive/v4_result_attribution_20260516.jsonl<br>data/v4_archive/v4_result_attribution_20260517.jsonl<br>data/v4_archive/v4_result_attribution_20260518.jsonl<br>data/v4_archive/v4_result_attribution_20260519.jsonl<br>data/v4_archive/v4_result_attribution_20260520.jsonl<br>brief_used_for_script_validation=false<br>match_date_used=true<br>scan_date_used=false<br>C_excluded=true<br>SKIP_excluded=true</p></details>
+</section>
+<section class="panel">
+  <h2>V4 情报状态</h2>
+  <div class="row"><span>正式候选</span><b>12 场</b></div>
+  <div class="row"><span>A/B/SKIP</span><b>A3 / B9 / SKIP12</b></div>
+  <div class="row"><span>review_mode</span><b>REPORT_ONLY</b></div>
+  <div class="row"><span>全量扫描场次</span><b>33</b></div>
+  <div class="row"><span>采集日期 / 窗口</span><b>20260523 / daily_1200</b></div>
+</section>
+<section class="panel candidate-panel">
+  <h2>候选列表</h2>
+  <p class="hint">今日候选。候选列表只展示 A/B 正式候选；SKIP 仅作为系统状态。</p>
+  
+<details class="candidate-group group-A" open>
+  <summary><span>A级候选</span><b>3 场</b></summary>
+  
+  <div class="candidate-list">
+<article class="candidate-card grade-A" data-grade="A">
+  <div class="card-r1"><span>05-23 18:00</span><span>日职联</span><b class="grade-badge grade-badge-A">A</b></div>
+  <div class="match-line">京都不死鸟 <span>vs</span> 长崎航海</div>
+  <div class="card-r3">HT71 · 球数 1.17球 · <span class='script-label'>剧本：</span><span class='script-value'>中段发力型</span></div>
+  <div class="time-bins">0-15m 17% | 16-30m 83% | 31-45m 33%</div>
+  <div class='english-line'>EN: 京都不死鸟 vs V-varen Nagasaki</div><div class='missing-fields'>missing_fields: strength</div>
+</article>
+
+<article class="candidate-card grade-A" data-grade="A">
+  <div class="card-r1"><span>05-23 20:00</span><span>捷克甲</span><b class="grade-badge grade-badge-A">A</b></div>
+  <div class="match-line">奥洛穆茨 <span>vs</span> 卡尔维纳</div>
+  <div class="card-r3">HT91 · 球数 1.50球 · <span class='script-label'>剧本：</span><span class='script-value'>中后段发力型</span></div>
+  <div class="time-bins">0-15m 67% | 16-30m 17% | 31-45m 83%</div>
+  <div class='english-line'>EN: 奥洛穆茨 vs Karviná</div><div class='missing-fields'>missing_fields: strength</div>
+</article>
+
+<article class="candidate-card grade-A" data-grade="A">
+  <div class="card-r1"><span>05-24 03:00</span><span>西甲</span><b class="grade-badge grade-badge-A">A</b></div>
+  <div class="match-line">皇家贝蒂斯 <span>vs</span> 莱万特</div>
+  <div class="card-r3">HT72 · 球数 2.00球 · <span class='script-label'>剧本：</span><span class='script-value'>中后段发力型</span></div>
+  <div class="time-bins">0-15m 50% | 16-30m 17% | 31-45m 83%</div>
+  <div class='missing-fields'>missing_fields: strength</div>
+</article></div>
+  <details class="lineage"><summary>技术血缘折叠区</summary><p>英文队名、source_hash、time_bins、taxonomy 仅作审计，不改变 A/B/SKIP active 展示。</p></details>
+</details>
+  
+<details class="candidate-group group-B" open>
+  <summary><span>B级候选</span><b>9 场</b></summary>
+  
+  <div class="candidate-list">
+<article class="candidate-card grade-B" data-grade="B">
+  <div class="card-r1"><span>05-23 17:00</span><span>印尼超</span><b class="grade-badge grade-badge-B">B</b></div>
+  <div class="match-line">马都拉联 <span>vs</span> 望加锡</div>
+  <div class="card-r3">HT78 · 球数 1.00球 · <span class='script-label'>剧本：</span><span class='script-value'>中后段发力型</span></div>
+  <div class="time-bins">0-15m 50% | 16-30m 17% | 31-45m 50%</div>
+  <div class='english-line'>EN: Persepam Madura Utd vs PSM Makassar</div><div class='missing-fields'>missing_fields: strength</div>
+</article>
+
+<article class="candidate-card grade-B" data-grade="B">
+  <div class="card-r1"><span>05-23 21:00</span><span>瑞典超</span><b class="grade-badge grade-badge-B">B</b></div>
+  <div class="match-line">卡尔马 <span>vs</span> 代格福什</div>
+  <div class="card-r3">HT76 · 球数 1.38球 · <span class='script-label'>剧本：</span><span class='script-value'>中段发力型</span></div>
+  <div class="time-bins">0-15m 33% | 16-30m 50% | 31-45m 33%</div>
+  <div class='english-line'>EN: Kalmar FF vs Degerfors IF</div><div class='missing-fields'>missing_fields: strength</div>
+</article>
+
+<article class="candidate-card grade-B" data-grade="B">
+  <div class="card-r1"><span>05-23 22:00</span><span>芬超</span><b class="grade-badge grade-badge-B">B</b></div>
+  <div class="match-line">古比斯 <span>vs</span> 拉赫蒂</div>
+  <div class="card-r3">HT64 · 球数 1.10球 · <span class='script-label'>剧本：</span><span class='script-value'>中后段发力型</span></div>
+  <div class="time-bins">0-15m 17% | 16-30m 33% | 31-45m 50%</div>
+  <div class='english-line'>EN: KuPS vs Lahti</div><div class='missing-fields'>missing_fields: strength</div>
+</article>
+
+<article class="candidate-card grade-B" data-grade="B">
+  <div class="card-r1"><span>05-24 00:15</span><span>比甲</span><b class="grade-badge grade-badge-B">B</b></div>
+  <div class="match-line">登德尔 <span>vs</span> 洛默尔联</div>
+  <div class="card-r3">HT63 · 球数 1.00球 · <span class='script-label'>剧本：</span><span class='script-value'>中后段发力型</span></div>
+  <div class="time-bins">0-15m 17% | 16-30m 33% | 31-45m 67%</div>
+  <div class='english-line'>EN: 登德尔 vs Lommel United</div><div class='missing-fields'>missing_fields: strength</div>
+</article>
+
+<article class="candidate-card grade-B" data-grade="B">
+  <div class="card-r1"><span>05-24 00:45</span><span>克亚甲</span><b class="grade-badge grade-badge-B">B</b></div>
+  <div class="match-line">萨格勒布迪纳摩 <span>vs</span> 萨格勒布火车头</div>
+  <div class="card-r3">HT75 · 球数 1.80球 · <span class='script-label'>剧本：</span><span class='script-value'>开局冲击型</span></div>
+  <div class="time-bins">0-15m 50% | 16-30m 50% | 31-45m 0%</div>
+  <div class='english-line'>EN: Dinamo Zagreb vs NK Lokomotiva Zagreb</div><div class='missing-fields'>missing_fields: strength</div>
+</article>
+
+<article class="candidate-card grade-B" data-grade="B">
+  <div class="card-r1"><span>05-24 01:00</span><span>埃及超</span><b class="grade-badge grade-badge-B">B</b></div>
+  <div class="match-line">哈拉斯胡杜德 <span>vs</span> 佩特罗杰特</div>
+  <div class="card-r3">HT70 · 球数 1.50球 · <span class='script-label'>剧本：</span><span class='script-value'>中后段发力型</span></div>
+  <div class="time-bins">0-15m 17% | 16-30m 33% | 31-45m 67%</div>
+  <div class='english-line'>EN: Haras El Hodood vs Petrojet</div><div class='missing-fields'>missing_fields: strength</div>
+</article>
+
+<article class="candidate-card grade-B" data-grade="B">
+  <div class="card-r1"><span>05-24 02:00</span><span>乌拉甲</span><b class="grade-badge grade-badge-B">B</b></div>
+  <div class="match-line">塞罗拉戈 <span>vs</span> 波士顿河</div>
+  <div class="card-r3">HT64 · 球数 1.00球 · <span class='script-label'>剧本：</span><span class='script-value'>中后段发力型</span></div>
+  <div class="time-bins">0-15m 33% | 16-30m 33% | 31-45m 50%</div>
+  <div class='english-line'>EN: Cerro Largo vs Boston River</div><div class='missing-fields'>missing_fields: strength</div>
+</article>
+
+<article class="candidate-card grade-B" data-grade="B">
+  <div class="card-r1"><span>05-24 03:00</span><span>西甲</span><b class="grade-badge grade-badge-B">B</b></div>
+  <div class="match-line">赫塔费 <span>vs</span> 奥萨苏纳</div>
+  <div class="card-r3">HT78 · 球数 1.30球 · <span class='script-label'>剧本：</span><span class='script-value'>开局冲击型</span></div>
+  <div class="time-bins">0-15m 50% | 16-30m 33% | 31-45m 33%</div>
+  <div class='missing-fields'>missing_fields: strength</div>
+</article>
+
+<article class="candidate-card grade-B" data-grade="B">
+  <div class="card-r1"><span>05-24 11:55</span><span>日职联</span><b class="grade-badge grade-badge-B">B</b></div>
+  <div class="match-line">冈山绿雉 <span>vs</span> 大阪樱花</div>
+  <div class="card-r3">HT72 · 球数 1.75球 · <span class='script-label'>剧本：</span><span class='script-value'>中段发力型</span></div>
+  <div class="time-bins">0-15m 50% | 16-30m 67% | 31-45m 50%</div>
+  <div class='english-line'>EN: Fagiano Okayama vs 大阪樱花</div><div class='missing-fields'>missing_fields: strength</div>
+</article></div>
+  <details class="lineage"><summary>技术血缘折叠区</summary><p>英文队名、source_hash、time_bins、taxonomy 仅作审计，不改变 A/B/SKIP active 展示。</p></details>
+</details>
+</section>
+</main>
+<aside>
+
+<section class="panel v3-panel">
+  <h2>V3 战备窗口</h2>
+  <div class="row"><span>状态</span><b>预留</b></div>
+  <div class="row"><span>Perception Gap</span><b>待生成</b></div>
+  <div class="row"><span>Watchlist</span><b>待生成</b></div>
+  <p class="hint">当前不参与 V4 A/B 正式候选。</p>
+</section>
+<section class="panel safety-panel">
+  <h2>系统安全</h2>
+  <div class="row"><span>V3 active</span><b>战备中 / 预留</b></div>
+  <div class="row"><span>V4 review</span><b>REPORT_ONLY</b></div>
+  <div class="row"><span>legacy modules</span><b>禁用</b></div>
+  <div class="row"><span>QQ推送</span><b>关闭</b></div>
+  <div class="row"><span>capture/cloud</span><b>关闭</b></div>
+  <div class="row"><span>cron</span><b>未启用 / status-only</b></div>
+</section>
+<section class="panel">
+  <h2>下一动作</h2>
+  <ul class="next-list"><li>等待 BOSS 验收 UI。</li><li>每日刷新仅使用 V3/V4 active source。</li><li>任何推送/cron/cloud 均需单独授权。</li></ul>
+</section>
+<details class="panel"><summary><span>系统审计折叠区</span><b>展开</b></summary><p class="audit-code">source_hash=d24d52ffefdf3ef7d8d99ee65d63e931253a84b4751f992d035f1ae2d9ea9683<br>candidate_source=data/runtime/status/v3v4_dashboard_candidate_view_20260523.json<br>validation_source_hash=9d5147c459e7c72a12c687bf9e2a968a50f190624cc3d78470fa55d1dae0a4c7<br>v3_source=reserved<br>api_status=API_OK<br>api_safe_to_scan=True<br>cache-only mode when blocked=true</p></details>
+</aside>
 </div>
-
-<h2>CURRENT: V4 状态</h2>
-<div class="card">
-<div class="r"><span class="l">A / B / C / SKIP</span><span class="v"><b>1 / 3 / 5 / 0</b></span></div>
-<div class="r"><span class="l">formal_recommendation_count</span><span class="v">4</span></div>
-<div class="r"><span class="l">future_ab_trigger</span><span class="v"><span class="t g">true</span></span></div>
-<div class="r"><span class="l">V4_QQ_ENABLED</span><span class="v"><span class="t n">false</span></span></div>
-<div class="r"><span class="l">actual_send / qq_sent</span><span class="v"><span class="t r2">false</span></span></div>
-<div class="r"><span class="l">route</span><span class="v">shadow_only</span></div>
-<div class="r"><span class="l">BOSS approval required</span><span class="v"><span class="t y">true</span></span></div>
-<div class="r"><span class="l">next_window</span><span class="v">night 22:20</span></div>
-<div class="r"><span class="l">D13 / V33 / HOURLY</span><span class="v"><span class="t n">false</span></span></div>
-</div>
-
-<h2> V4 B级候选 — 3场</h2>
-<div class="bcard"><div class="bl">B1 · 中超 · 20:00</div><div class="bn">Hangzhou Greentown vs Shandong Luneng</div><div class="bs">FULLTIME_OVER · SH_OU · HT:61 · Best:85.0</div><div class="bt"><span class="t g">FULLTIME_OVER</span> <span class="t n">HT:60.9</span> <span class="t n">SH_OU</span> <span class="t n">Best:85.0</span></div><div class="bi">candidate pending approval · 待BOSS批准 · QQ未发送 · night window</div></div>
-<div class="bcard"><div class="bl">B2 · 芬超 · 23:00</div><div class="bn">Ilves vs Inter Turku</div><div class="bs">FULLTIME_OVER · SH_OU · HT:80 · Best:80.5</div><div class="bt"><span class="t g">FULLTIME_OVER</span> <span class="t n">HT:80.2</span> <span class="t n">SH_OU</span> <span class="t n">Best:80.5</span></div><div class="bi">candidate pending approval · 待BOSS批准 · QQ未发送 · night window</div></div>
-<div class="bcard"><div class="bl">B3 · 挪超 · 00:00+1</div><div class="bn">Start vs Bodo/Glimt</div><div class="bs">FULLTIME_OVER · FT_OU · HT:70 · Best:80.8</div><div class="bt"><span class="t g">FULLTIME_OVER</span> <span class="t n">HT:70.1</span> <span class="t n">FT_OU</span> <span class="t n">Best:80.8</span></div><div class="bi">candidate pending approval · 待BOSS批准 · QQ未发送 · night window</div></div>
-<div class="bcard"><div class="bl">B4 · 南美杯 · 06:00+1</div><div class="bn">Santos vs San Lorenzo</div><div class="bs">FULLTIME_OVER · FT_OU · HT:64 · Best:71.0</div><div class="bt"><span class="t g">FULLTIME_OVER</span> <span class="t n">HT:67.2</span> <span class="t n">FT_OU</span> <span class="t n">Best:71.0</span></div><div class="bi">candidate pending approval · 待BOSS批准 · QQ未发送 · night window</div></div>
-
-<h2> C级观察 — 5场（observation-only）</h2>
-<div class="ccard">C1 · Shanghai Shenhua vs Wuhan Three Towns · <span class="t y">observation-only</span> · QQ未发送</div>
-<div class="ccard">C2 · KuPS vs FF Jaro · <span class="t y">observation-only</span> · QQ未发送</div>
-<div class="ccard">C3 · Pyramids FC vs Smouha SC · <span class="t y">observation-only</span> · QQ未发送</div>
-<div class="ccard">C4 · Zamalek SC vs Ceramica Cleopatra · <span class="t y">observation-only</span> · QQ未发送</div>
-<div class="ccard">C5 · Al Khaleej vs Al-Ahli Jeddah · <span class="t y">observation-only</span> · QQ未发送</div>
-<div class="ccard">C6 · Aalesund vs Brann · <span class="t y">observation-only</span> · QQ未发送</div>
-
-<h2> 历史审计 (historical=true · not_current=true · audit_only=true)</h2>
-<div class="history">
-<b>QQ unauthorized incident</b> — 2026-05-19 23:09<br>
-_push_system_event() 无 V2_QQ_SEND_ENABLED gate → QQ 真实发送<br>
-已修复 · BOSS 已签收 (23:24)<br><br>
-
-<b>T90 BET_LOCKED proof</b> — 2026-05-19 23:00<br>
-Ried vs Wolfsberger AC (historical, not current)<br><br>
-
-<b>Previous hardening tags (NOT current):</b>
-cron_removed · readonly_only · no_formal_daily_pool · crontool removed · no_cron_recovery<br>
-All above are historical. NOT current operational status.<br>
-Current ops mode: BOSS-directed. V2 PRODUCTION_VERIFIED. V4 QQ disabled pending BOSS approval.<br><br>
-
-<i>historical=true · not_current=true · audit_only=true</i>
-</div>
-
-<div class="footer">
-V2: PRODUCTION_VERIFIED | V4: night A=1 B=3 C=5 SKIP=0, QQ disabled | Next: night 22:20<br>
-D13/V33/HOURLY=false | actual_send=false | strategy unchanged<br>
-source: night window | hash: 549b0f23608c
-</div>
-</body></html>
+</body>
+</html>
