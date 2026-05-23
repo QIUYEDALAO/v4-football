@@ -157,7 +157,7 @@ def extract_candidate_entries(scout_data: list, scout_file_path: str) -> list:
             "away": m.get("away"),
             "league": m.get("league"),
             "kickoff_time": m.get("kickoff"),
-            "match_date": m.get("date"),
+            "match_date": m.get("match_date") or m.get("date"),
             "market_focus": m.get("market_focus"),
             "market_type": m.get("market_type"),
             "ht_score": factors.get("ht_score"),

@@ -24,7 +24,7 @@ import argparse
 import json
 import sys
 import time
-from datetime import datetime
+from datetime import datetime, timezone, timedelta
 from pathlib import Path
 from typing import Any
 
@@ -36,10 +36,38 @@ from engine.v4_match_intelligence import explain_match
 
 REPORT_DIR = BASE_DIR / "data" / "daily_reports"
 ARCHIVE_DIR = BASE_DIR / "data" / "v4_archive"
+LOCAL_TZ = timezone(timedelta(hours=8))
 
 
 def _date_key(v: str) -> str:
     return str(v).replace("-", "")
+
+
+def _target_match_date(v: str) -> str:
+    return datetime.strptime(_date_key(v), "%Y%m%d").date().isoformat()
+
+
+def _kickoff_date(rec: dict) -> str | None:
+    kickoff = str(rec.get("kickoff") or rec.get("kickoff_time") or "").strip()
+    if not kickoff:
+        return None
+    try:
+        dt = datetime.fromisoformat(kickoff.replace("Z", "+00:00"))
+    except Exception:
+        return None
+    if dt.tzinfo is None:
+        dt = dt.replace(tzinfo=LOCAL_TZ)
+    return dt.astimezone(LOCAL_TZ).date().isoformat()
+
+
+def _record_match_date(rec: dict) -> str | None:
+    raw = rec.get("match_date") or rec.get("date")
+    if not raw:
+        return None
+    text = str(raw)
+    if len(text) == 8 and text.isdigit():
+        return datetime.strptime(text, "%Y%m%d").date().isoformat()
+    return text[:10]
 
 
 def _load_json(path: Path, default: Any):
@@ -617,9 +645,37 @@ def run(date_str: str, fixture_id: int | None = None, sleep_ms: int = 120, dry_r
     if not isinstance(scout, list) or not scout:
         return {"error": f"scout文件不存在或为空: {scout_path}"}
 
+    target_match_date = _target_match_date(date_str)
+    input_rows = len(scout)
+    contaminated_rows = []
+    non_target_rows = 0
+    c_deprecated_rows = 0
+    date_filtered = []
+    for rec in scout:
+        record_date = _record_match_date(rec)
+        ko_date = _kickoff_date(rec)
+        if ko_date and record_date and record_date != ko_date:
+            contaminated_rows.append({
+                "fixture_id": rec.get("fixture_id"),
+                "date": rec.get("date"),
+                "match_date": rec.get("match_date"),
+                "kickoff": rec.get("kickoff"),
+                "kickoff_date": ko_date,
+            })
+            continue
+        if record_date != target_match_date:
+            non_target_rows += 1
+            continue
+        intel = explain_match(rec)
+        ht_rec = intel.get("ht_recommendation") or {}
+        if str(ht_rec.get("grade") or "SKIP").upper() == "C":
+            c_deprecated_rows += 1
+            continue
+        date_filtered.append(rec)
+
     stats_index = _load_live_stats_index(key)
     out_rows = []
-    selected = [r for r in scout if (fixture_id is None or int(r.get("fixture_id") or 0) == int(fixture_id))]
+    selected = [r for r in date_filtered if (fixture_id is None or int(r.get("fixture_id") or 0) == int(fixture_id))]
     for rec in selected:
         fid = int(rec.get("fixture_id") or 0)
         if not fid:
@@ -671,7 +727,9 @@ def run(date_str: str, fixture_id: int | None = None, sleep_ms: int = 120, dry_r
             # Must output UNKNOWN only.
             out_rows.append({
                 "fixture_id": fid,
-                "date": datetime.strptime(key, "%Y%m%d").strftime("%Y-%m-%d"),
+                "date": _record_match_date(rec) or target_match_date,
+                "match_date": _record_match_date(rec) or target_match_date,
+                "date_filter_field": "match_date",
                 "home": rec.get("home"),
                 "away": rec.get("away"),
                 "league": rec.get("league"),
@@ -773,7 +831,9 @@ def run(date_str: str, fixture_id: int | None = None, sleep_ms: int = 120, dry_r
 
         row = {
             "fixture_id": fid,
-            "date": datetime.strptime(key, "%Y%m%d").strftime("%Y-%m-%d"),
+            "date": _record_match_date(rec) or target_match_date,
+            "match_date": _record_match_date(rec) or target_match_date,
+            "date_filter_field": "match_date",
             "home": rec.get("home"),
             "away": rec.get("away"),
             "league": rec.get("league"),
@@ -832,6 +892,16 @@ def run(date_str: str, fixture_id: int | None = None, sleep_ms: int = 120, dry_r
             out_path = ARCHIVE_DIR / f"v4_result_attribution_{key}.jsonl"
             summary = {
                 "date": key,
+                "date_filter_field": "match_date",
+                "target_match_date": target_match_date,
+                "input_rows": input_rows,
+                "selected_rows": len(selected),
+                "non_target_rows": non_target_rows,
+                "contaminated_rows": len(contaminated_rows),
+                "contaminated_row_samples": contaminated_rows[:10],
+                "c_deprecated_rows_excluded": c_deprecated_rows,
+                "c_observation_active": False,
+                "c_excluded_from_ab": True,
                 "rows": len(out_rows),
                 "output_path": str(out_path) if out_path else None,
                 "main_file_written": False,
@@ -850,6 +920,16 @@ def run(date_str: str, fixture_id: int | None = None, sleep_ms: int = 120, dry_r
 
     summary = {
         "date": key,
+        "date_filter_field": "match_date",
+        "target_match_date": target_match_date,
+        "input_rows": input_rows,
+        "selected_rows": len(selected),
+        "non_target_rows": non_target_rows,
+        "contaminated_rows": len(contaminated_rows),
+        "contaminated_row_samples": contaminated_rows[:10],
+        "c_deprecated_rows_excluded": c_deprecated_rows,
+        "c_observation_active": False,
+        "c_excluded_from_ab": True,
         "rows": len(out_rows),
         "output_path": str(out_path) if out_path else None,
         "main_file_written": fixture_id is None,

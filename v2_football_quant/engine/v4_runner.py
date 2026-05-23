@@ -18,14 +18,14 @@ import json, ssl, certifi, time, sys
 import urllib.request
 from urllib.parse import urlsplit, parse_qsl, urlencode
 from pathlib import Path
-from datetime import datetime, date, timedelta
+from datetime import datetime, date, timedelta, timezone
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(BASE_DIR))
 
 from config.secrets import API_KEY, API_HOST
 from engine.data_sources.api_coverage import evaluate_fixture_coverage
-from engine.net_utils import _rpm_wait, api_get as _net_api_get
+from engine.net_utils import _rpm_wait, api_get as _net_api_get, api_preflight, get_api_guard_snapshot
 from engine.task_watchdog import v4_scan_watchdog
 from engine.data_sources.h2h_engine import (
     evaluate_h2h_edge,
@@ -64,6 +64,37 @@ with open(BASE_DIR / "config" / "leagues_whitelist.json") as f:
 
 WL_SET = set(str(k) for k in LEAGUE_CN.keys())
 SCAN_PROFILE_STABLE_FULL_24H = "stable_full_24h"
+LOCAL_TZ = timezone(timedelta(hours=8))
+
+
+def _parse_kickoff_local(kickoff: str) -> tuple[datetime, bool]:
+    """Return local kickoff time and whether timezone was missing."""
+    raw = str(kickoff or "").strip()
+    if not raw:
+        raise ValueError("missing kickoff")
+    normalized = raw.replace("Z", "+00:00")
+    dt = datetime.fromisoformat(normalized)
+    timezone_unknown = dt.tzinfo is None
+    if timezone_unknown:
+        dt = dt.replace(tzinfo=LOCAL_TZ)
+    return dt.astimezone(LOCAL_TZ), timezone_unknown
+
+
+def _scout_date_fields(kickoff: str, scan_dt: date, scout_file_date: str, source_window: str | None = None) -> dict:
+    """Formal V4 scout date schema: date is match date, never scan date."""
+    kickoff_local, timezone_unknown = _parse_kickoff_local(kickoff)
+    match_date = kickoff_local.date().isoformat()
+    fields = {
+        "date": match_date,
+        "match_date": match_date,
+        "scan_date": scan_dt.isoformat(),
+        "scout_file_date": scout_file_date,
+        "kickoff_local": kickoff_local.isoformat(),
+        "timezone_unknown": timezone_unknown,
+    }
+    if source_window:
+        fields["source_window"] = source_window
+    return fields
 
 
 def _load_candidate_rules() -> dict:
@@ -125,6 +156,7 @@ def _cached_api_client(base_client):
 
 def fetch_today_fixtures(
     lookahead_hours: float | None = None,
+    min_hours_to_kickoff: float | None = None,
     api_client=api_get,
     scan_base_date: date | None = None,
 ):
@@ -164,9 +196,11 @@ def fetch_today_fixtures(
             except:
                 ko_dt = datetime.fromisoformat(kickoff.split("+")[0] + "+00:00")
 
-            if lookahead_hours is not None and td >= date.today():
+            if td >= date.today():
                 hours_to_kickoff = (ko_dt - datetime.now(ko_dt.tzinfo)).total_seconds() / 3600
-                if hours_to_kickoff < 0 or hours_to_kickoff > lookahead_hours:
+                if min_hours_to_kickoff is not None and hours_to_kickoff < min_hours_to_kickoff:
+                    continue
+                if lookahead_hours is not None and (hours_to_kickoff < 0 or hours_to_kickoff > lookahead_hours):
                     continue
 
             all_fixtures.append({
@@ -280,6 +314,7 @@ def run_v4_scan(
     run_tag="V4_DEFAULT",
     with_lineups=False,
     lookahead_hours=None,
+    min_hours_to_kickoff=None,
     scan_mode: str = "fast",
     recent_prewarm: str = "on",
     scan_date: str | None = None,
@@ -288,24 +323,60 @@ def run_v4_scan(
 ):
     t0 = time.perf_counter()
     logger.info(f"🔭 V4 球探扫描 | {run_tag} | {datetime.now().strftime('%H:%M')}")
-    api_client = _cached_api_client(api_get)
-    lineup_analyzer = LineupStrengthAnalyzer(api_client) if with_lineups else None
 
     if scan_date:
         scan_dt = datetime.strptime(scan_date.replace("-", ""), "%Y%m%d").date()
     else:
         scan_dt = date.today()
+    today_key = scan_dt.strftime("%Y%m%d")
+
+    preflight = api_preflight(today_key, api_key=API_KEY, api_host=API_HOST, strict=False, write_status=True)
+    if not preflight.get("safe_to_scan"):
+        blocked = {
+            "schema_version": "v4_scan_api_blocked.v1",
+            "date": today_key,
+            "scan_status": "API_BLOCKED",
+            "run_tag": run_tag,
+            "generated_at": datetime.now().isoformat(),
+            "preflight_required": True,
+            "preflight_api_status": preflight.get("api_status"),
+            "active_provider": preflight.get("active_provider"),
+            "endpoint_host": preflight.get("endpoint_host"),
+            "key_fingerprint": preflight.get("key_fingerprint"),
+            "safe_to_scan": False,
+            "remote_scan_started": False,
+            "per_fixture_loop_started": False,
+            "curl_fallback_on_403": False,
+            "last_good_preserved": True,
+            "dashboard_message": "API数据源异常，候选未刷新，保留 last_good。",
+            "capture_ran": False,
+            "QQ_push": False,
+            "cloud_publish": False,
+            "auto_retry": False,
+            "auto_kill": False,
+            "timeout_change": False,
+            "api_guard": get_api_guard_snapshot(),
+        }
+        status_path = BASE_DIR / "data/runtime/status" / f"v4_scan_api_blocked_{today_key}.json"
+        status_path.parent.mkdir(parents=True, exist_ok=True)
+        status_path.write_text(json.dumps(blocked, ensure_ascii=False, indent=2), encoding="utf-8")
+        logger.error("[GUARD] V4_SCAN_API_BLOCKED | preflight=%s | no remote scan", preflight.get("api_status"))
+        return blocked
+
+    api_client = _cached_api_client(api_get)
+    lineup_analyzer = LineupStrengthAnalyzer(api_client) if with_lineups else None
+
     fixtures = fetch_today_fixtures(
         lookahead_hours=lookahead_hours,
+        min_hours_to_kickoff=min_hours_to_kickoff,
         api_client=api_client,
         scan_base_date=scan_dt,
     )
-    today_key = scan_dt.strftime("%Y%m%d")
     
     # ── 任务监控（仅独立运行时启用；wrapper模式下由调用方管理）──
     wd = None
+    window = "midday" if "NOON" in run_tag else ("evening" if "PM" in run_tag else ("late" if "LATE" in run_tag else "manual"))
     if use_watchdog:
-        window = "midday" if "NOON" in run_tag else ("evening" if "PM" in run_tag else ("late" if "LATE" in run_tag else "manual"))
         wd = v4_scan_watchdog(window)
         if not wd.acquire_lock():
             logger.warning(f"[WATCHDOG] V4扫描-{window} 已有实例运行，跳过")
@@ -374,7 +445,7 @@ def run_v4_scan(
         if lg_status == "DISABLED":
             append_jsonl(universe_out, {
                 "fixture_id": fx["id"],
-                "date": scan_dt.isoformat(),
+                **_scout_date_fields(fx["kickoff"], scan_dt, today_key, window),
                 "league_id": fx["league"],
                 "league_name": fx["league_name"],
                 "country": None,
@@ -395,19 +466,23 @@ def run_v4_scan(
             })
             continue
 
+        logger.info(f"  ⏳ H2H: {fx.get('league_name','?')} | {fx['home']} vs {fx['away']}")
+        import traceback, sys
         result = evaluate_h2h_edge(
             fx["homeId"],
             fx["awayId"],
             api_client,
             mode=scan_mode,
         )
+        if not result.get("valid"):
+            logger.info(f"  ⏭️ SKIP: {result.get('reason','?')}")
         h2h_valid = bool(result.get("valid"))
         h2h_reason = result.get("reason", "")
 
         if not result["valid"]:
             append_jsonl(universe_out, {
                 "fixture_id": fx["id"],
-                "date": scan_dt.isoformat(),
+                **_scout_date_fields(fx["kickoff"], scan_dt, today_key, window),
                 "league_id": fx["league"],
                 "league_name": fx["league_name"],
                 "country": None,
@@ -516,7 +591,7 @@ def run_v4_scan(
                 priority_boost = 2
             live_watchlist.append({
                 "fixture_id": fx["id"],
-                "date": scan_dt.isoformat(),
+                **_scout_date_fields(fx["kickoff"], scan_dt, today_key, window),
                 "home": fx["home"],
                 "away": fx["away"],
                 "league": fx["league_name"],
@@ -552,7 +627,7 @@ def run_v4_scan(
 
         append_jsonl(universe_out, {
             "fixture_id": fx["id"],
-            "date": scan_dt.isoformat(),
+            **_scout_date_fields(fx["kickoff"], scan_dt, today_key, window),
             "league_id": fx["league"],
             "league_name": fx["league_name"],
             "country": None,
@@ -583,7 +658,7 @@ def run_v4_scan(
         # ── 球探快照（纯数据，零交易字段）──
         scout_reports.append({
             "fixture_id": fx["id"],
-            "date": scan_dt.isoformat(),
+            **_scout_date_fields(fx["kickoff"], scan_dt, today_key, window),
             "kickoff": fx["kickoff"],
             "home": fx["home"],
             "away": fx["away"],
@@ -641,6 +716,8 @@ def run_v4_scan(
     api_stats = getattr(api_client, "_stats", {})
     perf = {
         "date": scan_dt.isoformat(),
+        "scan_date": scan_dt.isoformat(),
+        "scout_file_date": today_key,
         "run_tag": run_tag,
         "scan_mode": scan_mode,
         "scan_profile": SCAN_PROFILE_STABLE_FULL_24H,
@@ -653,6 +730,13 @@ def run_v4_scan(
         "api_calls_total": api_stats.get("calls_total", 0),
         "api_cache_hits": api_stats.get("cache_hits", 0),
         "api_cache_misses": api_stats.get("cache_misses", 0),
+        "api_guard": get_api_guard_snapshot(),
+        "api_calls_attempted": get_api_guard_snapshot().get("api_calls_attempted", 0),
+        "api_calls_blocked_by_preflight": get_api_guard_snapshot().get("api_calls_blocked_by_preflight", 0),
+        "api_calls_blocked_by_circuit_breaker": get_api_guard_snapshot().get("api_calls_blocked_by_circuit_breaker", 0),
+        "remote_requests": get_api_guard_snapshot().get("remote_requests", 0),
+        "forbidden_count": get_api_guard_snapshot().get("forbidden_count", 0),
+        "fallback_count": get_api_guard_snapshot().get("fallback_count", 0),
         "recent_prewarm": prewarm_info,
         "recent_profile_cache": recent_profile_cache_stats(),
         "generated_at": datetime.now().isoformat(),
