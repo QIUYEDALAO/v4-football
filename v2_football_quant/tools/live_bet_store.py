@@ -51,6 +51,31 @@ def _load_day(date: str) -> List[Dict[str, Any]]:
     return rows
 
 
+def _is_test_record(r: Dict[str, Any]) -> bool:
+    if bool(r.get("is_test")):
+        return True
+    txt = " ".join([
+        str(r.get("league") or ""),
+        str(r.get("home_cn") or ""),
+        str(r.get("away_cn") or ""),
+        str(r.get("notes") or ""),
+        str(r.get("official_source") or ""),
+    ]).lower()
+    if "test" in txt or "测试" in txt:
+        return True
+    fid = str(r.get("fixture_id") or "")
+    if fid.startswith("9"):
+        return True
+    return False
+
+
+def _effective_bet_rows(rows: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+    return [
+        r for r in rows
+        if r.get("bet_status") == "BET" and not _is_test_record(r)
+    ]
+
+
 def _save_day(date: str, rows: List[Dict[str, Any]]) -> None:
     path = _day_file(date)
     path.parent.mkdir(parents=True, exist_ok=True)
@@ -108,7 +133,7 @@ def settle_bet(date: str, bet_id: str, settlement_patch: Dict[str, Any]) -> Dict
 
 def day_summary(date: str) -> Dict[str, Any]:
     rows = _load_day(date)
-    bet_rows = [r for r in rows if r.get("bet_status") == "BET"]
+    bet_rows = _effective_bet_rows(rows)
     settled = [r for r in bet_rows if r.get("settlement_result") != "PENDING"]
     stake = sum(float(r.get("stake") or 0) for r in bet_rows)
     gross = sum(float(r.get("gross_pnl") or 0) for r in settled)
@@ -143,6 +168,8 @@ def day_summary(date: str) -> Dict[str, Any]:
         "today_roi_pct": round((roi * 100.0), 4) if roi is not None else None,
         "records": len(rows),
         "settled_records": len(settled),
+        "effective_bet_records": len(bet_rows),
+        "excluded_test_records": sum(1 for r in rows if _is_test_record(r)),
         "by_grade": by_grade,
         "by_line": by_line,
     }
@@ -153,7 +180,7 @@ def cumulative_summary() -> Dict[str, Any]:
     all_rows = []
     for p in files:
         all_rows.extend(_load_day(p.stem.split("_")[-1]))
-    bet_rows = [r for r in all_rows if r.get("bet_status") == "BET"]
+    bet_rows = _effective_bet_rows(all_rows)
     settled = [r for r in bet_rows if r.get("settlement_result") != "PENDING"]
     stake = sum(float(r.get("stake") or 0) for r in bet_rows)
     gross = sum(float(r.get("gross_pnl") or 0) for r in settled)
@@ -172,6 +199,8 @@ def cumulative_summary() -> Dict[str, Any]:
         "cumulative_roi_pct": round((roi * 100.0), 4) if roi is not None else None,
         "records": len(all_rows),
         "settled_records": len(settled),
+        "effective_bet_records": len(bet_rows),
+        "excluded_test_records": sum(1 for r in all_rows if _is_test_record(r)),
     }
 
 
@@ -184,3 +213,34 @@ def refresh_summaries(date: str) -> None:
 
 def get_day_records(date: str):
     return _load_day(date)
+
+
+def mark_existing_test_records(date: str | None = None) -> Dict[str, Any]:
+    touched = 0
+    files = [_day_file(date)] if date else sorted(LIVE_DIR.glob("v4_live_bets_*.jsonl"))
+    for fp in files:
+        if not fp.exists():
+            continue
+        day = fp.stem.split("_")[-1]
+        rows = _load_day(day)
+        changed = False
+        for r in rows:
+            if _is_test_record(r) and not bool(r.get("is_test")):
+                r["is_test"] = True
+                r["updated_at"] = datetime.utcnow().isoformat() + "Z"
+                changed = True
+                touched += 1
+        if changed:
+            _save_day(day, rows)
+            _log(f"MARK_TEST date={day} touched={touched}")
+    if date:
+        refresh_summaries(date)
+    else:
+        # refresh all available date summaries and cumulative
+        for fp in files:
+            if fp.exists():
+                d = fp.stem.split("_")[-1]
+                ds = day_summary(d)
+                _daily_summary_file(d).write_text(json.dumps(ds, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+        _cum_file().write_text(json.dumps(cumulative_summary(), ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+    return {"touched": touched}

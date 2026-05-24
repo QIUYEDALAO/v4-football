@@ -14,6 +14,53 @@ import live_bet_store as store
 
 ROOT = Path(__file__).resolve().parents[1]
 DASH = ROOT / "data/runtime/dashboard"
+STATUS = ROOT / "data/runtime/status"
+
+
+def _load_json(path: Path) -> dict:
+    try:
+        return json.loads(path.read_text(encoding="utf-8"))
+    except Exception:
+        return {}
+
+
+def _resolve_candidate_view(date: str) -> tuple[dict, str, bool]:
+    exact = STATUS / f"v3v4_dashboard_candidate_view_{date}.json"
+    if exact.exists():
+        return _load_json(exact), date, False
+    candidates = sorted(STATUS.glob("v3v4_dashboard_candidate_view_*.json"))
+    dated = []
+    for p in candidates:
+        d = p.stem.split("_")[-1]
+        if d.isdigit() and d <= date:
+            dated.append((d, p))
+    if dated:
+        d, p = dated[-1]
+        return _load_json(p), d, True
+    return {}, "", True
+
+
+def _normalize_candidate_rows(view: dict, source_date: str) -> list[dict]:
+    rows = []
+    for key in ("A_candidates", "B_candidates"):
+        for r in (view.get(key) or []):
+            if not isinstance(r, dict):
+                continue
+            rows.append({
+                "fixture_id": r.get("fixture_id"),
+                "league": r.get("league") or "",
+                "home_cn": r.get("home_cn") or r.get("home_team_cn") or r.get("home") or "",
+                "away_cn": r.get("away_cn") or r.get("away_team_cn") or r.get("away") or "",
+                "home_en": r.get("home_en") or r.get("home_team_en") or r.get("home") or "",
+                "away_en": r.get("away_en") or r.get("away_team_en") or r.get("away") or "",
+                "kickoff_time": r.get("kickoff_display") or "",
+                "v4_grade": r.get("grade") or key[0],
+                "v4_script": r.get("script_type") or "",
+                "ht_model_score": r.get("ht_score"),
+                "official_source": "official_57",
+                "candidate_source_date": source_date,
+            })
+    return rows
 
 
 def _json(handler: BaseHTTPRequestHandler, code: int, payload: dict):
@@ -58,6 +105,18 @@ class H(BaseHTTPRequestHandler):
 
         if u.path == "/api/live_bets/cumulative":
             return _json(self, 200, {"ok": True, "summary": store.cumulative_summary()})
+
+        if u.path == "/api/live_bets/candidates":
+            date = q.get("date", [datetime.utcnow().strftime("%Y%m%d")])[0]
+            view, source_date, fallback = _resolve_candidate_view(date)
+            rows = _normalize_candidate_rows(view, source_date)
+            return _json(self, 200, {
+                "ok": True,
+                "date": date,
+                "candidate_source_date": source_date or None,
+                "fallback_used": fallback,
+                "rows": rows,
+            })
 
         return _json(self, 404, {"ok": False, "error": "not_found"})
 

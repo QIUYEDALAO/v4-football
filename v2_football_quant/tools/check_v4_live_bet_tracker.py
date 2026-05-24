@@ -35,20 +35,23 @@ def main() -> int:
     else:
         html = page.read_text(encoding='utf-8', errors='ignore')
         required_tokens = [
+            '选择今日候选',
             '今日投注建议',
-            'A 级',
-            'O0.75：300',
-            'B 级',
-            'O0.75：150',
-            '止损：-1500',
-            '盈利 +600',
-            '盈利 +900',
-            '盈利 +1500',
-            '建议跳过，不建议下注',
+            'A:300/250/150/跳过',
+            'B:150/120/跳过',
+            '高级/手工录入',
+            '记录为未下注',
+            '今日投注列表（未结算置顶）',
+            'todayLocal',
+            'no_bet_reason',
         ]
         for tok in required_tokens:
             if tok not in html:
                 blockers.append(f'page_missing_token:{tok}')
+        if "document.getElementById('f_date').value=todayLocal();" not in html:
+            blockers.append('default_date_not_today_local')
+        if '20260524' in html:
+            blockers.append('stale_fixed_date_found')
 
     # Settlement test
     from live_bet_settlement import settle
@@ -101,6 +104,23 @@ def main() -> int:
                 if turnover > 0 and roi is not None:
                     if abs(float(roi) - net) < 1e-9:
                         blockers.append('cumulative_roi_equals_net_pnl_bug')
+                if sm.get('excluded_test_records', 0) < 0:
+                    blockers.append('excluded_test_records_invalid')
+
+        c5, cand_res = http_get(f'http://127.0.0.1:8766/api/live_bets/candidates?date={d}')
+        if c5 != 200:
+            blockers.append('api_candidates_failed')
+        else:
+            js = json.loads(cand_res)
+            if 'rows' not in js:
+                blockers.append('candidates_rows_missing')
+            else:
+                rows = js.get('rows') or []
+                for row in rows[:3]:
+                    for k in ['fixture_id', 'league', 'home_cn', 'away_cn', 'v4_grade', 'official_source', 'candidate_source_date']:
+                        if k not in row:
+                            blockers.append(f'candidate_field_missing:{k}')
+                            break
 
     except Exception as e:
         blockers.append(f'server_or_api_error:{e}')

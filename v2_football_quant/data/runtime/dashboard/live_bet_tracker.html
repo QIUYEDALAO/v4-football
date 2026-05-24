@@ -5,166 +5,213 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
 <title>V4 实盘记录</title>
 <style>
-:root{--bg:#0b1220;--card:#121c31;--line:#24324d;--txt:#eaf1ff;--muted:#93a5bf;--good:#4dd18b;--bad:#ff6b72;--warn:#f3c969}
-*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--txt);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;padding:12px;max-width:860px;margin-inline:auto}
-h1{font-size:22px;margin:0 0 8px}.sub{font-size:12px;color:var(--muted);margin-bottom:10px}
-.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.kpi{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:10px}
-.kpi .k{font-size:11px;color:var(--muted)}.kpi .v{font-size:18px;font-weight:700;margin-top:4px}
-.panel{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:10px;margin-top:10px}
-label{display:block;font-size:12px;color:var(--muted);margin:8px 0 4px}input,select,textarea,button{width:100%;border-radius:10px;border:1px solid #2a3b5d;background:#0e1728;color:#f0f6ff;padding:10px;font-size:16px}
-button{background:#1e5eff;border-color:#2e6aff;font-weight:700}button.secondary{background:#29384f}
+:root{--bg:#0b1220;--card:#121c31;--line:#24324d;--txt:#eaf1ff;--muted:#93a5bf;--good:#4dd18b;--bad:#ff6b72;--warn:#f3c969;--primary:#2e6aff}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--txt);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;padding:10px;max-width:860px;margin-inline:auto}
+h1{font-size:20px;margin:0 0 4px}.sub{font-size:12px;color:var(--muted);margin-bottom:8px}
+.sticky{position:sticky;top:0;z-index:20;background:rgba(11,18,32,.94);backdrop-filter:blur(6px);border:1px solid var(--line);border-radius:12px;padding:8px;margin-bottom:8px}
+.compact{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:6px}.kv{background:var(--card);border:1px solid var(--line);border-radius:8px;padding:6px}.k{font-size:11px;color:var(--muted)}.v{font-size:13px;font-weight:700}
+.panel{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:10px;margin-top:8px}
+label{display:block;font-size:12px;color:var(--muted);margin:6px 0 4px}input,select,textarea,button{width:100%;border-radius:10px;border:1px solid #2a3b5d;background:#0e1728;color:#f0f6ff;padding:10px;font-size:16px}
+button{background:var(--primary);border-color:var(--primary);font-weight:700}button.secondary{background:#29384f;border-color:#425777}
 .row{display:grid;grid-template-columns:1fr 1fr;gap:8px}.row3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}
-.item{border:1px solid var(--line);border-radius:10px;padding:8px;margin:8px 0;background:#0d1729}.item.pending{border-color:#f3c969}
-.bad{color:var(--bad)}.good{color:var(--good)}.muted{color:var(--muted)}
-.tag{display:inline-block;font-size:11px;padding:2px 6px;border-radius:999px;background:#2d3d5a;margin-right:6px}
-@media (max-width:640px){.grid{grid-template-columns:1fr}.row,.row3{grid-template-columns:1fr}}
+.item{border:1px solid var(--line);border-radius:10px;padding:8px;margin:8px 0;background:#0d1729}.item.pending{border-color:#f3c969}.tag{display:inline-block;font-size:11px;padding:2px 6px;border-radius:999px;background:#2d3d5a;margin-right:6px}
+.bad{color:var(--bad)}.good{color:var(--good)}.warn{color:var(--warn)}.muted{color:var(--muted)}
+summary{cursor:pointer}
+@media (max-width:760px){.compact{grid-template-columns:repeat(2,minmax(0,1fr))}.row3{grid-template-columns:1fr}.row{grid-template-columns:1fr}.v{font-size:14px}}
 </style>
 </head>
 <body>
 <h1>V4 实盘记录（本地）</h1>
 <div class="sub">仅本地记录，不自动下注，不连接任何账号。</div>
 
-<div class="grid" id="kpis"></div>
-
-<div class="panel">
-  <h3>今日投注建议</h3>
-  <div class="muted">本金：30000</div>
-  <div style="margin-top:6px"><b>A 级</b></div>
-  <div class="muted">- O0.75：300</div>
-  <div class="muted">- O1：200~300</div>
-  <div class="muted">- O1.25：150 或跳过</div>
-  <div class="muted">- O1.5：跳过</div>
-  <div style="margin-top:6px"><b>B 级</b></div>
-  <div class="muted">- O0.75：150</div>
-  <div class="muted">- O1：100~150</div>
-  <div class="muted">- O1.25 / O1.5：跳过</div>
-  <div style="margin-top:6px"><b>C/SKIP</b></div>
-  <div class="muted">- 0，不投注</div>
-  <div style="margin-top:6px"><b>日内风控</b></div>
-  <div class="muted">- 止损：-1500</div>
-  <div class="muted">- 盈利 +600：保护模式，只做 A 或优质 B</div>
-  <div class="muted">- 盈利 +900：只做 A 的 O0.75/O1</div>
-  <div class="muted">- 盈利 +1500：建议收手</div>
-  <div class="muted" style="margin-top:6px">提示：只记录，不自动下注。</div>
+<div class="sticky">
+  <div class="compact" id="kpis"></div>
 </div>
 
 <div class="panel">
-  <h3>快速添加投注</h3>
+  <details>
+    <summary><b>今日投注建议</b> <span class="muted">A:300/250/150/跳过 · B:150/120/跳过 · 止损-1500</span></summary>
+    <div class="muted" style="margin-top:6px">本金：30000</div>
+    <div class="muted">A级：O0.75=300，O1=200~300，O1.25=150（降仓/可跳过），O1.5=跳过</div>
+    <div class="muted">B级：O0.75=150，O1=100~150，O1.25/O1.5=跳过</div>
+    <div class="muted">C/SKIP：0，不投注</div>
+    <div class="muted">风控：-1500止损，+600保护，+900强保护，+1500建议收手</div>
+  </details>
+</div>
+
+<div class="panel">
+  <h3 style="margin:0 0 6px">快速添加投注</h3>
   <div class="row3">
     <div><label>日期</label><input id="f_date" /></div>
-    <div><label>Fixture ID</label><input id="f_fixture" placeholder="可留空" /></div>
-    <div><label>联赛</label><input id="f_league" /></div>
+    <div><label>选择今日候选</label><select id="f_candidate"><option value="">加载中...</option></select></div>
+    <div><label>候选来源日期</label><input id="candidate_source_date" readonly /></div>
   </div>
-  <div class="row">
-    <div><label>主队中文</label><input id="f_home_cn" /></div>
-    <div><label>客队中文</label><input id="f_away_cn" /></div>
-  </div>
+
   <div class="row3">
     <div><label>评级</label><select id="f_grade"><option>A</option><option selected>B</option><option>C</option><option>SKIP</option></select></div>
     <div><label>盘口线</label><select id="f_line"><option>O0.75</option><option selected>O1</option><option>O1.25</option><option>O1.5</option></select></div>
-    <div><label>建议 stake（可改）</label><input id="f_stake" type="number" step="0.01" /></div>
-  </div>
-  <div id="stake_hint" class="muted">建议跳过，不建议下注。</div>
-  <div class="row3">
     <div><label>水位</label><input id="f_odds" type="number" step="0.01" value="0.9" /></div>
+  </div>
+  <div class="row3">
+    <div><label>建议 stake / 实际 stake</label><input id="f_stake" type="number" step="0.01" /></div>
     <div><label>入场分钟</label><input id="f_entry_min" type="number" /></div>
     <div><label>入场比分</label><input id="f_entry_score" placeholder="0-0" /></div>
   </div>
-  <div class="row3">
-    <div><label>来源</label><select id="f_source"><option>official_57</option><option>outside_57_observation</option><option selected>manual</option></select></div>
-    <div><label>状态</label><select id="f_status"><option selected>BET</option><option>NO_BET</option><option>VOID</option></select></div>
-    <div><label>剧本</label><input id="f_script" /></div>
+  <div id="stake_hint" class="muted">建议跳过，不建议下注。</div>
+
+  <div class="row" style="margin-top:8px">
+    <button onclick="addBet('BET')">添加记录（BET）</button>
+    <button class="secondary" onclick="addNoBet()">记录为未下注</button>
   </div>
-  <label>备注</label><textarea id="f_notes" rows="2"></textarea>
-  <div class="row">
-    <button onclick="addBet()">添加记录</button>
-    <button class="secondary" onclick="refreshAll()">刷新</button>
+  <div class="row" style="margin-top:8px">
+    <div><label>未下注原因</label><select id="f_no_bet_reason"><option>盘口太高</option><option>水位太差</option><option>已进球</option><option>红牌/异常</option><option>超过风控</option><option>手动跳过</option><option>非57联赛</option></select></div>
+    <div><label>&nbsp;</label><button class="secondary" onclick="refreshAll()">刷新</button></div>
   </div>
+
+  <details style="margin-top:8px">
+    <summary><b>高级/手工录入</b></summary>
+    <div class="row3">
+      <div><label>fixture_id</label><input id="f_fixture" placeholder="可留空" /></div>
+      <div><label>联赛</label><input id="f_league" /></div>
+      <div><label>kickoff_time</label><input id="f_kickoff" /></div>
+    </div>
+    <div class="row">
+      <div><label>主队中文</label><input id="f_home_cn" /></div>
+      <div><label>客队中文</label><input id="f_away_cn" /></div>
+    </div>
+    <div class="row">
+      <div><label>主队英文</label><input id="f_home_en" /></div>
+      <div><label>客队英文</label><input id="f_away_en" /></div>
+    </div>
+    <div class="row3">
+      <div><label>剧本</label><input id="f_script" /></div>
+      <div><label>HT分</label><input id="f_ht_model_score" type="number" step="1" /></div>
+      <div><label>来源</label><select id="f_source"><option selected>official_57</option><option>outside_57_observation</option><option>manual</option></select></div>
+    </div>
+    <label>备注</label><textarea id="f_notes" rows="2"></textarea>
+  </details>
 </div>
 
 <div class="panel">
-  <h3>今日投注列表（未结算置顶）</h3>
+  <h3 style="margin:0 0 6px">今日投注列表（未结算置顶）</h3>
   <div id="list"></div>
 </div>
 
 <script>
-const API='';
-const today=()=>new Date().toISOString().slice(0,10).replaceAll('-','');
+const todayLocal=()=>{const d=new Date();const y=d.getFullYear();const m=String(d.getMonth()+1).padStart(2,'0');const dd=String(d.getDate()).padStart(2,'0');return `${y}${m}${dd}`;};
 const fmt=(n)=>Number(n||0).toFixed(2);
 const risk=(net)=> net<=-1500?['已触及止损，建议停止','bad'] : net>=1500?['已达强止盈，建议收手','warn'] : net>=900?['强保护，只做 A 的 O0.75/O1','warn'] : net>=600?['保护模式，降低风险','warn'] : ['正常','good'];
-const roiText=(roi,turnover)=>{
-  const t=Number(turnover||0);
-  if(t<=0) return 'N/A';
-  if(roi===null||roi===undefined||Number.isNaN(Number(roi))) return 'N/A';
-  return (Number(roi)*100).toFixed(2)+'%';
-};
+const roiText=(roi,turnover)=>{const t=Number(turnover||0); if(t<=0) return 'N/A'; if(roi===null||roi===undefined||Number.isNaN(Number(roi))) return 'N/A'; return (Number(roi)*100).toFixed(2)+'%';};
 
 function defaultStake(g,l){
   const m={A:{'O0.75':300,'O1':250,'O1.25':150,'O1.5':0},B:{'O0.75':150,'O1':120,'O1.25':0,'O1.5':0}};
   return (m[g]&&m[g][l]!==undefined)?m[g][l]:0;
 }
+function stakeHint(g,l,s){
+  if(g==='A'&&l==='O1.25') return `建议 stake：${fmt(s)}（降仓/可跳过）`;
+  if((g==='A'&&l==='O1.5')||(g==='B'&&(l==='O1.25'||l==='O1.5'))||g==='C'||g==='SKIP') return '建议跳过，不建议下注。';
+  if(g==='A'&&l==='O1') return `建议 stake：${fmt(s)}（可手改 200~300）`;
+  if(g==='B'&&l==='O1') return `建议 stake：${fmt(s)}（可手改 100~150）`;
+  return `建议 stake：${fmt(s)}`;
+}
 
 function bindDefaultStake(){
   const g=document.getElementById('f_grade').value;
   const l=document.getElementById('f_line').value;
-  const stake=defaultStake(g,l);
-  document.getElementById('f_stake').value=stake;
-  document.getElementById('stake_hint').textContent = stake>0 ? `建议 stake：${fmt(stake)}` : '建议跳过，不建议下注。';
+  const s=defaultStake(g,l);
+  document.getElementById('f_stake').value=s;
+  document.getElementById('stake_hint').textContent=stakeHint(g,l,s);
 }
 
-async function jget(url){ const r=await fetch(url); return r.json(); }
+async function jget(url){ const r=await fetch(url,{cache:'no-store'}); return r.json(); }
 async function jpost(url,payload){ const r=await fetch(url,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)}); return r.json(); }
 
+let candidateRows=[];
+async function loadCandidates(){
+  const d=document.getElementById('f_date').value||todayLocal();
+  const res=await jget(`/api/live_bets/candidates?date=${d}`);
+  candidateRows=res.rows||[];
+  document.getElementById('candidate_source_date').value = res.candidate_source_date || 'N/A';
+  const sel=document.getElementById('f_candidate');
+  const opts=['<option value="">手工录入</option>'];
+  candidateRows.forEach((r,i)=>{
+    opts.push(`<option value="${i}">[${r.v4_grade}] ${r.home_cn} vs ${r.away_cn} · ${r.league} · ${r.kickoff_time||''}</option>`);
+  });
+  sel.innerHTML=opts.join('');
+}
+
+function applyCandidate(){
+  const v=document.getElementById('f_candidate').value;
+  if(v==='') return;
+  const r=candidateRows[Number(v)];
+  if(!r) return;
+  document.getElementById('f_fixture').value=r.fixture_id||'';
+  document.getElementById('f_league').value=r.league||'';
+  document.getElementById('f_home_cn').value=r.home_cn||'';
+  document.getElementById('f_away_cn').value=r.away_cn||'';
+  document.getElementById('f_home_en').value=r.home_en||'';
+  document.getElementById('f_away_en').value=r.away_en||'';
+  document.getElementById('f_kickoff').value=r.kickoff_time||'';
+  document.getElementById('f_grade').value=r.v4_grade||'B';
+  document.getElementById('f_script').value=r.v4_script||'';
+  document.getElementById('f_ht_model_score').value=(r.ht_model_score??'');
+  document.getElementById('f_source').value=r.official_source||'official_57';
+  bindDefaultStake();
+}
+
 async function refreshKpis(){
-  const d=document.getElementById('f_date').value||today();
+  const d=document.getElementById('f_date').value||todayLocal();
   const ds=await jget(`/api/live_bets/summary?date=${d}`);
   const cs=await jget('/api/live_bets/cumulative');
   const s=ds.summary||{}; const c=cs.summary||{};
   const rk=risk(Number(s.today_net_pnl||0));
   const cards=[
     ['当前本金',fmt(c.current_bankroll||30000)],
-    ['初始本金','30000.00'],
-    ['今日投注额',fmt(s.today_turnover ?? s.today_stake)],
-    ['今日毛盈亏',fmt(s.today_gross_pnl)],
-    ['今日返水',fmt(s.today_rebate)],
     ['今日净盈亏',fmt(s.today_net_pnl)],
+    ['今日投注额',fmt(s.today_turnover ?? s.today_stake)],
     ['今日 ROI',roiText(s.today_roi, s.today_turnover ?? s.today_stake)],
-    ['累计净盈亏',fmt(c.cumulative_net_pnl)],
-    ['累计 ROI',roiText(c.cumulative_roi, c.cumulative_turnover ?? c.cumulative_stake)],
-    ['今日风险状态',rk[0],rk[1]],
+    ['风险状态',rk[0],rk[1]],
   ];
-  document.getElementById('kpis').innerHTML=cards.map(x=>`<div class='kpi'><div class='k'>${x[0]}</div><div class='v ${x[2]||''}'>${x[1]}</div></div>`).join('');
+  document.getElementById('kpis').innerHTML=cards.map(x=>`<div class='kv'><div class='k'>${x[0]}</div><div class='v ${x[2]||''}'>${x[1]}</div></div>`).join('');
 }
 
 async function refreshList(){
-  const d=document.getElementById('f_date').value||today();
+  const d=document.getElementById('f_date').value||todayLocal();
   const res=await jget(`/api/live_bets?date=${d}`);
   let rows=(res.records||[]);
   rows=rows.sort((a,b)=> (a.settlement_result==='PENDING'?-1:1) - (b.settlement_result==='PENDING'?-1:1));
   document.getElementById('list').innerHTML=rows.map(r=>{
     const cls=r.settlement_result==='PENDING'?'item pending':'item';
     const pnl=Number(r.net_pnl||0);
+    const team=`${r.home_cn||r.home_en||'-'} vs ${r.away_cn||r.away_en||'-'}`;
     return `<div class='${cls}'>
-      <div><span class='tag'>${r.v4_grade}</span><span class='tag'>${r.market_line}</span><b>${r.home_cn||r.home_en||'-'} vs ${r.away_cn||r.away_en||'-'}</b></div>
-      <div class='muted'>stake ${fmt(r.stake)} | 水位 ${fmt(r.odds_water)} | 状态 ${r.settlement_result}</div>
+      <div><b>${team}</b></div>
+      <div class='muted'><span class='tag'>${r.v4_grade}</span><span class='tag'>${r.market_line}</span>水位 ${fmt(r.odds_water)} · stake ${fmt(r.stake)}</div>
+      <div class='muted'>入场 ${r.entry_minute??'-'}' / 比分 ${r.score_at_entry||'-'} / 状态 ${r.settlement_result}</div>
       <div class='${pnl>=0?'good':'bad'}'>net ${fmt(pnl)}</div>
       <div class='row3'>
         <input id='g_${r.bet_id}' type='number' placeholder='HT进球数' />
         <input id='o_${r.bet_id}' type='number' step='0.01' value='${r.odds_water||0}' />
-        <button onclick="settleBet('${r.date}','${r.bet_id}','${r.market_line}',${r.stake||0})">一键结算</button>
+        <button onclick="settleBet('${r.date}','${r.bet_id}','${r.market_line}',${r.stake||0})">结算</button>
       </div>
-      <button class='secondary' onclick="voidBet('${r.date}','${r.bet_id}')">作废</button>
+      <div class='row'>
+        <button class='secondary' onclick="editBet('${r.date}','${r.bet_id}')">编辑</button>
+        <button class='secondary' onclick="voidBet('${r.date}','${r.bet_id}')">作废</button>
+      </div>
     </div>`;
   }).join('') || '<div class="muted">暂无记录</div>';
 }
 
-async function addBet(){
-  const p={
-    date:document.getElementById('f_date').value||today(),
+function buildPayload(status){
+  return {
+    date:document.getElementById('f_date').value||todayLocal(),
     fixture_id:document.getElementById('f_fixture').value||null,
     league:document.getElementById('f_league').value,
     home_cn:document.getElementById('f_home_cn').value,
     away_cn:document.getElementById('f_away_cn').value,
+    home_en:document.getElementById('f_home_en').value,
+    away_en:document.getElementById('f_away_en').value,
+    kickoff_time:document.getElementById('f_kickoff').value,
     v4_grade:document.getElementById('f_grade').value,
     market_line:document.getElementById('f_line').value,
     stake:Number(document.getElementById('f_stake').value||0),
@@ -172,12 +219,27 @@ async function addBet(){
     entry_minute:Number(document.getElementById('f_entry_min').value||0),
     score_at_entry:document.getElementById('f_entry_score').value,
     official_source:document.getElementById('f_source').value,
-    bet_status:document.getElementById('f_status').value,
+    bet_status:status,
     v4_script:document.getElementById('f_script').value,
+    ht_model_score:(document.getElementById('f_ht_model_score').value===''?null:Number(document.getElementById('f_ht_model_score').value)),
+    no_bet_reason: status==='NO_BET' ? document.getElementById('f_no_bet_reason').value : '',
     notes:document.getElementById('f_notes').value,
   };
+}
+
+async function addBet(status='BET'){
+  const p=buildPayload(status);
   const r=await jpost('/api/live_bets/add',p);
   if(!r.ok){ alert('添加失败: '+(r.error||'unknown')); return; }
+  await refreshAll();
+}
+
+async function addNoBet(){ return addBet('NO_BET'); }
+
+async function editBet(date,betId){
+  const p={date,bet_id:betId,patch:{entry_minute:Number(document.getElementById('f_entry_min').value||0),score_at_entry:document.getElementById('f_entry_score').value,notes:document.getElementById('f_notes').value}};
+  const r=await jpost('/api/live_bets/update',p);
+  if(!r.ok){ alert('编辑失败'); return; }
   await refreshAll();
 }
 
@@ -195,11 +257,13 @@ async function voidBet(date,betId){
   await refreshAll();
 }
 
-async function refreshAll(){ await refreshKpis(); await refreshList(); }
+async function refreshAll(){ await refreshKpis(); await loadCandidates(); await refreshList(); }
 
-document.getElementById('f_date').value=today();
+document.getElementById('f_date').value=todayLocal();
 document.getElementById('f_grade').addEventListener('change',bindDefaultStake);
 document.getElementById('f_line').addEventListener('change',bindDefaultStake);
+document.getElementById('f_candidate').addEventListener('change',applyCandidate);
+document.getElementById('f_date').addEventListener('change',refreshAll);
 bindDefaultStake();
 refreshAll();
 </script>
