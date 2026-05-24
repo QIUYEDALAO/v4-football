@@ -114,7 +114,7 @@ def day_summary(date: str) -> Dict[str, Any]:
     gross = sum(float(r.get("gross_pnl") or 0) for r in settled)
     rebate = sum(float(r.get("rebate") or 0) for r in settled)
     net = sum(float(r.get("net_pnl") or 0) for r in settled)
-    roi = (net / stake) if stake else 0
+    roi = (net / stake) if stake else None
 
     by_grade = {}
     by_line = {}
@@ -127,17 +127,20 @@ def day_summary(date: str) -> Dict[str, Any]:
             b["stake"] += float(r.get("stake") or 0)
             b["net_pnl"] += float(r.get("net_pnl") or 0)
         for g, b in buckets.items():
-            b["roi"] = (b["net_pnl"] / b["stake"]) if b["stake"] else 0
+            b["roi"] = (b["net_pnl"] / b["stake"]) if b["stake"] else None
+            b["roi_pct"] = round((b["roi"] * 100.0), 4) if b["roi"] is not None else None
         bucket_name.update(buckets)
 
     return {
         "date": date,
         "initial_bankroll": 30000,
         "today_stake": round(stake, 4),
+        "today_turnover": round(stake, 4),
         "today_gross_pnl": round(gross, 4),
         "today_rebate": round(rebate, 4),
         "today_net_pnl": round(net, 4),
-        "today_roi": round(roi, 6),
+        "today_roi": round(roi, 6) if roi is not None else None,
+        "today_roi_pct": round((roi * 100.0), 4) if roi is not None else None,
         "records": len(rows),
         "settled_records": len(settled),
         "by_grade": by_grade,
@@ -156,15 +159,17 @@ def cumulative_summary() -> Dict[str, Any]:
     gross = sum(float(r.get("gross_pnl") or 0) for r in settled)
     rebate = sum(float(r.get("rebate") or 0) for r in settled)
     net = sum(float(r.get("net_pnl") or 0) for r in settled)
-    roi = (net / stake) if stake else 0
+    roi = (net / stake) if stake else None
     return {
         "initial_bankroll": 30000,
         "current_bankroll": round(30000 + net, 4),
         "cumulative_stake": round(stake, 4),
+        "cumulative_turnover": round(stake, 4),
         "cumulative_gross_pnl": round(gross, 4),
         "cumulative_rebate": round(rebate, 4),
         "cumulative_net_pnl": round(net, 4),
-        "cumulative_roi": round(roi, 6),
+        "cumulative_roi": round(roi, 6) if roi is not None else None,
+        "cumulative_roi_pct": round((roi * 100.0), 4) if roi is not None else None,
         "records": len(all_rows),
         "settled_records": len(settled),
     }
