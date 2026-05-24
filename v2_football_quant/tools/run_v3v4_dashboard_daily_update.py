@@ -56,6 +56,23 @@ def marker_paths(date: str) -> dict[str, Path]:
         "history_recovery": STATUS / f"v4_match_date_validation_history_recovery_{date}.json",
     }
 
+
+def load_allowlist() -> dict[str, Any]:
+    path = STATUS / "v3v4_dashboard_active_source_allowlist_20260525.json"
+    return load(path) if path.exists() else {}
+
+
+def is_allowlisted(path: Path, key: str) -> bool:
+    cfg = load_allowlist().get("active_allowlist", {})
+    if not isinstance(cfg, dict):
+        return True
+    allowed = cfg.get(key)
+    if not isinstance(allowed, list):
+        return True
+    rel = str(path.relative_to(ROOT))
+    return rel in allowed
+
+
 def _yesterday_target(date: str) -> str:
     return (datetime.strptime(date, "%Y%m%d").date() - timedelta(days=1)).strftime("%Y%m%d")
 
@@ -156,6 +173,12 @@ def build_marker(args: argparse.Namespace) -> dict[str, Any]:
         phase_cfg = final_task_config(plan)
     blockers: list[str] = []
     warnings: list[str] = []
+    if paths["candidate_view"].exists() and not is_allowlisted(paths["candidate_view"], "candidate_view"):
+        blockers.append("CANDIDATE_SOURCE_NOT_ALLOWLISTED")
+    if paths["validation_summary"].exists() and not is_allowlisted(paths["validation_summary"], "validation_summary"):
+        blockers.append("VALIDATION_SOURCE_NOT_ALLOWLISTED")
+    if paths["script_validation_summary"].exists() and not is_allowlisted(paths["script_validation_summary"], "script_validation_summary"):
+        blockers.append("SCRIPT_VALIDATION_SOURCE_NOT_ALLOWLISTED")
 
     if args.phase == "after-scan":
         if args.final_pass:

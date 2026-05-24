@@ -48,15 +48,35 @@ def _latest(pattern: str) -> Path | None:
     return files[-1] if files else None
 
 
+def _active_source_allowlist() -> dict[str, Any]:
+    path = STATUS_DIR / "v3v4_dashboard_active_source_allowlist_20260525.json"
+    if not path.exists():
+        return {}
+    return _load_json(path)
+
+
+def _is_allowed(rel_path: str, key: str) -> bool:
+    allow = _active_source_allowlist().get("active_allowlist", {})
+    if not isinstance(allow, dict):
+        return True
+    allowed = allow.get(key)
+    if not isinstance(allowed, list):
+        return True
+    return rel_path in allowed
+
+
 def _latest_candidate_view(date_key: str = DATE_KEY) -> tuple[dict[str, Any], Path | None]:
     # Prefer the formal daily brief resolver output for the requested date.
     candidate_path = STATUS_DIR / f"v3v4_dashboard_candidate_view_{date_key}.json"
     if not candidate_path.exists() and resolve_brief is not None:
         resolve_brief(date_key, write=True)
     if candidate_path.exists():
-        return _load_json(candidate_path), candidate_path
-    path = _latest("intel_desk_v4_candidate_view_*.json")
-    return (_load_json(path), path) if path else ({}, None)
+        rel = str(candidate_path.relative_to(MODULE))
+        if _is_allowed(rel, "candidate_view"):
+            return _load_json(candidate_path), candidate_path
+    # Fail closed: do not fallback to legacy intel_desk_v4_candidate_view_*.json
+    # to avoid stale source pollution (e.g., 20260522 rollback artifacts).
+    return {}, None
 
 
 def _latest_v3_status() -> tuple[dict[str, Any], Path | None]:
