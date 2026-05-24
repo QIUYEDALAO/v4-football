@@ -11,10 +11,12 @@ from urllib.parse import parse_qs, urlparse
 from live_bet_tracker_schema import build_default_record, validate_record
 from live_bet_settlement import settle
 import live_bet_store as store
+from team_cn_resolver import TeamCnResolver
 
 ROOT = Path(__file__).resolve().parents[1]
 DASH = ROOT / "data/runtime/dashboard"
 STATUS = ROOT / "data/runtime/status"
+TEAM_RESOLVER = TeamCnResolver()
 
 
 def _load_json(path: Path) -> dict:
@@ -46,19 +48,36 @@ def _normalize_candidate_rows(view: dict, source_date: str) -> list[dict]:
         for r in (view.get(key) or []):
             if not isinstance(r, dict):
                 continue
+            home_en = r.get("home_en") or r.get("home_team_en") or r.get("home") or ""
+            away_en = r.get("away_en") or r.get("away_team_en") or r.get("away") or ""
+            home_cn_raw = r.get("home_cn") or r.get("home_team_cn") or ""
+            away_cn_raw = r.get("away_cn") or r.get("away_team_cn") or ""
+            if isinstance(home_cn_raw, str) and home_cn_raw.startswith("中文名缺失："):
+                home_cn_raw = ""
+            if isinstance(away_cn_raw, str) and away_cn_raw.startswith("中文名缺失："):
+                away_cn_raw = ""
+            resolved = TEAM_RESOLVER.resolve_match(
+                home_team_en=home_en,
+                away_team_en=away_en,
+                home_team_cn_hint=home_cn_raw,
+                away_team_cn_hint=away_cn_raw,
+                source=f"candidate_view:{source_date}",
+            )
             rows.append({
                 "fixture_id": r.get("fixture_id"),
                 "league": r.get("league") or "",
-                "home_cn": r.get("home_cn") or r.get("home_team_cn") or r.get("home") or "",
-                "away_cn": r.get("away_cn") or r.get("away_team_cn") or r.get("away") or "",
-                "home_en": r.get("home_en") or r.get("home_team_en") or r.get("home") or "",
-                "away_en": r.get("away_en") or r.get("away_team_en") or r.get("away") or "",
+                "home_cn": resolved.get("home_team_cn") or (r.get("home_cn") or r.get("home_team_cn") or r.get("home") or ""),
+                "away_cn": resolved.get("away_team_cn") or (r.get("away_cn") or r.get("away_team_cn") or r.get("away") or ""),
+                "home_en": resolved.get("home_team_en") or home_en,
+                "away_en": resolved.get("away_team_en") or away_en,
                 "kickoff_time": r.get("kickoff_display") or "",
                 "v4_grade": r.get("grade") or key[0],
                 "v4_script": r.get("script_type") or "",
                 "ht_model_score": r.get("ht_score"),
                 "official_source": "official_57",
                 "candidate_source_date": source_date,
+                "team_cn_source": resolved.get("team_cn_source"),
+                "team_cn_missing": resolved.get("team_cn_missing"),
             })
     return rows
 
@@ -110,11 +129,17 @@ class H(BaseHTTPRequestHandler):
             date = q.get("date", [datetime.utcnow().strftime("%Y%m%d")])[0]
             view, source_date, fallback = _resolve_candidate_view(date)
             rows = _normalize_candidate_rows(view, source_date)
+            semantics = {
+                "book_date": date,
+                "candidate_batch_date": source_date or None,
+                "note": "扫描批次可早于开赛日；例如 20260524 批次可包含 20260525 凌晨比赛。",
+            }
             return _json(self, 200, {
                 "ok": True,
                 "date": date,
                 "candidate_source_date": source_date or None,
                 "fallback_used": fallback,
+                "semantics": semantics,
                 "rows": rows,
             })
 

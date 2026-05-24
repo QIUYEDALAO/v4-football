@@ -15,6 +15,10 @@ label{display:block;font-size:12px;color:var(--muted);margin:6px 0 4px}input,sel
 button{background:var(--primary);border-color:var(--primary);font-weight:700}button.secondary{background:#29384f;border-color:#425777}
 .row{display:grid;grid-template-columns:1fr 1fr;gap:8px}.row3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}
 .item{border:1px solid var(--line);border-radius:10px;padding:8px;margin:8px 0;background:#0d1729}.item.pending{border-color:#f3c969}.tag{display:inline-block;font-size:11px;padding:2px 6px;border-radius:999px;background:#2d3d5a;margin-right:6px}
+.candidate-list{max-height:210px;overflow:auto;border:1px solid var(--line);border-radius:10px;padding:6px;background:#0d1729}
+.candidate-card{border:1px solid #2b3b58;border-radius:10px;padding:8px;margin:6px 0;cursor:pointer}
+.candidate-card.active{border-color:#5b8dff;background:#12203a}
+.candidate-title{font-weight:700}
 .bad{color:var(--bad)}.good{color:var(--good)}.warn{color:var(--warn)}.muted{color:var(--muted)}
 summary{cursor:pointer}
 @media (max-width:760px){.compact{grid-template-columns:repeat(2,minmax(0,1fr))}.row3{grid-template-columns:1fr}.row{grid-template-columns:1fr}.v{font-size:14px}}
@@ -42,10 +46,13 @@ summary{cursor:pointer}
 <div class="panel">
   <h3 style="margin:0 0 6px">快速添加投注</h3>
   <div class="row3">
-    <div><label>日期</label><input id="f_date" /></div>
-    <div><label>选择今日候选</label><select id="f_candidate"><option value="">加载中...</option></select></div>
-    <div><label>候选来源日期</label><input id="candidate_source_date" readonly /></div>
+    <div><label>记账日期 / 投注日期</label><input id="f_date" /></div>
+    <div><label>候选批次 / 扫描日</label><input id="candidate_source_date" readonly /></div>
+    <div><label>候选搜索</label><input id="candidate_search" placeholder="搜索球队/联赛/评级" /></div>
   </div>
+  <div class="muted" id="candidate_semantics_note" style="margin-top:4px">扫描日可早于开赛日，24号批次可包含25号凌晨比赛。</div>
+  <label style="margin-top:6px">候选卡片（点击自动填表）</label>
+  <div id="candidate_cards" class="candidate-list"><div class="muted">加载中...</div></div>
 
   <div class="row3">
     <div><label>评级</label><select id="f_grade"><option>A</option><option selected>B</option><option>C</option><option>SKIP</option></select></div>
@@ -127,24 +134,52 @@ async function jget(url){ const r=await fetch(url,{cache:'no-store'}); return r.
 async function jpost(url,payload){ const r=await fetch(url,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)}); return r.json(); }
 
 let candidateRows=[];
+let filteredCandidateRows=[];
+let activeCandidateIdx=-1;
 async function loadCandidates(){
   const d=document.getElementById('f_date').value||todayLocal();
   const res=await jget(`/api/live_bets/candidates?date=${d}`);
   candidateRows=res.rows||[];
+  filteredCandidateRows=[...candidateRows];
+  activeCandidateIdx=-1;
   document.getElementById('candidate_source_date').value = res.candidate_source_date || 'N/A';
-  const sel=document.getElementById('f_candidate');
-  const opts=['<option value="">手工录入</option>'];
-  candidateRows.forEach((r,i)=>{
-    opts.push(`<option value="${i}">[${r.v4_grade}] ${r.home_cn} vs ${r.away_cn} · ${r.league} · ${r.kickoff_time||''}</option>`);
-  });
-  sel.innerHTML=opts.join('');
+  const note = (res.semantics && res.semantics.note) ? res.semantics.note : '扫描日可早于开赛日，24号批次可包含25号凌晨比赛。';
+  document.getElementById('candidate_semantics_note').textContent = note;
+  renderCandidateCards();
 }
 
-function applyCandidate(){
-  const v=document.getElementById('f_candidate').value;
-  if(v==='') return;
-  const r=candidateRows[Number(v)];
+function renderCandidateCards(){
+  const box=document.getElementById('candidate_cards');
+  if(!filteredCandidateRows.length){
+    box.innerHTML='<div class="muted">无候选（可手工录入）</div>';
+    return;
+  }
+  box.innerHTML = filteredCandidateRows.map((r,i)=>`<div class="candidate-card ${i===activeCandidateIdx?'active':''}" data-i="${i}">
+    <div class="candidate-title">${r.home_cn||r.home_en||'-'} vs ${r.away_cn||r.away_en||'-'}</div>
+    <div class="muted">联赛 ${r.league||'-'} · 评级 ${r.v4_grade||'-'} · 开赛 ${r.kickoff_time||'-'}</div>
+    <div class="muted">扫描批次 ${r.candidate_source_date||'N/A'}</div>
+  </div>`).join('');
+  box.querySelectorAll('.candidate-card').forEach(el=>{
+    el.addEventListener('click',()=>applyCandidateCard(Number(el.getAttribute('data-i'))));
+  });
+}
+
+function filterCandidates(){
+  const q=(document.getElementById('candidate_search').value||'').trim().toLowerCase();
+  if(!q){ filteredCandidateRows=[...candidateRows]; activeCandidateIdx=-1; renderCandidateCards(); return; }
+  filteredCandidateRows=candidateRows.filter(r=>{
+    const text=[r.home_cn,r.away_cn,r.home_en,r.away_en,r.league,r.v4_grade,r.kickoff_time,r.candidate_source_date].join(' ').toLowerCase();
+    return text.includes(q);
+  });
+  activeCandidateIdx=-1;
+  renderCandidateCards();
+}
+
+function applyCandidateCard(idx){
+  const r=filteredCandidateRows[idx];
   if(!r) return;
+  activeCandidateIdx=idx;
+  renderCandidateCards();
   document.getElementById('f_fixture').value=r.fixture_id||'';
   document.getElementById('f_league').value=r.league||'';
   document.getElementById('f_home_cn').value=r.home_cn||'';
@@ -262,7 +297,7 @@ async function refreshAll(){ await refreshKpis(); await loadCandidates(); await 
 document.getElementById('f_date').value=todayLocal();
 document.getElementById('f_grade').addEventListener('change',bindDefaultStake);
 document.getElementById('f_line').addEventListener('change',bindDefaultStake);
-document.getElementById('f_candidate').addEventListener('change',applyCandidate);
+document.getElementById('candidate_search').addEventListener('input',filterCandidates);
 document.getElementById('f_date').addEventListener('change',refreshAll);
 bindDefaultStake();
 refreshAll();

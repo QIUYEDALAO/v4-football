@@ -35,7 +35,9 @@ def main() -> int:
     else:
         html = page.read_text(encoding='utf-8', errors='ignore')
         required_tokens = [
-            '选择今日候选',
+            '候选搜索',
+            '候选卡片（点击自动填表）',
+            '扫描日可早于开赛日',
             '今日投注建议',
             'A:300/250/150/跳过',
             'B:150/120/跳过',
@@ -48,6 +50,8 @@ def main() -> int:
         for tok in required_tokens:
             if tok not in html:
                 blockers.append(f'page_missing_token:{tok}')
+        if 'id="f_candidate"' in html:
+            blockers.append('legacy_long_select_still_present')
         if "document.getElementById('f_date').value=todayLocal();" not in html:
             blockers.append('default_date_not_today_local')
         if '20260524' in html:
@@ -116,8 +120,10 @@ def main() -> int:
                 blockers.append('candidates_rows_missing')
             else:
                 rows = js.get('rows') or []
+                if 'semantics' not in js:
+                    blockers.append('candidates_semantics_missing')
                 for row in rows[:3]:
-                    for k in ['fixture_id', 'league', 'home_cn', 'away_cn', 'v4_grade', 'official_source', 'candidate_source_date']:
+                    for k in ['fixture_id', 'league', 'home_cn', 'away_cn', 'v4_grade', 'official_source', 'candidate_source_date', 'team_cn_missing']:
                         if k not in row:
                             blockers.append(f'candidate_field_missing:{k}')
                             break
