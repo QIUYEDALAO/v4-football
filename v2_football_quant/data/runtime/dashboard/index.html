@@ -13,7 +13,7 @@ header{padding:10px 2px 16px}h1{margin:0;font-size:26px;letter-spacing:.02em}.su
 <body>
 <header>
   <h1>情报决策总台 — V3/V4</h1>
-  <div class="sub">generated=2026-05-24T15:14:48+08:00 · source_window=daily_1200 · no capture · no push · no cloud publish</div>
+  <div class="sub">generated=2026-05-24T15:55:17+08:00 · source_window=daily_1200 · no capture · no push · no cloud publish</div>
 </header>
 
 <section class="kpi-grid" aria-label="top status cards">
@@ -29,19 +29,19 @@ header{padding:10px 2px 16px}h1{margin:0;font-size:26px;letter-spacing:.02em}.su
   <h2>V3/V4 比赛验证</h2>
   <p class="hint">只展示昨日验证与累计验证；数据来自正式 V4 attribution / validation / review，不从 brief 反推命中率。</p>
   <div class="validation-grid">
-    <div class="validation-col validation-yesterday"><h3>昨日验证</h3><div class='validation-metric validation-row-A'><span>A</span><b>N/A</b></div><div class='validation-metric validation-row-B'><span>B</span><b>N/A</b></div><div class='validation-metric validation-row-AplusB'><span>A+B</span><b>N/A</b></div></div>
-    <div class="validation-col validation-cumulative"><h3>累计验证</h3><div class='validation-metric validation-row-A'><span>A</span><b>39/46 · 84.8%</b></div><div class='validation-metric validation-row-B'><span>B</span><b>85/94 · 90.4%</b></div><div class='validation-metric validation-row-AplusB'><span>A+B</span><b>124/140 · 88.6%</b></div></div>
+    <div class="validation-col validation-yesterday"><h3>昨日验证</h3><div class='validation-metric validation-row-A'><span>A</span><b>2/3 · 66.7%</b></div><div class='validation-metric validation-row-B'><span>B</span><b>6/8 · 75.0%</b></div><div class='validation-metric validation-row-AplusB'><span>A+B</span><b>8/11 · 72.7%</b></div></div>
+    <div class="validation-col validation-cumulative"><h3>累计验证</h3><div class='validation-metric validation-row-A'><span>A</span><b>25/41 · 61.0%</b></div><div class='validation-metric validation-row-B'><span>B</span><b>50/89 · 56.2%</b></div><div class='validation-metric validation-row-AplusB'><span>A+B</span><b>75/130 · 57.7%</b></div></div>
   </div>
   <div class="script-validation-lite">
     <span class="script-lite-title">剧本验证（辅助）</span>
-    <b>累计 A+B：69/124 · 55.6%</b>
+    <b>昨日 A+B：8/12 · 66.7%　|　累计 A+B：69/124 · 55.6%</b>
     <em>走势吻合率，不影响 A/B 结果命中率</em>
   </div>
-  <p class="hint script-validation-reason">走势吻合率，不影响 A/B 结果命中率。</p>
-  <p class="hint validation-empty-reason">累计验证已从本地 match_date attribution 历史恢复；昨日暂无可信已结算样本，显示 N/A。</p>
+  <p class="hint script-validation-reason">昨日已从official 12场events audit拉取可信事件时间。累计保持。</p>
+  <p class="hint validation-empty-reason">验证数据已加载：昨日与累计均来自正式 V4 attribution / validation / review。</p>
   <p class="hint v3-validation-row">V3：战备预留 / N/A</p>
-  <details class="validation-audit"><summary><span>展开：验证审计</span><b>audit</b></summary><p class="audit-code">source_files=<br>data/v4_archive/v4_result_attribution_20260513.jsonl<br>data/v4_archive/v4_result_attribution_20260514.jsonl<br>data/v4_archive/v4_result_attribution_20260515.jsonl<br>data/v4_archive/v4_result_attribution_20260516.jsonl<br>data/v4_archive/v4_result_attribution_20260517.jsonl<br>data/v4_archive/v4_result_attribution_20260518.jsonl<br>data/v4_archive/v4_result_attribution_20260520.jsonl<br>unknown_count_yesterday=0<br>unknown_count_cumulative=0<br>latest_validation_date=2026-05-21<br>api_enabled=false<br>brief_used_for_hit_rate=false<br>C_observation_deprecated=true<br>last_7d_removed=true</p></details>
-  <details class="validation-audit script-validation-audit"><summary><span>展开：剧本验证明细</span><b>script</b></summary><p class="audit-code">昨日：N/A（暂无可信已结算样本）<br>A：22/39 · 56.4% · SCRIPT_UNKNOWN=7<br>B：47/85 · 55.3% · SCRIPT_UNKNOWN=12<br>A+B：69/124 · 55.6% · SCRIPT_UNKNOWN=19<br>SCRIPT_UNKNOWN：19，不进分母<br>数据源：正式 attribution 事件时间<br>script_source_files=<br>data/v4_archive/v4_result_attribution_20260513.jsonl<br>data/v4_archive/v4_result_attribution_20260514.jsonl<br>data/v4_archive/v4_result_attribution_20260515.jsonl<br>data/v4_archive/v4_result_attribution_20260516.jsonl<br>data/v4_archive/v4_result_attribution_20260517.jsonl<br>data/v4_archive/v4_result_attribution_20260518.jsonl<br>data/v4_archive/v4_result_attribution_20260519.jsonl<br>data/v4_archive/v4_result_attribution_20260520.jsonl<br>brief_used_for_script_validation=false<br>match_date_used=true<br>scan_date_used=false<br>C_excluded=true<br>SKIP_excluded=true</p></details>
+  <details class="validation-audit"><summary><span>展开：验证审计</span><b>audit</b></summary><p class="audit-code">source_files=<br>data/runtime/status/v4_yesterday_validation_rebuilt_20260523.json<br>data/runtime/status/v4_rolling_validation_rebuilt_20260520.json<br>data/runtime/status/v4_validation_raw_records_20260520.json<br>unknown_count_yesterday=0<br>unknown_count_cumulative=6<br>latest_validation_date=unknown<br>api_enabled=true<br>brief_used_for_hit_rate=false<br>C_observation_deprecated=true<br>last_7d_removed=true</p></details>
+  <details class="validation-audit script-validation-audit"><summary><span>展开：剧本验证明细</span><b>script</b></summary><p class="audit-code">昨日：8/12 · 66.7%<br>A：2/3 · 66.7% · SCRIPT_UNKNOWN=0<br>B：6/9 · 66.7% · SCRIPT_UNKNOWN=0<br>A+B：8/12 · 66.7% · SCRIPT_UNKNOWN=0<br>累计：A+B 69/124 · 55.6% · SCRIPT_UNKNOWN=19<br>昨日数据源：official 12场 events audit，不进分母<br>数据源：正式 attribution 事件时间<br>script_source_files=<br>N/A<br>brief_used_for_script_validation=false<br>match_date_used=true<br>scan_date_used=false<br>C_excluded=true<br>SKIP_excluded=true</p></details>
 </section>
 <section class="panel">
   <h2>V4 情报状态</h2>
@@ -170,7 +170,7 @@ header{padding:10px 2px 16px}h1{margin:0;font-size:26px;letter-spacing:.02em}.su
   <h2>下一动作</h2>
   <ul class="next-list"><li>等待 BOSS 验收 UI。</li><li>每日刷新仅使用 V3/V4 active source。</li><li>任何推送/cron/cloud 均需单独授权。</li></ul>
 </section>
-<details class="panel"><summary><span>系统审计折叠区</span><b>展开</b></summary><p class="audit-code">source_hash=2a9a6dec488c81b9830ad4cae709e0f97ff537b5fffd32cb704df5f1dd208f0e<br>candidate_source=data/runtime/status/v3v4_dashboard_candidate_view_20260524.json<br>validation_source_hash=cdc642b2f725218eee60850ed9eb0b67c1c7f56788114d1d90da54709efc64fc<br>v3_source=reserved<br>api_status=API_OK<br>api_safe_to_scan=True<br>cache-only mode when blocked=true</p></details>
+<details class="panel"><summary><span>系统审计折叠区</span><b>展开</b></summary><p class="audit-code">source_hash=2a9a6dec488c81b9830ad4cae709e0f97ff537b5fffd32cb704df5f1dd208f0e<br>candidate_source=data/runtime/status/v3v4_dashboard_candidate_view_20260524.json<br>validation_source_hash=79547b6b390e4a3bc70a6dbf3f281fcd3f55e47a6c181c78cc49816d78bf6c55<br>v3_source=reserved<br>api_status=API_OK<br>api_safe_to_scan=True<br>cache-only mode when blocked=true</p></details>
 </aside>
 </div>
 </body>

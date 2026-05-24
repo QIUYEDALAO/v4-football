@@ -27,6 +27,20 @@ def main()->int:
     if val.get('brief_used_for_hit_rate') is not False: blockers.append('brief_used_for_hit_rate')
     if val.get('date_filter_field') not in ('match_date',None): blockers.append('date_filter_not_match_date')
     if val.get('yesterday_validation_target_date')!='20260523': blockers.append('yesterday_target_not_20260523')
+    y=((val.get('dashboard_active') or {}).get('yesterday') or {})
+    a=((y.get('A') or {}).get('display_rate') or 'N/A')
+    b=((y.get('B') or {}).get('display_rate') or 'N/A')
+    ab=((y.get('A_plus_B') or y.get('AB') or {}).get('display_rate') or 'N/A')
+    na_all = (a=='N/A' and b=='N/A' and ab=='N/A')
+    reason=((val.get('yesterday') or {}).get('reason')) or ((y.get('A_plus_B') or {}).get('reason')) or ''
+    if na_all and not reason:
+        if 'validation-empty-reason' not in text:
+            blockers.append('all_na_without_reason')
+    # If trusted rows exist for target_date, all N/A must be blocked.
+    truth=load(STATUS/f'v3v4_yesterday_validation_source_truth_audit_20260524.json')
+    trusted_ab=int(truth.get('trusted_AB_records_for_20260523') or 0)
+    if trusted_ab>0 and na_all:
+        blockers.append('trusted_rows_exist_but_all_na')
 
     if 'validation-yesterday' not in text and '昨日验证' in text:
         warnings.append('yesterday_css_hook_missing')
@@ -41,6 +55,9 @@ def main()->int:
       'brief_used_for_hit_rate':val.get('brief_used_for_hit_rate'),
       'scan_date_used_for_validation':val.get('date_filter_field')=='scan_date',
       'yesterday_validation_target_date':val.get('yesterday_validation_target_date'),
+      'trusted_AB_records_for_target_date':trusted_ab,
+      'all_na':na_all,
+      'na_reason':reason,
       'blockers':blockers,
       'warnings':warnings,
       'conclusion':'BLOCKER' if blockers else ('WARN_ONLY' if warnings else 'PASS')

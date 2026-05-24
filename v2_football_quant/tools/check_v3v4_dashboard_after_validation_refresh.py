@@ -20,6 +20,17 @@ def main():
     if data.get('brief_used_for_hit_rate') not in (False,None): blockers.append('brief_used_for_hit_rate')
     if data.get('date_filter_field') not in ('match_date', None): blockers.append('validation_not_match_date')
     if data.get('yesterday_validation_target_date') != '20260523': blockers.append('after_validation_target_date_not_20260523')
+    val_path=STATUS/f'v3v4_validation_summary_{DATE}.json'
+    if val_path.exists():
+        val=json.loads(val_path.read_text())
+        y=((val.get('dashboard_active') or {}).get('yesterday') or {})
+        a=((y.get('A') or {}).get('display_rate') or 'N/A')
+        b=((y.get('B') or {}).get('display_rate') or 'N/A')
+        ab=((y.get('A_plus_B') or y.get('AB') or {}).get('display_rate') or 'N/A')
+        if a=='N/A' and b=='N/A' and ab=='N/A':
+            reason=((val.get('yesterday') or {}).get('reason')) or ((y.get('A_plus_B') or {}).get('reason'))
+            if not reason:
+                blockers.append('after_validation_all_na_without_reason')
     if data.get('status')=='VALIDATION_NOT_READY': warnings.append('validation_not_ready')
     if '20260523' in str(data.get('validation_completion_marker')): blockers.append('stale_validation_marker_path')
     out={'checker':'tools/check_v3v4_dashboard_after_validation_refresh.py','phase':'V3V4-DASHBOARD-DYNAMIC-DATE-MARKER-AND-MATCHDATE-TZ-HOTFIX','date':DATE,'conclusion':'BLOCKER' if blockers else ('WARN_ONLY' if warnings else 'PASS'),'after_validation_time':data.get('planned_time'),'requires_validation_completed':data.get('requires_validation_completed'),'validation_ready':data.get('validation_ready'),'candidate_touched':data.get('candidate_touched'),'brief_used_for_hit_rate':data.get('brief_used_for_hit_rate'),'date_filter_field':data.get('date_filter_field'),'yesterday_validation_target_date':data.get('yesterday_validation_target_date'),'status':data.get('status'),'blockers':blockers,'warnings':warnings}

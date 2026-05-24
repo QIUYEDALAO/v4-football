@@ -79,6 +79,17 @@ def main() -> int:
         blockers.append("final_target_date_not_20260523")
     if marker.get("script_unknown_excluded_from_denominator") is not True:
         blockers.append("script_unknown_denominator_guard_missing")
+    val_path = STATUS / f"v3v4_validation_summary_{args.date}.json"
+    if val_path.exists():
+        val = load(val_path)
+        y = ((val.get("dashboard_active") or {}).get("yesterday") or {})
+        a = ((y.get("A") or {}).get("display_rate") or "N/A")
+        b = ((y.get("B") or {}).get("display_rate") or "N/A")
+        ab = (((y.get("A_plus_B") or y.get("AB") or {})).get("display_rate") or "N/A")
+        if a == "N/A" and b == "N/A" and ab == "N/A":
+            reason = ((val.get("yesterday") or {}).get("reason")) or ((y.get("A_plus_B") or {}).get("reason"))
+            if not reason:
+                blockers.append("final_all_na_without_reason")
     if marker.get("refresh_status") not in {"NOOP_AFTER_VALIDATION_RERUN", "UPDATED_AFTER_FINAL_VALIDATION", "VALIDATION_NOT_READY_FINAL", "VALIDATION_HASH_MISSING"}:
         blockers.append(f"final_refresh_status_invalid:{marker.get('refresh_status')}")
     if marker.get("dashboard_validation_refreshed") not in {True, False}:

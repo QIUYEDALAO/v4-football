@@ -62,6 +62,14 @@ def main():
     if final_marker.get('yesterday_validation_target_date')!='20260523': blockers.append('final_target_date_not_20260523')
     if final_marker.get('refresh_status') not in ('NOOP_AFTER_VALIDATION_RERUN','UPDATED_AFTER_FINAL_VALIDATION','VALIDATION_NOT_READY_FINAL','VALIDATION_HASH_MISSING'):
         blockers.append(f"final_refresh_status_invalid:{final_marker.get('refresh_status')}")
+    val=load(STATUS/f'v3v4_validation_summary_{DATE}.json')
+    y=((val.get('dashboard_active') or {}).get('yesterday') or {})
+    a=((y.get('A') or {}).get('display_rate') or 'N/A')
+    b=((y.get('B') or {}).get('display_rate') or 'N/A')
+    ab=((y.get('A_plus_B') or y.get('AB') or {}).get('display_rate') or 'N/A')
+    if a=='N/A' and b=='N/A' and ab=='N/A':
+        reason=((val.get('yesterday') or {}).get('reason')) or ((y.get('A_plus_B') or {}).get('reason'))
+        if not reason: blockers.append('pipeline_all_na_without_reason')
 
     timeout_cfg=p.get('scan_timeout', {}) if isinstance(p.get('scan_timeout'), dict) else {}
     timeout_seconds=int(timeout_cfg.get('timeout_seconds') or timeout_cfg.get('recommended_timeout_seconds') or 0)
