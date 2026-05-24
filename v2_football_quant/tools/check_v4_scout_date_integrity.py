@@ -37,6 +37,12 @@ def normalize_date(raw: Any) -> str | None:
 
 
 def kickoff_date(row: dict) -> tuple[str | None, bool]:
+    # Repaired rows carry kickoff_local in the match-local timezone. Historical
+    # rows without timezone_source keep the older CST interpretation until a
+    # scoped repair phase rewrites them, so this checker remains non-destructive.
+    if row.get("timezone_source") and row.get("kickoff_local"):
+        local_date = normalize_date(row.get("kickoff_local"))
+        return local_date, bool(row.get("timezone_unknown"))
     raw = str(row.get("kickoff") or row.get("kickoff_time") or "").strip()
     if not raw:
         return None, False
@@ -136,14 +142,15 @@ def main() -> int:
         if not ok:
             blockers.append(name)
 
-    validation = load(STATUS / "v3v4_validation_summary_20260523.json", {})
+    latest_validation = sorted(STATUS.glob("v3v4_validation_summary_*.json"), key=lambda p: p.stat().st_mtime, reverse=True)
+    validation = load(latest_validation[0], {}) if latest_validation else {}
     c_active = validation.get("c_observation_active") is True
     if c_active:
         blockers.append("c_observation_active_true")
     status = "BLOCKER" if blockers else ("WARN_ONLY" if warnings else "PASS")
     out = {
         "checker": "tools/check_v4_scout_date_integrity.py",
-        "phase": "V4-SCOUT-DATE-INTEGRITY-REPAIR-AND-VALIDATION-REBASE-20260523",
+        "phase": "V3V4-DASHBOARD-DYNAMIC-DATE-MARKER-AND-MATCHDATE-TZ-HOTFIX",
         "check_status": status,
         "files_scanned": len(files),
         "total_rows": total_rows,
@@ -167,7 +174,8 @@ def main() -> int:
         "warnings": warnings,
     }
     STATUS.mkdir(parents=True, exist_ok=True)
-    (STATUS / "check_v4_scout_date_integrity_result_20260523.json").write_text(json.dumps(out, ensure_ascii=False, indent=2), encoding="utf-8")
+    marker_date = datetime.now(LOCAL_TZ).strftime("%Y%m%d")
+    (STATUS / f"check_v4_scout_date_integrity_result_{marker_date}.json").write_text(json.dumps(out, ensure_ascii=False, indent=2), encoding="utf-8")
     print(json.dumps(out, ensure_ascii=False, indent=2))
     return 1 if blockers else 0
 

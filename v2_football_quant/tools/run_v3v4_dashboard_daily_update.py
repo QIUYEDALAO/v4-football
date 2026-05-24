@@ -1,9 +1,10 @@
 #!/usr/bin/env python3
-"""Plan-only V3/V4 dashboard daily update gate.
+"""V3/V4 dashboard daily update gate with dynamic date marker resolution.
 
 This runner models the after-scan and after-validation dashboard refresh gates.
-It does not run V4 scan, capture, QQ push, cloud publish, cron creation, or
-strategy logic. Apply mode writes only a status marker for review.
+It never runs V4 scan, capture, QQ push, cloud publish, cron creation, or V4
+strategy logic. All formal markers are resolved from --date; stale fixed-date
+markers are never used as fallback.
 """
 from __future__ import annotations
 
@@ -18,17 +19,8 @@ from typing import Any
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "tools"))
 STATUS = ROOT / "data/runtime/status"
+REPORTS = ROOT / "data/daily_reports"
 TZ = timezone(timedelta(hours=8))
-
-PLAN_CANDIDATES = [
-    STATUS / "v3v4_dashboard_daily_auto_update_cron_plan_20260524.json",
-    STATUS / "v3v4_dashboard_daily_auto_update_cron_plan_20260523.json",
-]
-SCAN_MARKER = STATUS / "v4_scout_date_daily1200_post_repair_openclaw_verify_20260523.json"
-BRIEF_MARKER = STATUS / "v3v4_dashboard_brief_resolution_20260523.json"
-CANDIDATE_MARKER = STATUS / "v3v4_dashboard_candidate_view_20260523.json"
-VALIDATION_SUMMARY = STATUS / "v3v4_validation_summary_20260523.json"
-HISTORY_RECOVERY = STATUS / "v4_match_date_validation_history_recovery_20260523.json"
 LAST_GOOD = STATUS / "v3v4_intel_ops_console_daily_refresh_last_good.json"
 
 
@@ -47,22 +39,62 @@ def digest(paths: list[Path]) -> str:
     return hashlib.sha256("|".join(parts).encode()).hexdigest()
 
 
-def plan_path() -> Path:
-    for path in PLAN_CANDIDATES:
-        if path.exists():
-            return path
-    return PLAN_CANDIDATES[-1]
+def plan_path() -> Path | None:
+    candidates = sorted(STATUS.glob("v3v4_dashboard_daily_auto_update_cron_plan_*.json"), key=lambda p: p.stat().st_mtime, reverse=True)
+    return candidates[0] if candidates else None
+
+
+def marker_paths(date: str) -> dict[str, Path]:
+    return {
+        "scout": REPORTS / f"scout_v4_{date}.json",
+        "scan_perf": REPORTS / f"scan_perf_v4_{date}.json",
+        "brief": REPORTS / f"v4_openclaw_brief_{date}.txt",
+        "brief_resolution": STATUS / f"v3v4_dashboard_brief_resolution_{date}.json",
+        "candidate_view": STATUS / f"v3v4_dashboard_candidate_view_{date}.json",
+        "validation_summary": STATUS / f"v3v4_validation_summary_{date}.json",
+        "script_validation_summary": STATUS / f"v4_script_validation_summary_{date}.json",
+        "history_recovery": STATUS / f"v4_match_date_validation_history_recovery_{date}.json",
+    }
+
+def _yesterday_target(date: str) -> str:
+    return (datetime.strptime(date, "%Y%m%d").date() - timedelta(days=1)).strftime("%Y%m%d")
+
+def ensure_validation_summary(date: str, paths: dict[str, Path]) -> bool:
+    if paths["validation_summary"].exists():
+        return True
+    try:
+        from v3v4_dashboard_validation_resolver import resolve as resolve_validation
+        resolved = resolve_validation(date, write=True)
+        return bool(resolved)
+    except Exception:
+        return False
+
+
+def ensure_scan_markers(date: str, paths: dict[str, Path]) -> dict[str, Any]:
+    rebuilt = False
+    rebuild_status = "not_required"
+    if (not paths["brief_resolution"].exists() or not paths["candidate_view"].exists()) and paths["brief"].exists():
+        try:
+            from v3v4_dashboard_brief_resolver import resolve as resolve_brief
+            resolve_brief(date, write=True)
+            rebuilt = True
+            rebuild_status = "rebuilt_from_formal_brief"
+        except Exception as exc:  # keep gate explicit; do not fallback to stale dates
+            rebuild_status = f"rebuild_failed:{exc}"
+    return {"attempted": rebuilt, "status": rebuild_status}
 
 
 def final_task_config(plan: dict[str, Any]) -> dict[str, Any]:
     for task in plan.get("schedule", []):
-        if isinstance(task, dict) and task.get("task") == "V3V4_DASHBOARD_AFTER_VALIDATION_REFRESH_FINAL":
+        if not isinstance(task, dict):
+            continue
+        if task.get("task") in {"V4_VALIDATION_DRY_RUN_FINAL_AND_DASHBOARD_REFRESH", "V3V4_DASHBOARD_AFTER_VALIDATION_REFRESH_FINAL"}:
             return task
     return {}
 
 
-def validation_source_hash(validation: dict[str, Any]) -> str:
-    return str(validation.get("source_hash") or digest([VALIDATION_SUMMARY]))
+def validation_source_hash(validation: dict[str, Any], paths: dict[str, Path]) -> str:
+    return str(validation.get("source_hash") or digest([paths["validation_summary"], paths["script_validation_summary"]]))
 
 
 def previous_after_validation_hash(date: str) -> tuple[str | None, str | None]:
@@ -71,20 +103,7 @@ def previous_after_validation_hash(date: str) -> tuple[str | None, str | None]:
         STATUS / f"v3v4_dashboard_daily_update_after_validation_dry_run_{date}.json",
     ]
     candidates = [p for p in preferred if p.exists()]
-    candidates.extend(
-        sorted(
-            STATUS.glob("v3v4_dashboard_daily_update_after_validation_apply_*.json"),
-            key=lambda p: p.stat().st_mtime,
-            reverse=True,
-        )
-    )
-    candidates.extend(
-        sorted(
-            STATUS.glob("v3v4_dashboard_daily_update_after_validation_dry_run_*.json"),
-            key=lambda p: p.stat().st_mtime,
-            reverse=True,
-        )
-    )
+    # Audit fallback only: same-date markers are preferred; cross-date is never used for gating.
     seen: set[Path] = set()
     for path in candidates:
         if path in seen:
@@ -100,27 +119,33 @@ def previous_after_validation_hash(date: str) -> tuple[str | None, str | None]:
 
 
 def build_marker(args: argparse.Namespace) -> dict[str, Any]:
+    paths = marker_paths(args.date)
+    yesterday_target = _yesterday_target(args.date)
+    marker_resolution = ensure_scan_markers(args.date, paths)
     plan_file = plan_path()
-    plan = load(plan_file)
-    scan = load(SCAN_MARKER)
-    brief = load(BRIEF_MARKER)
-    candidate = load(CANDIDATE_MARKER)
-    validation = load(VALIDATION_SUMMARY)
-    recovery = load(HISTORY_RECOVERY)
+    plan = load(plan_file) if plan_file else {}
+    scan_perf = load(paths["scan_perf"])
+    brief = load(paths["brief_resolution"])
+    candidate = load(paths["candidate_view"])
+    validation = load(paths["validation_summary"])
+    recovery = load(paths["history_recovery"])
     phase_cfg = (plan.get("tasks") or {}).get(args.phase, {}) if isinstance(plan.get("tasks"), dict) else {}
     if args.final_pass:
         phase_cfg = final_task_config(plan)
     blockers: list[str] = []
+    warnings: list[str] = []
 
     if args.phase == "after-scan":
         if args.final_pass:
             blockers.append("FINAL_PASS_ONLY_ALLOWED_AFTER_VALIDATION")
-        if phase_cfg.get("planned_time") != "13:00":
+        planned_time = phase_cfg.get("planned_time") or phase_cfg.get("time")
+        if planned_time and planned_time != "13:00":
             blockers.append("after_scan_time_not_1300")
-        scan_completed = bool(scan) and scan.get("contaminated_rows") == 0 and scan.get("active_scan_time") == "12:00"
-        brief_ready = bool(brief.get("brief_exists")) and brief.get("date") == args.date and brief.get("is_today_brief") is True
+        scan_completed = bool(paths["scout"].exists() and scan_perf) and str(scan_perf.get("scout_file_date") or scan_perf.get("scan_date") or "").replace("-", "") == args.date
+        brief_ready = bool(brief.get("brief_exists")) and brief.get("date") == args.date and brief.get("source_date") == args.date
         candidate_ready = bool(candidate) and candidate.get("scan_date") == args.date
-        source_window_ok = scan.get("active_scan_window") == "daily_1200" and candidate.get("source_window") in {"daily_1200", "auto"}
+        source_window = candidate.get("source_window") or brief.get("window") or scan_perf.get("run_tag")
+        source_window_ok = source_window in {"daily_1200", "auto", "V4_MIDDAY", "midday"}
         if not scan_completed:
             blockers.append("SCAN_NOT_READY")
         if not brief_ready:
@@ -130,66 +155,71 @@ def build_marker(args: argparse.Namespace) -> dict[str, Any]:
         if not source_window_ok:
             blockers.append("SOURCE_WINDOW_NOT_DAILY_1200_COMPATIBLE")
         status = "SCAN_NOT_READY" if any(b in blockers for b in ["SCAN_NOT_READY", "BRIEF_NOT_READY", "CANDIDATE_NOT_READY"]) else "READY"
-        allowed_updates = ["candidate_list", "A_B_SKIP", "v4_status", "data_status_card", "today_brief_display"]
-        forbidden_updates = ["yesterday_validation", "cumulative_validation", "validation_summary", "attribution", "review"]
         validation_touched = False
+        validation_summary_exists = ensure_validation_summary(args.date, paths)
+        validation_preserved = bool(validation_summary_exists)
         candidate_touched = args.mode == "apply" and not blockers
         marker = {
             "status": status,
             "requires_scan_completed": True,
-            "scan_completion_marker": str(SCAN_MARKER.relative_to(ROOT)),
             "scan_completed": scan_completed,
+            "scan_completion_marker": str(paths["scan_perf"].relative_to(ROOT)) if paths["scan_perf"].exists() else None,
+            "scout_marker": str(paths["scout"].relative_to(ROOT)) if paths["scout"].exists() else None,
             "brief_ready": brief_ready,
             "candidate_ready": candidate_ready,
-            "source_window": candidate.get("source_window"),
-            "source_window_policy": "daily_1200_required; auto accepted only as dashboard resolver alias after daily_1200 proof",
-            "allowed_updates": allowed_updates,
-            "forbidden_updates": forbidden_updates,
+            "source_window": source_window,
+            "source_window_policy": "daily_1200_required; V4_MIDDAY accepted as scan_perf run_tag alias for daily_1200",
+            "allowed_updates": ["candidate_list", "A_B_SKIP", "v4_status", "data_status_card", "today_brief_display"],
+            "forbidden_updates": ["yesterday_validation", "cumulative_validation", "validation_summary", "attribution", "review"],
+            "dashboard_date": args.date,
+            "yesterday_validation_target_date": yesterday_target,
+            "validation_preserved": validation_preserved,
             "validation_touched": validation_touched,
             "candidate_touched": candidate_touched,
+            "result_validation_changed": False,
+            "script_validation_changed": False,
             "last_good_preserved_on_not_ready": True,
         }
     else:
         if args.final_pass and args.phase != "after-validation":
             blockers.append("FINAL_PASS_ONLY_ALLOWED_AFTER_VALIDATION")
-        if phase_cfg.get("planned_time") != "13:30":
-            if args.final_pass:
-                if phase_cfg.get("time") != "14:00":
-                    blockers.append("after_validation_final_time_not_1400")
-            else:
-                blockers.append("after_validation_time_not_1330")
+        planned_time = phase_cfg.get("planned_time") or phase_cfg.get("time")
+        if args.final_pass:
+            if planned_time and planned_time != "14:00":
+                blockers.append("after_validation_final_time_not_1400")
+        elif planned_time and planned_time != "13:30":
+            blockers.append("after_validation_time_not_1330")
         validation_ready = bool(validation.get("source_files")) and validation.get("date_filter_field") == "match_date"
         history_ready = bool(recovery) and recovery.get("step_4", {}).get("status") == "PASS"
         if not validation_ready:
             blockers.append("VALIDATION_NOT_READY_FINAL" if args.final_pass else "VALIDATION_NOT_READY")
-        # Existing history-recovery report may not be present in older worktrees, but
-        # validation summary with source files is still the hard data gate.
         status = "VALIDATION_NOT_READY_FINAL" if args.final_pass and not validation_ready else ("VALIDATION_NOT_READY" if not validation_ready else "READY")
-        allowed_updates = ["yesterday_validation", "cumulative_validation", "validation_summary", "validation_audit"]
-        forbidden_updates = ["today_candidate_source", "brief_source", "candidate_raw_numbers", "v4_strategy"]
         candidate_touched = False
         validation_touched = args.mode == "apply" and not blockers
-        current_validation_hash = validation_source_hash(validation)
+        current_validation_hash = validation_source_hash(validation, paths)
         previous_hash, previous_hash_path = previous_after_validation_hash(args.date)
         source_hash_changed = previous_hash is not None and previous_hash != current_validation_hash
         final_refresh_status = None
         if args.final_pass:
             validation_touched = False
             if previous_hash is None:
-                blockers.append("PREVIOUS_VALIDATION_SOURCE_HASH_MISSING")
+                warnings.append("previous_validation_source_hash_missing; preserving last_good")
                 final_refresh_status = "VALIDATION_HASH_MISSING"
             elif not validation_ready:
                 final_refresh_status = "VALIDATION_NOT_READY_FINAL"
             elif source_hash_changed:
-                final_refresh_status = "REFRESH_VALIDATION_SECTION_ONLY"
+                final_refresh_status = "UPDATED_AFTER_FINAL_VALIDATION"
                 validation_touched = args.mode == "apply" and not blockers
             else:
-                final_refresh_status = "NOOP"
+                final_refresh_status = "NOOP_AFTER_VALIDATION_RERUN"
         marker = {
             "status": status,
             "requires_validation_completed": True,
-            "validation_completion_marker": str(VALIDATION_SUMMARY.relative_to(ROOT)),
+            "validation_completion_marker": str(paths["validation_summary"].relative_to(ROOT)) if paths["validation_summary"].exists() else None,
+            "script_validation_marker": str(paths["script_validation_summary"].relative_to(ROOT)) if paths["script_validation_summary"].exists() else None,
             "validation_ready": validation_ready,
+            "dashboard_date": args.date,
+            "yesterday_validation_target_date": yesterday_target,
             "validation_source_hash": current_validation_hash,
             "previous_validation_source_hash": previous_hash,
             "previous_validation_source_hash_path": previous_hash_path,
@@ -199,8 +229,8 @@ def build_marker(args: argparse.Namespace) -> dict[str, Any]:
             "api_disabled_reason": validation.get("api_disabled_reason"),
             "brief_used_for_hit_rate": validation.get("brief_used_for_hit_rate"),
             "date_filter_field": validation.get("date_filter_field"),
-            "allowed_updates": allowed_updates,
-            "forbidden_updates": forbidden_updates,
+            "allowed_updates": ["yesterday_validation", "cumulative_validation", "validation_summary", "validation_audit"],
+            "forbidden_updates": ["today_candidate_source", "brief_source", "candidate_raw_numbers", "v4_strategy"],
             "validation_touched": validation_touched,
             "candidate_touched": candidate_touched,
             "last_good_preserved_on_not_ready": True,
@@ -211,14 +241,15 @@ def build_marker(args: argparse.Namespace) -> dict[str, Any]:
         }
 
     common = {
-        "schema_version": "v3v4_dashboard_daily_update_gate.v1",
-        "phase": "V3V4-DASHBOARD-FINAL-PASS-RUNNER-AND-SCAN-TIMEOUT-FIX-20260524",
+        "schema_version": "v3v4_dashboard_daily_update_gate.v2",
+        "phase": "V3V4-DASHBOARD-DYNAMIC-DATE-MARKER-AND-MATCHDATE-TZ-HOTFIX",
         "generated_at": datetime.now(TZ).isoformat(),
         "date": args.date,
         "update_phase": args.phase,
         "mode": args.mode,
         "planned_time": phase_cfg.get("time") if args.final_pass else phase_cfg.get("planned_time"),
-        "plan_path": str(plan_file.relative_to(ROOT)) if plan_file.exists() else None,
+        "plan_path": str(plan_file.relative_to(ROOT)) if plan_file and plan_file.exists() else None,
+        "marker_resolution": {k: (str(v.relative_to(ROOT)) if isinstance(v, Path) else v) for k, v in paths.items()} | marker_resolution,
         "command_review_only": True,
         "cron_enabled": False,
         "autosync_cron_created": False,
@@ -242,9 +273,10 @@ def build_marker(args: argparse.Namespace) -> dict[str, Any]:
         "c_active_in_dashboard": False,
         "c_validation_visible": False,
         "last_7d_visible": False,
-        "source_hash": digest([SCAN_MARKER, BRIEF_MARKER, CANDIDATE_MARKER, VALIDATION_SUMMARY]),
+        "source_hash": digest([paths["scan_perf"], paths["brief_resolution"], paths["candidate_view"], paths["validation_summary"], paths["script_validation_summary"]]),
         "last_good_path": str(LAST_GOOD.relative_to(ROOT)),
         "blockers": blockers,
+        "warnings": warnings,
     }
     return common | marker
 
@@ -265,14 +297,15 @@ def main() -> int:
     if args.final_pass and args.phase != "after-validation":
         marker["blockers"].append("FINAL_PASS_ONLY_ALLOWED_AFTER_VALIDATION")
     should_refresh_dashboard = (
-        args.phase == "after-validation"
-        and args.mode == "apply"
+        args.mode == "apply"
         and not marker.get("blockers")
-        and not (args.final_pass and marker.get("refresh_status") == "NOOP")
+        and (
+            args.phase == "after-scan"
+            or (args.phase == "after-validation" and not (args.final_pass and marker.get("refresh_status") == "NOOP_AFTER_VALIDATION_RERUN"))
+        )
     )
     if should_refresh_dashboard:
         from generate_intel_desk_html import build_dashboard
-
         dashboard_marker = build_dashboard(write=True, date_key=args.date)
         marker["dashboard_refreshed"] = True
         marker["dashboard_sha256"] = dashboard_marker.get("dashboard_sha256")

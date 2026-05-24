@@ -16,6 +16,7 @@ import shutil
 from datetime import datetime, timezone, timedelta
 from pathlib import Path
 from typing import Any
+from zoneinfo import ZoneInfo
 
 ROOT = Path(__file__).resolve().parents[1]
 STATUS = ROOT / "data/runtime/status"
@@ -27,11 +28,31 @@ DATE_FIELDS = {
     "scout_file_date",
     "kickoff_local",
     "timezone_unknown",
+    "timezone_source",
     "date_schema_version",
     "date_repaired",
 }
 LOCAL_TZ_DEFAULT = timezone(timedelta(hours=8))
 FORMAL_RE = re.compile(r"^scout_v4_(\d{8})\.json$")
+COUNTRY_TZ = {
+    "England": "Europe/London", "Belgium": "Europe/Brussels", "Netherlands": "Europe/Amsterdam",
+    "Czech-Republic": "Europe/Prague", "Czech Republic": "Europe/Prague", "Ukraine": "Europe/Kyiv",
+    "Sweden": "Europe/Stockholm", "Finland": "Europe/Helsinki", "Peru": "America/Lima",
+    "USA": "America/New_York", "Brazil": "America/Sao_Paulo", "Uruguay": "America/Montevideo",
+    "Iceland": "Atlantic/Reykjavik", "Indonesia": "Asia/Jakarta",
+}
+LEAGUE_TZ = {
+    "英超": "Europe/London", "比甲": "Europe/Brussels", "荷甲": "Europe/Amsterdam",
+    "捷克甲": "Europe/Prague", "乌克超": "Europe/Kyiv", "瑞典超": "Europe/Stockholm",
+    "芬超": "Europe/Helsinki", "秘鲁甲": "America/Lima", "美职业": "America/New_York",
+    "巴西甲": "America/Sao_Paulo", "乌拉甲": "America/Montevideo", "冰岛超": "Atlantic/Reykjavik",
+    "印尼超": "Asia/Jakarta",
+    "挪超": "Europe/Oslo",
+    "立陶甲": "Europe/Vilnius",
+    "西乙": "Europe/Madrid",
+    "罗甲": "Europe/Bucharest",
+    "意甲": "Europe/Rome",
+}
 
 
 def sha256(path: Path) -> str:
@@ -64,19 +85,35 @@ def normalize_date(raw: Any) -> str | None:
     return text[:10]
 
 
-def parse_kickoff(kickoff: Any, tz: timezone) -> tuple[str | None, str | None, bool, str | None]:
+def resolve_match_tz(rec: dict[str, Any], default_tz: timezone):
+    for value in (rec.get("country"), rec.get("league"), rec.get("league_name")):
+        if value:
+            tz_name = COUNTRY_TZ.get(str(value)) or LEAGUE_TZ.get(str(value))
+            if tz_name:
+                return ZoneInfo(tz_name), False, f"mapped:{value}"
+    fixture_tz = rec.get("fixture_timezone") or rec.get("timezone")
+    if fixture_tz and fixture_tz not in {"Asia/Shanghai", "Asia/Singapore"}:
+        try:
+            return ZoneInfo(str(fixture_tz)), False, "fixture_timezone"
+        except Exception:
+            pass
+    return default_tz, True, "operator_timezone_fallback"
+
+
+def parse_kickoff(kickoff: Any, tz: timezone, rec: dict[str, Any]) -> tuple[str | None, str | None, bool, str | None, str | None]:
     raw = str(kickoff or "").strip()
     if not raw:
-        return None, None, False, "missing_kickoff"
+        return None, None, False, None, "missing_kickoff"
     try:
         dt = datetime.fromisoformat(raw.replace("Z", "+00:00"))
     except Exception as exc:
-        return None, None, False, f"parse_error:{exc}"
-    timezone_unknown = dt.tzinfo is None
-    if timezone_unknown:
+        return None, None, False, None, f"parse_error:{exc}"
+    parsed_unknown = dt.tzinfo is None
+    if parsed_unknown:
         dt = dt.replace(tzinfo=tz)
-    local = dt.astimezone(tz)
-    return local.date().isoformat(), local.isoformat(), timezone_unknown, None
+    match_tz, unresolved, source = resolve_match_tz(rec, tz)
+    local = dt.astimezone(match_tz)
+    return local.date().isoformat(), local.isoformat(), bool(parsed_unknown or unresolved), source, None
 
 
 def strip_date_fields(obj: Any) -> Any:
@@ -142,7 +179,7 @@ def process_file(path: Path, *, mode: str, tz: timezone) -> dict[str, Any]:
     timezone_unknown_rows = []
     sample_bad_rows = []
     for idx, rec in enumerate(rows):
-        kickoff_date, kickoff_local, tz_unknown, err = parse_kickoff(rec.get("kickoff") or rec.get("kickoff_time"), tz)
+        kickoff_date, kickoff_local, tz_unknown, tz_source, err = parse_kickoff(rec.get("kickoff") or rec.get("kickoff_time"), tz, rec)
         if err or not kickoff_date:
             ambiguous.append({"index": idx, "fixture_id": rec.get("fixture_id"), "error": err})
             continue
@@ -156,6 +193,7 @@ def process_file(path: Path, *, mode: str, tz: timezone) -> dict[str, Any]:
             or not rec.get("scan_date")
             or not rec.get("scout_file_date")
             or not rec.get("kickoff_local")
+            or not rec.get("timezone_source")
         )
         if bad:
             bad_rows += 1
@@ -185,6 +223,7 @@ def process_file(path: Path, *, mode: str, tz: timezone) -> dict[str, Any]:
             rec["scout_file_date"] = scout_file_date
             rec["kickoff_local"] = kickoff_local
             rec["timezone_unknown"] = tz_unknown
+            rec["timezone_source"] = tz_source
             rec["date_schema_version"] = "v4_scout_date.v1"
             rec["date_repaired"] = bool(bad)
     after_sha = before_sha
@@ -222,7 +261,8 @@ def process_file(path: Path, *, mode: str, tz: timezone) -> dict[str, Any]:
 
 def main() -> int:
     parser = argparse.ArgumentParser()
-    parser.add_argument("--glob", required=True)
+    parser.add_argument("--glob")
+    parser.add_argument("--date")
     parser.add_argument("--mode", choices=["dry-run", "apply"], required=True)
     parser.add_argument("--timezone", default="Asia/Singapore")
     parser.add_argument("--backup", action="store_true")
@@ -231,7 +271,10 @@ def main() -> int:
     if args.mode == "apply" and not args.backup:
         raise SystemExit("BLOCKER: apply requires --backup")
     tz = tz_from_name(args.timezone)
-    paths = sorted(Path(p).resolve() for p in glob_mod.glob(str(ROOT / args.glob), recursive=True))
+    pattern = args.glob or (f"data/daily_reports/scout_v4_{args.date}.json" if args.date else None)
+    if not pattern:
+        raise SystemExit("BLOCKER: either --glob or --date is required")
+    paths = sorted(Path(p).resolve() for p in glob_mod.glob(str(ROOT / pattern), recursive=True))
     results = [process_file(p, mode=args.mode, tz=tz) for p in paths if p.is_file()]
     active = [r for r in results if r.get("formal_scout") and not r.get("archive")]
     archive = [r for r in results if r.get("formal_scout") and r.get("archive")]
@@ -244,7 +287,8 @@ def main() -> int:
     timezone_unknown_rows = sum(int(r.get("timezone_unknown_rows", 0)) for r in active + archive)
     non_date_changed = any(bool(r.get("non_date_field_changed")) for r in results)
     out = {
-        "phase": "V4-SCOUT-DATE-INTEGRITY-REPAIR-AND-VALIDATION-REBASE-20260523",
+        "phase": "V3V4-DASHBOARD-DYNAMIC-DATE-MARKER-AND-MATCHDATE-TZ-HOTFIX",
+        "date": args.date,
         "mode": args.mode,
         "timezone": args.timezone,
         "backup_requested": bool(args.backup),
@@ -280,7 +324,8 @@ def main() -> int:
     if non_date_changed:
         out["blockers"].append("non_date_field_changed")
     STATUS.mkdir(parents=True, exist_ok=True)
-    marker = STATUS / f"v4_scout_date_repair_{args.mode.replace('-', '_')}_20260523.json"
+    marker_date = args.date or datetime.now(LOCAL_TZ_DEFAULT).strftime("%Y%m%d")
+    marker = STATUS / f"v4_scout_date_repair_{args.mode.replace('-', '_')}_{marker_date}.json"
     marker.write_text(json.dumps(out, ensure_ascii=False, indent=2), encoding="utf-8")
     print(json.dumps(out, ensure_ascii=False, indent=2))
     if args.strict and out["blockers"]:

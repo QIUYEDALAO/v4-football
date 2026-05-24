@@ -121,6 +121,7 @@ def empty_active_pack() -> dict[str, Any]:
 
 
 def resolve(date: str, *, write: bool = True) -> dict[str, Any]:
+    yesterday_target = (datetime.strptime(date, "%Y%m%d").date() - timedelta(days=1)).strftime("%Y%m%d")
     y_path = latest("v4_yesterday_validation_rebuilt_*.json") or latest("v4_yesterday_validation_*.json")
     r_path = latest("v4_rolling_validation_rebuilt_*.json") or latest("v4_rolling_validation_split_*.json")
     raw_path = latest("v4_validation_raw_records_*.json")
@@ -136,6 +137,8 @@ def resolve(date: str, *, write: bool = True) -> dict[str, Any]:
         records, audit = collect_records()
         recovered = build_summary(date, records, audit, write=write)
         recovered["recovery_resolver"] = "match_date_history"
+        recovered["dashboard_date"] = date
+        recovered["yesterday_validation_target_date"] = yesterday_target
         if write:
             out = STATUS / f"v3v4_validation_summary_{date}.json"
             out.write_text(json.dumps(recovered, ensure_ascii=False, indent=2), encoding="utf-8")
@@ -176,6 +179,8 @@ def resolve(date: str, *, write: bool = True) -> dict[str, Any]:
         "phase": "V3V4-DASHBOARD-VALIDATION-TWO-COLUMN-SCRIPT-HIGHLIGHT-20260523",
         "generated_at": datetime.now(TZ).isoformat(),
         "date": date,
+        "dashboard_date": date,
+        "yesterday_validation_target_date": yesterday_target,
         "dashboard_active": {
             "yesterday": y_active,
             "cumulative": cumulative_active,

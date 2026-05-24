@@ -6,14 +6,15 @@ import argparse
 import json
 import subprocess
 import sys
+from datetime import datetime, timezone, timedelta
 from pathlib import Path
 from typing import Any
 
 ROOT = Path(__file__).resolve().parents[1]
 STATUS = ROOT / "data/runtime/status"
 RUNNER = ROOT / "tools/run_v3v4_validation_final_and_dashboard_refresh.py"
-PLAN = STATUS / "v3v4_dashboard_daily_auto_update_cron_plan_20260524.json"
-DATE = "20260524"
+TZ = timezone(timedelta(hours=8))
+DATE = datetime.now(TZ).strftime("%Y%m%d")
 
 
 def load(path: Path) -> dict[str, Any]:
@@ -29,7 +30,9 @@ def main() -> int:
     args = parser.parse_args()
     blockers: list[str] = []
     warnings: list[str] = []
-    plan = load(PLAN)
+    plan_candidates = sorted(STATUS.glob("v3v4_dashboard_daily_auto_update_cron_plan_*.json"), key=lambda p: p.stat().st_mtime, reverse=True)
+    plan_path = plan_candidates[0] if plan_candidates else STATUS / f"v3v4_dashboard_daily_auto_update_cron_plan_{args.date}.json"
+    plan = load(plan_path)
     runner_text = RUNNER.read_text(encoding="utf-8") if RUNNER.exists() else ""
 
     if not RUNNER.exists():
@@ -72,6 +75,8 @@ def main() -> int:
         blockers.append("final_brief_used_for_hit_rate")
     if marker.get("brief_used_for_script_validation") is not False:
         blockers.append("final_brief_used_for_script_validation")
+    if marker.get("yesterday_validation_target_date") != "20260523":
+        blockers.append("final_target_date_not_20260523")
     if marker.get("script_unknown_excluded_from_denominator") is not True:
         blockers.append("script_unknown_denominator_guard_missing")
     if marker.get("refresh_status") not in {"NOOP_AFTER_VALIDATION_RERUN", "UPDATED_AFTER_FINAL_VALIDATION", "VALIDATION_NOT_READY_FINAL", "VALIDATION_HASH_MISSING"}:
@@ -84,7 +89,7 @@ def main() -> int:
 
     result = {
         "checker": "tools/check_v3v4_dashboard_after_validation_final_refresh.py",
-        "phase": "V3V4-VALIDATION-FINAL-RERUN-AND-DASHBOARD-REFRESH-SCHEDULE-REBASE-20260524",
+        "phase": "V3V4-DASHBOARD-DYNAMIC-DATE-MARKER-AND-MATCHDATE-TZ-HOTFIX",
         "date": args.date,
         "final_validation_guard": not blockers,
         "scan_boundary_guard": marker.get("scan_ran") is False,
@@ -98,12 +103,13 @@ def main() -> int:
         "scan_ran": marker.get("scan_ran"),
         "candidate_touched": marker.get("candidate_touched"),
         "match_date_used": marker.get("match_date_used"),
+        "yesterday_validation_target_date": marker.get("yesterday_validation_target_date"),
         "cron_enabled": plan.get("cron_enabled"),
         "blockers": blockers,
         "warnings": warnings,
         "conclusion": "PASS" if not blockers else "BLOCKER",
     }
-    out = STATUS / "check_v3v4_dashboard_after_validation_final_refresh_result_20260524.json"
+    out = STATUS / f"check_v3v4_dashboard_after_validation_final_refresh_result_{args.date}.json"
     out.write_text(json.dumps(result, ensure_ascii=False, indent=2), encoding="utf-8")
     print(json.dumps(result, ensure_ascii=False, indent=2))
     return 0 if not blockers else 2

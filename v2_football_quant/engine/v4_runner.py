@@ -19,6 +19,7 @@ import urllib.request
 from urllib.parse import urlsplit, parse_qsl, urlencode
 from pathlib import Path
 from datetime import datetime, date, timedelta, timezone
+from zoneinfo import ZoneInfo
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(BASE_DIR))
@@ -66,23 +67,79 @@ WL_SET = set(str(k) for k in LEAGUE_CN.keys())
 SCAN_PROFILE_STABLE_FULL_24H = "stable_full_24h"
 LOCAL_TZ = timezone(timedelta(hours=8))
 
+# Match-date validation must use the match-local calendar date, not the
+# operator/CST scan date. Country mapping is intentionally conservative; if a
+# league is unmapped the row is marked timezone_unknown instead of being silently
+# forced into the operator day.
+COUNTRY_TZ = {
+    "England": "Europe/London",
+    "Belgium": "Europe/Brussels",
+    "Netherlands": "Europe/Amsterdam",
+    "Czech-Republic": "Europe/Prague",
+    "Czech Republic": "Europe/Prague",
+    "Ukraine": "Europe/Kyiv",
+    "Sweden": "Europe/Stockholm",
+    "Finland": "Europe/Helsinki",
+    "Peru": "America/Lima",
+    "USA": "America/New_York",
+    "Brazil": "America/Sao_Paulo",
+    "Uruguay": "America/Montevideo",
+    "Iceland": "Atlantic/Reykjavik",
+    "Indonesia": "Asia/Jakarta",
+}
+LEAGUE_TZ = {
+    "英超": "Europe/London",
+    "比甲": "Europe/Brussels",
+    "荷甲": "Europe/Amsterdam",
+    "捷克甲": "Europe/Prague",
+    "乌克超": "Europe/Kyiv",
+    "瑞典超": "Europe/Stockholm",
+    "芬超": "Europe/Helsinki",
+    "秘鲁甲": "America/Lima",
+    "美职业": "America/New_York",
+    "巴西甲": "America/Sao_Paulo",
+    "乌拉甲": "America/Montevideo",
+    "冰岛超": "Atlantic/Reykjavik",
+    "印尼超": "Asia/Jakarta",
+    "挪超": "Europe/Oslo",
+    "立陶甲": "Europe/Vilnius",
+    "西乙": "Europe/Madrid",
+    "罗甲": "Europe/Bucharest",
+    "意甲": "Europe/Rome",
+}
 
-def _parse_kickoff_local(kickoff: str) -> tuple[datetime, bool]:
-    """Return local kickoff time and whether timezone was missing."""
+
+def _resolve_match_timezone(country: str | None = None, league_name: str | None = None, fixture_timezone: str | None = None):
+    for value, source in ((country, "country"), (league_name, "league_name")):
+        if value:
+            tz_name = COUNTRY_TZ.get(str(value)) or LEAGUE_TZ.get(str(value))
+            if tz_name:
+                return ZoneInfo(tz_name), source, False
+    if fixture_timezone and fixture_timezone not in {"Asia/Shanghai", "Asia/Singapore"}:
+        try:
+            return ZoneInfo(str(fixture_timezone)), "fixture_timezone", False
+        except Exception:
+            pass
+    return LOCAL_TZ, "operator_timezone_fallback", True
+
+
+def _parse_kickoff_local(kickoff: str, *, country: str | None = None, league_name: str | None = None, fixture_timezone: str | None = None) -> tuple[datetime, bool, str]:
+    """Return match-local kickoff time and whether timezone was unresolved."""
     raw = str(kickoff or "").strip()
     if not raw:
         raise ValueError("missing kickoff")
     normalized = raw.replace("Z", "+00:00")
     dt = datetime.fromisoformat(normalized)
-    timezone_unknown = dt.tzinfo is None
-    if timezone_unknown:
+    parsed_tz_missing = dt.tzinfo is None
+    if parsed_tz_missing:
         dt = dt.replace(tzinfo=LOCAL_TZ)
-    return dt.astimezone(LOCAL_TZ), timezone_unknown
+    match_tz, source, unresolved = _resolve_match_timezone(country=country, league_name=league_name, fixture_timezone=fixture_timezone)
+    return dt.astimezone(match_tz), bool(parsed_tz_missing or unresolved), source
 
 
-def _scout_date_fields(kickoff: str, scan_dt: date, scout_file_date: str, source_window: str | None = None) -> dict:
+def _scout_date_fields(kickoff: str, scan_dt: date, scout_file_date: str, source_window: str | None = None, *, country: str | None = None, league_name: str | None = None, fixture_timezone: str | None = None) -> dict:
     """Formal V4 scout date schema: date is match date, never scan date."""
-    kickoff_local, timezone_unknown = _parse_kickoff_local(kickoff)
+    kickoff_local, timezone_unknown, timezone_source = _parse_kickoff_local(kickoff, country=country, league_name=league_name, fixture_timezone=fixture_timezone)
     match_date = kickoff_local.date().isoformat()
     fields = {
         "date": match_date,
@@ -91,6 +148,7 @@ def _scout_date_fields(kickoff: str, scan_dt: date, scout_file_date: str, source
         "scout_file_date": scout_file_date,
         "kickoff_local": kickoff_local.isoformat(),
         "timezone_unknown": timezone_unknown,
+        "timezone_source": timezone_source,
     }
     if source_window:
         fields["source_window"] = source_window
@@ -211,6 +269,8 @@ def fetch_today_fixtures(
                 "awayId": f["teams"]["away"]["id"],
                 "league": lg_id,
                 "league_name": LEAGUE_CN.get(lg_id, f["league"]["name"]),
+                "country": f.get("league", {}).get("country"),
+                "fixture_timezone": f.get("fixture", {}).get("timezone"),
                 "kickoff": kickoff,
             })
         time.sleep(0.1)
@@ -445,7 +505,7 @@ def run_v4_scan(
         if lg_status == "DISABLED":
             append_jsonl(universe_out, {
                 "fixture_id": fx["id"],
-                **_scout_date_fields(fx["kickoff"], scan_dt, today_key, window),
+                **_scout_date_fields(fx["kickoff"], scan_dt, today_key, window, country=fx.get("country"), league_name=fx.get("league_name"), fixture_timezone=fx.get("fixture_timezone")),
                 "league_id": fx["league"],
                 "league_name": fx["league_name"],
                 "country": None,
@@ -482,7 +542,7 @@ def run_v4_scan(
         if not result["valid"]:
             append_jsonl(universe_out, {
                 "fixture_id": fx["id"],
-                **_scout_date_fields(fx["kickoff"], scan_dt, today_key, window),
+                **_scout_date_fields(fx["kickoff"], scan_dt, today_key, window, country=fx.get("country"), league_name=fx.get("league_name"), fixture_timezone=fx.get("fixture_timezone")),
                 "league_id": fx["league"],
                 "league_name": fx["league_name"],
                 "country": None,
@@ -591,7 +651,7 @@ def run_v4_scan(
                 priority_boost = 2
             live_watchlist.append({
                 "fixture_id": fx["id"],
-                **_scout_date_fields(fx["kickoff"], scan_dt, today_key, window),
+                **_scout_date_fields(fx["kickoff"], scan_dt, today_key, window, country=fx.get("country"), league_name=fx.get("league_name"), fixture_timezone=fx.get("fixture_timezone")),
                 "home": fx["home"],
                 "away": fx["away"],
                 "league": fx["league_name"],
@@ -627,7 +687,7 @@ def run_v4_scan(
 
         append_jsonl(universe_out, {
             "fixture_id": fx["id"],
-            **_scout_date_fields(fx["kickoff"], scan_dt, today_key, window),
+            **_scout_date_fields(fx["kickoff"], scan_dt, today_key, window, country=fx.get("country"), league_name=fx.get("league_name"), fixture_timezone=fx.get("fixture_timezone")),
             "league_id": fx["league"],
             "league_name": fx["league_name"],
             "country": None,
@@ -658,7 +718,7 @@ def run_v4_scan(
         # ── 球探快照（纯数据，零交易字段）──
         scout_reports.append({
             "fixture_id": fx["id"],
-            **_scout_date_fields(fx["kickoff"], scan_dt, today_key, window),
+            **_scout_date_fields(fx["kickoff"], scan_dt, today_key, window, country=fx.get("country"), league_name=fx.get("league_name"), fixture_timezone=fx.get("fixture_timezone")),
             "kickoff": fx["kickoff"],
             "home": fx["home"],
             "away": fx["away"],

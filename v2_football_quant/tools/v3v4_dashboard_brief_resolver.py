@@ -119,7 +119,7 @@ def split_blocks(text: str, header: str) -> list[str]:
     return blocks
 
 
-def parse_ab_block(block: str, grade: str, idx: int, scout_by_fixture: dict[int, dict[str, Any]]) -> dict[str, Any]:
+def parse_ab_block(block: str, grade: str, idx: int, scout_by_fixture: dict[int, dict[str, Any]], brief_path: Path) -> dict[str, Any]:
     lines = [ln.strip() for ln in block.splitlines() if ln.strip()]
     title = lines[0]
     home, away = [part.strip() for part in title.split(" vs ", 1)] if " vs " in title else (title, "UNKNOWN")
@@ -157,12 +157,12 @@ def parse_ab_block(block: str, grade: str, idx: int, scout_by_fixture: dict[int,
         "risk": risk_line.replace("风险：", "") if risk_line else "-",
         "grade": grade,
         "recommendation_status": "brief_formal_display_only",
-        "source": "data/daily_reports/v4_openclaw_brief_20260523.txt",
+        "source": str(brief_path.relative_to(ROOT)),
         "scout_fixture_found": bool(source),
     }
 
 
-def parse_c_items(text: str, scout_by_fixture: dict[int, dict[str, Any]]) -> list[dict[str, Any]]:
+def parse_c_items(text: str, scout_by_fixture: dict[int, dict[str, Any]], brief_path: Path) -> list[dict[str, Any]]:
     if C_HEADER not in text:
         return []
     section = text.split(C_HEADER, 1)[1].split("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━", 1)[0]
@@ -198,7 +198,7 @@ def parse_c_items(text: str, scout_by_fixture: dict[int, dict[str, Any]]) -> lis
             "risk": "仅观察，不是推荐",
             "grade": "C",
             "recommendation_status": "brief_observation_only",
-            "source": "data/daily_reports/v4_openclaw_brief_20260523.txt",
+            "source": str(brief_path.relative_to(ROOT)),
         })
     return items
 
@@ -207,9 +207,9 @@ def build_candidate_view(date: str, text: str, brief_path: Path, scout_path: Pat
     scout = load_json(scout_path) if scout_path else []
     scout_by_fixture = {int(item.get("fixture_id")): item for item in scout if isinstance(item, dict) and item.get("fixture_id")} if isinstance(scout, list) else {}
     overview = parse_overview(text)
-    a_items = [parse_ab_block(block, "A", i, scout_by_fixture) for i, block in enumerate(split_blocks(text, GRADE_HEADERS["A"]), 1)]
-    b_items = [parse_ab_block(block, "B", i, scout_by_fixture) for i, block in enumerate(split_blocks(text, GRADE_HEADERS["B"]), 1)]
-    c_items = parse_c_items(text, scout_by_fixture)
+    a_items = [parse_ab_block(block, "A", i, scout_by_fixture, brief_path) for i, block in enumerate(split_blocks(text, GRADE_HEADERS["A"]), 1)]
+    b_items = [parse_ab_block(block, "B", i, scout_by_fixture, brief_path) for i, block in enumerate(split_blocks(text, GRADE_HEADERS["B"]), 1)]
+    c_items = parse_c_items(text, scout_by_fixture, brief_path)
     return {
         "schema_version": "v3v4_dashboard_brief_candidate_view.v1",
         "generated_at": datetime.now(TZ).isoformat(),
@@ -273,7 +273,7 @@ def resolve(date: str, *, write: bool = True) -> dict[str, Any]:
         counts = {k: view[f"{k}_count"] for k in ["A", "B", "C", "SKIP"]}
         result = {
             "schema_version": "v3v4_dashboard_brief_resolution.v1",
-            "phase": "V3V4-DASHBOARD-BRIEF-VALIDATION-AUTO-REFRESH-20260523",
+            "phase": "V3V4-DASHBOARD-DYNAMIC-DATE-MARKER-AND-MATCHDATE-TZ-HOTFIX",
             "generated_at": datetime.now(TZ).isoformat(),
             "date": date,
             "brief_path": str(brief_path.relative_to(ROOT)),
@@ -281,7 +281,7 @@ def resolve(date: str, *, write: bool = True) -> dict[str, Any]:
             "brief_sha256": sha(brief_path),
             "brief_size": brief_path.stat().st_size,
             "source_date": date,
-            "is_today_brief": date == "20260523",
+            "is_today_brief": date == datetime.now(TZ).strftime("%Y%m%d"),
             "candidate_counts": counts,
             "A": counts["A"],
             "B": counts["B"],
@@ -309,7 +309,7 @@ def resolve(date: str, *, write: bool = True) -> dict[str, Any]:
 
 def main() -> int:
     parser = argparse.ArgumentParser()
-    parser.add_argument("--date", default="20260523")
+    parser.add_argument("--date", default=datetime.now(TZ).strftime("%Y%m%d"))
     args = parser.parse_args()
     result = resolve(args.date, write=True)
     printable = dict(result)

@@ -58,8 +58,6 @@ def previous_validation_hash(date: str) -> tuple[str | None, str | None]:
         STATUS / f"v3v4_dashboard_daily_update_after_validation_dry_run_{date}.json",
     ]
     candidates = [p for p in preferred if p.exists()]
-    candidates.extend(sorted(STATUS.glob("v3v4_dashboard_daily_update_after_validation_apply_*.json"), key=lambda p: p.stat().st_mtime, reverse=True))
-    candidates.extend(sorted(STATUS.glob("v3v4_dashboard_daily_update_after_validation_dry_run_*.json"), key=lambda p: p.stat().st_mtime, reverse=True))
     seen: set[Path] = set()
     for path in candidates:
         if path in seen:
@@ -142,10 +140,12 @@ def main() -> int:
     disk_summary = load(STATUS / f"v3v4_validation_summary_{args.date}.json")
     summary = parsed_summary if isinstance(parsed_summary, dict) and parsed_summary else disk_summary
     marker = {
-        "schema_version": "v3v4_validation_final_and_dashboard_refresh.v1",
+        "schema_version": "v3v4_validation_final_and_dashboard_refresh.v2",
         "phase": "VALIDATION_FINAL_AND_DASHBOARD_REFRESH",
         "generated_at": now(),
         "date": args.date,
+        "dashboard_date": args.date,
+        "yesterday_validation_target_date": (datetime.strptime(args.date, "%Y%m%d").date() - timedelta(days=1)).strftime("%Y%m%d"),
         "mode": args.mode,
         "final_validation_ran": True,
         "final_validation_mode": "local_match_date_no_api_dry_run" if args.mode == "dry-run" else "local_match_date_no_api_apply",
@@ -153,6 +153,14 @@ def main() -> int:
         "api_route_audit_only": True,
         "scan_ran": False,
         "candidate_touched": False,
+        "marker_resolution": {
+            "validation_summary": f"data/runtime/status/v3v4_validation_summary_{args.date}.json",
+            "script_validation_summary": f"data/runtime/status/v4_script_validation_summary_{args.date}.json",
+            "previous_after_validation_candidates": [
+                f"data/runtime/status/v3v4_dashboard_daily_update_after_validation_apply_{args.date}.json",
+                f"data/runtime/status/v3v4_dashboard_daily_update_after_validation_dry_run_{args.date}.json",
+            ],
+        },
         "validation_source_hash": current_hash,
         "previous_validation_source_hash": prev_hash,
         "previous_validation_source_hash_path": prev_hash_path,

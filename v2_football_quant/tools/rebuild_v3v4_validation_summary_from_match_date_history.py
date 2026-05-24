@@ -242,10 +242,11 @@ def empty_metric(reason: str) -> dict[str, Any]:
 def build_summary(date: str, records: list[dict[str, Any]], audit: dict[str, Any], *, write: bool) -> dict[str, Any]:
     target = datetime.strptime(date, "%Y%m%d").date()
     yesterday_date = (target - timedelta(days=1)).isoformat()
+    yesterday_yyyymmdd = yesterday_date.replace("-", "")
     trusted = [r for r in records if r.get("classification") == "TRUSTED_MATCH_DATE_READY"]
     yesterday = [r for r in trusted if r.get("match_date") == yesterday_date]
     source_files = sorted(audit.get("trusted_source_files", []))
-    source_hash = hashlib.sha256("|".join(source_files + [str(audit.get("trusted_records")), str(audit.get("unknown_records"))]).encode()).hexdigest()
+    source_hash = hashlib.sha256("|".join(source_files + [date, yesterday_yyyymmdd, str(audit.get("trusted_records")), str(audit.get("unknown_records"))]).encode()).hexdigest()
     unresolved = [r for r in records if r.get("classification") == "API_DISABLED_UNRESOLVED"]
     y_has = bool(yesterday)
     c_has = bool(trusted)
@@ -256,6 +257,8 @@ def build_summary(date: str, records: list[dict[str, Any]], audit: dict[str, Any
         "phase": "V4-MATCH-DATE-VALIDATION-HISTORY-RECOVERY-20260523",
         "generated_at": now(),
         "date": date,
+        "dashboard_date": date,
+        "yesterday_validation_target_date": yesterday_yyyymmdd,
         "dashboard_active": {
             "yesterday": {
                 "label": f"match_date {yesterday_date}",
@@ -310,6 +313,10 @@ def build_summary(date: str, records: list[dict[str, Any]], audit: dict[str, Any
         "api_enabled": False,
         "api_disabled_reason": "--no-api: local trusted match_date attribution only; unresolved rows remain unresolved",
         "validation_source_status": "MATCH_DATE_HISTORY_RECOVERED" if trusted else "NO_TRUSTED_HISTORY_API_DISABLED",
+        "yesterday": {
+            "status": "READY" if y_has else "N/A",
+            "reason": "" if y_has else "NO_TRUSTED_MATCH_DATE_ATTRIBUTION",
+        },
         "unknown_policy": "unknown rows are excluded from hit-rate denominator and shown only in audit",
         "c_observation_active": False,
         "last_7d_active": False,

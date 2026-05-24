@@ -3,6 +3,7 @@
 """
 from __future__ import annotations
 import json, subprocess, sys
+from datetime import datetime, timezone, timedelta
 from pathlib import Path
 ROOT=Path(__file__).resolve().parents[1]
 STATUS=ROOT/'data/runtime/status'
@@ -12,21 +13,25 @@ def load(p:Path)->dict:
     except: return {}
 
 def main():
-    p=load(STATUS/'v3v4_dashboard_daily_auto_update_cron_plan_20260524.json')
+    TZ=timezone(timedelta(hours=8))
+    DATE=datetime.now(TZ).strftime('%Y%m%d')
+    p=load(STATUS/f'v3v4_dashboard_daily_auto_update_cron_plan_{DATE}.json')
     blockers=[]; warnings=[]
 
     # After-scan runner test
-    rc_scan=subprocess.run([sys.executable,str(ROOT/'tools/run_v3v4_dashboard_daily_update.py'),'--date','20260524','--phase','after-scan','--mode','dry-run','--no-api','--no-capture','--no-push','--no-cloud'],capture_output=True,text=True,timeout=30)
-    scan=load(STATUS/f"v3v4_dashboard_daily_update_after_scan_dry_run_20260524.json")
+    rc_scan=subprocess.run([sys.executable,str(ROOT/'tools/run_v3v4_dashboard_daily_update.py'),'--date',DATE,'--phase','after-scan','--mode','dry-run','--no-api','--no-capture','--no-push','--no-cloud'],capture_output=True,text=True,timeout=30)
+    scan=load(STATUS/f"v3v4_dashboard_daily_update_after_scan_dry_run_{DATE}.json")
     if rc_scan.returncode!=0: warnings.append(f'after_scan_runner_rc_{rc_scan.returncode}')
     if scan.get('validation_touched') is not False: blockers.append('after_scan_validation_touched')
+    if scan.get('validation_preserved') is not True: blockers.append('after_scan_validation_not_preserved')
     if scan.get('candidate_touched') is not False: blockers.append('after_scan_candidate_touched_before_apply')
 
     # After-validation runner test (13:30)
-    rc_val=subprocess.run([sys.executable,str(ROOT/'tools/run_v3v4_dashboard_daily_update.py'),'--date','20260524','--phase','after-validation','--mode','dry-run','--no-api','--no-capture','--no-push','--no-cloud'],capture_output=True,text=True,timeout=30)
-    val=load(STATUS/f"v3v4_dashboard_daily_update_after_validation_dry_run_20260524.json")
+    rc_val=subprocess.run([sys.executable,str(ROOT/'tools/run_v3v4_dashboard_daily_update.py'),'--date',DATE,'--phase','after-validation','--mode','dry-run','--no-api','--no-capture','--no-push','--no-cloud'],capture_output=True,text=True,timeout=30)
+    val=load(STATUS/f"v3v4_dashboard_daily_update_after_validation_dry_run_{DATE}.json")
     if rc_val.returncode!=0: warnings.append(f'after_validation_runner_rc_{rc_val.returncode}')
     if val.get('candidate_touched') is not False: blockers.append('after_validation_candidate_touched')
+    if val.get('yesterday_validation_target_date')!='20260523': blockers.append('after_validation_target_date_not_20260523')
     if val.get('planned_time')!='13:30': blockers.append('after_validation_time_not_1330')
 
     # Final check (14:00). This must run a second validation dry-run and then
@@ -46,14 +51,15 @@ def main():
     final_cmd=str(final_cfg.get('command',''))
     if 'run_v3v4_validation_final_and_dashboard_refresh.py' not in final_cmd: blockers.append('final_command_not_validation_final_runner')
 
-    rc_final=subprocess.run([sys.executable,str(ROOT/'tools/run_v3v4_validation_final_and_dashboard_refresh.py'),'--date','20260524','--mode','dry-run','--no-capture','--no-push','--no-cloud','--strict'],capture_output=True,text=True,timeout=180)
-    final_marker=load(STATUS/'v3v4_validation_final_and_dashboard_refresh_20260524.json')
+    rc_final=subprocess.run([sys.executable,str(ROOT/'tools/run_v3v4_validation_final_and_dashboard_refresh.py'),'--date',DATE,'--mode','dry-run','--no-capture','--no-push','--no-cloud','--strict'],capture_output=True,text=True,timeout=180)
+    final_marker=load(STATUS/f'v3v4_validation_final_and_dashboard_refresh_{DATE}.json')
     if rc_final.returncode!=0: warnings.append(f'after_validation_final_runner_rc_{rc_final.returncode}')
     if final_marker.get('final_validation_ran') is not True: blockers.append('final_validation_ran_not_true')
     if final_marker.get('scan_ran') is not False: blockers.append('final_pass_scan_ran')
     if final_marker.get('candidate_touched') is not False: blockers.append('final_pass_candidate_touched')
     if final_marker.get('match_date_used') is not True: blockers.append('final_match_date_not_used')
     if final_marker.get('brief_used_for_hit_rate') is not False: blockers.append('final_brief_used_for_hit_rate')
+    if final_marker.get('yesterday_validation_target_date')!='20260523': blockers.append('final_target_date_not_20260523')
     if final_marker.get('refresh_status') not in ('NOOP_AFTER_VALIDATION_RERUN','UPDATED_AFTER_FINAL_VALIDATION','VALIDATION_NOT_READY_FINAL','VALIDATION_HASH_MISSING'):
         blockers.append(f"final_refresh_status_invalid:{final_marker.get('refresh_status')}")
 
@@ -72,8 +78,8 @@ def main():
         if p.get(k) is not False: blockers.append(f'{k}_not_false')
     if p.get('boss_approval_required') is not True: blockers.append('boss_approval_required_not_true')
 
-    out={'checker':'tools/check_v3v4_dashboard_daily_auto_update_pipeline.py','phase':'V3V4-VALIDATION-FINAL-RERUN-AND-DASHBOARD-REFRESH-SCHEDULE-REBASE-20260524','conclusion':'PASS' if not blockers else 'BLOCKER','phase_boundary_guard':not blockers,'after_scan_time':scan.get('planned_time'),'after_validation_time':val.get('planned_time'),'after_validation_final_time':ft.get('time') if final_tasks else None,'after_scan_validation_touched':scan.get('validation_touched'),'after_validation_candidate_touched':val.get('candidate_touched'),'final_refresh_in_plan':bool(final_tasks),'final_validation_ran':final_marker.get('final_validation_ran'),'dashboard_validation_refreshed':final_marker.get('dashboard_validation_refreshed'),'final_refresh_status':final_marker.get('refresh_status'),'noop_on_same_hash':final_marker.get('refresh_status')=='NOOP_AFTER_VALIDATION_RERUN','final_pass_candidate_touched':final_marker.get('candidate_touched'),'code_change_required':code_change,'timeout_seconds':timeout_seconds,'cron_enabled':p.get('cron_enabled'),'blockers':blockers,'warnings':warnings}
-    out_path=STATUS/'check_v3v4_dashboard_daily_auto_update_pipeline_result_20260524.json'
+    out={'checker':'tools/check_v3v4_dashboard_daily_auto_update_pipeline.py','phase':'V3V4-DASHBOARD-DYNAMIC-DATE-MARKER-AND-MATCHDATE-TZ-HOTFIX','conclusion':'PASS' if not blockers else 'BLOCKER','phase_boundary_guard':not blockers,'after_scan_time':scan.get('planned_time'),'after_validation_time':val.get('planned_time'),'after_validation_final_time':ft.get('time') if final_tasks else None,'after_scan_validation_touched':scan.get('validation_touched'),'after_validation_candidate_touched':val.get('candidate_touched'),'final_refresh_in_plan':bool(final_tasks),'final_validation_ran':final_marker.get('final_validation_ran'),'dashboard_validation_refreshed':final_marker.get('dashboard_validation_refreshed'),'final_refresh_status':final_marker.get('refresh_status'),'noop_on_same_hash':final_marker.get('refresh_status')=='NOOP_AFTER_VALIDATION_RERUN','final_pass_candidate_touched':final_marker.get('candidate_touched'),'code_change_required':code_change,'timeout_seconds':timeout_seconds,'cron_enabled':p.get('cron_enabled'),'blockers':blockers,'warnings':warnings}
+    out_path=STATUS/f'check_v3v4_dashboard_daily_auto_update_pipeline_result_{DATE}.json'
     out_path.write_text(json.dumps(out,ensure_ascii=False,indent=2),encoding='utf-8')
     print(json.dumps(out,ensure_ascii=False,indent=2))
     return 0 if not blockers else 2

@@ -26,8 +26,8 @@ STATUS_DIR = MODULE / "data" / "runtime" / "status"
 DASHBOARD_DIR = MODULE / "data" / "runtime" / "dashboard"
 TEAM_CN_MAP = MODULE / "engine" / "team_cn_map.json"
 CN_TZ = timezone(timedelta(hours=8))
-DATE_KEY = "20260523"
-CURRENT_LOCAL_DATE = DATE_KEY
+DATE_KEY = datetime.now(CN_TZ).strftime("%Y%m%d")
+CURRENT_LOCAL_DATE = datetime.now(CN_TZ).strftime("%Y%m%d")
 
 
 def _now() -> str:

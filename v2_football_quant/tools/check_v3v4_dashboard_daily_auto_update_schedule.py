@@ -4,11 +4,14 @@ Checks 12:00 scan + 13:00 after-scan + 13:30 after-validation + 14:00 final.
 """
 from __future__ import annotations
 import json
+from datetime import datetime, timezone, timedelta
 from pathlib import Path
 ROOT=Path(__file__).resolve().parents[1]
 STATUS=ROOT/'data/runtime/status'
-PLAN=STATUS/'v3v4_dashboard_daily_auto_update_cron_plan_20260524.json'
-DOC=ROOT/'docs/V3V4_DASHBOARD_DAILY_AUTO_UPDATE_CRON_PLAN_20260524.md'
+TZ=timezone(timedelta(hours=8))
+DATE=datetime.now(TZ).strftime('%Y%m%d')
+PLAN=STATUS/f'v3v4_dashboard_daily_auto_update_cron_plan_{DATE}.json'
+DOC=ROOT/f'docs/V3V4_DASHBOARD_DAILY_AUTO_UPDATE_CRON_PLAN_{DATE}.md'
 
 def load(p):
     try: return json.loads(p.read_text(encoding='utf-8'))
@@ -103,7 +106,7 @@ def main():
 
     out = {
         'checker': 'tools/check_v3v4_dashboard_daily_auto_update_schedule.py',
-        'phase': 'V3V4-DASHBOARD-AUTO-REFRESH-CRON-ENABLE-PRECHECK-SCHEDULE-REBASE-20260524',
+        'phase': 'V3V4-DASHBOARD-DYNAMIC-DATE-MARKER-AND-MATCHDATE-TZ-HOTFIX',
         'schedule_times': sorted(times.keys()),
         'after_scan_time': after_scan[0].get('time') if after_scan else None,
         'after_validation_time': after_val[0].get('time') if after_val else None,
@@ -120,7 +123,7 @@ def main():
         'conclusion': 'PASS' if not blockers else 'BLOCKER',
         'blockers': blockers,
     }
-    out_path = STATUS / 'check_v3v4_dashboard_daily_auto_update_schedule_result_20260524.json'
+    out_path = STATUS / f'check_v3v4_dashboard_daily_auto_update_schedule_result_{DATE}.json'
     out_path.write_text(json.dumps(out, ensure_ascii=False, indent=2), encoding='utf-8')
     print(json.dumps(out, ensure_ascii=False, indent=2))
     return 0 if not blockers else 2
