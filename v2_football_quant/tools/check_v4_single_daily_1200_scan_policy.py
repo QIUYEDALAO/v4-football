@@ -38,6 +38,19 @@ if policy_file.exists():
 else:
     check("Policy exists", False, "MISSING")
 
+# Check timeout plan before cron enable. This checker is read-only and must not
+# mutate the active Gateway cron state.
+timeout_plan_file = BASE / "data/runtime/status/v3v4_dashboard_daily_auto_update_cron_plan_20260524.json"
+if timeout_plan_file.exists():
+    timeout_plan = json.loads(timeout_plan_file.read_text())
+    timeout_cfg = timeout_plan.get("scan_timeout", {})
+    timeout_seconds = int(timeout_cfg.get("timeout_seconds") or timeout_cfg.get("recommended_timeout_seconds") or 0)
+    check("12:00 scan timeout plan=1800", timeout_seconds >= 1800)
+    check("Timeout change requires BOSS approval", timeout_cfg.get("boss_approval_required") == True)
+    check("Active cron not modified for timeout", timeout_cfg.get("active_cron_modified", False) == False)
+else:
+    check("Timeout plan exists", False, "MISSING")
+
 # Check Gateway cron
 import subprocess
 r = subprocess.run(["openclaw","cron","list"], capture_output=True, text=True)

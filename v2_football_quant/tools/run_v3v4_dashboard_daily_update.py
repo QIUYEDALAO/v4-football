@@ -20,7 +20,10 @@ sys.path.insert(0, str(ROOT / "tools"))
 STATUS = ROOT / "data/runtime/status"
 TZ = timezone(timedelta(hours=8))
 
-PLAN = STATUS / "v3v4_dashboard_daily_auto_update_cron_plan_20260523.json"
+PLAN_CANDIDATES = [
+    STATUS / "v3v4_dashboard_daily_auto_update_cron_plan_20260524.json",
+    STATUS / "v3v4_dashboard_daily_auto_update_cron_plan_20260523.json",
+]
 SCAN_MARKER = STATUS / "v4_scout_date_daily1200_post_repair_openclaw_verify_20260523.json"
 BRIEF_MARKER = STATUS / "v3v4_dashboard_brief_resolution_20260523.json"
 CANDIDATE_MARKER = STATUS / "v3v4_dashboard_candidate_view_20260523.json"
@@ -44,17 +47,74 @@ def digest(paths: list[Path]) -> str:
     return hashlib.sha256("|".join(parts).encode()).hexdigest()
 
 
+def plan_path() -> Path:
+    for path in PLAN_CANDIDATES:
+        if path.exists():
+            return path
+    return PLAN_CANDIDATES[-1]
+
+
+def final_task_config(plan: dict[str, Any]) -> dict[str, Any]:
+    for task in plan.get("schedule", []):
+        if isinstance(task, dict) and task.get("task") == "V3V4_DASHBOARD_AFTER_VALIDATION_REFRESH_FINAL":
+            return task
+    return {}
+
+
+def validation_source_hash(validation: dict[str, Any]) -> str:
+    return str(validation.get("source_hash") or digest([VALIDATION_SUMMARY]))
+
+
+def previous_after_validation_hash(date: str) -> tuple[str | None, str | None]:
+    preferred = [
+        STATUS / f"v3v4_dashboard_daily_update_after_validation_apply_{date}.json",
+        STATUS / f"v3v4_dashboard_daily_update_after_validation_dry_run_{date}.json",
+    ]
+    candidates = [p for p in preferred if p.exists()]
+    candidates.extend(
+        sorted(
+            STATUS.glob("v3v4_dashboard_daily_update_after_validation_apply_*.json"),
+            key=lambda p: p.stat().st_mtime,
+            reverse=True,
+        )
+    )
+    candidates.extend(
+        sorted(
+            STATUS.glob("v3v4_dashboard_daily_update_after_validation_dry_run_*.json"),
+            key=lambda p: p.stat().st_mtime,
+            reverse=True,
+        )
+    )
+    seen: set[Path] = set()
+    for path in candidates:
+        if path in seen:
+            continue
+        seen.add(path)
+        data = load(path)
+        if data.get("final_pass") is True:
+            continue
+        value = data.get("validation_source_hash")
+        if value:
+            return str(value), str(path.relative_to(ROOT))
+    return None, None
+
+
 def build_marker(args: argparse.Namespace) -> dict[str, Any]:
-    plan = load(PLAN)
+    plan_file = plan_path()
+    plan = load(plan_file)
     scan = load(SCAN_MARKER)
     brief = load(BRIEF_MARKER)
     candidate = load(CANDIDATE_MARKER)
     validation = load(VALIDATION_SUMMARY)
     recovery = load(HISTORY_RECOVERY)
     phase_cfg = (plan.get("tasks") or {}).get(args.phase, {}) if isinstance(plan.get("tasks"), dict) else {}
+    if args.final_pass:
+        phase_cfg = final_task_config(plan)
     blockers: list[str] = []
 
     if args.phase == "after-scan":
+        if args.final_pass:
+            blockers.append("FINAL_PASS_ONLY_ALLOWED_AFTER_VALIDATION")
         if phase_cfg.get("planned_time") != "13:00":
             blockers.append("after_scan_time_not_1300")
         scan_completed = bool(scan) and scan.get("contaminated_rows") == 0 and scan.get("active_scan_time") == "12:00"
@@ -90,24 +150,50 @@ def build_marker(args: argparse.Namespace) -> dict[str, Any]:
             "last_good_preserved_on_not_ready": True,
         }
     else:
+        if args.final_pass and args.phase != "after-validation":
+            blockers.append("FINAL_PASS_ONLY_ALLOWED_AFTER_VALIDATION")
         if phase_cfg.get("planned_time") != "13:30":
-            blockers.append("after_validation_time_not_1330")
+            if args.final_pass:
+                if phase_cfg.get("time") != "14:00":
+                    blockers.append("after_validation_final_time_not_1400")
+            else:
+                blockers.append("after_validation_time_not_1330")
         validation_ready = bool(validation.get("source_files")) and validation.get("date_filter_field") == "match_date"
         history_ready = bool(recovery) and recovery.get("step_4", {}).get("status") == "PASS"
         if not validation_ready:
-            blockers.append("VALIDATION_NOT_READY")
+            blockers.append("VALIDATION_NOT_READY_FINAL" if args.final_pass else "VALIDATION_NOT_READY")
         # Existing history-recovery report may not be present in older worktrees, but
         # validation summary with source files is still the hard data gate.
-        status = "VALIDATION_NOT_READY" if not validation_ready else "READY"
+        status = "VALIDATION_NOT_READY_FINAL" if args.final_pass and not validation_ready else ("VALIDATION_NOT_READY" if not validation_ready else "READY")
         allowed_updates = ["yesterday_validation", "cumulative_validation", "validation_summary", "validation_audit"]
         forbidden_updates = ["today_candidate_source", "brief_source", "candidate_raw_numbers", "v4_strategy"]
         candidate_touched = False
         validation_touched = args.mode == "apply" and not blockers
+        current_validation_hash = validation_source_hash(validation)
+        previous_hash, previous_hash_path = previous_after_validation_hash(args.date)
+        source_hash_changed = previous_hash is not None and previous_hash != current_validation_hash
+        final_refresh_status = None
+        if args.final_pass:
+            validation_touched = False
+            if previous_hash is None:
+                blockers.append("PREVIOUS_VALIDATION_SOURCE_HASH_MISSING")
+                final_refresh_status = "VALIDATION_HASH_MISSING"
+            elif not validation_ready:
+                final_refresh_status = "VALIDATION_NOT_READY_FINAL"
+            elif source_hash_changed:
+                final_refresh_status = "REFRESH_VALIDATION_SECTION_ONLY"
+                validation_touched = args.mode == "apply" and not blockers
+            else:
+                final_refresh_status = "NOOP"
         marker = {
             "status": status,
             "requires_validation_completed": True,
             "validation_completion_marker": str(VALIDATION_SUMMARY.relative_to(ROOT)),
             "validation_ready": validation_ready,
+            "validation_source_hash": current_validation_hash,
+            "previous_validation_source_hash": previous_hash,
+            "previous_validation_source_hash_path": previous_hash_path,
+            "source_hash_changed": source_hash_changed,
             "history_recovery_ready": history_ready,
             "api_enabled": bool(validation.get("api_enabled")),
             "api_disabled_reason": validation.get("api_disabled_reason"),
@@ -118,16 +204,21 @@ def build_marker(args: argparse.Namespace) -> dict[str, Any]:
             "validation_touched": validation_touched,
             "candidate_touched": candidate_touched,
             "last_good_preserved_on_not_ready": True,
+            "final_pass": bool(args.final_pass),
+            "scan_ran": False,
+            "validation_reran": False,
+            "refresh_status": final_refresh_status or status,
         }
 
     common = {
         "schema_version": "v3v4_dashboard_daily_update_gate.v1",
-        "phase": "V3V4-DASHBOARD-DAILY-AUTO-UPDATE-SCHEDULE-CORRECTION-20260523",
+        "phase": "V3V4-DASHBOARD-FINAL-PASS-RUNNER-AND-SCAN-TIMEOUT-FIX-20260524",
         "generated_at": datetime.now(TZ).isoformat(),
         "date": args.date,
         "update_phase": args.phase,
         "mode": args.mode,
-        "planned_time": phase_cfg.get("planned_time"),
+        "planned_time": phase_cfg.get("time") if args.final_pass else phase_cfg.get("planned_time"),
+        "plan_path": str(plan_file.relative_to(ROOT)) if plan_file.exists() else None,
         "command_review_only": True,
         "cron_enabled": False,
         "autosync_cron_created": False,
@@ -168,9 +259,18 @@ def main() -> int:
     parser.add_argument("--no-push", action="store_true", required=True)
     parser.add_argument("--no-cloud", action="store_true", required=True)
     parser.add_argument("--strict", action="store_true")
+    parser.add_argument("--final-pass", action="store_true")
     args = parser.parse_args()
     marker = build_marker(args)
-    if args.phase == "after-validation" and args.mode == "apply" and not marker.get("blockers"):
+    if args.final_pass and args.phase != "after-validation":
+        marker["blockers"].append("FINAL_PASS_ONLY_ALLOWED_AFTER_VALIDATION")
+    should_refresh_dashboard = (
+        args.phase == "after-validation"
+        and args.mode == "apply"
+        and not marker.get("blockers")
+        and not (args.final_pass and marker.get("refresh_status") == "NOOP")
+    )
+    if should_refresh_dashboard:
         from generate_intel_desk_html import build_dashboard
 
         dashboard_marker = build_dashboard(write=True, date_key=args.date)
@@ -179,7 +279,12 @@ def main() -> int:
         marker["script_validation_visible"] = True
     else:
         marker["dashboard_refreshed"] = False
-    out = STATUS / f"v3v4_dashboard_daily_update_{args.phase.replace('-', '_')}_{args.mode.replace('-', '_')}_{args.date}.json"
+    if args.final_pass and args.phase == "after-validation":
+        out = STATUS / f"v3v4_dashboard_after_validation_final_refresh_{args.date}.json"
+    elif args.final_pass:
+        out = STATUS / f"v3v4_dashboard_daily_update_{args.phase.replace('-', '_')}_invalid_final_pass_{args.date}.json"
+    else:
+        out = STATUS / f"v3v4_dashboard_daily_update_{args.phase.replace('-', '_')}_{args.mode.replace('-', '_')}_{args.date}.json"
     out.write_text(json.dumps(marker, ensure_ascii=False, indent=2), encoding="utf-8")
     print(json.dumps(marker, ensure_ascii=False, indent=2))
     if args.strict and marker.get("blockers"):
