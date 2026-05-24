@@ -50,6 +50,12 @@ def main() -> int:
         for tok in required_tokens:
             if tok not in html:
                 blockers.append(f'page_missing_token:{tok}')
+        if '建议 stake / 实际 stake' in html:
+            blockers.append('old_stake_label_still_present')
+        if '下注金额（建议值，可手改）' not in html:
+            blockers.append('new_stake_label_missing')
+        if '系统建议：' not in html:
+            blockers.append('stake_helper_text_missing')
         if 'id="f_candidate"' in html:
             blockers.append('legacy_long_select_still_present')
         if "document.getElementById('f_date').value=todayLocal();" not in html:
@@ -122,6 +128,19 @@ def main() -> int:
                 rows = js.get('rows') or []
                 if 'semantics' not in js:
                     blockers.append('candidates_semantics_missing')
+                official = [r for r in rows if str(r.get('official_source')) == 'official_57']
+                if official:
+                    miss = []
+                    for r in official:
+                        h = str(r.get('home_cn') or '')
+                        a = str(r.get('away_cn') or '')
+                        if r.get('team_cn_missing') or h.startswith('中文名缺失：') or a.startswith('中文名缺失：'):
+                            miss.append(r)
+                    miss_rate = (len(miss) / len(official)) * 100.0
+                    if miss_rate > 20:
+                        blockers.append(f'official_candidate_cn_missing_rate_too_high:{miss_rate:.1f}%')
+                    elif miss_rate > 0:
+                        warnings.append(f'official_candidate_cn_missing_rate_warn:{miss_rate:.1f}%')
                 for row in rows[:3]:
                     for k in ['fixture_id', 'league', 'home_cn', 'away_cn', 'v4_grade', 'official_source', 'candidate_source_date', 'team_cn_missing']:
                         if k not in row:

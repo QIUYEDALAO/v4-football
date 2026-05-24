@@ -43,6 +43,9 @@ def _resolve_candidate_view(date: str) -> tuple[dict, str, bool]:
 
 
 def _normalize_candidate_rows(view: dict, source_date: str) -> list[dict]:
+    def _looks_cn(s: str) -> bool:
+        return any('\u4e00' <= ch <= '\u9fff' for ch in (s or ""))
+
     rows = []
     for key in ("A_candidates", "B_candidates"):
         for r in (view.get(key) or []):
@@ -63,11 +66,23 @@ def _normalize_candidate_rows(view: dict, source_date: str) -> list[dict]:
                 away_team_cn_hint=away_cn_raw,
                 source=f"candidate_view:{source_date}",
             )
+            home_cn = resolved.get("home_team_cn") or (r.get("home_cn") or r.get("home_team_cn") or r.get("home") or "")
+            away_cn = resolved.get("away_team_cn") or (r.get("away_cn") or r.get("away_team_cn") or r.get("away") or "")
+            home_src = (resolved.get("team_cn_source") or {}).get("home")
+            away_src = (resolved.get("team_cn_source") or {}).get("away")
+            # If upstream put Chinese team names into *_en fields, preserve them as CN display instead of "中文名缺失：...".
+            if isinstance(home_cn, str) and home_cn.startswith("中文名缺失：") and _looks_cn(home_en):
+                home_cn = home_en
+                home_src = "en_field_cn_text"
+            if isinstance(away_cn, str) and away_cn.startswith("中文名缺失：") and _looks_cn(away_en):
+                away_cn = away_en
+                away_src = "en_field_cn_text"
+            missing = str(home_cn).startswith("中文名缺失：") or str(away_cn).startswith("中文名缺失：")
             rows.append({
                 "fixture_id": r.get("fixture_id"),
                 "league": r.get("league") or "",
-                "home_cn": resolved.get("home_team_cn") or (r.get("home_cn") or r.get("home_team_cn") or r.get("home") or ""),
-                "away_cn": resolved.get("away_team_cn") or (r.get("away_cn") or r.get("away_team_cn") or r.get("away") or ""),
+                "home_cn": home_cn,
+                "away_cn": away_cn,
                 "home_en": resolved.get("home_team_en") or home_en,
                 "away_en": resolved.get("away_team_en") or away_en,
                 "kickoff_time": r.get("kickoff_display") or "",
@@ -76,8 +91,15 @@ def _normalize_candidate_rows(view: dict, source_date: str) -> list[dict]:
                 "ht_model_score": r.get("ht_score"),
                 "official_source": "official_57",
                 "candidate_source_date": source_date,
-                "team_cn_source": resolved.get("team_cn_source"),
-                "team_cn_missing": resolved.get("team_cn_missing"),
+                "team_cn_source": {
+                    "home": home_src,
+                    "away": away_src,
+                    "team_id": (resolved.get("team_cn_source") or {}).get("team_id"),
+                    "league_id": (resolved.get("team_cn_source") or {}).get("league_id"),
+                    "country": (resolved.get("team_cn_source") or {}).get("country"),
+                    "source": (resolved.get("team_cn_source") or {}).get("source"),
+                },
+                "team_cn_missing": missing,
             })
     return rows
 

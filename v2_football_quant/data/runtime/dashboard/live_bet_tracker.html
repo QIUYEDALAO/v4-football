@@ -60,11 +60,11 @@ summary{cursor:pointer}
     <div><label>水位</label><input id="f_odds" type="number" step="0.01" value="0.9" /></div>
   </div>
   <div class="row3">
-    <div><label>建议 stake / 实际 stake</label><input id="f_stake" type="number" step="0.01" /></div>
+    <div><label>下注金额（建议值，可手改）</label><input id="f_stake" type="number" step="0.01" /></div>
     <div><label>入场分钟</label><input id="f_entry_min" type="number" /></div>
     <div><label>入场比分</label><input id="f_entry_score" placeholder="0-0" /></div>
   </div>
-  <div id="stake_hint" class="muted">建议跳过，不建议下注。</div>
+  <div id="stake_hint" class="muted">系统建议跳过；如仍需记录，请用 NO_BET 或手工填写。</div>
 
   <div class="row" style="margin-top:8px">
     <button onclick="addBet('BET')">添加记录（BET）</button>
@@ -116,10 +116,11 @@ function defaultStake(g,l){
 }
 function stakeHint(g,l,s){
   if(g==='A'&&l==='O1.25') return `建议 stake：${fmt(s)}（降仓/可跳过）`;
-  if((g==='A'&&l==='O1.5')||(g==='B'&&(l==='O1.25'||l==='O1.5'))||g==='C'||g==='SKIP') return '建议跳过，不建议下注。';
-  if(g==='A'&&l==='O1') return `建议 stake：${fmt(s)}（可手改 200~300）`;
-  if(g==='B'&&l==='O1') return `建议 stake：${fmt(s)}（可手改 100~150）`;
-  return `建议 stake：${fmt(s)}`;
+  if((g==='A'&&l==='O1.5')||(g==='B'&&(l==='O1.25'||l==='O1.5'))||g==='C'||g==='SKIP') return '系统建议跳过；如仍需记录，请用 NO_BET 或手工填写。';
+  if(g==='A'&&l==='O1') return `系统建议：${fmt(s)} 元；你可按实际下注金额修改（可手改 200~300）。`;
+  if(g==='B'&&l==='O1') return `系统建议：${fmt(s)} 元；你可按实际下注金额修改（可手改 100~150）。`;
+  if(g==='A'&&l==='O1.25') return `系统建议：${fmt(s)} 元；你可按实际下注金额修改（降仓/可跳过）。`;
+  return `系统建议：${fmt(s)} 元；你可按实际下注金额修改。`;
 }
 
 function bindDefaultStake(){
@@ -158,6 +159,7 @@ function renderCandidateCards(){
     <div class="candidate-title">${r.home_cn||r.home_en||'-'} vs ${r.away_cn||r.away_en||'-'}</div>
     <div class="muted">联赛 ${r.league||'-'} · 评级 ${r.v4_grade||'-'} · 开赛 ${r.kickoff_time||'-'}</div>
     <div class="muted">扫描批次 ${r.candidate_source_date||'N/A'}</div>
+    <div class="muted">EN: ${(r.home_en||'-')} vs ${(r.away_en||'-')}</div>
   </div>`).join('');
   box.querySelectorAll('.candidate-card').forEach(el=>{
     el.addEventListener('click',()=>applyCandidateCard(Number(el.getAttribute('data-i'))));
