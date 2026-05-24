@@ -1,0 +1,385 @@
+<!doctype html><html lang='zh-CN'><head><meta charset='utf-8'><meta name='viewport' content='width=device-width,initial-scale=1'>
+    <title>V4 联赛命中率与ROI诊断</title>
+    <style>
+    body{margin:0;background:#0b1220;color:#eaf1ff;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;padding:12px;max-width:920px;margin-inline:auto}
+    .panel{background:#121c31;border:1px solid #24324d;border-radius:12px;padding:10px;margin:8px 0}
+    .card{background:#0f1729;border:1px solid #24324d;border-radius:10px;padding:8px;margin:8px 0}
+    .title{font-weight:700} .country{color:#93a5bf;font-weight:400} .meta,.line{font-size:12px;color:#c9d7ef;margin-top:3px}
+    h1,h2{margin:6px 0}
+    </style></head><body>
+    <h1>V4 联赛命中率与 ROI 诊断</h1>
+    <div class='panel'>总样本 A/B/AB: 41/89/130<br>样本口径：只统计 official 57 A/B settled；排除 C/SKIP/UNKNOWN/outside_57。<br>诊断用途，不自动改策略。</div>
+    <div class='panel'><a href='/live_bet_tracker.html' style='color:#87b7ff'>返回实盘记录页</a></div>
+    <h2>样本 >=20 联赛</h2><div class='panel'>无</div>
+    <h2>样本 10-19 联赛（弱参考）</h2>
+        <div class='card'>
+          <div class='title'>美职业 <span class='country'>USA</span></div>
+          <div class='meta'>样本 15 | A/B 5/10 | 推荐 KEEP_OBSERVE</div>
+          <div class='line'>命中 A/B/AB: 80.0% / 60.0% / 66.7%</div>
+          <div class='line'>HT分布 0/1/2+: 0/8/7</div>
+          <div class='line'>ROI(含返水) O0.75/O1/O1.25/O1.5: 0.612 / 0.398 / 0.132 / -0.135</div>
+          <div class='line'>日期范围 2026-05-13 ~ 2026-05-17</div>
+        </div>
+        
+        <div class='card'>
+          <div class='title'>土超 <span class='country'>Turkey</span></div>
+          <div class='meta'>样本 10 | A/B 1/9 | 推荐 KEEP_OBSERVE</div>
+          <div class='line'>命中 A/B/AB: 100.0% / 55.6% / 60.0%</div>
+          <div class='line'>HT分布 0/1/2+: 0/6/4</div>
+          <div class='line'>ROI(含返水) O0.75/O1/O1.25/O1.5: 0.585 / 0.345 / 0.045 / -0.255</div>
+          <div class='line'>日期范围 2026-05-16 ~ 2026-05-18</div>
+        </div>
+        
+    <h2>样本 <10 联赛（仅观察）</h2>
+        <div class='card'>
+          <div class='title'>冰岛超 <span class='country'>UNKNOWN</span></div>
+          <div class='meta'>样本 8 | A/B 4/4 | 推荐 GOOD_BUT_SMALL_SAMPLE</div>
+          <div class='line'>命中 A/B/AB: 100.0% / 100.0% / 100.0%</div>
+          <div class='line'>HT分布 0/1/2+: 0/6/2</div>
+          <div class='line'>ROI(含返水) O0.75/O1/O1.25/O1.5: 0.525 / 0.225 / -0.150 / -0.525</div>
+          <div class='line'>日期范围 2026-05-17 ~ 2026-05-18</div>
+        </div>
+        
+        <div class='card'>
+          <div class='title'>西甲 <span class='country'>Spain</span></div>
+          <div class='meta'>样本 7 | A/B 1/6 | 推荐 GOOD_BUT_SMALL_SAMPLE</div>
+          <div class='line'>命中 A/B/AB: 0.0% / 33.3% / 28.6%</div>
+          <div class='line'>HT分布 0/1/2+: 0/6/1</div>
+          <div class='line'>ROI(含返水) O0.75/O1/O1.25/O1.5: 0.482 / 0.139 / -0.289 / -0.718</div>
+          <div class='line'>日期范围 2026-05-14 ~ 2026-05-18</div>
+        </div>
+        
+        <div class='card'>
+          <div class='title'>巴西甲 <span class='country'>Brazil</span></div>
+          <div class='meta'>样本 6 | A/B 0/6 | 推荐 GOOD_BUT_SMALL_SAMPLE</div>
+          <div class='line'>命中 A/B/AB: 0.0% / 66.7% / 66.7%</div>
+          <div class='line'>HT分布 0/1/2+: 0/2/4</div>
+          <div class='line'>ROI(含返水) O0.75/O1/O1.25/O1.5: 0.692 / 0.558 / 0.392 / 0.225</div>
+          <div class='line'>日期范围 2026-05-17 ~ 2026-05-18</div>
+        </div>
+        
+        <div class='card'>
+          <div class='title'>捷克甲 <span class='country'>UNKNOWN</span></div>
+          <div class='meta'>样本 6 | A/B 3/3 | 推荐 GOOD_BUT_SMALL_SAMPLE</div>
+          <div class='line'>命中 A/B/AB: 0.0% / 33.3% / 16.7%</div>
+          <div class='line'>HT分布 0/1/2+: 1/1/4</div>
+          <div class='line'>ROI(含返水) O0.75/O1/O1.25/O1.5: 0.458 / 0.392 / 0.308 / 0.225</div>
+          <div class='line'>日期范围 2026-05-13 ~ 2026-05-17</div>
+        </div>
+        
+        <div class='card'>
+          <div class='title'>法甲 <span class='country'>France</span></div>
+          <div class='meta'>样本 6 | A/B 1/5 | 推荐 GOOD_BUT_SMALL_SAMPLE</div>
+          <div class='line'>命中 A/B/AB: 100.0% / 60.0% / 66.7%</div>
+          <div class='line'>HT分布 0/1/2+: 0/3/3</div>
+          <div class='line'>ROI(含返水) O0.75/O1/O1.25/O1.5: 0.625 / 0.425 / 0.175 / -0.075</div>
+          <div class='line'>日期范围 2026-05-14 ~ 2026-05-18</div>
+        </div>
+        
+        <div class='card'>
+          <div class='title'>德乙 <span class='country'>Germany</span></div>
+          <div class='meta'>样本 5 | A/B 1/4 | 推荐 GOOD_BUT_SMALL_SAMPLE</div>
+          <div class='line'>命中 A/B/AB: 100.0% / 75.0% / 80.0%</div>
+          <div class='line'>HT分布 0/1/2+: 0/2/3</div>
+          <div class='line'>ROI(含返水) O0.75/O1/O1.25/O1.5: 0.665 / 0.505 / 0.305 / 0.105</div>
+          <div class='line'>日期范围 2026-05-17 ~ 2026-05-17</div>
+        </div>
+        
+        <div class='card'>
+          <div class='title'>瑞士超 <span class='country'>Sweden</span></div>
+          <div class='meta'>样本 5 | A/B 3/2 | 推荐 GOOD_BUT_SMALL_SAMPLE</div>
+          <div class='line'>命中 A/B/AB: 66.7% / 0.0% / 40.0%</div>
+          <div class='line'>HT分布 0/1/2+: 0/4/1</div>
+          <div class='line'>ROI(含返水) O0.75/O1/O1.25/O1.5: 0.505 / 0.185 / -0.215 / -0.615</div>
+          <div class='line'>日期范围 2026-05-16 ~ 2026-05-17</div>
+        </div>
+        
+        <div class='card'>
+          <div class='title'>沙特联 <span class='country'>UNKNOWN</span></div>
+          <div class='meta'>样本 4 | A/B 2/2 | 推荐 NO_ACTION_LOW_SAMPLE</div>
+          <div class='line'>命中 A/B/AB: 100.0% / 0.0% / 50.0%</div>
+          <div class='line'>HT分布 0/1/2+: 2/2/0</div>
+          <div class='line'>ROI(含返水) O0.75/O1/O1.25/O1.5: -0.275 / -0.475 / -0.725 / -0.975</div>
+          <div class='line'>日期范围 2026-05-14 ~ 2026-05-18</div>
+        </div>
+        
+        <div class='card'>
+          <div class='title'>苏超 <span class='country'>UNKNOWN</span></div>
+          <div class='meta'>样本 4 | A/B 2/2 | 推荐 NO_ACTION_LOW_SAMPLE</div>
+          <div class='line'>命中 A/B/AB: 100.0% / 50.0% / 75.0%</div>
+          <div class='line'>HT分布 0/1/2+: 1/0/3</div>
+          <div class='line'>ROI(含返水) O0.75/O1/O1.25/O1.5: 0.375 / 0.375 / 0.375 / 0.375</div>
+          <div class='line'>日期范围 2026-05-14 ~ 2026-05-17</div>
+        </div>
+        
+        <div class='card'>
+          <div class='title'>阿联酋超 <span class='country'>Argentina</span></div>
+          <div class='meta'>样本 4 | A/B 2/2 | 推荐 NO_ACTION_LOW_SAMPLE</div>
+          <div class='line'>命中 A/B/AB: 0.0% / 100.0% / 50.0%</div>
+          <div class='line'>HT分布 0/1/2+: 2/1/1</div>
+          <div class='line'>ROI(含返水) O0.75/O1/O1.25/O1.5: -0.175 / -0.275 / -0.400 / -0.525</div>
+          <div class='line'>日期范围 2026-05-14 ~ 2026-05-16</div>
+        </div>
+        
+        <div class='card'>
+          <div class='title'>墨西联 <span class='country'>Mexico</span></div>
+          <div class='meta'>样本 3 | A/B 0/3 | 推荐 NO_ACTION_LOW_SAMPLE</div>
+          <div class='line'>命中 A/B/AB: 0.0% / 33.3% / 33.3%</div>
+          <div class='line'>HT分布 0/1/2+: 2/1/0</div>
+          <div class='line'>ROI(含返水) O0.75/O1/O1.25/O1.5: -0.508 / -0.642 / -0.808 / -0.975</div>
+          <div class='line'>日期范围 2026-05-15 ~ 2026-05-18</div>
+        </div>
+        
+        <div class='card'>
+          <div class='title'>波兰超 <span class='country'>UNKNOWN</span></div>
+          <div class='meta'>样本 3 | A/B 2/1 | 推荐 NO_ACTION_LOW_SAMPLE</div>
+          <div class='line'>命中 A/B/AB: 50.0% / 100.0% / 66.7%</div>
+          <div class='line'>HT分布 0/1/2+: 0/2/1</div>
+          <div class='line'>ROI(含返水) O0.75/O1/O1.25/O1.5: 0.558 / 0.292 / -0.042 / -0.375</div>
+          <div class='line'>日期范围 2026-05-14 ~ 2026-05-17</div>
+        </div>
+        
+        <div class='card'>
+          <div class='title'>荷甲 <span class='country'>Netherlands</span></div>
+          <div class='meta'>样本 3 | A/B 1/2 | 推荐 NO_ACTION_LOW_SAMPLE</div>
+          <div class='line'>命中 A/B/AB: 100.0% / 50.0% / 66.7%</div>
+          <div class='line'>HT分布 0/1/2+: 0/0/3</div>
+          <div class='line'>ROI(含返水) O0.75/O1/O1.25/O1.5: 0.825 / 0.825 / 0.825 / 0.825</div>
+          <div class='line'>日期范围 2026-05-17 ~ 2026-05-17</div>
+        </div>
+        
+        <div class='card'>
+          <div class='title'>西乙 <span class='country'>Spain</span></div>
+          <div class='meta'>样本 3 | A/B 3/0 | 推荐 NO_ACTION_LOW_SAMPLE</div>
+          <div class='line'>命中 A/B/AB: 0.0% / 0.0% / 0.0%</div>
+          <div class='line'>HT分布 0/1/2+: 1/0/2</div>
+          <div class='line'>ROI(含返水) O0.75/O1/O1.25/O1.5: 0.225 / 0.225 / 0.225 / 0.225</div>
+          <div class='line'>日期范围 2026-05-16 ~ 2026-05-18</div>
+        </div>
+        
+        <div class='card'>
+          <div class='title'>丹超 <span class='country'>Denmark</span></div>
+          <div class='meta'>样本 2 | A/B 1/1 | 推荐 NO_ACTION_LOW_SAMPLE</div>
+          <div class='line'>命中 A/B/AB: 100.0% / 0.0% / 50.0%</div>
+          <div class='line'>HT分布 0/1/2+: 0/0/2</div>
+          <div class='line'>ROI(含返水) O0.75/O1/O1.25/O1.5: 0.825 / 0.825 / 0.825 / 0.825</div>
+          <div class='line'>日期范围 2026-05-17 ~ 2026-05-17</div>
+        </div>
+        
+        <div class='card'>
+          <div class='title'>乌拉甲 <span class='country'>Uruguay</span></div>
+          <div class='meta'>样本 2 | A/B 1/1 | 推荐 NO_ACTION_LOW_SAMPLE</div>
+          <div class='line'>命中 A/B/AB: 100.0% / 0.0% / 50.0%</div>
+          <div class='line'>HT分布 0/1/2+: 0/1/1</div>
+          <div class='line'>ROI(含返水) O0.75/O1/O1.25/O1.5: 0.625 / 0.425 / 0.175 / -0.075</div>
+          <div class='line'>日期范围 2026-05-15 ~ 2026-05-17</div>
+        </div>
+        
+        <div class='card'>
+          <div class='title'>俄超 <span class='country'>UNKNOWN</span></div>
+          <div class='meta'>样本 2 | A/B 1/1 | 推荐 NO_ACTION_LOW_SAMPLE</div>
+          <div class='line'>命中 A/B/AB: 100.0% / 100.0% / 100.0%</div>
+          <div class='line'>HT分布 0/1/2+: 0/1/1</div>
+          <div class='line'>ROI(含返水) O0.75/O1/O1.25/O1.5: 0.625 / 0.425 / 0.175 / -0.075</div>
+          <div class='line'>日期范围 2026-05-17 ~ 2026-05-17</div>
+        </div>
+        
+        <div class='card'>
+          <div class='title'>匈甲 <span class='country'>UNKNOWN</span></div>
+          <div class='meta'>样本 2 | A/B 0/2 | 推荐 NO_ACTION_LOW_SAMPLE</div>
+          <div class='line'>命中 A/B/AB: 0.0% / 0.0% / 0.0%</div>
+          <div class='line'>HT分布 0/1/2+: 1/0/1</div>
+          <div class='line'>ROI(含返水) O0.75/O1/O1.25/O1.5: -0.075 / -0.075 / -0.075 / -0.075</div>
+          <div class='line'>日期范围 2026-05-15 ~ 2026-05-16</div>
+        </div>
+        
+        <div class='card'>
+          <div class='title'>塞尔超 <span class='country'>UNKNOWN</span></div>
+          <div class='meta'>样本 2 | A/B 0/2 | 推荐 NO_ACTION_LOW_SAMPLE</div>
+          <div class='line'>命中 A/B/AB: 0.0% / 100.0% / 100.0%</div>
+          <div class='line'>HT分布 0/1/2+: 0/2/0</div>
+          <div class='line'>ROI(含返水) O0.75/O1/O1.25/O1.5: 0.425 / 0.025 / -0.475 / -0.975</div>
+          <div class='line'>日期范围 2026-05-17 ~ 2026-05-18</div>
+        </div>
+        
+        <div class='card'>
+          <div class='title'>希腊超 <span class='country'>Greece</span></div>
+          <div class='meta'>样本 2 | A/B 0/2 | 推荐 NO_ACTION_LOW_SAMPLE</div>
+          <div class='line'>命中 A/B/AB: 0.0% / 0.0% / 0.0%</div>
+          <div class='line'>HT分布 0/1/2+: 1/0/1</div>
+          <div class='line'>ROI(含返水) O0.75/O1/O1.25/O1.5: -0.075 / -0.075 / -0.075 / -0.075</div>
+          <div class='line'>日期范围 2026-05-17 ~ 2026-05-17</div>
+        </div>
+        
+        <div class='card'>
+          <div class='title'>德甲 <span class='country'>Germany</span></div>
+          <div class='meta'>样本 2 | A/B 1/1 | 推荐 NO_ACTION_LOW_SAMPLE</div>
+          <div class='line'>命中 A/B/AB: 0.0% / 0.0% / 0.0%</div>
+          <div class='line'>HT分布 0/1/2+: 2/0/0</div>
+          <div class='line'>ROI(含返水) O0.75/O1/O1.25/O1.5: -0.975 / -0.975 / -0.975 / -0.975</div>
+          <div class='line'>日期范围 2026-05-15 ~ 2026-05-15</div>
+        </div>
+        
+        <div class='card'>
+          <div class='title'>挪超 <span class='country'>Norway</span></div>
+          <div class='meta'>样本 2 | A/B 0/2 | 推荐 NO_ACTION_LOW_SAMPLE</div>
+          <div class='line'>命中 A/B/AB: 0.0% / 100.0% / 100.0%</div>
+          <div class='line'>HT分布 0/1/2+: 0/1/1</div>
+          <div class='line'>ROI(含返水) O0.75/O1/O1.25/O1.5: 0.625 / 0.425 / 0.175 / -0.075</div>
+          <div class='line'>日期范围 2026-05-17 ~ 2026-05-17</div>
+        </div>
+        
+        <div class='card'>
+          <div class='title'>日职联 <span class='country'>Japan</span></div>
+          <div class='meta'>样本 2 | A/B 1/1 | 推荐 NO_ACTION_LOW_SAMPLE</div>
+          <div class='line'>命中 A/B/AB: 0.0% / 0.0% / 0.0%</div>
+          <div class='line'>HT分布 0/1/2+: 1/0/1</div>
+          <div class='line'>ROI(含返水) O0.75/O1/O1.25/O1.5: -0.075 / -0.075 / -0.075 / -0.075</div>
+          <div class='line'>日期范围 2026-05-16 ~ 2026-05-17</div>
+        </div>
+        
+        <div class='card'>
+          <div class='title'>比甲 <span class='country'>Belgium</span></div>
+          <div class='meta'>样本 2 | A/B 1/1 | 推荐 NO_ACTION_LOW_SAMPLE</div>
+          <div class='line'>命中 A/B/AB: 100.0% / 0.0% / 50.0%</div>
+          <div class='line'>HT分布 0/1/2+: 0/1/1</div>
+          <div class='line'>ROI(含返水) O0.75/O1/O1.25/O1.5: 0.625 / 0.425 / 0.175 / -0.075</div>
+          <div class='line'>日期范围 2026-05-17 ~ 2026-05-17</div>
+        </div>
+        
+        <div class='card'>
+          <div class='title'>秘鲁甲 <span class='country'>Peru</span></div>
+          <div class='meta'>样本 2 | A/B 2/0 | 推荐 NO_ACTION_LOW_SAMPLE</div>
+          <div class='line'>命中 A/B/AB: 50.0% / 0.0% / 50.0%</div>
+          <div class='line'>HT分布 0/1/2+: 0/2/0</div>
+          <div class='line'>ROI(含返水) O0.75/O1/O1.25/O1.5: 0.425 / 0.025 / -0.475 / -0.975</div>
+          <div class='line'>日期范围 2026-05-16 ~ 2026-05-17</div>
+        </div>
+        
+        <div class='card'>
+          <div class='title'>英超 <span class='country'>England</span></div>
+          <div class='meta'>样本 2 | A/B 0/2 | 推荐 NO_ACTION_LOW_SAMPLE</div>
+          <div class='line'>命中 A/B/AB: 0.0% / 100.0% / 100.0%</div>
+          <div class='line'>HT分布 0/1/2+: 0/1/1</div>
+          <div class='line'>ROI(含返水) O0.75/O1/O1.25/O1.5: 0.625 / 0.425 / 0.175 / -0.075</div>
+          <div class='line'>日期范围 2026-05-14 ~ 2026-05-15</div>
+        </div>
+        
+        <div class='card'>
+          <div class='title'>葡超 <span class='country'>Portugal</span></div>
+          <div class='meta'>样本 2 | A/B 1/1 | 推荐 NO_ACTION_LOW_SAMPLE</div>
+          <div class='line'>命中 A/B/AB: 100.0% / 100.0% / 100.0%</div>
+          <div class='line'>HT分布 0/1/2+: 0/0/2</div>
+          <div class='line'>ROI(含返水) O0.75/O1/O1.25/O1.5: 0.825 / 0.825 / 0.825 / 0.825</div>
+          <div class='line'>日期范围 2026-05-16 ~ 2026-05-17</div>
+        </div>
+        
+        <div class='card'>
+          <div class='title'>乌克超 <span class='country'>Uruguay</span></div>
+          <div class='meta'>样本 1 | A/B 0/1 | 推荐 NO_ACTION_LOW_SAMPLE</div>
+          <div class='line'>命中 A/B/AB: 0.0% / 100.0% / 100.0%</div>
+          <div class='line'>HT分布 0/1/2+: 0/0/1</div>
+          <div class='line'>ROI(含返水) O0.75/O1/O1.25/O1.5: 0.825 / 0.825 / 0.825 / 0.825</div>
+          <div class='line'>日期范围 2026-05-17 ~ 2026-05-17</div>
+        </div>
+        
+        <div class='card'>
+          <div class='title'>保甲 <span class='country'>UNKNOWN</span></div>
+          <div class='meta'>样本 1 | A/B 0/1 | 推荐 NO_ACTION_LOW_SAMPLE</div>
+          <div class='line'>命中 A/B/AB: 0.0% / 100.0% / 100.0%</div>
+          <div class='line'>HT分布 0/1/2+: 0/1/0</div>
+          <div class='line'>ROI(含返水) O0.75/O1/O1.25/O1.5: 0.425 / 0.025 / -0.475 / -0.975</div>
+          <div class='line'>日期范围 2026-05-18 ~ 2026-05-18</div>
+        </div>
+        
+        <div class='card'>
+          <div class='title'>克亚甲 <span class='country'>UNKNOWN</span></div>
+          <div class='meta'>样本 1 | A/B 0/1 | 推荐 NO_ACTION_LOW_SAMPLE</div>
+          <div class='line'>命中 A/B/AB: 0.0% / 100.0% / 100.0%</div>
+          <div class='line'>HT分布 0/1/2+: 0/1/0</div>
+          <div class='line'>ROI(含返水) O0.75/O1/O1.25/O1.5: 0.425 / 0.025 / -0.475 / -0.975</div>
+          <div class='line'>日期范围 2026-05-17 ~ 2026-05-17</div>
+        </div>
+        
+        <div class='card'>
+          <div class='title'>印尼超 <span class='country'>UNKNOWN</span></div>
+          <div class='meta'>样本 1 | A/B 0/1 | 推荐 NO_ACTION_LOW_SAMPLE</div>
+          <div class='line'>命中 A/B/AB: 0.0% / 100.0% / 100.0%</div>
+          <div class='line'>HT分布 0/1/2+: 0/0/1</div>
+          <div class='line'>ROI(含返水) O0.75/O1/O1.25/O1.5: 0.825 / 0.825 / 0.825 / 0.825</div>
+          <div class='line'>日期范围 2026-05-17 ~ 2026-05-17</div>
+        </div>
+        
+        <div class='card'>
+          <div class='title'>埃及超 <span class='country'>UNKNOWN</span></div>
+          <div class='meta'>样本 1 | A/B 0/1 | 推荐 NO_ACTION_LOW_SAMPLE</div>
+          <div class='line'>命中 A/B/AB: 0.0% / 100.0% / 100.0%</div>
+          <div class='line'>HT分布 0/1/2+: 0/1/0</div>
+          <div class='line'>ROI(含返水) O0.75/O1/O1.25/O1.5: 0.425 / 0.025 / -0.475 / -0.975</div>
+          <div class='line'>日期范围 2026-05-17 ~ 2026-05-17</div>
+        </div>
+        
+        <div class='card'>
+          <div class='title'>奥甲 <span class='country'>Austria</span></div>
+          <div class='meta'>样本 1 | A/B 0/1 | 推荐 NO_ACTION_LOW_SAMPLE</div>
+          <div class='line'>命中 A/B/AB: 0.0% / 100.0% / 100.0%</div>
+          <div class='line'>HT分布 0/1/2+: 0/0/1</div>
+          <div class='line'>ROI(含返水) O0.75/O1/O1.25/O1.5: 0.825 / 0.825 / 0.825 / 0.825</div>
+          <div class='line'>日期范围 2026-05-17 ~ 2026-05-17</div>
+        </div>
+        
+        <div class='card'>
+          <div class='title'>意甲 <span class='country'>Italy</span></div>
+          <div class='meta'>样本 1 | A/B 0/1 | 推荐 NO_ACTION_LOW_SAMPLE</div>
+          <div class='line'>命中 A/B/AB: 0.0% / 100.0% / 100.0%</div>
+          <div class='line'>HT分布 0/1/2+: 0/1/0</div>
+          <div class='line'>ROI(含返水) O0.75/O1/O1.25/O1.5: 0.425 / 0.025 / -0.475 / -0.975</div>
+          <div class='line'>日期范围 2026-05-17 ~ 2026-05-17</div>
+        </div>
+        
+        <div class='card'>
+          <div class='title'>澳超 <span class='country'>UNKNOWN</span></div>
+          <div class='meta'>样本 1 | A/B 0/1 | 推荐 NO_ACTION_LOW_SAMPLE</div>
+          <div class='line'>命中 A/B/AB: 0.0% / 0.0% / 0.0%</div>
+          <div class='line'>HT分布 0/1/2+: 0/1/0</div>
+          <div class='line'>ROI(含返水) O0.75/O1/O1.25/O1.5: 0.425 / 0.025 / -0.475 / -0.975</div>
+          <div class='line'>日期范围 2026-05-15 ~ 2026-05-15</div>
+        </div>
+        
+        <div class='card'>
+          <div class='title'>爱超 <span class='country'>UNKNOWN</span></div>
+          <div class='meta'>样本 1 | A/B 0/1 | 推荐 NO_ACTION_LOW_SAMPLE</div>
+          <div class='line'>命中 A/B/AB: 0.0% / 100.0% / 100.0%</div>
+          <div class='line'>HT分布 0/1/2+: 0/0/1</div>
+          <div class='line'>ROI(含返水) O0.75/O1/O1.25/O1.5: 0.825 / 0.825 / 0.825 / 0.825</div>
+          <div class='line'>日期范围 2026-05-17 ~ 2026-05-17</div>
+        </div>
+        
+        <div class='card'>
+          <div class='title'>玻利甲 <span class='country'>UNKNOWN</span></div>
+          <div class='meta'>样本 1 | A/B 0/1 | 推荐 NO_ACTION_LOW_SAMPLE</div>
+          <div class='line'>命中 A/B/AB: 0.0% / 0.0% / 0.0%</div>
+          <div class='line'>HT分布 0/1/2+: 0/0/1</div>
+          <div class='line'>ROI(含返水) O0.75/O1/O1.25/O1.5: 0.825 / 0.825 / 0.825 / 0.825</div>
+          <div class='line'>日期范围 2026-05-17 ~ 2026-05-17</div>
+        </div>
+        
+        <div class='card'>
+          <div class='title'>立陶甲 <span class='country'>UNKNOWN</span></div>
+          <div class='meta'>样本 1 | A/B 1/0 | 推荐 NO_ACTION_LOW_SAMPLE</div>
+          <div class='line'>命中 A/B/AB: 0.0% / 0.0% / 0.0%</div>
+          <div class='line'>HT分布 0/1/2+: 1/0/0</div>
+          <div class='line'>ROI(含返水) O0.75/O1/O1.25/O1.5: -0.975 / -0.975 / -0.975 / -0.975</div>
+          <div class='line'>日期范围 2026-05-15 ~ 2026-05-15</div>
+        </div>
+        
+        <div class='card'>
+          <div class='title'>阿塞超 <span class='country'>Argentina</span></div>
+          <div class='meta'>样本 1 | A/B 0/1 | 推荐 NO_ACTION_LOW_SAMPLE</div>
+          <div class='line'>命中 A/B/AB: 0.0% / 0.0% / 0.0%</div>
+          <div class='line'>HT分布 0/1/2+: 0/0/1</div>
+          <div class='line'>ROI(含返水) O0.75/O1/O1.25/O1.5: 0.825 / 0.825 / 0.825 / 0.825</div>
+          <div class='line'>日期范围 2026-05-15 ~ 2026-05-15</div>
+        </div>
+        
+    </body></html>

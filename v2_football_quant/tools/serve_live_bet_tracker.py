@@ -136,6 +136,18 @@ class H(BaseHTTPRequestHandler):
             self.wfile.write(data)
             return
 
+        if u.path == "/v4_league_hit_rate.html":
+            p = DASH / "v4_league_hit_rate.html"
+            if not p.exists():
+                self.send_response(404); self.end_headers(); return
+            data = p.read_bytes()
+            self.send_response(200)
+            self.send_header("Content-Type", "text/html; charset=utf-8")
+            self.send_header("Content-Length", str(len(data)))
+            self.end_headers()
+            self.wfile.write(data)
+            return
+
         if u.path == "/api/live_bets":
             date = q.get("date", [datetime.utcnow().strftime("%Y%m%d")])[0]
             return _json(self, 200, {"ok": True, "date": date, "records": store.get_day_records(date)})
