@@ -390,14 +390,18 @@ def _ht_display(item: dict[str, Any]) -> str | None:
 
 
 def _card(item: dict[str, Any], grade: str) -> str:
-    if item.get("home_cn"):
-        home_cn, home_en = str(item.get("home_cn")), item.get("home_en")
+    home_cn_raw = item.get("home_team_cn") or item.get("home_cn")
+    away_cn_raw = item.get("away_team_cn") or item.get("away_cn")
+    home_en = item.get("home_team_en") or item.get("home_en") or item.get("home") or item.get("home_team")
+    away_en = item.get("away_team_en") or item.get("away_en") or item.get("away") or item.get("away_team")
+    if home_cn_raw:
+        home_cn = str(home_cn_raw)
     else:
-        home_cn, home_en = _cn_name(item.get("home") or item.get("home_team"))
-    if item.get("away_cn"):
-        away_cn, away_en = str(item.get("away_cn")), item.get("away_en")
+        home_cn = f"中文名缺失：{home_en}" if home_en else "中文名缺失：UNKNOWN"
+    if away_cn_raw:
+        away_cn = str(away_cn_raw)
     else:
-        away_cn, away_en = _cn_name(item.get("away") or item.get("away_team"))
+        away_cn = f"中文名缺失：{away_en}" if away_en else "中文名缺失：UNKNOWN"
     english = ""
     if home_en or away_en:
         english = f"<div class='english-line'>EN: {_h(home_en or home_cn)} vs {_h(away_en or away_cn)}</div>"

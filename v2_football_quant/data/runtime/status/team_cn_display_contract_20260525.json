@@ -1,0 +1,17 @@
+{
+  "phase": "V3V4-INTEL-CENTER-TEAM-CN-DISPLAY-FULL-FIX-20260525",
+  "status": "PASS",
+  "rules": [
+    "所有主卡片球队名必须中文",
+    "优先 home_team_cn / away_team_cn",
+    "其次 team_id mapping",
+    "再次 team_name_en alias",
+    "仍缺失则显示 中文名缺失：<English Name>",
+    "不得直接显示英文作为主标题",
+    "英文名只允许作为小字审计",
+    "不得因缺中文删除比赛",
+    "不得因缺中文改评级",
+    "checker 必须拦截主显示英文"
+  ],
+  "silent_english_fallback_allowed": false
+}

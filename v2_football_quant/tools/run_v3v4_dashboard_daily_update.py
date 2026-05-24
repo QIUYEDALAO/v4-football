@@ -83,6 +83,27 @@ def ensure_scan_markers(date: str, paths: dict[str, Path]) -> dict[str, Any]:
             rebuild_status = f"rebuild_failed:{exc}"
     return {"attempted": rebuilt, "status": rebuild_status}
 
+def enrich_team_cn(date: str) -> dict[str, Any]:
+    result = {"candidate_enriched": False, "outside57_enriched": False, "errors": []}
+    try:
+        from v3v4_dashboard_brief_resolver import resolve as resolve_brief
+        if (REPORTS / f"v4_openclaw_brief_{date}.txt").exists():
+            resolve_brief(date, write=True)
+            result["candidate_enriched"] = True
+    except Exception as exc:
+        result["errors"].append(f"candidate_enrich_failed:{exc}")
+    try:
+        import subprocess
+        cmd = [sys.executable, str(ROOT / "tools/enrich_outside_57_pool_team_cn.py"), "--date", date, "--mode", "apply"]
+        proc = subprocess.run(cmd, cwd=str(ROOT), text=True, capture_output=True, timeout=60)
+        if proc.returncode == 0:
+            result["outside57_enriched"] = True
+        else:
+            result["errors"].append(f"outside57_enrich_rc_{proc.returncode}")
+    except Exception as exc:
+        result["errors"].append(f"outside57_enrich_failed:{exc}")
+    return result
+
 
 def final_task_config(plan: dict[str, Any]) -> dict[str, Any]:
     for task in plan.get("schedule", []):
@@ -121,6 +142,7 @@ def previous_after_validation_hash(date: str) -> tuple[str | None, str | None]:
 def build_marker(args: argparse.Namespace) -> dict[str, Any]:
     paths = marker_paths(args.date)
     yesterday_target = _yesterday_target(args.date)
+    team_cn_enrich = enrich_team_cn(args.date)
     marker_resolution = ensure_scan_markers(args.date, paths)
     plan_file = plan_path()
     plan = load(plan_file) if plan_file else {}
@@ -273,6 +295,7 @@ def build_marker(args: argparse.Namespace) -> dict[str, Any]:
         "c_active_in_dashboard": False,
         "c_validation_visible": False,
         "last_7d_visible": False,
+        "team_cn_enrich": team_cn_enrich,
         "source_hash": digest([paths["scan_perf"], paths["brief_resolution"], paths["candidate_view"], paths["validation_summary"], paths["script_validation_summary"]]),
         "last_good_path": str(LAST_GOOD.relative_to(ROOT)),
         "blockers": blockers,

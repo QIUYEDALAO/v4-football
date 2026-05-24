@@ -13,6 +13,7 @@ import re
 from datetime import datetime, timezone, timedelta
 from pathlib import Path
 from typing import Any
+from team_cn_resolver import TeamCnResolver
 
 ROOT = Path(__file__).resolve().parents[1]
 DAILY = ROOT / "data/daily_reports"
@@ -78,6 +79,7 @@ def load_team_map() -> dict[str, str]:
     return result
 
 TEAM_MAP = load_team_map()
+CN_RESOLVER = TeamCnResolver()
 
 
 def cn(name: str) -> tuple[str, str | None]:
@@ -135,8 +137,9 @@ def parse_ab_block(block: str, grade: str, idx: int, scout_by_fixture: dict[int,
     dist_line = next((ln for ln in lines if ln.startswith("分布：")), "")
     risk_line = next((ln for ln in lines if ln.startswith("风险：")), "")
     source = scout_by_fixture.get(fixture_id or -1, {})
-    home_cn, home_en = cn(home)
-    away_cn, away_en = cn(away)
+    resolved = CN_RESOLVER.resolve_match(home, away, source=str(brief_path.relative_to(ROOT)))
+    home_cn, away_cn = resolved["home_team_cn"], resolved["away_team_cn"]
+    home_en, away_en = resolved["home_team_en"], resolved["away_team_en"]
     return {
         "index": idx,
         "fixture_id": fixture_id,
@@ -144,8 +147,14 @@ def parse_ab_block(block: str, grade: str, idx: int, scout_by_fixture: dict[int,
         "away": away,
         "home_cn": home_cn,
         "away_cn": away_cn,
+        "home_team_cn": home_cn,
+        "away_team_cn": away_cn,
         "home_en": home_en,
         "away_en": away_en,
+        "home_team_en": home_en,
+        "away_team_en": away_en,
+        "team_cn_source": resolved.get("team_cn_source"),
+        "team_cn_missing": resolved.get("team_cn_missing"),
         "league": league,
         "kickoff_display": kickoff_display,
         "ht_score": int(score_match.group(1)) if score_match else None,
@@ -178,16 +187,23 @@ def parse_c_items(text: str, scout_by_fixture: dict[int, dict[str, Any]], brief_
         ht = meta_parts[1].replace("HT", "").strip() if len(meta_parts) > 1 else None
         rate = meta_parts[2].strip() if len(meta_parts) > 2 else None
         script = meta_parts[3].strip() if len(meta_parts) > 3 else "待识别"
-        home_cn, home_en = cn(home)
-        away_cn, away_en = cn(away)
+        resolved = CN_RESOLVER.resolve_match(home, away, source=str(brief_path.relative_to(ROOT)))
+        home_cn, away_cn = resolved["home_team_cn"], resolved["away_team_cn"]
+        home_en, away_en = resolved["home_team_en"], resolved["away_team_en"]
         items.append({
             "index": idx,
             "home": home,
             "away": away,
             "home_cn": home_cn,
             "away_cn": away_cn,
+            "home_team_cn": home_cn,
+            "away_team_cn": away_cn,
             "home_en": home_en,
             "away_en": away_en,
+            "home_team_en": home_en,
+            "away_team_en": away_en,
+            "team_cn_source": resolved.get("team_cn_source"),
+            "team_cn_missing": resolved.get("team_cn_missing"),
             "league": league,
             "kickoff_display": kickoff_display,
             "ht_score": int(ht) if ht and ht.isdigit() else ht,
@@ -301,6 +317,27 @@ def resolve(date: str, *, write: bool = True) -> dict[str, Any]:
         if write:
             out_view = STATUS / f"v3v4_dashboard_candidate_view_{date}.json"
             out_view.write_text(json.dumps(view, ensure_ascii=False, indent=2), encoding="utf-8")
+            missing_rows: list[dict[str, Any]] = []
+            for bucket in ("A_candidates", "B_candidates", "C_candidates"):
+                rows = view.get(bucket, [])
+                if not isinstance(rows, list):
+                    continue
+                for row in rows:
+                    if row.get("team_cn_missing"):
+                        missing_rows.append({
+                            "source": "candidate_view",
+                            "date": date,
+                            "fixture_id": row.get("fixture_id"),
+                            "grade": row.get("grade"),
+                            "home_team_en": row.get("home_team_en"),
+                            "away_team_en": row.get("away_team_en"),
+                            "home_team_cn": row.get("home_team_cn"),
+                            "away_team_cn": row.get("away_team_cn"),
+                            "team_cn_source": row.get("team_cn_source"),
+                        })
+            missing_path = STATUS / f"missing_team_cn_{date}.json"
+            missing_payload = {"date": date, "missing_count": len(missing_rows), "missing_rows": missing_rows}
+            missing_path.write_text(json.dumps(missing_payload, ensure_ascii=False, indent=2), encoding="utf-8")
     if write:
         out = STATUS / f"v3v4_dashboard_brief_resolution_{date}.json"
         out.write_text(json.dumps(result, ensure_ascii=False, indent=2), encoding="utf-8")

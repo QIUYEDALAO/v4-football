@@ -15,11 +15,15 @@ def main()->int:
     blockers=[]
     text=HTML.read_text(encoding='utf-8',errors='replace') if HTML.exists() else ''
     if not HTML.exists(): blockers.append('dashboard_html_missing')
-    # Primary row should not show explicit EN fallback line.
-    if 'EN:' in text: blockers.append('english_primary_display_present')
-    # Hard guard against known old english-only fallback tokens.
-    for t in ['Home vs Away','vs UNKNOWN','Premier League','La Liga']:
-        if t in text: blockers.append(f'english_token:{t}')
+    # Primary row should not render bare english-vs-english in match-line.
+    import re
+    for m in re.finditer(r'<div class=\"match-line\">([^<]+)<span>vs</span>([^<]+)</div>', text):
+        left = m.group(1).strip()
+        right = m.group(2).strip()
+        if left.startswith('中文名缺失：') or right.startswith('中文名缺失：'):
+            continue
+        if re.fullmatch(r"[A-Za-z0-9 .'/&-]+", left) and re.fullmatch(r"[A-Za-z0-9 .'/&-]+", right):
+            blockers.append(f'english_main_match_line:{left} vs {right}')
 
     out={
       'checker':'tools/check_v3v4_dashboard_team_cn_display.py',

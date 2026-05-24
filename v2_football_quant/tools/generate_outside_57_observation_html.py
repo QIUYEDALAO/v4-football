@@ -4,6 +4,7 @@ from __future__ import annotations
 import argparse, json, sys
 from datetime import datetime, timezone, timedelta
 from pathlib import Path
+from team_cn_resolver import TeamCnResolver
 
 ROOT = Path(__file__).resolve().parents[1]
 STATUS = ROOT / "data/runtime/status"
@@ -11,6 +12,7 @@ DASHBOARD = ROOT / "data/runtime/dashboard"
 TZ = timezone(timedelta(hours=8))
 
 POOL_PATH = STATUS / "v4_outside_57_observation_pool_20260525.json"
+CN_RESOLVER = TeamCnResolver()
 
 HTML_HEAD = """<!doctype html>
 <html lang="zh-CN">
@@ -79,11 +81,14 @@ def generate_html(pool: dict) -> str:
     else:
         for m in fixtures:
             g = m.get('grade', 'SKIP')
+            home_cn = m.get('home_team_cn') or f"中文名缺失：{m.get('home_team_en') or m.get('home') or 'UNKNOWN'}"
+            away_cn = m.get('away_team_cn') or f"中文名缺失：{m.get('away_team_en') or m.get('away') or 'UNKNOWN'}"
+            en_line = f"EN: {m.get('home_team_en') or m.get('home') or '?'} vs {m.get('away_team_en') or m.get('away') or '?'}"
             parts.append(f'''<div class="match">
               <div class="match-row">
                 <div class="grade grade-{g}">{g}</div>
                 <div class="league">{m.get('league','?')}</div>
-                <div class="team">{m.get('home','?')} vs {m.get('away','?')}</div>
+                <div class="team">{home_cn} vs {away_cn}</div>
                 <div class="ht-score">HT{m.get('ht_score','?')}</div>
               </div>
               <div class="detail">
@@ -93,6 +98,7 @@ def generate_html(pool: dict) -> str:
                 <div><span>盘口:</span> {m.get('line_status','盘口待补')}</div>
                 <div><span>夹具ID:</span> {m.get('fixture_id','?')}</div>
                 <div><span>Paper:</span> {m.get('paper_status','未赛')}</div>
+                <div><span>审计:</span> {en_line}</div>
               </div>
             </div>''')
     
@@ -115,11 +121,53 @@ def main():
         'note': 'Pool not generated yet'
     }
     
+    fixtures = pool.get("fixtures", [])
+    missing_rows = []
+    if isinstance(fixtures, list):
+        for m in fixtures:
+            resolved = CN_RESOLVER.resolve_match(
+                m.get("home"),
+                m.get("away"),
+                home_team_cn_hint=m.get("home_team_cn"),
+                away_team_cn_hint=m.get("away_team_cn"),
+                team_id=m.get("fixture_id"),
+                league_id=m.get("league_id"),
+                source="outside_57_observation_pool",
+            )
+            m["home_team_cn"] = resolved["home_team_cn"]
+            m["away_team_cn"] = resolved["away_team_cn"]
+            m["home_team_en"] = resolved["home_team_en"]
+            m["away_team_en"] = resolved["away_team_en"]
+            m["team_cn_source"] = resolved["team_cn_source"]
+            m["team_cn_missing"] = resolved["team_cn_missing"]
+            if resolved["team_cn_missing"]:
+                missing_rows.append({
+                    "source": "outside_57_observation_pool",
+                    "fixture_id": m.get("fixture_id"),
+                    "league_id": m.get("league_id"),
+                    "home_team_en": resolved["home_team_en"],
+                    "away_team_en": resolved["away_team_en"],
+                    "home_team_cn": resolved["home_team_cn"],
+                    "away_team_cn": resolved["away_team_cn"],
+                })
+    pool["fixtures"] = fixtures
     html = generate_html(pool)
     
     if args.mode == "apply":
         out = DASHBOARD / "outside_57_observation.html"
         out.write_text(html, encoding="utf-8")
+        POOL_PATH.write_text(json.dumps(pool, ensure_ascii=False, indent=2), encoding="utf-8")
+        missing_path = STATUS / "missing_team_cn_20260525.json"
+        merged = {"date": "20260525", "missing_count": len(missing_rows), "missing_rows": missing_rows}
+        if missing_path.exists():
+            try:
+                old = json.loads(missing_path.read_text(encoding="utf-8"))
+                prev = old.get("missing_rows", []) if isinstance(old, dict) else []
+                merged_rows = prev + missing_rows
+                merged = {"date": "20260525", "missing_count": len(merged_rows), "missing_rows": merged_rows}
+            except Exception:
+                pass
+        missing_path.write_text(json.dumps(merged, ensure_ascii=False, indent=2), encoding="utf-8")
         print(f"✅ Written: {out} ({len(html)} bytes)")
     else:
         print(f"DRY-RUN: would write {len(html)} bytes to outside_57_observation.html")

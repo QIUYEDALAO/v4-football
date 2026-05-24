@@ -1,0 +1,20 @@
+{
+  "phase": "V3V4-TEAM-CN-PERSISTENT-PIPELINE-FIX-20260525",
+  "current_served_html_cn_source": "manual served html patch + recent renderer edits",
+  "tomorrow_regeneration_source": "run_v3v4_dashboard_daily_update -> brief_resolver/candidate_view -> generate_intel_desk_html + outside_57 generator",
+  "upstream_files_still_english_risk": [
+    "data/runtime/status/v3v4_dashboard_candidate_view_20260524.json (missing home_team_cn/away_team_cn flags)",
+    "data/runtime/status/v4_outside_57_observation_pool_20260525.json (historical rows may have only home/away EN)"
+  ],
+  "renderer_english_fallback_risk": [
+    "generate_intel_desk_html _card() historically fell back to home/away",
+    "generate_outside_57_observation_html historically used home/away directly"
+  ],
+  "runner_missing_team_cn_enrich_calls": [
+    "run_v3v4_dashboard_daily_update.py has no explicit team_cn enrich stage for candidate/outside57 before rendering",
+    "outside_57 refresh path not wired in daily runner"
+  ],
+  "why_html_only_not_persistent": "served file patch does not guarantee next marker regeneration keeps cn fields; upstream marker/resolver must persist home_team_cn/away_team_cn and checker must guard pipeline not only html snapshot",
+  "blocker_if_html_only": true,
+  "status": "PASS"
+}
