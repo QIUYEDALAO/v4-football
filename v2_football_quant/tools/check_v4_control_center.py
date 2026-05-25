@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""check_v4_control_center.py — V4统一作战台 UI模板校验 + 数据源污染守卫 + 内容绑定检查
+"""check_v4_control_center.py — V4统一作战台 UI模板校验 + 数据源污染守卫 + 内容绑定检查 + 紧凑布局检查
 
 UI 模板硬检查（黄金模板 v4_control_center_final_design.html）：
 1.  必须存在 .topbar
@@ -22,6 +22,15 @@ UI 模板硬检查（黄金模板 v4_control_center_final_design.html）：
 18. 不允许 V3世界杯进入 V4作战台
 19. 不允许验证累计读取 live_bets cumulative
 20. 黄金模板关键 CSS 变量必须存在
+
+COMPACT 紧凑布局检查 (V4-CONTROL-CENTER-COMPACT-OPERATIONS-UI-REFINE-20260526)：
+21. 桌面端 .nav display:none
+22. KPI min-height ≤ 84px
+23. 候选卡片存在 .bet-inline 内嵌投注输入
+24. 待办使用 .todo-row + .todo-chip 紧凑行
+25. 实盘快照使用 .snap-compact 紧凑网格
+26. 底部工具条 .toolbar 替代四大模块卡
+27. 所有数据绑定 ID 存在
 """
 from __future__ import annotations
 
@@ -89,13 +98,11 @@ def main() -> int:
     if missing_vars:
         blockers.append(f"ui_css_vars_missing_from_gold_template:{','.join(missing_vars)}")
 
-    # 黄金模板关键 CSS 规则检查
+    # 黄金模板关键 CSS 规则检查（compact 版本：module-grid→toolbar，chart-layout 移除）
     gold_css_rules = [
         (".topbar", "position:sticky"),
         (".kpi-grid", "grid-template-columns:repeat(6,1fr)"),
         (".primary-layout", "grid-template-columns:1.25fr .75fr"),
-        (".module-grid", "grid-template-columns:repeat(4,1fr)"),
-        (".chart-layout", "grid-template-columns:1.2fr .8fr"),
         (".summary-grid", "grid-template-columns:repeat(5,1fr)"),
         (".nav", "position:fixed"),
         (".drawer", "position:fixed"),
@@ -113,8 +120,6 @@ def main() -> int:
         ("topbar", ".topbar"),
         ("kpi-grid", ".kpi-grid"),
         ("primary-layout", ".primary-layout"),
-        ("module-grid", ".module-grid"),
-        ("chart-layout", ".chart-layout"),
         ("drawer", ".drawer"),
         ("nav_bottom", ".nav"),
         ("candidate", ".candidate"),
@@ -180,6 +185,56 @@ def main() -> int:
     )
     if skip_in_candidate:
         blockers.append("ui_skip_rendered_as_candidate_card")
+
+    # === COMPACT 紧凑布局检查 ===
+    # 1. 桌面端导航隐藏
+    if ".nav{display:none}" not in html_text and ".nav {display:none}" not in html_text:
+        blockers.append("compact_desktop_nav_not_hidden")
+
+    # 2. KPI 高度不过高 (target 72-82px, max 84px acceptable)
+    kpi_min_height_match = re.search(r'\.kpi\s*\{[^}]*min-height:\s*(\d+)px', html_text)
+    if kpi_min_height_match:
+        kpi_h = int(kpi_min_height_match.group(1))
+        if kpi_h > 84:
+            blockers.append(f"compact_kpi_min_height_too_tall:{kpi_h}px")
+    else:
+        blockers.append("compact_kpi_min_height_not_found")
+
+    # 3. 候选卡片存在内嵌投注输入 (.bet-inline + bi-line/bi-odds/bi-stake)
+    if ".bet-inline" not in html_text:
+        blockers.append("compact_missing_bet_inline_form")
+    if ".bi-line" not in html_text or ".bi-odds" not in html_text or ".bi-stake" not in html_text:
+        blockers.append("compact_missing_bet_input_fields")
+
+    # 4. 待办使用紧凑 chip 行 (.todo-row + .todo-chip)，不是大卡片
+    if ".todo-row" not in html_text:
+        blockers.append("compact_missing_todo_row")
+    if ".todo-chip" not in html_text:
+        blockers.append("compact_missing_todo_chip")
+
+    # 5. 实盘快照使用紧凑网格 (.snap-compact)
+    if ".snap-compact" not in html_text:
+        blockers.append("compact_missing_snap_compact_grid")
+
+    # 6. 底部工具条替代四大模块卡 (.toolbar)
+    if ".toolbar" not in html_text:
+        blockers.append("compact_missing_toolbar")
+
+    # === 数据绑定 ID 完整性检查 ===
+    binding_ids = [
+        "kpiCandidates", "kpiYesterday", "kpiCumulative", "kpiPnl", "kpiTurnover", "kpiTodo",
+        "kpiCandidatesHint", "kpiYesterdayHint", "kpiCumulativeHint", "kpiTodoHint",
+        "candidateList",
+        "snapStake", "snapPnl", "snapTurnover", "snapRebate", "snapNetPnl",
+        "todoBetVal", "todoSettleVal", "todoVerifyVal", "todoAlertVal",
+        "dotBet", "dotSettle", "dotVerify", "dotAlert",
+    ]
+    missing_binding_ids = []
+    for bid in binding_ids:
+        if f'id="{bid}"' not in html_text and f"id='{bid}'" not in html_text:
+            missing_binding_ids.append(bid)
+    if missing_binding_ids:
+        blockers.append(f"compact_missing_binding_ids:{','.join(missing_binding_ids)}")
 
     # === Model 文件检查 ===
     models = sorted(STATUS.glob("v4_control_center_model_*.json"))
@@ -346,6 +401,14 @@ def main() -> int:
     ui_checks["no_top-bar"] = "top-bar" not in html_text
     ui_checks["no_banned_english"] = len(eng_blockers) == 0
     ui_checks["skip_not_candidate_card"] = len(skip_in_candidate) == 0
+    # compact checks
+    ui_checks["desktop_nav_hidden"] = ".nav{display:none}" in html_text or ".nav {display:none}" in html_text
+    ui_checks["kpi_height_ok"] = kpi_min_height_match is not None and int(kpi_min_height_match.group(1)) <= 84
+    ui_checks["has_bet_inline_form"] = ".bet-inline" in html_text
+    ui_checks["has_todo_row_chip"] = ".todo-row" in html_text and ".todo-chip" in html_text
+    ui_checks["has_snap_compact"] = ".snap-compact" in html_text
+    ui_checks["has_toolbar"] = ".toolbar" in html_text
+    ui_checks["all_binding_ids_present"] = len(missing_binding_ids) == 0
 
     out = {
         "checker": "tools/check_v4_control_center.py",
@@ -362,6 +425,16 @@ def main() -> int:
             "top_kpis_populated": not any("dash" in b for b in blockers if "dash" in b),
             "no_banned_indicators": all(ind not in body_text for ind in banned_indicators),
             "chinese_main_labels": len(eng_blockers) == 0,
+            "compact_layout": {
+                "desktop_nav_hidden": ".nav{display:none}" in html_text or ".nav {display:none}" in html_text,
+                "kpi_min_height_px": int(kpi_min_height_match.group(1)) if kpi_min_height_match else None,
+                "bet_inline_form": ".bet-inline" in html_text,
+                "todo_row_chip": ".todo-row" in html_text and ".todo-chip" in html_text,
+                "snap_compact_grid": ".snap-compact" in html_text,
+                "toolbar": ".toolbar" in html_text,
+                "binding_ids_missing": len(missing_binding_ids),
+                "binding_ids_missing_list": missing_binding_ids if missing_binding_ids else [],
+            },
         },
         "full_scan_ran": False,
         "cloud_publish": False,
