@@ -20,6 +20,10 @@ button{background:var(--primary);border-color:var(--primary);font-weight:700}but
 .candidate-card.active{border-color:#5b8dff;background:#12203a}
 .candidate-title{font-weight:700}
 .bad{color:var(--bad)}.good{color:var(--good)}.warn{color:var(--warn)}.muted{color:var(--muted)}
+.toast{position:fixed;left:50%;bottom:20px;transform:translateX(-50%);background:#1f2a44;border:1px solid #31456e;color:#eaf1ff;padding:10px 14px;border-radius:10px;box-shadow:0 8px 24px rgba(0,0,0,.35);font-size:14px;z-index:9999;display:none}
+.toast.show{display:block;animation:fadein .15s ease-out}
+.toast.ok{border-color:#2f7a57}.toast.err{border-color:#8a3a3f}
+@keyframes fadein{from{opacity:0;transform:translateX(-50%) translateY(8px)}to{opacity:1;transform:translateX(-50%) translateY(0)}}
 summary{cursor:pointer}
 @media (max-width:760px){.compact{grid-template-columns:repeat(2,minmax(0,1fr))}.row3{grid-template-columns:1fr}.row{grid-template-columns:1fr}.v{font-size:14px}}
 </style>
@@ -28,6 +32,7 @@ summary{cursor:pointer}
 <h1>V4 实盘记录（本地）</h1>
 <div class="sub">仅本地记录，不自动下注，不连接任何账号。</div>
 <div class="sub"><a href="/v4_league_hit_rate.html" style="color:#87b7ff;text-decoration:none">联赛命中率</a></div>
+<div id="toast" class="toast"></div>
 
 <div class="sticky">
   <div class="compact" id="kpis"></div>
@@ -37,8 +42,8 @@ summary{cursor:pointer}
   <details>
     <summary><b>今日投注建议</b> <span class="muted">A:300/250/150/跳过 · B:150/120/跳过 · 止损-1500</span></summary>
     <div class="muted" style="margin-top:6px">本金：30000</div>
-    <div class="muted">A级：O0.75=300，O1=200~300，O1.25=150（降仓/可跳过），O1.5=跳过</div>
-    <div class="muted">B级：O0.75=150，O1=100~150，O1.25/O1.5=跳过</div>
+    <div class="muted">A级：O0.75=300，O1=200~300，O1.25=150（降仓/可跳过），O1.5/O2=跳过</div>
+    <div class="muted">B级：O0.75=150，O1=100~150，O1.25/O1.5/O2=跳过</div>
     <div class="muted">C/SKIP：0，不投注</div>
     <div class="muted">风控：-1500止损，+600保护，+900强保护，+1500建议收手</div>
   </details>
@@ -57,7 +62,7 @@ summary{cursor:pointer}
 
   <div class="row3">
     <div><label>评级</label><select id="f_grade"><option>A</option><option selected>B</option><option>C</option><option>SKIP</option></select></div>
-    <div><label>盘口线</label><select id="f_line"><option>O0.75</option><option selected>O1</option><option>O1.25</option><option>O1.5</option></select></div>
+    <div><label>盘口线</label><select id="f_line"><option>O0.75</option><option selected>O1</option><option>O1.25</option><option>O1.5</option><option>O2</option></select></div>
     <div><label>水位</label><input id="f_odds" type="number" step="0.01" value="0.9" /></div>
   </div>
   <div class="row3">
@@ -110,14 +115,23 @@ const todayLocal=()=>{const d=new Date();const y=d.getFullYear();const m=String(
 const fmt=(n)=>Number(n||0).toFixed(2);
 const risk=(net)=> net<=-1500?['已触及止损，建议停止','bad'] : net>=1500?['已达强止盈，建议收手','warn'] : net>=900?['强保护，只做 A 的 O0.75/O1','warn'] : net>=600?['保护模式，降低风险','warn'] : ['正常','good'];
 const roiText=(roi,turnover)=>{const t=Number(turnover||0); if(t<=0) return 'N/A'; if(roi===null||roi===undefined||Number.isNaN(Number(roi))) return 'N/A'; return (Number(roi)*100).toFixed(2)+'%';};
+let _toastTimer=null;
+function toast(msg,type='ok'){
+  const el=document.getElementById('toast');
+  if(!el) return;
+  el.textContent=msg;
+  el.className=`toast show ${type==='err'?'err':'ok'}`;
+  if(_toastTimer) clearTimeout(_toastTimer);
+  _toastTimer=setTimeout(()=>{el.className='toast';},1800);
+}
 
 function defaultStake(g,l){
-  const m={A:{'O0.75':300,'O1':250,'O1.25':150,'O1.5':0},B:{'O0.75':150,'O1':120,'O1.25':0,'O1.5':0}};
+  const m={A:{'O0.75':300,'O1':250,'O1.25':150,'O1.5':0,'O2':0},B:{'O0.75':150,'O1':120,'O1.25':0,'O1.5':0,'O2':0}};
   return (m[g]&&m[g][l]!==undefined)?m[g][l]:0;
 }
 function stakeHint(g,l,s){
   if(g==='A'&&l==='O1.25') return `建议 stake：${fmt(s)}（降仓/可跳过）`;
-  if((g==='A'&&l==='O1.5')||(g==='B'&&(l==='O1.25'||l==='O1.5'))||g==='C'||g==='SKIP') return '系统建议跳过；如仍需记录，请用 NO_BET 或手工填写。';
+  if((g==='A'&&(l==='O1.5'||l==='O2'))||(g==='B'&&(l==='O1.25'||l==='O1.5'||l==='O2'))||g==='C'||g==='SKIP') return '系统建议跳过；如仍需记录，请用 NO_BET 或手工填写。';
   if(g==='A'&&l==='O1') return `系统建议：${fmt(s)} 元；你可按实际下注金额修改（可手改 200~300）。`;
   if(g==='B'&&l==='O1') return `系统建议：${fmt(s)} 元；你可按实际下注金额修改（可手改 100~150）。`;
   if(g==='A'&&l==='O1.25') return `系统建议：${fmt(s)} 元；你可按实际下注金额修改（降仓/可跳过）。`;
@@ -202,12 +216,18 @@ async function refreshKpis(){
   const ds=await jget(`/api/live_bets/summary?date=${d}`);
   const cs=await jget('/api/live_bets/cumulative');
   const s=ds.summary||{}; const c=cs.summary||{};
-  const rk=risk(Number(s.today_net_pnl||0));
+  const rk=risk(Number(s.today_gross_pnl||0));
+  const stake=Number(s.today_stake_amount ?? s.today_turnover ?? s.today_stake ?? 0);
+  const eff=Number(s.today_effective_turnover ?? 0);
+  const roi=(s.today_roi!==null&&s.today_roi!==undefined)?(Number(s.today_roi)*100).toFixed(2)+'%':'N/A';
   const cards=[
     ['当前本金',fmt(c.current_bankroll||30000)],
+    ['今日投注本金',fmt(stake)],
+    ['今日投注盈亏',fmt(s.today_gross_pnl)],
+    ['今日有效流水',fmt(eff)],
+    ['今日返水',fmt(s.today_rebate)],
     ['今日净盈亏',fmt(s.today_net_pnl)],
-    ['今日投注额',fmt(s.today_turnover ?? s.today_stake)],
-    ['今日 ROI',roiText(s.today_roi, s.today_turnover ?? s.today_stake)],
+    ['今日 ROI',roi],
     ['风险状态',rk[0],rk[1]],
   ];
   document.getElementById('kpis').innerHTML=cards.map(x=>`<div class='kv'><div class='k'>${x[0]}</div><div class='v ${x[2]||''}'>${x[1]}</div></div>`).join('');
@@ -268,7 +288,8 @@ function buildPayload(status){
 async function addBet(status='BET'){
   const p=buildPayload(status);
   const r=await jpost('/api/live_bets/add',p);
-  if(!r.ok){ alert('添加失败: '+(r.error||'unknown')); return; }
+  if(!r.ok){ alert('添加失败: '+(r.error||'unknown')); toast('添加失败：'+(r.error||'unknown'),'err'); return; }
+  toast(status==='NO_BET'?'已记录未下注':'已添加记录');
   await refreshAll();
 }
 
@@ -277,7 +298,8 @@ async function addNoBet(){ return addBet('NO_BET'); }
 async function editBet(date,betId){
   const p={date,bet_id:betId,patch:{entry_minute:Number(document.getElementById('f_entry_min').value||0),score_at_entry:document.getElementById('f_entry_score').value,notes:document.getElementById('f_notes').value}};
   const r=await jpost('/api/live_bets/update',p);
-  if(!r.ok){ alert('编辑失败'); return; }
+  if(!r.ok){ alert('编辑失败'); toast('编辑失败','err'); return; }
+  toast('已更新记录');
   await refreshAll();
 }
 
@@ -285,13 +307,15 @@ async function settleBet(date,betId,line,stake){
   const goals=Number(document.getElementById('g_'+betId).value||0);
   const odds=Number(document.getElementById('o_'+betId).value||0);
   const r=await jpost('/api/live_bets/settle',{date:date,bet_id:betId,market_line:line,stake:Number(stake),odds_water:odds,ht_goal_count:goals,rebate_rate:0.025});
-  if(!r.ok){ alert('结算失败: '+(r.error||'unknown')); return; }
+  if(!r.ok){ alert('结算失败: '+(r.error||'unknown')); toast('结算失败：'+(r.error||'unknown'),'err'); return; }
+  toast('已完成结算');
   await refreshAll();
 }
 
 async function voidBet(date,betId){
   const r=await jpost('/api/live_bets/void',{date:date,bet_id:betId,reason:'manual_void'});
-  if(!r.ok){ alert('作废失败'); return; }
+  if(!r.ok){ alert('作废失败'); toast('作废失败','err'); return; }
+  toast('已作废记录');
   await refreshAll();
 }
 

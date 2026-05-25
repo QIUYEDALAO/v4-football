@@ -71,6 +71,8 @@ def main() -> int:
     t2 = settle(100, 1.0, 'O1', 1, 0.025)
     if abs(t2['gross_pnl'] - 0.0) > 1e-9:
         blockers.append('settlement_o1_failed')
+    if abs(t2.get('effective_turnover', 0.0) - 0.0) > 1e-9 or abs(t2['rebate'] - 0.0) > 1e-9:
+        blockers.append('push_rebate_not_zero')
     t3 = settle(100, 1.0, 'O1.25', 1, 0.025)
     if abs(t3['gross_pnl'] + 50.0) > 1e-9:
         blockers.append('settlement_o1_25_failed')
@@ -79,6 +81,8 @@ def main() -> int:
         blockers.append('settlement_o1_5_failed')
     if abs(t4['rebate'] - 2.5) > 1e-9:
         blockers.append('rebate_failed')
+    if abs(t4.get('effective_turnover', 0.0) - 100.0) > 1e-9:
+        blockers.append('effective_turnover_loss_failed')
 
     # Start server
     proc = subprocess.Popen(['python3', 'tools/serve_live_bet_tracker.py', '--host', '127.0.0.1', '--port', '8766'], cwd=str(ROOT), stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
@@ -96,6 +100,12 @@ def main() -> int:
             js = json.loads(sum_res)
             if 'summary' not in js:
                 blockers.append('summary_missing')
+            else:
+                s = js['summary']
+                if s.get('risk_status_base') != 'today_gross_pnl':
+                    blockers.append('risk_status_not_based_on_gross_pnl')
+                if s.get('rebate_formula_version') != 'effective_turnover_v1':
+                    blockers.append('rebate_formula_version_missing')
 
         c4, cum_res = http_get('http://127.0.0.1:8766/api/live_bets/cumulative')
         if c4 != 200:
@@ -112,7 +122,8 @@ def main() -> int:
                 if turnover == 0 and (roi not in (None, 0, 0.0)):
                     blockers.append('cumulative_roi_nonzero_when_turnover_zero')
                 if turnover > 0 and roi is not None:
-                    if abs(float(roi) - net) < 1e-9:
+                    # Flag only when ROI is numerically equal to raw net pnl in non-zero net scenarios.
+                    if abs(net) > 1e-9 and abs(float(roi) - net) < 1e-9:
                         blockers.append('cumulative_roi_equals_net_pnl_bug')
                 if sm.get('excluded_test_records', 0) < 0:
                     blockers.append('excluded_test_records_invalid')

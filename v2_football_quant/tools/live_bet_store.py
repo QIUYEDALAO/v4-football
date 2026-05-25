@@ -76,6 +76,41 @@ def _effective_bet_rows(rows: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
     ]
 
 
+def _calc_financials(r: Dict[str, Any]) -> Dict[str, float]:
+    """Recompute financials from raw settlement fields (do not trust legacy rebate fields)."""
+    stake = float(r.get("stake") or 0.0)
+    odds = float(r.get("odds_water") or 0.0)
+    rr = float(r.get("rebate_rate") or 0.025)
+    sr = str(r.get("settlement_result") or "PENDING").upper()
+
+    if sr == "WIN":
+        gross = stake * odds
+        effective = gross
+    elif sr == "HALF_WIN":
+        gross = stake * odds * 0.5
+        effective = gross
+    elif sr == "LOSS":
+        gross = -stake
+        effective = stake
+    elif sr == "HALF_LOSS":
+        gross = -stake * 0.5
+        effective = stake * 0.5
+    else:
+        # PUSH / PENDING / VOID
+        gross = 0.0
+        effective = 0.0
+
+    rebate = effective * rr
+    net = gross + rebate
+    return {
+        "stake_amount": stake,
+        "gross_pnl": gross,
+        "effective_turnover": effective,
+        "rebate": rebate,
+        "net_pnl": net,
+    }
+
+
 def _save_day(date: str, rows: List[Dict[str, Any]]) -> None:
     path = _day_file(date)
     path.parent.mkdir(parents=True, exist_ok=True)
@@ -134,12 +169,16 @@ def settle_bet(date: str, bet_id: str, settlement_patch: Dict[str, Any]) -> Dict
 def day_summary(date: str) -> Dict[str, Any]:
     rows = _load_day(date)
     bet_rows = _effective_bet_rows(rows)
-    settled = [r for r in bet_rows if r.get("settlement_result") != "PENDING"]
-    stake = sum(float(r.get("stake") or 0) for r in bet_rows)
-    gross = sum(float(r.get("gross_pnl") or 0) for r in settled)
-    rebate = sum(float(r.get("rebate") or 0) for r in settled)
-    net = sum(float(r.get("net_pnl") or 0) for r in settled)
-    roi = (net / stake) if stake else None
+    settled = [r for r in bet_rows if str(r.get("settlement_result") or "").upper() not in {"PENDING"}]
+    stake_amount = sum(float(r.get("stake") or 0) for r in bet_rows)
+    settled_fin = [_calc_financials(r) for r in settled]
+    gross = sum(x["gross_pnl"] for x in settled_fin)
+    effective_turnover = sum(x["effective_turnover"] for x in settled_fin)
+    rebate = sum(x["rebate"] for x in settled_fin)
+    net = sum(x["net_pnl"] for x in settled_fin)
+    roi = (net / stake_amount) if stake_amount else None
+    betting_roi = (gross / stake_amount) if stake_amount else None
+    effective_roi = (net / effective_turnover) if effective_turnover else None
 
     by_grade = {}
     by_line = {}
@@ -147,29 +186,41 @@ def day_summary(date: str) -> Dict[str, Any]:
         buckets = {}
         for r in settled:
             g = r.get(key) or "UNKNOWN"
-            b = buckets.setdefault(g, {"count": 0, "stake": 0.0, "net_pnl": 0.0})
+            f = _calc_financials(r)
+            b = buckets.setdefault(g, {"count": 0, "stake_amount": 0.0, "gross_pnl": 0.0, "effective_turnover": 0.0, "rebate": 0.0, "net_pnl": 0.0})
             b["count"] += 1
-            b["stake"] += float(r.get("stake") or 0)
-            b["net_pnl"] += float(r.get("net_pnl") or 0)
+            b["stake_amount"] += f["stake_amount"]
+            b["gross_pnl"] += f["gross_pnl"]
+            b["effective_turnover"] += f["effective_turnover"]
+            b["rebate"] += f["rebate"]
+            b["net_pnl"] += f["net_pnl"]
         for g, b in buckets.items():
-            b["roi"] = (b["net_pnl"] / b["stake"]) if b["stake"] else None
+            b["roi"] = (b["net_pnl"] / b["stake_amount"]) if b["stake_amount"] else None
             b["roi_pct"] = round((b["roi"] * 100.0), 4) if b["roi"] is not None else None
         bucket_name.update(buckets)
 
     return {
         "date": date,
         "initial_bankroll": 30000,
-        "today_stake": round(stake, 4),
-        "today_turnover": round(stake, 4),
+        "today_stake_amount": round(stake_amount, 4),
+        "today_turnover": round(stake_amount, 4),  # backward compatibility
         "today_gross_pnl": round(gross, 4),
+        "today_effective_turnover": round(effective_turnover, 4),
         "today_rebate": round(rebate, 4),
         "today_net_pnl": round(net, 4),
         "today_roi": round(roi, 6) if roi is not None else None,
         "today_roi_pct": round((roi * 100.0), 4) if roi is not None else None,
+        "today_betting_roi": round(betting_roi, 6) if betting_roi is not None else None,
+        "today_betting_roi_pct": round((betting_roi * 100.0), 4) if betting_roi is not None else None,
+        "today_effective_roi": round(effective_roi, 6) if effective_roi is not None else None,
+        "today_effective_roi_pct": round((effective_roi * 100.0), 4) if effective_roi is not None else None,
         "records": len(rows),
         "settled_records": len(settled),
         "effective_bet_records": len(bet_rows),
         "excluded_test_records": sum(1 for r in rows if _is_test_record(r)),
+        "risk_status_base": "today_gross_pnl",
+        "rebate_formula_version": "effective_turnover_v1",
+        "recalculated_by": "tools/live_bet_store.py::day_summary",
         "by_grade": by_grade,
         "by_line": by_line,
     }
@@ -181,18 +232,22 @@ def cumulative_summary() -> Dict[str, Any]:
     for p in files:
         all_rows.extend(_load_day(p.stem.split("_")[-1]))
     bet_rows = _effective_bet_rows(all_rows)
-    settled = [r for r in bet_rows if r.get("settlement_result") != "PENDING"]
-    stake = sum(float(r.get("stake") or 0) for r in bet_rows)
-    gross = sum(float(r.get("gross_pnl") or 0) for r in settled)
-    rebate = sum(float(r.get("rebate") or 0) for r in settled)
-    net = sum(float(r.get("net_pnl") or 0) for r in settled)
-    roi = (net / stake) if stake else None
+    settled = [r for r in bet_rows if str(r.get("settlement_result") or "").upper() not in {"PENDING"}]
+    stake_amount = sum(float(r.get("stake") or 0) for r in bet_rows)
+    settled_fin = [_calc_financials(r) for r in settled]
+    gross = sum(x["gross_pnl"] for x in settled_fin)
+    effective_turnover = sum(x["effective_turnover"] for x in settled_fin)
+    rebate = sum(x["rebate"] for x in settled_fin)
+    net = sum(x["net_pnl"] for x in settled_fin)
+    roi = (net / stake_amount) if stake_amount else None
     return {
         "initial_bankroll": 30000,
         "current_bankroll": round(30000 + net, 4),
-        "cumulative_stake": round(stake, 4),
-        "cumulative_turnover": round(stake, 4),
+        "cumulative_stake_amount": round(stake_amount, 4),
+        "cumulative_stake": round(stake_amount, 4),  # backward compatibility
+        "cumulative_turnover": round(stake_amount, 4),  # backward compatibility
         "cumulative_gross_pnl": round(gross, 4),
+        "cumulative_effective_turnover": round(effective_turnover, 4),
         "cumulative_rebate": round(rebate, 4),
         "cumulative_net_pnl": round(net, 4),
         "cumulative_roi": round(roi, 6) if roi is not None else None,
@@ -201,6 +256,8 @@ def cumulative_summary() -> Dict[str, Any]:
         "settled_records": len(settled),
         "effective_bet_records": len(bet_rows),
         "excluded_test_records": sum(1 for r in all_rows if _is_test_record(r)),
+        "rebate_formula_version": "effective_turnover_v1",
+        "recalculated_by": "tools/live_bet_store.py::cumulative_summary",
     }
 
 
