@@ -40,12 +40,45 @@ def main()->int:
     for r in mrs[:10]:
         if r.get('settled') is False and not (r.get('pending_retry') or r.get('excluded_reason')):
             blockers.append('pending_without_reason'); break
+    ledger=jload(LEDGER) or {}
+    lrows=ledger.get('records',[])
+    if not lrows:
+        blockers.append('ledger_rows_empty')
+    for r in lrows:
+        # settled lines: ht_goal_count and result_hit contract
+        if r.get('settled') and r.get('ht_goal_count') is not None:
+            hg=int(r.get('ht_goal_count'))
+            rh=r.get('result_hit')
+            if hg>=1 and rh is not True:
+                blockers.append('result_hit_contract_violation_settled_ge1')
+                break
+            if hg==0 and rh is not False:
+                blockers.append('result_hit_contract_violation_settled_eq0')
+                break
+        # pending lines must keep result_hit null
+        if (not r.get('settled')) and r.get('result_hit') is not None:
+            blockers.append('pending_result_hit_not_null')
+            break
+        # unknown league must carry reason
+        if str(r.get('league','')).upper() in {'','UNKNOWN'} and not r.get('league_missing_reason'):
+            blockers.append('unknown_league_without_reason')
+            break
+
+        # hard source boundaries
+        if str(r.get('grade','')).upper() not in {'A','B'}:
+            blockers.append('ledger_non_ab_grade')
+            break
+
     sim=jload(SIM) or {}
     if not sim.get('aggregate'): blockers.append('simulation_missing')
     else:
         st={x.get('settlement_type') for x in sim.get('per_match',[]) if x.get('settlement_type')}
         if not st.intersection({'WIN','HALF_WIN','PUSH','HALF_LOSS','LOSS','PENDING'}):
             blockers.append('settlement_type_invalid')
+        for x in sim.get('per_match',[]):
+            if x.get('line') not in {0.75,1.0,1.25,1.5}:
+                blockers.append('unexpected_line_in_simulation')
+                break
     seg=jload(SEG) or {}
     for s in seg.get('segments',[]):
         if s.get('sample_count',0)<10 and s.get('confidence_level')!='OBSERVE_ONLY':
@@ -53,6 +86,10 @@ def main()->int:
     html=HTML.read_text(encoding='utf-8') if HTML.exists() else ''
     if not html: blockers.append('ledger_html_missing')
     if '诊断用途，不自动改策略' not in html: blockers.append('diagnostic_disclaimer_missing')
+    if '{WIN/HALF_WIN/PUSH/HALF_LOSS/LOSS}' in html:
+        blockers.append('settlement_placeholder_visible')
+    if '结果命中' not in html or '剧本命中' not in html:
+        blockers.append('result_script_columns_missing')
     intel=INTEL.read_text(encoding='utf-8') if INTEL.exists() else ''
     if any(x in intel for x in ['124/140 · 88.6%','39/46 · 84.8%','85/94 · 90.4%']): blockers.append('dashboard_polluted')
     if 'V4 AB历史复盘' not in intel and '/v4_ab_historical_ledger.html' not in intel:
