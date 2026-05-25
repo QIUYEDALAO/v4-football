@@ -47,11 +47,12 @@ def main()->int:
         blockers.append('team_cn_missing_prefix_visible')
 
     # yesterday N/A cannot be validation success
-    if '昨日验证' in html and 'N/A' in html and '不代表验证链路成功' not in html:
+    non_success_tokens=('不代表验证链路成功','验证链路未视为成功','暂无可信已结算样本')
+    if '昨日验证' in html and 'N/A' in html and not any(t in html for t in non_success_tokens):
         blockers.append('na_without_non_success_disclaimer')
 
-    # cumulative must be AB-only and no 124/140
-    if not all(t in html for t in ['25/41 · 61.0%','50/89 · 56.2%','75/130 · 57.7%','A/B-only · 不含C']):
+    # cumulative must be AB-only label and no legacy signatures
+    if 'A/B-only · 不含C' not in html:
         blockers.append('ab_only_cumulative_signature_missing')
     if '124/140 · 88.6%' in html or '140 · 88.6%' in html:
         blockers.append('legacy_124_140_reflowed')

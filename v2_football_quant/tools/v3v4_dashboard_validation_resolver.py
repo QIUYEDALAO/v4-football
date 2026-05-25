@@ -121,6 +121,107 @@ def empty_active_pack() -> dict[str, Any]:
 
 
 def resolve(date: str, *, write: bool = True) -> dict[str, Any]:
+    # Highest-priority source-of-truth contract for active dashboard cumulative/yesterday.
+    sot_path = STATUS / f"v4_official_ab_validation_source_of_truth_{date}.json"
+    if sot_path.exists():
+        sot = load(sot_path)
+        y = sot.get("yesterday", {}) if isinstance(sot.get("yesterday"), dict) else {}
+        c = sot.get("cumulative", {}) if isinstance(sot.get("cumulative"), dict) else {}
+        rec = sot.get("recommended", {}) if isinstance(sot.get("recommended"), dict) else {}
+        ver = sot.get("verified", {}) if isinstance(sot.get("verified"), dict) else {}
+        pen = sot.get("pending", {}) if isinstance(sot.get("pending"), dict) else {}
+
+        def to_metric(src: dict[str, Any]) -> dict[str, Any]:
+            hit = int(src.get("hit", 0) or 0)
+            settled = int(src.get("settled", 0) or 0)
+            miss = max(0, settled - hit)
+            rate = (hit / settled) if settled > 0 else None
+            return {
+                "count": settled,
+                "hit": hit,
+                "miss": miss,
+                "unknown": 0,
+                "settled": settled,
+                "hit_rate": rate,
+                "display_rate": "N/A" if rate is None else f"{rate * 100:.1f}%",
+                "display_compact": "N/A" if rate is None else f"{hit}/{settled} · {rate * 100:.1f}%",
+            }
+
+        script_summary = load(STATUS / f"v4_script_validation_summary_{date}.json")
+        result = {
+            "schema_version": "v3v4_validation_summary.source_of_truth.v1",
+            "phase": "V4-CUMULATIVE-VALIDATION-SOURCE-POLLUTION-ROOTCAUSE-CLEANUP-20260526",
+            "generated_at": datetime.now(TZ).isoformat(),
+            "date": date,
+            "dashboard_date": date,
+            "yesterday_validation_target_date": sot.get("yesterday_target_date") or (datetime.strptime(date, "%Y%m%d").date() - timedelta(days=1)).strftime("%Y%m%d"),
+            "dashboard_active": {
+                "yesterday": {
+                    "label": f"official fixture_id bounded validation / {sot.get('yesterday_target_date')}",
+                    "A": to_metric(y.get("A", {}) if isinstance(y.get("A"), dict) else {}),
+                    "B": to_metric(y.get("B", {}) if isinstance(y.get("B"), dict) else {}),
+                    "A_plus_B": to_metric(y.get("A_plus_B", {}) if isinstance(y.get("A_plus_B"), dict) else {}),
+                },
+                "cumulative": {
+                    "label": sot.get("source_label", "A/B-only · 不含C · official settled only"),
+                    "A": to_metric(c.get("A", {}) if isinstance(c.get("A"), dict) else {}),
+                    "B": to_metric(c.get("B", {}) if isinstance(c.get("B"), dict) else {}),
+                    "A_plus_B": to_metric(c.get("A_plus_B", {}) if isinstance(c.get("A_plus_B"), dict) else {}),
+                },
+            },
+            "result_validation": {
+                "yesterday": {
+                    "A": to_metric(y.get("A", {}) if isinstance(y.get("A"), dict) else {}),
+                    "B": to_metric(y.get("B", {}) if isinstance(y.get("B"), dict) else {}),
+                    "A_plus_B": to_metric(y.get("A_plus_B", {}) if isinstance(y.get("A_plus_B"), dict) else {}),
+                },
+                "cumulative": {
+                    "A": to_metric(c.get("A", {}) if isinstance(c.get("A"), dict) else {}),
+                    "B": to_metric(c.get("B", {}) if isinstance(c.get("B"), dict) else {}),
+                    "A_plus_B": to_metric(c.get("A_plus_B", {}) if isinstance(c.get("A_plus_B"), dict) else {}),
+                },
+            },
+            "official_counts": {"recommended": rec, "verified": ver, "pending": pen},
+            "source_label": sot.get("source_label", "A/B-only · 不含C · official settled only"),
+            "safe_na_reason": sot.get("safe_na_reason"),
+            "source_files": [str(sot_path.relative_to(ROOT))],
+            "source_hash": sha(sot_path),
+            "date_filter_field": "match_date",
+            "validation_rebased_from_match_date": True,
+            "validation_source_status": "OFFICIAL_AB_SOURCE_OF_TRUTH",
+            "brief_used_for_hit_rate": False,
+            "scan_date_used_for_validation": False,
+            "c_observation_active": False,
+            "last_7d_active": False,
+            "c_excluded_from_ab": True,
+            "raw_audit": {
+                "excluded_not_settled": int((y.get("excluded_not_settled") or 0)),
+                "api_errors": int((y.get("api_errors") or 0)),
+                "forensic_source": str(sot_path.relative_to(ROOT)),
+            },
+            "script_validation": {
+                "summary_path": f"data/runtime/status/v4_script_validation_summary_{date}.json" if script_summary else None,
+                "yesterday": script_summary.get("yesterday", {}),
+                "cumulative": script_summary.get("cumulative", {}),
+                "by_grade": script_summary.get("by_grade", {}),
+                "source_files": script_summary.get("source_files", []),
+                "brief_used_for_script_validation": bool(script_summary.get("brief_used_for_script_validation")) if script_summary else False,
+                "scan_date_used": bool(script_summary.get("scan_date_used")) if script_summary else False,
+                "c_included": bool(script_summary.get("c_included")) if script_summary else False,
+                "skip_included": bool(script_summary.get("skip_included")) if script_summary else False,
+                "unknown_excluded_from_denominator": bool(script_summary.get("unknown_excluded_from_denominator", True)),
+                "status": "SCRIPT_VALIDATION_READY" if script_summary else "SCRIPT_VALIDATION_NOT_READY",
+            },
+            "v3_status": "N/A: V3 战备预留 / 暂无正式 validation",
+            "v4_status": "official_ab_source_of_truth_ready",
+            "capture_ran": False,
+            "QQ_push": False,
+            "cloud_publish": False,
+        }
+        if write:
+            out = STATUS / f"v3v4_validation_summary_{date}.json"
+            out.write_text(json.dumps(result, ensure_ascii=False, indent=2), encoding="utf-8")
+        return result
     yesterday_target = (datetime.strptime(date, "%Y%m%d").date() - timedelta(days=1)).strftime("%Y%m%d")
     y_path = latest("v4_yesterday_validation_rebuilt_*.json") or latest("v4_yesterday_validation_*.json")
     r_path = latest("v4_rolling_validation_rebuilt_*.json") or latest("v4_rolling_validation_split_*.json")

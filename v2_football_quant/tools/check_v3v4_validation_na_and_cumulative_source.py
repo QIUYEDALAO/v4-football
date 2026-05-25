@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 import json
+import re
 from pathlib import Path
 from datetime import datetime
 
@@ -28,12 +29,15 @@ def main():
 
     # 1) N/A cannot be treated as validation success
     non_success_tokens = ('validation 链路未视为成功', '不代表验证链路成功')
-    if '昨日验证' in html and 'N/A' in html and not any(t in html for t in non_success_tokens):
+    ysec = re.search(r'<div class="validation-col validation-yesterday">(.*?)</div>\s*</div>', html, re.S)
+    ytxt = ysec.group(1) if ysec else ''
+    yesterday_na = 'N/A' in ytxt
+    if yesterday_na and not any(t in html for t in non_success_tokens):
         blockers.append('na_marked_as_success_or_missing_failure_label')
 
     # 2) API missing/disabled cannot PASS
     api_disabled = '--no-api' in str(summary.get('api_disabled_reason', ''))
-    if api_disabled and not any(t in html for t in non_success_tokens):
+    if api_disabled and yesterday_na and not any(t in html for t in non_success_tokens):
         blockers.append('api_disabled_but_no_chain_failure_label')
 
     # 3) old 124/140 not as AB-only primary
@@ -62,6 +66,7 @@ def main():
         'dashboard_path': str(HTML_PATH.relative_to(ROOT)),
         'summary_path': str(SUMMARY_PATH.relative_to(ROOT)),
         'api_disabled': api_disabled,
+        'yesterday_na': yesterday_na,
         'brief_used_for_hit_rate': summary.get('brief_used_for_hit_rate'),
         'date_filter_field': summary.get('date_filter_field'),
         'blockers': blockers,

@@ -390,12 +390,34 @@ def _validation_section(summary: dict[str, Any]) -> str:
     script_main = str(script_cu_ab.get("display_compact") or "N/A")
     script_reason = "赛后事件数据未就绪 / API disabled / 无可信事件时间" if not script_ready or int(script_cu_ab.get("script_denominator", 0) or 0) <= 0 else "走势吻合率，不影响 A/B 结果命中率。"
     script_sources = "<br>".join(_h(x) for x in script_validation.get("source_files", [])) or "N/A"
+    official_counts = summary.get("official_counts", {}) if isinstance(summary.get("official_counts"), dict) else {}
+    rec = official_counts.get("recommended", {}) if isinstance(official_counts.get("recommended"), dict) else {}
+    ver = official_counts.get("verified", {}) if isinstance(official_counts.get("verified"), dict) else {}
+    pen = official_counts.get("pending", {}) if isinstance(official_counts.get("pending"), dict) else {}
+    rec_ab = int(rec.get("AB", 0) or 0)
+    ver_ab = int(ver.get("AB", 0) or 0)
+    pen_ab = int(pen.get("AB", 0) or 0)
+    counts_line = ""
+    if rec_ab > 0 or ver_ab > 0 or pen_ab > 0:
+        counts_line = (
+            f"<div style=\"font-size:11px;color:var(--muted);margin:4px 0 8px;padding-left:4px\">"
+            f"推荐 A<strong style=\"color:var(--green)\">{int(rec.get('A', 0) or 0)}</strong> · "
+            f"B<strong style=\"color:var(--blue)\">{int(rec.get('B', 0) or 0)}</strong> · "
+            f"合计<strong>{rec_ab}</strong>　"
+            f"已验证 <strong>{ver_ab}/{rec_ab}</strong>　待补验 <strong>{pen_ab}</strong></div>"
+        )
+    source_label = str(summary.get("source_label") or "A/B-only · 不含C · official settled only")
+    safe_na_reason = summary.get("safe_na_reason")
+    if safe_na_reason:
+        reason = f"昨日验证安全显示：{safe_na_reason}；不代表验证链路成功。累计主口径：{source_label}。"
+    else:
+        reason = f"昨日 official A/B 验证与累计均来自同一 source-of-truth；累计主口径：{source_label}。"
     return f"""
 <section class="panel validation-panel compact-validation two-column-validation-card">
   <h2>V3/V4 比赛验证</h2>
   <p class="hint">只展示昨日验证与累计验证；数据来自正式 V4 attribution / validation / review，不从 brief 反推命中率。</p>
   <div class="validation-grid">
-    <div class="validation-col validation-yesterday"><h3>昨日验证</h3>{_metric_line('A', y.get('A', {}))}{_metric_line('B', y.get('B', {}))}{_metric_line('A+B', y.get('A_plus_B', {}))}</div>
+    <div class="validation-col validation-yesterday"><h3>昨日验证</h3>{_metric_line('A', y.get('A', {}))}{_metric_line('B', y.get('B', {}))}{_metric_line('A+B', y.get('A_plus_B', {}))}{counts_line}</div>
     <div class="validation-col validation-cumulative"><h3>累计验证</h3>{_metric_line('A', cu.get('A', {}))}{_metric_line('B', cu.get('B', {}))}{_metric_line('A+B', cu.get('A_plus_B', {}))}</div>
   </div>
   <div class="script-validation-lite">
