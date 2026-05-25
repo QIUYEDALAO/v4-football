@@ -9,6 +9,11 @@ RUNNER=ROOT/'tools/run_v3v4_dashboard_daily_update.py'
 TZ=timezone(timedelta(hours=8))
 DATE=datetime.now(TZ).strftime('%Y%m%d')
 
+
+def prev_date_yyyymmdd(date_str: str) -> str:
+    dt = datetime.strptime(date_str, "%Y%m%d")
+    return (dt - timedelta(days=1)).strftime("%Y%m%d")
+
 def main():
     blockers=[]; warnings=[]
     r=subprocess.run([sys.executable,str(RUNNER),'--date',DATE,'--phase','after-validation','--mode','dry-run','--no-api','--no-capture','--no-push','--no-cloud','--strict'],cwd=str(ROOT),text=True,capture_output=True,timeout=30)
@@ -19,7 +24,9 @@ def main():
     if data.get('candidate_touched') is not False: blockers.append('after_validation_candidate_touched')
     if data.get('brief_used_for_hit_rate') not in (False,None): blockers.append('brief_used_for_hit_rate')
     if data.get('date_filter_field') not in ('match_date', None): blockers.append('validation_not_match_date')
-    if data.get('yesterday_validation_target_date') != '20260523': blockers.append('after_validation_target_date_not_20260523')
+    expected_target = prev_date_yyyymmdd(DATE)
+    if data.get('yesterday_validation_target_date') != expected_target:
+        blockers.append(f'after_validation_target_date_not_{expected_target}')
     val_path=STATUS/f'v3v4_validation_summary_{DATE}.json'
     if val_path.exists():
         val=json.loads(val_path.read_text())

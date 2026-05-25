@@ -11,6 +11,7 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
+import subprocess
 import sys
 from datetime import datetime, timezone, timedelta
 from pathlib import Path
@@ -138,6 +139,38 @@ def validation_source_hash(validation: dict[str, Any], paths: dict[str, Path]) -
     return str(validation.get("source_hash") or digest([paths["validation_summary"], paths["script_validation_summary"]]))
 
 
+def run_fixture_id_validation(dashboard_date: str, mode: str, no_api: bool) -> dict[str, Any]:
+    target_date = _yesterday_target(dashboard_date)
+    cmd = [
+        sys.executable,
+        str(ROOT / "tools/run_v4_official_fixture_id_validation.py"),
+        "--date",
+        target_date,
+        "--dashboard-date",
+        dashboard_date,
+        "--mode",
+        mode,
+    ]
+    if no_api:
+        cmd.append("--no-api")
+    proc = subprocess.run(cmd, cwd=str(ROOT), text=True, capture_output=True, timeout=240)
+    parsed: dict[str, Any] = {}
+    try:
+        payload = json.loads(proc.stdout)
+        if isinstance(payload, dict):
+            parsed = payload
+    except Exception:
+        parsed = {}
+    return {
+        "cmd": " ".join(cmd),
+        "returncode": proc.returncode,
+        "stdout_tail": proc.stdout[-1200:],
+        "stderr_tail": proc.stderr[-1200:],
+        "parsed": parsed,
+        "target_date": target_date,
+    }
+
+
 def previous_after_validation_hash(date: str) -> tuple[str | None, str | None]:
     preferred = [
         STATUS / f"v3v4_dashboard_daily_update_after_validation_apply_{date}.json",
@@ -237,7 +270,12 @@ def build_marker(args: argparse.Namespace) -> dict[str, Any]:
                 blockers.append("after_validation_final_time_not_1400")
         elif planned_time and planned_time != "13:30":
             blockers.append("after_validation_time_not_1330")
-        validation_ready = bool(validation.get("source_files")) and validation.get("date_filter_field") == "match_date"
+        fixture_id_step = run_fixture_id_validation(args.date, args.mode, bool(args.no_api))
+        if fixture_id_step["returncode"] != 0:
+            warnings.append(f"fixture_id_validation_rc_{fixture_id_step['returncode']}")
+        # reload summary after bounded validation attempt
+        validation = load(paths["validation_summary"])
+        validation_ready = bool(validation) and (validation.get("valid_for_dashboard") is True or bool(validation.get("source_files")))
         history_ready = bool(recovery) and recovery.get("step_4", {}).get("status") == "PASS"
         if not validation_ready:
             blockers.append("VALIDATION_NOT_READY_FINAL" if args.final_pass else "VALIDATION_NOT_READY")
@@ -286,6 +324,9 @@ def build_marker(args: argparse.Namespace) -> dict[str, Any]:
             "scan_ran": False,
             "validation_reran": False,
             "refresh_status": final_refresh_status or status,
+            "fixture_id_validation_step": fixture_id_step,
+            "will_use_fixture_id_validation": True,
+            "match_date_only_mode": False,
         }
 
     common = {

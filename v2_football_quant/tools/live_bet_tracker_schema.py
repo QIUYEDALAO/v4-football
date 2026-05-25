@@ -7,7 +7,7 @@ from typing import Any, Dict, Tuple
 import uuid
 
 ALLOWED_GRADES = {"A", "B", "C", "SKIP"}
-ALLOWED_MARKET_LINES = {"O0.75", "O1", "O1.25", "O1.5"}
+ALLOWED_MARKET_LINES = {"O0.75", "O1", "O1.25", "O1.5", "O2"}
 ALLOWED_SETTLEMENT = {"WIN", "HALF_WIN", "PUSH", "HALF_LOSS", "LOSS", "PENDING"}
 ALLOWED_BET_STATUS = {"BET", "NO_BET", "VOID"}
 ALLOWED_SOURCE = {"official_57", "outside_57_observation", "manual"}
@@ -28,10 +28,12 @@ def default_stake(grade: str, market_line: str) -> float:
         ("A", "O1"): 250,
         ("A", "O1.25"): 150,
         ("A", "O1.5"): 0,
+        ("A", "O2"): 0,
         ("B", "O0.75"): 150,
         ("B", "O1"): 120,
         ("B", "O1.25"): 0,
         ("B", "O1.5"): 0,
+        ("B", "O2"): 0,
     }
     return float(mapping.get((grade, market_line), 0))
 

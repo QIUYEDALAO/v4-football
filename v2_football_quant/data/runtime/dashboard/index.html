@@ -13,12 +13,12 @@ header{padding:10px 2px 16px}h1{margin:0;font-size:26px;letter-spacing:.02em}.su
 <body>
 <header>
   <h1>情报决策总台 — V3/V4</h1>
-  <div class="sub">generated=2026-05-24T15:55:17+08:00 · source_window=daily_1200 · no capture · no push · no cloud publish</div>
+  <div class="sub">generated=2026-05-25T17:44:37+08:00 · source_window=daily_1200 · no capture · no push · no cloud publish</div>
 </header>
 
 <section class="kpi-grid" aria-label="top status cards">
   <div class="kpi"><div class="label">数据状态</div><div class="value ok">今日已更新</div><div class="foot">今日候选 · last_good preserved</div></div>
-  <div class="kpi"><div class="label">候选结构</div><div class="value">A5 / B5</div><div class="foot">SKIP 4</div></div>
+  <div class="kpi"><div class="label">候选结构</div><div class="value">A2 / B0</div><div class="foot">SKIP 1</div></div>
   <div class="kpi"><div class="label">复盘状态</div><div class="value warn">REPORT_ONLY</div><div class="foot">等待赛果 / 可复盘</div></div>
   <div class="kpi"><div class="label">阻断</div><div class="value ok">0</div><div class="foot">active blocker count</div></div>
 </section>
@@ -29,128 +29,58 @@ header{padding:10px 2px 16px}h1{margin:0;font-size:26px;letter-spacing:.02em}.su
   <h2>V3/V4 比赛验证</h2>
   <p class="hint">只展示昨日验证与累计验证；数据来自正式 V4 attribution / validation / review，不从 brief 反推命中率。</p>
   <div class="validation-grid">
-    <div class="validation-col validation-yesterday"><h3>昨日验证</h3><div class='validation-metric validation-row-A'><span>A</span><b>2/3 · 66.7%</b></div><div class='validation-metric validation-row-B'><span>B</span><b>6/8 · 75.0%</b></div><div class='validation-metric validation-row-AplusB'><span>A+B</span><b>8/11 · 72.7%</b></div></div>
-    <div class="validation-col validation-cumulative"><h3>累计验证</h3><p class="hint" style="font-size:11px;margin:2px 0 4px">A/B-only · 不含C</p><div class='validation-metric validation-row-A'><span>A</span><b>25/41 · 61.0%</b></div><div class='validation-metric validation-row-B'><span>B</span><b>50/89 · 56.2%</b></div><div class='validation-metric validation-row-AplusB'><span>A+B</span><b>75/130 · 57.7%</b></div></div>
+    <div class="validation-col validation-yesterday"><h3>昨日验证</h3><div class='validation-metric validation-row-A'><span>A</span><b>3/5 · 60.0%</b></div><div class='validation-metric validation-row-B'><span>B</span><b>2/4 · 50.0%</b></div><div class='validation-metric validation-row-AplusB'><span>A+B</span><b>5/9 · 55.6%</b></div><div style="font-size:11px;color:var(--muted);margin:4px 0 8px;padding-left:4px">推荐 A<strong style="color:var(--green)">5</strong> · B<strong style="color:var(--blue)">5</strong> · 合计<strong>10</strong>　已验证 <strong>9/10</strong>　待补验 <strong>1</strong></div></div>
+    <div class="validation-col validation-cumulative"><h3>累计验证</h3><div class='validation-metric validation-row-A'><span>A</span><b>28/46 · 60.9%</b></div><div class='validation-metric validation-row-B'><span>B</span><b>52/93 · 55.9%</b></div><div class='validation-metric validation-row-AplusB'><span>A+B</span><b>80/139 · 57.6%</b></div></div>
   </div>
   <div class="script-validation-lite">
     <span class="script-lite-title">剧本验证（辅助）</span>
-    <b>昨日 A+B：8/12 · 66.7%　|　累计 A+B：69/124 · 55.6%</b>
+    <b>累计 A+B：69/124 · 55.6%</b>
     <em>走势吻合率，不影响 A/B 结果命中率</em>
   </div>
-  <p class="hint script-validation-reason">昨日已从official 12场events audit拉取可信事件时间。累计保持。</p>
-  <p class="hint validation-empty-reason">验证数据已加载：昨日与累计均来自正式 V4 attribution / validation / review。</p>
+  <p class="hint script-validation-reason">走势吻合率，不影响 A/B 结果命中率。</p>
+  <p class="hint validation-empty-reason">昨日 official A/B 验证与累计均来自同一 source-of-truth；累计主口径：A/B-only · 不含C · official settled only。</p>
   <p class="hint v3-validation-row">V3：战备预留 / N/A</p>
-  <details class="validation-audit"><summary><span>展开：验证审计</span><b>audit</b></summary><p class="audit-code">source_files=<br>data/runtime/status/v4_yesterday_validation_rebuilt_20260523.json<br>data/runtime/status/v4_rolling_validation_rebuilt_20260520.json<br>data/runtime/status/v4_validation_raw_records_20260520.json<br>unknown_count_yesterday=0<br>unknown_count_cumulative=6<br>latest_validation_date=unknown<br>api_enabled=true<br>brief_used_for_hit_rate=false<br>C_observation_deprecated=true<br>last_7d_removed=true</p></details>
-  <details class="validation-audit script-validation-audit"><summary><span>展开：剧本验证明细</span><b>script</b></summary><p class="audit-code">昨日：8/12 · 66.7%<br>A：2/3 · 66.7% · SCRIPT_UNKNOWN=0<br>B：6/9 · 66.7% · SCRIPT_UNKNOWN=0<br>A+B：8/12 · 66.7% · SCRIPT_UNKNOWN=0<br>累计：A+B 69/124 · 55.6% · SCRIPT_UNKNOWN=19<br>昨日数据源：official 12场 events audit，不进分母<br>数据源：正式 attribution 事件时间<br>script_source_files=<br>N/A<br>brief_used_for_script_validation=false<br>match_date_used=true<br>scan_date_used=false<br>C_excluded=true<br>SKIP_excluded=true</p></details>
+  <details class="validation-audit"><summary><span>展开：验证审计</span><b>audit</b></summary><p class="audit-code">source_files=<br>data/runtime/status/v4_official_ab_validation_source_of_truth_20260525.json<br>unknown_count_yesterday=0<br>unknown_count_cumulative=0<br>latest_validation_date=unknown<br>api_enabled=true<br>brief_used_for_hit_rate=false<br>C_observation_deprecated=true<br>last_7d_removed=true</p></details>
+  <details class="validation-audit script-validation-audit"><summary><span>展开：剧本验证明细</span><b>script</b></summary><p class="audit-code">昨日：N/A（暂无可信已结算样本）<br>A：22/39 · 56.4% · SCRIPT_UNKNOWN=7<br>B：47/85 · 55.3% · SCRIPT_UNKNOWN=12<br>A+B：69/124 · 55.6% · SCRIPT_UNKNOWN=19<br>SCRIPT_UNKNOWN：19，不进分母<br>数据源：正式 attribution 事件时间<br>script_source_files=<br>data/v4_archive/v4_result_attribution_20260513.jsonl<br>data/v4_archive/v4_result_attribution_20260514.jsonl<br>data/v4_archive/v4_result_attribution_20260515.jsonl<br>data/v4_archive/v4_result_attribution_20260516.jsonl<br>data/v4_archive/v4_result_attribution_20260517.jsonl<br>data/v4_archive/v4_result_attribution_20260518.jsonl<br>data/v4_archive/v4_result_attribution_20260519.jsonl<br>data/v4_archive/v4_result_attribution_20260520.jsonl<br>brief_used_for_script_validation=false<br>match_date_used=true<br>scan_date_used=false<br>C_excluded=true<br>SKIP_excluded=true</p></details>
 </section>
 <section class="panel">
   <h2>V4 情报状态</h2>
-  <div class="row"><span>正式候选</span><b>10 场</b></div>
-  <div class="row"><span>A/B/SKIP</span><b>A5 / B5 / SKIP4</b></div>
+  <div class="row"><span>正式候选</span><b>2 场</b></div>
+  <div class="row"><span>A/B/SKIP</span><b>A2 / B0 / SKIP1</b></div>
   <div class="row"><span>review_mode</span><b>REPORT_ONLY</b></div>
-  <div class="row"><span>全量扫描场次</span><b>26</b></div>
-  <div class="row"><span>采集日期 / 窗口</span><b>20260524 / daily_1200</b></div>
+  <div class="row"><span>全量扫描场次</span><b>6</b></div>
+  <div class="row"><span>采集日期 / 窗口</span><b>20260525 / daily_1200</b></div>
 </section>
 <section class="panel candidate-panel">
   <h2>候选列表</h2>
   <p class="hint">今日候选。候选列表只展示 A/B 正式候选；SKIP 仅作为系统状态。</p>
   
 <details class="candidate-group group-A" open>
-  <summary><span>A级候选</span><b>5 场</b></summary>
+  <summary><span>A级候选</span><b>2 场</b></summary>
   
   <div class="candidate-list">
 <article class="candidate-card grade-A" data-grade="A">
-  <div class="card-r1"><span>05-24 23:00</span><span>英超</span><b class="grade-badge grade-badge-A">A</b></div>
-  <div class="match-line">利物浦 <span>vs</span> 布伦特福德</div>
-  <div class="card-r3">HT79 · 球数 1.20球 · <span class='script-label'>剧本：</span><span class='script-value'>开局冲击型</span></div>
-  <div class="time-bins">0-15m 67% | 16-30m 0% | 31-45m 50%</div>
-  <div class='missing-fields'>missing_fields: strength</div>
+  <div class="card-r1"><span>05-25 23:00</span><span>挪超</span><b class="grade-badge grade-badge-A">A</b></div>
+  <div class="match-line">萨普斯堡08 <span>vs</span> 莫尔德</div>
+  <div class="card-r3">HT79 · 球数 1.80球 · <span class='script-label'>剧本：</span><span class='script-value'>中后段发力型</span></div>
+  <div class="time-bins">0-15m 33% | 16-30m 33% | 31-45m 50%</div>
+  <div class='english-line'>EN: Sarpsborg 08 FF vs Molde</div><div class='missing-fields'>missing_fields: strength</div>
 </article>
 
 <article class="candidate-card grade-A" data-grade="A">
-  <div class="card-r1"><span>05-25 00:30</span><span>比甲</span><b class="grade-badge grade-badge-A">A</b></div>
-  <div class="match-line">布鲁日 <span>vs</span> 根特</div>
-  <div class="card-r3">HT78 · 球数 1.30球 · <span class='script-label'>剧本：</span><span class='script-value'>中后段发力型</span></div>
-  <div class="time-bins">0-15m 33% | 16-30m 17% | 31-45m 50%</div>
-  <div class='missing-fields'>missing_fields: strength</div>
-</article>
-
-<article class="candidate-card grade-A" data-grade="A">
-  <div class="card-r1"><span>05-25 02:15</span><span>秘鲁甲</span><b class="grade-badge grade-badge-A">A</b></div>
-  <div class="match-line">万卡约体育 <span>vs</span> 西恩西亚诺</div>
-  <div class='english-line'>EN: Sport Huancayo vs Cienciano</div>
-  <div class="card-r3">HT71 · 球数 1.30球 · <span class='script-label'>剧本：</span><span class='script-value'>中段发力型</span></div>
-  <div class="time-bins">0-15m 17% | 16-30m 83% | 31-45m 67%</div>
-  <div class='missing-fields'>missing_fields: strength</div>
-</article>
-
-<article class="candidate-card grade-A" data-grade="A">
-  <div class="card-r1"><span>05-25 07:00</span><span>美职业</span><b class="grade-badge grade-badge-A">A</b></div>
-  <div class="match-line">迈阿密国际 <span>vs</span> 费城联合</div>
-  <div class='english-line'>EN: Inter Miami vs Philadelphia Union</div>
-  <div class="card-r3">HT83 · 球数 1.50球 · <span class='script-label'>剧本：</span><span class='script-value'>中后段发力型</span></div>
-  <div class="time-bins">0-15m 17% | 16-30m 33% | 31-45m 67%</div>
-  <div class='missing-fields'>missing_fields: strength</div>
-</article>
-
-<article class="candidate-card grade-A" data-grade="A">
-  <div class="card-r1"><span>05-25 07:30</span><span>巴西甲</span><b class="grade-badge grade-badge-A">A</b></div>
-  <div class="match-line">瓦斯科达伽马 <span>vs</span> 布拉干蒂诺RB</div>
-  <div class='english-line'>EN: Vasco DA Gama vs RB Bragantino</div>
-  <div class="card-r3">HT72 · 球数 0.90球 · <span class='script-label'>剧本：</span><span class='script-value'>中后段发力型</span></div>
-  <div class="time-bins">0-15m 0% | 16-30m 33% | 31-45m 83%</div>
-  <div class='missing-fields'>missing_fields: strength</div>
+  <div class="card-r1"><span>05-26 03:00</span><span>苏超</span><b class="grade-badge grade-badge-A">A</b></div>
+  <div class="match-line">圣米伦 <span>vs</span> 帕尔蒂克蓟</div>
+  <div class="card-r3">HT75 · 球数 1.00球 · <span class='script-label'>剧本：</span><span class='script-value'>中后段发力型</span></div>
+  <div class="time-bins">0-15m 0% | 16-30m 33% | 31-45m 67%</div>
+  <div class='english-line'>EN: 圣米伦 vs 帕尔蒂克</div><div class='missing-fields'>missing_fields: strength</div>
 </article></div>
   <details class="lineage"><summary>技术血缘折叠区</summary><p>英文队名、source_hash、time_bins、taxonomy 仅作审计，不改变 A/B/SKIP active 展示。</p></details>
 </details>
   
 <details class="candidate-group group-B" open>
-  <summary><span>B级候选</span><b>5 场</b></summary>
+  <summary><span>B级候选</span><b>0 场</b></summary>
   
-  <div class="candidate-list">
-<article class="candidate-card grade-B" data-grade="B">
-  <div class="card-r1"><span>05-24 22:00</span><span>挪超</span><b class="grade-badge grade-badge-B">B</b></div>
-  <div class="match-line">博德闪耀 <span>vs</span> 布兰</div>
-  <div class='english-line'>EN: Bodo/Glimt vs Brann</div>
-  <div class="card-r3">HT81 · 球数 1.70球 · <span class='script-label'>剧本：</span><span class='script-value'>中后段发力型</span></div>
-  <div class="time-bins">0-15m 17% | 16-30m 50% | 31-45m 50%</div>
-  <div class='missing-fields'>missing_fields: strength</div>
-</article>
-
-<article class="candidate-card grade-B" data-grade="B">
-  <div class="card-r1"><span>05-24 23:00</span><span>英超</span><b class="grade-badge grade-badge-B">B</b></div>
-  <div class="match-line">曼城 <span>vs</span> 阿斯顿维拉</div>
-  <div class="card-r3">HT64 · 球数 1.30球 · <span class='script-label'>剧本：</span><span class='script-value'>中后段发力型</span></div>
-  <div class="time-bins">0-15m 17% | 16-30m 0% | 31-45m 83%</div>
-  <div class='missing-fields'>missing_fields: strength</div>
-</article>
-
-<article class="candidate-card grade-B" data-grade="B">
-  <div class="card-r1"><span>05-25 00:30</span><span>比甲</span><b class="grade-badge grade-badge-B">B</b></div>
-  <div class="match-line">圣图尔登 <span>vs</span> 梅赫伦</div>
-  <div class='english-line'>EN: St. Truiden vs 梅赫伦</div>
-  <div class="card-r3">HT87 · 球数 1.30球 · <span class='script-label'>剧本：</span><span class='script-value'>开局冲击型</span></div>
-  <div class="time-bins">0-15m 50% | 16-30m 50% | 31-45m 33%</div>
-  <div class='missing-fields'>missing_fields: strength</div>
-</article>
-
-<article class="candidate-card grade-B" data-grade="B">
-  <div class="card-r1"><span>05-25 05:30</span><span>乌拉甲</span><b class="grade-badge grade-badge-B">B</b></div>
-  <div class="match-line">德芬索体育 <span>vs</span> 佩纳罗尔</div>
-  <div class='english-line'>EN: Defensor Sporting vs Penarol</div>
-  <div class="card-r3">HT67 · 球数 0.80球 · <span class='script-label'>剧本：</span><span class='script-value'>中后段发力型</span></div>
-  <div class="time-bins">0-15m 33% | 16-30m 50% | 31-45m 50%</div>
-  <div class='missing-fields'>missing_fields: strength</div>
-</article>
-
-<article class="candidate-card grade-B" data-grade="B">
-  <div class="card-r1"><span>05-25 09:15</span><span>美职业</span><b class="grade-badge grade-badge-B">B</b></div>
-  <div class="match-line">洛杉矶FC <span>vs</span> 西雅图海湾人</div>
-  <div class='english-line'>EN: Los Angeles FC vs Seattle Sounders FC</div>
-  <div class="card-r3">HT65 · 球数 0.90球 · <span class='script-label'>剧本：</span><span class='script-value'>中段发力型</span></div>
-  <div class="time-bins">0-15m 50% | 16-30m 67% | 31-45m 33%</div>
-  <div class='missing-fields'>missing_fields: strength</div>
-</article></div>
+  <div class="candidate-list"><article class='candidate-card empty grade-B' data-grade='B'><div class='match-line'>暂无正式候选</div><div class='card-r3'>等待下一次 V4 情报刷新</div></article></div>
   <details class="lineage"><summary>技术血缘折叠区</summary><p>英文队名、source_hash、time_bins、taxonomy 仅作审计，不改变 A/B/SKIP active 展示。</p></details>
 </details>
 </section>
@@ -177,24 +107,8 @@ header{padding:10px 2px 16px}h1{margin:0;font-size:26px;letter-spacing:.02em}.su
   <h2>下一动作</h2>
   <ul class="next-list"><li>等待 BOSS 验收 UI。</li><li>每日刷新仅使用 V3/V4 active source。</li><li>任何推送/cron/cloud 均需单独授权。</li></ul>
 </section>
-<details class="panel"><summary><span>系统审计折叠区</span><b>展开</b></summary><p class="audit-code">source_hash=2a9a6dec488c81b9830ad4cae709e0f97ff537b5fffd32cb704df5f1dd208f0e<br>candidate_source=data/runtime/status/v3v4_dashboard_candidate_view_20260524.json<br>validation_source_hash=79547b6b390e4a3bc70a6dbf3f281fcd3f55e47a6c181c78cc49816d78bf6c55<br>v3_source=reserved<br>api_status=API_OK<br>api_safe_to_scan=True<br>cache-only mode when blocked=true</p></details>
+<details class="panel"><summary><span>系统审计折叠区</span><b>展开</b></summary><p class="audit-code">source_hash=b785108bb838b9984e5c014126d0e1e6fbe7b7ca8ccb25bd3c0544e69d3ddd7c<br>candidate_source=data/runtime/status/v3v4_dashboard_candidate_view_20260525.json<br>validation_source_hash=d2c590bc1e33824f60c7114c2614c28061bf0e0caece2e1f818af0f57d7ce872<br>v3_source=reserved<br>api_status=API_OK<br>api_safe_to_scan=True<br>cache-only mode when blocked=true</p></details>
 </aside>
 </div>
-
-<div class="panel observation-panel" style="margin-top:16px">
-  <h2 style="font-size:16px;display:flex;align-items:center;gap:6px">
-    <span>57联赛外观察池</span>
-    <span class="badge badge-warn" style="font-size:10px;padding:2px 6px;border-radius:4px;background:#5a3a00;color:#ffc107">非正式推荐</span>
-  </h2>
-  <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin:8px 0">
-    <div style="text-align:center"><b style="color:#f05555;font-size:18px">0</b><br><span style="font-size:11px;color:#8899aa">A</span></div>
-    <div style="text-align:center"><b style="color:#f2a640;font-size:18px">0</b><br><span style="font-size:11px;color:#8899aa">B</span></div>
-    <div style="text-align:center"><b style="color:#8899aa;font-size:18px">0</b><br><span style="font-size:11px;color:#8899aa">C</span></div>
-    <div style="text-align:center"><b style="color:#556677;font-size:18px">0</b><br><span style="font-size:11px;color:#8899aa">SKIP</span></div>
-  </div>
-  <p style="font-size:11px;color:#667788;margin:4px 0">仅观察 · 不自动下注 · 不进QQ · 非正式推荐</p>
-  <a href="/outside_57_observation.html" style="display:inline-block;padding:6px 14px;background:#1a2a3a;border-radius:6px;color:#6cb4ee;text-decoration:none;font-size:13px;margin-top:4px">查看详情 →</a>
-</div>
-
 </body>
 </html>

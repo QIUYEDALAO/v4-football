@@ -20,6 +20,7 @@ BASELINE = STATUS / "v4_true_cumulative_result_validation_20260525.json"
 INV130 = STATUS / "v4_ab_130_sample_inventory_20260525.json"
 YR = STATUS / "v4_yesterday_result_validation_bounded_rerun_20260526.json"
 CV = STATUS / "v3v4_dashboard_candidate_view_20260525.json"
+CV_20260524 = STATUS / "v3v4_dashboard_candidate_view_20260524.json"
 
 STEP2 = STATUS / "v4_ab_historical_official_recommendation_inventory_20260526.json"
 STEP3 = STATUS / "v4_ab_historical_postmatch_matchup_20260526.json"
@@ -124,15 +125,18 @@ def main() -> int:
     inv130 = jload(INV130, {})
     y = jload(YR, {})
     cv = jload(CV, {})
+    cv24 = jload(CV_20260524, {})
     baseline = jload(BASELINE, {})
 
     cv_map: dict[int, dict[str, Any]] = {}
-    for gk in ["A_candidates", "B_candidates"]:
-        for c in cv.get(gk, []) or []:
-            try:
-                cv_map[int(c.get("fixture_id"))] = c
-            except Exception:
-                continue
+    for src in (cv24, cv):
+        for gk in ["A_candidates", "B_candidates", "official_candidates", "SKIP_candidates"]:
+            for c in src.get(gk, []) or []:
+                try:
+                    fid = int(c.get("fixture_id"))
+                except Exception:
+                    continue
+                cv_map[fid] = c
 
     league_by_fixture = {}
     for r in (y.get("fixtures") or []):
@@ -144,7 +148,7 @@ def main() -> int:
         except Exception:
             continue
 
-    recs: dict[tuple[int, str], Rec] = {}
+    recs: list[Rec] = []
 
     for r in inv130.get("records", []):
         grade = str(r.get("grade", "")).upper()
@@ -154,7 +158,7 @@ def main() -> int:
         cn = resolver.resolve_match(r.get("home"), r.get("away"), source="ab130_inventory")
         hg = int(r.get("ht_goal_count", 0))
         settled = str(r.get("result_status", "resolved")).lower() == "resolved"
-        recs[(fid, grade)] = Rec(
+        recs.append(Rec(
             date=str(r.get("match_date", "")),
             scan_date=str(r.get("match_date", "")).replace("-", ""),
             fixture_id=fid,
@@ -185,7 +189,7 @@ def main() -> int:
             goal_line_model=(float(r.get("market_line")) if r.get("market_line") is not None else None),
             strength_score=None,
             source_window="official_ab_inventory",
-        )
+        ))
 
     target_date = str(y.get("target_date", "20260524"))
     for r in (y.get("fixtures") or []):
@@ -202,7 +206,7 @@ def main() -> int:
         ht_score = f"{ht_h}-{ht_a}" if ht_h is not None and ht_a is not None else "UNKNOWN"
         settled = bool(r.get("settled", False))
         hg = int(r.get("ht_goals", 0)) if r.get("ht_goals") is not None else None
-        recs[(fid, grade)] = Rec(
+        recs.append(Rec(
             date=f"{target_date[:4]}-{target_date[4:6]}-{target_date[6:8]}",
             scan_date="20260525",
             fixture_id=fid,
@@ -233,9 +237,9 @@ def main() -> int:
             goal_line_model=(float(c.get("goal_line")) if c.get("goal_line") is not None else None),
             strength_score=(float(c.get("strength_score")) if c.get("strength_score") is not None else None),
             source_window="official_bounded_rerun",
-        )
+        ))
 
-    rows = sorted(recs.values(), key=lambda x: (x.date, x.fixture_id, x.grade))
+    rows = sorted(recs, key=lambda x: (x.date, x.fixture_id, x.grade))
 
     changed = []
     unknown_before = sum(1 for r in rows if str(r.league).upper() in {"", "UNKNOWN"})
@@ -457,13 +461,24 @@ def main() -> int:
         })
     jdump(STEP7, {"generated_at": datetime.now().isoformat(), "notes": notes})
 
-    top = baseline
-    top_a_hit = top.get("A", {}).get("hit", "?")
-    top_a_resolved = top.get("A", {}).get("resolved", "?")
-    top_b_hit = top.get("B", {}).get("hit", "?")
-    top_b_resolved = top.get("B", {}).get("resolved", "?")
-    top_ab_hit = top.get("AB", {}).get("hit", "?")
-    top_ab_resolved = top.get("AB", {}).get("resolved", "?")
+    # Header metrics must come from the same ledger rows to avoid source mismatch.
+    settled_rows = [r for r in rows if r.settled and r.result_hit is not None]
+    a_set = [r for r in settled_rows if r.grade == "A"]
+    b_set = [r for r in settled_rows if r.grade == "B"]
+    top_a_hit = sum(1 for r in a_set if r.result_hit is True)
+    top_a_resolved = len(a_set)
+    top_b_hit = sum(1 for r in b_set if r.result_hit is True)
+    top_b_resolved = len(b_set)
+    top_ab_hit = top_a_hit + top_b_hit
+    top_ab_resolved = top_a_resolved + top_b_resolved
+    y_rows = [r for r in rows if str(r.date) == f"{target_date[:4]}-{target_date[4:6]}-{target_date[6:8]}"]
+    y_set = [r for r in y_rows if r.settled and r.result_hit is not None]
+    y_hit = sum(1 for r in y_set if r.result_hit is True)
+    y_pending = sum(1 for r in y_rows if not r.settled)
+    yA = [r for r in y_set if r.grade == "A"]
+    yB = [r for r in y_set if r.grade == "B"]
+    yA_hit = sum(1 for r in yA if r.result_hit is True)
+    yB_hit = sum(1 for r in yB if r.result_hit is True)
     web_rows = []
     note_map = {n["fixture_id"]: n["optimization_tag"] for n in notes}
     for r in rows:
@@ -496,10 +511,11 @@ body{{font-family:-apple-system,BlinkMacSystemFont,'PingFang SC','Hiragino Sans 
 input,select{{padding:6px;border:1px solid #d1d5db;border-radius:8px}}
 </style></head><body><div class='wrap'>
 <div class='card'><h2>V4 AB历史复盘</h2><div class='small'>诊断用途，不自动改策略。</div>
+<div class='small'>本页累计口径：与下方逐场表格同源汇总（仅 settled 行进入分母）。</div>
 <div>当前 A/B-only 累计：A {top_a_hit}/{top_a_resolved}</div>
 <div>B {top_b_hit}/{top_b_resolved}</div>
 <div>A+B {top_ab_hit}/{top_ab_resolved}</div>
-<div class='small'>昨日验证：A 3/5 · 60.0% | B 3/5 · 60.0% | A+B 6/10 · 60.0%</div></div>
+<div class='small'>昨日验证：A {yA_hit}/{len(yA)} | B {yB_hit}/{len(yB)} | A+B {y_hit}/{len(y_set)}{' · 待补验 '+str(y_pending) if y_pending else ''}</div></div>
 <div class='card'><label>等级</label> <select id='g'><option value=''>全部</option><option>A</option><option>B</option></select>
 <label>联赛</label> <input id='lg' placeholder='搜索联赛'>
 <label>命中</label> <select id='hit'><option value=''>全部</option><option value='hit'>命中</option><option value='miss'>未命中</option></select></div>

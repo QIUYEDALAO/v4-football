@@ -5,10 +5,11 @@
 | `data/runtime/status/v3v4_validation_summary_20260523.json` | `STALE_SCAN_DATE_POLLUTED` | active summary was intentionally marked stale after scout date repair |
 | `data/runtime/status/v3v4_validation_summary_20260524.json` | `STALE_SCAN_DATE_POLLUTED` | active summary was intentionally marked stale after scout date repair |
 | `data/runtime/status/v3v4_validation_summary_20260524_backup.json` | `STALE_SCAN_DATE_POLLUTED` | active summary was intentionally marked stale after scout date repair |
+| `data/runtime/status/v3v4_validation_summary_20260525.json` | `STALE_SCAN_DATE_POLLUTED` | active summary was intentionally marked stale after scout date repair |
+| `data/runtime/status/v3v4_validation_summary_20260526.json` | `STALE_SCAN_DATE_POLLUTED` | active summary was intentionally marked stale after scout date repair |
 | `data/runtime/status/v4_validation_history_recoverability_audit_20260523.json` | `DO_NOT_USE` | not an active validation recovery source |
 | `data/runtime/status/v4_validation_history_source_inventory_20260523.json` | `DO_NOT_USE` | not an active validation recovery source |
 | `data/runtime/status/v4_validation_pre_repair_marked_stale_20260523.json` | `STALE_SCAN_DATE_POLLUTED` | explicit stale marker for pre-repair validation summary |
-| `data/runtime/status/v4_validation_raw_records_20260520.json` | `TRUSTED_MATCH_DATE_READY` | raw validation records include match_date but are audit source only |
 | `data/v4_archive/v4_result_attribution_20260512.jsonl` | `TRUSTED_MATCH_DATE_READY` | local attribution history; fixture_id can be reconnected to repaired scout match_date |
 | `data/v4_archive/v4_result_attribution_20260513.jsonl` | `TRUSTED_MATCH_DATE_READY` | local attribution history; fixture_id can be reconnected to repaired scout match_date |
 | `data/v4_archive/v4_result_attribution_20260514.jsonl` | `TRUSTED_MATCH_DATE_READY` | local attribution history; fixture_id can be reconnected to repaired scout match_date |
@@ -30,6 +31,7 @@
 | `data/daily_reports/v4_ht_recommend_validation_20260521.json` | `MISSING_MATCH_DATE_CAN_BACKFILL` | validation artifact may require fixture_id to repaired scout match_date backfill |
 | `data/daily_reports/v4_ht_recommend_validation_20260522.json` | `MISSING_MATCH_DATE_CAN_BACKFILL` | validation artifact may require fixture_id to repaired scout match_date backfill |
 | `data/daily_reports/v4_ht_recommend_validation_20260523.json` | `MISSING_MATCH_DATE_CAN_BACKFILL` | validation artifact may require fixture_id to repaired scout match_date backfill |
+| `data/daily_reports/v4_ht_recommend_validation_20260524.json` | `MISSING_MATCH_DATE_CAN_BACKFILL` | validation artifact may require fixture_id to repaired scout match_date backfill |
 | `data/daily_reports/v4_review_structured_20260514.json` | `DO_NOT_USE` | review/report artifact is not the primary hit-rate source for recovery |
 | `data/daily_reports/v4_review_structured_20260515.json` | `DO_NOT_USE` | review/report artifact is not the primary hit-rate source for recovery |
 | `data/daily_reports/v4_review_structured_20260516.json` | `DO_NOT_USE` | review/report artifact is not the primary hit-rate source for recovery |

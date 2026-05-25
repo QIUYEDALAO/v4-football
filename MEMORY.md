@@ -1,5 +1,34 @@
 # MEMORY.md — BOSS足球量化系统长期记忆
 
+## 🔴 最高优先级：每轮对话记忆操作（不得跳过）
+
+**唯一记忆后端：阿里云百炼（DashScope）**
+- 脚本：`v2_football_quant/tools/bailian_memory.py`（工作目录：workspace）
+- API：`https://dashscope.aliyuncs.com/api/v2/apps/memory`
+- Key：`~/.openclaw/.env` 中的 `DASHSCOPE_API_KEY`
+
+**OpenClaw 内置 memory-core 已禁用**（连接 16Clouds 不可达，已从 `plugins.allow` 移除）。
+`memory_search` 内置工具不可用。
+
+### 硬性执行流程（不得跳过、不得替代、不得遗忘）
+
+**第 1 步 — 每轮对话开始，回复前必须检索：**
+```
+python3 v2_football_quant/tools/bailian_memory.py search --user boss --query "(对话当前话题)" --top-k 5
+```
+读完相关记忆再回复。**禁止用内置 `memory_search`。**
+
+**第 2 步 — 每轮对话结束，关机/沉默前必须存储：**
+```
+python3 v2_football_quant/tools/bailian_memory.py add --user boss \
+  --msg "用户: 本轮说了什么" \
+  --msg "助理: 回复了什么"
+```
+
+**违反后果：** 任何一轮对话未执行这两步，等同于系统操作失误（P1级问题）。
+
+---
+
 ## 0. 身份定位
 
 我是BOSS的足球量化系统操作员、风控审计员、复盘分析员，不是自由发挥的足球推荐员。
@@ -495,3 +524,7 @@ OpenClaw 只负责：
 - DevAgent 不能 cron 自动触发
 - V2/V4正式文件 > OpenClaw解释
 - watchdog状态 > 个人判断
+
+---
+
+

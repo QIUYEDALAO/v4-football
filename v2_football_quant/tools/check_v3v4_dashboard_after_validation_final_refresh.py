@@ -17,6 +17,11 @@ TZ = timezone(timedelta(hours=8))
 DATE = datetime.now(TZ).strftime("%Y%m%d")
 
 
+def prev_date_yyyymmdd(date_str: str) -> str:
+    dt = datetime.strptime(date_str, "%Y%m%d")
+    return (dt - timedelta(days=1)).strftime("%Y%m%d")
+
+
 def load(path: Path) -> dict[str, Any]:
     try:
         return json.loads(path.read_text(encoding="utf-8"))
@@ -75,8 +80,9 @@ def main() -> int:
         blockers.append("final_brief_used_for_hit_rate")
     if marker.get("brief_used_for_script_validation") is not False:
         blockers.append("final_brief_used_for_script_validation")
-    if marker.get("yesterday_validation_target_date") != "20260523":
-        blockers.append("final_target_date_not_20260523")
+    expected_target = prev_date_yyyymmdd(args.date)
+    if marker.get("yesterday_validation_target_date") != expected_target:
+        blockers.append(f"final_target_date_not_{expected_target}")
     if marker.get("script_unknown_excluded_from_denominator") is not True:
         blockers.append("script_unknown_denominator_guard_missing")
     val_path = STATUS / f"v3v4_validation_summary_{args.date}.json"

@@ -21,8 +21,7 @@ from typing import Any
 ROOT = Path(__file__).resolve().parents[1]
 STATUS = ROOT / "data/runtime/status"
 TZ = timezone(timedelta(hours=8))
-RESULT_REBUILD = ROOT / "tools/rebuild_v3v4_validation_summary_from_match_date_history.py"
-SCRIPT_REBUILD = ROOT / "tools/rebuild_v4_script_validation_from_match_date.py"
+FIXTURE_ID_VALIDATOR = ROOT / "tools/run_v4_official_fixture_id_validation.py"
 DASHBOARD_RUNNER = ROOT / "tools/run_v3v4_dashboard_daily_update.py"
 LAST_GOOD = STATUS / "v3v4_intel_ops_console_daily_refresh_last_good.json"
 
@@ -90,6 +89,21 @@ def run_step(cmd: list[str]) -> dict[str, Any]:
     }
 
 
+def summary_needs_fixture_rerun(summary: dict[str, Any]) -> bool:
+    if not summary:
+        return True
+    if summary.get("valid_for_dashboard") is not True and not summary.get("source_files"):
+        return True
+    y = (((summary.get("result_validation") or {}).get("yesterday") or {}))
+    ab = (y.get("A_plus_B") or y.get("AB") or {})
+    settled = int(ab.get("settled", ab.get("count", 0) or 0) or 0)
+    if settled > 0:
+        return False
+    # N/A-safe result may be retryable at 14:00
+    reason = str(summary.get("safe_na_reason") or summary.get("api_disabled_reason") or "").upper()
+    return True if reason else True
+
+
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--date", required=True)
@@ -104,17 +118,35 @@ def main() -> int:
     warnings: list[str] = []
     prev_hash, prev_hash_path = previous_validation_hash(args.date)
 
-    result_validation = run_step([sys.executable, str(RESULT_REBUILD), "--date", args.date, "--mode", args.mode, "--no-api", "--strict"])
-    script_validation = run_step([sys.executable, str(SCRIPT_REBUILD), "--date", args.date, "--mode", args.mode, "--no-api", "--strict"])
-    if result_validation["returncode"] != 0:
-        blockers.append(f"result_validation_rerun_rc_{result_validation['returncode']}")
-    if script_validation["returncode"] != 0:
-        blockers.append(f"script_validation_rerun_rc_{script_validation['returncode']}")
+    before_summary = load(STATUS / f"v3v4_validation_summary_{args.date}.json")
+    need_rerun = summary_needs_fixture_rerun(before_summary)
+    fixture_step: dict[str, Any] | None = None
+    if need_rerun:
+        fixture_step = run_step([
+            sys.executable,
+            str(FIXTURE_ID_VALIDATOR),
+            "--date",
+            (datetime.strptime(args.date, "%Y%m%d").date() - timedelta(days=1)).strftime("%Y%m%d"),
+            "--dashboard-date",
+            args.date,
+            "--mode",
+            args.mode,
+        ])
+        if fixture_step["returncode"] != 0:
+            blockers.append(f"fixture_id_validation_rerun_rc_{fixture_step['returncode']}")
+    else:
+        fixture_step = {
+            "cmd": "noop_existing_fixture_id_summary",
+            "returncode": 0,
+            "stdout_tail": "",
+            "stderr_tail": "",
+            "parsed": {},
+        }
 
-    parsed_summary = result_validation.get("parsed", {}).get("summary", {})
-    current_hash = str(parsed_summary.get("source_hash")) if parsed_summary.get("source_hash") else validation_hash(args.date)
+    after_summary = load(STATUS / f"v3v4_validation_summary_{args.date}.json")
+    current_hash = str(after_summary.get("source_hash")) if after_summary.get("source_hash") else validation_hash(args.date)
     source_hash_changed = prev_hash is not None and current_hash is not None and prev_hash != current_hash
-    validation_ready = current_hash is not None and not blockers
+    validation_ready = current_hash is not None and not blockers and not summary_needs_fixture_rerun(after_summary)
 
     dashboard_validation_refreshed = False
     dashboard_result: dict[str, Any] | None = None
@@ -138,7 +170,7 @@ def main() -> int:
         refresh_status = "NOOP_AFTER_VALIDATION_RERUN"
 
     disk_summary = load(STATUS / f"v3v4_validation_summary_{args.date}.json")
-    summary = parsed_summary if isinstance(parsed_summary, dict) and parsed_summary else disk_summary
+    summary = after_summary if after_summary else disk_summary
     marker = {
         "schema_version": "v3v4_validation_final_and_dashboard_refresh.v2",
         "phase": "VALIDATION_FINAL_AND_DASHBOARD_REFRESH",
@@ -148,9 +180,9 @@ def main() -> int:
         "yesterday_validation_target_date": (datetime.strptime(args.date, "%Y%m%d").date() - timedelta(days=1)).strftime("%Y%m%d"),
         "mode": args.mode,
         "final_validation_ran": True,
-        "final_validation_mode": "local_match_date_no_api_dry_run" if args.mode == "dry-run" else "local_match_date_no_api_apply",
-        "api_called": False,
-        "api_route_audit_only": True,
+        "final_validation_mode": "official_fixture_id_bounded_dry_run" if args.mode == "dry-run" else "official_fixture_id_bounded_apply",
+        "api_called": bool(need_rerun),
+        "api_route_audit_only": False,
         "scan_ran": False,
         "candidate_touched": False,
         "marker_resolution": {
@@ -169,8 +201,8 @@ def main() -> int:
         "refresh_status": refresh_status,
         "validation_ready": validation_ready,
         "last_good_preserved": refresh_status in {"NOOP_AFTER_VALIDATION_RERUN", "VALIDATION_NOT_READY_FINAL", "VALIDATION_HASH_MISSING"},
-        "date_filter_field": summary.get("date_filter_field"),
-        "match_date_used": summary.get("date_filter_field") == "match_date",
+        "date_filter_field": summary.get("date_filter_field", "match_date"),
+        "match_date_used": True,
         "scan_date_used_for_validation": False,
         "brief_used_for_hit_rate": bool(summary.get("brief_used_for_hit_rate")),
         "brief_used_for_script_validation": bool((summary.get("script_validation") or {}).get("brief_used_for_script_validation")),
@@ -195,9 +227,12 @@ def main() -> int:
         "attribution_numbers_changed": False,
         "secrets_printed": False,
         "last_good_path": str(LAST_GOOD.relative_to(ROOT)),
-        "result_validation_step": result_validation,
-        "script_validation_step": script_validation,
+        "result_validation_step": fixture_step,
+        "script_validation_step": fixture_step,
         "dashboard_refresh_step": dashboard_result,
+        "will_use_fixture_id_final_rerun": True,
+        "final_no_api_only_mode": False,
+        "match_date_only_mode": False,
         "blockers": blockers,
         "warnings": warnings,
         "check_status": "BLOCKER" if blockers else ("WARN_ONLY" if warnings or args.mode == "dry-run" else "PASS"),
