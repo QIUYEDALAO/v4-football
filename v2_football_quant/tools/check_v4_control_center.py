@@ -16,12 +16,12 @@ UI 模板硬检查（黄金模板 v4_control_center_final_design.html）：
 12. 不允许出现 kpi-violet 旧 class
 13. 不允许出现 kpi-green 旧 class
 14. 不允许出现旧版浏览器标签式顶部导航
-15. 不允许页面主区域出现 "--"
-16. 不允许页面主区域出现 "加载中"
-17. 不允许主界面出现英文主文案
-18. 不允许 124/140、39/46、85/94、80/139 作为主指标
-19. 不允许 V3世界杯进入 V4作战台
-20. 不允许验证累计读取 live_bets cumulative
+15. 不允许主界面出现 API / POST / UNKNOWN / full scan / cron / source / model / checker / undefined
+16. 不允许 SKIP 大卡片
+17. 不允许 124/140、39/46、85/94、80/139 作为主指标
+18. 不允许 V3世界杯进入 V4作战台
+19. 不允许验证累计读取 live_bets cumulative
+20. 黄金模板关键 CSS 变量必须存在
 """
 from __future__ import annotations
 
@@ -75,8 +75,40 @@ def main() -> int:
 
     html_text = html_path.read_text(encoding="utf-8")
 
+    # ==== 黄金模板关键 CSS 变量检查 ====
+    gold_css_vars = [
+        "--bg", "--bg2", "--card", "--card2", "--line",
+        "--text", "--muted", "--muted2",
+        "--green", "--blue", "--yellow", "--red", "--purple", "--orange",
+        "--shadow", "--radius",
+    ]
+    missing_vars = []
+    for var in gold_css_vars:
+        if var not in html_text:
+            missing_vars.append(var)
+    if missing_vars:
+        blockers.append(f"ui_css_vars_missing_from_gold_template:{','.join(missing_vars)}")
+
+    # 黄金模板关键 CSS 规则检查
+    gold_css_rules = [
+        (".topbar", "position:sticky"),
+        (".kpi-grid", "grid-template-columns:repeat(6,1fr)"),
+        (".primary-layout", "grid-template-columns:1.25fr .75fr"),
+        (".module-grid", "grid-template-columns:repeat(4,1fr)"),
+        (".chart-layout", "grid-template-columns:1.2fr .8fr"),
+        (".summary-grid", "grid-template-columns:repeat(5,1fr)"),
+        (".nav", "position:fixed"),
+        (".drawer", "position:fixed"),
+    ]
+    for selector, rule in gold_css_rules:
+        # 在 style 标签中查找 selector + rule
+        style_match = re.search(r'<style[^>]*>(.*?)</style>', html_text, re.DOTALL)
+        if style_match:
+            style_text = style_match.group(1)
+            if selector not in style_text or rule not in style_text:
+                blockers.append(f"ui_css_rule_mismatch:{selector} missing {rule}")
+
     # ==== UI 模板结构硬检查 ====
-    # 黄金模板必须存在的 class
     required_classes = [
         ("topbar", ".topbar"),
         ("kpi-grid", ".kpi-grid"),
@@ -99,7 +131,7 @@ def main() -> int:
         ("kpi-violet", "kpi-violet"),
         ("kpi-green", "kpi-green"),
         ("kpi-amber", "kpi-amber"),
-        ("top-bar", "top-bar"),  # 旧布局 class
+        ("top-bar", "top-bar"),
     ]
     for name, pattern in forbidden_classes:
         if pattern in html_text:
@@ -113,6 +145,41 @@ def main() -> int:
     for pat in old_nav_patterns:
         if re.search(pat, html_text):
             blockers.append(f"ui_old_navigation_pattern:{pat}")
+
+    # === 可见文本准备 ===
+    body_visible = _get_body_visible(html_text)
+    body_text = _strip_tags(body_visible)
+
+    # ==== 主界面英文术语禁止检查（BLOCKER） ====
+    banned_english = [
+        ("API", "API"),
+        ("POST", "POST"),
+        ("UNKNOWN", "UNKNOWN"),
+        ("full scan", "full scan"),
+        ("cron", "cron"),
+        ("source", "source"),
+        ("model", "model"),
+        ("checker", "checker"),
+        ("undefined", "undefined"),
+    ]
+    eng_blockers = []
+    for term, pattern in banned_english:
+        if pattern.lower() in body_text.lower():
+            # 检查上下文：如果在抽屉面板内容或降级策略中，允许
+            # 但抽屉内容是 JS 动态生成的，不在 HTML source 中
+            # 只检查 HTML source 的 body 可见文本
+            eng_blockers.append(term)
+    if eng_blockers:
+        blockers.append(f"ui_banned_english_in_main_ui:{','.join(eng_blockers)}")
+
+    # === SKIP 大卡片检查 ===
+    # SKIP 候选中不应出现 .candidate class（应该是紧凑摘要行）
+    skip_in_candidate = re.findall(
+        r'class="[^"]*candidate[^"]*"[^>]*>.*?(?:skip|SKIP|跳过)',
+        body_visible, re.DOTALL
+    )
+    if skip_in_candidate:
+        blockers.append("ui_skip_rendered_as_candidate_card")
 
     # === Model 文件检查 ===
     models = sorted(STATUS.glob("v4_control_center_model_*.json"))
@@ -165,17 +232,11 @@ def main() -> int:
     else:
         blockers.append("model_file_empty_or_invalid")
 
-    # === 可见文本准备 ===
-    body_visible = _get_body_visible(html_text)
-    body_text = _strip_tags(body_visible)
-
     # === "--" 和 "加载中" 检查 ===
-    # 在 HTML source 中作为占位符存在是正常的（JS 运行后会替换）
-    # 只在 model 为空时才视为 blocker
     if "加载中" in body_visible and not model:
         blockers.append("content_page_loading_without_model")
 
-    dash_in_element = re.findall(r'id="(kpi|snap|vd|todo|dot)[^"]*"[^>]*>--<', body_visible)
+    dash_in_element = re.findall(r'id="(kpi|snap|vd|todo)[^"]*"[^>]*>--<', body_visible)
     if dash_in_element and not model:
         blockers.append(f"content_page_has_dash_elements_without_model:{len(dash_in_element)}")
 
@@ -183,17 +244,6 @@ def main() -> int:
     if "data.model" not in html_text and "data.ok && data.model" not in html_text:
         if 'MODEL = await resp.json()' in html_text or 'MODEL=await resp.json()' in html_text:
             blockers.append("frontend_missing_model_unwrap")
-
-    # === 页面主文案全部中文 ===
-    # 黄金模板在模块明细行中包含技术标签，允许作为二级标签存在
-    # 仅检查主标题/大标题区域是否出现英文
-    english_terms = ["source", "API", "POST", "full scan", "cron", "UNKNOWN"]
-    eng_found = []
-    for term in english_terms:
-        if term.lower() in body_text.lower():
-            eng_found.append(term)
-    if eng_found:
-        warnings.append(f"english_terms_in_module_labels:{','.join(eng_found)}")
 
     # === 顶部核心指标只出现一次 ===
     for label in ["验证累计", "昨日验证"]:
@@ -237,10 +287,9 @@ def main() -> int:
     if "V3世界杯" in body_text:
         context_v3 = re.search(r'.{0,40}V3世界杯.{0,40}', body_text)
         ctx = context_v3.group(0) if context_v3 else ""
-        if "未加载" not in ctx and "无" not in ctx and "禁止" not in ctx:
+        if "未加载" not in ctx and "无" not in ctx and "禁止" not in ctx and "不进V4" not in ctx:
             blockers.append("v3_worldcup_module_detected")
     if "worldcup" in body_text.lower():
-        # 黄金模板降级策略表中记录 v3_worldcup_roster_intel 为 "V3独立，不进V4" 是正确用法
         if "不进V4" not in body_text and "独立" not in body_text:
             blockers.append("worldcup_english_term_in_body")
 
@@ -288,12 +337,15 @@ def main() -> int:
     ui_checks = {}
     for name, selector in required_classes:
         ui_checks[f"has_{name}"] = selector in html_text
+    ui_checks["css_vars_match_gold"] = len(missing_vars) == 0
     ui_checks["no_OpenClaw_Control"] = "OpenClaw Control" not in html_text
     ui_checks["no_top-kpi"] = "top-kpi" not in html_text
     ui_checks["no_kpi-violet"] = "kpi-violet" not in html_text
     ui_checks["no_kpi-green"] = "kpi-green" not in html_text
     ui_checks["no_kpi-amber"] = "kpi-amber" not in html_text
     ui_checks["no_top-bar"] = "top-bar" not in html_text
+    ui_checks["no_banned_english"] = len(eng_blockers) == 0
+    ui_checks["skip_not_candidate_card"] = len(skip_in_candidate) == 0
 
     out = {
         "checker": "tools/check_v4_control_center.py",
@@ -309,7 +361,7 @@ def main() -> int:
             "model_non_empty": bool(model),
             "top_kpis_populated": not any("dash" in b for b in blockers if "dash" in b),
             "no_banned_indicators": all(ind not in body_text for ind in banned_indicators),
-            "chinese_main_labels": len(eng_found) == 0,
+            "chinese_main_labels": len(eng_blockers) == 0,
         },
         "full_scan_ran": False,
         "cloud_publish": False,

@@ -80,7 +80,6 @@ h2{font-size:15px;margin:0}
 .btn.ghost{border-color:rgba(143,165,196,.22);background:rgba(255,255,255,.045);color:#dfeaf9}
 .btn.warn{border-color:rgba(255,209,102,.34);background:rgba(255,209,102,.12);color:#ffe3a0}
 .btn.red{border-color:rgba(255,93,115,.35);background:rgba(255,93,115,.12);color:#ffc2ca}
-.btn.primary{background:rgba(92,200,255,.22);border-color:rgba(92,200,255,.40);color:#fff}
 .candidate{
   border:1px solid rgba(143,165,196,.15);
   border-radius:17px;padding:11px;background:rgba(255,255,255,.035);
@@ -164,8 +163,6 @@ th{color:var(--muted);font-weight:650}
 .panel-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
 .panel-head h3{margin:0;font-size:18px}
 .close-btn{border:0;background:rgba(255,255,255,.08);color:var(--text);border-radius:12px;padding:8px 10px}
-
-/* modal overlay */
 .modal-overlay{
   display:none;position:fixed;inset:0;
   background:rgba(0,0,0,.58);backdrop-filter:blur(5px);z-index:130;
@@ -183,7 +180,6 @@ th{color:var(--muted);font-weight:650}
 .modal-box .form-row{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:8px}
 .modal-box .form-row-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin-bottom:8px}
 .modal-box .field input:focus,.modal-box .field select:focus{border-color:var(--blue)}
-
 .toast-wrap{
   position:fixed;left:50%;bottom:78px;transform:translateX(-50%);
   background:#101f34;border:1px solid rgba(92,200,255,.30);
@@ -192,7 +188,6 @@ th{color:var(--muted);font-weight:650}
 .toast-wrap.show{display:block}
 .toast-wrap.ok{border-color:var(--green);background:rgba(50,217,145,.12)}
 .toast-wrap.err{border-color:var(--red);background:rgba(255,93,115,.10)}
-
 @media(max-width:980px){
   .kpi-grid{grid-template-columns:repeat(3,1fr)}
   .primary-layout,.module-grid,.chart-layout{grid-template-columns:1fr}
@@ -226,15 +221,13 @@ th{color:var(--muted);font-weight:650}
       </div>
     </div>
     <div class="pills">
-      <span class="pill" id="pillStatus"><span class="dot"></span>系统 PASS</span>
+      <span class="pill"><span class="dot"></span>系统运行中</span>
       <span class="pill">主入口 8766</span>
       <span class="pill">8765 只读跳转</span>
-      <button class="btn ghost" onclick="refreshModel()" style="font-size:11px;padding:5px 10px">刷新数据</button>
     </div>
   </header>
 
-  <!-- KPI 全局状态 — 整页只出现一次 -->
-  <section class="grid kpi-grid" aria-label="全局状态">
+  <section class="grid kpi-grid" aria-label="全局状态，整页只出现一次">
     <div class="card kpi">
       <div class="label">今日候选</div><div class="value blue" id="kpiCandidates">--</div><div class="hint" id="kpiCandidatesHint">A / B 正式候选</div>
     </div>
@@ -255,9 +248,7 @@ th{color:var(--muted);font-weight:650}
     </div>
   </section>
 
-  <!-- 主区两栏 -->
   <main class="grid primary-layout">
-    <!-- 左栏：今日候选行动区 -->
     <section class="card">
       <div class="section-head">
         <h2>今日候选行动区</h2>
@@ -266,16 +257,15 @@ th{color:var(--muted);font-weight:650}
       <div id="candidateList"><p style="color:var(--muted);font-size:12px;text-align:center;padding:12px">加载中...</p></div>
     </section>
 
-    <!-- 右栏：今日待办与实盘快照 -->
     <aside class="card">
       <div class="section-head">
         <h2>今日待办与实盘快照</h2>
         <button class="btn ghost" onclick="openPanel('rules')">操作规则</button>
       </div>
       <div class="todo-list" id="todoList">
-        <div class="todo"><div><div class="todo-title">待结算</div><div class="meta" style="font-size:11px;color:var(--muted)">加载中...</div></div><button class="btn warn" onclick="openSettleModal()">结算</button></div>
-        <div class="todo"><div><div class="todo-title">待投注候选</div><div class="meta" style="font-size:11px;color:var(--muted)">加载中...</div></div><span class="badge" id="todoBetBadge">--</span></div>
-        <div class="todo"><div><div class="todo-title">待补验</div><div class="meta" style="font-size:11px;color:var(--muted)">加载中...</div></div><span class="badge" id="todoVerifyBadge">--</span></div>
+        <div class="todo"><div><div class="todo-title" id="todoSettleTitle">待结算</div><div class="meta" id="todoSettleMeta">加载中...</div></div><button class="btn warn" onclick="openSettleModal()">结算</button></div>
+        <div class="todo"><div><div class="todo-title" id="todoBetTitle">待投注候选</div><div class="meta" id="todoBetMeta">加载中...</div></div><span class="badge a" id="todoBetBadge">--</span></div>
+        <div class="todo"><div><div class="todo-title" id="todoVerifyTitle">待补验</div><div class="meta" id="todoVerifyMeta">加载中...</div></div><span class="badge" id="todoVerifyBadge">--</span></div>
       </div>
       <div class="summary-grid">
         <div class="stat"><span class="label">投注本金</span><b id="snapStake">--</b></div>
@@ -287,7 +277,6 @@ th{color:var(--muted);font-weight:650}
     </aside>
   </main>
 
-  <!-- 四模块 -->
   <section class="grid module-grid">
     <div class="card module">
       <div class="section-head"><h2>验证明细</h2><button class="btn ghost" onclick="openPanel('validation')">打开</button></div>
@@ -295,55 +284,53 @@ th{color:var(--muted);font-weight:650}
         <div class="row"><span>昨日 A</span><b id="vdYA">--</b></div>
         <div class="row"><span>昨日 B</span><b id="vdYB">--</b></div>
         <div class="row"><span>昨日 A+B</span><b id="vdYAB">--</b></div>
-        <div class="row"><span>A推/B推 验 待</span><b id="vdYSum">--</b></div>
+        <div class="row"><span>推荐/已验证/待补验</span><b id="vdYSum">--</b></div>
         <div class="row"><span>累计 A</span><b id="vdCA">--</b></div>
         <div class="row"><span>累计 B</span><b id="vdCB">--</b></div>
         <div class="row"><span>累计 A+B</span><b id="vdCAB">--</b></div>
       </div>
-      <p style="font-size:10px;color:var(--muted);margin-top:6px">official A/B-only · 不含C · 与实盘分离</p>
     </div>
 
     <div class="card module">
-      <div class="section-head"><h2>投注操作</h2><button class="btn ghost" onclick="openPanel('betapi')">API</button></div>
+      <div class="section-head"><h2>投注操作</h2><button class="btn ghost" onclick="openPanel('betapi')">接口详情</button></div>
       <div class="rows">
-        <div class="row"><span>服务</span><b>8766</b></div>
-        <div class="row"><span>新增</span><b>POST /add</b></div>
-        <div class="row"><span>结算</span><b>POST /settle</b></div>
-        <div class="row"><span>审计</span><b>audit log</b></div>
+        <div class="row"><span>服务端口</span><b>8766</b></div>
+        <div class="row"><span>新增投注</span><b>已就绪</b></div>
+        <div class="row"><span>结算投注</span><b>已就绪</b></div>
+        <div class="row"><span>操作记录</span><b>可审计</b></div>
       </div>
-      <div class="actions" style="margin-top:12px">
-        <button class="btn primary" onclick="openBetModal()">新增投注</button>
+      <div class="actions">
+        <button class="btn" onclick="openBetModal()">新增投注</button>
         <button class="btn warn" onclick="openSettleModal()">结算投注</button>
-        <a href="/live_bet_tracker.html" class="btn ghost" style="font-size:11px">实盘记录</a>
+        <a href="/live_bet_tracker.html" class="btn ghost">实盘记录</a>
       </div>
     </div>
 
     <div class="card module">
       <div class="section-head"><h2>复盘与联赛</h2><button class="btn ghost" onclick="openPanel('review')">打开</button></div>
       <div class="rows">
-        <div class="row"><span>AB账本</span><b>抽屉，不铺140行</b></div>
+        <div class="row"><span>AB账本</span><b>抽屉查看</b></div>
         <div class="row"><span>联赛指数</span><b>样本分层</b></div>
-        <div class="row"><span>UNKNOWN</span><b class="red">不进主归因</b></div>
+        <div class="row"><span>联赛缺失</span><b class="red">不进主归因</b></div>
         <div class="row"><span>策略</span><b>只观察</b></div>
       </div>
-      <div class="actions" style="margin-top:12px">
-        <a href="/v4_ab_historical_ledger.html" class="btn ghost" style="font-size:11px">AB历史复盘</a>
-        <a href="/v4_league_hit_rate.html" class="btn ghost" style="font-size:11px">联赛命中率</a>
+      <div class="actions">
+        <a href="/v4_ab_historical_ledger.html" class="btn ghost">AB历史复盘</a>
+        <a href="/v4_league_hit_rate.html" class="btn ghost">联赛命中率</a>
       </div>
     </div>
 
     <div class="card module">
       <div class="section-head"><h2>系统控制</h2><button class="btn ghost" onclick="openPanel('system')">打开</button></div>
       <div class="rows">
-        <div class="row"><span>绿色</span><b style="color:var(--green)">刷新model / 导出</b></div>
-        <div class="row"><span>黄色</span><b style="color:var(--yellow)">重建summary / checker</b></div>
-        <div class="row"><span>红色</span><b class="red">full scan锁定</b></div>
-        <div class="row"><span>cron</span><b style="color:var(--green)">QQ通知</b></div>
+        <div class="row"><span>绿色操作</span><b style="color:var(--green)">刷新 / 导出</b></div>
+        <div class="row"><span>黄色操作</span><b style="color:var(--yellow)">二次确认</b></div>
+        <div class="row"><span>红色操作</span><b class="red">已锁定</b></div>
+        <div class="row"><span>定时任务</span><b style="color:var(--green)">QQ通知</b></div>
       </div>
     </div>
   </section>
 
-  <!-- 图表 + 数据源锁 -->
   <section class="grid chart-layout">
     <div class="card">
       <div class="section-head"><h2>趋势可视化</h2><span class="label">只展示，不参与策略</span></div>
@@ -358,28 +345,27 @@ th{color:var(--muted);font-weight:650}
       </div>
     </div>
     <div class="card">
-      <div class="section-head"><h2>Source Lock</h2><button class="btn ghost" onclick="openPanel('sources')">查看映射</button></div>
-      <div class="note">验证累计 ≠ live_bets/cumulative_summary。验证累计读取 official A/B-only truth file；实盘累计读取 live_bets cumulative。</div>
-      <div class="lock" style="margin-top:8px">禁止作为主指标：124/140、39/46、85/94、80/139、旧 history recovery。</div>
+      <div class="section-head"><h2>数据源锁</h2><button class="btn ghost" onclick="openPanel('sources')">查看映射</button></div>
+      <div class="note">验证累计 ≠ 实盘累计。验证累计读取 A/B-only 官方文件；实盘累计读取实盘汇总。</div>
+      <div class="lock" style="margin-top:8px">禁止作为主指标：124/140、39/46、85/94、80/139、旧历史恢复。</div>
       <details>
         <summary>旧页面降级策略</summary>
         <table>
           <tr><th>页面</th><th>定位</th></tr>
-          <tr><td>intel_ops_console</td><td>情报详情页</td></tr>
-          <tr><td>live_bet_tracker</td><td>实盘备用/详情页</td></tr>
-          <tr><td>v4_ab_historical_ledger</td><td>复盘详情页</td></tr>
-          <tr><td>v4_league_hit_rate</td><td>联赛详情页</td></tr>
-          <tr><td>v3_worldcup_roster_intel</td><td>V3独立，不进V4</td></tr>
+          <tr><td>情报控制台</td><td>情报详情页</td></tr>
+          <tr><td>实盘追踪</td><td>实盘备用/详情页</td></tr>
+          <tr><td>AB历史账本</td><td>复盘详情页</td></tr>
+          <tr><td>联赛命中率</td><td>联赛详情页</td></tr>
+          <tr><td>世界杯情报</td><td>独立模块，不进V4作战台</td></tr>
         </table>
       </details>
     </div>
   </section>
 </div>
 
-<!-- 底部导航 -->
 <nav class="nav">
   <div class="nav-inner">
-    <button class="active" onclick="scrollTo(0,0)"><b>&#8962;</b>总览</button>
+    <button class="active" onclick="window.scrollTo(0,0)"><b>&#8962;</b>总览</button>
     <button onclick="openBetModal()"><b>+</b>投注</button>
     <button onclick="openPanel('validation')"><b>&#10003;</b>验证</button>
     <button onclick="openPanel('review')"><b>&#9678;</b>复盘</button>
@@ -387,7 +373,6 @@ th{color:var(--muted);font-weight:650}
   </div>
 </nav>
 
-<!-- 抽屉面板 -->
 <div class="drawer" id="drawer">
   <div class="panel">
     <div class="panel-head"><h3 id="panelTitle">详情</h3><button class="close-btn" onclick="closePanel()">关闭</button></div>
@@ -395,7 +380,7 @@ th{color:var(--muted);font-weight:650}
   </div>
 </div>
 
-<!-- 新增投注模态层 -->
+<!-- 新增投注模态 -->
 <div class="modal-overlay" id="betModal">
   <div class="modal-box">
     <h3>新增投注</h3>
@@ -410,10 +395,7 @@ th{color:var(--muted);font-weight:650}
         <div class="field"><label>比赛编号</label><input type="text" id="betFixtureId" readonly></div>
       </div>
       <div class="form-row-3">
-        <div class="field">
-          <label>盘口线 *</label>
-          <select id="betLine" required><option value="">请选择</option><option value="O0.75">O0.75</option><option value="O1">O1</option><option value="O1.25">O1.25</option><option value="O1.5">O1.5</option><option value="O2">O2</option></select>
-        </div>
+        <div class="field"><label>盘口线 *</label><select id="betLine" required><option value="">请选择</option><option value="O0.75">O0.75</option><option value="O1">O1</option><option value="O1.25">O1.25</option><option value="O1.5">O1.5</option><option value="O2">O2</option></select></div>
         <div class="field"><label>水位 *</label><input type="number" id="betOdds" step="0.01" min="0.5" max="2.5" placeholder="如 0.85" required></div>
         <div class="field"><label>金额 *</label><input type="number" id="betStake" step="1" min="1" placeholder="如 300" required></div>
       </div>
@@ -423,14 +405,14 @@ th{color:var(--muted);font-weight:650}
       </div>
       <div class="field" style="margin-bottom:8px"><label>备注</label><textarea id="betNotes" rows="2" placeholder="选填"></textarea></div>
       <div style="display:flex;gap:8px;margin-top:12px">
-        <button type="submit" class="btn primary" style="flex:1">确认投注</button>
+        <button type="submit" class="btn" style="flex:1">确认投注</button>
         <button type="button" class="btn ghost" style="flex:1" onclick="closeBetModal()">取消</button>
       </div>
     </form>
   </div>
 </div>
 
-<!-- 结算模态层 -->
+<!-- 结算模态 -->
 <div class="modal-overlay" id="settleModal">
   <div class="modal-box">
     <h3>结算投注</h3>
@@ -443,7 +425,7 @@ th{color:var(--muted);font-weight:650}
         <div class="field"><label>半场主队进球 *</label><input type="number" id="settleHtHome" step="1" min="0" placeholder="0" required></div>
         <div class="field"><label>半场客队进球 *</label><input type="number" id="settleHtAway" step="1" min="0" placeholder="0" required></div>
       </div>
-      <p style="font-size:10px;color:var(--muted);margin-top:4px">仅输入半场进球。走水规则：投注盈亏=0，有效流水=0，返水=0，净盈亏=0。</p>
+      <p style="font-size:10px;color:var(--muted);margin-top:4px">仅输入半场进球。走水：投注盈亏=0，有效流水=0，返水=0，净盈亏=0。</p>
       <div style="display:flex;gap:8px;margin-top:12px">
         <button type="submit" class="btn warn" style="flex:1">确认结算</button>
         <button type="button" class="btn ghost" style="flex:1" onclick="closeSettleModal()">取消</button>
@@ -455,48 +437,44 @@ th{color:var(--muted);font-weight:650}
 <div class="toast-wrap" id="toast"></div>
 
 <script>
-// ====== 面板内容定义 ======
 var PANELS = {
-  intel: ["情报详情", "<div class='note'>读取 candidate_view / brief_resolution / scout_v4。这里只做详情，不重复显示顶部验证累计。</div>"],
-  rules: ["操作规则", "<table><tr><th>级别</th><th>允许内容</th></tr><tr><td>绿色</td><td>刷新只读模型、QQ测试、导出</td></tr><tr><td>黄色</td><td>补验pending、重建summary、运行checker，必须二次确认</td></tr><tr><td>红色</td><td>full scan、改策略、改candidate、cloud、改cron，不给按钮</td></tr></table>"],
+  intel: ["情报详情", "<div class='note'>读取候选视图 / 简报 / 球探。这里只做详情，不重复显示顶部验证累计。</div>"],
+  rules: ["操作规则", "<table><tr><th>级别</th><th>允许内容</th></tr><tr><td>绿色</td><td>刷新只读模型、导出</td></tr><tr><td>黄色</td><td>补验待处理、重建汇总、运行守卫检查，必须二次确认</td></tr><tr><td>红色</td><td>完整扫描、改策略、改候选、云发布、改定时任务，不给按钮</td></tr></table>"],
   validation: ["验证明细", "<div id='panelValidationDetail'><p style='color:var(--muted)'>加载中...</p></div>"],
-  betapi: ["实盘 API", "<table><tr><th>端点</th><th>风险</th></tr><tr><td>POST /api/live_bets/add</td><td>写jsonl+summary+audit</td></tr><tr><td>POST /api/live_bets/update</td><td>修改需审计</td></tr><tr><td>POST /api/live_bets/settle</td><td>结算不可逆</td></tr><tr><td>POST /api/live_bets/void</td><td>作废需理由</td></tr></table>"],
-  review: ["复盘与联赛", "<div class='note'>AB历史复盘，主页面不直接铺长表格。使用抽屉/筛选/导出，且必须先通过 source-of-truth checker。</div><div class='actions' style='margin-top:12px'><a href='/v4_ab_historical_ledger.html' class='btn ghost'>AB历史复盘</a><a href='/v4_league_hit_rate.html' class='btn ghost'>联赛命中率</a></div>"],
-  system: ["系统控制", "<div class='lock'>红色锁定操作不给按钮：完整scan、策略修改、candidate修改、历史validation重算、cloud publish、cron修改、QQ推荐推送。</div>"],
-  sources: ["Source Map", "<table><tr><th>模块</th><th>唯一来源</th></tr><tr><td>今日候选</td><td>candidate_view JSON</td></tr><tr><td>昨日验证</td><td>final fixture_id validation summary</td></tr><tr><td>验证累计</td><td>true_cumulative_result_validation 最新版</td></tr><tr><td>实盘累计</td><td>live_bets/cumulative_summary.json</td></tr><tr><td>系统</td><td>cron jobs + QQ notify markers</td></tr></table>"]
+  betapi: ["实盘接口", "<table><tr><th>接口</th><th>风险</th></tr><tr><td>新增投注</td><td>写记录+汇总+审计</td></tr><tr><td>修改投注</td><td>修改需审计</td></tr><tr><td>结算投注</td><td>结算不可逆</td></tr><tr><td>作废投注</td><td>作废需理由</td></tr></table>"],
+  review: ["复盘与联赛", "<div class='note'>AB历史复盘，主页面不直接铺长表格。使用抽屉/筛选/导出，且必须先通过数据源守卫检查。</div><div class='actions' style='margin-top:12px'><a href='/v4_ab_historical_ledger.html' class='btn ghost'>AB历史复盘</a><a href='/v4_league_hit_rate.html' class='btn ghost'>联赛命中率</a></div>"],
+  system: ["系统控制", "<div class='lock'>红色锁定操作不给按钮：完整扫描、策略修改、候选修改、历史验证重算、云发布、定时任务修改、QQ推荐推送。</div>"],
+  sources: ["数据源映射", "<table><tr><th>模块</th><th>唯一来源</th></tr><tr><td>今日候选</td><td>候选视图 JSON</td></tr><tr><td>昨日验证</td><td>比赛编号验证汇总</td></tr><tr><td>验证累计</td><td>真实累计结果验证 最新版</td></tr><tr><td>实盘累计</td><td>实盘累计汇总</td></tr><tr><td>系统</td><td>定时任务 + QQ通知标记</td></tr></table>"]
 };
 function openPanel(key){
   var p = PANELS[key] || ["详情","暂无"];
   document.getElementById("panelTitle").textContent = p[0];
   document.getElementById("panelBody").innerHTML = p[1];
   document.getElementById("drawer").classList.add("open");
-  if (key === 'validation' && MODEL) { fillPanelValidationDetail(); }
+  if (key === 'validation' && MODEL) fillPanelValidation();
 }
 function closePanel(){ document.getElementById("drawer").classList.remove("open"); }
-function fillPanelValidationDetail(){
+function fillPanelValidation(){
   var ts = MODEL.top_status;
   var yd = MODEL.yesterday_validation_detail;
   var cd = MODEL.cumulative_validation_detail;
-  var ab = cd.AB || {};
-  var html = '<table>';
-  html += '<tr><th>项目</th><th>值</th></tr>';
-  html += '<tr><td>昨日 A</td><td>' + esc(ts.yesterday_validation.A) + '</td></tr>';
-  html += '<tr><td>昨日 B</td><td>' + esc(ts.yesterday_validation.B) + '</td></tr>';
-  html += '<tr><td>昨日 A+B</td><td>' + esc(ts.yesterday_validation.AB) + '</td></tr>';
-  html += '<tr><td>推荐/已验证/待补验</td><td>A' + esc(yd.recommended.A) + '/B' + esc(yd.recommended.B) + ' 验' + esc(yd.verified.AB) + ' 待' + esc(yd.pending.AB) + '</td></tr>';
-  html += '<tr><td>累计 A</td><td>' + esc(ts.cumulative_validation.A) + '</td></tr>';
-  html += '<tr><td>累计 B</td><td>' + esc(ts.cumulative_validation.B) + '</td></tr>';
-  html += '<tr><td>累计 A+B</td><td>' + esc(ts.cumulative_validation.AB) + '</td></tr>';
-  html += '<tr><td>累计 source</td><td>' + esc(ab.display || '') + '</td></tr>';
-  html += '</table>';
-  document.getElementById("panelValidationDetail").innerHTML = html;
+  var h = '<table>';
+  h += '<tr><th>项目</th><th>值</th></tr>';
+  h += '<tr><td>昨日 A</td><td>'+esc(ts.yesterday_validation.A)+'</td></tr>';
+  h += '<tr><td>昨日 B</td><td>'+esc(ts.yesterday_validation.B)+'</td></tr>';
+  h += '<tr><td>昨日 A+B</td><td>'+esc(ts.yesterday_validation.AB)+'</td></tr>';
+  h += '<tr><td>推荐/已验证/待补验</td><td>A'+esc(yd.recommended.A)+'/B'+esc(yd.recommended.B)+' 验'+esc(yd.verified.AB)+' 待'+esc(yd.pending.AB)+'</td></tr>';
+  h += '<tr><td>累计 A</td><td>'+esc(ts.cumulative_validation.A)+'</td></tr>';
+  h += '<tr><td>累计 B</td><td>'+esc(ts.cumulative_validation.B)+'</td></tr>';
+  h += '<tr><td>累计 A+B</td><td>'+esc(ts.cumulative_validation.AB)+'</td></tr>';
+  h += '</table>';
+  document.getElementById("panelValidationDetail").innerHTML = h;
 }
 
-// ====== 全局状态 ======
+// ====== 数据绑定 ======
 var MODEL = null;
 var TODAY = new Date().toISOString().slice(0,10).replace(/-/g,'');
 
-// ====== 加载模型 ======
 async function loadModel() {
   try {
     var resp = await fetch('/api/v4_control_center_model');
@@ -505,7 +483,7 @@ async function loadModel() {
       if (data.ok && data.model) { MODEL = data.model; }
       else if (data.top_status) { MODEL = data; }
     }
-  } catch(e) { console.log('API加载失败'); }
+  } catch(e) {}
   if (!MODEL) {
     try {
       var resp2 = await fetch('/v4_control_center_model.json');
@@ -513,7 +491,6 @@ async function loadModel() {
     } catch(e2) {}
   }
   if (MODEL) renderAll();
-  else console.log('V4统一作战台：数据加载失败');
 }
 
 function renderAll() {
@@ -525,28 +502,23 @@ function renderAll() {
 
 function renderTopBar() {
   var ts = MODEL.top_status;
-  document.getElementById('kpiCandidates').textContent = ts.today_candidates.display;
-  document.getElementById('kpiYesterday').textContent = ts.yesterday_validation.display;
-  document.getElementById('kpiCumulative').textContent = ts.cumulative_validation.display;
-  document.getElementById('kpiPnl').textContent = ts.today_pnl.display;
-  document.getElementById('kpiTurnover').textContent = ts.turnover_and_rebate.display;
-  document.getElementById('kpiTodo').textContent = ts.today_todo.display;
-
+  setText('kpiCandidates', ts.today_candidates.display);
+  setText('kpiYesterday', ts.yesterday_validation.display);
+  setText('kpiCumulative', ts.cumulative_validation.display);
+  setText('kpiPnl', ts.today_pnl.display);
+  setText('kpiTurnover', ts.turnover_and_rebate.display);
+  setText('kpiTodo', ts.today_todo.display);
   var pnl = ts.today_pnl.net_pnl;
-  var pnlEl = document.getElementById('kpiPnl');
-  pnlEl.classList.remove('green','red');
-  if (pnl > 0) pnlEl.classList.add('green');
-  else if (pnl < 0) pnlEl.classList.add('red');
-
-  // hints
-  document.getElementById('kpiCandidatesHint').textContent = 'A' + MODEL.candidates.a_count + '/B' + MODEL.candidates.b_count + '/SKIP' + MODEL.candidates.skip_count;
+  var el = document.getElementById('kpiPnl');
+  el.classList.remove('green','red');
+  if (pnl > 0) el.classList.add('green');
+  else if (pnl < 0) el.classList.add('red');
+  setText('kpiCandidatesHint', 'A'+MODEL.candidates.a_count+'/B'+MODEL.candidates.b_count+'/SKIP'+MODEL.candidates.skip_count);
   var yv = ts.yesterday_validation;
-  document.getElementById('kpiYesterdayHint').textContent = 'A' + yv.A + ' · B' + yv.B;
-  document.getElementById('kpiCumulativeHint').textContent = ts.cumulative_validation.AB + ' · official A/B-only';
-  document.getElementById('kpiPnlHint').textContent = ts.today_pnl.net_pnl >= 0 ? '盈利' : '亏损';
-  document.getElementById('kpiTurnoverHint').textContent = '走水=0流水=0返水';
+  setText('kpiYesterdayHint', 'A'+yv.A+' · B'+yv.B);
+  setText('kpiCumulativeHint', ts.cumulative_validation.AB + ' · A/B-only');
   var todo = ts.today_todo;
-  document.getElementById('kpiTodoHint').textContent = '待投注' + todo.pending_bet + ' · 待结算' + todo.pending_settle + ' · 待补验' + todo.pending_validation;
+  setText('kpiTodoHint', '待投注'+todo.pending_bet+' · 待结算'+todo.pending_settle+' · 待补验'+todo.pending_validation);
 }
 
 function renderCandidates() {
@@ -555,91 +527,84 @@ function renderCandidates() {
   var bList = cand.b_candidates || [];
   var skipList = cand.skip_candidates || [];
   var html = '';
-
   if (aList.length === 0 && bList.length === 0) {
     html = '<p style="color:var(--muted);font-size:12px;text-align:center;padding:12px">暂无今日候选，等待情报刷新</p>';
   } else {
-    for (var i = 0; i < aList.length; i++) {
-      html += buildCandidateCard(aList[i], 'A');
-    }
-    for (var i = 0; i < bList.length; i++) {
-      html += buildCandidateCard(bList[i], 'B');
-    }
+    for (var i = 0; i < aList.length; i++) { html += buildCandidateCard(aList[i], 'A'); }
+    for (var i = 0; i < bList.length; i++) { html += buildCandidateCard(bList[i], 'B'); }
   }
-
   if (skipList.length > 0) {
-    var skipNames = [];
+    var names = [];
     for (var i = 0; i < skipList.length; i++) {
-      skipNames.push(esc(skipList[i].home_cn || '?') + ' vs ' + esc(skipList[i].away_cn || '?'));
+      names.push(esc(skipList[i].home_cn || '?') + ' vs ' + esc(skipList[i].away_cn || '?'));
     }
-    html += '<div style="border:1px solid rgba(143,165,196,.13);border-radius:14px;padding:8px 10px;margin-top:6px;font-size:11px;color:var(--muted);background:rgba(255,255,255,.025)">跳过：<b style="color:var(--yellow)">' + skipNames.join('、') + '</b>（不投注）</div>';
+    html += '<div style="border:1px solid rgba(143,165,196,.13);border-radius:14px;padding:8px 10px;margin-top:6px;font-size:11px;color:var(--muted);background:rgba(255,255,255,.025)">跳过：<b style="color:var(--yellow)">' + names.join('、') + '</b>（不投注）</div>';
   }
-
   document.getElementById('candidateList').innerHTML = html;
 }
 
 function buildCandidateCard(c, grade) {
-  var badgeCls = grade === 'A' ? 'a' : 'b';
-  var h = '';
-  h += '<article class="candidate">';
-  h += '<div class="cand-top">';
-  h += '<div>';
-  h += '<div class="match">' + esc(c.home_cn || '?') + ' <span style="font-weight:400;color:var(--muted);font-size:11px;margin:0 4px">vs</span> ' + esc(c.away_cn || '?') + '</div>';
+  var cls = grade === 'A' ? 'a' : 'b';
+  var h = '<article class="candidate">';
+  h += '<div class="cand-top"><div>';
+  h += '<div class="match">' + esc(c.home_cn || '?') + ' vs ' + esc(c.away_cn || '?') + '</div>';
   h += '<div class="meta">' + esc(c.league || '') + ' · ' + grade + '级 · ' + esc(c.kickoff_time || '--');
-  if (c.script_type) { h += ' · ' + esc(c.script_type); }
-  if (c.ht_score) { h += ' · 半场' + esc(String(c.ht_score)) + '分'; }
-  h += '</div>';
-  h += '</div>';
-  h += '<span class="badge ' + badgeCls + '">' + grade + '</span>';
-  h += '</div>';
+  if (c.script_type) h += ' · ' + esc(c.script_type);
+  h += '</div></div>';
+  h += '<span class="badge ' + cls + '">' + grade + '</span></div>';
   if (c.script_type || c.suggested_lines) {
     h += '<div class="badges">';
-    if (c.suggested_lines) { h += '<span class="badge">建议观察 ' + esc(c.suggested_lines) + '</span>'; }
-    if (c.script_type) { h += '<span class="badge">' + esc(c.script_type) + '</span>'; }
-    h += '<span class="badge">未投注</span>';
-    h += '</div>';
+    if (c.suggested_lines) h += '<span class="badge">' + esc(c.suggested_lines) + '</span>';
+    if (c.script_type) h += '<span class="badge">' + esc(c.script_type) + '</span>';
+    h += '<span class="badge">未投注</span></div>';
   }
   h += '<div class="actions">';
-  h += '<button class="btn primary" onclick=\'quickBet(' + JSON.stringify(c).replace(/'/g, "\\'").replace(/"/g, '&quot;') + ')\'>记录投注</button>';
+  h += '<button class="btn" onclick=\'quickBet(' + JSON.stringify(c).replace(/'/g,"\\'") + ')\'>记录投注</button>';
   h += '<button class="btn ghost" onclick="openPanel(\'intel\')">查看情报</button>';
-  h += '</div>';
-  h += '</article>';
+  h += '</div></article>';
   return h;
 }
 
 function renderValidationDetail() {
   var ts = MODEL.top_status;
-  document.getElementById('vdYA').textContent = ts.yesterday_validation.A;
-  document.getElementById('vdYB').textContent = ts.yesterday_validation.B;
-  document.getElementById('vdYAB').textContent = ts.yesterday_validation.AB;
+  setText('vdYA', ts.yesterday_validation.A);
+  setText('vdYB', ts.yesterday_validation.B);
+  setText('vdYAB', ts.yesterday_validation.AB);
   var yd = MODEL.yesterday_validation_detail;
-  document.getElementById('vdYSum').textContent = 'A' + yd.recommended.A + '/B' + yd.recommended.B + ' 验' + yd.verified.AB + ' 待' + yd.pending.AB;
-  document.getElementById('vdCA').textContent = ts.cumulative_validation.A;
-  document.getElementById('vdCB').textContent = ts.cumulative_validation.B;
-  document.getElementById('vdCAB').textContent = ts.cumulative_validation.AB;
+  setText('vdYSum', 'A'+yd.recommended.A+'/B'+yd.recommended.B+' 验'+yd.verified.AB+' 待'+yd.pending.AB);
+  setText('vdCA', ts.cumulative_validation.A);
+  setText('vdCB', ts.cumulative_validation.B);
+  setText('vdCAB', ts.cumulative_validation.AB);
 }
 
 function renderTodoAndSnapshot() {
   var ts = MODEL.top_status;
   var lb = MODEL.live_bet.today;
   var cum = MODEL.live_bet.cumulative;
-
   var todoBet = MODEL.candidates.a_count + MODEL.candidates.b_count;
   var todoSettle = Math.max(0, lb.effective_bet_records - lb.settled_records);
   var todoVerify = ts.today_todo.pending_validation;
 
-  document.getElementById('todoBetBadge').textContent = todoBet + '场';
-  document.getElementById('todoVerifyBadge').textContent = todoVerify + '场';
+  setText('todoBetBadge', todoBet + '场');
+  setText('todoVerifyBadge', todoVerify + '场');
+  setText('todoSettleMeta', todoSettle + '笔待结算');
+  setText('todoBetMeta', '从候选卡片一键记录');
+  setText('todoVerifyMeta', '自动补验');
 
-  document.getElementById('snapStake').textContent = lb.stake_amount.toFixed(2);
-  var pnlEl = document.getElementById('snapPnl');
-  pnlEl.textContent = (lb.gross_pnl >= 0 ? '+' : '') + lb.gross_pnl.toFixed(2);
-  pnlEl.style.color = lb.gross_pnl >= 0 ? 'var(--green)' : 'var(--red)';
-  document.getElementById('snapTurnover').textContent = lb.effective_turnover.toFixed(2);
-  document.getElementById('snapRebate').textContent = lb.rebate.toFixed(4);
-  var netEl = document.getElementById('snapNetPnl');
-  netEl.textContent = (lb.net_pnl >= 0 ? '+' : '') + lb.net_pnl.toFixed(2);
-  netEl.style.color = lb.net_pnl >= 0 ? 'var(--green)' : 'var(--red)';
+  setText('snapStake', lb.stake_amount.toFixed(2));
+  var pEl = document.getElementById('snapPnl');
+  pEl.textContent = (lb.gross_pnl >= 0 ? '+' : '') + lb.gross_pnl.toFixed(2);
+  pEl.style.color = lb.gross_pnl >= 0 ? 'var(--green)' : 'var(--red)';
+  setText('snapTurnover', lb.effective_turnover.toFixed(2));
+  setText('snapRebate', lb.rebate.toFixed(4));
+  var nEl = document.getElementById('snapNetPnl');
+  nEl.textContent = (lb.net_pnl >= 0 ? '+' : '') + lb.net_pnl.toFixed(2);
+  nEl.style.color = lb.net_pnl >= 0 ? 'var(--green)' : 'var(--red)';
+}
+
+function setText(id, val) {
+  var el = document.getElementById(id);
+  if (el) el.textContent = (val != null ? String(val) : '--');
 }
 
 function quickBet(card) {
@@ -667,8 +632,7 @@ async function submitBet(e) {
     date: document.getElementById('betDate').value,
     grade: document.getElementById('betGrade').value || 'MANUAL',
     league: document.getElementById('betLeague').value || '',
-    home_cn: teams[0].trim(),
-    away_cn: teams.length > 1 ? teams[1].trim() : '',
+    home_cn: teams[0].trim(), away_cn: teams.length > 1 ? teams[1].trim() : '',
     fixture_id: document.getElementById('betFixtureId').value || '',
     market_line: document.getElementById('betLine').value,
     odds_water: parseFloat(document.getElementById('betOdds').value),
@@ -676,8 +640,7 @@ async function submitBet(e) {
     entry_minute: document.getElementById('betEntryMinute').value || '',
     rebate_rate: parseFloat(document.getElementById('betRebateRate').value) || 0.025,
     notes: document.getElementById('betNotes').value || '',
-    bet_status: 'BET',
-    settlement_result: 'PENDING',
+    bet_status: 'BET', settlement_result: 'PENDING',
   };
   try {
     var resp = await fetch('/api/live_bets/add', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(payload) });
@@ -738,13 +701,11 @@ function esc(s) {
   return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 }
 
-// 点击抽屉背景关闭
 document.getElementById('drawer').addEventListener('click', function(e){
   if (e.target === document.getElementById('drawer')) closePanel();
 });
 
 loadModel();
 </script>
-
 </body>
 </html>
