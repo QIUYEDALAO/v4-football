@@ -171,6 +171,28 @@ def parse_ab_block(block: str, grade: str, idx: int, scout_by_fixture: dict[int,
     }
 
 
+def _is_placeholder_candidate(item: dict[str, Any]) -> bool:
+    fixture_id = item.get("fixture_id")
+    home = str(item.get("home") or "").strip()
+    away = str(item.get("away") or "").strip()
+    kickoff = str(item.get("kickoff_display") or "").strip()
+    dist = str(item.get("distribution_text") or "").strip()
+    bad_tokens = {"", "UNKNOWN", "TBD", "：(无)", "(无)", "无"}
+    if not fixture_id:
+        return True
+    if home in bad_tokens or away in bad_tokens:
+        return True
+    if "UNKNOWN" in home or "UNKNOWN" in away:
+        return True
+    if "中文名缺失：UNKNOWN" in str(item.get("home_cn") or "") or "中文名缺失：UNKNOWN" in str(item.get("away_cn") or ""):
+        return True
+    if kickoff in {"", "TBD"}:
+        return True
+    if dist in {"", "time_bins 待补齐"}:
+        return True
+    return False
+
+
 def parse_c_items(text: str, scout_by_fixture: dict[int, dict[str, Any]], brief_path: Path) -> list[dict[str, Any]]:
     if C_HEADER not in text:
         return []
@@ -223,8 +245,10 @@ def build_candidate_view(date: str, text: str, brief_path: Path, scout_path: Pat
     scout = load_json(scout_path) if scout_path else []
     scout_by_fixture = {int(item.get("fixture_id")): item for item in scout if isinstance(item, dict) and item.get("fixture_id")} if isinstance(scout, list) else {}
     overview = parse_overview(text)
-    a_items = [parse_ab_block(block, "A", i, scout_by_fixture, brief_path) for i, block in enumerate(split_blocks(text, GRADE_HEADERS["A"]), 1)]
-    b_items = [parse_ab_block(block, "B", i, scout_by_fixture, brief_path) for i, block in enumerate(split_blocks(text, GRADE_HEADERS["B"]), 1)]
+    a_items_raw = [parse_ab_block(block, "A", i, scout_by_fixture, brief_path) for i, block in enumerate(split_blocks(text, GRADE_HEADERS["A"]), 1)]
+    b_items_raw = [parse_ab_block(block, "B", i, scout_by_fixture, brief_path) for i, block in enumerate(split_blocks(text, GRADE_HEADERS["B"]), 1)]
+    a_items = [x for x in a_items_raw if not _is_placeholder_candidate(x)]
+    b_items = [x for x in b_items_raw if not _is_placeholder_candidate(x)]
     c_items = parse_c_items(text, scout_by_fixture, brief_path)
     return {
         "schema_version": "v3v4_dashboard_brief_candidate_view.v1",

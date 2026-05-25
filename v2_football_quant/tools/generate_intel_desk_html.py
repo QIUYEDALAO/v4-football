@@ -136,7 +136,28 @@ def _candidate_list(data: dict[str, Any], grade: str) -> list[dict[str, Any]]:
         single = data.get("A_candidate")
         return [single] if isinstance(single, dict) and single else []
     value = data.get(f"{grade}_candidates")
-    return value if isinstance(value, list) else []
+    rows = value if isinstance(value, list) else []
+    return [x for x in rows if _is_formal_candidate_row(x)]
+
+
+def _is_formal_candidate_row(item: dict[str, Any]) -> bool:
+    fixture_id = item.get("fixture_id")
+    home = str(item.get("home") or "").strip()
+    away = str(item.get("away") or "").strip()
+    kickoff = str(item.get("kickoff_display") or item.get("kickoff_time") or "").strip()
+    dist = str(item.get("distribution_text") or "").strip()
+    bad_tokens = {"", "UNKNOWN", "TBD", "：(无)", "(无)", "无"}
+    if not fixture_id:
+        return False
+    if home in bad_tokens or away in bad_tokens:
+        return False
+    if "UNKNOWN" in home or "UNKNOWN" in away:
+        return False
+    if kickoff in {"", "TBD"}:
+        return False
+    if dist in {"", "time_bins 待补齐"}:
+        return False
+    return True
 
 
 def _h(value: Any) -> str:
@@ -417,11 +438,16 @@ def _card(item: dict[str, Any], grade: str) -> str:
     if home_cn_raw:
         home_cn = str(home_cn_raw)
     else:
-        home_cn = f"中文名缺失：{home_en}" if home_en else "中文名缺失：UNKNOWN"
+        home_cn = str(home_en or "UNKNOWN")
     if away_cn_raw:
         away_cn = str(away_cn_raw)
     else:
-        away_cn = f"中文名缺失：{away_en}" if away_en else "中文名缺失：UNKNOWN"
+        away_cn = str(away_en or "UNKNOWN")
+    # Never render the explicit missing-prefix in active A/B titles.
+    if home_cn.startswith("中文名缺失："):
+        home_cn = home_cn.replace("中文名缺失：", "", 1).strip() or str(home_en or "UNKNOWN")
+    if away_cn.startswith("中文名缺失："):
+        away_cn = away_cn.replace("中文名缺失：", "", 1).strip() or str(away_en or "UNKNOWN")
     english = ""
     if home_en or away_en:
         english = f"<div class='english-line'>EN: {_h(home_en or home_cn)} vs {_h(away_en or away_cn)}</div>"

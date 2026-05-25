@@ -59,7 +59,8 @@ class TeamCnResolver:
         n = self._norm(en)
         if n in self.map_norm:
             return self.map_norm[n], en, False, "norm_map"
-        return f"中文名缺失：{en}", en, True, "missing"
+        # Keep active display clean: fallback to original EN name when CN is missing.
+        return en, en, True, "missing"
 
     def resolve_match(self,
                       home_team_en: Any,
