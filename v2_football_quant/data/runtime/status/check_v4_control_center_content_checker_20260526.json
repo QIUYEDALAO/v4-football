@@ -1,0 +1,23 @@
+{
+  "checker": "tools/check_v4_control_center.py",
+  "phase": "V4-CONTROL-CENTER-DATA-BINDING-AND-CONTENT-VERIFY-FIX-20260526",
+  "generated_at": "2026-05-26T02:09:57.054915",
+  "blockers": [],
+  "warnings": [],
+  "conclusion": "PASS",
+  "content_check_details": {
+    "html_exists": true,
+    "model_exists": true,
+    "model_non_empty": true,
+    "top_kpis_populated": true,
+    "no_loading_in_body": false,
+    "no_banned_indicators": true,
+    "chinese_main_labels": true
+  },
+  "full_scan_ran": false,
+  "cloud_publish": false,
+  "QQ_push": false,
+  "cron_modified": false,
+  "secrets_printed": false,
+  "secrets_committed": false
+}

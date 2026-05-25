@@ -536,7 +536,13 @@ async function loadModel() {
   try {
     var resp = await fetch('/api/v4_control_center_model');
     if (resp.ok) {
-      MODEL = await resp.json();
+      var data = await resp.json();
+      if (data.ok && data.model) {
+        MODEL = data.model;
+      } else if (data.top_status) {
+        // 兼容直接返回 model 的情况
+        MODEL = data;
+      }
     }
   } catch(e) {
     console.log('API加载失败，尝试静态回退');
@@ -544,10 +550,14 @@ async function loadModel() {
   if (!MODEL) {
     try {
       var resp2 = await fetch('/v4_control_center_model.json');
-      if (resp2.ok) MODEL = await resp2.json();
+      if (resp2.ok) {
+        var data2 = await resp2.json();
+        MODEL = data2.model || data2;
+      }
     } catch(e2) {}
   }
   if (MODEL) renderAll();
+  else console.log('V4统一作战台：数据加载失败，请检查服务状态');
 }
 
 // ====== 渲染全部 ======

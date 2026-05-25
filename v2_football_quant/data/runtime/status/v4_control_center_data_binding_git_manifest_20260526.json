@@ -1,0 +1,35 @@
+{
+  "schema_version": "v4_control_center_data_binding_git_manifest.v1",
+  "phase": "V4-CONTROL-CENTER-DATA-BINDING-AND-CONTENT-VERIFY-FIX-20260526",
+  "generated_at": "2026-05-26T02:15:00+08:00",
+  "git_commit_required": true,
+  "files_to_commit": [
+    {
+      "path": "v2_football_quant/data/runtime/dashboard/v4_control_center.html",
+      "type": "modified",
+      "category": "html",
+      "description": "修复前端 JS 字段绑定：MODEL = data.model 解包 API 返回的 model"
+    },
+    {
+      "path": "v2_football_quant/tools/check_v4_control_center.py",
+      "type": "modified",
+      "category": "checker",
+      "description": "增强 checker：新增内容级检查，防止 HTTP 200 假通过"
+    },
+    {
+      "path": "v2_football_quant/data/runtime/status/v4_control_center_checker_output.json",
+      "type": "new",
+      "category": "status",
+      "description": "增强版 checker 运行结果"
+    }
+  ],
+  "excluded_files": [],
+  "excluded_patterns": [
+    ".env", "secrets", "raw_dump", "backup",
+    "live_bet 真实记录", "bookmaker 信息",
+    "data/runtime/live_bets 原始记录"
+  ],
+  "real_secret_count": 0,
+  "live_bet_record_count": 0,
+  "status": "PASS"
+}

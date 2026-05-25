@@ -1,0 +1,32 @@
+{
+  "schema_version": "v4_control_center_data_binding_freeze.v1",
+  "phase": "V4-CONTROL-CENTER-DATA-BINDING-AND-CONTENT-VERIFY-FIX-20260526",
+  "generated_at": "2026-05-26T02:15:00+08:00",
+  "page_urls": {
+    "local": "http://127.0.0.1:8766/v4_control_center.html",
+    "lan": "http://192.168.1.2:8766/v4_control_center.html"
+  },
+  "symptoms": {
+    "today_candidates": "--",
+    "yesterday_validation": "--",
+    "cumulative_validation": "--",
+    "today_pnl": "--",
+    "turnover_rebate": "--",
+    "today_todo": "--",
+    "candidate_list": "加载中...",
+    "all_6_kpis": "全部显示 --"
+  },
+  "api_status": {
+    "http_code": 200,
+    "response_is_json": true,
+    "ok_field": true,
+    "model_contains_data": true,
+    "top_status_populated": true,
+    "candidates_populated": true,
+    "live_bet_populated": true
+  },
+  "root_cause": "API返回 {ok:true, model:{top_status:{...}}} 但前端 JS 读取 MODEL.top_status 而非 MODEL.model.top_status",
+  "root_cause_category": "frontend_field_path_mismatch",
+  "confirmation": "API 数据完整，前端无法绑定",
+  "status": "PASS"
+}

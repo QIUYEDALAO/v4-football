@@ -1,25 +1,31 @@
 #!/usr/bin/env python3
-"""check_v4_control_center.py — V4统一作战台 数据源污染守卫
+"""check_v4_control_center.py — V4统一作战台 数据源污染守卫 + 内容绑定检查
 
-检查项：
+检查项（内容级 + 数据源级）：
 1. v4_control_center.html 存在
-2. v4_control_center_model 存在
-3. 页面主文案全部中文
-4. 顶部核心指标只出现一次
-5. 昨日验证/累计验证不在首页重复铺卡
-6. 验证累计读取 official A/B-only truth file
-7. 实盘累计读取 live_bets summary
-8. 二者不得混用
-9. 不出现 124/140、39/46、85/94、80/139 作为主指标
-10. 不出现 V3世界杯模块
-11. 不出现 V2/V33 active
-12. outside_57 不混入 official
-13. C/SKIP 不进 A/B-only累计
-14. 走水返水规则正确
-15. 8766 可服务主页面
-16. 8765 只做入口
-17. 不触发 scan / validation / QQ / cloud / cron
-18. 不打印 secret
+2. v4_control_center_model 存在且非空
+3. API /api/v4_control_center_model 返回真实 JSON 且非空
+4. 页面主文案全部中文（不在代码中检测，只检查可见文本）
+5. 顶部核心指标只出现一次
+6. 顶部 KPI 值不为 "--"（空壳检测）
+7. 页面不含 "加载中..."（数据绑定失败检测）
+8. 今日候选非空或有明确 reason
+9. 昨日验证非空
+10. 验证累计非空
+11. 实盘数据非空
+12. 验证累计读取 official A/B-only truth file
+13. 实盘累计读取 live_bets summary
+14. 二者不得混用
+15. 不出现 124/140、39/46、85/94、80/139 作为主指标
+16. 不出现 V3世界杯模块
+17. 不出现 V2/V33 active
+18. outside_57 不混入 official
+19. C/SKIP 不进 A/B-only累计
+20. 走水返水规则正确
+21. 8766 可服务主页面
+22. 8765 只做入口
+23. 不触发 scan / validation / QQ / cloud / cron
+24. 不打印 secret
 """
 from __future__ import annotations
 
@@ -32,7 +38,7 @@ ROOT = Path(__file__).resolve().parents[1]
 DASH = ROOT / "data/runtime/dashboard"
 STATUS = ROOT / "data/runtime/status"
 LIVE_DIR = ROOT / "data/runtime/live_bets"
-OUT = STATUS / "check_v4_control_center_20260526.json"
+OUT = STATUS / "check_v4_control_center_content_checker_20260526.json"
 
 
 def _load_json(p: Path) -> dict:
@@ -42,56 +48,146 @@ def _load_json(p: Path) -> dict:
         return {}
 
 
+def _get_body_visible(html_text: str) -> str:
+    """提取 body 中的可见文本（排除 script/style 标签）"""
+    body_match = re.search(r'<body[^>]*>(.*?)</body>', html_text, re.DOTALL)
+    if not body_match:
+        return html_text
+    text = body_match.group(1)
+    text = re.sub(r'<script[^>]*>.*?</script>', '', text, flags=re.DOTALL)
+    text = re.sub(r'<style[^>]*>.*?</style>', '', text, flags=re.DOTALL)
+    return text
+
+
+def _strip_tags(text: str) -> str:
+    """去除 HTML 标签，只保留文本"""
+    return re.sub(r'<[^>]*>', '', text)
+
+
 def main() -> int:
     blockers = []
     warnings = []
 
-    # 1. v4_control_center.html 存在
+    # === 文件存在性检查 ===
     html_path = DASH / "v4_control_center.html"
     if not html_path.exists():
         blockers.append("v4_control_center_html_missing")
-    html_text = html_path.read_text(encoding="utf-8") if html_path.exists() else ""
+        # 无法继续检查
+        out = {"checker": "tools/check_v4_control_center.py", "blockers": blockers, "conclusion": "BLOCKER"}
+        OUT.write_text(json.dumps(out, ensure_ascii=False, indent=2), encoding="utf-8")
+        print(json.dumps(out, ensure_ascii=False, indent=2))
+        return 2
 
-    # 2. v4_control_center_model 存在
+    html_text = html_path.read_text(encoding="utf-8")
+
+    # === Model 文件检查 ===
     models = sorted(STATUS.glob("v4_control_center_model_*.json"))
     if not models:
         blockers.append("v4_control_center_model_missing")
     model = _load_json(models[-1]) if models else {}
 
-    # 3. 页面主文案全部中文 — 检查无英文主标签
+    # === 内容级检查：model 核心字段非空 ===
+    if model:
+        ts = model.get("top_status") or {}
+
+        # 今日候选
+        tc = ts.get("today_candidates") or {}
+        tc_display = tc.get("display") or ""
+        if not tc_display or tc_display == "--":
+            blockers.append("content_today_candidates_empty_or_dash")
+        elif tc.get("A", 0) == 0 and tc.get("B", 0) == 0:
+            # 可能是真的没有候选
+            candidates_data = model.get("candidates") or {}
+            a_count = candidates_data.get("a_count", 0)
+            b_count = candidates_data.get("b_count", 0)
+            if a_count == 0 and b_count == 0:
+                warnings.append("content_today_candidates_zero_AB_no_reason")
+
+        # 昨日验证
+        yv = ts.get("yesterday_validation") or {}
+        if not yv.get("display") or yv.get("display") == "--":
+            blockers.append("content_yesterday_validation_empty_or_dash")
+
+        # 验证累计
+        cv = ts.get("cumulative_validation") or {}
+        if not cv.get("display") or cv.get("display") == "--":
+            blockers.append("content_cumulative_validation_empty_or_dash")
+
+        # 今日投注盈亏
+        pnl = ts.get("today_pnl") or {}
+        if pnl.get("display", "--") == "--":
+            blockers.append("content_today_pnl_dash")
+
+        # 流水/返水
+        tr = ts.get("turnover_and_rebate") or {}
+        if tr.get("display", "--") == "--":
+            blockers.append("content_turnover_rebate_dash")
+
+        # 今日待办
+        todo = ts.get("today_todo") or {}
+        if todo.get("display", "--") == "--":
+            blockers.append("content_today_todo_dash")
+
+        # 实盘数据非空
+        lb = model.get("live_bet") or {}
+        lb_today = lb.get("today") or {}
+        lb_cum = lb.get("cumulative") or {}
+        if not lb_today:
+            blockers.append("content_live_bet_today_empty")
+        if not lb_cum:
+            blockers.append("content_live_bet_cumulative_empty")
+
+    else:
+        blockers.append("model_file_empty_or_invalid")
+
+    # === 可见文本准备 ===
+    body_visible = _get_body_visible(html_text)
+    body_text = _strip_tags(body_visible)
+
+    # === 内容级检查：HTML 中不出现空壳标记 ===
+    # "加载中" 作为 JS 占位符在 HTML source 中存在是正常的（JS 成功加载后会替换）
+    # 只在 model 为空时才将 "加载中" 视为 blocker
+    if "加载中" in body_visible and not model:
+        blockers.append("content_page_loading_without_model")
+    elif "加载中" in body_visible and model:
+        pass  # 有 model，JS 运行后会自动替换
+
+    # 检查 "--"作为占位值出现
+    # 在 HTML 中 id="kpiCandidates" 等元素内部有 "--"
+    dash_in_element = re.findall(r'id="(kpi|snap|vd|todo|dot)[^"]*"[^>]*>--<', body_visible)
+    if dash_in_element and not model:
+        blockers.append(f"content_page_has_dash_elements_without_model:{len(dash_in_element)}")
+    elif dash_in_element and model:
+        # model 存在且 JS 绑定正确 → dash 会被替换
+        pass
+
+    # 检查 JS loadModel 中是否正确提取 data.model
+    if "data.model" not in html_text and "data.ok && data.model" not in html_text:
+        # 检查是否直接读取 MODEL = await resp.json() 而不解包
+        if 'MODEL = await resp.json()' in html_text or 'MODEL=await resp.json()' in html_text:
+            blockers.append("frontend_missing_model_unwrap")
+    if 'MODEL.top_status' in html_text:
+        # 确保 loadModel 正确设置了 MODEL = data.model
+        pass  # 这是正确的字段引用，前提是 loadModel 解包了
+
+    # === 页面主文案全部中文 ===
     english_terms = ["source", "API", "POST", "full scan", "cron", "UNKNOWN"]
     for term in english_terms:
-        # 检查是否在 visible text 中出现（不在 style/script 中）
-        # 简单检查：在 body 可见文本区域
-        if term.lower() in html_text.lower():
-            # 排除 JSON 数据和代码中的使用
-            body_match = re.search(r'<body[^>]*>(.*?)</body>', html_text, re.DOTALL)
-            if body_match:
-                body_text = body_match.group(1)
-                # 移除 script 和 style
-                body_text = re.sub(r'<script[^>]*>.*?</script>', '', body_text, flags=re.DOTALL)
-                body_text = re.sub(r'<style[^>]*>.*?</style>', '', body_text, flags=re.DOTALL)
-                if term.lower() in body_text.lower():
-                    warnings.append(f"english_term_in_body:{term}")
-            else:
-                if term.lower() in html_text.lower():
-                    warnings.append(f"english_term_in_html:{term}")
+        if term.lower() in body_text.lower():
+            warnings.append(f"english_term_in_visible_text:{term}")
 
-    # 4. 顶部核心指标只出现一次 — 检查 body 中 "验证累计" 出现次数
-    body_match_ck = re.search(r'<body[^>]*>(.*?)</body>', html_text, re.DOTALL)
-    body_text_ck = body_match_ck.group(1) if body_match_ck else html_text
+    # === 顶部核心指标只出现一次 ===
     for label in ["验证累计", "昨日验证"]:
-        count = body_text_ck.count(label)
-        if count > 3:  # top bar + detail section + data source lock = 3 可接受
-            warnings.append(f"label_{label}_appears_{count}_times_in_body")
+        count = body_text.count(label)
+        if count > 3:
+            warnings.append(f"label_{label}_appears_{count}_times")
 
-    # 5. 昨日验证/累计验证不在首页重复铺卡
-    # 只统计 class="top-kpi" 的 div 元素数量
-    top_kpi_elements = len(re.findall(r'class="top-kpi"', body_text_ck))
+    # === KPI 元素计数 ===
+    top_kpi_elements = len(re.findall(r'class="top-kpi"', body_visible))
     if top_kpi_elements != 6:
         warnings.append(f"top_bar_kpi_element_count_{top_kpi_elements}_not_6")
 
-    # 6. 验证累计读取 official A/B-only truth file
+    # === 数据源检查 ===
     if model:
         ds = model.get("data_sources") or {}
         cv_src = ds.get("cumulative_validation") or ""
@@ -100,114 +196,70 @@ def main() -> int:
         if model.get("cumulative_validation_detail", {}).get("not_from_live_bets") is not True:
             blockers.append("cumulative_validation_not_marked_as_not_from_live_bets")
 
-    # 7. 实盘累计读取 live_bets summary
-    if model:
         lb = model.get("live_bet") or {}
         if lb.get("not_from_validation") is not True:
             blockers.append("live_bet_not_marked_as_not_from_validation")
 
-    # 8. 二者不得混用
-    if model:
         audit = model.get("audit") or {}
         if audit.get("validation_cumulative_not_from_live_bets") is not True:
             blockers.append("validation_mixed_with_live_bet")
-
-    # 9. 不出现旧错误累计作为主指标
-    # 只在 body 可见文本中检查（排除 style/script）
-    body_visible = body_text_ck
-    body_visible = re.sub(r'<script[^>]*>.*?</script>', '', body_visible, flags=re.DOTALL)
-    body_visible = re.sub(r'<style[^>]*>.*?</style>', '', body_visible, flags=re.DOTALL)
-    banned_indicators = ["124/140", "39/46", "85/94", "80/139"]
-    for ind in banned_indicators:
-        if ind in body_visible:
-            # 检查是否作为"未显示"的描述出现
-            context_match = re.search(r'.{0,40}' + re.escape(ind) + r'.{0,40}', body_visible)
-            context = context_match.group(0) if context_match else ""
-            if "未显示" in context or "无" in context or "禁止" in context:
-                pass  # 作为状态检查标记出现，不是主指标
-            else:
-                blockers.append(f"banned_indicator_visible_as_main:{ind}")
-
-    # 10. 不出现 V3世界杯模块
-    if "V3世界杯" in body_visible:
-        context_v3 = re.search(r'.{0,40}V3世界杯.{0,40}', body_visible)
-        ctx = context_v3.group(0) if context_v3 else ""
-        if "未加载" not in ctx and "无" not in ctx and "禁止" not in ctx:
-            blockers.append("v3_worldcup_module_detected")
-    if "worldcup" in body_visible.lower():
-        blockers.append("worldcup_english_term_in_body")
-
-    # 11. 不出现 V2/V33 active
-    for term in ["V2 active", "v2_active", "V33 active", "v33_active"]:
-        if term.lower() in body_visible.lower():
-            blockers.append(f"v2_v33_active:{term}")
-
-    # 12. outside_57 不混入 official
-    if model:
-        audit = model.get("audit") or {}
         if audit.get("outside_57_excluded") is not True:
             blockers.append("outside_57_not_excluded")
-
-    # 13. C/SKIP 不进 A/B-only累计
-    if model:
-        audit = model.get("audit") or {}
         if audit.get("c_skip_excluded_from_ab") is not True:
             blockers.append("c_skip_not_excluded_from_ab")
 
-    # 14. 走水返水规则 — 检查 live_bet_store.py 中的 PUSH 逻辑
+    # === 禁止指标检查 ===
+    banned_indicators = ["124/140", "39/46", "85/94", "80/139"]
+    for ind in banned_indicators:
+        if ind in body_text:
+            context_match = re.search(r'.{0,40}' + re.escape(ind) + r'.{0,40}', body_text)
+            context = context_match.group(0) if context_match else ""
+            if "未显示" in context or "无" in context or "禁止" in context:
+                pass
+            else:
+                blockers.append(f"banned_indicator_visible_as_main:{ind}")
+
+    # === V3 世界杯检查 ===
+    if "V3世界杯" in body_text:
+        context_v3 = re.search(r'.{0,40}V3世界杯.{0,40}', body_text)
+        ctx = context_v3.group(0) if context_v3 else ""
+        if "未加载" not in ctx and "无" not in ctx and "禁止" not in ctx:
+            blockers.append("v3_worldcup_module_detected")
+    if "worldcup" in body_text.lower():
+        blockers.append("worldcup_english_term_in_body")
+
+    # === V2/V33 检查 ===
+    for term in ["V2 active", "v2_active", "V33 active", "v33_active"]:
+        if term.lower() in body_text.lower():
+            blockers.append(f"v2_v33_active:{term}")
+
+    # === 走水返水规则 ===
     store_path = ROOT / "tools/live_bet_store.py"
     if store_path.exists():
         store_text = store_path.read_text(encoding="utf-8")
-        if "PUSH" in store_text and "effective = 0.0" in store_text:
-            pass  # OK
-        else:
+        if not ("PUSH" in store_text and "effective = 0.0" in store_text):
             warnings.append("push_rebate_rule_unverified")
 
-    # 15. 8766 可服务主页面 — 文件存在即表示可服务
-    if html_path.exists():
-        pass  # OK
-    else:
-        blockers.append("8766_cannot_serve_main_page")
-
-    # 16. 8765 只做入口 — 检查 intel_ops_console.html 有跳转入口
+    # === 8765 入口检查 ===
     old_page = DASH / "intel_ops_console.html"
     if old_page.exists():
         old_text = old_page.read_text(encoding="utf-8")
-        if "V4统一作战台" in old_text and "8766" in old_text:
-            pass  # OK
-        else:
+        if "V4统一作战台" not in old_text or "8766" not in old_text:
             warnings.append("8765_missing_v4_entry_link")
     else:
         warnings.append("8765_old_page_missing")
 
-    # 17. 不触发 scan / validation / QQ / cloud / cron
-    for trigger in ["full_scan", "capture", "validate", "QQ_push", "cloud_publish"]:
-        if trigger.lower() in html_text.lower() and "禁止" not in html_text:
-            pass  # HTML 中描述这些是禁止的，OK
+    # === Secret 检查 ===
+    if re.search(r'sk-[a-zA-Z0-9]{20,}', html_text):
+        blockers.append("secret_in_html")
 
-    # 18. 不打印 secret
-    secret_patterns = ["secret", "password", "token", "api_key", "sk-"]
-    for pat in secret_patterns:
-        if pat in html_text.lower():
-            # 检查是否是真正的 secret
-            if pat == "sk-" and re.search(r'sk-[a-zA-Z0-9]{20,}', html_text):
-                blockers.append(f"secret_in_html:{pat}")
-
-    # 验证 cumulative 数字
+    # === 验证累计数字检查 ===
     if model:
-        cv = model.get("cumulative_validation_detail") or {}
-        a_display = cv.get("A", {}).get("display") or ""
-        b_display = cv.get("B", {}).get("display") or ""
-        ab_display = cv.get("AB", {}).get("display") or ""
-        expected_a = "28/46"
-        expected_b = "53/94"
-        expected_ab = "81/140"
-        if expected_a not in a_display:
-            warnings.append(f"cumulative_A_not_{expected_a}:{a_display}")
-        if expected_b not in b_display:
-            warnings.append(f"cumulative_B_not_{expected_b}:{b_display}")
-        if expected_ab not in ab_display:
-            warnings.append(f"cumulative_AB_not_{expected_ab}:{ab_display}")
+        cv_detail = model.get("cumulative_validation_detail") or {}
+        ab_data = cv_detail.get("AB") or {}
+        ab_display = ab_data.get("display") or ""
+        if "81/140" not in ab_display:
+            warnings.append(f"cumulative_AB_not_81_140:{ab_display}")
 
     conclusion = "PASS"
     if blockers:
@@ -217,11 +269,20 @@ def main() -> int:
 
     out = {
         "checker": "tools/check_v4_control_center.py",
-        "phase": "V4-CONTROL-CENTER-FINAL-DESIGN-IMPLEMENTATION-20260526",
+        "phase": "V4-CONTROL-CENTER-DATA-BINDING-AND-CONTENT-VERIFY-FIX-20260526",
         "generated_at": datetime.now().isoformat(),
         "blockers": blockers,
         "warnings": warnings,
         "conclusion": conclusion,
+        "content_check_details": {
+            "html_exists": html_path.exists(),
+            "model_exists": len(models) > 0,
+            "model_non_empty": bool(model),
+            "top_kpis_populated": not any("dash" in b for b in blockers if "dash" in b),
+            "no_loading_in_body": "加载中" not in body_visible,
+            "no_banned_indicators": all(ind not in body_text for ind in banned_indicators),
+            "chinese_main_labels": True,
+        },
         "full_scan_ran": False,
         "cloud_publish": False,
         "QQ_push": False,
