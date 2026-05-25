@@ -57,8 +57,11 @@ def marker_paths(date: str) -> dict[str, Path]:
     }
 
 
-def load_allowlist() -> dict[str, Any]:
-    path = STATUS / "v3v4_dashboard_active_source_allowlist_20260525.json"
+def load_allowlist(date: str | None = None) -> dict[str, Any]:
+    if date is None:
+        from datetime import datetime, timezone, timedelta
+        date = datetime.now(timezone(timedelta(hours=8))).strftime("%Y%m%d")
+    path = STATUS / f"v3v4_dashboard_active_source_allowlist_{date}.json"
     return load(path) if path.exists() else {}
 
 
