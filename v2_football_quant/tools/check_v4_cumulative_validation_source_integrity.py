@@ -39,19 +39,25 @@ def main()->int:
     if summary.get('scan_date_used_for_validation') is True:
         blockers.append('scan_date_used_for_validation_true')
 
-    # yesterday top/footer consistency: no stale 6/10 or stale footer B2/4 when top differs
-    top_y_ab='5/9 · 55.6%' in html
+    # yesterday top/footer consistency:
+    # Accept both legal states:
+    # 1) pre-retry: AB 5/9 with pending visible
+    # 2) post-retry: AB 6/10 with completed state
+    top_y_ab_59='5/9 · 55.6%' in html
+    top_y_ab_610='6/10 · 60.0%' in html
     footer_stale='B 2/4·50.0% AB 5/9·55.6%（全部完成）' in html
-    if '6/10 · 60.0%' in html:
-        blockers.append('yesterday_top_stale_6_10_visible')
     if footer_stale:
         blockers.append('stale_footer_copy_visible')
-    if not top_y_ab:
-        warns.append('top_yesterday_ab_not_5_9_check_source')
+    if not (top_y_ab_59 or top_y_ab_610):
+        blockers.append('yesterday_ab_signature_missing')
 
-    # pending separated
-    if '待补验' not in html:
-        blockers.append('pending_counter_missing')
+    # pending / completed display must be explicit depending on stage
+    has_pending = '待补验' in html
+    has_completed = '已完成' in html
+    if top_y_ab_59 and not has_pending:
+        blockers.append('pending_counter_missing_for_5_9_state')
+    if top_y_ab_610 and not has_completed:
+        blockers.append('completed_counter_missing_for_6_10_state')
 
     # ensure official boundaries
     if summary.get('c_excluded_from_ab') is not True:
