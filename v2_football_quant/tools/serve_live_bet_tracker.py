@@ -8,10 +8,17 @@ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from urllib.parse import parse_qs, urlparse
 
-from live_bet_tracker_schema import build_default_record, validate_record
-from live_bet_settlement import settle
-import live_bet_store as store
-from team_cn_resolver import TeamCnResolver
+try:
+    from live_bet_tracker_schema import build_default_record, validate_record
+    from live_bet_settlement import settle
+    import live_bet_store as store
+    from team_cn_resolver import TeamCnResolver
+except ModuleNotFoundError:
+    # Support package-style import smoke tests: `import tools.serve_live_bet_tracker`.
+    from tools.live_bet_tracker_schema import build_default_record, validate_record
+    from tools.live_bet_settlement import settle
+    from tools import live_bet_store as store
+    from tools.team_cn_resolver import TeamCnResolver
 
 ROOT = Path(__file__).resolve().parents[1]
 DASH = ROOT / "data/runtime/dashboard"
