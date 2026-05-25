@@ -4,6 +4,7 @@
 |---|---|---|
 | `data/runtime/status/v3v4_validation_summary_20260523.json` | `STALE_SCAN_DATE_POLLUTED` | active summary was intentionally marked stale after scout date repair |
 | `data/runtime/status/v3v4_validation_summary_20260524.json` | `STALE_SCAN_DATE_POLLUTED` | active summary was intentionally marked stale after scout date repair |
+| `data/runtime/status/v3v4_validation_summary_20260524_backup.json` | `STALE_SCAN_DATE_POLLUTED` | active summary was intentionally marked stale after scout date repair |
 | `data/runtime/status/v4_validation_history_recoverability_audit_20260523.json` | `DO_NOT_USE` | not an active validation recovery source |
 | `data/runtime/status/v4_validation_history_source_inventory_20260523.json` | `DO_NOT_USE` | not an active validation recovery source |
 | `data/runtime/status/v4_validation_pre_repair_marked_stale_20260523.json` | `STALE_SCAN_DATE_POLLUTED` | explicit stale marker for pre-repair validation summary |

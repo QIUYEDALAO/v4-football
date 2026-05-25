@@ -34,8 +34,17 @@ SECRET_FILENAME_PATTERNS = [
 ]
 
 SECRET_CONTENT_PATTERNS = [
-    "API_KEY", "TOKEN", "SECRET", "PASSWORD", "COOKIE",
-    "PRIVATE KEY", "QQ", "BOT_TOKEN",
+    # Keep only high-confidence constant markers here.
+    "PRIVATE KEY",
+]
+
+SECRET_CONTENT_REGEX_PATTERNS = [
+    # Generic key-value style secrets with non-trivial values.
+    re.compile(r"(?i)\\b(api[_-]?key|token|secret|password|cookie|bot[_-]?token)\\b\\s*[:=]\\s*['\\\"]?[A-Za-z0-9_\\-]{8,}"),
+    # Provider-like key prefixes.
+    re.compile(r"(?i)\\b(sk-[A-Za-z0-9]{16,})\\b"),
+    # QQ credentials-like assignments.
+    re.compile(r"(?i)\\b(appsecret|qq[_-]?bot[_-]?token|qq[_-]?token)\\b\\s*[:=]\\s*['\\\"]?[A-Za-z0-9_\\-]{8,}"),
 ]
 
 # ---- Public allowlist for status files ----
@@ -147,19 +156,15 @@ def scan_file_content(filepath: Path) -> list:
         return ["(binary/unreadable)"]
 
     for pattern in SECRET_CONTENT_PATTERNS:
-        # Case-insensitive search
         if pattern.lower() in content.lower():
-            # For QQ: allow if it appears only in "V4_QQ_ENABLED=false" context
-            # and not as a real token/credential
-            if pattern == "QQ":
-                # Count QQ occurrences; if only in sanitized dashboard context, OK
-                qq_count = len(re.findall(r'\bQQ\b', content, re.IGNORECASE))
-                v4_qq_false = "V4_QQ_ENABLED=false" in content or "V4 QQ 未启用" in content or "QQ未启用" in content
-                if qq_count <= 3 and v4_qq_false:
-                    continue  # Sanitized dashboard reference, not a token
             hits.append(pattern)
 
-    return hits
+    for regex in SECRET_CONTENT_REGEX_PATTERNS:
+        if regex.search(content):
+            hits.append(f"REGEX:{regex.pattern}")
+
+    # Stable order for deterministic manifests and easier diff.
+    return sorted(set(hits))
 
 
 def get_source_window() -> str:

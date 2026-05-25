@@ -10,8 +10,8 @@ V3V4-TEAM-CN-BAD-FIX-ROLLBACK-AND-DATA-RESTORE-20260525
 - Step 4 display-only 中文修复: PASS
 - Step 5 本地/内网 HTTP 复测: PASS
 - Step 6 防回归 checker: PASS
-- Step 7 Git 同步: PENDING
-- Step 8 local-only closeout: IN_PROGRESS
+- Step 7 Git 同步: PASS
+- Step 8 local-only closeout: PASS
 
 ## 核心修复结果
 - 已恢复 dashboard 为正确数据口径：
@@ -51,7 +51,7 @@ V3V4-TEAM-CN-BAD-FIX-ROLLBACK-AND-DATA-RESTORE-20260525
 14. 是否 cloud publish？
 - 否。
 15. commit sha 是什么？
-- PENDING（Step 7 后回填）。
+- 23d249507aa97b376f5578aa6ae56762747168eb
 
 ## 本地 HTTP 结果
 - 127 intel: 200
@@ -77,3 +77,7 @@ V3V4-TEAM-CN-BAD-FIX-ROLLBACK-AND-DATA-RESTORE-20260525
 - last_7d_visible=false
 - secrets_printed=false
 - secrets_synced=false
+
+
+## 最终结论
+V3V4_TEAM_CN_BAD_FIX_ROLLBACK_DATA_RESTORE_WARN_ONLY
