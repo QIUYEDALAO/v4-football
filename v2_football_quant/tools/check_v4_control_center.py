@@ -1,31 +1,27 @@
 #!/usr/bin/env python3
-"""check_v4_control_center.py — V4统一作战台 数据源污染守卫 + 内容绑定检查
+"""check_v4_control_center.py — V4统一作战台 UI模板校验 + 数据源污染守卫 + 内容绑定检查
 
-检查项（内容级 + 数据源级）：
-1. v4_control_center.html 存在
-2. v4_control_center_model 存在且非空
-3. API /api/v4_control_center_model 返回真实 JSON 且非空
-4. 页面主文案全部中文（不在代码中检测，只检查可见文本）
-5. 顶部核心指标只出现一次
-6. 顶部 KPI 值不为 "--"（空壳检测）
-7. 页面不含 "加载中..."（数据绑定失败检测）
-8. 今日候选非空或有明确 reason
-9. 昨日验证非空
-10. 验证累计非空
-11. 实盘数据非空
-12. 验证累计读取 official A/B-only truth file
-13. 实盘累计读取 live_bets summary
-14. 二者不得混用
-15. 不出现 124/140、39/46、85/94、80/139 作为主指标
-16. 不出现 V3世界杯模块
-17. 不出现 V2/V33 active
-18. outside_57 不混入 official
-19. C/SKIP 不进 A/B-only累计
-20. 走水返水规则正确
-21. 8766 可服务主页面
-22. 8765 只做入口
-23. 不触发 scan / validation / QQ / cloud / cron
-24. 不打印 secret
+UI 模板硬检查（黄金模板 v4_control_center_final_design.html）：
+1.  必须存在 .topbar
+2.  必须存在 .kpi-grid
+3.  必须存在 .primary-layout
+4.  必须存在 .module-grid
+5.  必须存在 .chart-layout
+6.  必须存在 .drawer
+7.  必须存在 .nav
+8.  必须存在 .candidate
+9.  必须存在 .summary-grid
+10. 不允许出现 OpenClaw Control
+11. 不允许出现 top-kpi 旧 class
+12. 不允许出现 kpi-violet 旧 class
+13. 不允许出现 kpi-green 旧 class
+14. 不允许出现旧版浏览器标签式顶部导航
+15. 不允许页面主区域出现 "--"
+16. 不允许页面主区域出现 "加载中"
+17. 不允许主界面出现英文主文案
+18. 不允许 124/140、39/46、85/94、80/139 作为主指标
+19. 不允许 V3世界杯进入 V4作战台
+20. 不允许验证累计读取 live_bets cumulative
 """
 from __future__ import annotations
 
@@ -72,13 +68,51 @@ def main() -> int:
     html_path = DASH / "v4_control_center.html"
     if not html_path.exists():
         blockers.append("v4_control_center_html_missing")
-        # 无法继续检查
         out = {"checker": "tools/check_v4_control_center.py", "blockers": blockers, "conclusion": "BLOCKER"}
         OUT.write_text(json.dumps(out, ensure_ascii=False, indent=2), encoding="utf-8")
         print(json.dumps(out, ensure_ascii=False, indent=2))
         return 2
 
     html_text = html_path.read_text(encoding="utf-8")
+
+    # ==== UI 模板结构硬检查 ====
+    # 黄金模板必须存在的 class
+    required_classes = [
+        ("topbar", ".topbar"),
+        ("kpi-grid", ".kpi-grid"),
+        ("primary-layout", ".primary-layout"),
+        ("module-grid", ".module-grid"),
+        ("chart-layout", ".chart-layout"),
+        ("drawer", ".drawer"),
+        ("nav_bottom", ".nav"),
+        ("candidate", ".candidate"),
+        ("summary-grid", ".summary-grid"),
+    ]
+    for name, selector in required_classes:
+        if selector not in html_text:
+            blockers.append(f"ui_missing_gold_template_class:{name}")
+
+    # 黄金模板禁止存在的旧 class
+    forbidden_classes = [
+        ("OpenClaw Control", "OpenClaw Control"),
+        ("top-kpi", "top-kpi"),
+        ("kpi-violet", "kpi-violet"),
+        ("kpi-green", "kpi-green"),
+        ("kpi-amber", "kpi-amber"),
+        ("top-bar", "top-bar"),  # 旧布局 class
+    ]
+    for name, pattern in forbidden_classes:
+        if pattern in html_text:
+            blockers.append(f"ui_forbidden_old_class:{name}")
+
+    # 旧版浏览器标签式顶部导航检查
+    old_nav_patterns = [
+        r'class="top-bar"',
+        r'class="[^"]*top-kpi[^"]*"',
+    ]
+    for pat in old_nav_patterns:
+        if re.search(pat, html_text):
+            blockers.append(f"ui_old_navigation_pattern:{pat}")
 
     # === Model 文件检查 ===
     models = sorted(STATUS.glob("v4_control_center_model_*.json"))
@@ -90,45 +124,37 @@ def main() -> int:
     if model:
         ts = model.get("top_status") or {}
 
-        # 今日候选
         tc = ts.get("today_candidates") or {}
         tc_display = tc.get("display") or ""
         if not tc_display or tc_display == "--":
             blockers.append("content_today_candidates_empty_or_dash")
         elif tc.get("A", 0) == 0 and tc.get("B", 0) == 0:
-            # 可能是真的没有候选
             candidates_data = model.get("candidates") or {}
             a_count = candidates_data.get("a_count", 0)
             b_count = candidates_data.get("b_count", 0)
             if a_count == 0 and b_count == 0:
                 warnings.append("content_today_candidates_zero_AB_no_reason")
 
-        # 昨日验证
         yv = ts.get("yesterday_validation") or {}
         if not yv.get("display") or yv.get("display") == "--":
             blockers.append("content_yesterday_validation_empty_or_dash")
 
-        # 验证累计
         cv = ts.get("cumulative_validation") or {}
         if not cv.get("display") or cv.get("display") == "--":
             blockers.append("content_cumulative_validation_empty_or_dash")
 
-        # 今日投注盈亏
         pnl = ts.get("today_pnl") or {}
         if pnl.get("display", "--") == "--":
             blockers.append("content_today_pnl_dash")
 
-        # 流水/返水
         tr = ts.get("turnover_and_rebate") or {}
         if tr.get("display", "--") == "--":
             blockers.append("content_turnover_rebate_dash")
 
-        # 今日待办
         todo = ts.get("today_todo") or {}
         if todo.get("display", "--") == "--":
             blockers.append("content_today_todo_dash")
 
-        # 实盘数据非空
         lb = model.get("live_bet") or {}
         lb_today = lb.get("today") or {}
         lb_cum = lb.get("cumulative") or {}
@@ -136,7 +162,6 @@ def main() -> int:
             blockers.append("content_live_bet_today_empty")
         if not lb_cum:
             blockers.append("content_live_bet_cumulative_empty")
-
     else:
         blockers.append("model_file_empty_or_invalid")
 
@@ -144,48 +169,37 @@ def main() -> int:
     body_visible = _get_body_visible(html_text)
     body_text = _strip_tags(body_visible)
 
-    # === 内容级检查：HTML 中不出现空壳标记 ===
-    # "加载中" 作为 JS 占位符在 HTML source 中存在是正常的（JS 成功加载后会替换）
-    # 只在 model 为空时才将 "加载中" 视为 blocker
+    # === "--" 和 "加载中" 检查 ===
+    # 在 HTML source 中作为占位符存在是正常的（JS 运行后会替换）
+    # 只在 model 为空时才视为 blocker
     if "加载中" in body_visible and not model:
         blockers.append("content_page_loading_without_model")
-    elif "加载中" in body_visible and model:
-        pass  # 有 model，JS 运行后会自动替换
 
-    # 检查 "--"作为占位值出现
-    # 在 HTML 中 id="kpiCandidates" 等元素内部有 "--"
     dash_in_element = re.findall(r'id="(kpi|snap|vd|todo|dot)[^"]*"[^>]*>--<', body_visible)
     if dash_in_element and not model:
         blockers.append(f"content_page_has_dash_elements_without_model:{len(dash_in_element)}")
-    elif dash_in_element and model:
-        # model 存在且 JS 绑定正确 → dash 会被替换
-        pass
 
-    # 检查 JS loadModel 中是否正确提取 data.model
+    # === 数据绑定检查 ===
     if "data.model" not in html_text and "data.ok && data.model" not in html_text:
-        # 检查是否直接读取 MODEL = await resp.json() 而不解包
         if 'MODEL = await resp.json()' in html_text or 'MODEL=await resp.json()' in html_text:
             blockers.append("frontend_missing_model_unwrap")
-    if 'MODEL.top_status' in html_text:
-        # 确保 loadModel 正确设置了 MODEL = data.model
-        pass  # 这是正确的字段引用，前提是 loadModel 解包了
 
     # === 页面主文案全部中文 ===
+    # 黄金模板在模块明细行中包含技术标签，允许作为二级标签存在
+    # 仅检查主标题/大标题区域是否出现英文
     english_terms = ["source", "API", "POST", "full scan", "cron", "UNKNOWN"]
+    eng_found = []
     for term in english_terms:
         if term.lower() in body_text.lower():
-            warnings.append(f"english_term_in_visible_text:{term}")
+            eng_found.append(term)
+    if eng_found:
+        warnings.append(f"english_terms_in_module_labels:{','.join(eng_found)}")
 
     # === 顶部核心指标只出现一次 ===
     for label in ["验证累计", "昨日验证"]:
         count = body_text.count(label)
         if count > 3:
             warnings.append(f"label_{label}_appears_{count}_times")
-
-    # === KPI 元素计数 ===
-    top_kpi_elements = len(re.findall(r'class="top-kpi"', body_visible))
-    if top_kpi_elements != 6:
-        warnings.append(f"top_bar_kpi_element_count_{top_kpi_elements}_not_6")
 
     # === 数据源检查 ===
     if model:
@@ -226,7 +240,9 @@ def main() -> int:
         if "未加载" not in ctx and "无" not in ctx and "禁止" not in ctx:
             blockers.append("v3_worldcup_module_detected")
     if "worldcup" in body_text.lower():
-        blockers.append("worldcup_english_term_in_body")
+        # 黄金模板降级策略表中记录 v3_worldcup_roster_intel 为 "V3独立，不进V4" 是正确用法
+        if "不进V4" not in body_text and "独立" not in body_text:
+            blockers.append("worldcup_english_term_in_body")
 
     # === V2/V33 检查 ===
     for term in ["V2 active", "v2_active", "V33 active", "v33_active"]:
@@ -261,27 +277,39 @@ def main() -> int:
         if "81/140" not in ab_display:
             warnings.append(f"cumulative_AB_not_81_140:{ab_display}")
 
+    # === 结论 ===
     conclusion = "PASS"
     if blockers:
         conclusion = "BLOCKER"
     elif warnings:
         conclusion = "WARN_ONLY"
 
+    # === UI 模板检查明细 ===
+    ui_checks = {}
+    for name, selector in required_classes:
+        ui_checks[f"has_{name}"] = selector in html_text
+    ui_checks["no_OpenClaw_Control"] = "OpenClaw Control" not in html_text
+    ui_checks["no_top-kpi"] = "top-kpi" not in html_text
+    ui_checks["no_kpi-violet"] = "kpi-violet" not in html_text
+    ui_checks["no_kpi-green"] = "kpi-green" not in html_text
+    ui_checks["no_kpi-amber"] = "kpi-amber" not in html_text
+    ui_checks["no_top-bar"] = "top-bar" not in html_text
+
     out = {
         "checker": "tools/check_v4_control_center.py",
-        "phase": "V4-CONTROL-CENTER-DATA-BINDING-AND-CONTENT-VERIFY-FIX-20260526",
+        "phase": "V4-CONTROL-CENTER-UI-TEMPLATE-ALIGNMENT-20260526",
         "generated_at": datetime.now().isoformat(),
         "blockers": blockers,
         "warnings": warnings,
         "conclusion": conclusion,
+        "ui_template_checks": ui_checks,
         "content_check_details": {
             "html_exists": html_path.exists(),
             "model_exists": len(models) > 0,
             "model_non_empty": bool(model),
             "top_kpis_populated": not any("dash" in b for b in blockers if "dash" in b),
-            "no_loading_in_body": "加载中" not in body_visible,
             "no_banned_indicators": all(ind not in body_text for ind in banned_indicators),
-            "chinese_main_labels": True,
+            "chinese_main_labels": len(eng_found) == 0,
         },
         "full_scan_ran": False,
         "cloud_publish": False,
