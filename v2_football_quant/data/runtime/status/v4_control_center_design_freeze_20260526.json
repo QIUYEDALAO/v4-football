@@ -1,0 +1,94 @@
+{
+  "schema_version": "v4_control_center_design_freeze.v1",
+  "phase": "V4-CONTROL-CENTER-FINAL-DESIGN-IMPLEMENTATION-20260526",
+  "generated_at": "2026-05-26T01:30:00+08:00",
+  "page_name": "V4统一作战台",
+  "main_url": "http://192.168.1.2:8766/v4_control_center.html",
+  "page_structure": {
+    "top_global_status": {
+      "appears_once": true,
+      "items": [
+        "今日候选",
+        "昨日验证",
+        "验证累计",
+        "今日投注盈亏",
+        "有效流水 / 返水",
+        "今日待办"
+      ]
+    },
+    "main_area": {
+      "today_candidate_action_zone": {
+        "description": "今日候选行动区 — 展示A/B/SKIP候选列表，可直接记录投注",
+        "auto_fill": ["球队", "联赛", "评级", "fixture_id"],
+        "boss_input": ["盘口线", "水位", "金额", "入场分钟", "备注"]
+      },
+      "today_todo_and_live_snapshot": {
+        "description": "今日待办与实盘快照",
+        "todo_items": ["待投注", "待结算", "待补验", "系统异常"],
+        "live_snapshot": ["投注本金", "投注盈亏", "有效流水", "返水", "净盈亏"]
+      }
+    },
+    "drill_down_modules": {
+      "validation_detail": "验证明细",
+      "betting_operations": "投注操作",
+      "review_and_league": "复盘与联赛",
+      "system_control": "系统控制",
+      "trend_visualization": "趋势可视化",
+      "data_source_lock": "数据源锁"
+    }
+  },
+  "design_rules": {
+    "no_v3_worldcup": true,
+    "no_english_main_labels": true,
+    "banned_english_terms": ["source", "API", "POST", "full scan", "cron", "UNKNOWN"],
+    "top_status_once_only": true,
+    "no_duplicate_yesterday_validation_card": true,
+    "no_duplicate_cumulative_validation_card": true,
+    "validation_cumulative_source": "official A/B-only truth file",
+    "live_bet_cumulative_source": "live_bets cumulative_summary.json",
+    "two_sources_must_not_mix": true,
+    "banned_main_indicators": ["124/140", "39/46", "85/94", "80/139"],
+    "no_c_skip_in_ab_cumulative": true,
+    "no_outside_57_in_official": true,
+    "dangerous_operations_locked": true,
+    "all_chinese_main_ui": true
+  },
+  "server_architecture": {
+    "8766": "可操作主入口 — V4统一作战台 + 实盘API",
+    "8765": "只读入口 — 旧页面降级为详情页 + 跳转入口"
+  },
+  "old_pages": {
+    "intel_ops_console.html": "降级为详情页，不删除",
+    "live_bet_tracker.html": "降级为详情页，不删除",
+    "intel_desk.html": "降级为详情页，不删除",
+    "v4_ab_historical_ledger.html": "保留为详情页",
+    "v4_league_hit_rate.html": "保留为详情页"
+  },
+  "forbidden_actions": [
+    "full_scan_ran",
+    "capture_ran",
+    "validation_recomputed",
+    "strategy_changed",
+    "candidate_changed",
+    "candidate_rating_changed",
+    "result_validation_history_changed",
+    "script_validation_history_changed",
+    "live_bet_raw_records_rewritten",
+    "validation_cumulative_mixed_with_live_bet",
+    "old_cumulative_source_reused",
+    "v3_module_added",
+    "v2_restored",
+    "v33_active",
+    "QQ_recommendation_pushed",
+    "cloud_publish",
+    "cron_schedule_modified",
+    "secrets_printed",
+    "secrets_committed"
+  ],
+  "auto_advance": {
+    "condition": "PASS",
+    "next_step": "Step 2 — 建立统一数据模型"
+  },
+  "status": "PASS",
+  "reason": "设计结构冻结，未改业务数据，结构与BOSS确认版一致"
+}

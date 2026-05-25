@@ -131,6 +131,18 @@ class H(BaseHTTPRequestHandler):
         u = urlparse(self.path)
         q = parse_qs(u.query)
 
+        if u.path == "/v4_control_center.html":
+            p = DASH / "v4_control_center.html"
+            if not p.exists():
+                self.send_response(404); self.end_headers(); return
+            data = p.read_bytes()
+            self.send_response(200)
+            self.send_header("Content-Type", "text/html; charset=utf-8")
+            self.send_header("Content-Length", str(len(data)))
+            self.end_headers()
+            self.wfile.write(data)
+            return
+
         if u.path == "/live_bet_tracker.html":
             p = DASH / "live_bet_tracker.html"
             if not p.exists():
@@ -184,7 +196,36 @@ class H(BaseHTTPRequestHandler):
                 "rows": rows,
             })
 
-        return _json(self, 404, {"ok": False, "error": "not_found"})
+        if u.path == "/api/v4_control_center_model":
+            candidates = sorted(STATUS.glob("v4_control_center_model_*.json"))
+            if not candidates:
+                return _json(self, 404, {"ok": False, "error": "model_not_found"})
+            model = _load_json(candidates[-1])
+            return _json(self, 200, {"ok": True, "model": model})
+
+        if u.path == "/v4_control_center_model.json":
+            candidates = sorted(STATUS.glob("v4_control_center_model_*.json"))
+            if not candidates:
+                self.send_response(404); self.end_headers(); return
+            data = candidates[-1].read_bytes()
+            self.send_response(200)
+            self.send_header("Content-Type", "application/json; charset=utf-8")
+            self.send_header("Content-Length", str(len(data)))
+            self.end_headers()
+            self.wfile.write(data)
+            return
+
+        if u.path == "/v4_ab_historical_ledger.html":
+            p = DASH / "v4_ab_historical_ledger.html"
+            if not p.exists():
+                self.send_response(404); self.end_headers(); return
+            data = p.read_bytes()
+            self.send_response(200)
+            self.send_header("Content-Type", "text/html; charset=utf-8")
+            self.send_header("Content-Length", str(len(data)))
+            self.end_headers()
+            self.wfile.write(data)
+            return
 
     def do_POST(self):
         u = urlparse(self.path)
