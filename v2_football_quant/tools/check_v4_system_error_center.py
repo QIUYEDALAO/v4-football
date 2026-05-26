@@ -24,7 +24,7 @@ def load_latest_summary() -> tuple[Path|None, dict]:
 def main() -> int:
     now = datetime.now().isoformat()
     out = {
-        'phase': 'V4-SYSTEM-ERROR-CENTER-FALSE-POSITIVE-FIX-20260526',
+        'phase': 'V4-CONTROL-CENTER-COPY-CLEANUP-AND-ERROR-ACTIVE-LOGIC-FIX-20260527',
         'generated_at': now,
         'checker': 'tools/check_v4_system_error_center.py',
         'checks': [],
@@ -46,12 +46,29 @@ def main() -> int:
     check('collector_exists', collector.exists(), str(collector))
     check('collector_has_json_parse_contract', '_status_from_json_obj' in src, 'must parse JSON structurally')
     check('collector_has_self_feedback_excludes', 'SELF_FEEDBACK_EXCLUDES' in src, 'must exclude own summary/checker outputs')
+    check('collector_has_active_whitelist', '_is_active_eligible_status_file' in src, 'must enforce active source whitelist')
 
     summary_path, summary = load_latest_summary()
     check('summary_exists', summary_path is not None, str(summary_path) if summary_path else 'missing')
 
     active = summary.get('active_items', []) if isinstance(summary, dict) else []
     recent = summary.get('recent_items', []) if isinstance(summary, dict) else []
+    c_active_err = int(summary.get('active_error_count') or 0)
+    c_active_blk = int(summary.get('active_blocker_count') or 0)
+
+    # 0) header copy cleanup checks
+    if DASH.exists():
+        html = DASH.read_text(encoding='utf-8', errors='ignore')
+        check('copy_remove_final_design', '最终设计稿' not in html, 'found 最终设计稿')
+        check('copy_remove_main_route', '主入口：8766/v4_control_center.html' not in html, 'found main route copy')
+        check('copy_remove_8765_route', '8765：只读跳转' not in html, 'found 8765 route copy')
+        # green blocker conflict guard (string template level)
+        if c_active_blk == 0:
+            check('no_blocker_text_when_zero', '系统阻塞' not in html, 'html still contains blocker text template', blocker=False)
+        if c_active_err == 0:
+            check('no_error_count_text_when_zero', '系统异常(' not in html, 'html still contains error count template', blocker=False)
+    else:
+        check('dashboard_html_exists', False, str(DASH))
 
     # 1) PASS/all_pass/blockers=[] not in ACTIVE
     bad_active = []
@@ -77,14 +94,18 @@ def main() -> int:
         lname = sf.lower()
         if any(x in lname for x in ('freeze', 'audit', 'verify', 'git_manifest', '_manifest_', 'report')):
             bad_active.append((sf, 'process file pattern in ACTIVE'))
+        if 'checker' in lname and ('pass' in s.lower() or 'all_pass' in s.lower()):
+            bad_active.append((sf, 'checker pass in ACTIVE'))
+        if 'all_pass' in s.lower() and 'true' in s.lower():
+            bad_active.append((sf, 'all_pass=true in ACTIVE'))
+        if '已恢复' in str(it):
+            bad_active.append((sf, '已恢复 text in ACTIVE item'))
 
     check('active_has_no_false_positive_pass_items', len(bad_active) == 0, str(bad_active[:8]))
 
     # 2) ACTIVE counters must match unresolved blocker/fail
     unresolved = [i for i in active if not bool(i.get('resolved')) and str(i.get('severity','')).upper() in {'BLOCKER','FAIL'}]
     unresolved_blockers = [i for i in unresolved if str(i.get('severity','')).upper() == 'BLOCKER']
-    c_active_err = int(summary.get('active_error_count') or 0)
-    c_active_blk = int(summary.get('active_blocker_count') or 0)
     check('active_error_count_matches', c_active_err == len(unresolved), f'count={c_active_err}, expected={len(unresolved)}')
     check('active_blocker_count_matches', c_active_blk == len(unresolved_blockers), f'count={c_active_blk}, expected={len(unresolved_blockers)}')
     check('active_error_count_matches_active_items_len', c_active_err == len(active), f'count={c_active_err}, active_len={len(active)}')
@@ -98,17 +119,21 @@ def main() -> int:
         html = DASH.read_text(encoding='utf-8', errors='ignore')
         check('frontend_no_raw_log_token', 'raw_log' not in html.lower(), 'raw log token exists')
         check('frontend_no_kill_retry_rerun_buttons', all(k not in html.lower() for k in ['kill', 'rerun', 'retry']), 'dangerous action words found', blocker=False)
-        if c_active_blk == 0:
-            check('frontend_not_show_blocker_when_zero', '系统阻塞(' not in html, 'html contains blocker label template', blocker=False)
-    else:
-        check('dashboard_html_exists', False, str(DASH))
+        check('frontend_active_title_updated', '当前未恢复' in html, 'ACTIVE title not updated')
+        check('frontend_recent_title_updated', '最近已恢复 / 观察项' in html, 'RECENT title not updated')
+
+    # 5) model-facing consistency
+    if c_active_blk == 0:
+        check('active_blocker_zero_consistency', summary.get('system_error_status') != 'BLOCKER', f"status={summary.get('system_error_status')}", blocker=False)
+    if c_active_err == 0:
+        check('active_error_zero_consistency', summary.get('system_error_status') in {'PASS','WARN_ONLY'}, f"status={summary.get('system_error_status')}", blocker=False)
 
     if out['blockers']:
         out['conclusion'] = 'BLOCKER'
     elif out['warnings']:
         out['conclusion'] = 'WARN_ONLY'
 
-    res = STATUS / 'v4_system_error_false_positive_checker_20260526.json'
+    res = STATUS / 'v4_control_center_copy_error_checker_20260527.json'
     res.write_text(json.dumps(out, ensure_ascii=False, indent=2), encoding='utf-8')
     print(json.dumps({'result': str(res), 'conclusion': out['conclusion'], 'blockers': len(out['blockers']), 'warnings': len(out['warnings'])}, ensure_ascii=False))
     return 0 if out['conclusion'] != 'BLOCKER' else 1

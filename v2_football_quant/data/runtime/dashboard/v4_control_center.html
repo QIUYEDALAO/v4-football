@@ -271,35 +271,33 @@ th{color:var(--muted);font-weight:650}
       <div class="logo">V4</div>
       <div>
         <div class="title">V4统一作战台</div>
-        <div class="subtitle">最终设计稿 · 8766主入口可操作 · 8765只读入口</div>
+        <div class="subtitle">候选 · 实盘 · 验证 · 风控</div>
       </div>
     </div>
     <div class="pills">
-      <span class="pill"><span class="dot"></span><span id="sysState">系统正常</span></span>
-      <span class="pill">主入口：8766/v4_control_center.html</span>
-      <span class="pill">8765：只读跳转</span>
+      <span class="pill"><span class="dot" id="sysDot"></span><span id="sysState">系统正常</span></span>
       <span class="pill">QQ完成通知 已开启</span>
     </div>
   </header>
 
   <section class="grid kpi-grid" aria-label="全局状态，整页只出现一次">
     <div class="card kpi">
-      <div class="label">今日候选</div><div class="value blue" id="kpiCandidates">A0 B0</div><div class="hint" id="kpiCandidatesHint">SKIP0 · 正式候选视图</div>
+      <div class="label">今日候选</div><div class="value blue" id="kpiCandidates">A0 B0</div><div class="hint" id="kpiCandidatesHint"></div>
     </div>
     <div class="card kpi">
-      <div class="label">昨日验证</div><div class="value green" id="kpiYesterday">N/A</div><div class="hint" id="kpiYesterdayHint">A N/A · B N/A · 待补验0</div>
+      <div class="label">昨日验证</div><div class="value green" id="kpiYesterday">N/A</div><div class="hint" id="kpiYesterdayHint"></div>
     </div>
     <div class="card kpi">
-      <div class="label">验证累计</div><div class="value green" id="kpiCumulative">N/A</div><div class="hint" id="kpiCumulativeHint">A/B 正式口径</div>
+      <div class="label">验证累计</div><div class="value green" id="kpiCumulative">N/A</div><div class="hint" id="kpiCumulativeHint"></div>
     </div>
     <div class="card kpi">
-      <div class="label">今日投注盈亏</div><div class="value" id="kpiPnl">0.00</div><div class="hint">风险按投注盈亏判断</div>
+      <div class="label">今日投注盈亏</div><div class="value" id="kpiPnl">0.00</div><div class="hint"></div>
     </div>
     <div class="card kpi">
-      <div class="label">有效流水 / 返水</div><div class="value purple" id="kpiTurnoverRebate">0 / 0</div><div class="hint">走水=0流水=0返水</div>
+      <div class="label">有效流水 / 返水</div><div class="value purple" id="kpiTurnoverRebate">0 / 0</div><div class="hint"></div>
     </div>
     <div class="card kpi">
-      <div class="label">今日待办</div><div class="value yellow" id="kpiTodo">0项</div><div class="hint" id="kpiTodoHint">待投注0 · 待结算0 · 待补验0</div>
+      <div class="label">今日待办</div><div class="value yellow" id="kpiTodo">0项</div><div class="hint" id="kpiTodoHint"></div>
     </div>
   </section>
 
@@ -327,11 +325,11 @@ th{color:var(--muted);font-weight:650}
           <button class="btn warn" onclick="toggleOpenBetList()">查看</button>
         </div>
         <div class="todo">
-          <div><div class="todo-title">待投注候选：<span id="todoBet">0</span>场</div><div class="meta">从候选卡片一键记录，不手填球队名</div></div>
+          <div><div class="todo-title">待投注候选：<span id="todoBet">0</span>场</div><div class="meta"></div></div>
           <span class="badge a" id="todoBetBadge">A0</span>
         </div>
         <div class="todo">
-          <div><div class="todo-title">待补验：<span id="todoRetry">0</span>场</div><div class="meta">验证重试队列</div></div>
+          <div><div class="todo-title">待补验：<span id="todoRetry">0</span>场</div><div class="meta"></div></div>
           <span class="badge" id="todoError">0</span>
         </div>
       </div>
@@ -540,19 +538,19 @@ function renderTop(){
   const b=Number(first(top.today_b_count,(top.today_candidates||{}).B,c.b_count,0));
   const sk=Number(first(top.today_skip_count,(top.today_candidates||{}).SKIP,c.skip_count,0));
   $('kpiCandidates').textContent=safe(first(top.today_candidates_text,(top.today_candidates||{}).display,`A${a} B${b}`),`A${a} B${b}`);
-  $('kpiCandidatesHint').textContent=`SKIP${sk} · 正式候选视图 · 不混57外观察`;
+  $('kpiCandidatesHint').textContent='';
 
   const yv=top.yesterday_validation||{};
   const yA=safe(first(top.yesterday_a_text,yv.A),'N/A');
   const yB=safe(first(top.yesterday_b_text,yv.B),'N/A');
   const yAB=safe(first(top.yesterday_ab_text,yv.AB,top.yesterday_validation_text,yv.display),'N/A');
-  $('kpiYesterday').textContent=yAB; $('kpiYesterdayHint').textContent=`A${yA} · B${yB}`;
+  $('kpiYesterday').textContent=yAB; $('kpiYesterdayHint').textContent='';
 
   const cv=top.cumulative_validation||{};
   const cA=safe(first(top.cumulative_a_text,cv.A),'N/A');
   const cB=safe(first(top.cumulative_b_text,cv.B),'N/A');
   const cAB=safe(first(top.cumulative_ab_text,cv.AB,top.cumulative_validation_text,cv.display),'N/A');
-  $('kpiCumulative').textContent=cAB; $('kpiCumulativeHint').textContent=`A${cA} · B${cB} · 仅A/B正式口径`;
+  $('kpiCumulative').textContent=cAB; $('kpiCumulativeHint').textContent='';
 
   const live=MODEL.live_bet_summary||{};
   const kGross='today_'+'gross'+'_pnl';
@@ -566,7 +564,7 @@ function renderTop(){
   const tb=Number(first(todo.to_bet,0));
   const ts=Number(first(todo.to_settle,0));
   const tr=Number(first(todo.to_retry,0));
-  $('kpiTodo').textContent=`${tb+ts+tr}项`; $('kpiTodoHint').textContent=`待投注${tb} · 待结算${ts} · 待补验${tr}`;
+  $('kpiTodo').textContent=`${tb+ts+tr}项`; $('kpiTodoHint').textContent='';
 }
 
 function matchName(x){return `${safe(first(x.home_cn,x.home,'主队'),'主队')} vs ${safe(first(x.away_cn,x.away,'客队'),'客队')}`;}
@@ -613,7 +611,7 @@ function renderCandidate(x,i){
   const lines=['O0.75','O1','O1.25','O1.5','O2'];
   const lineOpts=lines.map(l=>`<option${l===dl?' selected':''}>${l}</option>`).join('');
   const stateTag=x.settled?'已结算':(x.already_bet?'已投注':'未投注');
-  return `<article class="candidate"><div class="cand-top"><div><div class="match">${matchName(x)}</div><div class="meta">${league} · ${r} · ${time} · ${script}</div><div class="meta">${binText}</div></div><span class="badge ${r==='A'?'a':'b'}">${r}</span></div><div class="badges"><span class="badge">建议观察 O0.75 / O1</span><span class="badge warn">O1.25谨慎</span><span class="badge red">O1.5默认跳过</span><span class="badge">${stateTag}</span></div><form class="quick-form" onsubmit="event.preventDefault();addBet(${i})"><div class="field"><label>盘口线</label><select id="line-${i}">${lineOpts}</select></div><div class="field"><label>水位</label><input id="odds-${i}" value="${od}"/></div><div class="field"><label>金额</label><input id="stake-${i}" value="${st}"/></div><div class="field"><label>入场分钟</label><input id="minute-${i}" value="${mi}"/></div><button class="btn">保存投注</button><div class="field full"><label>备注</label><textarea id="notes-${i}">不自动下注，仅记录与结算。</textarea></div></form></article>`;
+  return `<article class="candidate"><div class="cand-top"><div><div class="match">${matchName(x)}</div><div class="meta">${league} · ${r} · ${time} · ${script}</div><div class="meta">${binText}</div></div><span class="badge ${r==='A'?'a':'b'}">${r}</span></div><div class="badges"><span class="badge">${stateTag}</span></div><form class="quick-form" onsubmit="event.preventDefault();addBet(${i})"><div class="field"><label>盘口线</label><select id="line-${i}">${lineOpts}</select></div><div class="field"><label>水位</label><input id="odds-${i}" value="${od}"/></div><div class="field"><label>金额</label><input id="stake-${i}" value="${st}"/></div><div class="field"><label>入场分钟</label><input id="minute-${i}" value="${mi}"/></div><button class="btn">保存投注</button><div class="field full"><label>备注</label><textarea id="notes-${i}"></textarea></div></form></article>`;
 }
 
 function renderSide(){
@@ -689,12 +687,20 @@ function renderSystem(){
   const se=MODEL.system_errors||{};
   const errCount=Number(se.active_error_count||0);
   const blockerCount=Number(se.active_blocker_count||0);
+  const recentCount=Number(se.recent_error_count_24h||0);
+  const dot=$('sysDot');
   if(blockerCount>0){
-    $('sysState').textContent='系统阻塞('+blockerCount+')';
+    $('sysState').textContent='系统阻塞 '+blockerCount;
+    if(dot) dot.style.background='var(--red)';
   }else if(errCount>0){
-    $('sysState').textContent='系统异常('+errCount+')';
+    $('sysState').textContent='系统异常 '+errCount;
+    if(dot) dot.style.background='var(--orange)';
+  }else if(recentCount>0){
+    $('sysState').textContent='系统正常 · 有历史异常';
+    if(dot) dot.style.background='var(--yellow)';
   }else{
-    $('sysState').textContent=ok?'系统正常':'系统告警';
+    $('sysState').textContent='系统正常';
+    if(dot) dot.style.background='var(--green)';
   }
   $('systemToolbarStatus').textContent=safe(first(ss.cron_status_text,ss.cron_status,'状态未知'),'状态未知');
 
@@ -788,18 +794,20 @@ function buildSystemPanel(){
 }
 function buildErrorsPanel(){
   const se=MODEL.system_errors||{};
-  const activeItems=arr(se.active_items);
-  const recentItems=arr(se.recent_items);
+  const activeItems=arr(se.active_items).filter(x=>!x?.resolved && String(x?.severity||'').toUpperCase().match(/FAIL|BLOCKER/) && !x?.process_artifact);
+  const recentItems=arr(se.recent_items).concat(arr(se.active_items).filter(x=>x?.resolved || x?.process_artifact));
   if(!activeItems.length&&!recentItems.length){
     return "<div class='note'>当前无异常。</div><div class='note' style='margin-top:6px'>扫描范围：最近"+safe(se.scan_window_hours,48)+"小时内 status json + 日志文件。只读，不执行任何修复操作。</div>";
   }
   let html='';
+  html+='<div class="error-section-title" style="color:var(--red)">当前未恢复</div>';
   if(activeItems.length){
-    html+='<div class="error-section-title" style="color:var(--red)">ACTIVE（未恢复）— '+activeItems.length+' 项</div>';
     html+=activeItems.map(x=>renderErrorItem(x)).join('');
+  }else{
+    html+='<div class="note">当前无 active 异常。</div>';
   }
   if(recentItems.length){
-    html+='<div class="error-section-title" style="color:var(--yellow)">RECENT（近期已恢复/低风险）— '+recentItems.length+' 项</div>';
+    html+='<div class="error-section-title" style="color:var(--yellow)">最近已恢复 / 观察项</div>';
     html+=recentItems.map(x=>renderErrorItem(x)).join('');
   }
   html+='<div class="lock" style="margin-top:12px">只读摘要。不提供 kill / retry / rerun 按钮。不显示原始日志。不显示完整文件路径。</div>';
