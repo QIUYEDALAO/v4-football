@@ -25,6 +25,7 @@ except ModuleNotFoundError:
 ROOT = Path(__file__).resolve().parents[1]
 DASH = ROOT / "data/runtime/dashboard"
 STATUS = ROOT / "data/runtime/status"
+LIVE = ROOT / "data/runtime/live_bets"
 TEAM_RESOLVER = TeamCnResolver()
 
 
@@ -133,6 +134,31 @@ def _json(handler: BaseHTTPRequestHandler, code: int, payload: dict):
     handler.send_header("Content-Length", str(len(b)))
     handler.end_headers()
     handler.wfile.write(b)
+
+
+def _append_no_bet_decision(date: str, rec: dict) -> dict:
+    LIVE.mkdir(parents=True, exist_ok=True)
+    path = LIVE / f"v4_no_bet_decisions_{date}.jsonl"
+    existing: list[dict] = []
+    if path.exists():
+        for ln in path.read_text(encoding="utf-8").splitlines():
+            ln = ln.strip()
+            if not ln:
+                continue
+            try:
+                existing.append(json.loads(ln))
+            except Exception:
+                continue
+    # de-dup by fixture_id + reason_code + date (replace previous record)
+    fid = str(rec.get("fixture_id") or "")
+    reason = str(rec.get("reason_code") or "")
+    filtered = [
+        x for x in existing
+        if not (str(x.get("fixture_id") or "") == fid and str(x.get("reason_code") or "") == reason and str(x.get("date") or "") == date)
+    ]
+    filtered.append(rec)
+    path.write_text("\n".join(json.dumps(x, ensure_ascii=False) for x in filtered) + "\n", encoding="utf-8")
+    return rec
 
 
 def _read_json(handler: BaseHTTPRequestHandler):
@@ -289,6 +315,43 @@ class H(BaseHTTPRequestHandler):
             if not r:
                 return _json(self, 404, {"ok": False, "error": "bet_not_found"})
             return _json(self, 200, {"ok": True, "record": r})
+
+        if u.path == "/api/v4_live_bet/no_bet":
+            date = str(payload.get("date") or datetime.utcnow().strftime("%Y%m%d"))
+            fixture_id = str(payload.get("fixture_id") or "").strip()
+            if not fixture_id:
+                return _json(self, 400, {"ok": False, "error": "fixture_id_required"})
+            reason_code = str(payload.get("reason_code") or "").strip().upper()
+            allowed = {"EARLY_GOAL", "ODDS_MOVED", "NOT_WATCHED", "MANUAL_SKIP", "MARKET_CLOSED", "OTHER"}
+            if reason_code not in allowed:
+                return _json(self, 400, {"ok": False, "error": "invalid_reason_code"})
+            now = datetime.utcnow().isoformat()
+            rec = {
+                "schema_version": "v4.no_bet_decision.v1",
+                "date": date,
+                "recorded_at": now,
+                "fixture_id": fixture_id,
+                "league": payload.get("league") or "",
+                "home": payload.get("home") or payload.get("home_cn") or "",
+                "away": payload.get("away") or payload.get("away_cn") or "",
+                "grade": payload.get("grade") or "",
+                "decision": "NO_BET",
+                "reason_code": reason_code,
+                "reason_text": payload.get("reason_text") or "",
+                "planned_line": payload.get("planned_line") or "",
+                "planned_odds": payload.get("planned_odds"),
+                "planned_stake": payload.get("planned_stake"),
+                "planned_entry_minute": payload.get("planned_entry_minute"),
+                "counts_as_bet": False,
+                "counts_as_stake": False,
+                "counts_as_pnl": False,
+                "counts_as_turnover": False,
+                "counts_as_validation": False,
+                "source": "v4_control_center",
+                "note": payload.get("note") or "",
+            }
+            saved = _append_no_bet_decision(date, rec)
+            return _json(self, 200, {"ok": True, "record": saved})
 
         return _json(self, 404, {"ok": False, "error": "not_found"})
 

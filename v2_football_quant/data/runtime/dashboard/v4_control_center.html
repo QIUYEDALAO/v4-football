@@ -610,8 +610,8 @@ function renderCandidate(x,i){
       : '进球时间分布：待补齐');
   const lines=['O0.75','O1','O1.25','O1.5','O2'];
   const lineOpts=lines.map(l=>`<option${l===dl?' selected':''}>${l}</option>`).join('');
-  const stateTag=x.settled?'已结算':(x.already_bet?'已投注':'未投注');
-  return `<article class="candidate"><div class="cand-top"><div><div class="match">${matchName(x)}</div><div class="meta">${league} · ${r} · ${time} · ${script}</div><div class="meta">${binText}</div></div><span class="badge ${r==='A'?'a':'b'}">${r}</span></div><div class="badges"><span class="badge">${stateTag}</span></div><form class="quick-form" onsubmit="event.preventDefault();addBet(${i})"><div class="field"><label>盘口线</label><select id="line-${i}">${lineOpts}</select></div><div class="field"><label>水位</label><input id="odds-${i}" value="${od}"/></div><div class="field"><label>金额</label><input id="stake-${i}" value="${st}"/></div><div class="field"><label>入场分钟</label><input id="minute-${i}" value="${mi}"/></div><button class="btn">保存投注</button><div class="field full"><label>备注</label><textarea id="notes-${i}"></textarea></div></form></article>`;
+  const stateTag=x.no_bet_recorded?(x.no_bet_reason_code==='EARLY_GOAL'?'未投：早进球':'未投：已记录'):(x.settled?'已结算':(x.already_bet?'已投注':'未投注'));
+  return `<article class="candidate"><div class="cand-top"><div><div class="match">${matchName(x)}</div><div class="meta">${league} · ${r} · ${time} · ${script}</div><div class="meta">${binText}</div></div><span class="badge ${r==='A'?'a':'b'}">${r}</span></div><div class="badges"><span class="badge">${stateTag}</span></div><form class="quick-form" onsubmit="event.preventDefault();addBet(${i})"><div class="field"><label>盘口线</label><select id="line-${i}">${lineOpts}</select></div><div class="field"><label>水位</label><input id="odds-${i}" value="${od}"/></div><div class="field"><label>金额</label><input id="stake-${i}" value="${st}"/></div><div class="field"><label>入场分钟</label><input id="minute-${i}" value="${mi}"/></div><button class="btn">保存投注</button><button type="button" class="btn ghost" onclick="markNoBetEarlyGoal(${i})">早进球未投</button><div class="field full"><label>备注</label><textarea id="notes-${i}"></textarea></div></form></article>`;
 }
 
 function renderSide(){
@@ -754,6 +754,33 @@ async function addBet(i){
     const d=await r.json();
     if(d.ok){toast('已添加记录'); loadModel(true);} else {toast('添加失败: '+(d.error||'未知错误'));}
   }catch(e){toast('网络错误: '+e.message);}
+}
+
+async function markNoBetEarlyGoal(i){
+  const list=DISPLAY_CANDIDATES.length?DISPLAY_CANDIDATES:getCandidates().filter(x=>['A','B'].includes(String(first(x.rating,x.grade,'')).toUpperCase()));
+  const x=list[i]; if(!x){toast('候选数据缺失');return;}
+  const payload={
+    date:MODEL.today_date||new Date().toISOString().slice(0,10).replace(/-/g,''),
+    fixture_id:first(x.fixture_id,''),
+    league:first(x.league,x.league_cn,''),
+    home:first(x.home_cn,x.home,'主队'),
+    away:first(x.away_cn,x.away,'客队'),
+    grade:first(x.rating,x.grade,'A'),
+    reason_code:'EARLY_GOAL',
+    reason_text:'入场前已进球，未按计划投注',
+    planned_line:document.getElementById(`line-${i}`)?.value||'O1',
+    planned_odds:parseFloat(document.getElementById(`odds-${i}`)?.value||'0.86'),
+    planned_stake:parseFloat(document.getElementById(`stake-${i}`)?.value||'428'),
+    planned_entry_minute:document.getElementById(`minute-${i}`)?.value||'13',
+    note:document.getElementById(`notes-${i}`)?.value||''
+  };
+  if(!payload.fixture_id){ toast('缺少 fixture_id，无法记录未投注原因'); return; }
+  try{
+    const r=await fetch('/api/v4_live_bet/no_bet',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
+    const d=await r.json();
+    if(d.ok){ toast('已记录：早进球未投'); await loadModel(true); }
+    else { toast('记录失败: '+(d.error||'未知错误')); }
+  }catch(e){ toast('网络错误: '+e.message); }
 }
 
 function buildValidationPanel(){

@@ -117,6 +117,24 @@ def _load_live_records_all() -> list[tuple[str, dict]]:
     return out
 
 
+def _load_no_bet_decisions_for_date(date_str: str) -> list[dict]:
+    p = LIVE_DIR / f"v4_no_bet_decisions_{date_str}.jsonl"
+    out: list[dict] = []
+    if not p.exists():
+        return out
+    for line in p.read_text(encoding="utf-8").splitlines():
+        line = line.strip()
+        if not line:
+            continue
+        try:
+            rec = json.loads(line)
+        except Exception:
+            continue
+        if str(rec.get("date") or "") == date_str and str(rec.get("decision") or "").upper() == "NO_BET":
+            out.append(rec)
+    return out
+
+
 def _get_default_bet_params(candidates_list: list, live_daily: dict) -> dict:
     """从实盘记录提取默认盘口/水位/金额/分钟，否则使用硬编码 fallback 并写 reason"""
     by_grade = live_daily.get("by_grade") or {}
@@ -622,6 +640,12 @@ def build_model() -> dict:
                     pass
     by_fixture_today: dict[str, dict[str, Any]] = {}
     by_fixture_cross_day: dict[str, dict[str, Any]] = {}
+    no_bet_decisions = _load_no_bet_decisions_for_date(today_str)
+    no_bet_by_fixture: dict[str, dict[str, Any]] = {}
+    for d in no_bet_decisions:
+        fid = str(d.get("fixture_id") or "")
+        if fid:
+            no_bet_by_fixture[fid] = d
     open_bet_items: list[dict[str, Any]] = []
     for rec in raw_records:
         if bool(rec.get("is_test")):
@@ -656,6 +680,7 @@ def build_model() -> dict:
             })
 
     pending_bet_candidates: list[dict[str, Any]] = []
+    no_bet_items: list[dict[str, Any]] = []
     already_bet_ab = 0
     for bucket in (candidates.get("a_candidates") or [], candidates.get("b_candidates") or []):
         for arr in bucket:
@@ -664,6 +689,7 @@ def build_model() -> dict:
             fid = str(arr.get("fixture_id") or "")
             rec = by_fixture_today.get(fid)
             cross_rec = by_fixture_cross_day.get(fid)
+            no_bet_rec = no_bet_by_fixture.get(fid)
             bet_status = str((rec or {}).get("bet_status", "")).upper()
             settlement_result = str((rec or {}).get("settlement_result", "PENDING")).upper()
             arr["already_bet"] = bool(rec and bet_status in {"BET", "PENDING", "SETTLED"} and settlement_result == "PENDING")
@@ -672,9 +698,24 @@ def build_model() -> dict:
             arr["settlement_result"] = settlement_result if rec else "UNMATCHED"
             arr["live_bet_record_date"] = (rec or {}).get("bet_date") or (rec or {}).get("date") or today_str if rec else ""
             arr["forensic_cross_day_match"] = bool(cross_rec and not rec)
-            arr["pending_action"] = "待结算" if (arr["already_bet"] and not arr["settled"]) else ("待投注" if not arr["already_bet"] else "已结算")
+            arr["no_bet_recorded"] = bool(no_bet_rec)
+            arr["no_bet_reason_code"] = (no_bet_rec or {}).get("reason_code") or ""
+            arr["no_bet_reason_text"] = (no_bet_rec or {}).get("reason_text") or ""
+            if arr["no_bet_recorded"]:
+                arr["pending_action"] = "未投：早进球" if arr["no_bet_reason_code"] == "EARLY_GOAL" else "未投：已记录"
+            else:
+                arr["pending_action"] = "待结算" if (arr["already_bet"] and not arr["settled"]) else ("待投注" if not arr["already_bet"] else "已结算")
             if arr["already_bet"]:
                 already_bet_ab += 1
+            elif arr["no_bet_recorded"]:
+                no_bet_items.append({
+                    "fixture_id": arr.get("fixture_id"),
+                    "home_cn": arr.get("home_cn") or "",
+                    "away_cn": arr.get("away_cn") or "",
+                    "grade": arr.get("grade") or "",
+                    "reason_code": arr.get("no_bet_reason_code") or "",
+                    "reason_text": arr.get("no_bet_reason_text") or "",
+                })
             else:
                 pending_bet_candidates.append({
                     "fixture_id": arr.get("fixture_id"),
@@ -825,7 +866,9 @@ def build_model() -> dict:
             "to_settle": open_bets_count,
             "to_retry": pending_validation,
             "errors": system_alerts,
+            "no_bet_count": len(no_bet_items),
             "pending_bet_candidates": pending_bet_candidates,
+            "no_bet_items": no_bet_items,
             "open_bet_items": open_bet_items,
             "retry_items": retry_items,
             "source": "fixture_id_canonical",
