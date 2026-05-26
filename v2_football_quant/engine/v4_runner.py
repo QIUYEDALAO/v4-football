@@ -531,6 +531,9 @@ def run_v4_scan(
             fx["awayId"],
             api_client,
             mode=scan_mode,
+            current_league_id=fx["league"],
+            current_league_name=fx["league_name"],
+            current_country=fx.get("country"),
         )
         if not result.get("valid"):
             logger.info(f"  ⏭️ SKIP: {result.get('reason','?')}")

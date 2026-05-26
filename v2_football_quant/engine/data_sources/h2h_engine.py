@@ -14,6 +14,8 @@ V4 比赛画像引擎 — H2H + 近期状态综合评估
 
 from __future__ import annotations
 
+import json
+import os
 import time
 import logging
 from datetime import datetime, timezone, timedelta
@@ -32,6 +34,146 @@ RECENT_ATTACK_DEFENSE_MIN = 0.65
 RECENT_TIMING_PRESSURE_MIN = 0.50
 H2H_BAD_FLOOR_MIN = 0.50
 HT_LIVE_SCORE_MIN = 0.50
+
+H2H_POLICY_VERSION = "LEAGUE_PYRAMID_POST2020_ONLY_v1.0.0"
+H2H_FILTER_VERSION = "v4_h2h_league_pyramid_post2020_filter_fix_20260526"
+
+_PYRAMID_MAP: dict | None = None
+
+
+def _load_pyramid_map() -> dict:
+    global _PYRAMID_MAP
+    if _PYRAMID_MAP is not None:
+        return _PYRAMID_MAP
+    config_path = os.path.join(
+        os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))),
+        "config", "v4_league_pyramid_map.json",
+    )
+    try:
+        with open(config_path) as f:
+            data = json.load(f)
+        _PYRAMID_MAP = data.get("pyramid_map", {})
+    except Exception:
+        logger.warning("Failed to load league pyramid map, falling back to same-league-only")
+        _PYRAMID_MAP = {}
+    return _PYRAMID_MAP
+
+
+def _classify_h2h_sample(match: dict, current_league_id, current_country,
+                         pyramid_map: dict, cutoff: datetime) -> dict:
+    """对单条 H2H 样本做联赛体系分类，返回分类标签和原因。"""
+    fixture = match.get("fixture", {})
+    ts = fixture.get("timestamp", 0)
+    try:
+        match_dt = datetime.fromtimestamp(ts, tz=timezone.utc) if ts else datetime.min.replace(tzinfo=timezone.utc)
+    except Exception:
+        match_dt = datetime.min.replace(tzinfo=timezone.utc)
+
+    if match_dt < cutoff:
+        return {"category": "pre2020", "reason": "pre2020", "league_id": None}
+
+    league = match.get("league", {})
+    match_league_id = str(league.get("id", "")) if league else None
+
+    if not match_league_id:
+        return {"category": "forensic_h2h", "reason": "league_id_missing", "league_id": None}
+
+    pyr_entry = pyramid_map.get(match_league_id)
+    if not pyr_entry:
+        return {
+            "category": "forensic_h2h",
+            "reason": "pyramid_unknown",
+            "league_id": match_league_id,
+        }
+
+    comp_type = pyr_entry.get("competition_type", "unknown")
+
+    if comp_type in ("continental_cup",):
+        return {"category": "excluded_h2h", "reason": "continental_cup", "league_id": match_league_id, "competition_type": comp_type}
+
+    if comp_type == "friendly":
+        return {"category": "excluded_h2h", "reason": "friendly", "league_id": match_league_id, "competition_type": comp_type}
+
+    if comp_type == "cup":
+        return {"category": "excluded_h2h", "reason": "cup", "league_id": match_league_id, "competition_type": comp_type}
+
+    if comp_type == "unknown":
+        return {"category": "excluded_h2h", "reason": "competition_type_unknown", "league_id": match_league_id, "competition_type": comp_type}
+
+    if comp_type != "league":
+        return {"category": "excluded_h2h", "reason": f"non_league:{comp_type}", "league_id": match_league_id, "competition_type": comp_type}
+
+    # comp_type == "league" — 进入正式联赛判断
+    if str(match_league_id) == str(current_league_id):
+        return {
+            "category": "same_league_h2h",
+            "reason": "same_league_id",
+            "league_id": match_league_id,
+            "league_name": pyr_entry.get("league_name"),
+            "country": pyr_entry.get("country"),
+            "pyramid_group": pyr_entry.get("pyramid_group"),
+            "tier": pyr_entry.get("tier"),
+        }
+
+    match_country = pyr_entry.get("country")
+    match_pyramid = pyr_entry.get("pyramid_group")
+    match_tier = pyr_entry.get("tier")
+
+    if not match_country or not match_pyramid or match_tier is None:
+        return {"category": "forensic_h2h", "reason": "pyramid_unknown", "league_id": match_league_id}
+
+    current_pyr = pyramid_map.get(str(current_league_id), {}) if current_league_id else {}
+    current_tier = current_pyr.get("tier")
+
+    if match_country != current_country:
+        return {"category": "forensic_h2h", "reason": "cross_country", "league_id": match_league_id}
+
+    current_pyramid_group = current_pyr.get("pyramid_group")
+    if match_pyramid != current_pyramid_group:
+        return {"category": "forensic_h2h", "reason": "cross_pyramid", "league_id": match_league_id}
+
+    if current_tier is not None and match_tier is not None and abs(match_tier - current_tier) <= 1:
+        return {
+            "category": "adjacent_tier_league_h2h",
+            "reason": "adjacent_tier",
+            "league_id": match_league_id,
+            "league_name": pyr_entry.get("league_name"),
+            "country": match_country,
+            "pyramid_group": match_pyramid,
+            "tier": match_tier,
+            "tier_delta": abs(match_tier - current_tier),
+        }
+
+    return {"category": "forensic_h2h", "reason": "tier_gap_too_large", "league_id": match_league_id}
+
+
+def _select_official_pool(classified: list[dict]) -> dict:
+    """根据优先规则选择 official_h2h 样本池。"""
+    same_league = [c for c in classified if c["category"] == "same_league_h2h"]
+    adjacent = [c for c in classified if c["category"] == "adjacent_tier_league_h2h"]
+    eligible = same_league + adjacent
+
+    if len(same_league) >= H2H_REFERENCE_MIN_SAMPLES:
+        return {
+            "official_pool": same_league,
+            "h2h_scope": "SAME_LEAGUE",
+            "cross_tier_used": False,
+            "h2h_low_sample": False,
+        }
+    elif len(eligible) >= H2H_REFERENCE_MIN_SAMPLES:
+        return {
+            "official_pool": eligible,
+            "h2h_scope": "ADJACENT_TIER_FALLBACK",
+            "cross_tier_used": True,
+            "h2h_low_sample": False,
+        }
+    else:
+        return {
+            "official_pool": eligible,
+            "h2h_scope": "LOW_SAMPLE",
+            "cross_tier_used": False,
+            "h2h_low_sample": True,
+        }
 # 性能开关：recent画像的进球时间分布对 pullback_fit / 11-45压力判断至关重要。
 # 关闭会导致 time_bins 全 0，HT候选全部被 recent_timing_pass 卡死。
 # 每场多 ~10 次 API 调用（recent=5×2队），换取准确的时间分布诊断。
@@ -315,7 +457,8 @@ def reset_recent_profile_cache_stats() -> None:
     _RECENT_PROFILE_STATS["misses"] = 0
 
 
-def evaluate_h2h_edge(home_id: int, away_id: int, api_client, mode: str = "full") -> dict:
+def evaluate_h2h_edge(home_id: int, away_id: int, api_client, mode: str = "full",
+                       current_league_id=None, current_league_name=None, current_country=None) -> dict:
     endpoint = f"fixtures/headtohead?h2h={home_id}-{away_id}"
     resp = api_client(endpoint)
 
@@ -339,11 +482,32 @@ def evaluate_h2h_edge(home_id: int, away_id: int, api_client, mode: str = "full"
     recent_3y = [m for m in matches if _match_timestamp(m) >= cutoff]
     n_3y = len(recent_3y)
 
+    # ── 联赛金字塔分类 ──
+    pyramid_map = _load_pyramid_map()
+    classified = [_classify_h2h_sample(m, current_league_id, current_country, pyramid_map, cutoff) for m in recent_3y]
+
+    same_league_h2h = [c for c in classified if c["category"] == "same_league_h2h"]
+    adjacent_tier_h2h = [c for c in classified if c["category"] == "adjacent_tier_league_h2h"]
+    eligible_h2h = [c for c in classified if c["category"] in ("same_league_h2h", "adjacent_tier_league_h2h")]
+    forensic_h2h = [c for c in classified if c["category"] == "forensic_h2h"]
+    excluded_h2h = [c for c in classified if c["category"] == "excluded_h2h"]
+    pre2020 = [c for c in classified if c["category"] == "pre2020"]
+
+    pool_info = _select_official_pool(classified)
+    official_pool_cats = pool_info["official_pool"]
+
+    # 将 official_pool_cats 按 timestamp 排序并截取最近10场
+    cat_indices = {i: c for i, c in enumerate(classified) if c in official_pool_cats}
+    official_matches_raw = [recent_3y[i] for i in cat_indices]
+    official_matches = sorted(official_matches_raw, key=lambda x: _match_timestamp(x), reverse=True)[:10]
+
+    # 同时保留原始的 recent_3y 排序列表用于 forensic 对比
     fast_mode = str(mode).lower() == "fast"
     recent_limit = 10
     recent = sorted(recent_3y, key=lambda x: _match_timestamp(x), reverse=True)[:recent_limit]
     n = len(recent)
 
+    # ── 基于 official_matches 计算核心指标 ──
     ht_goal_count = 0
     sh_goal_count = 0
     ft_over_1_5_count = 0
@@ -352,8 +516,9 @@ def evaluate_h2h_edge(home_id: int, away_id: int, api_client, mode: str = "full"
     total_sh_goals = 0
     total_ft_goals = 0
     expired_count = total_h2h - n_3y
+    official_n = len(official_matches)
 
-    for m in recent:
+    for m in official_matches:
         score = m.get("score", {})
         ht = score.get("halftime", {})
         ft = score.get("fulltime", {})
@@ -376,15 +541,35 @@ def evaluate_h2h_edge(home_id: int, away_id: int, api_client, mode: str = "full"
         if ft_goals == 0:
             ft_zero_count += 1
 
-    h2h_denominator = max(n, 1)
-    ht_rate = ht_goal_count / h2h_denominator
-    sh_rate = sh_goal_count / h2h_denominator
-    ft_over_1_5_rate = ft_over_1_5_count / h2h_denominator
-    avg_ht_goals = round(total_ht_goals / h2h_denominator, 2)
-    avg_sh_goals = round(total_sh_goals / h2h_denominator, 2)
-    avg_ft_goals = round(total_ft_goals / h2h_denominator, 2)
+    official_denominator = max(official_n, 1)
+    ht_rate = ht_goal_count / official_denominator
+    sh_rate = sh_goal_count / official_denominator
+    ft_over_1_5_rate = ft_over_1_5_count / official_denominator
+    avg_ht_goals = round(total_ht_goals / official_denominator, 2)
+    avg_sh_goals = round(total_sh_goals / official_denominator, 2)
+    avg_ft_goals = round(total_ft_goals / official_denominator, 2)
 
-    # 进球时间分桶
+    # ── same_league / adjacent / eligible 分别独立统计 ──
+    def _calc_subset_rates(subset_cats, all_recent_3y):
+        indices = {i for i, c in enumerate(classified) if c in subset_cats}
+        subset_matches = [all_recent_3y[i] for i in indices]
+        sn = len(subset_matches)
+        sht = 0
+        for m in subset_matches:
+            score = m.get("score", {})
+            ht_s = score.get("halftime", {})
+            ht_h_s = ht_s.get("home") if ht_s and ht_s.get("home") is not None else 0
+            ht_a_s = ht_s.get("away") if ht_s and ht_s.get("away") is not None else 0
+            if ht_h_s + ht_a_s > 0:
+                sht += 1
+        return {"count": sn, "ht_goal_rate": round(sht / max(sn, 1), 3)}
+
+    same_stats = _calc_subset_rates(same_league_h2h, recent_3y)
+    adj_stats = _calc_subset_rates(adjacent_tier_h2h, recent_3y)
+    eligible_stats = _calc_subset_rates(eligible_h2h, recent_3y)
+    official_stats = _calc_subset_rates(official_pool_cats, recent_3y)
+
+    # 进球时间分桶 (基于 official_matches)
     time_bins = {
         "0_10": 0,
         "11_15": 0,
@@ -397,7 +582,7 @@ def evaluate_h2h_edge(home_id: int, away_id: int, api_client, mode: str = "full"
     }
     second_half_bins = {"46_60": 0, "61_75": 0, "76_90": 0}
     if not fast_mode:
-        for m in recent:
+        for m in official_matches:
             fid = m.get("fixture", {}).get("id")
             if not fid:
                 continue
@@ -417,10 +602,11 @@ def evaluate_h2h_edge(home_id: int, away_id: int, api_client, mode: str = "full"
             except Exception:
                 pass
 
+    timebin_denom = max(official_n, 1)
     for k in time_bins:
-        time_bins[k] = round(time_bins[k] / h2h_denominator, 3)
+        time_bins[k] = round(time_bins[k] / timebin_denom, 3)
     for k in second_half_bins:
-        second_half_bins[k] = round(second_half_bins[k] / h2h_denominator, 3)
+        second_half_bins[k] = round(second_half_bins[k] / timebin_denom, 3)
 
     late_fh_pressure = round(
         (time_bins.get("11_45", 0) * 0.55)
@@ -512,7 +698,7 @@ def evaluate_h2h_edge(home_id: int, away_id: int, api_client, mode: str = "full"
     score_pack = _score_market_fit(
         ht_rate=ht_rate,
         ht_goal_count=ht_goal_count,
-        n=n,
+        n=official_n,
         recent_form_avg=recent_form_avg,
         time_bins=effective_time_bins,
         sh_rate=sh_rate,
@@ -525,12 +711,12 @@ def evaluate_h2h_edge(home_id: int, away_id: int, api_client, mode: str = "full"
     )
 
     h2h_strong_signal = (
-        n >= H2H_STRONG_SAMPLE_SIZE
+        official_n >= H2H_STRONG_SAMPLE_SIZE
         and ht_rate >= H2H_STRONG_RATE_MIN
         and ft_zero_count <= 2
     )
     h2h_bad_signal = (
-        n >= H2H_REFERENCE_MIN_SAMPLES
+        official_n >= H2H_REFERENCE_MIN_SAMPLES
         and (ht_rate < H2H_BAD_FLOOR_MIN or ft_zero_count > 2)
     )
     recent_strength_pass = (
@@ -567,15 +753,44 @@ def evaluate_h2h_edge(home_id: int, away_id: int, api_client, mode: str = "full"
         market_focus = None
         market_type = None
 
+    # ── excluded_reasons 汇总 ──
+    from collections import Counter
+    reason_counts = Counter(c["reason"] for c in excluded_h2h + [f for f in forensic_h2h if f["reason"] != "same_league_id" and f["reason"] != "adjacent_tier"])
+    pre2020_count = sum(1 for m in matches if _match_timestamp(m) < cutoff)
+
+    excluded_reasons = dict(reason_counts)
+    excluded_reasons["pre2020_total"] = pre2020_count
+
+    cup_excluded_count = excluded_reasons.get("cup", 0) + excluded_reasons.get("continental_cup", 0)
+    friendly_excluded_count = excluded_reasons.get("friendly", 0)
+    pyramid_unknown_count = excluded_reasons.get("pyramid_unknown", 0)
+
     if not (ht_candidate or sh_candidate or ft_candidate):
         return {
             "valid": False,
             "reason": (
                 f"未达标 (近期HT={recent_form_avg:.0%}, 近期攻防={ht_attack_vs_defense:.0%}, "
-                f"近期10-45压力={recent_late_fh_pressure:.0%}, H2H={ht_goal_count}/{n}={ht_rate:.0%}, "
+                f"近期10-45压力={recent_late_fh_pressure:.0%}, H2H={ht_goal_count}/{official_n}={ht_rate:.0%}, "
                 f"HT分={score_pack['scores'].get('HT_LIVE_OVER', 0):.1f}, 最强方向={score_pack['best_focus_by_score']}, "
                 f"SH={sh_rate:.0%}/近期{recent_sh_avg:.0%}, FT2+={ft_over_1_5_rate:.0%})"
-            )
+            ),
+            "factors": {
+                "h2h_policy": H2H_POLICY_VERSION,
+                "h2h_filter_version": H2H_FILTER_VERSION,
+                "official_h2h_count": official_n,
+                "same_league_h2h_count": same_stats["count"],
+                "adjacent_tier_h2h_count": adj_stats["count"],
+                "eligible_regular_league_h2h_count": eligible_stats["count"],
+                "forensic_h2h_count": len(forensic_h2h),
+                "excluded_h2h_count": len(excluded_h2h),
+                "pre2020_excluded_count": pre2020_count,
+                "cup_excluded_count": cup_excluded_count,
+                "excluded_reasons": excluded_reasons,
+                "pyramid_unknown_count": pyramid_unknown_count,
+                "h2h_scope": pool_info["h2h_scope"],
+                "cross_tier_used": pool_info["cross_tier_used"],
+                "h2h_low_sample": pool_info["h2h_low_sample"],
+            },
         }
 
     phase_bias = "BALANCED"
@@ -593,6 +808,27 @@ def evaluate_h2h_edge(home_id: int, away_id: int, api_client, mode: str = "full"
         "best_focus_by_score": score_pack["best_focus_by_score"],
         "best_score": score_pack["best_score"],
         "factors": {
+            # ── 联赛金字塔政策字段 (new) ──
+            "h2h_policy": H2H_POLICY_VERSION,
+            "h2h_filter_version": H2H_FILTER_VERSION,
+            "h2h_scope": pool_info["h2h_scope"],
+            "cross_tier_used": pool_info["cross_tier_used"],
+            "h2h_low_sample": pool_info["h2h_low_sample"],
+            "same_league_h2h_count": same_stats["count"],
+            "same_league_h2h_ht_goal_rate": same_stats["ht_goal_rate"],
+            "adjacent_tier_h2h_count": adj_stats["count"],
+            "adjacent_tier_h2h_ht_goal_rate": adj_stats["ht_goal_rate"],
+            "eligible_regular_league_h2h_count": eligible_stats["count"],
+            "eligible_regular_league_h2h_ht_goal_rate": eligible_stats["ht_goal_rate"],
+            "official_h2h_count": official_stats["count"],
+            "official_h2h_ht_goal_rate": official_stats["ht_goal_rate"],
+            "forensic_h2h_count": len(forensic_h2h),
+            "excluded_h2h_count": len(excluded_h2h),
+            "pre2020_excluded_count": pre2020_count,
+            "cup_excluded_count": cup_excluded_count,
+            "pyramid_unknown_count": pyramid_unknown_count,
+            "excluded_reasons": excluded_reasons,
+            # ── 原有字段 ──
             "market_scores": score_pack["scores"],
             "best_focus_by_score": score_pack["best_focus_by_score"],
             "best_score": score_pack["best_score"],
@@ -614,6 +850,7 @@ def evaluate_h2h_edge(home_id: int, away_id: int, api_client, mode: str = "full"
             "h2h_avg_sh_goals": avg_sh_goals,
             "h2h_avg_ft_goals": avg_ft_goals,
             "h2h_sample_size": n,
+            "h2h_official_sample_size": official_n,
             "h2h_total": total_h2h,
             "h2h_3y_count": n_3y,
             "h2h_expired": expired_count,
@@ -659,7 +896,7 @@ def evaluate_h2h_edge(home_id: int, away_id: int, api_client, mode: str = "full"
         "metrics": {
             "h2h_total": total_h2h,
             "h2h_3y_count": n_3y,
-            "h2h_analyzed": n,
+            "h2h_official_analyzed": official_n,
             "h2h_expired": expired_count,
             "ht_goal_rate": round(ht_rate, 3),
             "ht_goal_count": ht_goal_count,
@@ -667,5 +904,13 @@ def evaluate_h2h_edge(home_id: int, away_id: int, api_client, mode: str = "full"
             "sh_goal_rate": round(sh_rate, 3),
             "ft_over_1_5_rate": round(ft_over_1_5_rate, 3),
             "ft_0_0_count": ft_zero_count,
+            "h2h_scope": pool_info["h2h_scope"],
+            "same_league_h2h_count": same_stats["count"],
+            "eligible_regular_league_h2h_count": eligible_stats["count"],
+            "official_h2h_count": official_stats["count"],
+            "official_h2h_ht_goal_rate": official_stats["ht_goal_rate"],
+            "excluded_h2h_count": len(excluded_h2h),
+            "forensic_h2h_count": len(forensic_h2h),
+            "excluded_reasons": excluded_reasons,
         }
     }
