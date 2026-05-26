@@ -794,8 +794,16 @@ function buildSystemPanel(){
 }
 function buildErrorsPanel(){
   const se=MODEL.system_errors||{};
-  const activeItems=arr(se.active_items).filter(x=>!x?.resolved && String(x?.severity||'').toUpperCase().match(/FAIL|BLOCKER/) && !x?.process_artifact);
-  const recentItems=arr(se.recent_items).concat(arr(se.active_items).filter(x=>x?.resolved || x?.process_artifact));
+  const activeItems=arr(se.active_items).filter(x=>
+    x?.active===true &&
+    x?.resolved!==true &&
+    x?.process_artifact!==true &&
+    x?.active_eligible===true &&
+    /FAIL|BLOCKER/.test(String(x?.severity||'').toUpperCase())
+  );
+  const recentItems=arr(se.recent_items).concat(arr(se.active_items).filter(x=>
+    x?.resolved===true || x?.process_artifact===true || x?.active_eligible===false
+  ));
   if(!activeItems.length&&!recentItems.length){
     return "<div class='note'>当前无异常。</div><div class='note' style='margin-top:6px'>扫描范围：最近"+safe(se.scan_window_hours,48)+"小时内 status json + 日志文件。只读，不执行任何修复操作。</div>";
   }

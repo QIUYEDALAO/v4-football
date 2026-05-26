@@ -70,7 +70,7 @@ def main() -> int:
     else:
         check('dashboard_html_exists', False, str(DASH))
 
-    # 1) PASS/all_pass/blockers=[] not in ACTIVE
+    # 1) ACTIVE hard guards
     bad_active = []
     for it in active:
         sf = str(it.get('source_file') or '')
@@ -100,6 +100,13 @@ def main() -> int:
             bad_active.append((sf, 'all_pass=true in ACTIVE'))
         if '已恢复' in str(it):
             bad_active.append((sf, '已恢复 text in ACTIVE item'))
+        if bool(it.get('active_eligible')) is False:
+            bad_active.append((sf, 'active_eligible=false in ACTIVE'))
+        if sev == 'WARN':
+            bad_active.append((sf, 'WARN in ACTIVE'))
+        # historical recovered defaults should not stay in ACTIVE
+        if any(k in lname for k in ('qq_notify_done', 'dashboard_daily_auto_update', 'api_controlled_ingest_real')):
+            bad_active.append((sf, 'known historical recovered source in ACTIVE'))
 
     check('active_has_no_false_positive_pass_items', len(bad_active) == 0, str(bad_active[:8]))
 
@@ -109,6 +116,10 @@ def main() -> int:
     check('active_error_count_matches', c_active_err == len(unresolved), f'count={c_active_err}, expected={len(unresolved)}')
     check('active_blocker_count_matches', c_active_blk == len(unresolved_blockers), f'count={c_active_blk}, expected={len(unresolved_blockers)}')
     check('active_error_count_matches_active_items_len', c_active_err == len(active), f'count={c_active_err}, active_len={len(active)}')
+    check('active_resolved_true_count_zero', sum(1 for i in active if bool(i.get('resolved')))==0, 'resolved=true found in ACTIVE')
+    check('active_process_artifact_zero', sum(1 for i in active if bool(i.get('process_artifact')))==0, 'process_artifact=true found in ACTIVE')
+    check('active_active_eligible_false_zero', sum(1 for i in active if i.get('active_eligible') is False)==0, 'active_eligible=false found in ACTIVE')
+    check('active_warn_zero', sum(1 for i in active if str(i.get('severity','')).upper()=='WARN')==0, 'WARN found in ACTIVE')
 
     # 3) recent can contain resolved/warn
     rec_bad = [i for i in recent if bool(i.get('active')) and bool(i.get('resolved'))]

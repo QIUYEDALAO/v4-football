@@ -21,6 +21,7 @@ import re
 import sys
 from datetime import datetime, timezone, timedelta
 from pathlib import Path
+from zoneinfo import ZoneInfo
 
 BASE_DIR = Path(__file__).resolve().parents[1]
 STATUS_DIR = BASE_DIR / "data" / "runtime" / "status"
@@ -66,6 +67,7 @@ PROCESS_ARTIFACT_PATTERNS = [
     re.compile(r".*_classification_.*\.json$", re.IGNORECASE),
     re.compile(r".*_safety_impact_.*\.json$", re.IGNORECASE),
     re.compile(r".*_recommendation_.*\.json$", re.IGNORECASE),
+    re.compile(r".*_binding_complete_.*\.json$", re.IGNORECASE),
     re.compile(r".*_fix_.*\.json$", re.IGNORECASE),
 ]
 
@@ -532,14 +534,78 @@ def _suggested_action(component: str, severity: str) -> str:
     return f"监控 {component} 组件，等待自动恢复或人工确认"
 
 
+def _is_still_open_history_source(source_file: str) -> bool:
+    s = (source_file or "").lower()
+    # 仅允许显式 still-open 标记进入跨日 ACTIVE，普通历史 runner/pipeline 结果不再保活
+    return any(k in s for k in (
+        "watchdog_open",
+        "still_open",
+        "unresolved_runtime",
+    ))
+
+
 def classify_and_rank(items: list[dict], hours: int) -> dict:
     """对错误分类并排名。"""
     now = datetime.now(timezone.utc)
     recent_cutoff = now - timedelta(hours=24)
     window_cutoff = now - timedelta(hours=hours)
 
-    active_items = [i for i in items if i["active"] and i["severity"] in ("BLOCKER", "FAIL")]
-    recent_items = [i for i in items if not i["active"] or i["severity"] == "WARN"]
+    today_date = datetime.now(ZoneInfo("Asia/Shanghai")).date().isoformat()
+    hard_source_blocklist = (
+        "qq_notify_done",
+        "api_controlled_ingest_real",
+        "dashboard_daily_auto_update",
+    )
+    recent_items = []
+    active_items = []
+
+    # Final purge layer: ACTIVE 只能来自真实未恢复且非过程产物
+    for i in items:
+        severity = str(i.get("severity") or "").upper()
+        active_flag = i.get("active") is True
+        resolved_flag = i.get("resolved") is True
+        process_artifact = i.get("process_artifact") is True
+        active_eligible = i.get("active_eligible") is True
+        detected_day = str(i.get("detected_at") or "")[:10]
+        source_file = str(i.get("source_file") or "")
+        has_recovered_text = "已恢复" in str(i)
+
+        stale_history = detected_day not in {"", today_date}
+        history_allowed = (
+            active_flag
+            and (not resolved_flag)
+            and active_eligible
+            and (not process_artifact)
+            and _is_still_open_history_source(source_file)
+        )
+
+        i["stale_history"] = stale_history
+        i["history_reason"] = "today" if not stale_history else ("still_open_runtime_source" if history_allowed else "historical_not_active")
+
+        include_active = (
+            active_flag
+            and (not resolved_flag)
+            and (not process_artifact)
+            and active_eligible
+            and severity in {"FAIL", "BLOCKER"}
+            and (not has_recovered_text)
+            and ((not stale_history) or history_allowed)
+            and (not any(k in source_file.lower() for k in hard_source_blocklist))
+        )
+
+        if include_active:
+            active_items.append(i)
+        else:
+            # RECENT includes resolved/process/WARN/history观察项
+            if (
+                resolved_flag
+                or process_artifact
+                or severity == "WARN"
+                or stale_history
+                or (not active_eligible and severity in {"FAIL", "BLOCKER"})
+                or has_recovered_text
+            ):
+                recent_items.append(i)
     archive_items = []  # 超过窗口的不收集
 
     # 按严重程度排序
