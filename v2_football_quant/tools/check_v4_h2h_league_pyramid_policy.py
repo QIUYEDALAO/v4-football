@@ -302,6 +302,49 @@ if os.path.exists(pyramid_path):
 else:
     check("B.1 金字塔配置文件存在", False, "文件缺失！")
 
+# ── LOW_SAMPLE 折扣检查 ──
+print("\n[Bonus] LOW_SAMPLE_H2H_SCORE_DISCOUNT 检查")
+
+check("L.1 _score_market_fit 接受 h2h_low_sample 参数",
+      "h2h_low_sample" in h2h_src,
+      "函数签名支持低样本标志")
+
+check("L.2 h2h_low_sample=True 时 ht_rate 权重=0",
+      "ht_rate * 0.00" in h2h_src or "ht_rate*0.00" in h2h_src.replace(" ", ""),
+      "H2H ht_rate 在低样本时不参与主评分")
+
+check("L.3 h2h_low_sample=True 时 ht_sample_bonus 权重=0",
+      "ht_sample_bonus * 0.00" in h2h_src or "ht_sample_bonus*0.00" in h2h_src.replace(" ", ""),
+      "低样本时不发强信号 bonus")
+
+check("L.4 h2h_low_sample=True 时 recent_form_avg 权重上升",
+      "recent_form_avg * 0.40" in h2h_src,
+      "低样本时 recent 画像权重从 0.20 提升到 0.40")
+
+check("L.5 h2h_low_sample=True 时 ht_attack_vs_defense 权重上升",
+      "ht_attack_vs_defense * 0.20" in h2h_src,
+      "低样本时攻防交叉权重从 0.10 提升到 0.20")
+
+check("L.6 h2h_low_sample=True 时 late_fh 权重上升",
+      "late_fh * 0.30" in h2h_src,
+      "低样本时时间压力权重从 0.20 提升到 0.30")
+
+check("L.7 score_pack 返回 h2h_score_discount 字段",
+      "h2h_score_discount" in h2h_src,
+      "评分包返回折扣标志")
+
+check("L.8 factors 输出 h2h_score_discount",
+      source_contains(h2h_path, "h2h_score_discount"),
+      "因素输出包含折扣标记")
+
+check("L.9 factors 输出 h2h_weight_in_ht_score",
+      "h2h_weight_in_ht_score" in h2h_src,
+      "因素输出包含 H2H 在 HT 分数中的实际权重")
+
+check("L.10 调用点传入 pool_info['h2h_low_sample']",
+      "h2h_low_sample=pool_info[\"h2h_low_sample\"]" in h2h_src.replace("'", '"') or "h2h_low_sample=pool_info['h2h_low_sample']" in h2h_src,
+      "从 pool_info 传入低样本标志")
+
 # ── 汇总 ──
 print("\n" + "=" * 72)
 passed = sum(1 for r in results if r["passed"])

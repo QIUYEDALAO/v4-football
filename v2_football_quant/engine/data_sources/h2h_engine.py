@@ -197,10 +197,13 @@ def _score_market_fit(
     recent_ft_over_1_5: float,
     avg_ft_goals: float,
     ht_attack_vs_defense: float = 0.0,
+    h2h_low_sample: bool = False,
 ) -> dict:
     """
     输出三套独立分数，避免把 HT / SH / FT 混成一个热度。
     分数只是排序和展示用，主策略仍由硬门槛控制。
+
+    LOW_SAMPLE 模式下 H2H 权重降为 0，避免 1/1、2/2 小样本把 HT 分数顶高。
     """
     late_fh = max(
         time_bins.get("11_45", 0),
@@ -208,13 +211,24 @@ def _score_market_fit(
         time_bins.get("31_45", 0),
     )
     ht_sample_bonus = 1.0 if (n >= H2H_STRONG_SAMPLE_SIZE and ht_rate >= H2H_STRONG_RATE_MIN) else 0.0
-    ht_score = (
-        ht_rate * 0.40
-        + recent_form_avg * 0.20
-        + ht_attack_vs_defense * 0.10
-        + late_fh * 0.20
-        + ht_sample_bonus * 0.10
-    )
+
+    if h2h_low_sample:
+        # H2H 只进解释层，主评分权重全部转移到 recent team profile
+        ht_score = (
+            recent_form_avg * 0.40
+            + ht_attack_vs_defense * 0.20
+            + late_fh * 0.30
+            + ht_rate * 0.00
+            + ht_sample_bonus * 0.00
+        )
+    else:
+        ht_score = (
+            ht_rate * 0.40
+            + recent_form_avg * 0.20
+            + ht_attack_vs_defense * 0.10
+            + late_fh * 0.20
+            + ht_sample_bonus * 0.10
+        )
 
     late_sh = max(second_half_bins.values()) if second_half_bins else 0.0
     sh_score = (
@@ -240,6 +254,7 @@ def _score_market_fit(
         "scores": scores,
         "best_focus_by_score": best_focus,
         "best_score": scores[best_focus],
+        "h2h_score_discount": h2h_low_sample,
     }
 
 
@@ -708,6 +723,7 @@ def evaluate_h2h_edge(home_id: int, away_id: int, api_client, mode: str = "full"
         recent_ft_over_1_5=recent_ft_over_1_5,
         avg_ft_goals=avg_ft_goals,
         ht_attack_vs_defense=ht_attack_vs_defense,
+        h2h_low_sample=pool_info["h2h_low_sample"],
     )
 
     h2h_strong_signal = (
@@ -814,6 +830,8 @@ def evaluate_h2h_edge(home_id: int, away_id: int, api_client, mode: str = "full"
             "h2h_scope": pool_info["h2h_scope"],
             "cross_tier_used": pool_info["cross_tier_used"],
             "h2h_low_sample": pool_info["h2h_low_sample"],
+            "h2h_score_discount": score_pack.get("h2h_score_discount", False),
+            "h2h_weight_in_ht_score": 0.0 if pool_info["h2h_low_sample"] else 0.40,
             "same_league_h2h_count": same_stats["count"],
             "same_league_h2h_ht_goal_rate": same_stats["ht_goal_rate"],
             "adjacent_tier_h2h_count": adj_stats["count"],
