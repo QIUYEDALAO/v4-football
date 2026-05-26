@@ -216,6 +216,13 @@ def build_result_lines(task_name: str, date: str, status: str, duration: int, ma
             pending = vs.get("pending", vs.get("pending_count", "?"))
             results["pending"] = str(pending)
 
+    # ── 兜底：如果 pending 没有被任何分支设置，给合理默认值 ──
+    if "pending" not in results:
+        if marker_info is None:
+            results["pending"] = "未知（无marker）"
+        else:
+            results["pending"] = "0（无字段）"
+
     return results
 
 
@@ -225,7 +232,9 @@ def build_notification_text(
     """生成 iPhone 友好 QQ 通知文案。"""
     lines = []
     lines.append("【V3/V4定时任务完成】")
-    lines.append(f"任务：{task_name}")
+    # 避免 QQ Markdown 把下划线当作斜体标记，用全角下划线替代
+    display_name = task_name.replace("_", "＿")
+    lines.append(f"任务：{display_name}")
     config = TASK_CONFIG.get(task_name, {})
     lines.append(f"时间：{config.get('scheduled_time', '?')}")
     lines.append(f"状态：{status}")
