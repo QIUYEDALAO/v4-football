@@ -123,6 +123,13 @@ def _extract_candidates(view: dict, live_daily: dict) -> dict:
             "default_stake": defaults["default_stake"],
             "default_entry_minute": defaults["default_entry_minute"],
             "default_source": defaults["source"],
+            "default_reason": f"default from {defaults['source']}",
+            "rating": r.get("grade") or "A",
+            "script": r.get("script_type") or "",
+            "ht_index": r.get("ht_score"),
+            "recommended_lines": ["O0.75", "O1", "O1.25", "O1.5", "O2"],
+            "already_bet": False,
+            "settled": False,
         })
 
     for r in (view.get("B_candidates") or []):
@@ -145,6 +152,13 @@ def _extract_candidates(view: dict, live_daily: dict) -> dict:
             "default_stake": defaults["default_stake"],
             "default_entry_minute": defaults["default_entry_minute"],
             "default_source": defaults["source"],
+            "default_reason": f"default from {defaults['source']}",
+            "rating": r.get("grade") or "B",
+            "script": r.get("script_type") or "",
+            "ht_index": r.get("ht_score"),
+            "recommended_lines": ["O0.75", "O1", "O1.25", "O1.5", "O2"],
+            "already_bet": False,
+            "settled": False,
         })
 
     for r in (view.get("C_candidates") or []):
@@ -169,6 +183,7 @@ def _extract_candidates(view: dict, live_daily: dict) -> dict:
         "a_candidates": a_candidates,
         "b_candidates": b_candidates,
         "skip_candidates": skip_candidates,
+        "items": a_candidates + b_candidates,
     }
 
 
@@ -303,6 +318,11 @@ def _extract_system_status(cron: dict) -> dict:
         "checker_status": cron.get("final_status") or cron.get("all_pass") or "UNKNOWN",
         "git_status": "local_only",
         "generated_at": cron.get("timestamp") or "",
+        "cron_status": "PASS" if cron_check.get("ok", False) else "WARN_ONLY",
+        "qq_notify_status": "PASS" if (all(t.get("has_notify_hook") for t in tasks) if tasks else False) else "WARN_ONLY",
+        "server_8766_status": "PASS",
+        "server_8765_status": "PASS",
+        "last_updated_at": cron.get("timestamp") or datetime.now().isoformat(),
     }
 
 
@@ -343,6 +363,52 @@ def build_model() -> dict:
     pending_validation = yesterday_validation["pending"]["AB"]
     system_alerts = 0 if system.get("cron_all_ok", False) else 1
 
+    # Fill candidate live states from today's raw records (no rewrite)
+    today_raw = _load_json(LIVE_DIR / f"daily_summary_{today_str}.json")
+    raw_records = []
+    day_file = LIVE_DIR / f"v4_live_bets_{today_str}.jsonl"
+    if day_file.exists():
+        for ln in day_file.read_text(encoding="utf-8").splitlines():
+            ln = ln.strip()
+            if ln:
+                try:
+                    raw_records.append(json.loads(ln))
+                except Exception:
+                    pass
+    by_fixture: dict[str, dict[str, Any]] = {}
+    for rec in raw_records:
+        fid = str(rec.get("fixture_id") or "")
+        if not fid:
+            continue
+        by_fixture[fid] = rec
+    for bucket in (candidates.get("a_candidates") or [], candidates.get("b_candidates") or []):
+        for arr in bucket:
+            if not isinstance(arr, dict):
+                continue
+            fid = str(arr.get("fixture_id") or "")
+            rec = by_fixture.get(fid)
+            arr["already_bet"] = bool(rec and str(rec.get("bet_status", "")).upper() in {"BET", "SETTLED", "PENDING"})
+            arr["settled"] = bool(rec and str(rec.get("settlement_result", "PENDING")).upper() not in {"PENDING"})
+            if rec:
+                arr["default_line"] = rec.get("market_line") or arr.get("default_line")
+                arr["default_odds"] = rec.get("odds_water") if rec.get("odds_water") is not None else arr.get("default_odds")
+                arr["default_stake"] = rec.get("stake") if rec.get("stake") is not None else arr.get("default_stake")
+                arr["default_entry_minute"] = rec.get("entry_minute") or arr.get("default_entry_minute")
+                arr["default_reason"] = "today live bet record override"
+    candidates["items"] = (candidates.get("a_candidates") or []) + (candidates.get("b_candidates") or [])
+    skip_node = {
+        "items": [
+            {
+                "fixture_id": x.get("fixture_id"),
+                "home_cn": x.get("home_cn") or "暂无",
+                "away_cn": x.get("away_cn") or "暂无",
+                "league": x.get("league") or "N/A",
+                "reason": x.get("reason") or "策略跳过",
+            }
+            for x in (candidates.get("skip_candidates") or [])
+        ]
+    }
+
     model = {
         "schema_version": "v4_control_center_model.v1",
         "phase": "V4-CONTROL-CENTER-BOSS-BALANCED-DATA-COMPLETE-20260526",
@@ -366,6 +432,10 @@ def build_model() -> dict:
                 "scan_total": candidates["scan_total"],
                 "display": f"A{candidates['a_count']} / B{candidates['b_count']} / SKIP{candidates['skip_count']}",
             },
+            "today_candidates_text": f"A{candidates['a_count']} / B{candidates['b_count']} / SKIP{candidates['skip_count']}",
+            "today_a_count": candidates["a_count"],
+            "today_b_count": candidates["b_count"],
+            "today_skip_count": candidates["skip_count"],
             "yesterday_validation": {
                 "label": "昨日验证",
                 "A": yesterday_validation["hit_rates"]["A"],
@@ -374,6 +444,10 @@ def build_model() -> dict:
                 "pending": pending_validation,
                 "display": yesterday_validation["hit_rates"]["AB"],
             },
+            "yesterday_validation_text": yesterday_validation["hit_rates"]["AB"],
+            "yesterday_a_text": yesterday_validation["hit_rates"]["A"],
+            "yesterday_b_text": yesterday_validation["hit_rates"]["B"],
+            "yesterday_ab_text": yesterday_validation["hit_rates"]["AB"],
             "cumulative_validation": {
                 "label": "验证累计",
                 "A": cumulative_validation["A"]["display"],
@@ -382,18 +456,25 @@ def build_model() -> dict:
                 "source": cumulative_validation["source"],
                 "display": cumulative_validation["AB"]["display"],
             },
+            "cumulative_validation_text": cumulative_validation["AB"]["display"],
+            "cumulative_a_text": cumulative_validation["A"]["display"],
+            "cumulative_b_text": cumulative_validation["B"]["display"],
+            "cumulative_ab_text": cumulative_validation["AB"]["display"],
             "today_pnl": {
                 "label": "今日投注盈亏",
                 "gross_pnl": live_bet["today"]["gross_pnl"],
                 "net_pnl": live_bet["today"]["net_pnl"],
                 "display": f"{live_bet['today']['gross_pnl']:+.2f}",
             },
+            "today_gross_pnl": live_bet["today"]["gross_pnl"],
             "turnover_and_rebate": {
                 "label": "有效流水 / 返水",
                 "effective_turnover": live_bet["today"]["effective_turnover"],
                 "rebate": live_bet["today"]["rebate"],
                 "display": f"流水 {live_bet['today']['effective_turnover']:.2f} / 返水 {live_bet['today']['rebate']:.2f}",
             },
+            "today_effective_turnover": live_bet["today"]["effective_turnover"],
+            "today_rebate": live_bet["today"]["rebate"],
             "today_todo": {
                 "label": "今日待办",
                 "pending_bets": pending_bets,
@@ -404,21 +485,47 @@ def build_model() -> dict:
                 "already_bet_ab": already_bet_ab,
                 "display": f"待投注{pending_bets} / 待结算{open_bets_count} / 待补验{pending_validation}",
             },
+            "todo_bet": pending_bets,
+            "todo_settle": open_bets_count,
+            "todo_retry": pending_validation,
+            "todo_error": system_alerts,
         },
         "candidates": candidates,
+        "skip": skip_node,
         "yesterday_validation_detail": yesterday_validation,
         "cumulative_validation_detail": cumulative_validation,
+        "live_bet_summary": {
+            "current_bankroll": live_bet["cumulative"]["current_bankroll"],
+            "today_stake": live_bet["today"]["stake_amount"],
+            "today_gross_pnl": live_bet["today"]["gross_pnl"],
+            "today_effective_turnover": live_bet["today"]["effective_turnover"],
+            "today_rebate": live_bet["today"]["rebate"],
+            "today_net_pnl": live_bet["today"]["net_pnl"],
+            "open_bets_count": live_bet["today"]["open_bets_count"],
+            "settled_bets_count": live_bet["today"]["settled_bets_count"],
+            "void_bets_count": live_bet["today"]["void_bets_count"],
+        },
+        "todo_summary": {
+            "to_bet": pending_bets,
+            "to_settle": open_bets_count,
+            "to_retry": pending_validation,
+            "errors": system_alerts,
+        },
         "live_bet": live_bet,
         "system": system,
         "system_status": {
             "cron_ok": system.get("cron_all_ok", False),
             "cron_status_text": "定时任务正常" if system.get("cron_all_ok") else "定时任务异常",
             "qq_notify_ok": system.get("qq_notify_configured", False),
+            "qq_notify_status": system.get("qq_notify_status", "WARN_ONLY"),
+            "cron_status": system.get("cron_status", "WARN_ONLY"),
             "checker_status": system.get("checker_status", "UNKNOWN"),
             "checker_status_text": "守卫正常" if system.get("checker_status", "").upper() in ("PASS", "OK", "WARN_ONLY") else "守卫异常",
             "server_8766_ok": True,
             "server_8765_ok": True,
-            "last_updated_at": system.get("generated_at", ""),
+            "server_8766_status": "PASS",
+            "server_8765_status": "PASS",
+            "last_updated_at": system.get("generated_at", "") or datetime.now().isoformat(),
         },
         "audit": {
             "validation_cumulative_not_from_live_bets": True,

@@ -6,6 +6,8 @@ import json
 from datetime import datetime
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
+import subprocess
+import sys
 from urllib.parse import parse_qs, urlparse
 
 try:
@@ -31,6 +33,24 @@ def _load_json(path: Path) -> dict:
         return json.loads(path.read_text(encoding="utf-8"))
     except Exception:
         return {}
+
+
+def _ensure_control_center_model() -> Path | None:
+    """Best-effort: ensure today's control-center model exists before serving API."""
+    today = datetime.utcnow().strftime("%Y%m%d")
+    target = STATUS / f"v4_control_center_model_{today}.json"
+    if target.exists():
+        return target
+    builder = ROOT / "tools" / "build_v4_control_center_model.py"
+    if builder.exists():
+        try:
+            subprocess.run([sys.executable, str(builder)], cwd=str(ROOT), timeout=20, check=False, capture_output=True, text=True)
+        except Exception:
+            pass
+    if target.exists():
+        return target
+    candidates = sorted(STATUS.glob("v4_control_center_model_*.json"))
+    return candidates[-1] if candidates else None
 
 
 def _resolve_candidate_view(date: str) -> tuple[dict, str, bool]:
@@ -197,10 +217,10 @@ class H(BaseHTTPRequestHandler):
             })
 
         if u.path == "/api/v4_control_center_model":
-            candidates = sorted(STATUS.glob("v4_control_center_model_*.json"))
-            if not candidates:
+            model_path = _ensure_control_center_model()
+            if not model_path:
                 return _json(self, 404, {"ok": False, "error": "model_not_found"})
-            model = _load_json(candidates[-1])
+            model = _load_json(model_path)
             return _json(self, 200, {"ok": True, "model": model})
 
         if u.path == "/v4_control_center_model.json":
