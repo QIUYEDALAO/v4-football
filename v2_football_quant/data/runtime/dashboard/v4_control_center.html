@@ -72,17 +72,31 @@ button{cursor:pointer}
 .primary-layout{
   grid-template-columns:1.25fr .75fr;
   margin-top:10px;
-  align-items:stretch;
-  --action-zone-h:560px;
-  --action-zone-h-two:560px;
-  --action-zone-h-four:980px;
+  align-items:start;
+  --pane-h:440px;
+  --action-zone-h:var(--pane-h);
+  --action-zone-h-two:440px;
+  --action-zone-h-four:440px;
 }
 .primary-layout.mode-2{--action-zone-h:var(--action-zone-h-two)}
 .primary-layout.mode-4{--action-zone-h:var(--action-zone-h-four)}
-.primary-layout>.card{height:var(--action-zone-h);min-height:var(--action-zone-h)}
-.side-sticky{position:static;overflow:auto}
-.candidate-panel{display:flex;flex-direction:column;overflow:hidden}
-.candidate-list{flex:1;overflow:auto;padding-right:3px}
+.side-sticky{
+  position:static;
+  align-self:start;
+  height:var(--action-zone-h);
+  min-height:var(--action-zone-h);
+  max-height:var(--action-zone-h);
+  overflow:auto;
+}
+.candidate-panel{
+  display:flex;
+  flex-direction:column;
+  overflow:hidden;
+  height:var(--pane-h);
+  min-height:var(--pane-h);
+  max-height:var(--action-zone-h);
+}
+.candidate-list{overflow:auto;padding-right:3px;max-height:calc(var(--action-zone-h) - 74px)}
 .candidate-list::-webkit-scrollbar{width:8px}
 .candidate-list::-webkit-scrollbar-thumb{background:rgba(143,165,196,.32);border-radius:999px}
 .candidate-list{
@@ -228,12 +242,12 @@ th{color:var(--muted);font-weight:650}
 @media(max-width:980px){
   .kpi-grid{grid-template-columns:repeat(3,1fr)}
   .primary-layout,.module-grid,.chart-layout{grid-template-columns:1fr}
-  .primary-layout>.card{height:auto;min-height:unset}
+  .candidate-panel{height:auto;min-height:unset;max-height:none}
   .summary-grid{grid-template-columns:repeat(2,1fr)}
   .quick-form{grid-template-columns:repeat(2,1fr)}
   .quick-form button{grid-column:1/-1}
-  .side-sticky{position:static;max-height:none;overflow:visible}
-  .candidate-list{overflow:visible;grid-template-columns:1fr}
+  .side-sticky{position:static;height:auto;min-height:unset;max-height:none;overflow:visible}
+  .candidate-list{overflow:visible;grid-template-columns:1fr;max-height:none}
 }
 @media(max-width:540px){
   .app{padding:10px 9px 84px}
@@ -327,7 +341,7 @@ th{color:var(--muted);font-weight:650}
       </div>
       <div class="summary-grid">
         <div class="stat"><span class="label">当前本金</span><b id="snapBankroll">30000</b></div>
-        <div class="stat"><span class="label">投注本金</span><b id="snapStake">428</b></div>
+        <div class="stat"><span class="label">今日已投</span><b id="snapStake">0</b></div>
         <div class="stat"><span class="label">投注盈亏</span><b id="snapGross">0</b></div>
         <div class="stat"><span class="label">有效流水</span><b id="snapTurnover">0</b></div>
         <div class="stat"><span class="label">返水</span><b id="snapRebate">0</b></div>
@@ -498,16 +512,25 @@ function sortCandidates(list){
 }
 
 async function loadModel(manual=false){
+  let parsed=null;
   try{
     const r=await fetch('/api/v4_control_center_model',{cache:'no-store'});
     if(!r.ok){ throw new Error(`HTTP_${r.status}`); }
     const txt=await r.text();
-    let d={};
-    try{ d=JSON.parse(txt); }catch(_){ throw new Error('MODEL_JSON_PARSE_FAILED'); }
-    MODEL=normalizeModel(d.model||d);
+    try{ parsed=JSON.parse(txt); }catch(_){ throw new Error('MODEL_JSON_PARSE_FAILED'); }
+  }catch(e){
+    console.error(e);
+    toast(`数据读取失败: ${String(e.message||e)}`);
+    return;
+  }
+  try{
+    MODEL=normalizeModel(parsed.model||parsed);
     renderAll();
     if(manual) toast('数据已刷新');
-  }catch(e){ console.error(e); toast('数据读取失败'); }
+  }catch(e){
+    console.error(e);
+    toast(`页面渲染异常: ${String(e.message||e)}`);
+  }
 }
 
 function renderAll(){renderTop();renderCandidates();renderSide();renderSystem();renderModules();}
@@ -554,8 +577,14 @@ function renderCandidates(){
   const list=sortCandidates(demoCount?buildDemoCandidates(base,demoCount):base);
   const skip=getSkipItems();
   const el=$('candidateList');
+  const layout=document.querySelector('.primary-layout');
   DISPLAY_CANDIDATES=list;
   el.innerHTML=list.length?list.map((x,i)=>renderCandidate(x,i)).join(''):'<div class="note">今日暂无 A/B 正式候选。</div>';
+  el.classList.toggle('single-item', list.length===1);
+  if(layout){
+    layout.classList.toggle('mode-4', list.length>2);
+    layout.classList.toggle('mode-2', list.length<=2);
+  }
   $('skipLine').style.display='none';
   if(demoCount){ toast(`临时演示已启用：${demoCount}场（A级优先→按开赛时间）`); }
 }
@@ -620,8 +649,14 @@ function renderSide(){
     }).join('') : `<div class="todo"><div class="meta">当前无待结算订单</div></div>`;
   }
 
+  const crossDayOpen = Number(first(live.cross_day_open_bets_count,0));
+  const settleMetaEl = document.querySelector('.todo .meta');
+  if(settleMetaEl && crossDayOpen>0){
+    settleMetaEl.textContent = `跨日待结算 ${crossDayOpen} 笔（不计入今日已投）`;
+  }
+
   $('snapBankroll').textContent=num(first(live.current_bankroll,30000));
-  $('snapStake').textContent=num(first(live.today_stake,0));
+  $('snapStake').textContent=num(first(live.today_real_stake,live.today_stake,0));
   const kGross='today_'+'gross'+'_pnl';
   const g=Number(first(live[kGross],0)); $('snapGross').textContent=`${g>=0?'+':''}${num(g)}`;
   $('snapTurnover').textContent=num(first(live.today_effective_turnover,0));
@@ -678,6 +713,7 @@ function renderModules(){
   const top=MODEL.top_status||{};
   const y=top.yesterday_validation||{};
   const c=top.cumulative_validation||{};
+  const ss=MODEL.system_status||{};
   $('modValidationA').textContent=safe(first(top.yesterday_a_text,y.A),'N/A');
   $('modValidationB').textContent=safe(first(top.yesterday_b_text,y.B),'N/A');
   $('modValidationAB').textContent=safe(first(top.yesterday_ab_text,y.AB),'N/A');
