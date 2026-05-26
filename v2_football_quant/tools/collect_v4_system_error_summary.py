@@ -45,6 +45,14 @@ ERROR_KEYWORDS = [
     "incomplete", "stale", "hung",
 ]
 
+SELF_FEEDBACK_EXCLUDES = [
+    re.compile(r"^v4_system_error_summary_\d{8}\.json$"),
+    re.compile(r"^v4_control_center_system_error_center_.*\.json$"),
+    re.compile(r"^v4_system_error_center_checker_.*\.json$"),
+    re.compile(r"^v4_system_error_center_http_verify_.*\.json$"),
+    re.compile(r"^v4_system_error_center_git_manifest_.*\.json$"),
+]
+
 COMPONENT_MAP = {
     "cron": "cron",
     "checker": "checker",
@@ -102,6 +110,85 @@ def _resolve_severity(filepath: Path, content_preview: str) -> str:
     return "INFO"
 
 
+def _is_self_feedback_file(fp: Path) -> bool:
+    name = fp.name
+    return any(rx.match(name) for rx in SELF_FEEDBACK_EXCLUDES)
+
+
+def _truthy(v: object) -> bool:
+    if isinstance(v, bool):
+        return v
+    if isinstance(v, (int, float)):
+        return v != 0
+    if isinstance(v, str):
+        return v.strip().lower() in {"1", "true", "yes", "y", "ok", "pass"}
+    return False
+
+
+def _status_from_json_obj(obj: dict) -> tuple[str, bool, str]:
+    """
+    基于 JSON 结构做状态判定（优先级高于文件名关键词）:
+    返回: (severity, resolved_hint, reason)
+    """
+    if not isinstance(obj, dict):
+        return "INFO", False, "non-dict json"
+
+    def up(x):
+        return str(x or "").strip().upper()
+
+    final_status = up(obj.get("final_status"))
+    conclusion = up(obj.get("conclusion"))
+    status = up(obj.get("status"))
+    checker_pass = _truthy(obj.get("checker_pass"))
+    all_pass = obj.get("all_pass")
+    ok = obj.get("ok")
+    blocker_count = int(obj.get("blocker_count") or 0)
+    fail_count = int(obj.get("fail_count") or 0)
+    active_blocker_count = int(obj.get("active_blocker_count") or 0)
+    active_error_count = int(obj.get("active_error_count") or 0)
+    exit_code = obj.get("exit_code")
+    traceback = obj.get("traceback")
+    exception = obj.get("exception")
+    blockers = obj.get("blockers")
+    errors = obj.get("errors")
+    failed = obj.get("failed")
+
+    # PASS 信号（命中任一条则不可进入 ACTIVE）
+    pass_signal = (
+        final_status == "PASS"
+        or conclusion == "PASS"
+        or status == "PASS"
+        or checker_pass
+        or (_truthy(all_pass) if all_pass is not None else False)
+        or ((_truthy(ok) if ok is not None else False) and (isinstance(blockers, list) and len(blockers) == 0))
+        or (blocker_count == 0 and fail_count == 0 and blocker_count + fail_count > -1)
+        or (active_blocker_count == 0 and active_error_count == 0 and (("active_blocker_count" in obj) or ("active_error_count" in obj)))
+        or (isinstance(blockers, list) and len(blockers) == 0 and "blockers" in obj)
+        or (isinstance(errors, list) and len(errors) == 0 and "errors" in obj)
+        or (isinstance(failed, bool) and failed is False)
+    )
+
+    # 真实异常信号
+    hard_blocker = final_status in {"BLOCKER", "BLOCKED"} or conclusion in {"BLOCKER", "BLOCKED"} or status in {"BLOCKER", "BLOCKED"}
+    hard_fail = final_status == "FAIL" or conclusion == "FAIL" or status == "FAIL"
+    has_runtime_err = bool(traceback) or bool(exception) or (isinstance(exit_code, int) and exit_code != 0)
+    has_counts = (blocker_count > 0) or (fail_count > 0) or (active_blocker_count > 0) or (active_error_count > 0)
+    has_lists = (isinstance(blockers, list) and len(blockers) > 0) or (isinstance(errors, list) and len(errors) > 0)
+    all_pass_false = (all_pass is not None and not _truthy(all_pass)) or (ok is not None and not _truthy(ok))
+
+    if pass_signal and not (hard_blocker or hard_fail or has_runtime_err or has_counts or has_lists or all_pass_false):
+        return "INFO", True, "json PASS signal"
+
+    if hard_blocker or active_blocker_count > 0 or blocker_count > 0:
+        return "BLOCKER", False, "json blocker signal"
+    if hard_fail or fail_count > 0 or has_runtime_err or all_pass_false:
+        return "FAIL", False, "json fail signal"
+    if has_lists or active_error_count > 0:
+        return "WARN", False, "json warn signal"
+
+    return "INFO", False, "json neutral"
+
+
 def _extract_title(filepath: Path, content_preview: str) -> str:
     """从文件名和内容提取标题。"""
     stem = filepath.stem
@@ -132,6 +219,8 @@ def collect_status_errors(hours: int) -> list[dict]:
         return items
 
     for fp in sorted(STATUS_DIR.glob("*.json"), key=os.path.getmtime, reverse=True):
+        if _is_self_feedback_file(fp):
+            continue
         mtime = datetime.fromtimestamp(os.path.getmtime(fp), tz=timezone.utc)
         if mtime < cutoff:
             continue
@@ -144,13 +233,24 @@ def collect_status_errors(hours: int) -> list[dict]:
         component = _detect_component(fp)
         severity = _resolve_severity(fp, content)
         title = _extract_title(fp, content)
+        resolved_hint = False
+        parse_reason = "keyword_fallback"
+
+        # 结构化 JSON 优先判定
+        try:
+            obj = json.loads(content)
+            if isinstance(obj, dict):
+                s2, resolved_hint, parse_reason = _status_from_json_obj(obj)
+                severity = s2
+        except Exception:
+            pass
 
         # 只收集 WARN 及以上
         if severity not in ("BLOCKER", "FAIL", "WARN"):
             continue
 
         # 检查是否已被后续 PASS 覆盖
-        resolved = _check_resolved(fp, component, title)
+        resolved = resolved_hint or _check_resolved(fp, component, title)
 
         scrubbed_summary, was_redacted = scrub_text(content[:500])
         items.append({
@@ -162,6 +262,7 @@ def collect_status_errors(hours: int) -> list[dict]:
             "severity": severity,
             "title": title,
             "summary": _extract_summary(scrubbed_summary),
+            "parse_reason": parse_reason,
             "impact": _infer_impact(component, severity),
             "suggested_action": _suggested_action(component, severity),
             "active": not resolved,
