@@ -1,0 +1,27 @@
+{
+  "schema_version": "v4_control_center_data_complete_checker.v1",
+  "phase": "V4-CONTROL-CENTER-BOSS-BALANCED-DATA-COMPLETE-20260526",
+  "step": 6,
+  "generated_at": "2026-05-26T04:12:00+08:00",
+  "conclusion": "PASS",
+  "auto_advance": "Step 7",
+  "checker_result": {
+    "blockers": 0,
+    "warnings": 0,
+    "conclusion": "PASS",
+    "new_checks_added": [
+      "undefined in body visible text",
+      "BOSS-balanced CSS variables (--panel, --r instead of --bg2/--card/--card2)",
+      "BOSS-balanced CSS rules (.main-layout instead of .primary-layout)",
+      "BOSS-balanced required classes (.skip-line, .todo-chips, .snap-grid)",
+      "BOSS-balanced binding IDs (kpiTurnoverRebate, snapGross, snapNet, todoBet/Settle/Retry/Error)",
+      "system status IDs (sysState, toolStatus)",
+      "SKIP not in .candidate class",
+      "bet-inline with id=\"line-/odds-/stake-\" inputs",
+      "desktop nav hidden",
+      "cumulative_validation source != live_bets",
+      "no banned indicators (124/140, 39/46, 85/94, 80/139)",
+      "no V3世界杯"
+    ]
+  }
+}

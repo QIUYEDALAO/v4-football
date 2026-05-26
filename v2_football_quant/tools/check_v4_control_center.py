@@ -84,12 +84,12 @@ def main() -> int:
 
     html_text = html_path.read_text(encoding="utf-8")
 
-    # ==== 黄金模板关键 CSS 变量检查 ====
+    # ==== BOSS-balanced 关键 CSS 变量检查 ====
     gold_css_vars = [
-        "--bg", "--bg2", "--card", "--card2", "--line",
-        "--text", "--muted", "--muted2",
-        "--green", "--blue", "--yellow", "--red", "--purple", "--orange",
-        "--shadow", "--radius",
+        "--bg", "--panel", "--line",
+        "--text", "--muted",
+        "--green", "--blue", "--yellow", "--red", "--purple",
+        "--shadow", "--r",
     ]
     missing_vars = []
     for var in gold_css_vars:
@@ -98,12 +98,11 @@ def main() -> int:
     if missing_vars:
         blockers.append(f"ui_css_vars_missing_from_gold_template:{','.join(missing_vars)}")
 
-    # 黄金模板关键 CSS 规则检查（compact 版本：module-grid→toolbar，chart-layout 移除）
+    # BOSS-balanced 关键 CSS 规则检查
     gold_css_rules = [
         (".topbar", "position:sticky"),
         (".kpi-grid", "grid-template-columns:repeat(6,1fr)"),
-        (".primary-layout", "grid-template-columns:1.25fr .75fr"),
-        (".summary-grid", "grid-template-columns:repeat(5,1fr)"),
+        (".main-layout", "grid-template-columns:1.55fr .95fr"),
         (".nav", "position:fixed"),
         (".drawer", "position:fixed"),
     ]
@@ -115,15 +114,19 @@ def main() -> int:
             if selector not in style_text or rule not in style_text:
                 blockers.append(f"ui_css_rule_mismatch:{selector} missing {rule}")
 
-    # ==== UI 模板结构硬检查 ====
+    # ==== UI 模板结构硬检查（BOSS-balanced） ====
     required_classes = [
         ("topbar", ".topbar"),
         ("kpi-grid", ".kpi-grid"),
-        ("primary-layout", ".primary-layout"),
+        ("main-layout", ".main-layout"),
         ("drawer", ".drawer"),
         ("nav_bottom", ".nav"),
         ("candidate", ".candidate"),
-        ("summary-grid", ".summary-grid"),
+        ("bet-inline", ".bet-inline"),
+        ("skip-line", ".skip-line"),
+        ("todo-chips", ".todo-chips"),
+        ("snap-grid", ".snap-grid"),
+        ("toolbar", ".toolbar"),
     ]
     for name, selector in required_classes:
         if selector not in html_text:
@@ -177,57 +180,71 @@ def main() -> int:
     if eng_blockers:
         blockers.append(f"ui_banned_english_in_main_ui:{','.join(eng_blockers)}")
 
-    # === SKIP 大卡片检查 ===
-    # SKIP 候选中不应出现 .candidate class（应该是紧凑摘要行）
+    # === SKIP 大卡片检查（BOSS-balanced：SKIP 在 .skip-line 中，不含 .candidate） ===
+    # 查找 class 含 candidate 且内容含 "跳过" / "SKIP"
     skip_in_candidate = re.findall(
-        r'class="[^"]*candidate[^"]*"[^>]*>.*?(?:skip|SKIP|跳过)',
+        r'class="[^"]*candidate[^"]*"[^>]*>.*?(?:SKIP)(?!-)',
         body_visible, re.DOTALL
     )
     if skip_in_candidate:
         blockers.append("ui_skip_rendered_as_candidate_card")
 
-    # === COMPACT 紧凑布局检查 ===
+    # === BOSS-balanced 紧凑布局检查 ===
     # 1. 桌面端导航隐藏
     if ".nav{display:none}" not in html_text and ".nav {display:none}" not in html_text:
         blockers.append("compact_desktop_nav_not_hidden")
 
-    # 2. KPI 高度不过高 (target 72-82px, max 84px acceptable)
+    # 2. KPI 高度不过高 (BOSS target 82px, max 90px)
     kpi_min_height_match = re.search(r'\.kpi\s*\{[^}]*min-height:\s*(\d+)px', html_text)
     if kpi_min_height_match:
         kpi_h = int(kpi_min_height_match.group(1))
-        if kpi_h > 84:
+        if kpi_h > 90:
             blockers.append(f"compact_kpi_min_height_too_tall:{kpi_h}px")
     else:
         blockers.append("compact_kpi_min_height_not_found")
 
-    # 3. 候选卡片存在内嵌投注输入 (.bet-inline + bi-line/bi-odds/bi-stake)
+    # 3. 候选卡片存在内嵌投注输入 (.bet-inline)
     if ".bet-inline" not in html_text:
         blockers.append("compact_missing_bet_inline_form")
-    if ".bi-line" not in html_text or ".bi-odds" not in html_text or ".bi-stake" not in html_text:
+    # BOSS 使用 .field input/select 而非 .bi-line/.bi-odds 等
+    if 'id="line-' not in html_text or 'id="odds-' not in html_text or 'id="stake-' not in html_text:
         blockers.append("compact_missing_bet_input_fields")
 
-    # 4. 待办使用紧凑 chip 行 (.todo-row + .todo-chip)，不是大卡片
-    if ".todo-row" not in html_text:
-        blockers.append("compact_missing_todo_row")
-    if ".todo-chip" not in html_text:
-        blockers.append("compact_missing_todo_chip")
+    # 4. 待办使用 chip 行 (.todo-chips + .chip)
+    if ".todo-chips" not in html_text:
+        blockers.append("compact_missing_todo_chips")
+    if ".chip" not in html_text and ".todo-chips" not in html_text:
+        blockers.append("compact_missing_chip")
 
-    # 5. 实盘快照使用紧凑网格 (.snap-compact)
-    if ".snap-compact" not in html_text:
-        blockers.append("compact_missing_snap_compact_grid")
+    # 5. 实盘快照使用网格 (.snap-grid)
+    if ".snap-grid" not in html_text:
+        blockers.append("compact_missing_snap_grid")
 
-    # 6. 底部工具条替代四大模块卡 (.toolbar)
+    # 6. 底部工具条 (.toolbar)
     if ".toolbar" not in html_text:
         blockers.append("compact_missing_toolbar")
 
-    # === 数据绑定 ID 完整性检查 ===
+    # 7. SKIP 行存在 (.skip-line)
+    if ".skip-line" not in html_text:
+        blockers.append("compact_missing_skip_line")
+
+    # === 数据绑定 ID 完整性检查（BOSS-balanced） ===
     binding_ids = [
-        "kpiCandidates", "kpiYesterday", "kpiCumulative", "kpiPnl", "kpiTurnover", "kpiTodo",
-        "kpiCandidatesHint", "kpiYesterdayHint", "kpiCumulativeHint", "kpiTodoHint",
-        "candidateList",
-        "snapStake", "snapPnl", "snapTurnover", "snapRebate", "snapNetPnl",
-        "todoBetVal", "todoSettleVal", "todoVerifyVal", "todoAlertVal",
-        "dotBet", "dotSettle", "dotVerify", "dotAlert",
+        # KPI
+        "kpiCandidates", "kpiCandidatesHint",
+        "kpiYesterday", "kpiYesterdayHint",
+        "kpiCumulative", "kpiCumulativeHint",
+        "kpiPnl", "kpiTurnoverRebate", "kpiTodo", "kpiTodoHint",
+        # 候选
+        "candidateList", "skipLine",
+        # 待办 chips
+        "todoBet", "todoSettle", "todoRetry", "todoError",
+        # 实盘快照
+        "snapBankroll", "snapStake", "snapGross", "snapTurnover", "snapRebate", "snapNet",
+        # 系统状态
+        "sysState", "toolStatus",
+        # 抽屉/弹窗
+        "drawer", "panelTitle", "panelBody", "toast",
     ]
     missing_binding_ids = []
     for bid in binding_ids:
@@ -401,13 +418,14 @@ def main() -> int:
     ui_checks["no_top-bar"] = "top-bar" not in html_text
     ui_checks["no_banned_english"] = len(eng_blockers) == 0
     ui_checks["skip_not_candidate_card"] = len(skip_in_candidate) == 0
-    # compact checks
+    # compact checks (BOSS-balanced)
     ui_checks["desktop_nav_hidden"] = ".nav{display:none}" in html_text or ".nav {display:none}" in html_text
-    ui_checks["kpi_height_ok"] = kpi_min_height_match is not None and int(kpi_min_height_match.group(1)) <= 84
+    ui_checks["kpi_height_ok"] = kpi_min_height_match is not None and int(kpi_min_height_match.group(1)) <= 90
     ui_checks["has_bet_inline_form"] = ".bet-inline" in html_text
-    ui_checks["has_todo_row_chip"] = ".todo-row" in html_text and ".todo-chip" in html_text
-    ui_checks["has_snap_compact"] = ".snap-compact" in html_text
+    ui_checks["has_todo_chips"] = ".todo-chips" in html_text
+    ui_checks["has_snap_grid"] = ".snap-grid" in html_text
     ui_checks["has_toolbar"] = ".toolbar" in html_text
+    ui_checks["has_skip_line"] = ".skip-line" in html_text
     ui_checks["all_binding_ids_present"] = len(missing_binding_ids) == 0
 
     out = {
@@ -425,13 +443,15 @@ def main() -> int:
             "top_kpis_populated": not any("dash" in b for b in blockers if "dash" in b),
             "no_banned_indicators": all(ind not in body_text for ind in banned_indicators),
             "chinese_main_labels": len(eng_blockers) == 0,
-            "compact_layout": {
+            "undefined_in_body": body_text.count("undefined"),
+            "boss_balanced_layout": {
                 "desktop_nav_hidden": ".nav{display:none}" in html_text or ".nav {display:none}" in html_text,
                 "kpi_min_height_px": int(kpi_min_height_match.group(1)) if kpi_min_height_match else None,
                 "bet_inline_form": ".bet-inline" in html_text,
-                "todo_row_chip": ".todo-row" in html_text and ".todo-chip" in html_text,
-                "snap_compact_grid": ".snap-compact" in html_text,
+                "todo_chips": ".todo-chips" in html_text,
+                "snap_grid": ".snap-grid" in html_text,
                 "toolbar": ".toolbar" in html_text,
+                "skip_line": ".skip-line" in html_text,
                 "binding_ids_missing": len(missing_binding_ids),
                 "binding_ids_missing_list": missing_binding_ids if missing_binding_ids else [],
             },

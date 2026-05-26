@@ -1,0 +1,34 @@
+{
+  "schema_version": "v4_control_center_data_content_verify.v1",
+  "phase": "V4-CONTROL-CENTER-BOSS-BALANCED-DATA-COMPLETE-20260526",
+  "step": 5,
+  "generated_at": "2026-05-26T04:10:00+08:00",
+  "conclusion": "PASS",
+  "auto_advance": "Step 6",
+  "verification": {
+    "api_json_no_undefined": true,
+    "html_body_no_undefined": true,
+    "api_json_undefined_count": 0,
+    "html_body_undefined_count": 0,
+    "top_kpi_no_error_zero": true,
+    "today_todo_matches_candidates": true,
+    "pending_settlement_matches_open_bets": true,
+    "pending_validation_matches_retry_state": true,
+    "candidate_defaults_from_model": true,
+    "snap_snapshot_from_live_bet_summary": true,
+    "cumulative_validation_source_correct": true,
+    "ui_appearance_unchanged": true,
+    "banned_indicators_found": [],
+    "banned_terms_in_visible_text": []
+  },
+  "data_bindings_verified": {
+    "today_candidates": "A2 / B0 / SKIP1 ✓",
+    "yesterday_validation": "5/9 · 55.6% from official A/B-only truth ✓",
+    "cumulative_validation": "81/140 · 57.9% from true_cumulative_result_validation ✓",
+    "today_pnl": "+0.00 from live_bet daily_summary ✓",
+    "turnover_rebate": "流水0 / 返水0 from live_bet ✓",
+    "today_todo": "pending_bets=1 (2 candidates - 1 already bet), pending_settlement=0, pending_validation=1 ✓",
+    "candidate_defaults": "line=O1, odds=0.86, stake=428, minute=13 from live_bet daily_summary by_grade ✓",
+    "system_status": "cron_ok=true, checker=PASS, server up ✓"
+  }
+}

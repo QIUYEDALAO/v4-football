@@ -1,0 +1,59 @@
+{
+  "schema_version": "v4_control_center_boss_balanced_data_freeze.v1",
+  "phase": "V4-CONTROL-CENTER-BOSS-BALANCED-DATA-COMPLETE-20260526",
+  "step": 1,
+  "generated_at": "2026-05-26T04:00:00+08:00",
+  "conclusion": "PASS",
+  "auto_advance": "Step 2",
+  "ui_frozen": {
+    "boss_accepted": true,
+    "bet_inline_in_candidate": true,
+    "skip_one_line_summary": true,
+    "desktop_nav_hidden": true,
+    "todo_snapshot_right_side": true,
+    "toolbar_at_bottom": true,
+    "css_unchanged": true,
+    "layout_unchanged": true
+  },
+  "data_gaps_found": {
+    "undefined_in_html": 3,
+    "undefined_note": "3 occurrences are in safe() function definition (v===undefined check), not in rendered output",
+    "hardcoded_candidate_defaults": {
+      "odds": "0.86 (hardcoded in renderCandidate)",
+      "stake": "428 (hardcoded in renderCandidate)",
+      "minute": "13 (hardcoded in renderCandidate)",
+      "line": "O1 selected (hardcoded)"
+    },
+    "top_status_today_todo": {
+      "pending_bets": "0 but display says 2 — INCONSISTENT",
+      "pending_settlement": "0 — correct if no open bets",
+      "pending_validation": "1 — from retry_state",
+      "system_alerts": "0"
+    },
+    "candidate_missing_fields": [
+      "default_line",
+      "default_odds",
+      "default_stake",
+      "default_entry_minute",
+      "recommended_lines",
+      "ht_index",
+      "script (has script_type instead)",
+      "rating (has grade instead)"
+    ],
+    "model_missing_sections": [
+      "live_bet_summary (has live_bet instead)",
+      "todo_summary (has top_status.today_todo instead)",
+      "system_status (has system cron_tasks but no aggregated status)",
+      "open_bets_count",
+      "settled_bets_count",
+      "void_bets_count"
+    ],
+    "js_stubs": [
+      "addBet(i) only shows toast, doesn't submit",
+      "kpiTodoHint never updated by JS",
+      "system state pill hardcoded '系统运行中'",
+      "toolbar status hardcoded '定时任务正常'",
+      "candidate tag '未投注' is hardcoded"
+    ]
+  }
+}

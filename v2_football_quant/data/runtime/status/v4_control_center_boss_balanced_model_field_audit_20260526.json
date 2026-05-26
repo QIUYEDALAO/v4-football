@@ -1,0 +1,49 @@
+{
+  "schema_version": "v4_control_center_model_field_audit.v1",
+  "phase": "V4-CONTROL-CENTER-BOSS-BALANCED-DATA-COMPLETE-20260526",
+  "step": 2,
+  "generated_at": "2026-05-26T04:05:00+08:00",
+  "conclusion": "FAIL",
+  "auto_advance": "Step 3",
+  "field_audit": {
+    "top_status.today_candidates": {"exists": true, "has_a_b_skip": true, "display_ok": true},
+    "top_status.yesterday_validation": {"exists": true, "has_A_B_AB_display": true, "has_A_B_detail": true},
+    "top_status.cumulative_validation": {"exists": true, "source": "official A/B-only truth file", "correct_source": true, "display": "81/140 · 57.9%"},
+    "top_status.today_pnl": {"exists": true, "gross_pnl": 0, "net_pnl": 0},
+    "top_status.turnover_and_rebate": {"exists": true, "effective_turnover": 0, "rebate": 0},
+    "top_status.today_todo": {
+      "exists": true,
+      "pending_bets": "0 — BUG: should be 2 (A2+B0 candidates), current formula effective_bet_records-settled_records is wrong",
+      "pending_settlement": "0 — correct if all settled",
+      "pending_validation": "1 — from retry_state pending AB",
+      "system_alerts": "0",
+      "display": "correctly shows 待投注2 but pending_bets field contradicts"
+    },
+    "candidates": {
+      "a_candidates": "2 items with fixture_id, league, home_cn, away_cn, kickoff_time, grade, script_type ✓",
+      "b_candidates": "0 items",
+      "skip_candidates": "3 items ✓",
+      "missing_fields_per_candidate": ["default_line", "default_odds", "default_stake", "default_entry_minute", "recommended_lines", "ht_index"]
+    },
+    "live_bet": {
+      "today": {"stake_amount": 428.0, "gross_pnl": 0, "effective_turnover": 0, "rebate": 0, "net_pnl": 0, "records": 4, "effective_bet_records": 1, "settled_records": 1},
+      "cumulative": {"current_bankroll": 30000.0, "cumulative_stake_amount": 856.0},
+      "missing_fields": ["open_bets_count", "settled_bets_count", "void_bets_count"]
+    },
+    "system": {
+      "has_cron_tasks": true,
+      "missing_aggregated_status": "no system_status section with cron_status/qq_notify_status/checker_status/server_status"
+    },
+    "todo_summary_top_level": {"exists": false, "note": "data is in top_status.today_todo, JS uses td=top.today_todo ✓"},
+    "live_bet_summary_top_level": {"exists": false, "note": "data is in live_bet, JS fallback chain includes MODEL.live_bet ✓"}
+  },
+  "fixes_needed": [
+    "Fix today_todo.pending_bets formula in model builder",
+    "Add default_line, default_odds, default_stake, default_entry_minute to each candidate",
+    "Add open_bets_count, settled_bets_count, void_bets_count to live_bet.today",
+    "Add system_status aggregation section",
+    "Fix frontend renderCandidate to use model defaults instead of hardcoded 0.86/428/13",
+    "Fix frontend addBet stub to actually submit",
+    "Fix frontend system state to read from model instead of hardcoded"
+  ]
+}
