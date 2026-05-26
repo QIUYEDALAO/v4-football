@@ -127,6 +127,10 @@ def _extract_candidates(view: dict, live_daily: dict) -> dict:
             "rating": r.get("grade") or "A",
             "script": r.get("script_type") or "",
             "ht_index": r.get("ht_score"),
+            "distribution_text": r.get("distribution_text") or "",
+            "time_bin_0_15": r.get("time_bin_0_15") if r.get("time_bin_0_15") is not None else (r.get("time_bins") or {}).get("0_15"),
+            "time_bin_16_30": r.get("time_bin_16_30") if r.get("time_bin_16_30") is not None else (r.get("time_bins") or {}).get("16_30"),
+            "time_bin_31_45": r.get("time_bin_31_45") if r.get("time_bin_31_45") is not None else (r.get("time_bins") or {}).get("31_45"),
             "recommended_lines": ["O0.75", "O1", "O1.25", "O1.5", "O2"],
             "already_bet": False,
             "settled": False,
@@ -156,6 +160,10 @@ def _extract_candidates(view: dict, live_daily: dict) -> dict:
             "rating": r.get("grade") or "B",
             "script": r.get("script_type") or "",
             "ht_index": r.get("ht_score"),
+            "distribution_text": r.get("distribution_text") or "",
+            "time_bin_0_15": r.get("time_bin_0_15") if r.get("time_bin_0_15") is not None else (r.get("time_bins") or {}).get("0_15"),
+            "time_bin_16_30": r.get("time_bin_16_30") if r.get("time_bin_16_30") is not None else (r.get("time_bins") or {}).get("16_30"),
+            "time_bin_31_45": r.get("time_bin_31_45") if r.get("time_bin_31_45") is not None else (r.get("time_bins") or {}).get("31_45"),
             "recommended_lines": ["O0.75", "O1", "O1.25", "O1.5", "O2"],
             "already_bet": False,
             "settled": False,
@@ -326,6 +334,52 @@ def _extract_system_status(cron: dict) -> dict:
     }
 
 
+def _load_system_error_summary() -> dict:
+    """加载最新系统异常摘要；如不存在则自动运行采集器；失败时返回安全 fallback。"""
+    import subprocess
+
+    candidates = sorted(STATUS.glob("v4_system_error_summary_*.json"))
+    if candidates:
+        data = _load_json(candidates[-1])
+        if data and data.get("system_error_status"):
+            return data
+
+    # 自动运行采集器
+    try:
+        collector = ROOT / "tools" / "collect_v4_system_error_summary.py"
+        if collector.exists():
+            cp = subprocess.run(
+                ["python3", str(collector), "--hours", "48", "--limit", "20"],
+                capture_output=True, text=True, timeout=30,
+                cwd=str(ROOT),
+            )
+            if cp.returncode == 0:
+                # 重新查找输出文件
+                candidates2 = sorted(STATUS.glob("v4_system_error_summary_*.json"))
+                if candidates2:
+                    data = _load_json(candidates2[-1])
+                    if data and data.get("system_error_status"):
+                        return data
+    except Exception:
+        pass
+
+    return {
+        "active_error_count": 0,
+        "active_blocker_count": 0,
+        "recent_error_count_24h": 0,
+        "recent_error_count_48h": 0,
+        "system_error_status": "PASS",
+        "display_text": "当前无 active 异常",
+        "active_items": [],
+        "recent_items": [],
+        "generated_at": datetime.now().isoformat(),
+        "scan_window_hours": 48,
+        "safe_to_show": True,
+        "raw_logs_hidden": True,
+        "read_only_collector": True,
+    }
+
+
 def build_model() -> dict:
     today_str = datetime.now().strftime("%Y%m%d")
 
@@ -352,19 +406,7 @@ def build_model() -> dict:
     cron_path, cron = _find_latest_cron_checker()
     system = _extract_system_status(cron)
 
-    # 计算真实待办
-    ab_candidate_count = candidates["a_count"] + candidates["b_count"]
-    by_grade = live_daily.get("by_grade") or {}
-    a_bet_count = (by_grade.get("A") or {}).get("count", 0)
-    b_bet_count = (by_grade.get("B") or {}).get("count", 0)
-    already_bet_ab = a_bet_count + b_bet_count
-    pending_bets = max(0, ab_candidate_count - already_bet_ab)
-    open_bets_count = live_bet["today"]["open_bets_count"]
-    pending_validation = yesterday_validation["pending"]["AB"]
-    system_alerts = 0 if system.get("cron_all_ok", False) else 1
-
     # Fill candidate live states from today's raw records (no rewrite)
-    today_raw = _load_json(LIVE_DIR / f"daily_summary_{today_str}.json")
     raw_records = []
     day_file = LIVE_DIR / f"v4_live_bets_{today_str}.jsonl"
     if day_file.exists():
@@ -376,25 +418,82 @@ def build_model() -> dict:
                 except Exception:
                     pass
     by_fixture: dict[str, dict[str, Any]] = {}
+    open_bet_items: list[dict[str, Any]] = []
     for rec in raw_records:
+        if bool(rec.get("is_test")):
+            continue
         fid = str(rec.get("fixture_id") or "")
         if not fid:
             continue
-        by_fixture[fid] = rec
+        # keep latest by updated_at/created_at if duplicated fixture
+        prev = by_fixture.get(fid)
+        if prev is None:
+            by_fixture[fid] = rec
+        else:
+            by_fixture[fid] = rec if str(rec.get("updated_at") or rec.get("created_at") or "") >= str(prev.get("updated_at") or prev.get("created_at") or "") else prev
+
+        bet_status = str(rec.get("bet_status") or "").upper()
+        settlement_result = str(rec.get("settlement_result") or "PENDING").upper()
+        if bet_status in {"BET", "PENDING"} and settlement_result == "PENDING":
+            open_bet_items.append({
+                "date": rec.get("date") or today_str,
+                "bet_id": rec.get("bet_id"),
+                "fixture_id": rec.get("fixture_id"),
+                "league": rec.get("league") or "",
+                "home_cn": rec.get("home_cn") or "",
+                "away_cn": rec.get("away_cn") or "",
+                "market_line": rec.get("market_line") or "",
+                "odds_water": rec.get("odds_water"),
+                "stake": rec.get("stake"),
+                "entry_minute": rec.get("entry_minute"),
+                "bet_status": bet_status,
+                "settlement_result": settlement_result,
+            })
+
+    pending_bet_candidates: list[dict[str, Any]] = []
+    already_bet_ab = 0
     for bucket in (candidates.get("a_candidates") or [], candidates.get("b_candidates") or []):
         for arr in bucket:
             if not isinstance(arr, dict):
                 continue
             fid = str(arr.get("fixture_id") or "")
             rec = by_fixture.get(fid)
-            arr["already_bet"] = bool(rec and str(rec.get("bet_status", "")).upper() in {"BET", "SETTLED", "PENDING"})
-            arr["settled"] = bool(rec and str(rec.get("settlement_result", "PENDING")).upper() not in {"PENDING"})
+            bet_status = str((rec or {}).get("bet_status", "")).upper()
+            settlement_result = str((rec or {}).get("settlement_result", "PENDING")).upper()
+            arr["already_bet"] = bool(rec and bet_status in {"BET", "PENDING", "SETTLED"})
+            arr["settled"] = bool(rec and settlement_result not in {"PENDING"})
+            arr["live_bet_status"] = bet_status or "UNMATCHED"
+            arr["settlement_result"] = settlement_result if rec else "UNMATCHED"
+            arr["pending_action"] = "待结算" if (arr["already_bet"] and not arr["settled"]) else ("待投注" if not arr["already_bet"] else "已结算")
+            if arr["already_bet"]:
+                already_bet_ab += 1
+            else:
+                pending_bet_candidates.append({
+                    "fixture_id": arr.get("fixture_id"),
+                    "home_cn": arr.get("home_cn") or "",
+                    "away_cn": arr.get("away_cn") or "",
+                    "grade": arr.get("grade") or "",
+                })
             if rec:
                 arr["default_line"] = rec.get("market_line") or arr.get("default_line")
                 arr["default_odds"] = rec.get("odds_water") if rec.get("odds_water") is not None else arr.get("default_odds")
                 arr["default_stake"] = rec.get("stake") if rec.get("stake") is not None else arr.get("default_stake")
                 arr["default_entry_minute"] = rec.get("entry_minute") or arr.get("default_entry_minute")
                 arr["default_reason"] = "today live bet record override"
+
+    # Canonical todo from fixture-level state (no by_grade reverse inference)
+    ab_candidate_count = candidates["a_count"] + candidates["b_count"]
+    pending_bets = len(pending_bet_candidates)
+    open_bets_count = len(open_bet_items)
+    pending_validation = int((yesterday_validation.get("pending") or {}).get("AB") or 0)
+    retry_items = []
+    if pending_validation > 0:
+        retry_items.append({
+            "type": "validation_retry",
+            "count": pending_validation,
+            "source": "official_pending_source",
+        })
+    system_alerts = 0 if system.get("cron_all_ok", False) else 1
     candidates["items"] = (candidates.get("a_candidates") or []) + (candidates.get("b_candidates") or [])
     skip_node = {
         "items": [
@@ -510,6 +609,10 @@ def build_model() -> dict:
             "to_settle": open_bets_count,
             "to_retry": pending_validation,
             "errors": system_alerts,
+            "pending_bet_candidates": pending_bet_candidates,
+            "open_bet_items": open_bet_items,
+            "retry_items": retry_items,
+            "source": "fixture_id_canonical",
         },
         "live_bet": live_bet,
         "system": system,
@@ -545,6 +648,19 @@ def build_model() -> dict:
             "secrets_printed": False,
         },
     }
+
+    # ── system_errors 接入 ──
+    model["system_errors"] = _load_system_error_summary()
+
+    # 更新 system_status 增加 error 计数
+    se = model["system_errors"]
+    model["system_status"].update({
+        "active_error_count": se.get("active_error_count", 0),
+        "active_blocker_count": se.get("active_blocker_count", 0),
+        "recent_error_count_24h": se.get("recent_error_count_24h", 0),
+        "system_error_status": se.get("system_error_status", "PASS"),
+        "system_error_display": se.get("display_text", "当前无 active 异常"),
+    })
 
     return model
 
