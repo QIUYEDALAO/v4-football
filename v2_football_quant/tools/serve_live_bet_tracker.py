@@ -36,20 +36,15 @@ def _load_json(path: Path) -> dict:
 
 
 def _ensure_control_center_model() -> Path | None:
-    """Best-effort: ensure today's control-center model exists before serving API."""
-    today = datetime.utcnow().strftime("%Y%m%d")
-    target = STATUS / f"v4_control_center_model_{today}.json"
-    if target.exists():
-        return target
+    """Best-effort: always refresh control-center model before serving API."""
     builder = ROOT / "tools" / "build_v4_control_center_model.py"
     if builder.exists():
         try:
             subprocess.run([sys.executable, str(builder)], cwd=str(ROOT), timeout=20, check=False, capture_output=True, text=True)
         except Exception:
             pass
-    if target.exists():
-        return target
-    candidates = sorted(STATUS.glob("v4_control_center_model_*.json"))
+    # Always return the latest generated model by mtime to avoid UTC/local date mismatch.
+    candidates = sorted(STATUS.glob("v4_control_center_model_*.json"), key=lambda p: p.stat().st_mtime)
     return candidates[-1] if candidates else None
 
 

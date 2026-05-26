@@ -72,6 +72,11 @@ def main() -> int:
             bad_active.append((sf, 'blockers=[] in ACTIVE'))
         if sev not in {'BLOCKER', 'FAIL'}:
             bad_active.append((sf, f'ACTIVE severity invalid: {sev}'))
+        if bool(it.get('process_artifact')):
+            bad_active.append((sf, 'process_artifact=true in ACTIVE'))
+        lname = sf.lower()
+        if any(x in lname for x in ('freeze', 'audit', 'verify', 'git_manifest', '_manifest_', 'report')):
+            bad_active.append((sf, 'process file pattern in ACTIVE'))
 
     check('active_has_no_false_positive_pass_items', len(bad_active) == 0, str(bad_active[:8]))
 
@@ -82,6 +87,7 @@ def main() -> int:
     c_active_blk = int(summary.get('active_blocker_count') or 0)
     check('active_error_count_matches', c_active_err == len(unresolved), f'count={c_active_err}, expected={len(unresolved)}')
     check('active_blocker_count_matches', c_active_blk == len(unresolved_blockers), f'count={c_active_blk}, expected={len(unresolved_blockers)}')
+    check('active_error_count_matches_active_items_len', c_active_err == len(active), f'count={c_active_err}, active_len={len(active)}')
 
     # 3) recent can contain resolved/warn
     rec_bad = [i for i in recent if bool(i.get('active')) and bool(i.get('resolved'))]
@@ -92,6 +98,8 @@ def main() -> int:
         html = DASH.read_text(encoding='utf-8', errors='ignore')
         check('frontend_no_raw_log_token', 'raw_log' not in html.lower(), 'raw log token exists')
         check('frontend_no_kill_retry_rerun_buttons', all(k not in html.lower() for k in ['kill', 'rerun', 'retry']), 'dangerous action words found', blocker=False)
+        if c_active_blk == 0:
+            check('frontend_not_show_blocker_when_zero', '系统阻塞(' not in html, 'html contains blocker label template', blocker=False)
     else:
         check('dashboard_html_exists', False, str(DASH))
 

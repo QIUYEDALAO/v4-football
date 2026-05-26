@@ -53,6 +53,33 @@ SELF_FEEDBACK_EXCLUDES = [
     re.compile(r"^v4_system_error_center_git_manifest_.*\.json$"),
 ]
 
+PROCESS_ARTIFACT_PATTERNS = [
+    re.compile(r".*_freeze_.*\.json$", re.IGNORECASE),
+    re.compile(r".*_audit_.*\.json$", re.IGNORECASE),
+    re.compile(r".*_verify_.*\.json$", re.IGNORECASE),
+    re.compile(r".*_http_verify_.*\.json$", re.IGNORECASE),
+    re.compile(r".*_content_verify_.*\.json$", re.IGNORECASE),
+    re.compile(r".*_git_manifest_.*\.json$", re.IGNORECASE),
+    re.compile(r".*_manifest_.*\.json$", re.IGNORECASE),
+    re.compile(r".*_report_.*\.json$", re.IGNORECASE),
+    re.compile(r".*_source_trace_.*\.json$", re.IGNORECASE),
+    re.compile(r".*_classification_.*\.json$", re.IGNORECASE),
+    re.compile(r".*_safety_impact_.*\.json$", re.IGNORECASE),
+    re.compile(r".*_recommendation_.*\.json$", re.IGNORECASE),
+    re.compile(r".*_fix_.*\.json$", re.IGNORECASE),
+]
+
+ACTIVE_TYPE_PATTERNS = [
+    re.compile(r".*final.*", re.IGNORECASE),
+    re.compile(r".*task_result.*", re.IGNORECASE),
+    re.compile(r".*cron_task_result.*", re.IGNORECASE),
+    re.compile(r".*watchdog.*", re.IGNORECASE),
+    re.compile(r".*runner_result.*", re.IGNORECASE),
+    re.compile(r".*pipeline_result.*", re.IGNORECASE),
+    re.compile(r".*validation_result.*", re.IGNORECASE),
+    re.compile(r".*scan_result.*", re.IGNORECASE),
+]
+
 COMPONENT_MAP = {
     "cron": "cron",
     "checker": "checker",
@@ -137,6 +164,13 @@ def _status_from_json_obj(obj: dict) -> tuple[str, bool, str]:
         return str(x or "").strip().upper()
 
     final_status = up(obj.get("final_status"))
+    # 兼容 phase 最终状态枚举：*_PASS / *_WARN_ONLY / *_BLOCKED
+    if final_status.endswith("_PASS"):
+        return "INFO", True, "phase final PASS enum"
+    if final_status.endswith("_WARN_ONLY"):
+        return "WARN", True, "phase final WARN enum"
+    if final_status.endswith("_BLOCKED") or final_status.endswith("_BLOCKER"):
+        return "BLOCKER", False, "phase final BLOCKED enum"
     conclusion = up(obj.get("conclusion"))
     status = up(obj.get("status"))
     checker_pass = _truthy(obj.get("checker_pass"))
@@ -189,6 +223,75 @@ def _status_from_json_obj(obj: dict) -> tuple[str, bool, str]:
     return "INFO", False, "json neutral"
 
 
+def _is_process_artifact_file(fp: Path, obj: dict | None) -> bool:
+    name = fp.name
+    for rx in PROCESS_ARTIFACT_PATTERNS:
+        if rx.match(name):
+            return True
+    # checker 文件默认作为过程产物，除非明确 final fail/blocker（在 active 白名单函数中再兜底）
+    if re.match(r".*_checker_.*\.json$", name, re.IGNORECASE):
+        return True
+    step = str((obj or {}).get("step") or "").lower()
+    if any(k in step for k in ("freeze", "audit", "verify", "checker", "manifest", "report", "fix")):
+        return True
+    return False
+
+
+def _is_active_eligible_status_file(fp: Path, obj: dict | None, severity: str) -> tuple[bool, str]:
+    obj = obj or {}
+    name = fp.name
+    stem = fp.stem
+
+    # 先挡住 process artifact
+    process_artifact = _is_process_artifact_file(fp, obj)
+    if process_artifact:
+        # 例外：checker 文件如果明确 FAIL/BLOCKER 且 all_pass=false，允许进入 ACTIVE
+        if re.match(r".*_checker_.*\.json$", name, re.IGNORECASE):
+            all_pass = obj.get("all_pass")
+            conclusion = str(obj.get("conclusion") or "").upper()
+            status = str(obj.get("status") or "").upper()
+            final_status = str(obj.get("final_status") or "").upper()
+            if (conclusion in {"FAIL", "BLOCKER", "BLOCKED"} or status in {"FAIL", "BLOCKER", "BLOCKED"} or final_status in {"FAIL", "BLOCKER", "BLOCKED"}) and (all_pass is False):
+                return True, "checker_explicit_fail"
+        return False, "process_artifact_excluded"
+
+    # A. 最终任务结果文件：文件名包含 final/result/watchdog 等
+    type_hit = any(rx.match(stem) for rx in ACTIVE_TYPE_PATTERNS)
+    has_final_key = any(k in obj for k in ("final_status", "final_result", "task_result", "runner_result", "pipeline_result"))
+
+    # B. 真实运行错误信号
+    blockers = obj.get("blockers")
+    errors = obj.get("errors")
+    runtime_error = (
+        bool(obj.get("traceback"))
+        or bool(obj.get("exception"))
+        or bool(obj.get("error_message"))
+        or bool(obj.get("stderr"))
+        or isinstance(obj.get("exit_code"), int) and obj.get("exit_code") != 0
+        or int(obj.get("active_blocker_count") or 0) > 0
+        or int(obj.get("blocker_count") or 0) > 0
+        or int(obj.get("fail_count") or 0) > 0
+        or (isinstance(blockers, list) and len(blockers) > 0)
+        or (isinstance(errors, list) and len(errors) > 0)
+    )
+
+    # C. unresolved marker
+    unresolved_signal = (
+        obj.get("active") is True
+        or str(obj.get("resolved")).lower() == "false"
+        or str(obj.get("status") or "").upper() in {"FAIL", "BLOCKER", "BLOCKED"}
+        or str(obj.get("conclusion") or "").upper() in {"FAIL", "BLOCKER", "BLOCKED"}
+        or str(obj.get("final_status") or "").upper() in {"FAIL", "BLOCKER", "BLOCKED"}
+    )
+
+    if severity not in {"FAIL", "BLOCKER"}:
+        return False, "severity_not_active"
+
+    if (type_hit or has_final_key or runtime_error or unresolved_signal):
+        return True, "eligible_signal"
+    return False, "no_active_signal"
+
+
 def _extract_title(filepath: Path, content_preview: str) -> str:
     """从文件名和内容提取标题。"""
     stem = filepath.stem
@@ -236,6 +339,7 @@ def collect_status_errors(hours: int) -> list[dict]:
         resolved_hint = False
         parse_reason = "keyword_fallback"
 
+        obj: dict | None = None
         # 结构化 JSON 优先判定
         try:
             obj = json.loads(content)
@@ -249,8 +353,19 @@ def collect_status_errors(hours: int) -> list[dict]:
         if severity not in ("BLOCKER", "FAIL", "WARN"):
             continue
 
-        # 检查是否已被后续 PASS 覆盖
-        resolved = resolved_hint or _check_resolved(fp, component, title)
+        obj_dict = obj if isinstance(obj, dict) else {}
+        process_artifact = _is_process_artifact_file(fp, obj_dict)
+        active_eligible, active_reason = _is_active_eligible_status_file(
+            fp,
+            obj_dict,
+            severity,
+        )
+
+        # 检查是否已被后续 PASS 覆盖（phase 优先）
+        resolved = process_artifact or resolved_hint or _check_resolved(
+            fp, component, title, obj_dict
+        )
+        active = (not resolved) and active_eligible and severity in ("BLOCKER", "FAIL")
 
         scrubbed_summary, was_redacted = scrub_text(content[:500])
         items.append({
@@ -265,9 +380,12 @@ def collect_status_errors(hours: int) -> list[dict]:
             "parse_reason": parse_reason,
             "impact": _infer_impact(component, severity),
             "suggested_action": _suggested_action(component, severity),
-            "active": not resolved,
+            "active": active,
             "resolved": resolved,
-            "resolution_marker": "subsequent_PASS_found" if resolved else None,
+            "resolution_marker": "subsequent_PASS_found_or_process_artifact" if resolved else None,
+            "process_artifact": process_artifact,
+            "active_eligible": active_eligible,
+            "active_eligible_reason": active_reason,
             "safe_to_show": True,
             "redacted": was_redacted,
             "raw_log_hidden": True,
@@ -334,26 +452,57 @@ def collect_log_errors(hours: int) -> list[dict]:
     return items
 
 
-def _check_resolved(fp: Path, component: str, title: str) -> bool:
-    """检查同一个 phase/task 是否有后续 PASS。"""
-    # 查找更新的同名文件或有 PASS 标记的文件
-    stem_base = re.sub(r'_\d{8}$', '', fp.stem)
-    newer_files = sorted(
-        STATUS_DIR.glob(f"{stem_base}*.json"),
-        key=os.path.getmtime,
-        reverse=True,
+def _is_pass_json(obj: dict) -> bool:
+    if not isinstance(obj, dict):
+        return False
+    return (
+        str(obj.get("final_status") or "").upper() == "PASS"
+        or str(obj.get("conclusion") or "").upper() == "PASS"
+        or str(obj.get("status") or "").upper() == "PASS"
+        or _truthy(obj.get("all_pass"))
+        or _truthy(obj.get("pass"))
     )
+
+
+def _check_resolved(fp: Path, component: str, title: str, obj: dict | None = None) -> bool:
+    """检查同一个 phase/task 是否有后续 PASS（phase 优先）。"""
+    obj = obj or {}
+    current_mtime = os.path.getmtime(fp)
+    current_phase = str(obj.get("phase") or "").strip()
+
+    # 1) phase 优先：同 phase 只要后续 PASS，即认为当前过程项已恢复
+    if current_phase:
+        for nf in sorted(STATUS_DIR.glob("*.json"), key=os.path.getmtime, reverse=True):
+            if nf == fp:
+                continue
+            if os.path.getmtime(nf) <= current_mtime:
+                continue
+            try:
+                nobj = json.loads(nf.read_text(encoding="utf-8", errors="ignore"))
+            except Exception:
+                continue
+            if str(nobj.get("phase") or "").strip() != current_phase:
+                continue
+            if _is_pass_json(nobj):
+                return True
+            # 同 phase 出现最终 BLOCKED，说明以最终状态替代中间过程项
+            if str(nobj.get("final_status") or "").upper() in {"BLOCKER", "BLOCKED"} or str(nobj.get("conclusion") or "").upper() in {"BLOCKER", "BLOCKED"}:
+                return True
+
+    # 2) 退化到 stem 匹配
+    stem_base = re.sub(r'_\d{8}$', '', fp.stem)
+    newer_files = sorted(STATUS_DIR.glob(f"{stem_base}*.json"), key=os.path.getmtime, reverse=True)
     for nf in newer_files:
         if nf == fp:
             continue
-        if os.path.getmtime(nf) <= os.path.getmtime(fp):
+        if os.path.getmtime(nf) <= current_mtime:
             continue
         try:
-            content = nf.read_text(encoding="utf-8", errors="ignore")[:500]
-            if '"PASS"' in content or '"status": "PASS"' in content:
-                return True
+            nobj = json.loads(nf.read_text(encoding="utf-8", errors="ignore"))
         except Exception:
-            pass
+            continue
+        if _is_pass_json(nobj):
+            return True
     return False
 
 
