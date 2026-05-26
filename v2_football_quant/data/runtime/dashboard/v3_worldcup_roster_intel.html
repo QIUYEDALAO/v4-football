@@ -1,0 +1,473 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>V3 World Cup Roster Intelligence — 2026 Baseline</title>
+<style>
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{font-family:-apple-system,BlinkMacSystemFont,sans-serif;background:#0f172a;color:#e2e8f0;padding:12px}
+  h1{font-size:18px;margin-bottom:4px}
+  h2{font-size:12px;color:#94a3b8;margin-bottom:12px}
+  .card{background:#1e293b;border-radius:10px;padding:12px;margin-bottom:12px}
+  .stats{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:8px}
+  .stat{background:#334155;border-radius:8px;padding:10px;min-width:70px;text-align:center}
+  .stat .num{font-size:24px;font-weight:bold}
+  .stat .label{font-size:10px;color:#94a3b8}
+  table{width:100%;border-collapse:collapse;font-size:11px}
+  th,td{padding:6px 4px;text-align:left;border-bottom:1px solid #334155}
+  th{color:#94a3b8;font-weight:600;font-size:10px}
+  .warn{background:#451a03;color:#fbbf24;padding:6px 10px;border-radius:6px;font-size:11px}
+  .green{color:#22c55e}
+  footer{text-align:center;color:#475569;font-size:10px;margin-top:16px}
+</style></head>
+<body>
+<div style="background:#1a1e2e;border-bottom:2px solid #93a5bf;color:#93a5bf;font-size:13px;text-align:center;padding:8px 16px;line-height:1.5;">
+V3 归档页，不得进入 V4 作战台。当前唯一主入口 → <a href="/v4_control_center.html" style="color:#4dd18b;">V4统一作战台</a>
+</div>
+<h1>V3 World Cup Roster Intelligence</h1>
+<h2>Baseline 2026-05-25 · Perception Gap Pre-Screening · NO BETTING</h2>
+<div style="background:#7f1d1d;color:#fca5a5;padding:12px;border-radius:8px;margin-bottom:12px;font-size:13px;border:2px solid #ef4444">
+<b>🚨 名单数据待核验 — 不作为正式 V3 PG 结论</b><br>
+当前名单来源为 API_CURRENT_SQUAD（非世界杯官方最终名单）。<br>
+球员 club/caps/goals/minutes 全为空白。PG_MEDIUM / WATCHLIST 已隔离，不得用于正式判断。<br>
+<x>v2026-05-25 audit: team_count=46/48, source=API_CURRENT_SQUAD, field_completeness=0%</x>
+</div>
+
+<div class="card">
+  <div class="stats">
+    <div class="stat"><div class="num green">46</div><div class="label">Teams</div></div>
+    <div class="stat"><div class="num">1375</div><div class="label">Players</div></div>
+    <div class="stat"><div class="num">4</div><div class="label">Watchlist</div></div>
+    <div class="stat"><div class="num">15</div><div class="label">PG Medium</div></div>
+  </div>
+  <div class="warn">Perception Gap pre-screening only. Zero betting recommendations.</div>
+</div>
+<div class="card">
+  <table>
+    <tr><th>Team</th><th>#</th><th>Age</th><th>Stab</th><th>AgeR</th><th>Depth</th><th>PG</th></tr>
+    
+    <tr>
+      <td>Algeria</td>
+      <td>31</td>
+      <td>25.4</td>
+      <td><span style="color:#eab308;font-weight:bold">69</span></td>
+      <td><span style="color:#22c55e;font-weight:bold">6</span></td>
+      <td><span style="color:#22c55e;font-weight:bold">93</span></td>
+      <td><span style="background:#22c55e;color:white;padding:2px 8px;border-radius:4px;font-size:12px">PG_LOW</span></td>
+    </tr>
+    <tr>
+      <td>Argentina</td>
+      <td>28</td>
+      <td>27.3</td>
+      <td><span style="color:#eab308;font-weight:bold">58</span></td>
+      <td><span style="color:#22c55e;font-weight:bold">21</span></td>
+      <td><span style="color:#22c55e;font-weight:bold">84</span></td>
+      <td><span style="background:#22c55e;color:white;padding:2px 8px;border-radius:4px;font-size:12px">PG_LOW</span></td>
+    </tr>
+    <tr>
+      <td>Australia</td>
+      <td>26</td>
+      <td>26.3</td>
+      <td><span style="color:#22c55e;font-weight:bold">70</span></td>
+      <td><span style="color:#22c55e;font-weight:bold">7</span></td>
+      <td><span style="color:#22c55e;font-weight:bold">78</span></td>
+      <td><span style="background:#22c55e;color:white;padding:2px 8px;border-radius:4px;font-size:12px">PG_LOW</span></td>
+    </tr>
+    <tr>
+      <td>Austria</td>
+      <td>25</td>
+      <td>27.4</td>
+      <td><span style="color:#eab308;font-weight:bold">66</span></td>
+      <td><span style="color:#22c55e;font-weight:bold">8</span></td>
+      <td><span style="color:#22c55e;font-weight:bold">75</span></td>
+      <td><span style="background:#22c55e;color:white;padding:2px 8px;border-radius:4px;font-size:12px">PG_LOW</span></td>
+    </tr>
+    <tr>
+      <td>Belgium</td>
+      <td>24</td>
+      <td>26.2</td>
+      <td><span style="color:#eab308;font-weight:bold">64</span></td>
+      <td><span style="color:#22c55e;font-weight:bold">16</span></td>
+      <td><span style="color:#22c55e;font-weight:bold">72</span></td>
+      <td><span style="background:#22c55e;color:white;padding:2px 8px;border-radius:4px;font-size:12px">PG_LOW</span></td>
+    </tr>
+    <tr>
+      <td>Brazil</td>
+      <td>23</td>
+      <td>28.0</td>
+      <td><span style="color:#eab308;font-weight:bold">58</span></td>
+      <td><span style="color:#22c55e;font-weight:bold">21</span></td>
+      <td><span style="color:#eab308;font-weight:bold">69</span></td>
+      <td><span style="background:#22c55e;color:white;padding:2px 8px;border-radius:4px;font-size:12px">PG_LOW</span></td>
+    </tr>
+    <tr>
+      <td>Cameroon</td>
+      <td>24</td>
+      <td>23.1</td>
+      <td><span style="color:#22c55e;font-weight:bold">79</span></td>
+      <td><span style="color:#22c55e;font-weight:bold">0</span></td>
+      <td><span style="color:#22c55e;font-weight:bold">72</span></td>
+      <td><span style="background:#3b82f6;color:white;padding:2px 8px;border-radius:4px;font-size:12px">WATCHLIST</span></td>
+    </tr>
+    <tr>
+      <td>Canada</td>
+      <td>30</td>
+      <td>26.5</td>
+      <td><span style="color:#22c55e;font-weight:bold">74</span></td>
+      <td><span style="color:#22c55e;font-weight:bold">3</span></td>
+      <td><span style="color:#22c55e;font-weight:bold">90</span></td>
+      <td><span style="background:#eab308;color:white;padding:2px 8px;border-radius:4px;font-size:12px">PG_MEDIUM</span></td>
+    </tr>
+    <tr>
+      <td>Chile</td>
+      <td>37</td>
+      <td>24.7</td>
+      <td><span style="color:#22c55e;font-weight:bold">73</span></td>
+      <td><span style="color:#22c55e;font-weight:bold">10</span></td>
+      <td><span style="color:#22c55e;font-weight:bold">100</span></td>
+      <td><span style="background:#eab308;color:white;padding:2px 8px;border-radius:4px;font-size:12px">PG_MEDIUM</span></td>
+    </tr>
+    <tr>
+      <td>Colombia</td>
+      <td>27</td>
+      <td>28.9</td>
+      <td><span style="color:#eab308;font-weight:bold">56</span></td>
+      <td><span style="color:#22c55e;font-weight:bold">18</span></td>
+      <td><span style="color:#22c55e;font-weight:bold">81</span></td>
+      <td><span style="background:#22c55e;color:white;padding:2px 8px;border-radius:4px;font-size:12px">PG_LOW</span></td>
+    </tr>
+    <tr>
+      <td>Costa Rica</td>
+      <td>37</td>
+      <td>26.2</td>
+      <td><span style="color:#eab308;font-weight:bold">63</span></td>
+      <td><span style="color:#22c55e;font-weight:bold">13</span></td>
+      <td><span style="color:#22c55e;font-weight:bold">100</span></td>
+      <td><span style="background:#22c55e;color:white;padding:2px 8px;border-radius:4px;font-size:12px">PG_LOW</span></td>
+    </tr>
+    <tr>
+      <td>Croatia</td>
+      <td>26</td>
+      <td>27.3</td>
+      <td><span style="color:#eab308;font-weight:bold">62</span></td>
+      <td><span style="color:#22c55e;font-weight:bold">15</span></td>
+      <td><span style="color:#22c55e;font-weight:bold">78</span></td>
+      <td><span style="background:#22c55e;color:white;padding:2px 8px;border-radius:4px;font-size:12px">PG_LOW</span></td>
+    </tr>
+    <tr>
+      <td>Denmark</td>
+      <td>30</td>
+      <td>26.5</td>
+      <td><span style="color:#eab308;font-weight:bold">65</span></td>
+      <td><span style="color:#22c55e;font-weight:bold">13</span></td>
+      <td><span style="color:#22c55e;font-weight:bold">90</span></td>
+      <td><span style="background:#22c55e;color:white;padding:2px 8px;border-radius:4px;font-size:12px">PG_LOW</span></td>
+    </tr>
+    <tr>
+      <td>Ecuador</td>
+      <td>35</td>
+      <td>24.9</td>
+      <td><span style="color:#22c55e;font-weight:bold">75</span></td>
+      <td><span style="color:#22c55e;font-weight:bold">5</span></td>
+      <td><span style="color:#22c55e;font-weight:bold">100</span></td>
+      <td><span style="background:#eab308;color:white;padding:2px 8px;border-radius:4px;font-size:12px">PG_MEDIUM</span></td>
+    </tr>
+    <tr>
+      <td>Egypt</td>
+      <td>36</td>
+      <td>28.0</td>
+      <td><span style="color:#eab308;font-weight:bold">58</span></td>
+      <td><span style="color:#22c55e;font-weight:bold">11</span></td>
+      <td><span style="color:#22c55e;font-weight:bold">100</span></td>
+      <td><span style="background:#22c55e;color:white;padding:2px 8px;border-radius:4px;font-size:12px">PG_LOW</span></td>
+    </tr>
+    <tr>
+      <td>England</td>
+      <td>32</td>
+      <td>26.3</td>
+      <td><span style="color:#eab308;font-weight:bold">66</span></td>
+      <td><span style="color:#22c55e;font-weight:bold">9</span></td>
+      <td><span style="color:#22c55e;font-weight:bold">96</span></td>
+      <td><span style="background:#22c55e;color:white;padding:2px 8px;border-radius:4px;font-size:12px">PG_LOW</span></td>
+    </tr>
+    <tr>
+      <td>France</td>
+      <td>22</td>
+      <td>26.1</td>
+      <td><span style="color:#22c55e;font-weight:bold">72</span></td>
+      <td><span style="color:#22c55e;font-weight:bold">4</span></td>
+      <td><span style="color:#eab308;font-weight:bold">66</span></td>
+      <td><span style="background:#eab308;color:white;padding:2px 8px;border-radius:4px;font-size:12px">PG_MEDIUM</span></td>
+    </tr>
+    <tr>
+      <td>Germany</td>
+      <td>25</td>
+      <td>27.1</td>
+      <td><span style="color:#eab308;font-weight:bold">67</span></td>
+      <td><span style="color:#22c55e;font-weight:bold">8</span></td>
+      <td><span style="color:#22c55e;font-weight:bold">75</span></td>
+      <td><span style="background:#22c55e;color:white;padding:2px 8px;border-radius:4px;font-size:12px">PG_LOW</span></td>
+    </tr>
+    <tr>
+      <td>Ghana</td>
+      <td>26</td>
+      <td>25.3</td>
+      <td><span style="color:#22c55e;font-weight:bold">75</span></td>
+      <td><span style="color:#22c55e;font-weight:bold">3</span></td>
+      <td><span style="color:#22c55e;font-weight:bold">78</span></td>
+      <td><span style="background:#eab308;color:white;padding:2px 8px;border-radius:4px;font-size:12px">PG_MEDIUM</span></td>
+    </tr>
+    <tr>
+      <td>Iran</td>
+      <td>25</td>
+      <td>28.6</td>
+      <td><span style="color:#eab308;font-weight:bold">55</span></td>
+      <td><span style="color:#22c55e;font-weight:bold">24</span></td>
+      <td><span style="color:#22c55e;font-weight:bold">75</span></td>
+      <td><span style="background:#22c55e;color:white;padding:2px 8px;border-radius:4px;font-size:12px">PG_LOW</span></td>
+    </tr>
+    <tr>
+      <td>Iraq</td>
+      <td>26</td>
+      <td>25.6</td>
+      <td><span style="color:#22c55e;font-weight:bold">72</span></td>
+      <td><span style="color:#22c55e;font-weight:bold">3</span></td>
+      <td><span style="color:#22c55e;font-weight:bold">78</span></td>
+      <td><span style="background:#eab308;color:white;padding:2px 8px;border-radius:4px;font-size:12px">PG_MEDIUM</span></td>
+    </tr>
+    <tr>
+      <td>Italy</td>
+      <td>27</td>
+      <td>25.7</td>
+      <td><span style="color:#22c55e;font-weight:bold">75</span></td>
+      <td><span style="color:#22c55e;font-weight:bold">0</span></td>
+      <td><span style="color:#22c55e;font-weight:bold">81</span></td>
+      <td><span style="background:#eab308;color:white;padding:2px 8px;border-radius:4px;font-size:12px">PG_MEDIUM</span></td>
+    </tr>
+    <tr>
+      <td>Ivory Coast</td>
+      <td>26</td>
+      <td>24.8</td>
+      <td><span style="color:#22c55e;font-weight:bold">74</span></td>
+      <td><span style="color:#22c55e;font-weight:bold">3</span></td>
+      <td><span style="color:#22c55e;font-weight:bold">78</span></td>
+      <td><span style="background:#eab308;color:white;padding:2px 8px;border-radius:4px;font-size:12px">PG_MEDIUM</span></td>
+    </tr>
+    <tr>
+      <td>Jamaica</td>
+      <td>25</td>
+      <td>26.1</td>
+      <td><span style="color:#eab308;font-weight:bold">68</span></td>
+      <td><span style="color:#22c55e;font-weight:bold">8</span></td>
+      <td><span style="color:#22c55e;font-weight:bold">75</span></td>
+      <td><span style="background:#22c55e;color:white;padding:2px 8px;border-radius:4px;font-size:12px">PG_LOW</span></td>
+    </tr>
+    <tr>
+      <td>Japan</td>
+      <td>23</td>
+      <td>26.5</td>
+      <td><span style="color:#eab308;font-weight:bold">67</span></td>
+      <td><span style="color:#22c55e;font-weight:bold">8</span></td>
+      <td><span style="color:#eab308;font-weight:bold">69</span></td>
+      <td><span style="background:#22c55e;color:white;padding:2px 8px;border-radius:4px;font-size:12px">PG_LOW</span></td>
+    </tr>
+    <tr>
+      <td>Mexico</td>
+      <td>49</td>
+      <td>25.9</td>
+      <td><span style="color:#22c55e;font-weight:bold">71</span></td>
+      <td><span style="color:#22c55e;font-weight:bold">6</span></td>
+      <td><span style="color:#22c55e;font-weight:bold">100</span></td>
+      <td><span style="background:#eab308;color:white;padding:2px 8px;border-radius:4px;font-size:12px">PG_MEDIUM</span></td>
+    </tr>
+    <tr>
+      <td>Morocco</td>
+      <td>39</td>
+      <td>25.3</td>
+      <td><span style="color:#22c55e;font-weight:bold">73</span></td>
+      <td><span style="color:#22c55e;font-weight:bold">7</span></td>
+      <td><span style="color:#22c55e;font-weight:bold">100</span></td>
+      <td><span style="background:#eab308;color:white;padding:2px 8px;border-radius:4px;font-size:12px">PG_MEDIUM</span></td>
+    </tr>
+    <tr>
+      <td>Netherlands</td>
+      <td>25</td>
+      <td>26.1</td>
+      <td><span style="color:#eab308;font-weight:bold">65</span></td>
+      <td><span style="color:#22c55e;font-weight:bold">12</span></td>
+      <td><span style="color:#22c55e;font-weight:bold">75</span></td>
+      <td><span style="background:#22c55e;color:white;padding:2px 8px;border-radius:4px;font-size:12px">PG_LOW</span></td>
+    </tr>
+    <tr>
+      <td>New Zealand</td>
+      <td>26</td>
+      <td>27.1</td>
+      <td><span style="color:#eab308;font-weight:bold">60</span></td>
+      <td><span style="color:#22c55e;font-weight:bold">15</span></td>
+      <td><span style="color:#22c55e;font-weight:bold">78</span></td>
+      <td><span style="background:#22c55e;color:white;padding:2px 8px;border-radius:4px;font-size:12px">PG_LOW</span></td>
+    </tr>
+    <tr>
+      <td>Nigeria</td>
+      <td>35</td>
+      <td>26.5</td>
+      <td><span style="color:#22c55e;font-weight:bold">74</span></td>
+      <td><span style="color:#22c55e;font-weight:bold">0</span></td>
+      <td><span style="color:#22c55e;font-weight:bold">100</span></td>
+      <td><span style="background:#eab308;color:white;padding:2px 8px;border-radius:4px;font-size:12px">PG_MEDIUM</span></td>
+    </tr>
+    <tr>
+      <td>Panama</td>
+      <td>47</td>
+      <td>27.7</td>
+      <td><span style="color:#eab308;font-weight:bold">55</span></td>
+      <td><span style="color:#22c55e;font-weight:bold">14</span></td>
+      <td><span style="color:#22c55e;font-weight:bold">100</span></td>
+      <td><span style="background:#22c55e;color:white;padding:2px 8px;border-radius:4px;font-size:12px">PG_LOW</span></td>
+    </tr>
+    <tr>
+      <td>Poland</td>
+      <td>33</td>
+      <td>27.1</td>
+      <td><span style="color:#eab308;font-weight:bold">59</span></td>
+      <td><span style="color:#22c55e;font-weight:bold">15</span></td>
+      <td><span style="color:#22c55e;font-weight:bold">99</span></td>
+      <td><span style="background:#22c55e;color:white;padding:2px 8px;border-radius:4px;font-size:12px">PG_LOW</span></td>
+    </tr>
+    <tr>
+      <td>Portugal</td>
+      <td>26</td>
+      <td>26.3</td>
+      <td><span style="color:#22c55e;font-weight:bold">71</span></td>
+      <td><span style="color:#22c55e;font-weight:bold">3</span></td>
+      <td><span style="color:#22c55e;font-weight:bold">78</span></td>
+      <td><span style="background:#eab308;color:white;padding:2px 8px;border-radius:4px;font-size:12px">PG_MEDIUM</span></td>
+    </tr>
+    <tr>
+      <td>Qatar</td>
+      <td>23</td>
+      <td>27.2</td>
+      <td><span style="color:#eab308;font-weight:bold">68</span></td>
+      <td><span style="color:#22c55e;font-weight:bold">8</span></td>
+      <td><span style="color:#eab308;font-weight:bold">69</span></td>
+      <td><span style="background:#22c55e;color:white;padding:2px 8px;border-radius:4px;font-size:12px">PG_LOW</span></td>
+    </tr>
+    <tr>
+      <td>Saudi Arabia</td>
+      <td>43</td>
+      <td>26.7</td>
+      <td><span style="color:#eab308;font-weight:bold">60</span></td>
+      <td><span style="color:#22c55e;font-weight:bold">11</span></td>
+      <td><span style="color:#22c55e;font-weight:bold">100</span></td>
+      <td><span style="background:#22c55e;color:white;padding:2px 8px;border-radius:4px;font-size:12px">PG_LOW</span></td>
+    </tr>
+    <tr>
+      <td>Senegal</td>
+      <td>33</td>
+      <td>25.9</td>
+      <td><span style="color:#eab308;font-weight:bold">66</span></td>
+      <td><span style="color:#22c55e;font-weight:bold">15</span></td>
+      <td><span style="color:#22c55e;font-weight:bold">99</span></td>
+      <td><span style="background:#22c55e;color:white;padding:2px 8px;border-radius:4px;font-size:12px">PG_LOW</span></td>
+    </tr>
+    <tr>
+      <td>Serbia</td>
+      <td>46</td>
+      <td>25.4</td>
+      <td><span style="color:#22c55e;font-weight:bold">74</span></td>
+      <td><span style="color:#22c55e;font-weight:bold">6</span></td>
+      <td><span style="color:#22c55e;font-weight:bold">100</span></td>
+      <td><span style="background:#eab308;color:white;padding:2px 8px;border-radius:4px;font-size:12px">PG_MEDIUM</span></td>
+    </tr>
+    <tr>
+      <td>South Korea</td>
+      <td>26</td>
+      <td>27.4</td>
+      <td><span style="color:#eab308;font-weight:bold">60</span></td>
+      <td><span style="color:#22c55e;font-weight:bold">15</span></td>
+      <td><span style="color:#22c55e;font-weight:bold">78</span></td>
+      <td><span style="background:#22c55e;color:white;padding:2px 8px;border-radius:4px;font-size:12px">PG_LOW</span></td>
+    </tr>
+    <tr>
+      <td>Spain</td>
+      <td>29</td>
+      <td>25.4</td>
+      <td><span style="color:#22c55e;font-weight:bold">78</span></td>
+      <td><span style="color:#22c55e;font-weight:bold">0</span></td>
+      <td><span style="color:#22c55e;font-weight:bold">87</span></td>
+      <td><span style="background:#3b82f6;color:white;padding:2px 8px;border-radius:4px;font-size:12px">WATCHLIST</span></td>
+    </tr>
+    <tr>
+      <td>Switzerland</td>
+      <td>26</td>
+      <td>27.1</td>
+      <td><span style="color:#eab308;font-weight:bold">65</span></td>
+      <td><span style="color:#22c55e;font-weight:bold">11</span></td>
+      <td><span style="color:#22c55e;font-weight:bold">78</span></td>
+      <td><span style="background:#22c55e;color:white;padding:2px 8px;border-radius:4px;font-size:12px">PG_LOW</span></td>
+    </tr>
+    <tr>
+      <td>Tunisia</td>
+      <td>26</td>
+      <td>25.7</td>
+      <td><span style="color:#22c55e;font-weight:bold">77</span></td>
+      <td><span style="color:#22c55e;font-weight:bold">0</span></td>
+      <td><span style="color:#22c55e;font-weight:bold">78</span></td>
+      <td><span style="background:#3b82f6;color:white;padding:2px 8px;border-radius:4px;font-size:12px">WATCHLIST</span></td>
+    </tr>
+    <tr>
+      <td>Turkey</td>
+      <td>33</td>
+      <td>26.2</td>
+      <td><span style="color:#22c55e;font-weight:bold">73</span></td>
+      <td><span style="color:#22c55e;font-weight:bold">3</span></td>
+      <td><span style="color:#22c55e;font-weight:bold">99</span></td>
+      <td><span style="background:#eab308;color:white;padding:2px 8px;border-radius:4px;font-size:12px">PG_MEDIUM</span></td>
+    </tr>
+    <tr>
+      <td>USA</td>
+      <td>31</td>
+      <td>23.9</td>
+      <td><span style="color:#22c55e;font-weight:bold">81</span></td>
+      <td><span style="color:#22c55e;font-weight:bold">0</span></td>
+      <td><span style="color:#22c55e;font-weight:bold">93</span></td>
+      <td><span style="background:#3b82f6;color:white;padding:2px 8px;border-radius:4px;font-size:12px">WATCHLIST</span></td>
+    </tr>
+    <tr>
+      <td>Ukraine</td>
+      <td>28</td>
+      <td>25.9</td>
+      <td><span style="color:#22c55e;font-weight:bold">75</span></td>
+      <td><span style="color:#22c55e;font-weight:bold">0</span></td>
+      <td><span style="color:#22c55e;font-weight:bold">84</span></td>
+      <td><span style="background:#eab308;color:white;padding:2px 8px;border-radius:4px;font-size:12px">PG_MEDIUM</span></td>
+    </tr>
+    <tr>
+      <td>Uruguay</td>
+      <td>29</td>
+      <td>27.3</td>
+      <td><span style="color:#eab308;font-weight:bold">68</span></td>
+      <td><span style="color:#22c55e;font-weight:bold">3</span></td>
+      <td><span style="color:#22c55e;font-weight:bold">87</span></td>
+      <td><span style="background:#22c55e;color:white;padding:2px 8px;border-radius:4px;font-size:12px">PG_LOW</span></td>
+    </tr>
+    <tr>
+      <td>Uzbekistan</td>
+      <td>26</td>
+      <td>27.0</td>
+      <td><span style="color:#eab308;font-weight:bold">66</span></td>
+      <td><span style="color:#22c55e;font-weight:bold">11</span></td>
+      <td><span style="color:#22c55e;font-weight:bold">78</span></td>
+      <td><span style="background:#22c55e;color:white;padding:2px 8px;border-radius:4px;font-size:12px">PG_LOW</span></td>
+    </tr>
+  </table>
+</div>
+<div class="card" style="font-size:12px">
+  <h3 style="margin-bottom:6px">Watchlist</h3>
+  <p><b>Cameroon:</b> UNDERRATED — High stability + depth — public may underrate squad readiness</p>
+<p><b>Spain:</b> UNDERRATED — High stability + depth — public may underrate squad readiness</p>
+<p><b>Tunisia:</b> UNDERRATED — High stability + depth — public may underrate squad readiness</p>
+<p><b>USA:</b> UNDERRATED — High stability + depth — public may underrate squad readiness</p>
+
+</div>
+<footer>Generated 2026-05-25 · No betting content</footer>
+</body></html>
