@@ -419,6 +419,14 @@
       "tier": 1,
       "competition_type": "league"
     },
+    "342": {
+      "league_name": "Armenian Premier League",
+      "aliases": ["亚美尼亚超", "Premier League", "Fastex Premier League"],
+      "country": "Armenia",
+      "pyramid_group": "ARM_PRO",
+      "tier": 1,
+      "competition_type": "league"
+    },
     "344": {
       "league_name": "Primera División",
       "aliases": ["玻利甲", "Bolivian Primera"],
