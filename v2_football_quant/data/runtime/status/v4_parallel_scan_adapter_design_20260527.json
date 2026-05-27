@@ -1,0 +1,55 @@
+{
+  "schema_version": "v4_parallel_scan_adapter_design.v1",
+  "phase": "V4-DAILY-SCAN-PARALLEL-ENGINE-ADAPTER-INTEGRATION-20260527",
+  "design": {
+    "entrypoint_unchanged": "engine/v4_scan_and_brief.py",
+    "adapter_location": "engine/v4_scan_and_brief.py (inline function)",
+    "trigger": "--scan-engine parallel + --write-official-output",
+    "flow": [
+      "1. v4_scan_and_brief.py with --scan-engine parallel",
+      "2. Run outside57 scanner programmatically (import, not subprocess)",
+      "3. Get full scan results (284 fixtures)",
+      "4. Adapter transforms results to official formats",
+      "5. Write candidate_view, scout, brief",
+      "6. Continue normal post-scan flow (QQ notify, etc.)"
+    ],
+    "transformation_rules": {
+      "candidate_view": {
+        "source": "parallel scanner results",
+        "grade_filter": "A/B/SKIP only; no C",
+        "A_candidates": "results where grade=A AND (official_candidate=true OR not outside57)",
+        "B_candidates": "results where grade=B AND (official_candidate=true OR not outside57)",
+        "C_candidates": "NOT GENERATED",
+        "C_count": 0,
+        "C_observation_only": true,
+        "SKIP_count": "count of grade=SKIP results",
+        "scan_total": "total results (284)",
+        "A_count": "count of grade=A",
+        "B_count": "count of grade=B",
+        "official_candidate_semantics": {
+          "A/B": "official_candidate=true",
+          "SKIP": "official_candidate=false, skip=true",
+          "outside57_trace": "outside57=true field on each fixture entry"
+        },
+        "schema_compat": "unchanged keys, no C generated"
+      },
+      "scout_file": {
+        "format": "list[dict] compatible with current scout schema",
+        "fields": "mapped from scanner results to match current scout keys"
+      },
+      "brief_file": {
+        "format": "same markdown as current v4_openclaw_brief_*.txt",
+        "C_section": "NOT GENERATED (C_observation_only comments replaced with SKIP summary)",
+        "grade_summary": "A/B/SKIP counts only"
+      }
+    },
+    "restrictions": [
+      "adapter only called from v4_scan_and_brief.py with --write-official-output",
+      "standalone scanner never writes official output",
+      "no C grade generated anywhere",
+      "no validation triggered",
+      "no QQ recommendation pushed",
+      "no live bet records modified"
+    ]
+  }
+}

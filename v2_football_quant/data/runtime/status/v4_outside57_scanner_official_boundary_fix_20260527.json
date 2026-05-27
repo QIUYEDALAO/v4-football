@@ -1,0 +1,17 @@
+{
+  "schema_version": "v4_outside57_scanner_official_boundary_fix.v1",
+  "phase": "V4-DAILY-SCAN-PARALLEL-ENGINE-ADAPTER-INTEGRATION-20260527",
+  "step": "Step 4 — official boundary fix",
+  "generated_at": "2026-05-27T19:55:00+08:00",
+  "boundary_rules": [
+    "standalone scanner (v4_outside57_scanner.py main()) writes ONLY to v4_outside57_scan_result_*.json",
+    "official output is ONLY written when called through v4_scan_and_brief.py adapter with --write-official-output",
+    "v4_outside57_scanner.py has no --write-official flag",
+    "run_outside57_scan() returns results dict; caller decides where to write"
+  ],
+  "verification": {
+    "standalone_writes_official": false,
+    "official_only_via_adapter": true,
+    "adapter_caller_must_be_scan_and_brief": true
+  }
+}

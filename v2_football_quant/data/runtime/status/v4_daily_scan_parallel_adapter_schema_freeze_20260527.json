@@ -1,0 +1,46 @@
+{
+  "schema_version": "v4_daily_scan_parallel_adapter_schema_freeze.v1",
+  "phase": "V4-DAILY-SCAN-PARALLEL-ENGINE-ADAPTER-INTEGRATION-20260527",
+  "generated_at": "2026-05-27T19:45:00+08:00",
+  "schemas": {
+    "isolated_scanner_output": {
+      "file": "v4_outside57_scan_result_*.json",
+      "keys": ["phase","run_id","generated_at","scan_date","full_coverage","performance","rate_limiter","inflight_limiter","cache","config","isolation","results","conclusion"],
+      "per_fixture_keys": ["fixture_id","home_team","away_team","league_id","league_name","country","kickoff_time","outside57","full_scan","official_candidate","not_for_validation","not_for_live_bet","not_for_qq_recommendation","processed_at","status","grade","ht_score","h2h_valid","h2h_reason","prematch_line","prematch_over_odds","prematch_under_odds","api_coverage_level","is_candidate","candidate_score","h2h_official_count","h2h_sample_category","recent_form_low_sample","recommendation_summary","fetch_errors","_cache_stats"],
+      "grade_values": ["A","B","SKIP"],
+      "isolation_markers": {"outside57":true,"full_scan":true,"official_candidate":false,"not_for_validation":true,"not_for_live_bet":true,"not_for_qq_recommendation":true},
+      "C_present": false
+    },
+    "official_candidate_view": {
+      "file": "v3v4_dashboard_candidate_view_YYYYMMDD.json",
+      "keys": ["schema_version","generated_at","scan_date","source_window","source_path","source_hash","brief_path","brief_sha256","scout_path","scout_sha256","A_count","B_count","C_count","SKIP_count","scan_total","formal_recommendation_count","A_candidates","A_candidate","B_candidates","C_candidates","C_observation_only","actual_send","qq_sent","V4_QQ_ENABLED","parsed_from_brief","fallback_used","fallback_reason","builder_script"],
+      "current_A_count": 0,
+      "current_C_count": 8,
+      "current_C_observation_only": true,
+      "grade_keys_exist": {"A_count":true,"B_count":true,"C_count":true,"SKIP_count":true}
+    },
+    "scout_file": {
+      "file": "scout_v4_YYYYMMDD.json",
+      "type": "list[dict]",
+      "per_fixture_keys": ["fixture_id","date","match_date","scan_date","scout_file_date","kickoff_local","timezone_unknown","timezone_source","source_window","kickoff","home","away","league","market_focus","market_type","market_scores","best_focus_by_score","best_score","factors","ht_ou_lines","data_coverage","league_baseline","season_phase","motivation","schedule_pressure","injury","context_observation","lineup_gate"],
+      "grade_field": "grade (None in current)"
+    },
+    "brief_file": {
+      "file": "v4_openclaw_brief_YYYYMMDD.txt",
+      "format": "Markdown-style text with A/B/C/SKIP sections",
+      "contains_C": true,
+      "C_heading": "C级观察池"
+    },
+    "cron_V4_DAILY_SCAN_READONLY": {
+      "entrypoint": "engine/v4_scan_and_brief.py",
+      "current_args": "--date $(date +%Y%m%d) --no-push"
+    }
+  },
+  "diff_summary": {
+    "scanner_has_grade": true,
+    "scanner_has_A_B_SKIP": true,
+    "scanner_has_C": false,
+    "candidate_view_has_C": true,
+    "adapter_required_transform": "map per-fixture results to candidate_view/scout/brief formats"
+  }
+}

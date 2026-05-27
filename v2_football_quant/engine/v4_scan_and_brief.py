@@ -73,6 +73,177 @@ def _sigmask_push(window: str, date: str, status: str, progress: str, reason: st
 下一步：等待下一窗口或手动低负载重跑""", flush=True)
 
 
+def _run_parallel_scan(args, scan_date: str, today_key: str, wd, log_path: Path) -> None:
+    """Run parallel outside57 scanner and write official output if requested."""
+    from engine.v4_outside57_scanner import run_outside57_scan
+
+    print(f"[adapter] parallel scan engine: workers={args.outside57_workers}, "
+          f"rpm={args.outside57_api_rpm}/{args.outside57_api_rpm_hard_cap}, "
+          f"inflight={args.outside57_max_inflight}", flush=True)
+
+    summary = run_outside57_scan(
+        workers=args.outside57_workers,
+        worker_max=args.outside57_workers,
+        api_rpm=args.outside57_api_rpm,
+        api_rpm_hard_cap=args.outside57_api_rpm_hard_cap,
+        max_inflight=args.outside57_max_inflight,
+        api_timeout_sec=12,
+        fixture_timeout_sec=35,
+        retry_max=2,
+        resume=args.outside57_resume,
+        run_id=None,
+        scan_mode="full",
+        scan_date_str=today_key,
+    )
+
+    results = summary.get("results", [])
+    fc = summary.get("full_coverage", {})
+    print(f"[adapter] scan complete: {fc.get('input_fixture_count',0)} in, "
+          f"{fc.get('done_count',0)} done, "
+          f"silent_drop={fc.get('silent_drop_count',0)}", flush=True)
+
+    if not args.write_official_output:
+        print("[adapter] --write-official-output not set; skipping official output", flush=True)
+        wd.finish(status="DONE_NO_OFFICIAL",
+                  output_files={"scan_result": summary.get("run_id","")})
+        return
+
+    # ── Adapter: transform scanner results to official formats ──
+
+    candidate_path = BASE_DIR / "data" / "runtime" / "status" / f"v3v4_dashboard_candidate_view_{today_key}.json"
+    scout_path = REPORT_DIR / f"scout_v4_{today_key}.json"
+
+    # Load whitelist
+    try:
+        wl = json.loads((BASE_DIR / "config" / "leagues_whitelist.json").read_text())
+        wl_ids = set(str(k) for k in wl.get("leagueId", {}).keys())
+    except Exception:
+        wl_ids = set()
+
+    a_list, b_list, skip_list = [], [], []
+    scout_list = []
+
+    for r in results:
+        grade = str(r.get("grade", "SKIP")).strip().upper()
+        lid = str(r.get("league_id", ""))
+        is_whitelist = lid in wl_ids
+        is_outside57 = r.get("outside57", True)
+
+        # Build common fields
+        entry = {
+            "fixture_id": r.get("fixture_id"),
+            "home": r.get("home_team", "?"),
+            "away": r.get("away_team", "?"),
+            "league": r.get("league_name", "?"),
+            "league_id": int(r.get("league_id", 0)) if r.get("league_id") else 0,
+            "kickoff": r.get("kickoff_time", "?"),
+            "grade": grade,
+            "official_candidate": grade in ("A", "B"),
+            "skip": grade == "SKIP",
+            "outside57": is_outside57 or (not is_whitelist),
+            "h2h_valid": bool(r.get("h2h_valid", False)),
+            "filter_reason": str(r.get("h2h_reason", "") or ""),
+            "ht_score": r.get("ht_score"),
+            "prematch_line": r.get("prematch_line"),
+            "prematch_over_odds": r.get("prematch_over_odds"),
+            "prematch_under_odds": r.get("prematch_under_odds"),
+            "api_coverage_level": r.get("api_coverage_level", "UNKNOWN"),
+            "is_candidate": grade in ("A", "B"),
+            "recent_form_low_sample": r.get("recent_form_low_sample", False),
+            "candidate_score": r.get("candidate_score"),
+        }
+
+        if grade == "A":
+            a_list.append(entry)
+        elif grade == "B":
+            b_list.append(entry)
+        else:
+            skip_list.append(entry)
+
+        # Scout entry (compatible with existing scout schema)
+        scout_entry = {
+            "fixture_id": r.get("fixture_id"),
+            "date": scan_date,
+            "match_date": scan_date,
+            "scan_date": today_key,
+            "scout_file_date": today_key,
+            "kickoff": r.get("kickoff_time", "?"),
+            "home": r.get("home_team", "?"),
+            "away": r.get("away_team", "?"),
+            "league": r.get("league_name", "?"),
+            "grade": grade,
+            "market_scores": {},
+            "factors": {},
+            "ht_ou_lines": [],
+        }
+        # Merge recommendation summary if available
+        rec = r.get("recommendation_summary", {})
+        if isinstance(rec, dict):
+            for k in ("market_focus", "market_type", "best_focus_by_score", "best_score",
+                      "data_coverage", "script_type", "ht_attack_vs_defense",
+                      "recent_form_avg", "late_fh_pressure"):
+                if k in rec:
+                    scout_entry[k] = rec[k]
+        scout_list.append(scout_entry)
+
+    # Build candidate_view (no C grade)
+    candidate_view = {
+        "schema_version": "v3v4_dashboard_candidate_view.v1",
+        "generated_at": datetime.now(LOCAL_TZ).isoformat(),
+        "scan_date": today_key,
+        "source_window": "daily_1200",
+        "source_path": str(candidate_path),
+        "source_hash": "",
+        "brief_path": "",
+        "brief_sha256": "",
+        "scout_path": str(scout_path),
+        "scout_sha256": "",
+        "A_count": len(a_list),
+        "B_count": len(b_list),
+        "C_count": 0,
+        "SKIP_count": len(skip_list),
+        "scan_total": len(results),
+        "formal_recommendation_count": len(a_list) + len(b_list),
+        "A_candidates": a_list,
+        "B_candidates": b_list,
+        "C_candidates": [],
+        "C_observation_only": True,
+        "actual_send": False,
+        "qq_sent": False,
+        "V4_QQ_ENABLED": False,
+        "parsed_from_brief": False,
+        "fallback_used": True,
+        "fallback_reason": "parallel_engine_adapter",
+        "builder_script": "v4_scan_and_brief.py",
+    }
+    candidate_path.parent.mkdir(parents=True, exist_ok=True)
+    candidate_path.write_text(json.dumps(candidate_view, ensure_ascii=False, indent=2), encoding="utf-8")
+    print(f"[adapter] wrote candidate_view: A={len(a_list)} B={len(b_list)} SKIP={len(skip_list)} total={len(results)}", flush=True)
+
+    # Write scout
+    scout_path.parent.mkdir(parents=True, exist_ok=True)
+    scout_path.write_text(json.dumps(scout_list, ensure_ascii=False, indent=2), encoding="utf-8")
+    print(f"[adapter] wrote scout: {len(scout_list)} entries", flush=True)
+
+    # Generate brief via existing engine
+    try:
+        from engine.v4_openclaw_brief import build_brief
+        from engine.v4_qq_formatter import format_qq
+        brief_text = build_brief(args.date)
+        brief_path = REPORT_DIR / f"v4_openclaw_brief_{today_key}.txt"
+        brief_path.write_text(brief_text, encoding="utf-8")
+        qq_text = format_qq(args.date, window=args.window)
+        qq_path = REPORT_DIR / f"v4_openclaw_brief_qq_{today_key}.txt"
+        qq_path.write_text(qq_text, encoding="utf-8")
+        print(f"[adapter] wrote brief/qq", flush=True)
+    except Exception as e:
+        print(f"[adapter] brief generation skipped: {e}", flush=True)
+
+    wd.finish(status="DONE",
+              output_files={"candidate_view": str(candidate_path),
+                           "scout": str(scout_path)})
+
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--date", default=None, help="Scan date YYYYMMDD (legacy, prefer --scan-date)")
@@ -92,6 +263,16 @@ def main():
     parser.add_argument("--preflight", action="store_true",
                         help="Preflight only — validate paths, do not execute")
     parser.add_argument("--scan-mode", default="fast", choices=["fast","full"])
+    parser.add_argument("--include-outside-57", action="store_true", help="扫描全部联赛（含白名单之外）")
+    parser.add_argument("--scan-engine", default="serial", choices=["serial","parallel"],
+                        help="Scan engine: serial=existing v4_scan_worker, parallel=v4_outside57_scanner")
+    parser.add_argument("--write-official-output", action="store_true",
+                        help="In parallel mode, write official candidate_view/scout/brief")
+    parser.add_argument("--outside57-workers", type=int, default=8)
+    parser.add_argument("--outside57-api-rpm", type=int, default=290)
+    parser.add_argument("--outside57-api-rpm-hard-cap", type=int, default=300)
+    parser.add_argument("--outside57-max-inflight", type=int, default=30)
+    parser.add_argument("--outside57-resume", action="store_true")
     args = parser.parse_args()
 
     # Resolve scan_date: --scan-date takes priority over --date
@@ -186,13 +367,20 @@ def main():
     LOG_DIR.mkdir(parents=True, exist_ok=True)
     log_path = LOG_DIR / f"v4_scan_{args.window}_{today_key}.log"
 
+    # ── PARALLEL ENGINE MODE ──
+    if args.scan_engine == "parallel":
+        _run_parallel_scan(args, scan_date, today_key, wd, log_path)
+        GLOBAL_LOCK.unlink(missing_ok=True)
+        return
+
     try:
         with open(str(log_path), "w") as log_fh:
             child = subprocess.Popen(
                 [sys.executable, "-u", str(BASE_DIR / "engine" / "v4_scan_worker.py"),
                  "--date", scan_date, "--window", args.window,
                  "--lookahead-hours", str(args.lookahead_hours),
-                 "--scan-mode", args.scan_mode],
+                 "--scan-mode", args.scan_mode]
+                + (["--include-outside-57"] if args.include_outside_57 else []),
                 stdout=log_fh, stderr=subprocess.STDOUT,
             )
 

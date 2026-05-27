@@ -1,0 +1,42 @@
+{
+  "schema_version": "v4_daily_scan_parallel_adapter_checker.v1",
+  "generated_at": "2026-05-27T19:43:07.011410+08:00",
+  "checks": {
+    "v4_scan_and_brief_exists": true,
+    "has_scan_engine_arg": true,
+    "has_parallel_mode": true,
+    "has_write_official_output": true,
+    "has_outside57_args": true,
+    "has_adapter_function": true,
+    "adapter_C_count_is_zero": true,
+    "scanner_has_write_official_flag": false,
+    "scanner_exists": true,
+    "scanner_recent_form_last_n": null,
+    "scanner_has_topN": false,
+    "scanner_rpm_target_290": true,
+    "scanner_rpm_hard_cap_300": true,
+    "scanner_max_inflight_30": true
+  },
+  "violations": [],
+  "forbidden_flags": {
+    "outside57_full_coverage_preserved": true,
+    "topn_replacement_used": false,
+    "required_scoring_skipped": false,
+    "h2h_skipped": false,
+    "recent_form_skipped": false,
+    "recent_form_scoring_sample_size_10": true,
+    "official_scan_entrypoint_preserved": true,
+    "cron_direct_to_isolated_scanner": false,
+    "c_grade_generated": false,
+    "c_mixed_into_current_view": false,
+    "skip_mixed_into_ab_cumulative": false,
+    "validation_recomputed": false,
+    "strategy_changed": false,
+    "candidate_rating_changed": false,
+    "live_bet_raw_records_modified": false,
+    "QQ_recommendation_pushed": false,
+    "cloud_publish": false,
+    "secrets_committed": false
+  },
+  "conclusion": "PASS"
+}

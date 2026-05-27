@@ -901,6 +901,9 @@ def main():
     )
     Path(output_path).parent.mkdir(parents=True, exist_ok=True)
 
+    # Standalone mode: ONLY write isolated result, never official candidate_view.
+    # Official output path is only written when called through v4_scan_and_brief.py
+    # adapter with the write-official-output flag.
     # 写结果（不含 results 数组太大时的截断版本）
     summary_light = {k: v for k, v in summary.items() if k != "results"}
     summary_light["results_count"] = len(summary["results"])
