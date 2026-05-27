@@ -1,0 +1,39 @@
+{
+  "schema_version": "v4_lab_prod_clone_h2h_last3_freeze.v1",
+  "phase": "V4-LAB-PRODUCTION-CLONE-H2H-LAST3-FIX-20260527",
+  "step": "Step 1 — freeze",
+  "generated_at": "2026-05-27T23:08:00+08:00",
+  "current_lab_state": {
+    "file": "engine/v4_lab_fullscan.py",
+    "calls_production_scoring": true,
+    "scoring_path": "run_outside57_scan → _process_one_fixture → evaluate_h2h_edge → build_ht_recommendation",
+    "events_enabled": true,
+    "time_bins_active": true,
+    "late_fh_pressure_active": true,
+    "ht_score_active": true,
+    "scoring_overrides_applied": "RECENT_PROFILE_INCLUDE_EVENTS: false (in very_aggressive profile only)",
+    "h2h_promotion": "lab independent H2H check after production scan",
+    "h2h_last3_implementation": "lab_h2h_check function uses last 5 sorted matches, counts only played, returns rate",
+    "data_timeout_tracking": false,
+    "incomplete_data_blocking": false
+  },
+  "target_state": {
+    "profile": "prod_clone_h2h_last3",
+    "events": true,
+    "time_bins": true,
+    "late_fh": true,
+    "ht_score": true,
+    "h2h_policy": "LAB_H2H_LAST3_ALL_FH_GOAL",
+    "h2h_sample": 3,
+    "h2h_require_all": true,
+    "data_timeout_tracked": true,
+    "incomplete_blocks_lab_ab": true
+  },
+  "gaps": [
+    "very_aggressive profile has RECENT_PROFILE_INCLUDE_EVENTS: false (conflicts with clone requirement)",
+    "Lab H2H check doesn't filter by league pyramid or exclude cups/friendlies",
+    "No DATA_TIMEOUT tracking",
+    "No SCORE_INCOMPLETE tracking",
+    "No scoring_complete field in output"
+  ]
+}

@@ -1,0 +1,41 @@
+{
+  "schema_version": "v4_lab_production_clone_h2h_last3_checker.v1",
+  "generated_at": "2026-05-27T23:13:36.489526+08:00",
+  "checks": {
+    "profile_exists": true,
+    "mode": "production_clone_h2h_last3",
+    "use_production_scoring_chain": true,
+    "include_events": true,
+    "include_time_bins": true,
+    "include_late_fh_pressure": true,
+    "include_ht_score": true,
+    "recent_form_sample_size": 10,
+    "h2h_policy": "LAB_H2H_LAST3_ALL_FH_GOAL",
+    "h2h_valid_sample_size": 3,
+    "h2h_require_all_last3_fh_goal": true,
+    "h2h_min_valid_matches": 3,
+    "allow_c_grade": false,
+    "grades": [
+      "LAB_A",
+      "LAB_B",
+      "LAB_SKIP"
+    ],
+    "scanner_has_prod_clone_mode": true,
+    "scanner_tracks_data_timeout": true,
+    "scanner_tracks_score_incomplete": true,
+    "scanner_h2h_last3_check": true,
+    "scanner_uses_h2h_last3_policy": true
+  },
+  "violations": [],
+  "forbidden_flags": {
+    "official_candidate_modified": false,
+    "validation_recomputed": false,
+    "live_bet_raw_records_modified": false,
+    "cron_modified": false,
+    "QQ_recommendation_pushed": false,
+    "production_strategy_changed": false,
+    "candidate_rating_changed": false,
+    "c_grade_generated": false
+  },
+  "conclusion": "PASS"
+}
