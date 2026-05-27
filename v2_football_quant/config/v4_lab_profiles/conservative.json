@@ -1,0 +1,26 @@
+{
+  "profile_id": "conservative",
+  "profile_name": "V4 Lab Conservative",
+  "lab_only": true,
+  "production_safe": false,
+  "grade_schema": ["LAB_A", "LAB_B", "LAB_SKIP"],
+  "allow_lab_observe_grade": false,
+  "recent_form_sample_size": 10,
+  "h2h_policy": "LEAGUE_PYRAMID_POST2020_ONLY",
+  "full_scan": true,
+  "include_outside57": false,
+  "thresholds": {
+    "lab_a_min_score": 75,
+    "lab_b_min_score": 60
+  },
+  "weights": {
+    "ht_score_weight": 1.0,
+    "recent_form_weight": 1.2,
+    "h2h_weight": 1.5
+  },
+  "filters": {
+    "min_h2h_samples": 5,
+    "min_recent_matches": 5
+  },
+  "notes": "Lab only. Higher thresholds for higher confidence plays."
+}

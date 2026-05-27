@@ -1,0 +1,6 @@
+{
+  "schema_version": "v4_lab_fullscan_fullrun_decision.v1",
+  "full_run_executed": false,
+  "full_run_skipped_by_boss_authorization": true,
+  "note": "Full run requires BOSS separate authorization. Not executed in this phase."
+}

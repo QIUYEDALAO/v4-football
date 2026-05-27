@@ -1,0 +1,30 @@
+{
+  "schema_version": "v4_lab_independent_copy_freeze.v1",
+  "phase": "V4-LAB-INDEPENDENT-FULLSCAN-COPY-20260527",
+  "step": "Step 1 — freeze",
+  "generated_at": "2026-05-27T20:35:00+08:00",
+  "production_state": {
+    "12:00_cron": {
+      "task_name": "V4_DAILY_SCAN_READONLY",
+      "entrypoint": "v4_scan_and_brief.py",
+      "flags": "--scan-engine parallel --write-official-output --outside57-workers 8 --outside57-api-rpm 290 --outside57-api-rpm-hard-cap 300 --outside57-max-inflight 30 --outside57-resume --no-push",
+      "include_outside57": false
+    },
+    "13:00_cron": {"task":"V4_VALIDATION_DRY_RUN","entrypoint":"v4_ht_result_validator.py","unchanged":true},
+    "13:00_dashboard_refresh": {"task":"V3V4_DASHBOARD_AFTER_SCAN_REFRESH","entrypoint":"run_v3v4_dashboard_daily_update.py","unchanged":true},
+    "13:30_dashboard_refresh": {"task":"V3V4_DASHBOARD_AFTER_VALIDATION_REFRESH","entrypoint":"run_v3v4_dashboard_daily_update.py","unchanged":true},
+    "14:00_final_refresh": {"task":"V4_VALIDATION_DRY_RUN_FINAL_AND_DASHBOARD_REFRESH","entrypoint":"run_v3v4_validation_final_and_dashboard_refresh.py","unchanged":true},
+    "official_candidate_view_path": "data/runtime/status/v3v4_dashboard_candidate_view_YYYYMMDD.json",
+    "scout_path": "data/daily_reports/scout_v4_YYYYMMDD.json",
+    "brief_path": "data/daily_reports/v4_openclaw_brief_YYYYMMDD.txt",
+    "dashboard_model_path": "data/runtime/status/v4_control_center_model_YYYYMMDD.json",
+    "validation_source_of_truth": "data/runtime/status/v4_official_ab_validation_source_of_truth_YYYYMMDD.json",
+    "live_bet_path": "data/runtime/live_bets/daily_summary_YYYYMMDD.json",
+    "recent_form_sample_size": 10,
+    "v4_candidate_grades": ["A","B","SKIP"],
+    "c_grade_active": false,
+    "outside57_manual_entrypoint": "engine/v4_outside57_scanner.py",
+    "production_recent_form_policy": "LAST_10_VALID_MATCHES",
+    "last_git_commit": "a35a055"
+  }
+}

@@ -1,0 +1,36 @@
+{
+  "schema_version": "v4_lab_fullscan_checker.v1",
+  "generated_at": "2026-05-27T20:33:44.568174+08:00",
+  "checks": {
+    "lab_fullscan_exists": true,
+    "profile_default_exists": true,
+    "profile_aggressive_exists": true,
+    "profile_conservative_exists": true,
+    "lab_rejects_write_official": true,
+    "lab_output_path_correct": true,
+    "no_official_paths_in_lab": true,
+    "marker_lab_only": true,
+    "marker_official_candidate=false": true,
+    "marker_not_for_validation": true,
+    "marker_not_for_live_bet": true,
+    "marker_not_for_qq_recommendation": true,
+    "lab_has_c_grade": false,
+    "lab_cache_namespace": true,
+    "default_api_rpm_290": true
+  },
+  "violations": [],
+  "forbidden_flags": {
+    "production_cron_modified": false,
+    "official_candidate_modified": false,
+    "scout_v4_modified": false,
+    "official_brief_modified": false,
+    "validation_recomputed": false,
+    "live_bet_raw_records_modified": false,
+    "QQ_recommendation_pushed": false,
+    "lab_outputs_isolated": true,
+    "lab_grades_only_LAB_A_LAB_B_LAB_SKIP": true,
+    "c_grade_generated": false,
+    "secrets_committed": false
+  },
+  "conclusion": "PASS"
+}
