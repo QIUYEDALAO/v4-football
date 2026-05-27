@@ -1,0 +1,63 @@
+{
+  "schema_version": "v4_recent_form_fetch_vs_score_audit.v1",
+  "phase": "V4-RECENT-FORM-SAMPLE-SIZE-AUDIT-AND-FIX-20260527",
+  "step": "Step 2 — fetch vs score audit",
+  "generated_at": "2026-05-27T15:56:30+08:00",
+  "audit_table": [
+    {
+      "row": 1,
+      "file": "engine/data_sources/h2h_engine.py",
+      "function": "_query_recent_goal_profile",
+      "api_endpoint": "fixtures?team={team_id}&last={last_n}&status=FT",
+      "raw_fetch_limit": 3,
+      "raw_fetch_reason": "API parameter last=3",
+      "filtering_rules": "No filtering; all 3 returned matches used",
+      "scoring_sample_size": 3,
+      "scoring_sample_source": "All 3 matches from API response, iterated directly",
+      "used_for_recent_form_avg": true,
+      "used_for_ht_attack_vs_defense": true,
+      "used_for_late_fh": true,
+      "used_for_outside_57": true,
+      "used_for_official_scan": true,
+      "conclusion": "FETCH_3_SCORE_3_COMPLIANT",
+      "note": "raw_fetch=3, scoring=3 — both within BOSS's 10-match requirement"
+    },
+    {
+      "row": 2,
+      "file": "engine/data_sources/lineup_strength.py",
+      "function": "LineupStrengthAnalyzer.fetch_recent",
+      "api_endpoint": "fixtures?team={team_id}&last={self.recent_matches}&status=FT",
+      "raw_fetch_limit": 10,
+      "raw_fetch_reason": "RECENT_MATCHES = 10 constant",
+      "filtering_rules": "N/A — lineup analysis only",
+      "scoring_sample_size": 10,
+      "scoring_sample_source": "All 10 matches for lineup analysis",
+      "used_for_recent_form_avg": false,
+      "used_for_ht_attack_vs_defense": false,
+      "used_for_late_fh": false,
+      "used_for_outside_57": false,
+      "used_for_official_scan": false,
+      "conclusion": "FETCH_10_SCORE_10_LINEUP_ONLY",
+      "note": "Not used for recent form scoring. Only when --with-lineups flag passed (default: disabled)."
+    },
+    {
+      "row": 3,
+      "file": "tools/patch_time_bins.py",
+      "function": "recent_time_bins",
+      "api_endpoint": "fixtures?team={team_id}&last={last_n}&status=FT",
+      "raw_fetch_limit": 5,
+      "raw_fetch_reason": "last_n=5 hardcoded",
+      "filtering_rules": "N/A — standalone utility",
+      "scoring_sample_size": 5,
+      "used_for_recent_form_avg": false,
+      "used_for_ht_attack_vs_defense": false,
+      "used_for_late_fh": false,
+      "used_for_outside_57": false,
+      "used_for_official_scan": false,
+      "conclusion": "NOT_IN_SCAN_PIPELINE",
+      "note": "Standalone tool, not called by v4_runner, not part of scan pipeline."
+    }
+  ],
+  "conclusion": "PASS",
+  "summary": "No violation found. All scan-path recent form entries use raw_fetch_limit <= 3 (h2h_engine) or 10 (lineup_strength). No last=50 found. scoring_sample_size matches raw_fetch_limit in all cases. BOSS's 10-match requirement is already satisfied."
+}

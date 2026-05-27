@@ -469,7 +469,7 @@ def run_v4_scan(
         prewarm_info = warm_recent_goal_profiles(
             api_client,
             prewarm_team_ids,
-            last_n=5,
+            last_n=10,
             include_events=False,
         )
         prewarm_info["enabled"] = True

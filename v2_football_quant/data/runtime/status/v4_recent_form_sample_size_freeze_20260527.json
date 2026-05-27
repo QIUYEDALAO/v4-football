@@ -1,0 +1,43 @@
+{
+  "schema_version": "v4_recent_form_sample_size_freeze.v1",
+  "phase": "V4-RECENT-FORM-SAMPLE-SIZE-AUDIT-AND-FIX-20260527",
+  "step": "Step 1 — freeze",
+  "generated_at": "2026-05-27T15:56:00+08:00",
+  "entries": [
+    {
+      "file": "engine/data_sources/h2h_engine.py",
+      "function": "_query_recent_goal_profile",
+      "api_endpoint": "fixtures?team={team_id}&last={last_n}&status=FT",
+      "default_last_n": 3,
+      "caller": "evaluate_h2h_edge() at line 648/654",
+      "caller_last_n": 3,
+      "hardcoded_at": "line 644: recent_last_n = 3",
+      "used_for": ["recent_form_avg", "ht_attack_vs_defense", "late_fh_pressure", "ht_over", "sh_over", "ft_over_1_5", "time_bins"],
+      "outside_57": true,
+      "official_scan": true,
+      "include_events": true,
+      "cache_enabled": true
+    },
+    {
+      "file": "engine/data_sources/lineup_strength.py",
+      "function": "LineupStrengthAnalyzer.fetch_recent",
+      "api_endpoint": "fixtures?team={team_id}&last={self.recent_matches}&status=FT",
+      "recent_matches_default": 10,
+      "caller": "run_v4_scan with --with-lineups (default: disabled)",
+      "used_for": "lineup strength analysis only, NOT recent_form_avg",
+      "outside_57": false,
+      "official_scan": "only when --with-lineups passed"
+    },
+    {
+      "file": "tools/patch_time_bins.py",
+      "function": "recent_time_bins",
+      "api_endpoint": "fixtures?team={team_id}&last={last_n}&status=FT",
+      "last_n": 5,
+      "used_for": "standalone utility, NOT used in scan pipeline",
+      "outside_57": false,
+      "official_scan": false
+    }
+  ],
+  "conclusion": "PASS",
+  "note": "All recent form entries located. No last=50 found in any scan-path code. _query_recent_goal_profile uses last=3 by default."
+}

@@ -1,0 +1,74 @@
+{
+  "schema_version": "v4_outside57_speed_allowed_methods.v1",
+  "phase": "V4-RECENT-FORM-SAMPLE-SIZE-AUDIT-AND-FIX-20260527",
+  "step": "Step 5 — outside_57 speed optimization methods",
+  "generated_at": "2026-05-27T15:57:00+08:00",
+  "existing_optimizations": {
+    "team_recent_form_cache": {
+      "status": "ALREADY_IMPLEMENTED",
+      "location": "engine/data_sources/h2h_engine.py:25 — _RECENT_PROFILE_CACHE dict",
+      "cached_by": "(team_id, last_n, include_events) tuple key",
+      "stats_tracked": true
+    },
+    "h2h_caching": {
+      "status": "NOT_IMPLEMENTED",
+      "note": "H2H API call is fresh per fixture pair — no cache. Could be added if same team pair appears multiple times (rare)."
+    }
+  },
+  "allowed_methods": [
+    {
+      "method": "concurrent_workers",
+      "impact": "Multiple fixtures scored in parallel. Would increase API throughput.",
+      "risk": "API rate limit 450 RPM — concurrent workers would need coordinated RPM control."
+    },
+    {
+      "method": "HTTP_session_reuse",
+      "impact": "Reuse TCP connections, reduce handshake overhead.",
+      "risk": "Low. urllib already pools connections via ProxyHandler."
+    },
+    {
+      "method": "team_recent_form_cache",
+      "impact": "Already implemented. Avoids re-fetching recent form for same team.",
+      "risk": "None. Already active."
+    },
+    {
+      "method": "H2H_cache",
+      "impact": "Cache H2H results for (home_id, away_id) pairs seen multiple times.",
+      "risk": "Low. Same team pairs rarely repeat in same scan window."
+    },
+    {
+      "method": "API_timeout",
+      "impact": "Reduce per-request timeout from 15s to shorter bounds.",
+      "risk": "Could cause spurious failures for slow API responses."
+    },
+    {
+      "method": "fixture_timeout",
+      "impact": "Skip a fixture if it takes too long, resume later.",
+      "risk": "Would need resume logic for skipped fixtures."
+    },
+    {
+      "method": "resume_breakpoint",
+      "impact": "Save progress and resume if scan is interrupted.",
+      "risk": "Moderate complexity to implement."
+    },
+    {
+      "method": "fetch_score_phase_split",
+      "impact": "Fetch all fixtures first, then score in a separate pass.",
+      "risk": "Architectural refactor. Benefit may be limited if bottleneck is API latency."
+    },
+    {
+      "method": "same_team_recent_form_reuse",
+      "impact": "Already implemented via _RECENT_PROFILE_CACHE. Same team in multiple fixtures shares cached profile.",
+      "risk": "None."
+    }
+  ],
+  "forbidden_methods_verified": {
+    "skip_recent_form": false,
+    "skip_h2h": false,
+    "fetch_only_no_score": false,
+    "topN_replacement": false,
+    "reduce_fixture_count": false
+  },
+  "actual_bottleneck": "API-Football network latency (1-5s per call). Each fixture makes 3 API calls (H2H + home recent + away recent). With 240 fixtures and sequential processing, the limiting factor is serial API round-trips.",
+  "note": "BOSS directive prohibits: topN, skip required scoring, reduce fixture count, skip H2H, skip recent form. All confirmed not violated."
+}

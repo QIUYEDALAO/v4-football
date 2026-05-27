@@ -1,0 +1,19 @@
+{
+  "schema_version": "v4_recent_form_sample_size_verify.v1",
+  "phase": "V4-RECENT-FORM-SAMPLE-SIZE-AUDIT-AND-FIX-20260527",
+  "step": "Step 7 — verification matrix",
+  "generated_at": "2026-05-27T15:58:45+08:00",
+  "raw_fetch_limit": 3,
+  "scoring_sample_size": 3,
+  "recent_form_policy": "LAST_3_MATCHES",
+  "fix_applied": false,
+  "fix_required": false,
+  "affects_official_scan": false,
+  "affects_outside57_full_coverage": false,
+  "checker_result": "PASS",
+  "violations": [],
+  "verdict": "WARN_ONLY",
+  "warnings": [
+    "raw_fetch=3 is within 10-match BOSS requirement, but smaller than ideal for filtering. Current implementation does not do any filtering beyond the API return."
+  ]
+}

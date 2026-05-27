@@ -1,0 +1,25 @@
+{
+  "schema_version": "v4_recent_form_sample_size_classification.v1",
+  "phase": "V4-RECENT-FORM-SAMPLE-SIZE-AUDIT-AND-FIX-20260527",
+  "step": "Step 3 — classification (revised)",
+  "generated_at": "2026-05-27T16:05:00+08:00",
+  "raw_fetch_limit": 3,
+  "scoring_sample_size": 3,
+  "boss_requirement": 10,
+  "classification": "VIOLATION_LAST3",
+  "detail": "evaluate_h2h_edge() hardcodes recent_last_n=3 which is used as both raw_fetch_limit and scoring_sample_size. All scoring metrics (recent_form_avg, ht_attack_vs_defense, late_fh_pressure, time_bins) are computed from only 3 matches per team. No filtering, no padding. Violates BOSS requirement of 10-match minimum.",
+  "affected_metrics": [
+    "recent_form_avg (line 658)",
+    "ht_attack_vs_defense (line 669)",
+    "both_sides_ht_threat (line 670)",
+    "late_fh_pressure (line 682)",
+    "recent_timing_fit (lines 690-699)",
+    "recent_strength_pass (line 739-741)",
+    "recent_timing_pass (line 744)",
+    "ht_score_floor_pass (line 745)",
+    "ht_candidate / sh_candidate / ft_candidate (lines 749-757)",
+    "score_pack['scores'] (lines 707-725)"
+  ],
+  "verdict": "MUST_FIX",
+  "next_step": 4
+}

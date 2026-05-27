@@ -1,0 +1,60 @@
+{
+  "schema_version": "v4_recent_form_last3_meaning_audit.v1",
+  "phase": "V4-RECENT-FORM-SAMPLE-SIZE-AUDIT-AND-FIX-20260527",
+  "step": "Step 2 — last=3 meaning audit (revised)",
+  "generated_at": "2026-05-27T16:04:00+08:00",
+  "locations": [
+    {"file": "engine/data_sources/h2h_engine.py", "line": 311, "code": "def _query_recent_goal_profile(..., last_n: int = 3, ...)", "role": "default parameter"},
+    {"file": "engine/data_sources/h2h_engine.py", "line": 331, "code": "api_client(f\"fixtures?team={team_id}&last={last_n}&status=FT\")", "role": "API endpoint with last=3"},
+    {"file": "engine/data_sources/h2h_engine.py", "line": 644, "code": "recent_last_n = 3", "role": "caller hardcodes to 3"},
+    {"file": "engine/data_sources/h2h_engine.py", "line": 648, "code": "home_recent = _query_recent_goal_profile(..., last_n=recent_last_n)", "role": "home team call"},
+    {"file": "engine/data_sources/h2h_engine.py", "line": 654, "code": "away_recent = _query_recent_goal_profile(..., last_n=recent_last_n)", "role": "away team call"}
+  ],
+  "questions": [
+    {
+      "q": "last=3 是 API raw fetch limit 吗？",
+      "a": "是。API 参数 last=3 → 只返回最近3场完赛。",
+      "evidence": "line 331: fixtures?team={team_id}&last={last_n}&status=FT, last_n=3"
+    },
+    {
+      "q": "last=3 是评分样本数吗？",
+      "a": "是。所有返回的3场直接用于评分，无过滤、无补足。",
+      "evidence": "lines 645-654: 3 matches returned → 3 matches scored"
+    },
+    {
+      "q": "recent_form_avg 实际用了几场？",
+      "a": "3场。home_recent['ht_over'] + away_recent['ht_over']，各来自3场。",
+      "evidence": "line 658: recent_form_avg = (home_recent['ht_over'] + away_recent['ht_over']) / 2"
+    },
+    {
+      "q": "ht_attack_vs_defense 实际用了几场？",
+      "a": "3场。来自 home_recent + away_recent 各3场。",
+      "evidence": "lines 661-669"
+    },
+    {
+      "q": "late_fh 实际用了几场？",
+      "a": "3场。来自 home_recent['late_fh_pressure'] / away_recent 各3场。",
+      "evidence": "line 682-683"
+    },
+    {
+      "q": "team profile 实际用了几场？",
+      "a": "3场。ht_over, sh_over, ft_over_1_5, time_bins 均来自3场。",
+      "evidence": "lines 391-420 (_query_recent_goal_profile result)"
+    },
+    {
+      "q": "是否有其他地方补足到10场？",
+      "a": "没有。lineup_strength.py 的 RECENT_MATCHES=10 是独立模块，仅用于 --with-lineups 模式（默认关闭），不参与评分。",
+      "evidence": "tools/check_v4_h2h_league_pyramid_policy.py:230-231"
+    },
+    {
+      "q": "是否存在 last=10 或 RECENT_FORM_SAMPLE_SIZE=10 配置？",
+      "a": "没有用于 recent form 评分的。lineup_strength.py 的 RECENT_MATCHES=10 用于不同目的。"
+    }
+  ],
+  "conclusion": {
+    "raw_fetch_limit": 3,
+    "scoring_sample_size": 3,
+    "verdict": "raw_fetch=3 AND scoring=3 — no separation",
+    "boss_requirement": "scoring_sample_size >= 10"
+  }
+}

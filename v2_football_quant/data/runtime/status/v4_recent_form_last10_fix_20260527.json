@@ -1,0 +1,46 @@
+{
+  "schema_version": "v4_recent_form_last10_fix.v1",
+  "phase": "V4-RECENT-FORM-SAMPLE-SIZE-AUDIT-AND-FIX-20260527",
+  "step": "Step 4 — last-10 fix",
+  "generated_at": "2026-05-27T16:07:00+08:00",
+  "fixes": [
+    {
+      "file": "engine/data_sources/h2h_engine.py",
+      "line": 311,
+      "change": "def _query_recent_goal_profile(..., last_n: int = 3, ...) → last_n: int = 10",
+      "reason": "Increase default fetch/scoring sample from 3 to 10"
+    },
+    {
+      "file": "engine/data_sources/h2h_engine.py",
+      "line": 644,
+      "change": "recent_last_n = 3 → recent_last_n = 10",
+      "reason": "Caller now requests 10 matches per team"
+    },
+    {
+      "file": "engine/data_sources/h2h_engine.py",
+      "line": 321,
+      "change": "Added recent_form_valid_count, recent_form_low_sample, recent_form_raw_fetch_limit, recent_form_policy to empty dict",
+      "reason": "Transparency fields for downstream consumers"
+    },
+    {
+      "file": "engine/data_sources/h2h_engine.py",
+      "line": 417,
+      "change": "Added same fields to result dict after computation",
+      "reason": "Transparency fields for downstream consumers"
+    },
+    {
+      "file": "engine/v4_runner.py",
+      "line": 473,
+      "change": "warm_recent_goal_profiles last_n=5 → last_n=10",
+      "reason": "Cache key consistency with scoring call"
+    }
+  ],
+  "forbidden_flags": {
+    "strategy_thresholds_changed": false,
+    "candidate_rating_changed": false,
+    "validation_recomputed": false,
+    "live_bet_raw_records_modified": false,
+    "cron_modified": false
+  },
+  "note": "If a team has fewer than 10 valid finished matches, recent_form_low_sample=True is set and all available matches are used. The policy is 'LAST_10_VALID_MATCHES'."
+}

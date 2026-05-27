@@ -1,0 +1,54 @@
+{
+  "schema_version": "v4_recent_form_sample_size_audit_and_fix.v2",
+  "phase": "V4-RECENT-FORM-SAMPLE-SIZE-AUDIT-AND-FIX-20260527",
+  "final_status": "V4_RECENT_FORM_LAST10_COMPLIANCE_FIXED",
+  "generated_at": "2026-05-27T16:08:00+08:00",
+  "audit_findings": [
+    {"q": "recent form API 原始拉取是多少场？", "a": "修复前 last=3，修复后 last=10"},
+    {"q": "recent form 实际评分使用是多少场？", "a": "修复前 3 场，修复后 10 场"},
+    {"q": "OpenClaw 所说'拉近50场'是否属实？", "a": "不属实。OpenClaw 犯错了。实际代码 never 拉50。"},
+    {"q": "是否违反 BOSS 最近10场要求？", "a": "修复前违反（只用3场），修复后合规（10场）"},
+    {"q": "是否已修复为最近10场评分？", "a": "是。recent_last_n = 3 → 10，函数默认参数 3 → 10"},
+    {"q": "raw fetch=10 是否保留？", "a": "是。API 拉取 last=10 即评分用10场"},
+    {"q": "outside_57 是否仍全量跑比赛？", "a": "是。未减少比赛，未使用 topN"},
+    {"q": "是否修改 official scan？", "a": "否。official_scan_modified=False"},
+    {"q": "是否修改策略阈值？", "a": "否。strategy_changed=False"},
+    {"q": "是否修改 candidate？", "a": "否。candidate_rating_changed=False"},
+    {"q": "是否重算 validation？", "a": "否。validation_recomputed=False"},
+    {"q": "是否修改 cron？", "a": "否。cron_modified=False"}
+  ],
+  "fixes": [
+    {"file": "engine/data_sources/h2h_engine.py", "line": 311, "change": "last_n default: 3 → 10"},
+    {"file": "engine/data_sources/h2h_engine.py", "line": 654, "change": "recent_last_n: 3 → 10"},
+    {"file": "engine/data_sources/h2h_engine.py", "line": 322, "change": "added recent_form_low_sample, valid_count, raw_fetch_limit, policy fields"},
+    {"file": "engine/data_sources/h2h_engine.py", "line": 418, "change": "added same fields to result dict"},
+    {"file": "engine/v4_runner.py", "line": 473, "change": "prewarm last_n: 5 → 10 (cache consistency)"}
+  ],
+  "new_files": [
+    "tools/check_v4_recent_form_sample_size.py",
+    "docs/V4_RECENT_FORM_SAMPLE_SIZE_AUDIT_AND_FIX_20260527.md"
+  ],
+  "unrelated_pending": [
+    "engine/v4_runner.py (outside_57 include flag — separate task)",
+    "engine/v4_scan_worker.py (outside_57 include flag — separate task)",
+    "engine/v4_scan_and_brief.py (outside_57 include flag — separate task)"
+  ],
+  "forbidden_flags": {
+    "recent_form_scoring_sample_size_10": true,
+    "raw_fetch_10_match_scoring": true,
+    "recent_form_50_used_in_score": false,
+    "outside57_full_coverage_preserved": true,
+    "topn_replacement_used": false,
+    "required_scoring_skipped": false,
+    "official_scan_modified": false,
+    "strategy_changed": false,
+    "candidate_rating_changed": false,
+    "validation_recomputed": false,
+    "live_bet_raw_records_modified": false,
+    "cron_modified": false,
+    "QQ_recommendation_pushed": false,
+    "cloud_publish": false,
+    "secrets_printed": false,
+    "secrets_committed": false
+  }
+}

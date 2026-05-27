@@ -308,7 +308,7 @@ def _parse_goal_events(api_client, fixture_id: int) -> dict:
     return bins
 
 
-def _query_recent_goal_profile(api_client, team_id: int, last_n: int = 3, include_events: bool = True) -> dict:
+def _query_recent_goal_profile(api_client, team_id: int, last_n: int = 10, include_events: bool = True) -> dict:
     """查询某队最近 N 场完赛的上下半场进球画像。"""
     cache_key = (int(team_id), int(last_n), bool(include_events))
     if cache_key in _RECENT_PROFILE_CACHE:
@@ -326,6 +326,10 @@ def _query_recent_goal_profile(api_client, team_id: int, last_n: int = 3, includ
         "second_half_bins": {"46_60": 0.0, "61_75": 0.0, "76_90": 0.0},
         "late_fh_pressure": 0.0,
         "early_only_flag": False,
+        "recent_form_valid_count": 0,
+        "recent_form_low_sample": True,
+        "recent_form_raw_fetch_limit": last_n,
+        "recent_form_policy": "LAST_10_VALID_MATCHES",
     }
     try:
         resp = api_client(f"fixtures?team={team_id}&last={last_n}&status=FT")
@@ -419,6 +423,10 @@ def _query_recent_goal_profile(api_client, team_id: int, last_n: int = 3, includ
             "second_half_bins": second_half_bins,
             "late_fh_pressure": late_fh_pressure,
             "early_only_flag": early_only_flag,
+            "recent_form_valid_count": n,
+            "recent_form_low_sample": n < 10,
+            "recent_form_raw_fetch_limit": last_n,
+            "recent_form_policy": "LAST_10_VALID_MATCHES",
         }
         _RECENT_PROFILE_CACHE[cache_key] = result
         return result
@@ -641,7 +649,9 @@ def evaluate_h2h_edge(home_id: int, away_id: int, api_client, mode: str = "full"
     )
 
     # 近期战绩（含场均进球）
-    recent_last_n = 3
+    # recent_last_n=10: 使用最近10场有效比赛作为评分样本
+    # 若API返回不足10场，按实际有效样本数计算，并标记low_sample
+    recent_last_n = 10
     home_recent = _query_recent_goal_profile(
         api_client,
         home_id,
