@@ -1,0 +1,20 @@
+{
+  "step": "Step 5 — 实现全局 API RPM limiter",
+  "status": "PASS",
+  "checked_at": "2026-05-27T00:00:00",
+  "phase": "V4-OUTSIDE57-FULL-SCAN-PARALLEL-ARCHITECTURE-FIX-20260527",
+  "rate_limiter": {
+    "class": "RateLimiter (threading.Lock + deque sliding window)",
+    "default_rpm_target": 290,
+    "rpm_hard_cap": 300,
+    "window_type": "60 秒滑动窗口",
+    "backoff_mechanism": "接近 hard cap 强制等待；收到 429 指数退避 (2^n up to 120s)",
+    "shared_across_workers": true,
+    "shared_across_intra_fixture": true,
+    "retry_requests_counted": true,
+    "h2h_recent_events_all_counted": true,
+    "implementation": "engine/v4_outside57_scanner.py — RateLimiter class"
+  },
+  "tracked_metrics": ["rpm_target", "rpm_hard_cap", "rpm_peak_60s", "rate_limited_count", "backoff_count", "http_429_count"],
+  "conclusion": "并发提速同时默认不超过 290 RPM，硬上限不超过 300 RPM"
+}

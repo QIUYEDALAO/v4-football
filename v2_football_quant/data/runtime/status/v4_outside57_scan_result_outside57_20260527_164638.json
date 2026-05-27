@@ -1,0 +1,71 @@
+{
+  "phase": "V4-OUTSIDE57-FULL-SCAN-PARALLEL-ARCHITECTURE-FIX-20260527",
+  "run_id": "outside57_20260527_164638",
+  "generated_at": "2026-05-27T16:46:52.666554+08:00",
+  "scan_date": "20260527",
+  "full_coverage": {
+    "input_fixture_count": 0,
+    "processed_fixture_count": 0,
+    "done_count": 0,
+    "timeout_count": 0,
+    "failed_count": 0,
+    "silent_drop_count": 0,
+    "coverage_rate": 0.0,
+    "processed_eq_input": true,
+    "silent_drop_eq_zero": true
+  },
+  "performance": {
+    "total_duration_sec": 14.072844833,
+    "total_duration_min": 0.23454741388333333,
+    "avg_sec_per_fixture": 14.072844833,
+    "api_request_count": 2
+  },
+  "rate_limiter": {
+    "rpm_target": 290,
+    "rpm_hard_cap": 300,
+    "rpm_current_60s": 2,
+    "rpm_peak_60s": 2,
+    "rate_limited_count": 0,
+    "backoff_count": 0,
+    "http_429_count": 0
+  },
+  "inflight_limiter": {
+    "max_inflight_requests": 30,
+    "peak_inflight_requests": 1,
+    "semaphore_wait_count": 2,
+    "semaphore_timeout_count": 0,
+    "current_inflight": 0
+  },
+  "cache": {
+    "cache_hits": 0,
+    "cache_misses": 0,
+    "h2h_cache_hits": 0,
+    "recent_form_cache_hits": 0,
+    "event_cache_hits": 0,
+    "cache_errors": 0
+  },
+  "config": {
+    "workers": 1,
+    "worker_max": 12,
+    "api_rpm": 290,
+    "api_rpm_hard_cap": 300,
+    "max_inflight": 30,
+    "api_timeout_sec": 12,
+    "fixture_timeout_sec": 35,
+    "retry_max": 2,
+    "resume": false,
+    "scan_mode": "full"
+  },
+  "isolation": {
+    "outside57": true,
+    "official_candidate_written": false,
+    "validation_triggered": false,
+    "live_bet_modified": false,
+    "qq_pushed": false,
+    "official_scan_modified": false,
+    "strategy_changed": false,
+    "candidate_rating_changed": false
+  },
+  "results": [],
+  "conclusion": "PASS"
+}

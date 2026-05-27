@@ -1,0 +1,265 @@
+{
+  "phase": "V4-OUTSIDE57-FULL-SCAN-PARALLEL-ARCHITECTURE-FIX-20260527",
+  "generated_at": "2026-05-27T17:34:39.104103",
+  "checker": "tools/check_v4_outside57_parallel_architecture.py",
+  "checks": [
+    {
+      "name": "1. scanner_exists",
+      "ok": true,
+      "detail": "/Users/liudehua/.openclaw/workspace/v2_football_quant/engine/v4_outside57_scanner.py"
+    },
+    {
+      "name": "1. full_coverage_preserved",
+      "ok": true,
+      "detail": "保留全量 input 计数"
+    },
+    {
+      "name": "2. no_topn_replacement",
+      "ok": true,
+      "detail": "无 topN 抽样替代全量（已排除注释）"
+    },
+    {
+      "name": "3. not_fixture_list_only",
+      "ok": true,
+      "detail": "不仅拉赛程，有评分逻辑"
+    },
+    {
+      "name": "4. h2h_not_skipped",
+      "ok": true,
+      "detail": "H2H 评分未跳过"
+    },
+    {
+      "name": "5. recent_form_not_skipped",
+      "ok": true,
+      "detail": "recent form 未跳过"
+    },
+    {
+      "name": "6. recent_form_sample_size_10",
+      "ok": true,
+      "detail": "recent form 保持10场"
+    },
+    {
+      "name": "7. worker_pool_exists",
+      "ok": true,
+      "detail": "worker pool 存在"
+    },
+    {
+      "name": "8. workers_default_8",
+      "ok": true,
+      "detail": "workers 默认8"
+    },
+    {
+      "name": "9. worker_max_12",
+      "ok": true,
+      "detail": "worker 上限可配置"
+    },
+    {
+      "name": "10. intra_fixture_parallel",
+      "ok": true,
+      "detail": "单场内部并发 fetch 存在"
+    },
+    {
+      "name": "11. rate_limiter_exists",
+      "ok": true,
+      "detail": "API rate limiter 存在"
+    },
+    {
+      "name": "12. rpm_default_290",
+      "ok": true,
+      "detail": "默认 RPM = 290"
+    },
+    {
+      "name": "13. rpm_hard_cap_300",
+      "ok": true,
+      "detail": "RPM hard cap <= 300"
+    },
+    {
+      "name": "14. sliding_window_60s",
+      "ok": true,
+      "detail": "使用滑动窗口统计 RPM"
+    },
+    {
+      "name": "15. retry_counted_in_rpm",
+      "ok": true,
+      "detail": "retry 逻辑存在，所有请求走同一 limiter"
+    },
+    {
+      "name": "16. all_endpoints_counted",
+      "ok": true,
+      "detail": "所有 API 调用前 acquire limiter"
+    },
+    {
+      "name": "17. backoff_on_429",
+      "ok": true,
+      "detail": "429 触发 backoff"
+    },
+    {
+      "name": "18. no_bypass_via_workers",
+      "ok": true,
+      "detail": "rate_limiter 在 worker pool 外初始化，全局共享"
+    },
+    {
+      "name": "19. no_bypass_via_intra_fixture",
+      "ok": true,
+      "detail": "单场内部也共享 rate_limiter"
+    },
+    {
+      "name": "20. inflight_semaphore_exists",
+      "ok": true,
+      "detail": "in-flight semaphore 存在"
+    },
+    {
+      "name": "21. max_inflight_le_30",
+      "ok": true,
+      "detail": "max_inflight <= 30"
+    },
+    {
+      "name": "22. retry_counted_in_inflight",
+      "ok": true,
+      "detail": "retry 请求计入 in-flight"
+    },
+    {
+      "name": "23. http_session_reuse",
+      "ok": true,
+      "detail": "HTTP session 复用存在"
+    },
+    {
+      "name": "24. team_recent_cache",
+      "ok": true,
+      "detail": "team recent cache 存在"
+    },
+    {
+      "name": "25. h2h_cache",
+      "ok": true,
+      "detail": "H2H cache 存在"
+    },
+    {
+      "name": "26. event_cache",
+      "ok": true,
+      "detail": "event cache 存在"
+    },
+    {
+      "name": "27. api_timeout_exists",
+      "ok": true,
+      "detail": "API timeout 存在"
+    },
+    {
+      "name": "28. fixture_timeout_exists",
+      "ok": true,
+      "detail": "fixture timeout 存在"
+    },
+    {
+      "name": "29. retry_backoff_exists",
+      "ok": true,
+      "detail": "retry/backoff 存在"
+    },
+    {
+      "name": "30. resume_exists",
+      "ok": true,
+      "detail": "resume/progress marker 存在"
+    },
+    {
+      "name": "31. processed_eq_input",
+      "ok": true,
+      "detail": "processed == input 验证逻辑存在"
+    },
+    {
+      "name": "32. silent_drop_eq_zero",
+      "ok": true,
+      "detail": "silent_drop 检测逻辑存在"
+    },
+    {
+      "name": "33. no_official_candidate",
+      "ok": true,
+      "detail": "不写 official candidate_view"
+    },
+    {
+      "name": "34. no_validation",
+      "ok": true,
+      "detail": "不进 validation cumulative"
+    },
+    {
+      "name": "35. no_live_bet",
+      "ok": true,
+      "detail": "不进 live bet pending"
+    },
+    {
+      "name": "36. no_qq",
+      "ok": true,
+      "detail": "不推 QQ 推荐"
+    },
+    {
+      "name": "37. no_modify_official_scan",
+      "ok": true,
+      "detail": "不触发 official scan"
+    },
+    {
+      "name": "38. no_modify_strategy",
+      "ok": true,
+      "detail": "明确标记 strategy_changed=false"
+    },
+    {
+      "name": "39. no_modify_candidate_rating",
+      "ok": true,
+      "detail": "明确标记 candidate_rating_changed=false"
+    },
+    {
+      "name": "40. no_modify_cron",
+      "ok": true,
+      "detail": "不改 cron"
+    },
+    {
+      "name": "41. no_secrets_printed",
+      "ok": true,
+      "detail": "不打印 secrets"
+    },
+    {
+      "name": "42. no_validation_trigger",
+      "ok": true,
+      "detail": "不触发 validation"
+    },
+    {
+      "name": "RUN.1 coverage_rate_100",
+      "ok": true,
+      "detail": "coverage_rate=1.0"
+    },
+    {
+      "name": "RUN.2 silent_drop_0",
+      "ok": true,
+      "detail": "silent_drop=0"
+    },
+    {
+      "name": "RUN.3 rpm_peak_lte_300",
+      "ok": true,
+      "detail": "rpm_peak_60s=300"
+    },
+    {
+      "name": "RUN.4 inflight_peak_lte_30",
+      "ok": true,
+      "detail": "peak_inflight=30"
+    },
+    {
+      "name": "RUN.5 official_not_written",
+      "ok": true,
+      "detail": "official_candidate_written=False"
+    },
+    {
+      "name": "RUN.6 validation_not_triggered",
+      "ok": true,
+      "detail": "validation_triggered=False"
+    },
+    {
+      "name": "RUN.7 live_bet_not_modified",
+      "ok": true,
+      "detail": "live_bet_modified=False"
+    },
+    {
+      "name": "RUN.8 qq_not_pushed",
+      "ok": true,
+      "detail": "qq_pushed=False"
+    }
+  ],
+  "blockers": [],
+  "warnings": [],
+  "conclusion": "PASS"
+}

@@ -1,0 +1,24 @@
+{
+  "step": "Step 2 — 建立全量覆盖硬规则",
+  "status": "PASS",
+  "checked_at": "2026-05-27T00:00:00",
+  "phase": "V4-OUTSIDE57-FULL-SCAN-PARALLEL-ARCHITECTURE-FIX-20260527",
+  "full_coverage_policy": {
+    "rule": "每个输入 fixture 最终必须有明确状态",
+    "valid_statuses": ["DONE", "API_TIMEOUT", "DATA_MISSING", "SCORE_ERROR", "RETRY_PENDING", "FAILED_WITH_REASON"],
+    "hard_requirements": {
+      "processed_fixture_count_eq_input": true,
+      "silent_drop_count_eq_zero": true,
+      "every_fixture_has_status": true
+    },
+    "forbidden": [
+      "静默漏场",
+      "timeout 后直接丢弃",
+      "failed 后无 reason",
+      "topN 替代全量",
+      "只输出成功场次"
+    ],
+    "implementation": "engine/v4_outside57_scanner.py — _process_one_fixture 内 try/except 全覆盖，所有路径写入 status 字段"
+  },
+  "conclusion": "全量覆盖规则已建立"
+}

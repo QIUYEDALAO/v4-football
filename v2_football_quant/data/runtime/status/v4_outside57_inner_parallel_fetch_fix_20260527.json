@@ -1,0 +1,19 @@
+{
+  "step": "Step 4 — 实现单场内部并发 fetch",
+  "status": "PASS",
+  "checked_at": "2026-05-27T00:00:00",
+  "phase": "V4-OUTSIDE57-FULL-SCAN-PARALLEL-ARCHITECTURE-FIX-20260527",
+  "intra_fixture_parallel": {
+    "strategy": "ThreadPoolExecutor(4) 并行 fetch H2H + home recent + away recent + odds",
+    "no_longer_serial": "H2H/home_recent/away_recent 不再串行相加",
+    "single_fixture_latency": "接近最慢单请求耗时，而非所有请求耗时之和",
+    "score_phase_reads_fetch_result": true,
+    "score_phase_no_duplicate_api": true,
+    "partial_failure_handled": "任一请求失败写入 fetch_errors，不阻塞其他请求",
+    "timeout_protection": "as_completed(timeout=35s) 防止一个 events 拖死整场",
+    "rate_limiter_shared": true,
+    "inflight_semaphore_shared": true,
+    "implementation": "engine/v4_outside57_scanner.py — _process_one_fixture() 内 ThreadPoolExecutor(4)"
+  },
+  "conclusion": "单场内部 fetch 已并发化，且没有绕过 RPM / in-flight 限制"
+}

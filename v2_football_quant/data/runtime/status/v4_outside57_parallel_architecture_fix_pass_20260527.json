@@ -1,0 +1,53 @@
+{
+  "schema_version": "v4_outside57_parallel_architecture_fix_pass.v1",
+  "phase": "V4-OUTSIDE57-FULL-SCAN-PARALLEL-ARCHITECTURE-FIX-20260527",
+  "final_status": "V4_OUTSIDE57_FULL_SCAN_PARALLEL_ARCHITECTURE_FIX_PASS",
+  "generated_at": "2026-05-27T17:34:00+08:00",
+  "verification": {
+    "outside57_full_scan_preserved": true,
+    "input_fixture_count": 284,
+    "processed_fixture_count": 284,
+    "silent_drop_count": 0,
+    "total_duration_sec": 1098,
+    "total_duration_min": 18.3,
+    "old_duration_min": 35.3,
+    "speed_improvement_pct": 48,
+    "throughput_old_per_min": 6.9,
+    "throughput_new_per_min": 15.5,
+    "rpm_peak_60s": 300,
+    "rpm_peak_60s_lte_300": true,
+    "peak_inflight_requests": 30,
+    "peak_inflight_lte_30": true,
+    "topn_replacement_used": false,
+    "h2h_skipped": false,
+    "recent_form_skipped": false,
+    "recent_form_scoring_sample_size_10": true,
+    "official_candidate_written": false,
+    "validation_triggered": false,
+    "live_bet_modified": false,
+    "qq_pushed": false,
+    "cron_modified": false,
+    "production_cron_enabled": false,
+    "manual_api_verified": true,
+    "cron_enabled": false,
+    "ready_for_cron_review": true,
+    "not_auto_enabled": true
+  },
+  "files_added": [
+    "engine/v4_outside57_scanner.py",
+    "tools/check_v4_outside57_parallel_architecture.py",
+    "docs/V4_OUTSIDE57_FULL_SCAN_PARALLEL_ARCHITECTURE_FIX_20260527.md"
+  ],
+  "forbidden_flags": {
+    "official_scan_modified": false,
+    "strategy_changed": false,
+    "candidate_rating_changed": false,
+    "validation_recomputed": false,
+    "live_bet_raw_records_modified": false,
+    "cron_modified": false,
+    "QQ_recommendation_pushed": false,
+    "cloud_publish": false,
+    "secrets_printed": false,
+    "secrets_committed": false
+  }
+}

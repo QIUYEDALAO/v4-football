@@ -325,7 +325,12 @@ class Outside57ApiClient:
 
     def _build_url(self, endpoint: str) -> str:
         endpoint = endpoint.lstrip("/")
-        return f"https://{API_HOST}/{endpoint}"
+        host = API_HOST
+        if host.startswith("https://"):
+            host = host[len("https://"):]
+        elif host.startswith("http://"):
+            host = host[len("http://"):]
+        return f"https://{host}/{endpoint}"
 
     def call(self, endpoint: str) -> dict | None:
         """线程安全的 API 调用，带 rate limiting / semaphore / retry。"""

@@ -1,0 +1,29 @@
+{
+  "step": "Step 3 — 实现 fixture worker pool",
+  "status": "PASS",
+  "checked_at": "2026-05-27T00:00:00",
+  "phase": "V4-OUTSIDE57-FULL-SCAN-PARALLEL-ARCHITECTURE-FIX-20260527",
+  "worker_pool": {
+    "library": "concurrent.futures.ThreadPoolExecutor",
+    "default_workers": 8,
+    "worker_range": "1-12",
+    "concurrency_level": "fixture 级并发",
+    "per_fixture_output": "temp result dict → merged list",
+    "merge_strategy": "ThreadPoolExecutor as_completed → list append with threading.Lock",
+    "atomic_write": true,
+    "isolation": "单场失败不影响其他场次",
+    "sorting": "按 kickoff_time / fixture_id 稳定排序",
+    "rate_limiter_shared": true,
+    "inflight_semaphore_shared": true,
+    "implementation": "engine/v4_outside57_scanner.py — run_outside57_scan() 中 ThreadPoolExecutor(max_workers=actual_workers)"
+  },
+  "no_regression": {
+    "fixture_count_preserved": true,
+    "no_topn_replacement": true,
+    "no_skip_h2h": true,
+    "no_skip_recent_form": true,
+    "rpm_respected": true,
+    "inflight_respected": true
+  },
+  "conclusion": "outside_57 fixture 不再逐场完全串行"
+}
