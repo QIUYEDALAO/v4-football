@@ -1,0 +1,33 @@
+{
+  "schema_version": "v4_production_default_rules_original_freeze.v1",
+  "phase": "V4-PRODUCTION-DEFAULT-RULES-RESTORE-20260527",
+  "source": "git HEAD of engine/v4_match_intelligence.py",
+  "original_values": {
+    "grades": {
+      "A": {
+        "min_ht_score": 70,
+        "min_h2h_ht_goal_rate": 0.65,
+        "min_recent_ht": 0.70,
+        "min_ht_attack": 0.70,
+        "min_late_11_45": 0.55,
+        "min_sample_size": 5,
+        "allow_early_only": false
+      },
+      "B": {
+        "min_ht_score": 60,
+        "min_h2h_ht_goal_rate": 0.55,
+        "min_recent_ht": 0.60,
+        "min_ht_attack": 0.60,
+        "min_late_11_45": 0.45,
+        "min_sample_size": 3,
+        "allow_early_only": true
+      },
+      "C": {"min_ht_score": 50}
+    },
+    "skip": {
+      "min_h2h_ht_goal_rate": 0.50,
+      "min_ht_avg_goals": 0.60,
+      "min_late_11_45": 0.45
+    }
+  }
+}

@@ -1,0 +1,14 @@
+{
+  "schema_version": "v4_suspicious_production_changes_audit.v1",
+  "generated_at": "2026-05-28T01:53:00+08:00",
+  "files": [
+    {"file": "engine/v4_match_intelligence.py", "status": "RESTORED — no diff against HEAD"},
+    {"file": "engine/v4_scan_worker.py", "status": "AUTHORIZED_PRODUCTION_FIX — outside_57 include flag"},
+    {"file": "engine/v4_runner.py", "status": "AUTHORIZED_PRODUCTION_FIX — include_outside_57 param + prewarm"},
+    {"file": "tools/build_v4_control_center_model.py", "status": "AUTHORIZED_PRODUCTION_FIX — pre-existing dashboard update"},
+    {"file": "tools/check_v4_control_center.py", "status": "AUTHORIZED_PRODUCTION_FIX — pre-existing"},
+    {"file": "tools/serve_live_bet_tracker.py", "status": "AUTHORIZED_PRODUCTION_FIX — pre-existing"}
+  ],
+  "suspicious_count": 0,
+  "conclusion": "PASS"
+}
