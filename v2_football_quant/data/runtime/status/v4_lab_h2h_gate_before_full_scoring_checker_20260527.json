@@ -1,0 +1,33 @@
+{
+  "schema_version": "v4_lab_h2h_gate_before_full_scoring_checker.v1",
+  "generated_at": "2026-05-27T23:22:17.027906+08:00",
+  "checks": {
+    "profile_mode": "production_clone_h2h_last3",
+    "h2h_policy": "LAB_H2H_LAST3_ALL_FH_GOAL",
+    "h2h_require_all": true,
+    "h2h_samples": 3,
+    "include_events": true,
+    "include_time_bins": true,
+    "include_late_fh": true,
+    "include_ht_score": true,
+    "recent_form_size": 10,
+    "has_h2h_gate": true,
+    "gate_before_full": true,
+    "no_events_in_gate": true,
+    "full_scoring_only_gate_pass": true,
+    "gate_fail_not_skip": true,
+    "data_timeout_not_skip": true,
+    "lab_ab_only_scoring_complete": true
+  },
+  "violations": [],
+  "forbidden_flags": {
+    "official_candidate_modified": false,
+    "validation_recomputed": false,
+    "live_bet_raw_records_modified": false,
+    "cron_modified": false,
+    "QQ_recommendation_pushed": false,
+    "production_strategy_changed": false,
+    "candidate_rating_changed": false
+  },
+  "conclusion": "PASS"
+}

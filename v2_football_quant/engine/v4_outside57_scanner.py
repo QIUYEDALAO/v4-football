@@ -644,11 +644,13 @@ def run_outside57_scan(
     scan_mode: str = "full",
     scan_date_str: str | None = None,
     include_outside_57: bool = False,
+    pre_fetched_fixtures: list | None = None,
 ) -> dict:
     """outside_57 并行全量扫描主入口。
 
     include_outside_57=False: 只扫白名单联赛 (正式12:00扫描默认)
     include_outside_57=True:  扫全部联赛 (手动全量扫描)
+    pre_fetched_fixtures: 可选预拉取比赛列表，跳过内部 fetch
     """
     t_start = time.perf_counter()
 
@@ -675,8 +677,11 @@ def run_outside57_scan(
         retry_max=retry_max,
     )
 
-    # ── 拉取 fixtures ──
-    fixtures = fetch_today_fixtures(
+    # ── 拉取 fixtures（支持预拉取）──
+    if pre_fetched_fixtures is not None:
+        fixtures = pre_fetched_fixtures
+    else:
+        fixtures = fetch_today_fixtures(
         lookahead_hours=None,
         min_hours_to_kickoff=None,
         api_client=api.call,
