@@ -101,7 +101,32 @@ def main() -> int:
         has_topN = "top" in scanner_src.lower() and ("top_n" in scanner_src or "topn" in scanner_src or "top_n" in scanner_src)
         flags["scanner_has_topN"] = has_topN
 
-    # 7. Check RPM limits
+    # 7. Check include_outside_57 flag passing
+    sbsrc = scan_brief.read_text(encoding="utf-8")
+    has_args_include = "args.include_outside_57" in sbsrc or "include_outside_57=bool(args.include_outside_57)" in sbsrc
+    flags["adapter_passes_args_include_outside57"] = has_args_include
+    if not has_args_include:
+        violations.append("adapter_does_not_pass_include_outside57")
+
+    # 8. Check scanner has include_outside_57 parameter (default False)
+    scanner_path = ROOT / "engine/v4_outside57_scanner.py"
+    scanner_src = ""
+    if scanner_path.exists():
+        scanner_src = scanner_path.read_text(encoding="utf-8")
+        has_param = "include_outside_57: bool" in scanner_src
+        default_false = "include_outside_57: bool = False" in scanner_src
+        has_hardcode_true_in_scan_call = "include_outside_57=True" in scanner_src and "include_outside_57=include_outside_57" not in scanner_src
+        flags["scanner_has_include_outside57_param"] = has_param
+        flags["scanner_include_outside57_default_false"] = default_false
+        flags["scanner_has_hardcode_true"] = has_hardcode_true_in_scan_call
+        if not has_param:
+            violations.append("scanner_missing_include_outside57_param")
+        if not default_false:
+            violations.append("scanner_include_outside57_default_not_false")
+        if has_hardcode_true_in_scan_call:
+            violations.append("scanner_hardcode_include_outside57_true")
+
+    # 9. Check RPM limits
     rpm_290 = "api_rpm=290" in scanner_src or "api_rpm = 290" in scanner_src or "rpm_target: int = 290" in scanner_src or "api_rpm=290" in scanner_src.replace(" ", "")
     rpm_300 = "rpm_hard_cap=300" in scanner_src or "rpm_hard_cap = 300" in scanner_src or "rpm_hard_cap: int = 300" in scanner_src
     inflight_30 = "max_inflight=30" in scanner_src or "max_inflight = 30" or "max_inflight: int = 30" in scanner_src

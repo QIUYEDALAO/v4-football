@@ -643,8 +643,13 @@ def run_outside57_scan(
     run_id: str | None = None,
     scan_mode: str = "full",
     scan_date_str: str | None = None,
+    include_outside_57: bool = False,
 ) -> dict:
-    """outside_57 并行全量扫描主入口。"""
+    """outside_57 并行全量扫描主入口。
+
+    include_outside_57=False: 只扫白名单联赛 (正式12:00扫描默认)
+    include_outside_57=True:  扫全部联赛 (手动全量扫描)
+    """
     t_start = time.perf_counter()
 
     if run_id is None:
@@ -676,7 +681,7 @@ def run_outside57_scan(
         min_hours_to_kickoff=None,
         api_client=api.call,
         scan_base_date=date.today(),
-        include_outside_57=True,
+        include_outside_57=include_outside_57,
     )
 
     input_fixture_count = len(fixtures)
@@ -882,7 +887,10 @@ def main():
 
     workers = max(1, min(args.workers, args.worker_max))
 
+    # Standalone: default to include_outside_57=True (this IS the outside_57 scanner)
+    # When called from v4_scan_and_brief.py adapter, this flag is controlled by args.include_outside_57
     summary = run_outside57_scan(
+        include_outside_57=True,
         workers=workers,
         worker_max=args.worker_max,
         api_rpm=args.api_rpm,

@@ -82,6 +82,7 @@ def _run_parallel_scan(args, scan_date: str, today_key: str, wd, log_path: Path)
           f"inflight={args.outside57_max_inflight}", flush=True)
 
     summary = run_outside57_scan(
+        include_outside_57=bool(args.include_outside_57),
         workers=args.outside57_workers,
         worker_max=args.outside57_workers,
         api_rpm=args.outside57_api_rpm,
@@ -123,11 +124,16 @@ def _run_parallel_scan(args, scan_date: str, today_key: str, wd, log_path: Path)
     a_list, b_list, skip_list = [], [], []
     scout_list = []
 
-    for r in results:
+    # Official candidate_view ONLY includes whitelist league fixtures.
+    # Outside_57 fixtures do NOT enter candidate_view, scout, or brief paths.
+    official_results = [r for r in results if str(r.get("league_id", "")) in wl_ids]
+    print(f"[adapter] official filter: {len(official_results)}/{len(results)} whitelist fixtures", flush=True)
+
+    for r in official_results:
         grade = str(r.get("grade", "SKIP")).strip().upper()
         lid = str(r.get("league_id", ""))
-        is_whitelist = lid in wl_ids
-        is_outside57 = r.get("outside57", True)
+        is_whitelist = True
+        is_outside57 = False
 
         # Build common fields
         entry = {
