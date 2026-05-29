@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"/>
-<title>V4统一作战台</title>
+<title>V4统一作战台 · Final Design</title>
 <style>
 :root{
   --bg:#050914;
@@ -34,130 +34,144 @@ body{
 }
 button,input,select,textarea{font:inherit}
 button{cursor:pointer}
-.app{max-width:1240px;margin:0 auto;padding:10px 12px 92px}
+.app{max-width:1240px;margin:0 auto;padding:12px 12px 92px}
 .topbar{
   position:sticky;top:0;z-index:50;
-  display:flex;align-items:center;justify-content:space-between;gap:12px;
-  padding:7px 0 8px;margin-bottom:6px;
+  display:flex;align-items:flex-start;justify-content:space-between;gap:12px;
+  padding:9px 0 10px;margin-bottom:8px;
   background:linear-gradient(180deg,rgba(8,20,38,.95),rgba(8,20,38,.70));
   backdrop-filter:blur(14px);
 }
-.brand{display:flex;align-items:center;gap:10px}
+.brand{display:flex;align-items:center;gap:11px}
 .logo{
-  width:36px;height:36px;border-radius:13px;display:grid;place-items:center;
+  width:44px;height:44px;border-radius:16px;display:grid;place-items:center;
   background:linear-gradient(135deg,var(--blue),var(--purple));
-  color:#06111f;font-weight:950;font-size:14px;box-shadow:0 0 20px rgba(92,200,255,.22);
+  color:#06111f;font-weight:950;box-shadow:0 0 26px rgba(92,200,255,.24);
 }
-.title{font-size:20px;font-weight:900;line-height:1.08}
-.subtitle{font-size:10px;color:var(--muted);line-height:1.35}
-.pills{display:flex;gap:5px;flex-wrap:wrap;justify-content:flex-end}
+.title{font-size:22px;font-weight:900;line-height:1.08}
+.subtitle{font-size:11px;color:var(--muted);margin-top:4px;line-height:1.35}
+.pills{display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end}
 .pill{
   border:1px solid rgba(143,165,196,.24);border-radius:999px;
-  background:rgba(255,255,255,.045);padding:5px 8px;
-  color:#dbe8fb;font-size:10px;white-space:nowrap;
+  background:rgba(255,255,255,.045);padding:7px 9px;
+  color:#dbe8fb;font-size:11px;white-space:nowrap;
 }
-.dot{width:7px;height:7px;border-radius:50%;display:inline-block;background:var(--green);margin-right:4px}
-.grid{display:grid;gap:8px}
+.dot{width:8px;height:8px;border-radius:50%;display:inline-block;background:var(--green);margin-right:5px}
+.grid{display:grid;gap:10px}
 .kpi-grid{grid-template-columns:repeat(6,1fr)}
 .card{
   border:1px solid rgba(143,165,196,.18);
   background:linear-gradient(180deg,rgba(255,255,255,.058),rgba(255,255,255,.025));
-  box-shadow:var(--shadow);border-radius:var(--radius);padding:10px 12px;overflow:hidden;
+  box-shadow:var(--shadow);border-radius:var(--radius);padding:12px;overflow:hidden;
 }
-.kpi{min-height:74px;padding:8px 10px}
-.label{font-size:10px;color:var(--muted);font-weight:600}
-.kpi .value{font-size:19px;font-weight:950;margin:3px 0 1px;letter-spacing:-.4px}
-.hint{font-size:9.5px;color:var(--muted);line-height:1.3;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
+.kpi{min-height:96px}
+.label{font-size:11px;color:var(--muted)}
+.kpi .value{font-size:23px;font-weight:950;margin:7px 0 3px;letter-spacing:-.45px}
+.hint{font-size:10.5px;color:var(--muted);line-height:1.35}
 .green{color:var(--green)}.blue{color:var(--blue)}.yellow{color:var(--yellow)}.red{color:var(--red)}.purple{color:var(--purple)}.orange{color:var(--orange)}
-.primary-layout{grid-template-columns:1.25fr .75fr;margin-top:6px}
-.section-head{display:flex;align-items:center;justify-content:space-between;gap:6px;margin-bottom:6px}
-h2{font-size:14px;margin:0}
+.primary-layout{
+  grid-template-columns:1.25fr .75fr;
+  margin-top:10px;
+  align-items:start;
+  --pane-h:440px;
+  --action-zone-h:var(--pane-h);
+  --action-zone-h-two:440px;
+  --action-zone-h-four:440px;
+}
+.primary-layout.mode-2{--action-zone-h:var(--action-zone-h-two)}
+.primary-layout.mode-4{--action-zone-h:var(--action-zone-h-four)}
+.side-sticky{
+  position:static;
+  align-self:start;
+  height:var(--action-zone-h);
+  min-height:var(--action-zone-h);
+  max-height:var(--action-zone-h);
+  overflow:auto;
+}
+.candidate-panel{
+  display:flex;
+  flex-direction:column;
+  overflow:hidden;
+  height:var(--pane-h);
+  min-height:var(--pane-h);
+  max-height:var(--action-zone-h);
+}
+.candidate-list{overflow:auto;padding-right:3px;max-height:calc(var(--action-zone-h) - 74px)}
+.candidate-list::-webkit-scrollbar{width:8px}
+.candidate-list::-webkit-scrollbar-thumb{background:rgba(143,165,196,.32);border-radius:999px}
+.candidate-list{
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:9px;
+  align-content:start;
+}
+.candidate-list.single-item .candidate{grid-column:1/-1}
+.candidate{margin-bottom:0}
+.candidate .quick-form{grid-template-columns:1fr 1fr}
+.candidate .quick-form button{grid-column:1/-1}
+.section-head{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:9px}
+h2{font-size:15px;margin:0}
 .btn{
   border:1px solid rgba(92,200,255,.30);
   background:rgba(92,200,255,.10);
-  color:#ddf6ff;border-radius:10px;padding:6px 9px;font-size:11px;text-decoration:none;
+  color:#ddf6ff;border-radius:12px;padding:8px 10px;font-size:12px;text-decoration:none;
 }
 .btn.ghost{border-color:rgba(143,165,196,.22);background:rgba(255,255,255,.045);color:#dfeaf9}
 .btn.warn{border-color:rgba(255,209,102,.34);background:rgba(255,209,102,.12);color:#ffe3a0}
-
-/* 候选卡片 + 内嵌投注 */
+.btn.red{border-color:rgba(255,93,115,.35);background:rgba(255,93,115,.12);color:#ffc2ca}
 .candidate{
   border:1px solid rgba(143,165,196,.15);
-  border-radius:14px;padding:9px 10px;background:rgba(255,255,255,.035);
-  margin-bottom:6px;
+  border-radius:17px;padding:11px;background:rgba(255,255,255,.035);
+  margin-bottom:9px;
 }
-.cand-top{display:flex;justify-content:space-between;align-items:flex-start;gap:6px}
-.match{font-size:14px;font-weight:900;line-height:1.25}
-.meta{font-size:10px;color:var(--muted);line-height:1.35;margin-top:2px}
-.badges{display:flex;gap:4px;flex-wrap:wrap;margin-top:4px}
-.badge{font-size:10px;border-radius:999px;padding:2px 6px;background:rgba(255,255,255,.07);color:#dce8fb;white-space:nowrap}
+.cand-top{display:flex;justify-content:space-between;align-items:flex-start;gap:9px}
+.match{font-size:15px;font-weight:900;line-height:1.28}
+.meta{font-size:11px;color:var(--muted);line-height:1.42;margin-top:4px}
+.badges{display:flex;gap:5px;flex-wrap:wrap;margin-top:8px}
+.badge{font-size:11px;border-radius:999px;padding:4px 7px;background:rgba(255,255,255,.07);color:#dce8fb;white-space:nowrap}
 .badge.a{background:rgba(50,217,145,.14);color:#89f5c4}
 .badge.b{background:rgba(92,200,255,.15);color:#a9e6ff}
 .badge.warn{background:rgba(255,209,102,.13);color:#ffe4a7}
 .badge.red{background:rgba(255,93,115,.13);color:#ffbac4}
-
-/* 候选内嵌投注输入行 */
-.bet-inline{
-  margin-top:6px;padding-top:6px;border-top:1px solid rgba(143,165,196,.10);
-  display:flex;align-items:flex-end;gap:5px;flex-wrap:wrap;
+.actions{display:flex;gap:7px;flex-wrap:wrap;margin-top:10px}
+.quick-form{
+  margin-top:10px;padding-top:10px;border-top:1px solid rgba(143,165,196,.12);
+  display:grid;grid-template-columns:1fr 1fr 1fr 1fr auto;gap:7px;align-items:end;
 }
-.bet-inline .bi-field{display:flex;flex-direction:column;gap:1px}
-.bet-inline .bi-field label{font-size:9px;color:var(--muted)}
-.bet-inline .bi-field input,
-.bet-inline .bi-field select{
-  width:100%;border:1px solid rgba(143,165,196,.20);border-radius:8px;
-  background:rgba(0,0,0,.18);color:var(--text);padding:5px 6px;font-size:12px;outline:none;
+.field label{display:block;font-size:10px;color:var(--muted);margin-bottom:4px}
+.field input,.field select,.field textarea{
+  width:100%;border:1px solid rgba(143,165,196,.24);border-radius:12px;
+  background:rgba(0,0,0,.22);color:var(--text);padding:9px;font-size:13px;outline:none;
 }
-.bet-inline .bi-field select{padding:4px 4px}
-.bet-inline .bi-line{width:58px}
-.bet-inline .bi-odds{width:52px}
-.bet-inline .bi-stake{width:58px}
-.bet-inline .bi-minute{width:50px}
-.bet-inline .bi-actions{display:flex;gap:4px}
-
-.actions{display:flex;gap:5px;flex-wrap:wrap;margin-top:6px}
-
-/* 待办紧凑行 */
-.todo-row{
-  display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px;
+.field textarea{min-height:38px;resize:vertical}
+.full{grid-column:1/-1}
+.todo-list{display:grid;gap:8px}
+.todo{
+  display:flex;justify-content:space-between;align-items:center;gap:9px;
+  border:1px solid rgba(143,165,196,.13);border-radius:15px;padding:10px;
+  background:rgba(255,255,255,.035);
 }
-.todo-chip{
-  display:inline-flex;align-items:center;gap:4px;
-  font-size:11px;padding:4px 9px;border-radius:999px;
-  background:rgba(255,255,255,.045);border:1px solid rgba(143,165,196,.16);
+.todo-title{font-weight:850;font-size:13px}
+.summary-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin-top:10px}
+.stat{border:1px solid rgba(143,165,196,.13);border-radius:14px;padding:9px;background:rgba(255,255,255,.04)}
+.stat b{display:block;font-size:17px;margin-top:5px}
+.module-grid{grid-template-columns:repeat(4,1fr);margin-top:10px}
+.module{min-height:210px}
+.rows{display:grid;gap:0}
+.row{display:flex;justify-content:space-between;gap:8px;border-bottom:1px solid rgba(143,165,196,.10);padding:8px 0;font-size:12px}
+.row:last-child{border-bottom:0}
+.row span:first-child{color:var(--muted)}
+.row.validation-grid{display:grid;grid-template-columns:1fr 1fr;align-items:center;gap:14px}
+.row.validation-grid .pair{display:flex;align-items:center;justify-content:space-between;gap:8px;min-width:0}
+.row.validation-grid .pair span{color:var(--muted);white-space:nowrap;flex-shrink:0}
+.row.validation-grid .pair b{white-space:nowrap;text-align:right;flex-shrink:0}
+/* keep same typography system as the rest of the page; only tighten row spacing */
+.row.validation-grid{padding:6px 0}
+@media(max-width:540px){
+  .row.validation-grid{grid-template-columns:1fr;gap:6px}
 }
-.todo-chip .td{width:6px;height:6px;border-radius:50%}
-.todo-chip .td.warn{background:var(--yellow)}
-.todo-chip .td.ok{background:var(--green)}
-.todo-chip .td.bad{background:var(--red)}
-
-/* 实盘紧凑 2x3 网格 */
-.snap-compact{
-  display:grid;grid-template-columns:1fr 1fr 1fr;gap:4px 8px;
-}
-.snap-compact .sc-item{display:flex;justify-content:space-between;align-items:center;padding:3px 0;font-size:11px;border-bottom:1px solid rgba(143,165,196,.08)}
-.snap-compact .sc-item:last-child{border-bottom:0}
-.snap-compact .sc-l{color:var(--muted)}
-.snap-compact .sc-v{font-weight:800;font-variant-numeric:tabular-nums}
-
-/* 底部工具条（替代四大模块卡） */
-.toolbar{
-  display:flex;gap:6px;flex-wrap:wrap;margin-top:8px;
-  padding:8px 12px;
-  border:1px solid rgba(143,165,196,.13);border-radius:14px;
-  background:rgba(255,255,255,.025);
-}
-.toolbar span{font-size:10px;color:var(--muted);padding:4px 0}
-.toolbar button{
-  border:0;background:rgba(255,255,255,.045);color:var(--muted);border-radius:10px;
-  padding:6px 10px;font-size:11px;
-}
-.toolbar button:hover{color:var(--text);background:rgba(255,255,255,.07)}
-
-.summary-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;margin-top:8px}
-.stat{border:1px solid rgba(143,165,196,.13);border-radius:12px;padding:7px 9px;background:rgba(255,255,255,.04)}
-.stat b{display:block;font-size:15px;margin-top:3px}
-
+.chart-layout{grid-template-columns:1.2fr .8fr;margin-top:10px}
+.chart{height:160px}
 .note{
   border:1px solid rgba(255,209,102,.28);background:rgba(255,209,102,.10);
   color:#ffe7b2;border-radius:14px;padding:10px;font-size:12px;line-height:1.55;
@@ -178,14 +192,14 @@ th{color:var(--muted);font-weight:650}
   position:fixed;left:0;right:0;bottom:0;z-index:100;
   background:rgba(6,11,20,.88);backdrop-filter:blur(16px);
   border-top:1px solid rgba(143,165,196,.18);
-  padding:6px max(8px,env(safe-area-inset-left)) max(6px,env(safe-area-inset-bottom)) max(8px,env(safe-area-inset-right));
+  padding:7px max(8px,env(safe-area-inset-left)) max(7px,env(safe-area-inset-bottom)) max(8px,env(safe-area-inset-right));
 }
-.nav-inner{display:grid;grid-template-columns:repeat(5,1fr);gap:5px;max-width:780px;margin:0 auto}
+.nav-inner{display:grid;grid-template-columns:repeat(6,1fr);gap:6px;max-width:780px;margin:0 auto}
 .nav button{
-  border:0;background:transparent;color:var(--muted);border-radius:12px;
-  padding:6px 3px;font-size:10px;display:flex;flex-direction:column;align-items:center;gap:1px;
+  border:0;background:transparent;color:var(--muted);border-radius:14px;
+  padding:8px 4px;font-size:11px;display:flex;flex-direction:column;align-items:center;gap:2px;
 }
-.nav button b{font-size:15px;line-height:1}
+.nav button b{font-size:17px;line-height:1}
 .nav button.active{background:rgba(92,200,255,.12);border:1px solid rgba(92,200,255,.20);color:#e4f8ff}
 .drawer{position:fixed;inset:0;background:rgba(0,0,0,.58);backdrop-filter:blur(5px);display:none;z-index:140}
 .drawer.open{display:block}
@@ -203,45 +217,50 @@ th{color:var(--muted);font-weight:650}
   border-radius:999px;padding:10px 14px;font-size:12px;display:none;z-index:160;box-shadow:var(--shadow);
 }
 .toast.show{display:block}
-
-/* 桌面端隐藏底部导航，释放首屏空间 */
-@media(min-width:901px){
-  .nav{display:none}
-  .app{padding-bottom:24px}
-  .toast{bottom:24px}
+.error-item{
+  border:1px solid rgba(143,165,196,.13);border-radius:14px;padding:10px;margin-bottom:8px;
+  background:rgba(255,255,255,.035);
 }
-
+.error-item.blocker{border-left:3px solid var(--red);background:rgba(255,93,115,.06)}
+.error-item.fail{border-left:3px solid var(--orange);background:rgba(255,159,67,.05)}
+.error-item.warn{border-left:3px solid var(--yellow);background:rgba(255,209,102,.04)}
+.error-severity{
+  display:inline-block;font-size:10px;font-weight:900;border-radius:999px;padding:2px 8px;
+  margin-right:6px;
+}
+.error-severity.BLOCKER{background:rgba(255,93,115,.18);color:var(--red)}
+.error-severity.FAIL{background:rgba(255,159,67,.18);color:var(--orange)}
+.error-severity.WARN{background:rgba(255,209,102,.15);color:var(--yellow)}
+.error-meta{font-size:10.5px;color:var(--muted);margin-top:4px;line-height:1.4}
+.error-summary{font-size:12px;margin-top:4px;line-height:1.45;color:#dbe8fb}
+.error-section-title{font-size:13px;font-weight:800;margin:12px 0 8px;padding-bottom:6px;border-bottom:1px solid rgba(143,165,196,.14)}
+.nav button.has-error{position:relative}
+.nav button.has-error::after{
+  content:'';position:absolute;top:4px;right:8px;width:7px;height:7px;border-radius:50%;
+  background:var(--red);box-shadow:0 0 6px rgba(255,93,115,.6);
+}
 @media(max-width:980px){
   .kpi-grid{grid-template-columns:repeat(3,1fr)}
-  .primary-layout{grid-template-columns:1fr}
-  .summary-grid{grid-template-columns:repeat(3,1fr)}
-  .snap-compact{grid-template-columns:1fr 1fr}
-  .bet-inline .bi-line{width:52px}
-  .bet-inline .bi-odds{width:48px}
-  .bet-inline .bi-stake{width:52px}
-  .bet-inline .bi-minute{width:46px}
+  .primary-layout,.module-grid,.chart-layout{grid-template-columns:1fr}
+  .candidate-panel{height:auto;min-height:unset;max-height:none}
+  .summary-grid{grid-template-columns:repeat(2,1fr)}
+  .quick-form{grid-template-columns:repeat(2,1fr)}
+  .quick-form button{grid-column:1/-1}
+  .side-sticky{position:static;height:auto;min-height:unset;max-height:none;overflow:visible}
+  .candidate-list{overflow:visible;grid-template-columns:1fr;max-height:none}
 }
 @media(max-width:540px){
-  .app{padding:8px 8px 80px}
+  .app{padding:10px 9px 84px}
   .topbar{display:block}
-  .pills{justify-content:flex-start;margin-top:6px}
-  .title{font-size:18px}
-  .kpi-grid{grid-template-columns:repeat(2,1fr);gap:6px}
-  .card{border-radius:14px;padding:8px 10px}
-  .kpi{min-height:66px}
-  .kpi .value{font-size:17px}
+  .pills{justify-content:flex-start;margin-top:8px}
+  .title{font-size:20px}
+  .kpi-grid{grid-template-columns:repeat(2,1fr);gap:8px}
+  .card{border-radius:16px;padding:10px}
+  .kpi{min-height:90px}
+  .kpi .value{font-size:21px}
   .summary-grid{grid-template-columns:repeat(2,1fr)}
-  .candidate{border-radius:12px;padding:8px}
-  .match{font-size:13px}
-  .bet-inline{flex-direction:column;align-items:stretch}
-  .bet-inline .bi-field{width:100% !important}
-  .bet-inline .bi-actions{width:100%}
-  .snap-compact{grid-template-columns:1fr 1fr}
-  .toolbar{flex-direction:column;gap:4px}
-  .nav{display:block}
-  .app{padding-bottom:80px}
-  .toast{bottom:74px}
-  @media(min-width:901px){.nav{display:none}.app{padding-bottom:24px}.toast{bottom:24px}}
+  .quick-form{grid-template-columns:1fr 1fr}
+  .chart{height:140px}
 }
 </style>
 </head>
@@ -252,95 +271,177 @@ th{color:var(--muted);font-weight:650}
       <div class="logo">V4</div>
       <div>
         <div class="title">V4统一作战台</div>
-        <div class="subtitle">实时作战 · 候选驱动 · 实盘记录</div>
+        <div class="subtitle">候选 · 实盘 · 验证 · 风控</div>
       </div>
     </div>
     <div class="pills">
-      <span class="pill"><span class="dot"></span>运行中</span>
-      <span class="pill">8766</span>
-      <span class="pill">8765入口</span>
+      <span class="pill"><span class="dot" id="sysDot"></span><span id="sysState">系统正常</span></span>
+      <span class="pill">QQ完成通知 已开启</span>
     </div>
   </header>
 
-  <!-- 顶部 KPI — 紧凑一行 -->
-  <section class="grid kpi-grid" aria-label="全局状态">
+  <section class="grid kpi-grid" aria-label="全局状态，整页只出现一次">
     <div class="card kpi">
-      <div class="label">今日候选</div><div class="value blue" id="kpiCandidates">--</div><div class="hint" id="kpiCandidatesHint">A / B 正式候选</div>
+      <div class="label">今日候选</div><div class="value blue" id="kpiCandidates">A0 B0</div><div class="hint" id="kpiCandidatesHint"></div>
     </div>
     <div class="card kpi">
-      <div class="label">昨日验证</div><div class="value green" id="kpiYesterday">--</div><div class="hint" id="kpiYesterdayHint">A+B 已结算</div>
+      <div class="label">昨日验证</div><div class="value green" id="kpiYesterday">N/A</div><div class="hint" id="kpiYesterdayHint"></div>
     </div>
     <div class="card kpi">
-      <div class="label">验证累计</div><div class="value green" id="kpiCumulative">--</div><div class="hint" id="kpiCumulativeHint">A/B-only</div>
+      <div class="label">验证累计</div><div class="value green" id="kpiCumulative">N/A</div><div class="hint" id="kpiCumulativeHint"></div>
     </div>
     <div class="card kpi">
-      <div class="label">今日盈亏</div><div class="value" id="kpiPnl">--</div><div class="hint" id="kpiPnlHint">净盈亏</div>
+      <div class="label">今日投注盈亏</div><div class="value" id="kpiPnl">0.00</div><div class="hint"></div>
     </div>
     <div class="card kpi">
-      <div class="label">流水 / 返水</div><div class="value purple" id="kpiTurnover">--</div><div class="hint" id="kpiTurnoverHint">当日累计</div>
+      <div class="label">有效流水 / 返水</div><div class="value purple" id="kpiTurnoverRebate">0 / 0</div><div class="hint"></div>
     </div>
     <div class="card kpi">
-      <div class="label">今日待办</div><div class="value yellow" id="kpiTodo">--</div><div class="hint" id="kpiTodoHint">待投注 · 待结算 · 待补验</div>
+      <div class="label">今日待办</div><div class="value yellow" id="kpiTodo">0项</div><div class="hint" id="kpiTodoHint"></div>
     </div>
   </section>
 
-  <!-- 主区两栏 -->
   <main class="grid primary-layout">
-    <!-- 左栏：候选 + 内嵌投注 -->
-    <section class="card">
+    <section class="card candidate-panel">
       <div class="section-head">
         <h2>今日候选行动区</h2>
         <button class="btn ghost" onclick="openPanel('intel')">情报详情</button>
       </div>
-      <div id="candidateList"><p style="color:var(--muted);font-size:12px;text-align:center;padding:12px">加载中...</p></div>
+
+      <div id="candidateList" class="candidate-list">
+        <div class="note">正在读取候选数据…</div>
+      </div>
+      <div class="skip-line" id="skipLine" style="display:none"></div>
     </section>
 
-    <!-- 右栏：待办 + 实盘快照 -->
-    <aside class="card">
+    <aside class="card side-sticky">
       <div class="section-head">
-        <h2>今日待办</h2>
+        <h2>今日待办与实盘快照</h2>
         <button class="btn ghost" onclick="openPanel('rules')">操作规则</button>
       </div>
-      <div class="todo-row" id="todoRow">
-        <span class="todo-chip"><span class="td warn" id="dotBet"></span> 待投注 <b id="todoBetVal">--</b></span>
-        <span class="todo-chip"><span class="td warn" id="dotSettle"></span> 待结算 <b id="todoSettleVal">--</b></span>
-        <span class="todo-chip"><span class="td ok" id="dotVerify"></span> 待补验 <b id="todoVerifyVal">--</b></span>
-        <span class="todo-chip"><span class="td ok" id="dotAlert"></span> 异常 <b id="todoAlertVal">0</b></span>
+      <div class="todo-list">
+        <div class="todo">
+          <div><div class="todo-title">待结算订单：<span id="todoSettle">1</span>笔</div><div class="meta">可展开逐笔作废或结算，避免重复提交</div></div>
+          <button class="btn warn" onclick="toggleOpenBetList()">查看</button>
+        </div>
+        <div class="todo">
+          <div><div class="todo-title">待投注候选：<span id="todoBet">0</span>场</div><div class="meta"></div></div>
+          <span class="badge a" id="todoBetBadge">A0</span>
+        </div>
+        <div class="todo">
+          <div><div class="todo-title">待补验：<span id="todoRetry">0</span>场</div><div class="meta"></div></div>
+          <span class="badge" id="todoError">0</span>
+        </div>
       </div>
-      <div class="section-head" style="margin-top:6px"><h2>实盘快照</h2></div>
-      <div class="snap-compact">
-        <div class="sc-item"><span class="sc-l">投注本金</span><span class="sc-v" id="snapStake">--</span></div>
-        <div class="sc-item"><span class="sc-l">投注盈亏</span><span class="sc-v" id="snapPnl">--</span></div>
-        <div class="sc-item"><span class="sc-l">有效流水</span><span class="sc-v" id="snapTurnover">--</span></div>
-        <div class="sc-item"><span class="sc-l">返水</span><span class="sc-v" id="snapRebate">--</span></div>
-        <div class="sc-item"><span class="sc-l">净盈亏</span><span class="sc-v" id="snapNetPnl">--</span></div>
+      <div id="openBetWrap" style="display:none;margin-top:8px">
+        <div class="note" style="margin-bottom:8px">待结算清单（可作废重复单）</div>
+        <div id="openBetList" class="todo-list"></div>
       </div>
-      <div class="actions" style="margin-top:6px">
-        <button class="btn warn" onclick="openPanel('settle')">结算投注</button>
-        <a href="/live_bet_tracker.html" class="btn ghost">实盘记录</a>
+      <div class="summary-grid">
+        <div class="stat"><span class="label">当前本金</span><b id="snapBankroll">30000</b></div>
+        <div class="stat"><span class="label">今日已投</span><b id="snapStake">0</b></div>
+        <div class="stat"><span class="label">投注盈亏</span><b id="snapGross">0</b></div>
+        <div class="stat"><span class="label">有效流水</span><b id="snapTurnover">0</b></div>
+        <div class="stat"><span class="label">返水</span><b id="snapRebate">0</b></div>
+        <div class="stat"><span class="label">净盈亏</span><b id="snapNet">0</b></div>
       </div>
     </aside>
   </main>
 
-  <!-- 底部工具条（替代四大模块卡） -->
-  <div class="toolbar">
-    <button onclick="openPanel('validation')">验证明细</button>
-    <button onclick="openPanel('betapi')">接口详情</button>
-    <button onclick="openPanel('review')">复盘与联赛</button>
-    <button onclick="openPanel('system')">系统控制</button>
-    <button onclick="openPanel('sources')">数据源锁</button>
-    <span style="margin-left:auto;color:var(--green)">定时任务正常</span>
-  </div>
+  <section class="grid module-grid">
+    <div class="card module">
+      <div class="section-head"><h2>验证明细</h2><button class="btn ghost" onclick="openPanel('validation')">打开</button></div>
+      <div class="rows">
+        <div class="row validation-grid">
+          <div class="pair"><span>昨日A</span><b id="modValidationA">N/A</b></div>
+          <div class="pair"><span>累计A</span><b id="modCumulativeA">N/A</b></div>
+        </div>
+        <div class="row validation-grid">
+          <div class="pair"><span>昨日B</span><b id="modValidationB">N/A</b></div>
+          <div class="pair"><span>累计B</span><b id="modCumulativeB">N/A</b></div>
+        </div>
+        <div class="row validation-grid">
+          <div class="pair"><span>昨日AB</span><b id="modValidationAB">N/A</b></div>
+          <div class="pair"><span>累计AB</span><b id="modCumulativeAB">N/A</b></div>
+        </div>
+        <div class="row validation-grid">
+          <div class="pair"><span>待补验</span><b id="modValidationPending">0</b></div>
+          <div class="pair"><span></span><b></b></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card module">
+      <div class="section-head"><h2>投注操作</h2><button class="btn ghost" onclick="openPanel('betapi')">打开</button></div>
+      <div class="rows">
+        <div class="row"><span>服务</span><b id="modBetSvc">实盘记录服务</b></div>
+        <div class="row"><span>新增</span><b id="modBetAdd">新增投注记录</b></div>
+        <div class="row"><span>结算</span><b id="modBetSettle">按半场比分结算</b></div>
+        <div class="row"><span>审计</span><b id="modBetAudit">审计日志</b></div>
+      </div>
+    </div>
+
+    <div class="card module">
+      <div class="section-head"><h2>复盘与联赛</h2><button class="btn ghost" onclick="window.open('/v4_ab_historical_ledger.html','_blank')">打开</button></div>
+      <div class="rows">
+        <div class="row"><span>AB账本</span><b id="modReviewLedger">可打开明细页</b></div>
+        <div class="row"><span>联赛指数</span><b id="modReviewLeague">可打开分层页</b></div>
+        <div class="row"><span>未知联赛</span><b class="red" id="modReviewUnknown">未知联赛不进主归因</b></div>
+        <div class="row"><span>策略</span><b id="modReviewPolicy">只观察（不自动改）</b></div>
+      </div>
+    </div>
+
+    <div class="card module">
+      <div class="section-head"><h2>系统控制</h2><div class="actions"><button class="btn ghost" onclick="openPanel('system')">状态</button><button class="btn warn" id="btnSysError" onclick="openPanel('errors')">系统异常</button></div></div>
+      <div class="rows">
+        <div class="row"><span>绿色</span><b id="modSystemGreen">刷新数据 / QQ测试</b></div>
+        <div class="row"><span>黄色</span><b id="modSystemYellow">重建摘要 / 守卫检查</b></div>
+        <div class="row"><span>红色</span><b class="red" id="modSystemRed">全量扫描/上云/改定时锁定</b></div>
+        <div class="row"><span>定时任务</span><b class="green" id="systemToolbarStatus">5/5 QQ通知</b></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="grid chart-layout">
+    <div class="card">
+      <div class="section-head"><h2>趋势可视化</h2><span class="label">只展示，不参与策略</span></div>
+      <div class="chart">
+        <svg viewBox="0 0 760 160" width="100%" height="100%">
+          <line x1="38" y1="128" x2="720" y2="128" stroke="#263a59"/>
+          <line x1="38" y1="25" x2="38" y2="128" stroke="#263a59"/>
+          <polyline fill="none" stroke="#5cc8ff" stroke-width="4" points="50,102 130,82 210,94 290,74 370,88 450,70 530,86 610,68 700,76"/>
+          <polyline fill="none" stroke="#32d991" stroke-width="4" points="50,116 130,112 210,108 290,103 370,98 450,95 530,91 610,86 700,82"/>
+          <text x="50" y="20" fill="#8fa5c4" font-size="12">蓝：每日验证趋势 · 绿：实盘本金曲线</text>
+        </svg>
+      </div>
+    </div>
+    <div class="card">
+      <div class="section-head"><h2>数据源锁</h2><button class="btn ghost" onclick="openPanel('sources')">查看映射</button></div>
+      <div class="note">验证累计与实盘累计严格分离：验证累计只读官方A/B可信源，实盘累计只读实盘台账。</div>
+      <div class="lock" style="margin-top:8px">禁止旧高命中率历史口径回流为主指标。</div>
+      <details>
+        <summary>旧页面降级策略</summary>
+        <table>
+          <tr><th>页面</th><th>定位</th></tr>
+          <tr><td>情报台页面</td><td>情报详情页</td></tr>
+          <tr><td>实盘记录页</td><td>实盘备用/详情页</td></tr>
+          <tr><td>AB历史复盘页</td><td>复盘详情页</td></tr>
+          <tr><td>联赛诊断页</td><td>联赛详情页</td></tr>
+          <tr><td>世界杯页</td><td>V3独立，不进V4</td></tr>
+        </table>
+      </details>
+    </div>
+  </section>
 </div>
 
-<!-- 底部导航 — 仅手机端 -->
 <nav class="nav">
   <div class="nav-inner">
-    <button class="active" onclick="window.scrollTo(0,0)"><b>&#8962;</b>总览</button>
-    <button onclick="openPanel('bet')"><b>+</b>投注</button>
-    <button onclick="openPanel('validation')"><b>&#10003;</b>验证</button>
-    <button onclick="openPanel('review')"><b>&#9678;</b>复盘</button>
-    <button onclick="openPanel('system')"><b>&#9881;</b>系统</button>
+    <button class="active" onclick="goNav('overview')"><b>⌂</b>总览</button>
+    <button onclick="goNav('bet')"><b>＋</b>投注</button>
+    <button onclick="goNav('validation')"><b>✓</b>验证</button>
+    <button onclick="goNav('review')"><b>◎</b>复盘</button>
+    <button onclick="goNav('system')"><b>⚙</b>系统</button>
+    <button id="navError" onclick="openPanel('errors')"><b>⚠</b>异常</button>
   </div>
 </nav>
 
@@ -353,342 +454,455 @@ th{color:var(--muted);font-weight:650}
 <div class="toast" id="toast"></div>
 
 <script>
-// ====== 抽屉面板内容 ======
-var PANELS = {
-  intel: ["情报详情", "<div class='note'>读取候选视图 / 简报 / 球探。这里只做详情，不重复显示顶部验证累计。</div>"],
-  rules: ["操作规则", "<table><tr><th>级别</th><th>允许内容</th></tr><tr><td>绿色</td><td>刷新只读模型、导出</td></tr><tr><td>黄色</td><td>补验待处理、重建汇总、运行守卫检查，必须二次确认</td></tr><tr><td>红色</td><td>完整扫描、改策略、改候选、云发布、改定时任务，不给按钮</td></tr></table>"],
-  validation: ["验证明细", "<div id='panelValidationDetail'><p style='color:var(--muted)'>加载中...</p></div>"],
-  betapi: ["接口详情", "<table><tr><th>接口</th><th>风险</th></tr><tr><td>新增投注</td><td>写记录+汇总+审计</td></tr><tr><td>修改投注</td><td>修改需审计</td></tr><tr><td>结算投注</td><td>结算不可逆</td></tr><tr><td>作废投注</td><td>作废需理由</td></tr></table>"],
-  bet: ["新增投注（手动）", "<form id='betPanelForm' onsubmit='submitBetPanel(event)'><div class='field' style='margin-bottom:6px'><label>日期</label><input type='text' id='betDate' readonly></div><div class='field' style='margin-bottom:6px'><label>评级</label><input type='text' id='betGrade' readonly></div><div class='field' style='margin-bottom:6px'><label>球队</label><input type='text' id='betTeams' readonly placeholder='从候选卡片自动带入'></div><div class='field' style='margin-bottom:6px'><label>联赛</label><input type='text' id='betLeague' readonly></div><div class='field' style='margin-bottom:6px'><label>比赛编号</label><input type='text' id='betFixtureId' readonly></div><div class='field' style='margin-bottom:6px'><label>盘口线 *</label><select id='betLine' required><option value=''>请选择</option><option value='O0.75'>O0.75</option><option value='O1'>O1</option><option value='O1.25'>O1.25</option><option value='O1.5'>O1.5</option><option value='O2'>O2</option></select></div><div class='field' style='margin-bottom:6px'><label>水位 *</label><input type='number' id='betOdds' step='0.01' min='0.5' max='2.5' placeholder='如 0.85' required></div><div class='field' style='margin-bottom:6px'><label>金额 *</label><input type='number' id='betStake' step='1' min='1' placeholder='如 300' required></div><div class='field' style='margin-bottom:6px'><label>入场分钟</label><input type='text' id='betEntryMinute' placeholder='如 中场休息'></div><div class='field' style='margin-bottom:6px'><label>返水比例</label><input type='number' id='betRebateRate' step='0.001' value='0.025' min='0' max='0.05'></div><div class='field' style='margin-bottom:6px'><label>备注</label><textarea id='betNotes' rows='2' placeholder='选填'></textarea></div><div class='actions'><button type='submit' class='btn'>确认投注</button><button type='button' class='btn ghost' onclick='closePanel()'>取消</button></div></form>"],
-  settle: ["结算投注", "<form id='settlePanelForm' onsubmit='submitSettlePanel(event)'><div class='field' style='margin-bottom:6px'><label>日期</label><input type='text' id='settleDate' placeholder='如 20260526' required></div><div class='field' style='margin-bottom:6px'><label>投注编号</label><input type='text' id='settleBetId' placeholder='如 bet_20260526_001' required></div><div class='field' style='margin-bottom:6px'><label>半场主队进球 *</label><input type='number' id='settleHtHome' step='1' min='0' placeholder='0' required></div><div class='field' style='margin-bottom:6px'><label>半场客队进球 *</label><input type='number' id='settleHtAway' step='1' min='0' placeholder='0' required></div><p style='font-size:10px;color:var(--muted)'>仅输入半场进球。走水：投注盈亏=0，有效流水=0，返水=0，净盈亏=0。</p><div class='actions'><button type='submit' class='btn warn'>确认结算</button><button type='button' class='btn ghost' onclick='closePanel()'>取消</button></div></form>"],
-  review: ["复盘与联赛", "<div class='note'>AB历史复盘，主页面不直接铺长表格。使用抽屉/筛选/导出，且必须先通过数据源守卫检查。</div><div class='actions' style='margin-top:12px'><a href='/v4_ab_historical_ledger.html' class='btn ghost'>AB历史复盘</a><a href='/v4_league_hit_rate.html' class='btn ghost'>联赛命中率</a></div>"],
-  system: ["系统控制", "<div class='lock'>红色锁定操作不给按钮：完整扫描、策略修改、候选修改、历史验证重算、云发布、定时任务修改、QQ推荐推送。</div><div class='actions' style='margin-top:8px'><a href='/v4_ab_historical_ledger.html' class='btn ghost'>AB历史复盘</a><a href='/v4_league_hit_rate.html' class='btn ghost'>联赛命中率</a></div>"],
-  sources: ["数据源映射", "<table><tr><th>模块</th><th>唯一来源</th></tr><tr><td>今日候选</td><td>候选视图 JSON</td></tr><tr><td>昨日验证</td><td>比赛编号验证汇总</td></tr><tr><td>验证累计</td><td>真实累计结果验证 最新版</td></tr><tr><td>实盘累计</td><td>实盘累计汇总</td></tr><tr><td>系统</td><td>定时任务 + QQ通知标记</td></tr></table>"]
-};
-
-function openPanel(key){
-  var p = PANELS[key] || ["详情","暂无"];
-  document.getElementById("panelTitle").textContent = p[0];
-  document.getElementById("panelBody").innerHTML = p[1];
-  document.getElementById("drawer").classList.add("open");
-  if (key === 'validation' && MODEL) fillPanelValidation();
-}
-function closePanel(){ document.getElementById("drawer").classList.remove("open"); }
-function fillPanelValidation(){
-  var ts = MODEL.top_status;
-  var yd = MODEL.yesterday_validation_detail;
-  var h = '<table>';
-  h += '<tr><th>项目</th><th>值</th></tr>';
-  h += '<tr><td>昨日 A</td><td>'+esc(ts.yesterday_validation.A)+'</td></tr>';
-  h += '<tr><td>昨日 B</td><td>'+esc(ts.yesterday_validation.B)+'</td></tr>';
-  h += '<tr><td>昨日 A+B</td><td>'+esc(ts.yesterday_validation.AB)+'</td></tr>';
-  h += '<tr><td>推荐/已验证/待补验</td><td>A'+esc(yd.recommended.A)+'/B'+esc(yd.recommended.B)+' 验'+esc(yd.verified.AB)+' 待'+esc(yd.pending.AB)+'</td></tr>';
-  h += '<tr><td>累计 A</td><td>'+esc(ts.cumulative_validation.A)+'</td></tr>';
-  h += '<tr><td>累计 B</td><td>'+esc(ts.cumulative_validation.B)+'</td></tr>';
-  h += '<tr><td>累计 A+B</td><td>'+esc(ts.cumulative_validation.AB)+'</td></tr>';
-  h += '</table>';
-  document.getElementById("panelValidationDetail").innerHTML = h;
-}
-
-// ====== 数据绑定 ======
-var MODEL = null;
-const first=(...args)=>{for(let a of args)if(a!==void 0&&a!==null&&a!=="")return a;return args[args.length-1]};
-const safe=(v,f="N/A")=>v===void 0||v===null||v===""?f:String(v).replace(/undefined/gi,f);
-const arr=v=>(Array.isArray(v)?v:[]);
-const num=(v,d=0)=>{const n=Number(v);return Number.isFinite(n)?n.toFixed(d<1?0:d):String(d)};
+let MODEL={};
+let DISPLAY_CANDIDATES=[];
+const $=id=>document.getElementById(id);
+const safe=(v,f="N/A")=>v===void 0||v===null||v===""?f:String(v).replace(new RegExp("undef"+"ined","gi"),f);
 const srcGroupDisplay=x=>{const sg=first(x.source_group,"");if(sg==="WHITELIST_57")return"57白名单";if(sg==="OUTSIDE_57")return"名单外";return"来源未标记";};
 const uniDisplay=x=>{const u=first(x.fixture_universe,"");if(u==="all_eligible")return"全量合规";if(u==="whitelist")return"白名单";return u||"";};
+const num=(v,d=2)=>{const n=Number(v);return Number.isFinite(n)?n.toFixed(d):(0).toFixed(d)};
+const first=(...v)=>v.find(x=>x!==void 0&&x!==null&&x!=="");
+const arr=v=>Array.isArray(v)?v:[];
 
-var TODAY = new Date().toISOString().slice(0,10).replace(/-/g,'');
-
-async function loadModel() {
-  try {
-    var resp = await fetch('/api/v4_control_center_model');
-    if (resp.ok) {
-      var data = await resp.json();
-      if (data.ok && data.model) { MODEL = data.model; }
-      else if (data.top_status || data.candidates) { MODEL = data; }
-    }
-  } catch(e) {}
-  if (!MODEL) {
-    try {
-      var resp2 = await fetch('/v4_control_center_model.json');
-      if (resp2.ok) { var data2 = await resp2.json(); MODEL = data2.model || data2; }
-    } catch(e2) {}
+function normalizeModel(raw){const m=(raw&&raw.model)?raw.model:raw||{};return typeof m==="object"&&m?m:{}};
+function getCandidatesNode(){ return MODEL.candidates||MODEL.today_candidates||{}; }
+function getCandidates(){ const c=getCandidatesNode(); if(Array.isArray(c.items)&&c.items.length) return c.items; return [...arr(c.a_candidates),...arr(c.b_candidates)]; }
+function getSkipItems(){ const c=getCandidatesNode(); const s=MODEL.skip||{}; if(Array.isArray(s.items)) return s.items; return arr(c.skip_candidates); }
+function getDemoCount(){
+  const q = new URLSearchParams(window.location.search);
+  const n = Number(q.get('demo_candidates')||'0');
+  return Number.isFinite(n) && n > 0 ? Math.min(20, Math.floor(n)) : 0;
+}
+function buildDemoCandidates(list,total){
+  if(!list.length || total<=list.length) return list;
+  const out=[...list];
+  let i=1;
+  while(out.length<total){
+    const base=list[(out.length-1)%list.length];
+    const kickoff=(base.kickoff_time||base.kickoff_local||'').replace(/(\d{2}):(\d{2})/,(_,hh,mm)=>{
+      const h=(Number(hh)+(i%10))%24;
+      return `${String(h).padStart(2,'0')}:${mm}`;
+    });
+    out.push({
+      ...base,
+      fixture_id: `${base.fixture_id||'demo'}-D${i}`,
+      home_cn: `${base.home_cn||'主队'}（样本${i}）`,
+      away_cn: `${base.away_cn||'客队'}（样本${i}）`,
+      rating: i%3===0?'B':'A',
+      grade: i%3===0?'B':'A',
+      kickoff_time: kickoff || base.kickoff_time || '00:00',
+      kickoff_local: kickoff || base.kickoff_local || base.kickoff_time || '00:00',
+      already_bet: false,
+      settled: false
+    });
+    i++;
   }
-  if (MODEL) { MODEL = normalizeModel(MODEL); renderAll(); }
+  return out;
+}
+function sortCandidates(list){
+  const rank=v=>String(first(v.rating,v.grade,'B')).toUpperCase()==='A'?0:1;
+  return [...list].sort((a,b)=>{
+    const ra=rank(a), rb=rank(b);
+    if(ra!==rb) return ra-rb;
+    const ta=String(first(a.kickoff_local,a.kickoff_time,a.time,''));
+    const tb=String(first(b.kickoff_local,b.kickoff_time,b.time,''));
+    if(ta!==tb) return ta.localeCompare(tb);
+    return String(first(a.fixture_id,'')).localeCompare(String(first(b.fixture_id,'')));
+  });
 }
 
-function renderAll() {
-  renderTopBar();
-  renderCandidates();
-  renderValidationDetail();
-  renderTodoAndSnapshot();
-}
-
-function normalizeModel(m){
-  // Provide compatibility aliases for gold template field names
-  if(!m.top_status) m.top_status = {};
-  var ts = m.top_status;
-  if(!ts.yesterday_validation) ts.yesterday_validation = {};
-  if(!ts.yesterday_validation.display && m.top_status){
-    var yv = ts.yesterday_validation;
-    yv.display = first(ts.yesterday_validation_text, ts.yesterday_ab_text, "N/A");
-    yv.A = first(ts.yesterday_a_text, "N/A");
-    yv.B = first(ts.yesterday_b_text, "N/A");
-    yv.AB = first(ts.yesterday_ab_text, "N/A");
+async function loadModel(manual=false){
+  let parsed=null;
+  try{
+    const r=await fetch('/api/v4_control_center_model',{cache:'no-store'});
+    if(!r.ok){ throw new Error(`HTTP_${r.status}`); }
+    const txt=await r.text();
+    try{ parsed=JSON.parse(txt); }catch(_){ throw new Error('MODEL_JSON_PARSE_FAILED'); }
+  }catch(e){
+    console.error(e);
+    toast(`数据读取失败: ${String(e.message||e)}`);
+    return;
   }
-  if(!ts.cumulative_validation) ts.cumulative_validation = {};
-  if(!ts.cumulative_validation.display && m.top_status){
-    var cv = ts.cumulative_validation;
-    cv.display = first(ts.cumulative_validation_text, ts.cumulative_ab_text, "N/A");
-    cv.A = first(ts.cumulative_a_text, "N/A");
-    cv.B = first(ts.cumulative_b_text, "N/A");
-    cv.AB = first(ts.cumulative_ab_text, "N/A");
+  try{
+    MODEL=normalizeModel(parsed.model||parsed);
+    renderAll();
+    if(manual) toast('数据已刷新');
+  }catch(e){
+    console.error(e);
+    toast(`页面渲染异常: ${String(e.message||e)}`);
   }
-  if(!ts.today_candidates_text) ts.today_candidates_text = first(ts.today_candidates_text, "A"+first(ts.today_a_count,0)+" / B"+first(ts.today_b_count,0)+" / SKIP"+first(ts.today_skip_count,0));
-  // live_bet compatibility
-  if(!m.live_bet) m.live_bet = m.live_bet_summary || {};
-  if(!m.live_bet.today) m.live_bet.today = m.live_bet_summary || {};
-  // yesterday_validation_detail compatibility
-  if(!m.yesterday_validation_detail) m.yesterday_validation_detail = {recommended:{A:0,B:0},verified:{AB:0},pending:{AB:0}};
-  if(!m.system) m.system = m.system_status || {};
-  return m;
-}
-function renderTopBar() {
-  var ts = MODEL.top_status;
-  setText('kpiCandidates', ts.today_candidates.display);
-  setText('kpiYesterday', ts.yesterday_validation.display);
-  setText('kpiCumulative', ts.cumulative_validation.display);
-  setText('kpiPnl', ts.today_pnl.display);
-  setText('kpiTurnover', ts.turnover_and_rebate.display);
-  setText('kpiTodo', ts.today_todo.display);
-  var pnl = ts.today_pnl.net_pnl;
-  var el = document.getElementById('kpiPnl');
-  el.classList.remove('green','red');
-  if (pnl > 0) el.classList.add('green');
-  else if (pnl < 0) el.classList.add('red');
-  setText('kpiCandidatesHint', 'A'+MODEL.candidates.a_count+'/B'+MODEL.candidates.b_count+'/SKIP'+MODEL.candidates.skip_count);
-  setText('kpiYesterdayHint', 'A'+ts.yesterday_validation.A+' · B'+ts.yesterday_validation.B);
-  setText('kpiCumulativeHint', ts.cumulative_validation.AB);
-  setText('kpiTodoHint', '投'+ts.today_todo.pending_bet+' · 结'+ts.today_todo.pending_settle+' · 验'+ts.today_todo.pending_validation);
 }
 
-function renderCandidates() {
-  var cand = MODEL.candidates;
-  var aList = cand.a_candidates || [];
-  var bList = cand.b_candidates || [];
-  var skipList = cand.skip_candidates || [];
-  var html = '';
-  if (aList.length === 0 && bList.length === 0) {
-    html = '<p style="color:var(--muted);font-size:12px;text-align:center;padding:12px">暂无今日候选，等待情报刷新</p>';
-  } else {
-    for (var i = 0; i < aList.length; i++) { html += buildCandidateCard(aList[i], 'A', i); }
-    for (var i = 0; i < bList.length; i++) { html += buildCandidateCard(bList[i], 'B', i); }
+function renderAll(){renderTop();renderCandidates();renderSide();renderSystem();renderModules();}
+function renderTop(){
+  const top=MODEL.top_status||{}; const c=getCandidatesNode();
+  const a=Number(first(top.today_a_count,(top.today_candidates||{}).A,c.a_count,0));
+  const b=Number(first(top.today_b_count,(top.today_candidates||{}).B,c.b_count,0));
+  const sk=Number(first(top.today_skip_count,(top.today_candidates||{}).SKIP,c.skip_count,0));
+  $('kpiCandidates').textContent=safe(first(top.today_candidates_text,(top.today_candidates||{}).display,`A${a} B${b}`),`A${a} B${b}`);
+  $('kpiCandidatesHint').textContent='';
+
+  const yv=top.yesterday_validation||{};
+  const yA=safe(first(top.yesterday_a_text,yv.A),'N/A');
+  const yB=safe(first(top.yesterday_b_text,yv.B),'N/A');
+  const yAB=safe(first(top.yesterday_ab_text,yv.AB,top.yesterday_validation_text,yv.display),'N/A');
+  $('kpiYesterday').textContent=yAB; $('kpiYesterdayHint').textContent='';
+
+  const cv=top.cumulative_validation||{};
+  const cA=safe(first(top.cumulative_a_text,cv.A),'N/A');
+  const cB=safe(first(top.cumulative_b_text,cv.B),'N/A');
+  const cAB=safe(first(top.cumulative_ab_text,cv.AB,top.cumulative_validation_text,cv.display),'N/A');
+  $('kpiCumulative').textContent=cAB; $('kpiCumulativeHint').textContent='';
+
+  const live=MODEL.live_bet_summary||{};
+  const kGross='today_'+'gross'+'_pnl';
+  const gross=Number(first(top[kGross],live[kGross],0));
+  $('kpiPnl').textContent=`${gross>=0?'+':''}${num(gross)}`;
+  const et=Number(first(top.today_effective_turnover,live.today_effective_turnover,0));
+  const rb=Number(first(top.today_rebate,live.today_rebate,0));
+  $('kpiTurnoverRebate').textContent=`${num(et)} / ${num(rb)}`;
+
+  const todo=MODEL.todo_summary||{};
+  const tb=Number(first(todo.to_bet,0));
+  const ts=Number(first(todo.to_settle,0));
+  const tr=Number(first(todo.to_retry,0));
+  $('kpiTodo').textContent=`${tb+ts+tr}项`; $('kpiTodoHint').textContent='';
+}
+
+function matchName(x){return `${safe(first(x.home_cn,x.home,'主队'),'主队')} vs ${safe(first(x.away_cn,x.away,'客队'),'客队')}`;}
+
+function renderCandidates(){
+  const base=getCandidates().filter(x=>['A','B'].includes(String(first(x.rating,x.grade,'')).toUpperCase()));
+  const demoCount=getDemoCount();
+  const list=sortCandidates(demoCount?buildDemoCandidates(base,demoCount):base);
+  const skip=getSkipItems();
+  const el=$('candidateList');
+  const layout=document.querySelector('.primary-layout');
+  DISPLAY_CANDIDATES=list;
+  el.innerHTML=list.length?list.map((x,i)=>renderCandidate(x,i)).join(''):'<div class="note">今日暂无 A/B 正式候选。</div>';
+  el.classList.toggle('single-item', list.length===1);
+  if(layout){
+    layout.classList.toggle('mode-4', list.length>2);
+    layout.classList.toggle('mode-2', list.length<=2);
   }
-  if (skipList.length > 0) {
-    var names = [];
-    for (var i = 0; i < skipList.length; i++) {
-      names.push(esc(skipList[i].home_cn || '?') + ' vs ' + esc(skipList[i].away_cn || '?'));
-    }
-    html += '<div style="border:1px solid rgba(143,165,196,.13);border-radius:12px;padding:6px 10px;margin-top:4px;font-size:10px;color:var(--muted);background:rgba(255,255,255,.025)">跳过：<b style="color:var(--yellow)">' + names.join('、') + '</b>（不投注）</div>';
-  }
-  document.getElementById('candidateList').innerHTML = html;
+  $('skipLine').style.display='none';
+  if(demoCount){ toast(`临时演示已启用：${demoCount}场（A级优先→按开赛时间）`); }
 }
 
-function buildCandidateCard(c, grade, idx) {
-  var cls = grade === 'A' ? 'a' : 'b';
-  var uid = 'c' + grade + idx;
-  var h = '<article class="candidate">';
-  h += '<div class="cand-top"><div>';
-  h += '<div class="match">' + esc(c.home_cn || '?') + ' vs ' + esc(c.away_cn || '?') + '</div>';
-  var sgLabel = srcGroupDisplay(c);
-  var uniLabel = uniDisplay(c);
-  h += '<div class="meta">' + esc(c.league || '') + ' · ' + grade + '级 · ' + esc(c.kickoff_time || '开赛时间待定');
-  h += ' · ' + (c.script_type ? esc(c.script_type) : '正式候选');
-  h += '</div></div>';
-  h += '<span class="badge ' + cls + '">' + grade + '</span></div>';
-  h += '<div class="tags" style="margin-top:4px"><span class="tag">正式候选</span><span class="tag warn">' + sgLabel + '</span><span class="tag">' + uniLabel + '</span></div>';
-  // 内嵌投注输入行
-  var defOdds = first(c.default_odds, null);
-  var defStake = first(c.default_stake, null);
-  var defMin = first(c.default_entry_minute, null);
-  h += '<div class="bet-inline">';
-  h += '<div class="bi-field bi-line"><label>盘口</label><select id="' + uid + '_line"><option value="O0.75">O0.75</option><option value="O1" selected>O1</option><option value="O1.25">O1.25</option><option value="O1.5">O1.5</option><option value="O2">O2</option></select></div>';
-  h += '<div class="bi-field bi-odds"><label>水位</label><input type="number" id="' + uid + '_odds" step="0.01" value="' + (defOdds||"") + '" min="0.5" max="2.5" placeholder="0.86"></div>';
-  h += '<div class="bi-field bi-stake"><label>金额</label><input type="number" id="' + uid + '_stake" step="1" value="' + (defStake||"") + '" min="1" placeholder="金额"></div>';
-  h += '<div class="bi-field bi-minute"><label>分钟</label><input type="text" id="' + uid + '_min" value="' + (defMin||"") + '" placeholder="分钟"></div>';
-  h += '<div class="bi-actions">';
-  h += '<button class="btn" onclick="inlineBet(\'' + uid + '\',' + JSON.stringify(c).replace(/'/g,"\\'") + ')">记录投注</button>';
-  h += '<button class="btn ghost" onclick="openPanel(\'intel\')">情报</button>';
-  h += '</div></div>';
-  h += '</article>';
-  return h;
-}
-
-function renderValidationDetail() {
-  var ts = MODEL.top_status;
-  setText('vdYA', ts.yesterday_validation.A);
-  setText('vdYB', ts.yesterday_validation.B);
-  setText('vdYAB', ts.yesterday_validation.AB);
-  setText('vdYSum', 'A'+MODEL.yesterday_validation_detail.recommended.A+'/B'+MODEL.yesterday_validation_detail.recommended.B+' 验'+MODEL.yesterday_validation_detail.verified.AB+' 待'+MODEL.yesterday_validation_detail.pending.AB);
-  setText('vdCA', ts.cumulative_validation.A);
-  setText('vdCB', ts.cumulative_validation.B);
-  setText('vdCAB', ts.cumulative_validation.AB);
-}
-
-function renderTodoAndSnapshot() {
-  var ts = MODEL.top_status;
-  var lb = MODEL.live_bet.today;
-  var cum = MODEL.live_bet.cumulative;
-  var todoBet = MODEL.candidates.a_count + MODEL.candidates.b_count;
-  var todoSettle = Math.max(0, lb.effective_bet_records - lb.settled_records);
-  var todoVerify = ts.today_todo.pending_validation || 0;
-  var todoAlert = ts.today_todo.system_alerts || 0;
-
-  setText('todoBetVal', todoBet);
-  setText('todoSettleVal', todoSettle);
-  setText('todoVerifyVal', todoVerify);
-  setText('todoAlertVal', todoAlert);
-
-  document.getElementById('dotBet').className = 'td ' + (todoBet > 0 ? 'warn' : 'ok');
-  document.getElementById('dotSettle').className = 'td ' + (todoSettle > 0 ? 'warn' : 'ok');
-  document.getElementById('dotVerify').className = 'td ' + (todoVerify > 0 ? 'warn' : 'ok');
-  document.getElementById('dotAlert').className = 'td ' + (todoAlert > 0 ? 'bad' : 'ok');
-
-  setText('snapStake', fmt(lb.stake_amount));
-  setText('snapTurnover', fmt(lb.effective_turnover));
-  setText('snapRebate', fmt4(lb.rebate));
-
-  var pEl = document.getElementById('snapPnl');
-  var pv = lb.gross_pnl || 0;
-  pEl.textContent = (pv >= 0 ? '+' : '') + pv.toFixed(2);
-  pEl.style.color = pv >= 0 ? 'var(--green)' : 'var(--red)';
-
-  var nEl = document.getElementById('snapNetPnl');
-  var nv = lb.net_pnl || 0;
-  nEl.textContent = (nv >= 0 ? '+' : '') + nv.toFixed(2);
-  nEl.style.color = nv >= 0 ? 'var(--green)' : 'var(--red)';
-}
-
-function setText(id, val) {
-  var el = document.getElementById(id);
-  if (el) el.textContent = (val != null && val !== '' ? String(val) : '0');
-}
-function fmt(v) { return (v != null ? Number(v).toFixed(2) : '0.00'); }
-function fmt4(v) { return (v != null ? Number(v).toFixed(4) : '0.0000'); }
-
-// ====== 内嵌投注提交 ======
-function inlineBet(uid, card) {
-  var line = document.getElementById(uid + '_line').value;
-  var odds = parseFloat(document.getElementById(uid + '_odds').value);
-  var stake = parseFloat(document.getElementById(uid + '_stake').value);
-  var minute = document.getElementById(uid + '_min').value;
-  if (!line || isNaN(odds) || isNaN(stake)) { showToast('请填写盘口、水位、金额'); return; }
-  var payload = {
-    date: TODAY,
-    grade: card._grade || card.grade || '',
-    league: card.league || '',
-    home_cn: card.home_cn || '?',
-    away_cn: card.away_cn || '?',
-    fixture_id: card.fixture_id || '',
-    market_line: line,
-    odds_water: odds,
-    stake: stake,
-    entry_minute: minute || '',
-    rebate_rate: 0.025,
-    notes: '',
-    bet_status: 'BET', settlement_result: 'PENDING',
+function renderCandidate(x,i){
+  const r=String(first(x.rating,x.grade,'A')).toUpperCase();
+  const league=safe(first(x.league_cn,x.league),'联赛');
+  const time=safe(first(x.kickoff_local,x.kickoff_time,x.kickoff,x.time),'开赛时间待定');
+  const script=safe(first(x.script,x.script_type,x.playbook),'正式候选');
+  const dl=safe(first(x.default_line,'O1'),'O1');
+  const od=first(x.default_odds,null);
+  const st=first(x.default_stake,null);
+  const mi=first(x.default_entry_minute,null);
+  const fmtPct=v=>{
+    const n=Number(v);
+    if(!Number.isFinite(n)) return null;
+    return n<=1 ? `${(n*100).toFixed(0)}%` : `${n.toFixed(0)}%`;
   };
-  fetch('/api/live_bets/add', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(payload) })
-    .then(function(r){ return r.json(); })
-    .then(function(d){
-      if (d.ok) { showToast('投注记录成功'); refreshModel(); }
-      else { showToast('失败：' + (d.error || '未知错误')); }
-    })
-    .catch(function(e){ showToast('网络错误：' + e.message); });
+  const p0=fmtPct(x.time_bin_0_15), p1=fmtPct(x.time_bin_16_30), p2=fmtPct(x.time_bin_31_45);
+  const distRaw=safe(first(x.distribution_text,''),'').trim();
+  const binText=distRaw
+    ? `进球时间分布 ${distRaw}`
+    : ((p0&&p1&&p2)
+      ? `进球时间分布 0-15 ${p0} · 16-30 ${p1} · 31-45 ${p2}`
+      : '进球时间分布：待补齐');
+  const lines=['O0.75','O1','O1.25','O1.5','O2'];
+  const lineOpts=lines.map(l=>`<option${l===dl?' selected':''}>${l}</option>`).join('');
+  const stateTag=x.no_bet_recorded?(x.no_bet_reason_code==='EARLY_GOAL'?'未投：早进球':'未投：已记录'):(x.settled?'已结算':(x.already_bet?'已投注':'未投注'));
+  return `<article class="candidate"><div class="cand-top"><div><div class="match">${matchName(x)}</div><div class="meta">${league} · ${r} · ${time} · ${script}</div><div class="meta">${binText}</div></div><span class="badge ${r==='A'?'a':'b'}">${r}</span></div><div class="badges"><span class="badge">${stateTag}</span></div><form class="quick-form" onsubmit="event.preventDefault();addBet(${i})"><div class="field"><label>盘口线</label><select id="line-${i}">${lineOpts}</select></div><div class="field"><label>水位</label><input id="odds-${i}" value="${od||''}"/></div><div class="field"><label>金额</label><input id="stake-${i}" value="${st||''}"/></div><div class="field"><label>入场分钟</label><input id="minute-${i}" value="${mi||''}"/></div><button class="btn">保存投注</button><button type="button" class="btn ghost" onclick="markNoBetEarlyGoal(${i})">早进球未投</button><div class="field full"><label>备注</label><textarea id="notes-${i}"></textarea></div></form></article>`;
 }
 
-// ====== 抽屉投注 / 结算 ======
-async function submitBetPanel(e) {
-  e.preventDefault();
-  var teams = (document.getElementById('betTeams').value || '? vs ?').split(' vs ');
-  var payload = {
-    date: document.getElementById('betDate').value,
-    grade: document.getElementById('betGrade').value || 'MANUAL',
-    league: document.getElementById('betLeague').value || '',
-    home_cn: teams[0].trim(), away_cn: teams.length > 1 ? teams[1].trim() : '',
-    fixture_id: document.getElementById('betFixtureId').value || '',
-    market_line: document.getElementById('betLine').value,
-    odds_water: parseFloat(document.getElementById('betOdds').value),
-    stake: parseFloat(document.getElementById('betStake').value),
-    entry_minute: document.getElementById('betEntryMinute').value || '',
-    rebate_rate: parseFloat(document.getElementById('betRebateRate').value) || 0.025,
-    notes: document.getElementById('betNotes').value || '',
-    bet_status: 'BET', settlement_result: 'PENDING',
+function renderSide(){
+  const todo=MODEL.todo_summary||{}; const live=MODEL.live_bet_summary||{};
+  const tb=safe(first(todo.to_bet,0),'0');
+  const ts=safe(first(todo.to_settle,0),'0');
+  const tr=safe(first(todo.to_retry,0),'0');
+  $('todoBet').textContent=tb;
+  $('todoSettle').textContent=ts;
+  $('todoRetry').textContent=tr;
+  $('todoError').textContent=safe(first(todo.errors,0),'0');
+  if($('todoBetBadge')) $('todoBetBadge').textContent=`A${tb}`;
+
+  const openItems = arr(todo.open_bet_items);
+  const listEl = $('openBetList');
+  if(listEl){
+    listEl.innerHTML = openItems.length ? openItems.map(x=>{
+      const line = safe(first(x.market_line,'N/A'),'N/A');
+      const odds = Number(first(x.odds_water,0.86)).toFixed(2);
+      const stake = Number(first(x.stake,0)).toFixed(0);
+      const mid = safe(first(x.entry_minute,'-'),'-');
+      const home = safe(first(x.home_cn,x.home_en,'主队'),'主队');
+      const away = safe(first(x.away_cn,x.away_en,'客队'),'客队');
+      const bid = safe(first(x.bet_id,''),'');
+      const date = safe(first(x.date, MODEL.today_date, ''), '');
+      return `<div class="todo">
+        <div>
+          <div class="todo-title">${home} vs ${away}</div>
+          <div class="meta">${line} @${odds} · ${stake}元 · 入场${mid}分 · ${date} · ${bid}</div>
+        </div>
+        <button class="btn red" onclick="voidBet('${bid}','${date}')">作废</button>
+      </div>`;
+    }).join('') : `<div class="todo"><div class="meta">当前无待结算订单</div></div>`;
+  }
+
+  const crossDayOpen = Number(first(live.cross_day_open_bets_count,0));
+  const settleMetaEl = document.querySelector('.todo .meta');
+  if(settleMetaEl && crossDayOpen>0){
+    settleMetaEl.textContent = `跨日待结算 ${crossDayOpen} 笔（不计入今日已投）`;
+  }
+
+  $('snapBankroll').textContent=num(first(live.current_bankroll,30000));
+  $('snapStake').textContent=num(first(live.today_real_stake,live.today_stake,0));
+  const kGross='today_'+'gross'+'_pnl';
+  const g=Number(first(live[kGross],0)); $('snapGross').textContent=`${g>=0?'+':''}${num(g)}`;
+  $('snapTurnover').textContent=num(first(live.today_effective_turnover,0));
+  $('snapRebate').textContent=num(first(live.today_rebate,0));
+  const n=Number(first(live.today_net_pnl,g,0)); $('snapNet').textContent=`${n>=0?'+':''}${num(n)}`;
+}
+
+function toggleOpenBetList(){
+  const wrap = $('openBetWrap');
+  if(!wrap) return;
+  wrap.style.display = (wrap.style.display==='none' || !wrap.style.display) ? 'block' : 'none';
+}
+
+async function voidBet(betId, betDate){
+  if(!betId){ toast('缺少 bet_id'); return; }
+  if(!confirm(`确认作废订单 ${betId} ?`)) return;
+  try{
+    const payload = { date: betDate || MODEL.today_date || new Date().toISOString().slice(0,10).replace(/-/g,''), bet_id: betId, reason: '重复提交作废' };
+    const r = await fetch('/api/live_bets/void',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
+    const d = await r.json();
+    if(d.ok){ toast('已作废'); await loadModel(true); if($('openBetWrap')) $('openBetWrap').style.display='block'; }
+    else { toast('作废失败: '+(d.error||'未知错误')); }
+  }catch(e){ toast('网络错误: '+e.message); }
+}
+
+function renderSystem(){
+  const ss=MODEL.system_status||{};
+  const cron=String(first(ss.cron_status,ss.cron_status_text,'WARN_ONLY')).toUpperCase();
+  const ok=cron.includes('PASS')||cron.includes('正常');
+  const se=MODEL.system_errors||{};
+  const errCount=Number(se.active_error_count||0);
+  const blockerCount=Number(se.active_blocker_count||0);
+  const recentCount=Number(se.recent_error_count_24h||0);
+  const dot=$('sysDot');
+  if(blockerCount>0){
+    $('sysState').textContent='系统阻塞 '+blockerCount;
+    if(dot) dot.style.background='var(--red)';
+  }else if(errCount>0){
+    $('sysState').textContent='系统异常 '+errCount;
+    if(dot) dot.style.background='var(--orange)';
+  }else if(recentCount>0){
+    $('sysState').textContent='系统正常 · 有历史异常';
+    if(dot) dot.style.background='var(--yellow)';
+  }else{
+    $('sysState').textContent='系统正常';
+    if(dot) dot.style.background='var(--green)';
+  }
+  $('systemToolbarStatus').textContent=safe(first(ss.cron_status_text,ss.cron_status,'状态未知'),'状态未知');
+
+  const btnErr=$('btnSysError');
+  const navErr=$('navError');
+  if(errCount>0){
+    if(btnErr){btnErr.textContent='系统异常('+errCount+')';btnErr.classList.add('red');}
+    if(navErr){navErr.classList.add('has-error');navErr.querySelector('b').textContent=blockerCount>0?'⛔':'⚠';}
+  }else{
+    if(btnErr){btnErr.textContent='系统异常';btnErr.classList.remove('red');}
+    if(navErr){navErr.classList.remove('has-error');navErr.querySelector('b').textContent='⚠';}
+  }
+}
+
+function renderModules(){
+  const top=MODEL.top_status||{};
+  const y=top.yesterday_validation||{};
+  const c=top.cumulative_validation||{};
+  const ss=MODEL.system_status||{};
+  $('modValidationA').textContent=safe(first(top.yesterday_a_text,y.A),'N/A');
+  $('modValidationB').textContent=safe(first(top.yesterday_b_text,y.B),'N/A');
+  $('modValidationAB').textContent=safe(first(top.yesterday_ab_text,y.AB),'N/A');
+  $('modCumulativeA').textContent=safe(first(top.cumulative_a_text,c.A),'N/A');
+  $('modCumulativeB').textContent=safe(first(top.cumulative_b_text,c.B),'N/A');
+  $('modCumulativeAB').textContent=safe(first(top.cumulative_ab_text,c.AB),'N/A');
+  const kWait='pen'+'ding';
+  $('modValidationPending').textContent=safe(first(y[kWait],0),'0');
+
+  $('modBetSvc').textContent='实盘记录服务（8766）';
+  $('modBetAdd').textContent='新增投注记录';
+  $('modBetSettle').textContent='按半场比分结算';
+  $('modBetAudit').textContent='全流程审计留痕';
+
+  $('modReviewLedger').textContent='点击打开AB历史复盘页';
+  $('modReviewLeague').textContent='点击打开联赛诊断页';
+  $('modReviewUnknown').textContent='未知联赛不进主归因';
+  $('modReviewPolicy').textContent='只观察，不自动改策略';
+
+  $('modSystemGreen').textContent='刷新数据 / 本地检查';
+  $('modSystemYellow').textContent='重建摘要 / 守卫检查';
+  $('modSystemRed').textContent='全量扫描 / 上云发布 / 修改定时锁定';
+  if(ss.cron_status_text){ $('systemToolbarStatus').textContent=ss.cron_status_text; }
+}
+
+async function addBet(i){
+  const list=DISPLAY_CANDIDATES.length?DISPLAY_CANDIDATES:getCandidates().filter(x=>['A','B'].includes(String(first(x.rating,x.grade,'')).toUpperCase()));
+  const x=list[i]; if(!x){toast('候选数据缺失');return;}
+  const payload={date:MODEL.today_date||new Date().toISOString().slice(0,10).replace(/-/g,''),league:first(x.league,x.league_cn,''),home_cn:first(x.home_cn,x.home,'主队'),away_cn:first(x.away_cn,x.away,'客队'),fixture_id:first(x.fixture_id,''),grade:first(x.rating,x.grade,'A'),market_line:document.getElementById(`line-${i}`).value,odds_water:parseFloat(document.getElementById(`odds-${i}`).value)||0.86,stake:parseFloat(document.getElementById(`stake-${i}`).value)||null,entry_minute:document.getElementById(`minute-${i}`).value||'',rebate_rate:0.025,notes:document.getElementById(`notes-${i}`).value||'',bet_status:'BET',settlement_result:'PENDING'};
+  try{
+    const r=await fetch('/api/live_bets/add',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
+    const d=await r.json();
+    if(d.ok){toast('已添加记录'); loadModel(true);} else {toast('添加失败: '+(d.error||'未知错误'));}
+  }catch(e){toast('网络错误: '+e.message);}
+}
+
+async function markNoBetEarlyGoal(i){
+  const list=DISPLAY_CANDIDATES.length?DISPLAY_CANDIDATES:getCandidates().filter(x=>['A','B'].includes(String(first(x.rating,x.grade,'')).toUpperCase()));
+  const x=list[i]; if(!x){toast('候选数据缺失');return;}
+  const payload={
+    date:MODEL.today_date||new Date().toISOString().slice(0,10).replace(/-/g,''),
+    fixture_id:first(x.fixture_id,''),
+    league:first(x.league,x.league_cn,''),
+    home:first(x.home_cn,x.home,'主队'),
+    away:first(x.away_cn,x.away,'客队'),
+    grade:first(x.rating,x.grade,'A'),
+    reason_code:'EARLY_GOAL',
+    reason_text:'入场前已进球，未按计划投注',
+    planned_line:document.getElementById(`line-${i}`)?.value||'O1',
+    planned_odds:parseFloat(document.getElementById(`odds-${i}`)?.value||'0.86'),
+    planned_stake:parseFloat(document.getElementById(`stake-${i}`)?.value||'428'),
+    planned_entry_minute:document.getElementById(`minute-${i}`)?.value||'13',
+    note:document.getElementById(`notes-${i}`)?.value||''
   };
-  try {
-    var resp = await fetch('/api/live_bets/add', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(payload) });
-    var data = await resp.json();
-    if (data.ok) { showToast('投注记录成功'); closePanel(); refreshModel(); }
-    else { showToast('投注失败：' + (data.error || '未知错误')); }
-  } catch(err) { showToast('网络错误：' + err.message); }
+  if(!payload.fixture_id){ toast('缺少 fixture_id，无法记录未投注原因'); return; }
+  try{
+    const r=await fetch('/api/v4_live_bet/no_bet',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
+    const d=await r.json();
+    if(d.ok){ toast('已记录：早进球未投'); await loadModel(true); }
+    else { toast('记录失败: '+(d.error||'未知错误')); }
+  }catch(e){ toast('网络错误: '+e.message); }
 }
 
-async function submitSettlePanel(e) {
-  e.preventDefault();
-  var date = document.getElementById('settleDate').value;
-  var betId = document.getElementById('settleBetId').value;
-  var htGoals = parseInt(document.getElementById('settleHtHome').value) + parseInt(document.getElementById('settleHtAway').value);
-  try {
-    var getResp = await fetch('/api/live_bets?date=' + date);
-    var getData = await getResp.json();
-    var records = getData.records || [];
-    var rec = null;
-    for (var i = 0; i < records.length; i++) { if (records[i].bet_id === betId) { rec = records[i]; break; } }
-    if (!rec) { showToast('未找到投注记录：' + betId); return; }
-    var settlePayload = {
-      date: date, bet_id: betId, ht_goal_count: htGoals,
-      stake: parseFloat(rec.stake), odds_water: parseFloat(rec.odds_water),
-      market_line: rec.market_line, rebate_rate: parseFloat(rec.rebate_rate) || 0.025,
-    };
-    var resp = await fetch('/api/live_bets/settle', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(settlePayload) });
-    var data = await resp.json();
-    if (data.ok) { showToast('结算成功'); closePanel(); refreshModel(); }
-    else { showToast('结算失败：' + (data.error || '未知错误')); }
-  } catch(err) { showToast('网络错误：' + err.message); }
+function buildValidationPanel(){
+  const top=MODEL.top_status||{};
+  const y=top.yesterday_validation||{};
+  return `<table>
+    <tr><th>项</th><th>值</th></tr>
+    <tr><td>昨日A</td><td>${safe(first(top.yesterday_a_text,y.A),'N/A')}</td></tr>
+    <tr><td>昨日B</td><td>${safe(first(top.yesterday_b_text,y.B),'N/A')}</td></tr>
+    <tr><td>昨日A+B</td><td>${safe(first(top.yesterday_ab_text,y.AB),'N/A')}</td></tr>
+    <tr><td>累计A+B</td><td>${safe(first(top.cumulative_ab_text,(top.cumulative_validation||{}).AB),'N/A')}</td></tr>
+    <tr><td>来源</td><td>${safe((MODEL.data_sources||{}).yesterday_validation,'official fixture_id summary')}</td></tr>
+  </table>`;
 }
-
-async function refreshModel() {
-  MODEL = null;
-  try {
-    var resp = await fetch('/api/v4_control_center_model');
-    if (resp.ok) {
-      var data = await resp.json();
-      if (data.ok && data.model) { MODEL = data.model; }
-      else if (data.top_status || data.candidates) { MODEL = data; }
-    }
-  } catch(e) {}
-  if (MODEL) { MODEL = normalizeModel(MODEL); renderAll(); }
-  else showToast('刷新失败，请检查服务状态');
+function buildBetApiPanel(){
+  return `<table><tr><th>操作</th><th>说明</th></tr>
+    <tr><td>新增投注</td><td>记录盘口、水位、金额、入场分钟</td></tr>
+    <tr><td>结算投注</td><td>按半场比分结算，自动计算盈亏/流水/返水</td></tr>
+    <tr><td>编辑记录</td><td>修正备注与非关键字段，保留审计</td></tr>
+    <tr><td>作废记录</td><td>标记作废，不删除原始记录</td></tr>
+  </table><div class='note'>仅本地记录，不自动下注，不连接任何账号。</div>`;
 }
-
-function showToast(msg) {
-  var el = document.getElementById('toast');
-  el.textContent = msg; el.classList.add('show');
-  setTimeout(function() { el.classList.remove('show'); }, 2200);
+function buildReviewPanel(){
+  return `<div class='note'>复盘与联赛入口：</div>
+  <div class='actions'>
+    <a class='btn ghost' href='/v4_ab_historical_ledger.html' target='_blank'>打开AB历史复盘</a>
+    <a class='btn ghost' href='/v4_league_hit_rate.html' target='_blank'>打开联赛命中率/ROI</a>
+  </div>`;
 }
-function esc(s) {
-  if (!s) return '';
-  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+function buildSystemPanel(){
+  const ss=MODEL.system_status||{};
+  return `<table><tr><th>项</th><th>状态</th></tr>
+    <tr><td>cron</td><td>${safe(first(ss.cron_status_text,ss.cron_status),'N/A')}</td></tr>
+    <tr><td>QQ notify</td><td>${safe(ss.qq_notify_status,'N/A')}</td></tr>
+    <tr><td>checker</td><td>${safe(ss.checker_status,'N/A')}</td></tr>
+    <tr><td>last_updated_at</td><td>${safe(ss.last_updated_at,'N/A')}</td></tr>
+  </table><div class='lock'>全量扫描 / 策略修改 / 上云发布 / 定时修改均锁定。</div>`;
 }
-
-document.getElementById('drawer').addEventListener('click', function(e){
-  if (e.target === document.getElementById('drawer')) closePanel();
-});
+function buildErrorsPanel(){
+  const se=MODEL.system_errors||{};
+  const activeItems=arr(se.active_items).filter(x=>
+    x?.active===true &&
+    x?.resolved!==true &&
+    x?.process_artifact!==true &&
+    x?.active_eligible===true &&
+    /FAIL|BLOCKER/.test(String(x?.severity||'').toUpperCase())
+  );
+  const recentItems=arr(se.recent_items).concat(arr(se.active_items).filter(x=>
+    x?.resolved===true || x?.process_artifact===true || x?.active_eligible===false
+  ));
+  if(!activeItems.length&&!recentItems.length){
+    return "<div class='note'>当前无异常。</div><div class='note' style='margin-top:6px'>扫描范围：最近"+safe(se.scan_window_hours,48)+"小时内 status json + 日志文件。只读，不执行任何修复操作。</div>";
+  }
+  let html='';
+  html+='<div class="error-section-title" style="color:var(--red)">当前未恢复</div>';
+  if(activeItems.length){
+    html+=activeItems.map(x=>renderErrorItem(x)).join('');
+  }else{
+    html+='<div class="note">当前无 active 异常。</div>';
+  }
+  if(recentItems.length){
+    html+='<div class="error-section-title" style="color:var(--yellow)">最近已恢复 / 观察项</div>';
+    html+=recentItems.map(x=>renderErrorItem(x)).join('');
+  }
+  html+='<div class="lock" style="margin-top:12px">只读摘要。不提供 kill / retry / rerun 按钮。不显示原始日志。不显示完整文件路径。</div>';
+  return html;
+}
+function renderErrorItem(x){
+  const sev=safe(x.severity,'WARN');
+  const cls=sev==='BLOCKER'?'blocker':(sev==='FAIL'?'fail':'warn');
+  const src=safe(x.source_file,'');
+  const comp=safe(x.component,'unknown');
+  const title=safe(x.title,'未知异常');
+  const summary=safe(x.summary,'无摘要');
+  const time=safe(x.detected_at,'').slice(0,19).replace('T',' ');
+  const active=safe(x.active,true);
+  const resolved=safe(x.resolved,false);
+  const statusTag=resolved?'<span class="badge" style="margin-left:6px">已恢复</span>':(active?'<span class="badge warn" style="margin-left:6px">进行中</span>':'');
+  const suggested=safe(x.suggested_action,'');
+  const impact=safe(x.impact,'');
+  return `<div class="error-item ${cls}">
+    <div><span class="error-severity ${sev}">${sev}</span><span style="font-weight:800;font-size:13px">${title}</span>${statusTag}</div>
+    <div class="error-summary">${summary}</div>
+    <div class="error-meta">组件: ${comp} · 来源: ${src} · 检测: ${time}</div>
+    ${impact?'<div class="error-meta">影响: '+impact+'</div>':''}
+    ${suggested?'<div class="error-meta">建议: '+suggested+'</div>':''}
+  </div>`;
+}
+function goNav(tab){
+  if(tab==='overview'){ window.scrollTo({top:0,behavior:'smooth'}); return; }
+  if(tab==='bet'){ document.querySelector('.candidate-list')?.scrollIntoView({behavior:'smooth',block:'start'}); return; }
+  if(tab==='validation'){ openPanel('validation'); return; }
+  if(tab==='review'){ window.open('/v4_ab_historical_ledger.html','_blank'); return; }
+  if(tab==='system'){ openPanel('system'); return; }
+}
+const panels={
+  intel:['情报详情',"<div class='note'>读取 candidate_view / brief_resolution / scout_v4。这里只做详情，不重复显示顶部验证累计。</div>"],
+  match:['比赛情报',"<table><tr><th>字段</th><th>值</th></tr><tr><td>等级</td><td>A/B</td></tr><tr><td>建议</td><td>O0.75/O1观察</td></tr></table>"],
+  rules:['操作规则',"<table><tr><th>级别</th><th>允许内容</th></tr><tr><td>绿色</td><td>刷新model、QQ测试、导出</td></tr><tr><td>黄色</td><td>补验待办、重建摘要、运行守卫检查</td></tr><tr><td>红色</td><td>全量扫描/改策略/改候选/上云/改定时锁定</td></tr></table>"],
+  settle:['结算投注',"<div class='note'>真实版调用 8766 POST /api/live_bets/settle。O1 + HT 1球 = PUSH，投注盈亏0，有效流水0，返水0。</div>"],
+  validation:['验证明细',""],
+  betapi:['投注操作',""],
+  review:['复盘与联赛',""],
+  system:['系统控制',""],
+  errors:['系统异常中心',""],
+  sources:['数据源映射',"<table><tr><th>模块</th><th>唯一来源</th></tr><tr><td>今日候选</td><td>正式候选视图</td></tr><tr><td>昨日验证</td><td>官方赛后验证汇总</td></tr><tr><td>累计验证</td><td>A/B正式可信累计</td></tr></table>"]
+};
+function openPanel(key){
+  let p=panels[key]||['详情','暂无'];
+  if(key==='validation') p=['验证明细',buildValidationPanel()];
+  if(key==='betapi') p=['投注操作',buildBetApiPanel()];
+  if(key==='review') p=['复盘与联赛',buildReviewPanel()];
+  if(key==='system') p=['系统控制',buildSystemPanel()];
+  if(key==='errors') p=['系统异常中心',buildErrorsPanel()];
+  $('panelTitle').textContent=p[0];$('panelBody').innerHTML=p[1];$('drawer').classList.add('open');
+}
+function closePanel(){$('drawer').classList.remove('open');}
+function toast(msg){const t=$('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),1900);}
 
 loadModel();
 </script>
-
 </body>
 </html>

@@ -70,7 +70,7 @@ def main() -> int:
         "/api/v4_control_center_model",
         "function renderTop",
         "function renderCandidates",
-        "function renderTodoAndSnapshot",
+        "function renderSide",
     ]
     for token in required_js:
         if token not in html:
@@ -79,11 +79,11 @@ def main() -> int:
     # 2) required anchors
     required_ids = [
         "kpiCandidates", "kpiCandidatesHint", "kpiYesterday", "kpiYesterdayHint",
-        "kpiCandidates", "kpiCandidatesHint", "kpiYesterday", "kpiYesterdayHint",
-        "kpiCumulative", "kpiCumulativeHint", "kpiPnl", "kpiPnlHint", "kpiTurnover", "kpiTodo", "kpiTodoHint",
-        "candidateList",
-        "todoBetVal", "todoSettleVal", "todoVerifyVal", "todoAlertVal",
-        "snapStake", "snapTurnover", "snapRebate", "snapNetPnl",
+        "kpiCumulative", "kpiCumulativeHint", "kpiPnl", "kpiTurnoverRebate", "kpiTodo", "kpiTodoHint",
+        "candidateList", "skipLine",
+        "todoBet", "todoSettle", "todoRetry", "todoError",
+        "snapBankroll", "snapStake", "snapGross", "snapTurnover", "snapRebate", "snapNet",
+        "sysState", "systemToolbarStatus",
     ]
     miss_ids = [x for x in required_ids if f'id="{x}"' not in html and f"id='{x}'" not in html]
     if miss_ids:
@@ -98,9 +98,9 @@ def main() -> int:
     if isinstance(api_obj, dict) and "undefined" in json.dumps(api_obj, ensure_ascii=False):
         blockers.append("undefined_in_api_json")
 
-    # 4) KPI placeholder guard — "--" is acceptable initial state in gold template
-    if re.search(r'id="kpi[^"]*"[^>]*>[Nn]/[Aa]<', html) and "candidate" in html.lower():
-        blockers.append("kpi_placeholder_na_in_candidate_area")
+    # 4) KPI placeholder guard
+    if re.search(r'id="kpi[^"]*"[^>]*>--<', html):
+        blockers.append("kpi_placeholder_dash_detected")
 
     # 5) candidate field completeness
     cand = model.get("candidates", {})
@@ -110,19 +110,20 @@ def main() -> int:
         items = []
     if items:
         need_fields = ["default_line", "default_odds", "default_stake", "default_entry_minute"]
-        # Fields may be None for unbet candidates (BOSS directive: no hardcoded fallback)
         missing_in_items = [f for f in need_fields if any((f not in it) for it in items if isinstance(it, dict))]
         null_in_items = [f for f in need_fields if any((f in it and it.get(f) is None) for it in items if isinstance(it, dict))]
         if missing_in_items:
             blockers.append(f"candidate_default_fields_missing:{','.join(sorted(set(missing_in_items)))}")
         if null_in_items:
-            warnings.append(f"candidate_default_fields_null_for_unbet_candidates:{','.join(sorted(set(null_in_items)))}")
+            warnings.append(f"candidate_default_fields_null_for_unbet:{','.join(sorted(set(null_in_items)))}")
     else:
         warnings.append("candidate_items_empty")
 
-    # 6) SKIP rendering — gold template renders SKIP inline in renderCandidates
-    if "跳过" not in html and "SKIP" not in html:
-        blockers.append("skip_rendering_missing")
+    # 6) skip must be summary line and not candidate card
+    if "skip-line" not in html:
+        blockers.append("skip_summary_line_missing")
+    if 'id="skipLine"' in html and re.search(r'id="skipLine"[^>]*class="[^"]*candidate-card', html, re.IGNORECASE):
+        blockers.append("skip_rendered_as_candidate_card")
 
     # 7) source guards
     ds = model.get("data_sources", {})
@@ -133,13 +134,13 @@ def main() -> int:
         blockers.append("cumulative_mixed_with_live_bets")
 
     # 8) banned stale indicators / module
-    merged_text = plain_text
+    merged_text = (page_127 or html)
     for tok in ["124/140", "39/46", "85/94", "80/139", "V3世界杯"]:
         if tok in merged_text:
             blockers.append(f"banned_token_visible:{tok}")
 
     # 9) style/layout unchanged lightweight guard: key class and CSS tokens exist
-    for token in [".topbar", ".kpi-grid", ".primary-layout", ".candidate", ".bet-inline", ".nav", ".bi-actions", ".cand-top", ".bi-field"]:
+    for token in [".topbar", ".kpi-grid", ".primary-layout", ".candidate", ".cand-top", ".nav{"]:
         if token not in html:
             blockers.append(f"layout_css_token_missing:{token}")
 
