@@ -285,10 +285,10 @@ th{color:var(--muted);font-weight:650}
       <div class="label">今日候选</div><div class="value blue" id="kpiCandidates">A0 B0</div><div class="hint" id="kpiCandidatesHint"></div>
     </div>
     <div class="card kpi">
-      <div class="label">昨日验证</div><div class="value green" id="kpiYesterday">N/A</div><div class="hint" id="kpiYesterdayHint"></div>
+      <div class="label">昨日验证</div><div class="value green" id="kpiYesterday">暂无</div><div class="hint" id="kpiYesterdayHint"></div>
     </div>
     <div class="card kpi">
-      <div class="label">验证累计</div><div class="value green" id="kpiCumulative">N/A</div><div class="hint" id="kpiCumulativeHint"></div>
+      <div class="label">验证累计</div><div class="value green" id="kpiCumulative">暂无</div><div class="hint" id="kpiCumulativeHint"></div>
     </div>
     <div class="card kpi">
       <div class="label">今日投注盈亏</div><div class="value" id="kpiPnl">0.00</div><div class="hint"></div>
@@ -353,16 +353,16 @@ th{color:var(--muted);font-weight:650}
       <div class="section-head"><h2>验证明细</h2><button class="btn ghost" onclick="openPanel('validation')">打开</button></div>
       <div class="rows">
         <div class="row validation-grid">
-          <div class="pair"><span>昨日A</span><b id="modValidationA">N/A</b></div>
-          <div class="pair"><span>累计A</span><b id="modCumulativeA">N/A</b></div>
+          <div class="pair"><span>昨日A</span><b id="modValidationA">暂无</b></div>
+          <div class="pair"><span>累计A</span><b id="modCumulativeA">暂无</b></div>
         </div>
         <div class="row validation-grid">
-          <div class="pair"><span>昨日B</span><b id="modValidationB">N/A</b></div>
-          <div class="pair"><span>累计B</span><b id="modCumulativeB">N/A</b></div>
+          <div class="pair"><span>昨日B</span><b id="modValidationB">暂无</b></div>
+          <div class="pair"><span>累计B</span><b id="modCumulativeB">暂无</b></div>
         </div>
         <div class="row validation-grid">
-          <div class="pair"><span>昨日AB</span><b id="modValidationAB">N/A</b></div>
-          <div class="pair"><span>累计AB</span><b id="modCumulativeAB">N/A</b></div>
+          <div class="pair"><span>昨日AB</span><b id="modValidationAB">暂无</b></div>
+          <div class="pair"><span>累计AB</span><b id="modCumulativeAB">暂无</b></div>
         </div>
         <div class="row validation-grid">
           <div class="pair"><span>待补验</span><b id="modValidationPending">0</b></div>
@@ -543,15 +543,15 @@ function renderTop(){
   $('kpiCandidatesHint').textContent='';
 
   const yv=top.yesterday_validation||{};
-  const yA=safe(first(top.yesterday_a_text,yv.A),'N/A');
-  const yB=safe(first(top.yesterday_b_text,yv.B),'N/A');
-  const yAB=safe(first(top.yesterday_ab_text,yv.AB,top.yesterday_validation_text,yv.display),'N/A');
+  const yA=safe(first(top.yesterday_a_text,yv.A),'暂无');
+  const yB=safe(first(top.yesterday_b_text,yv.B),'暂无');
+  const yAB=safe(first(top.yesterday_ab_text,yv.AB,top.yesterday_validation_text,yv.display),'暂无');
   $('kpiYesterday').textContent=yAB; $('kpiYesterdayHint').textContent='';
 
   const cv=top.cumulative_validation||{};
-  const cA=safe(first(top.cumulative_a_text,cv.A),'N/A');
-  const cB=safe(first(top.cumulative_b_text,cv.B),'N/A');
-  const cAB=safe(first(top.cumulative_ab_text,cv.AB,top.cumulative_validation_text,cv.display),'N/A');
+  const cA=safe(first(top.cumulative_a_text,cv.A),'暂无');
+  const cB=safe(first(top.cumulative_b_text,cv.B),'暂无');
+  const cAB=safe(first(top.cumulative_ab_text,cv.AB,top.cumulative_validation_text,cv.display),'暂无');
   $('kpiCumulative').textContent=cAB; $('kpiCumulativeHint').textContent='';
 
   const live=MODEL.live_bet_summary||{};
@@ -569,7 +569,14 @@ function renderTop(){
   $('kpiTodo').textContent=`${tb+ts+tr}项`; $('kpiTodoHint').textContent='';
 }
 
-function matchName(x){return `${safe(first(x.home_cn,x.home,'主队'),'主队')} vs ${safe(first(x.away_cn,x.away,'客队'),'客队')}`;}
+const TEAM_ALIAS_ZH={"Rosenborg":"罗森博格","Bodo/Glimt":"博德闪耀","Bodo Glimt":"博德闪耀","TransINVEST Vilnius":"特兰斯因维斯特","TransINVEST":"特兰斯因维斯特","Hegelmann Litauen":"赫格尔曼","Hegelmann":"赫格尔曼"};
+function matchName(x){
+  const rawHome=first(x.home_cn,x.home,x.home_name,'');
+  const rawAway=first(x.away_cn,x.away,x.away_name,'');
+  const zhHome=TEAM_ALIAS_ZH[rawHome]||rawHome||'主队';
+  const zhAway=TEAM_ALIAS_ZH[rawAway]||rawAway||'客队';
+  return `${zhHome} vs ${zhAway}`;
+}
 
 function renderCandidates(){
   const base=getCandidates().filter(x=>['A','B'].includes(String(first(x.rating,x.grade,'')).toUpperCase()));
