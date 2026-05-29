@@ -539,7 +539,7 @@ function renderTop(){
   const a=Number(first(top.today_a_count,(top.today_candidates||{}).A,c.a_count,0));
   const b=Number(first(top.today_b_count,(top.today_candidates||{}).B,c.b_count,0));
   const sk=Number(first(top.today_skip_count,(top.today_candidates||{}).SKIP,c.skip_count,0));
-  $('kpiCandidates').textContent=safe(first(top.today_candidates_text,(top.today_candidates||{}).display,`A${a} B${b}`),`A${a} B${b}`);
+  $('kpiCandidates').textContent=`A${a}/B${b}/SKIP${sk}`;
   $('kpiCandidatesHint').textContent='';
 
   const yv=top.yesterday_validation||{};
@@ -592,28 +592,37 @@ function renderCandidates(){
 function renderCandidate(x,i){
   const r=String(first(x.rating,x.grade,'A')).toUpperCase();
   const league=safe(first(x.league_cn,x.league),'联赛');
-  const time=safe(first(x.kickoff_local,x.kickoff_time,x.kickoff,x.time),'开赛时间待定');
+  const fmtKickoff=v=>{if(!v)return null;const s=String(v);const m=s.match(/(\d{4})-(\d{2})-(\d{2})[T ](\d{2}):(\d{2})/);if(m)return m[2]+'-'+m[3]+' '+m[4]+':'+m[5];const m2=s.match(/(\d{2})-(\d{2})\s+(\d{2}):(\d{2})/);if(m2)return m2[1]+'-'+m2[2]+' '+m2[3]+':'+m2[4];return s.slice(0,16).replace('T',' ');};
+const rawTime=first(x.kickoff_bj,x.kickoff_time_bj,x.kickoff_local,x.kickoff_time,x.kickoff,x.time,null);
+const time=rawTime?fmtKickoff(rawTime):'开赛时间待定';
   const script=safe(first(x.script,x.script_type,x.playbook),'正式候选');
   const dl=safe(first(x.default_line,'O1'),'O1');
   const od=first(x.default_odds,null);
   const st=first(x.default_stake,null);
   const mi=first(x.default_entry_minute,null);
   const fmtPct=v=>{
+    if(v===null||v===undefined) return null;
     const n=Number(v);
     if(!Number.isFinite(n)) return null;
     return n<=1 ? `${(n*100).toFixed(0)}%` : `${n.toFixed(0)}%`;
   };
-  const p0=fmtPct(x.time_bin_0_15), p1=fmtPct(x.time_bin_16_30), p2=fmtPct(x.time_bin_31_45);
+  const hasTB=(x.time_bin_0_15!=null)||(x.time_bin_16_30!=null)||(x.time_bin_31_45!=null);
+  const p0=hasTB?fmtPct(x.time_bin_0_15):null;
+  const p1=hasTB?fmtPct(x.time_bin_16_30):null;
+  const p2=hasTB?fmtPct(x.time_bin_31_45):null;
   const distRaw=safe(first(x.distribution_text,''),'').trim();
+  const scoreSummary = x.ht_score ? `评分 HT${Math.round(x.ht_score)}` : '';
+  const h2hSample = x.h2h_official_count ? ` · H2H样本${x.h2h_official_count}场` : '';
+  const hasScoreData = scoreSummary || (x.factors && Object.keys(x.factors||{}).length>0);
   const binText=distRaw
     ? `进球时间分布 ${distRaw}`
-    : ((p0&&p1&&p2)
-      ? `进球时间分布 0-15 ${p0} · 16-30 ${p1} · 31-45 ${p2}`
-      : '进球时间分布：待补齐');
+    : (hasTB
+      ? `进球时间分布 0-15 ${p0||'—'} · 16-30 ${p1||'—'} · 31-45 ${p2||'—'}`
+      : (hasScoreData ? `评分摘要${scoreSummary}${h2hSample}` : '评分摘要暂缺'));
   const lines=['O0.75','O1','O1.25','O1.5','O2'];
   const lineOpts=lines.map(l=>`<option${l===dl?' selected':''}>${l}</option>`).join('');
   const stateTag=x.no_bet_recorded?(x.no_bet_reason_code==='EARLY_GOAL'?'未投：早进球':'未投：已记录'):(x.settled?'已结算':(x.already_bet?'已投注':'未投注'));
-  return `<article class="candidate"><div class="cand-top"><div><div class="match">${matchName(x)}</div><div class="meta">${league} · ${r} · ${time} · ${script}</div><div class="meta">${binText}</div></div><span class="badge ${r==='A'?'a':'b'}">${r}</span></div><div class="badges"><span class="badge">${stateTag}</span></div><form class="quick-form" onsubmit="event.preventDefault();addBet(${i})"><div class="field"><label>盘口线</label><select id="line-${i}">${lineOpts}</select></div><div class="field"><label>水位</label><input id="odds-${i}" value="${od||''}"/></div><div class="field"><label>金额</label><input id="stake-${i}" value="${st||''}"/></div><div class="field"><label>入场分钟</label><input id="minute-${i}" value="${mi||''}"/></div><button class="btn">保存投注</button><button type="button" class="btn ghost" onclick="markNoBetEarlyGoal(${i})">早进球未投</button><div class="field full"><label>备注</label><textarea id="notes-${i}"></textarea></div></form></article>`;
+  return `<article class="candidate"><div class="cand-top"><div><div class="match">${matchName(x)}</div><div class="meta">${league} · ${r} · ${time} · ${script}</div><div class="meta">${binText}</div><div class="meta source-label">${srcGroupDisplay(x)} · ${uniDisplay(x)}</div></div><span class="badge ${r==='A'?'a':'b'}">${r}</span></div><div class="badges"><span class="badge">${stateTag}</span></div><form class="quick-form" onsubmit="event.preventDefault();addBet(${i})"><div class="field"><label>盘口线</label><select id="line-${i}">${lineOpts}</select></div><div class="field"><label>水位</label><input id="odds-${i}" value="${od||''}"/></div><div class="field"><label>金额</label><input id="stake-${i}" value="${st||''}"/></div><div class="field"><label>入场分钟</label><input id="minute-${i}" value="${mi||''}"/></div><button class="btn">保存投注</button><button type="button" class="btn ghost" onclick="markNoBetEarlyGoal(${i})">早进球未投</button><div class="field full"><label>备注</label><textarea id="notes-${i}"></textarea></div></form></article>`;
 }
 
 function renderSide(){
@@ -625,7 +634,7 @@ function renderSide(){
   $('todoSettle').textContent=ts;
   $('todoRetry').textContent=tr;
   $('todoError').textContent=safe(first(todo.errors,0),'0');
-  if($('todoBetBadge')) $('todoBetBadge').textContent=`A${tb}`;
+  if($('todoBetBadge')) $('todoBetBadge').textContent=`A${a}B${b}`;
 
   const openItems = arr(todo.open_bet_items);
   const listEl = $('openBetList');
