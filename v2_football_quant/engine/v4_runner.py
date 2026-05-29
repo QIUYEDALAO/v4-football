@@ -215,29 +215,33 @@ def fetch_today_fixtures(
     min_hours_to_kickoff: float | None = None,
     api_client=api_get,
     scan_base_date: date | None = None,
+    include_outside_57: bool = False,
 ):
     """拉取白名单联赛 + 今日/明日未开赛比赛。
 
-    lookahead_hours 仅作为可选收窄条件；默认不再硬卡 12h。
-    V4 走地策略需要先建全天观察池，再在 T-30 / 开赛后做二次闸门。
+    北京时间业务日窗口: 当日 12:00 → 次日 12:00。
+    lookahead_hours 仅作为额外收窄条件，不替代业务日窗口。
     """
+    BJ_TZ = timezone(timedelta(hours=8))
     td = scan_base_date or date.today()
     nd = td + timedelta(days=1)
+    td_str = td.strftime("%Y-%m-%d")
+    nd_str = nd.strftime("%Y-%m-%d")
     all_fixtures = []
 
-    for day in [td.strftime("%Y-%m-%d"), nd.strftime("%Y-%m-%d")]:
+    for day in [td_str, nd_str]:
         resp = api_client(f"fixtures?date={day}&timezone=Asia/Shanghai")
         if not resp: continue
         for f in resp.get("response", []):
             lg_id = str(f["league"]["id"])
-            if lg_id not in WL_SET: continue
+            if not include_outside_57 and lg_id not in WL_SET: continue
             status = f["fixture"]["status"]["short"]
             # Backfill mode (historical date) should keep all statuses.
             # Real-time mode:
             # - base day(td): keep not-finished matches so started fixtures stay visible on dashboard.
             # - next day(nd): keep pre-match only.
             if td >= date.today():
-                is_base_day = (day == td.strftime("%Y-%m-%d"))
+                is_base_day = (day == td_str)
                 terminal_status = {"FT", "AET", "PEN", "CANC", "ABD", "AWD", "WO", "PST"}
                 prematch_status = {"NS", "TBD"}
                 if is_base_day:
@@ -246,13 +250,35 @@ def fetch_today_fixtures(
                 else:
                     if status not in prematch_status:
                         continue
+
             kickoff = f["fixture"]["date"]
             try:
                 ko_dt = datetime.fromisoformat(kickoff.replace("Z", "+00:00"))
             except:
                 ko_dt = datetime.fromisoformat(kickoff.split("+")[0] + "+00:00")
 
+            # Convert to Beijing time for business window check
+            bj_dt = ko_dt.astimezone(BJ_TZ)
+            bj_date_str = bj_dt.strftime("%Y-%m-%d")
+            bj_hour = bj_dt.hour
+
+            # Business window: today 12:00 BJ <= kickoff < next-day 12:00 BJ
+            business_window_start_bj = f"{td_str} 12:00"
+            business_window_end_bj = f"{nd_str} 12:00"
+            kickoff_bj = bj_dt.strftime("%Y-%m-%d %H:%M")
+            filtered_by_business_window = False
+
             if td >= date.today():
+                in_window = False
+                if bj_date_str == td_str and bj_hour >= 12:
+                    in_window = True
+                elif bj_date_str == nd_str and bj_hour < 12:
+                    in_window = True
+
+                if not in_window:
+                    filtered_by_business_window = True
+                    continue
+
                 hours_to_kickoff = (ko_dt - datetime.now(ko_dt.tzinfo)).total_seconds() / 3600
                 if min_hours_to_kickoff is not None and hours_to_kickoff < min_hours_to_kickoff:
                     continue
@@ -270,6 +296,11 @@ def fetch_today_fixtures(
                 "country": f.get("league", {}).get("country"),
                 "fixture_timezone": f.get("fixture", {}).get("timezone"),
                 "kickoff": kickoff,
+                # Business window trace fields
+                "business_window_start_bj": business_window_start_bj,
+                "business_window_end_bj": business_window_end_bj,
+                "kickoff_bj": kickoff_bj,
+                "filtered_by_business_window": filtered_by_business_window,
             })
         time.sleep(0.1)
 
