@@ -575,8 +575,27 @@ def _process_one_fixture(
             "h2h_sample_category": h2h_result.get("metrics", {}).get("h2h_sample_category", ""),
             "recent_form_low_sample": h2h_result.get("metrics", {}).get("recent_form_low_sample", False),
             "recommendation_summary": recommendation.get("summary", ""),
+            "market_scores": h2h_result.get("market_scores") if isinstance(h2h_result.get("market_scores"), dict) else {},
+            "factors": h2h_result.get("factors") if isinstance(h2h_result.get("factors"), dict) else {},
+            "score_pack": h2h_result.get("score_pack") if isinstance(h2h_result.get("score_pack"), dict) else {},
+            "h2h_score": h2h_result.get("metrics", {}).get("h2h_score"),
+            "recent_form_summary": h2h_result.get("factors", {}).get("recent_form_avg"),
+            "time_bins": h2h_result.get("factors", {}).get("time_bins", {}),
+            "late_fh_pressure": h2h_result.get("factors", {}).get("late_fh_pressure"),
+            "h2h_policy": h2h_result.get("factors", {}).get("h2h_policy", ""),
+            "h2h_low_sample": h2h_result.get("factors", {}).get("h2h_low_sample", False),
+            "recent_form_sample_size": h2h_result.get("factors", {}).get("recent_form_valid_count"),
+            "events_complete": bool(h2h_result.get("factors", {}).get("time_bins")),
             "fetch_errors": fetch_errors if fetch_errors else None,
         })
+
+        # BOSS guard: flag truly missing scoring fields
+        if not result_base.get("market_scores"):
+            result_base["market_scores_missing"] = True
+        if not result_base.get("factors"):
+            result_base["factors_missing"] = True
+        if not result_base.get("score_pack"):
+            result_base["score_pack_missing"] = True
     except Exception as e:
         scoring_error = f"score_error:{type(e).__name__}:{e}"
         result_base.update({

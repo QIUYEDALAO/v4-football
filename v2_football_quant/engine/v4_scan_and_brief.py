@@ -208,6 +208,16 @@ def _run_parallel_scan(args, scan_date: str, today_key: str, wd, log_path: Path)
             "recent_form_summary": r.get("recent_form_summary"),
             "source_trace": r.get("source_trace", "parallel_adapter"),
             "scoring_complete": r.get("status") == "DONE",
+            "time_bins": r.get("time_bins", {}),
+            "late_fh_pressure": r.get("late_fh_pressure"),
+            "h2h_policy": r.get("h2h_policy", ""),
+            "h2h_official_count": r.get("h2h_official_count"),
+            "h2h_low_sample": r.get("h2h_low_sample", False),
+            "recent_form_sample_size": r.get("recent_form_sample_size"),
+            "events_complete": r.get("events_complete"),
+            "market_scores_missing": r.get("market_scores_missing", False),
+            "factors_missing": r.get("factors_missing", False),
+            "score_pack_missing": r.get("score_pack_missing", False),
             "ht_ou_lines": [],
         }
         if not scout_entry["market_scores"] or not scout_entry["factors"]:

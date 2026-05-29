@@ -800,6 +800,8 @@ def evaluate_h2h_edge(home_id: int, away_id: int, api_client, mode: str = "full"
                 f"HT分={score_pack['scores'].get('HT_LIVE_OVER', 0):.1f}, 最强方向={score_pack['best_focus_by_score']}, "
                 f"SH={sh_rate:.0%}/近期{recent_sh_avg:.0%}, FT2+={ft_over_1_5_rate:.0%})"
             ),
+            "market_scores": score_pack["scores"],
+            "score_pack": score_pack,
             "factors": {
                 "h2h_policy": H2H_POLICY_VERSION,
                 "h2h_filter_version": H2H_FILTER_VERSION,
@@ -833,6 +835,7 @@ def evaluate_h2h_edge(home_id: int, away_id: int, api_client, mode: str = "full"
         "market_scores": score_pack["scores"],
         "best_focus_by_score": score_pack["best_focus_by_score"],
         "best_score": score_pack["best_score"],
+        "score_pack": score_pack,
         "factors": {
             # ── 联赛金字塔政策字段 (new) ──
             "h2h_policy": H2H_POLICY_VERSION,
