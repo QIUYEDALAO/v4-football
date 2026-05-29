@@ -168,6 +168,7 @@ def parse_ab_block(block: str, grade: str, idx: int, scout_by_fixture: dict[int,
         "recommendation_status": "brief_formal_display_only",
         "source": str(brief_path.relative_to(ROOT)),
         "scout_fixture_found": bool(source),
+        "grade_source": "brief_parsed",
     }
 
 
@@ -242,14 +243,113 @@ def parse_c_items(text: str, scout_by_fixture: dict[int, dict[str, Any]], brief_
 
 
 def build_candidate_view(date: str, text: str, brief_path: Path, scout_path: Path | None) -> dict[str, Any]:
-    scout = load_json(scout_path) if scout_path else []
-    scout_by_fixture = {int(item.get("fixture_id")): item for item in scout if isinstance(item, dict) and item.get("fixture_id")} if isinstance(scout, list) else {}
+    scout_obj = load_json(scout_path) if scout_path else []
+    if isinstance(scout_obj, list):
+        scout = scout_obj
+    elif isinstance(scout_obj, dict):
+        scout = scout_obj.get("rows") if isinstance(scout_obj.get("rows"), list) else []
+    else:
+        scout = []
+    scout_by_fixture = {int(item.get("fixture_id")): item for item in scout if isinstance(item, dict) and item.get("fixture_id")}
     overview = parse_overview(text)
     a_items_raw = [parse_ab_block(block, "A", i, scout_by_fixture, brief_path) for i, block in enumerate(split_blocks(text, GRADE_HEADERS["A"]), 1)]
     b_items_raw = [parse_ab_block(block, "B", i, scout_by_fixture, brief_path) for i, block in enumerate(split_blocks(text, GRADE_HEADERS["B"]), 1)]
     a_items = [x for x in a_items_raw if not _is_placeholder_candidate(x)]
     b_items = [x for x in b_items_raw if not _is_placeholder_candidate(x)]
+    parsed_by_fixture = {}
+    for x in a_items + b_items:
+        fid = x.get("fixture_id")
+        if fid:
+            parsed_by_fixture[int(fid)] = x
+
+    # Official-grade-first merge:
+    # 1) preserve scan official grade from scout;
+    # 2) brief/explain only enrich display text; never overwrite A/B/SKIP.
+    merged_a: list[dict[str, Any]] = []
+    merged_b: list[dict[str, Any]] = []
+    for row in scout:
+        if not isinstance(row, dict):
+            continue
+        fid = row.get("fixture_id")
+        if not fid:
+            continue
+        grade = str((row.get("official_grade") or row.get("grade") or "")).upper().strip()
+        if grade not in {"A", "B"}:
+            continue
+        p = parsed_by_fixture.get(int(fid), {})
+        home = str(row.get("home") or row.get("home_team") or p.get("home") or "UNKNOWN")
+        away = str(row.get("away") or row.get("away_team") or p.get("away") or "UNKNOWN")
+        resolved = CN_RESOLVER.resolve_match(home, away, source=str(brief_path.relative_to(ROOT)))
+        market_scores = row.get("market_scores") if isinstance(row.get("market_scores"), dict) else {}
+        factors = row.get("factors") if isinstance(row.get("factors"), dict) else {}
+        explain_missing = not market_scores or not factors
+        base = {
+            "index": len(merged_a) + 1 if grade == "A" else len(merged_b) + 1,
+            "fixture_id": fid,
+            "home": home,
+            "away": away,
+            "home_cn": resolved["home_team_cn"],
+            "away_cn": resolved["away_team_cn"],
+            "home_team_cn": resolved["home_team_cn"],
+            "away_team_cn": resolved["away_team_cn"],
+            "home_en": resolved["home_team_en"],
+            "away_en": resolved["away_team_en"],
+            "home_team_en": resolved["home_team_en"],
+            "away_team_en": resolved["away_team_en"],
+            "team_cn_source": resolved.get("team_cn_source"),
+            "team_cn_missing": resolved.get("team_cn_missing"),
+            "league": str(row.get("league") or row.get("league_name") or p.get("league") or "UNKNOWN"),
+            "kickoff_display": str(row.get("kickoff") or row.get("kickoff_time") or p.get("kickoff_display") or "TBD"),
+            "ht_score": p.get("ht_score"),
+            "ht_rate": p.get("ht_rate"),
+            "expected_goals": p.get("expected_goals") or "-",
+            "sample_size": p.get("sample_size"),
+            "script_type": p.get("script_type") or "待识别",
+            "distribution_text": p.get("distribution_text") or "time_bins 待补齐",
+            "risk": p.get("risk") or "-",
+            "grade": grade,
+            "official_grade": grade,
+            "grade_source": "scout_official",
+            "recommendation_status": "scan_official_display",
+            "source": str(brief_path.relative_to(ROOT)),
+            "scout_fixture_found": True,
+            "fallback_recompute": False,
+            "market_scores_empty": not market_scores,
+            "factors_empty": not factors,
+            "explain_factors_missing": explain_missing,
+            "official_grade_preserved": True,
+        }
+        if grade == "A":
+            merged_a.append(base)
+        else:
+            merged_b.append(base)
+
+    # Legacy fallback only when scout has no A/B grade at all.
+    scout_has_official_ab = len(merged_a) + len(merged_b) > 0
+    if not scout_has_official_ab:
+        for x in a_items:
+            x["fallback_recompute"] = True
+            x["official_grade_preserved"] = False
+            x["grade_source"] = "legacy_brief_fallback"
+        for x in b_items:
+            x["fallback_recompute"] = True
+            x["official_grade_preserved"] = False
+            x["grade_source"] = "legacy_brief_fallback"
+        merged_a = a_items
+        merged_b = b_items
+
     c_items = parse_c_items(text, scout_by_fixture, brief_path)
+    scout_grade_counts = {"A": 0, "B": 0, "C": 0, "SKIP": 0}
+    for row in scout:
+        if isinstance(row, dict):
+            g = str((row.get("official_grade") or row.get("grade") or "")).upper().strip()
+            if g in scout_grade_counts:
+                scout_grade_counts[g] += 1
+    final_a = scout_grade_counts["A"] if scout_has_official_ab else len(merged_a)
+    final_b = scout_grade_counts["B"] if scout_has_official_ab else len(merged_b)
+    final_c = scout_grade_counts["C"] if scout else overview.get("C", len(c_items))
+    final_skip = scout_grade_counts["SKIP"] if scout else overview.get("SKIP", 0)
+    final_total = len(scout) if scout else overview.get("scan_total", final_a + final_b + final_c + final_skip)
     return {
         "schema_version": "v3v4_dashboard_brief_candidate_view.v1",
         "generated_at": datetime.now(TZ).isoformat(),
@@ -261,24 +361,25 @@ def build_candidate_view(date: str, text: str, brief_path: Path, scout_path: Pat
         "brief_sha256": sha(brief_path),
         "scout_path": str(scout_path.relative_to(ROOT)) if scout_path else None,
         "scout_sha256": sha(scout_path),
-        "A_count": overview.get("A", len(a_items)),
-        "B_count": overview.get("B", len(b_items)),
-        "C_count": overview.get("C", len(c_items)),
-        "SKIP_count": overview.get("SKIP", 0),
-        "scan_total": overview.get("scan_total", overview.get("A", len(a_items)) + overview.get("B", len(b_items)) + overview.get("C", len(c_items)) + overview.get("SKIP", 0)),
-        "formal_recommendation_count": overview.get("A", len(a_items)) + overview.get("B", len(b_items)),
-        "A_candidates": a_items,
-        "A_candidate": a_items[0] if a_items else None,
-        "B_candidates": b_items,
+        "A_count": final_a,
+        "B_count": final_b,
+        "C_count": final_c,
+        "SKIP_count": final_skip,
+        "scan_total": final_total,
+        "formal_recommendation_count": final_a + final_b,
+        "A_candidates": merged_a,
+        "A_candidate": merged_a[0] if merged_a else None,
+        "B_candidates": merged_b,
         "C_candidates": c_items,
         "C_observation_only": True,
         "actual_send": False,
         "qq_sent": False,
         "V4_QQ_ENABLED": False,
         "parsed_from_brief": True,
-        "fallback_used": False,
-        "fallback_reason": None,
+        "fallback_used": not scout_has_official_ab,
+        "fallback_reason": None if scout_has_official_ab else "legacy_missing_official_grade",
         "builder_script": "tools/v3v4_dashboard_brief_resolver.py",
+        "official_grade_source": "scout_official" if scout_has_official_ab else "brief_fallback",
     }
 
 
