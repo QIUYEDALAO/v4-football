@@ -103,7 +103,7 @@ button{cursor:pointer}
 .candidate-row .league-col{color:var(--muted);font-size:11px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .candidate-row .teams-col{font-weight:700;font-size:13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .candidate-row .playbook-col{color:var(--amber);font-weight:600;font-size:11px;white-space:nowrap}
-.candidate-row .dist-col{color:var(--muted);font-size:10.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.candidate-row .dist-col{color:var(--muted);font-size:10.5px;white-space:normal;word-break:keep-all}
 .candidate-row .status-col{white-space:nowrap;font-size:11px}
 .candidate-row .action-col{text-align:right;white-space:nowrap}
 .expand-btn{background:rgba(255,255,255,.06);border:1px solid var(--line);color:var(--ink);padding:2px 9px;border-radius:5px;cursor:pointer;font-size:11px}
@@ -120,7 +120,8 @@ button{cursor:pointer}
 .bet-form-inline textarea{flex:1;min-width:120px;height:28px;resize:none}
 .bet-form-inline .btn-save{background:var(--green);color:#08111f;border:none;padding:4px 12px;border-radius:5px;cursor:pointer;font-weight:700;font-size:12px}
 .bet-form-inline .btn-no-market{background:rgba(255,180,70,.16);color:#ffb446;border:1px solid rgba(255,180,70,.24)}.btn-skip{background:rgba(255,107,114,.14);color:var(--red);border:1px solid rgba(255,107,114,.25);padding:4px 12px;border-radius:5px;cursor:pointer;font-size:12px}
-@media(max-width:760px){.candidate-row .playbook-col,.candidate-row .dist-col{display:none}.candidate-row .league-col{font-size:10px;max-width:60px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.candidate-row .teams-col{font-size:12px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.candidate-table th:nth-child(3),.candidate-table th:nth-child(5),.candidate-table th:nth-child(6){display:none}}
+@media(max-width:760px){.candidate-row .playbook-col{display:none}
+.candidate-row .dist-col{white-space:normal;word-break:keep-all}.candidate-row .league-col{font-size:10px;max-width:60px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.candidate-row .teams-col{font-size:12px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.candidate-table th:nth-child(3),.candidate-table th:nth-child(5),.candidate-table th:nth-child(6){display:none}}
 .section-head{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:9px}
 h2{font-size:15px;margin:0}
 .btn{

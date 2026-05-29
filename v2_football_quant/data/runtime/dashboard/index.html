@@ -20,7 +20,7 @@ header{padding:10px 2px 16px}h1{margin:0;font-size:26px;letter-spacing:.02em}.su
 .candidate-row .league-col{color:var(--muted);max-width:100px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .candidate-row .teams-col{font-weight:700;font-size:14px;max-width:220px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .candidate-row .playbook-col{color:var(--amber);font-weight:600;white-space:nowrap}
-.candidate-row .dist-col{color:var(--muted);font-size:12px;white-space:nowrap}
+.candidate-row .dist-col{color:var(--muted);font-size:12px;white-space:normal;word-break:keep-all}
 .candidate-row .status-col{white-space:nowrap;font-size:12px}
 .candidate-row .action-col{text-align:right;white-space:nowrap}
 .grade-dot{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:2px;vertical-align:middle}
@@ -47,7 +47,8 @@ header{padding:10px 2px 16px}h1{margin:0;font-size:26px;letter-spacing:.02em}.su
 .candidate-table{font-size:12px}
 .candidate-table th{font-size:10px}
 .candidate-row .teams-col{font-size:13px;max-width:140px}
-.candidate-row .playbook-col,.candidate-row .dist-col{display:none}
+.candidate-row .playbook-col{display:none}
+.candidate-row .dist-col{white-space:normal;word-break:keep-all}
 /* 移动端关键字段始终可见：时间、等级、队名、操作 */
 .candidate-row .league-col{max-width:70px}
 }
