@@ -62,7 +62,7 @@ def main():
             warnings.append("h2h_sample_in_html_not_on_cards")
     
     # 8-10: Time bin display
-    if '进球时间分布 0-15' in html:
+    if '进球分布 0-15' in html:
         warnings.append("time_bin_display_0_15")
     else:
         blockers.append("time_bin_0_15_missing")

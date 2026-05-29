@@ -614,17 +614,26 @@ const time=rawTime?fmtKickoff(rawTime):'开赛时间待定';
     if(!Number.isFinite(n)) return null;
     return n<=1 ? `${(n*100).toFixed(0)}%` : `${n.toFixed(0)}%`;
   };
-  const hasTB=(x.time_bin_0_15!=null)||(x.time_bin_16_30!=null)||(x.time_bin_31_45!=null);
-  const p0=hasTB?fmtPct(x.time_bin_0_15):null;
-  const p1=hasTB?fmtPct(x.time_bin_16_30):null;
-  const p2=hasTB?fmtPct(x.time_bin_31_45):null;
-  const binText=hasTB
-    ? ('进球时间分布 0-15 '+(p0||'—')+' · 16-30 '+(p1||'—')+' · 31-45 '+(p2||'—'))
-    : '进球时间分布暂缺';
+  // Normalize time_bin hit rates to goal distribution (sum ~100%) and derive playbook
+  const tb=x.time_bins||{};
+  const r015=Number(tb['0_15']||0);const r1630=Number(tb['16_30']||0);const r3145=Number(tb['31_45']||0);
+  const tbSum=r015+r1630+r3145;
+  let d015=null,d1630=null,d3145=null,playbook='数据暂缺';
+  if(tbSum>0){
+    d015=Math.round(r015/tbSum*100);d1630=Math.round(r1630/tbSum*100);d3145=Math.round(r3145/tbSum*100);
+    const adj=d015+d1630+d3145;if(adj!==100){const diff=100-adj;const bins=[[0,d015],[1,d1630],[2,d3145]];bins.sort((a,b)=>Math.abs(b[1])-Math.abs(a[1]));if(bins[0][0]===0)d015+=diff;else if(bins[0][0]===1)d1630+=diff;else d3145+=diff;}
+    const mx=Math.max(d015,d1630,d3145);
+    if(d015===mx&&d015>=40)playbook='开局冲击';
+    else if(d1630===mx&&d1630>=40)playbook='中段发力';
+    else if(d3145===mx&&d3145>=40)playbook='尾段压迫';
+    else{const hi=[d015,d1630,d3145].filter(v=>v>=35);if(hi.length>=2&&mx-Math.min(...hi)<=15)playbook='双段压迫';else if(d015>=25&&d015<=40&&d1630>=25&&d1630<=40&&d3145>=25&&d3145<=40)playbook='均衡压迫';else playbook=d015===mx?'开局冲击':d1630===mx?'中段发力':'尾段压迫';}
+  }
+  const playbookText='剧本：'+playbook;
+  const distText=(tbSum>0)?('进球分布 0-15 '+d015+'% · 16-30 '+d1630+'% · 31-45 '+d3145+'%'):'进球分布暂缺';
   const lines=['O0.75','O1','O1.25','O1.5','O2'];
   const lineOpts=lines.map(l=>`<option${l===dl?' selected':''}>${l}</option>`).join('');
   const stateTag=x.no_bet_recorded?(x.no_bet_reason_code==='EARLY_GOAL'?'未投：早进球':'未投：已记录'):(x.settled?'已结算':(x.already_bet?'已投注':'未投注'));
-  return `<article class="candidate"><div class="cand-top"><div><div class="match">${matchName(x)}</div><div class="meta">${league} · ${r} · ${time}</div><div class="meta">${binText}</div></div><span class="badge ${r==='A'?'a':'b'}">${r}</span></div><div class="badges"><span class="badge">${stateTag}</span></div><form class="quick-form" onsubmit="event.preventDefault();addBet(${i})"><div class="field"><label>盘口线</label><select id="line-${i}">${lineOpts}</select></div><div class="field"><label>水位</label><input id="odds-${i}" value="${od||''}"/></div><div class="field"><label>金额</label><input id="stake-${i}" value="${st||''}"/></div><div class="field"><label>入场分钟</label><input id="minute-${i}" value="${mi||''}"/></div><button class="btn">保存投注</button><button type="button" class="btn ghost" onclick="markNoBetEarlyGoal(${i})">早进球未投</button><div class="field full"><label>备注</label><textarea id="notes-${i}"></textarea></div></form></article>`;
+  return `<article class="candidate"><div class="cand-top"><div><div class="match">${matchName(x)}</div><div class="meta">${league} · ${r} · ${time}</div><div class="meta">${playbookText}</div><div class="meta">${distText}</div></div><span class="badge ${r==='A'?'a':'b'}">${r}</span></div><div class="badges"><span class="badge">${stateTag}</span></div><form class="quick-form" onsubmit="event.preventDefault();addBet(${i})"><div class="field"><label>盘口线</label><select id="line-${i}">${lineOpts}</select></div><div class="field"><label>水位</label><input id="odds-${i}" value="${od||''}"/></div><div class="field"><label>金额</label><input id="stake-${i}" value="${st||''}"/></div><div class="field"><label>入场分钟</label><input id="minute-${i}" value="${mi||''}"/></div><button class="btn">保存投注</button><button type="button" class="btn ghost" onclick="markNoBetEarlyGoal(${i})">早进球未投</button><div class="field full"><label>备注</label><textarea id="notes-${i}"></textarea></div></form></article>`;
 }
 
 function renderSide(){
