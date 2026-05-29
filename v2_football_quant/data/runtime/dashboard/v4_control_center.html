@@ -684,7 +684,7 @@ function renderSide(){
   $('todoSettle').textContent=ts;
   $('todoRetry').textContent=tr;
   $('todoError').textContent=safe(first(todo.errors,0),'0');
-  if($('todoBetBadge')) $('todoBetBadge').textContent=`A${a}B${b}`;
+  const c2=getCandidatesNode();const abA=Number(first(c2.a_count,0));const abB=Number(first(c2.b_count,0));if($('todoBetBadge')) $('todoBetBadge').textContent='A'+abA+'B'+abB;
 
   const openItems = arr(todo.open_bet_items);
   const listEl = $('openBetList');
@@ -869,29 +869,23 @@ async function markNoMarket(i){
 }
 
 function buildValidationPanel(){
-  const top=MODEL.top_status||{};
-  const y=top.yesterday_validation||{};
-  const cv=top.cumulative_validation||{};
-  const cvd=MODEL.cumulative_validation_detail||{};
-  const yvd=MODEL.yesterday_validation_detail||{};
-  // Defensive access: avoid optional chaining that may be unsupported
-  const _a=cvd.A||{}; const _b=cvd.B||{}; const _ab=cvd.AB||{};
-  const _hr=yvd.hit_rates||{};
-  const cumA=safe(first(top.cumulative_a_text,cv.A,_a.display),'暂无');
-  const cumB=safe(first(top.cumulative_b_text,cv.B,_b.display),'暂无');
-  const cumAB=safe(first(top.cumulative_ab_text,cv.AB,top.cumulative_validation_text,_ab.display),'暂无');
-  const yestA=safe(first(top.yesterday_a_text,y.A,_hr.A),'暂无');
-  const yestB=safe(first(top.yesterday_b_text,y.B,_hr.B),'暂无');
-  const yestAB=safe(first(top.yesterday_ab_text,y.AB,top.yesterday_validation_text,y.display),'暂无');
-  return '<table>'+
-    '<tr><th>项</th><th>值</th></tr>'+
+  var top=MODEL.top_status||{};
+  var y=top.yesterday_validation||{};
+  var cv=top.cumulative_validation||{};
+  var cumA=safe(first(top.cumulative_a_text,cv.A),'N/A');
+  var cumB=safe(first(top.cumulative_b_text,cv.B),'N/A');
+  var cumAB=safe(first(top.cumulative_ab_text,cv.AB,top.cumulative_validation_text,cv.display),'N/A');
+  var yestA=safe(first(top.yesterday_a_text,y.A),'N/A');
+  var yestB=safe(first(top.yesterday_b_text,y.B),'N/A');
+  var yestAB=safe(first(top.yesterday_ab_text,y.AB,top.yesterday_validation_text,y.display),'N/A');
+  return '<table><tr><th>项</th><th>值</th></tr>'+
     '<tr><td>累计A</td><td>'+cumA+'</td></tr>'+
     '<tr><td>累计B</td><td>'+cumB+'</td></tr>'+
     '<tr><td>累计AB</td><td>'+cumAB+'</td></tr>'+
     '<tr><td>昨日A</td><td>'+yestA+'</td></tr>'+
     '<tr><td>昨日B</td><td>'+yestB+'</td></tr>'+
     '<tr><td>昨日AB</td><td>'+yestAB+'</td></tr>'+
-    '<tr><td>来源</td><td>'+safe((MODEL.data_sources||{}).yesterday_validation,'official fixture_id summary')+'</td></tr>'+
+    '<tr><td>来源</td><td>'+safe((MODEL.data_sources||{}).yesterday_validation,'validation file')+'</td></tr>'+
   '</table>';
 }
 function buildBetApiPanel(){
