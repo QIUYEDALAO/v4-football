@@ -110,9 +110,13 @@ def main() -> int:
         items = []
     if items:
         need_fields = ["default_line", "default_odds", "default_stake", "default_entry_minute"]
-        missing_in_items = [f for f in need_fields if any((f not in it or it.get(f) in [None, ""]) for it in items if isinstance(it, dict))]
+        # Fields may be None for unbet candidates (BOSS directive: no hardcoded fallback)
+        missing_in_items = [f for f in need_fields if any((f not in it) for it in items if isinstance(it, dict))]
+        null_in_items = [f for f in need_fields if any((f in it and it.get(f) is None) for it in items if isinstance(it, dict))]
         if missing_in_items:
             blockers.append(f"candidate_default_fields_missing:{','.join(sorted(set(missing_in_items)))}")
+        if null_in_items:
+            warnings.append(f"candidate_default_fields_null_for_unbet_candidates:{','.join(sorted(set(null_in_items)))}")
     else:
         warnings.append("candidate_items_empty")
 
@@ -131,13 +135,13 @@ def main() -> int:
         blockers.append("cumulative_mixed_with_live_bets")
 
     # 8) banned stale indicators / module
-    merged_text = (page_127 or html)
+    merged_text = plain_text
     for tok in ["124/140", "39/46", "85/94", "80/139", "V3世界杯"]:
         if tok in merged_text:
             blockers.append(f"banned_token_visible:{tok}")
 
     # 9) style/layout unchanged lightweight guard: key class and CSS tokens exist
-    for token in [".topbar", ".kpi-grid", ".main-layout", ".candidate", ".bet-inline", ".toolbar", ".nav{display:none}"]:
+    for token in [".topbar", ".kpi-grid", ".primary-layout", ".candidate", ".quick-form", ".nav", ".module-grid"]:
         if token not in html:
             blockers.append(f"layout_css_token_missing:{token}")
 

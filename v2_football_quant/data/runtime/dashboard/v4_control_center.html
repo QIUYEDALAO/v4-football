@@ -325,12 +325,20 @@ th{color:var(--muted);font-weight:650}
           <button class="btn warn" onclick="toggleOpenBetList()">查看</button>
         </div>
         <div class="todo">
+          <div><div class="todo-title">今日投注记录：<span id="todoBetRecords">0</span>条</div><div class="meta">含已投注/已结算（仅今日）</div></div>
+          <button class="btn ghost" onclick="openPanel('bet_records')">查看</button>
+        </div>
+        <div class="todo">
           <div><div class="todo-title">待投注候选：<span id="todoBet">0</span>场</div><div class="meta"></div></div>
           <span class="badge a" id="todoBetBadge">A0</span>
         </div>
         <div class="todo">
           <div><div class="todo-title">待补验：<span id="todoRetry">0</span>场</div><div class="meta"></div></div>
           <span class="badge" id="todoError">0</span>
+        </div>
+        <div class="todo">
+          <div><div class="todo-title">未投注记录：<span id="todoNoBet">0</span>条</div><div class="meta">早进球/盘口变化等主动放弃记录</div></div>
+          <button class="btn ghost" onclick="openPanel('no_bet')">查看</button>
         </div>
       </div>
       <div id="openBetWrap" style="display:none;margin-top:8px">
@@ -458,6 +466,7 @@ let MODEL={};
 let DISPLAY_CANDIDATES=[];
 const $=id=>document.getElementById(id);
 const safe=(v,f="N/A")=>v===void 0||v===null||v===""?f:String(v).replace(new RegExp("undef"+"ined","gi"),f);
+const srcGroupDisplay=x=>{const sg=first(x.source_group,'');if(sg==='WHITELIST_57')return 'WHITELIST_57';if(sg==='OUTSIDE_57')return 'OUTSIDE_57';return '来源未标记';};
 const num=(v,d=2)=>{const n=Number(v);return Number.isFinite(n)?n.toFixed(d):(0).toFixed(d)};
 const first=(...v)=>v.find(x=>x!==void 0&&x!==null&&x!=="");
 const arr=v=>Array.isArray(v)?v:[];
@@ -590,28 +599,30 @@ function renderCandidates(){
 function renderCandidate(x,i){
   const r=String(first(x.rating,x.grade,'A')).toUpperCase();
   const league=safe(first(x.league_cn,x.league),'联赛');
-  const time=safe(first(x.kickoff_local,x.kickoff_time,x.kickoff,x.time),'N/A');
-  const script=safe(first(x.script,x.script_type,x.playbook),'候选剧本');
+  const time=safe(first(x.kickoff_local,x.kickoff_time,x.kickoff,x.time),'开赛时间待定');
+  const script=safe(first(x.script,x.script_type,x.playbook),'正式候选');
   const dl=safe(first(x.default_line,'O1'),'O1');
-  const od=safe(first(x.default_odds,0.86),'0.86');
-  const st=safe(first(x.default_stake,428),'428');
-  const mi=safe(first(x.default_entry_minute,13),'13');
+  const od=first(x.default_odds,null);
+  const st=first(x.default_stake,null);
+  const mi=first(x.default_entry_minute,null);
   const fmtPct=v=>{
     const n=Number(v);
     if(!Number.isFinite(n)) return null;
     return n<=1 ? `${(n*100).toFixed(0)}%` : `${n.toFixed(0)}%`;
   };
-  const p0=fmtPct(x.time_bin_0_15), p1=fmtPct(x.time_bin_16_30), p2=fmtPct(x.time_bin_31_45);
+  const p0=x.time_bin_0_15!=null?fmtPct(x.time_bin_0_15):null;
+  const p1=x.time_bin_16_30!=null?fmtPct(x.time_bin_16_30):null;
+  const p2=x.time_bin_31_45!=null?fmtPct(x.time_bin_31_45):null;
   const distRaw=safe(first(x.distribution_text,''),'').trim();
   const binText=distRaw
     ? `进球时间分布 ${distRaw}`
-    : ((p0&&p1&&p2)
-      ? `进球时间分布 0-15 ${p0} · 16-30 ${p1} · 31-45 ${p2}`
-      : '进球时间分布：待补齐');
+    : ((p0!==null||p1!==null||p2!==null)
+      ? `进球时间分布 0-15 ${p0||'—'} · 16-30 ${p1||'—'} · 31-45 ${p2||'—'}`
+      : '进球时间分布：暂无解释数据');
   const lines=['O0.75','O1','O1.25','O1.5','O2'];
   const lineOpts=lines.map(l=>`<option${l===dl?' selected':''}>${l}</option>`).join('');
   const stateTag=x.no_bet_recorded?(x.no_bet_reason_code==='EARLY_GOAL'?'未投：早进球':'未投：已记录'):(x.settled?'已结算':(x.already_bet?'已投注':'未投注'));
-  return `<article class="candidate"><div class="cand-top"><div><div class="match">${matchName(x)}</div><div class="meta">${league} · ${r} · ${time} · ${script}</div><div class="meta">${binText}</div></div><span class="badge ${r==='A'?'a':'b'}">${r}</span></div><div class="badges"><span class="badge">${stateTag}</span></div><form class="quick-form" onsubmit="event.preventDefault();addBet(${i})"><div class="field"><label>盘口线</label><select id="line-${i}">${lineOpts}</select></div><div class="field"><label>水位</label><input id="odds-${i}" value="${od}"/></div><div class="field"><label>金额</label><input id="stake-${i}" value="${st}"/></div><div class="field"><label>入场分钟</label><input id="minute-${i}" value="${mi}"/></div><button class="btn">保存投注</button><button type="button" class="btn ghost" onclick="markNoBetEarlyGoal(${i})">早进球未投</button><div class="field full"><label>备注</label><textarea id="notes-${i}"></textarea></div></form></article>`;
+  return `<article class="candidate"><div class="cand-top"><div><div class="match">${matchName(x)}</div><div class="meta">${league} · ${r} · ${time} · ${script}</div><div class="meta source-meta">${srcGroupDisplay(x)} · ${safe(first(x.fixture_universe),'—')}</div><div class="meta">${binText}</div></div><span class="badge ${r==='A'?'a':'b'}">${r}</span></div><div class="badges"><span class="badge">${stateTag}</span></div><form class="quick-form" onsubmit="event.preventDefault();addBet(${i})"><div class="field"><label>盘口线</label><select id="line-${i}">${lineOpts}</select></div><div class="field"><label>水位</label><input id="odds-${i}" value="${od||''}"/></div><div class="field"><label>金额</label><input id="stake-${i}" value="${st||''}"/></div><div class="field"><label>入场分钟</label><input id="minute-${i}" value="${mi||''}"/></div><button class="btn">保存投注</button><button type="button" class="btn ghost" onclick="markNoBetEarlyGoal(${i})">早进球未投</button><div class="field full"><label>备注</label><textarea id="notes-${i}"></textarea></div></form></article>`;
 }
 
 function renderSide(){
@@ -619,9 +630,13 @@ function renderSide(){
   const tb=safe(first(todo.to_bet,0),'0');
   const ts=safe(first(todo.to_settle,0),'0');
   const tr=safe(first(todo.to_retry,0),'0');
+  const tnb=safe(first(todo.no_bet_count,0),'0');
+  const tbr=safe(first(live.today_record_count,0),'0');
   $('todoBet').textContent=tb;
   $('todoSettle').textContent=ts;
   $('todoRetry').textContent=tr;
+  $('todoNoBet').textContent=tnb;
+  $('todoBetRecords').textContent=tbr;
   $('todoError').textContent=safe(first(todo.errors,0),'0');
   if($('todoBetBadge')) $('todoBetBadge').textContent=`A${tb}`;
 
@@ -748,7 +763,7 @@ function renderModules(){
 async function addBet(i){
   const list=DISPLAY_CANDIDATES.length?DISPLAY_CANDIDATES:getCandidates().filter(x=>['A','B'].includes(String(first(x.rating,x.grade,'')).toUpperCase()));
   const x=list[i]; if(!x){toast('候选数据缺失');return;}
-  const payload={date:MODEL.today_date||new Date().toISOString().slice(0,10).replace(/-/g,''),league:first(x.league,x.league_cn,''),home_cn:first(x.home_cn,x.home,'主队'),away_cn:first(x.away_cn,x.away,'客队'),fixture_id:first(x.fixture_id,''),grade:first(x.rating,x.grade,'A'),market_line:document.getElementById(`line-${i}`).value,odds_water:parseFloat(document.getElementById(`odds-${i}`).value)||0.86,stake:parseFloat(document.getElementById(`stake-${i}`).value)||428,entry_minute:document.getElementById(`minute-${i}`).value||'',rebate_rate:0.025,notes:document.getElementById(`notes-${i}`).value||'',bet_status:'BET',settlement_result:'PENDING'};
+  const payload={date:MODEL.today_date||new Date().toISOString().slice(0,10).replace(/-/g,''),league:first(x.league,x.league_cn,''),home_cn:first(x.home_cn,x.home,'主队'),away_cn:first(x.away_cn,x.away,'客队'),fixture_id:first(x.fixture_id,''),grade:first(x.rating,x.grade,'A'),market_line:document.getElementById(`line-${i}`).value,odds_water:parseFloat(document.getElementById(`odds-${i}`).value)||0.86,stake:parseFloat(document.getElementById(`stake-${i}`).value)||null,entry_minute:document.getElementById(`minute-${i}`).value||'',rebate_rate:0.025,notes:document.getElementById(`notes-${i}`).value||'',bet_status:'BET',settlement_result:'PENDING'};
   try{
     const r=await fetch('/api/live_bets/add',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
     const d=await r.json();
@@ -778,7 +793,7 @@ async function markNoBetEarlyGoal(i){
   try{
     const r=await fetch('/api/v4_live_bet/no_bet',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
     const d=await r.json();
-    if(d.ok){ toast('已记录：早进球未投'); await loadModel(true); }
+    if(d.ok){ toast('已记录：早进球未投'); await loadModel(false); }
     else { toast('记录失败: '+(d.error||'未知错误')); }
   }catch(e){ toast('网络错误: '+e.message); }
 }
@@ -818,6 +833,56 @@ function buildSystemPanel(){
     <tr><td>checker</td><td>${safe(ss.checker_status,'N/A')}</td></tr>
     <tr><td>last_updated_at</td><td>${safe(ss.last_updated_at,'N/A')}</td></tr>
   </table><div class='lock'>全量扫描 / 策略修改 / 上云发布 / 定时修改均锁定。</div>`;
+}
+function buildNoBetPanel(){
+  const todo=MODEL.todo_summary||{};
+  const items=arr(todo.no_bet_items);
+  if(!items.length){
+    return "<div class='note'>当前无未投注原因记录。</div>";
+  }
+  const rows=items.map(x=>{
+    const home=safe(first(x.home_cn,x.home,'主队'),'主队');
+    const away=safe(first(x.away_cn,x.away,'客队'),'客队');
+    const grade=safe(first(x.grade,'A'),'A');
+    const code=safe(first(x.reason_code,''),'');
+    const reason=safe(first(x.reason_text,x.reason_code,'未填写原因'),'未填写原因');
+    return `<tr><td>${home} vs ${away}</td><td>${grade}</td><td>${code}</td><td>${reason}</td></tr>`;
+  }).join('');
+  return `<table><tr><th>对阵</th><th>级别</th><th>代码</th><th>说明</th></tr>${rows}</table>`;
+}
+function buildBetRecordsPanel(){
+  return "<div class='note'>正在读取历史记录…</div>";
+}
+function renderBetHistoryPanel(rows){
+  const list=arr(rows);
+  if(!list.length){
+    return "<div class='note'>近30天暂无投注/未投注记录。</div>";
+  }
+  const tr=list.map(x=>{
+    const typ=safe(first(x.record_type,'BET'),'BET');
+    const d=safe(first(x.record_date,x.date,x.bet_date,''),'');
+    const home=safe(first(x.home_cn,x.home,'主队'),'主队');
+    const away=safe(first(x.away_cn,x.away,'客队'),'客队');
+    const line=safe(first(x.market_line,x.planned_line,'-'),'-');
+    const odds=Number(first(x.odds_water,x.planned_odds,0.86));
+    const stake=Number(first(x.stake,x.planned_stake,0));
+    const result=typ==='NO_BET'
+      ? (`未投注(${safe(first(x.reason_code,x.reason_text,'-'),'-')})`)
+      : safe(first(x.settlement_result,x.bet_status,'PENDING'),'PENDING');
+    const bid=safe(first(x.bet_id,''),'');
+    return `<tr><td>${d}</td><td>${typ}</td><td>${home} vs ${away}</td><td>${line}</td><td>@${Number.isFinite(odds)?odds.toFixed(2):'0.86'}</td><td>${Number.isFinite(stake)?stake.toFixed(0):'0'}</td><td>${result}</td><td>${bid}</td></tr>`;
+  }).join('');
+  return `<div class='note' style='margin-bottom:8px'>近30天历史记录 ${list.length} 条（投注 + 未投注原因）。</div><table><tr><th>日期</th><th>类型</th><th>对阵</th><th>盘口</th><th>水位</th><th>金额</th><th>状态/原因</th><th>bet_id</th></tr>${tr}</table>`;
+}
+async function loadBetHistoryPanel(days=30){
+  try{
+    const r=await fetch(`/api/live_bets/history?days=${encodeURIComponent(days)}`,{cache:'no-store'});
+    if(!r.ok){ throw new Error(`HTTP_${r.status}`); }
+    const j=await r.json();
+    $('panelBody').innerHTML=renderBetHistoryPanel(j.rows||[]);
+  }catch(e){
+    $('panelBody').innerHTML=`<div class='note'>读取历史记录失败：${safe(String(e.message||e),'未知错误')}</div>`;
+  }
 }
 function buildErrorsPanel(){
   const se=MODEL.system_errors||{};
@@ -885,6 +950,8 @@ const panels={
   betapi:['投注操作',""],
   review:['复盘与联赛',""],
   system:['系统控制',""],
+  no_bet:['未投注记录',""],
+  bet_records:['今日投注记录',""],
   errors:['系统异常中心',""],
   sources:['数据源映射',"<table><tr><th>模块</th><th>唯一来源</th></tr><tr><td>今日候选</td><td>正式候选视图</td></tr><tr><td>昨日验证</td><td>官方赛后验证汇总</td></tr><tr><td>累计验证</td><td>A/B正式可信累计</td></tr></table>"]
 };
@@ -894,8 +961,11 @@ function openPanel(key){
   if(key==='betapi') p=['投注操作',buildBetApiPanel()];
   if(key==='review') p=['复盘与联赛',buildReviewPanel()];
   if(key==='system') p=['系统控制',buildSystemPanel()];
+  if(key==='no_bet') p=['未投注记录',buildNoBetPanel()];
+  if(key==='bet_records') p=['今日投注记录',buildBetRecordsPanel()];
   if(key==='errors') p=['系统异常中心',buildErrorsPanel()];
   $('panelTitle').textContent=p[0];$('panelBody').innerHTML=p[1];$('drawer').classList.add('open');
+  if(key==='bet_records'){ loadBetHistoryPanel(30); }
 }
 function closePanel(){$('drawer').classList.remove('open');}
 function toast(msg){const t=$('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),1900);}

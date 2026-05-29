@@ -135,28 +135,21 @@ def _load_no_bet_decisions_for_date(date_str: str) -> list[dict]:
     return out
 
 
-def _get_default_bet_params(candidates_list: list, live_daily: dict) -> dict:
-    """从实盘记录提取默认盘口/水位/金额/分钟，否则使用硬编码 fallback 并写 reason"""
+def _get_default_bet_params(candidates_list: list, live_daily: dict) -> dict | None:
+    """从实盘记录提取默认盘口/水位/金额/分钟，无实盘记录时返回 None"""
     by_grade = live_daily.get("by_grade") or {}
-    # 尝试从当日实盘记录按等级取最新值
     for grade_key in ("A", "B"):
         gd = by_grade.get(grade_key) or {}
         if gd.get("count", 0) > 0:
             return {
                 "default_line": gd.get("last_line") or gd.get("common_line") or "O1",
-                "default_odds": gd.get("last_odds") or gd.get("avg_odds") or 0.86,
-                "default_stake": gd.get("last_stake") or gd.get("avg_stake") or 428,
-                "default_entry_minute": gd.get("last_minute") or "13",
+                "default_odds": gd.get("last_odds") or gd.get("avg_odds"),
+                "default_stake": gd.get("last_stake") or gd.get("avg_stake"),
+                "default_entry_minute": gd.get("last_minute"),
                 "source": f"live_bet daily_summary by_grade.{grade_key}",
             }
-    # Fallback: 默认金额只用于输入建议，不等于今日真实投注
-    return {
-        "default_line": "O1",
-        "default_odds": live_daily.get("last_odds") or 0.86,
-        "default_stake": live_daily.get("last_stake") or 428,
-        "default_entry_minute": "13",
-        "source": "live_bet daily_summary fallback (no by_grade detail)",
-    }
+    # BOSS directive: no hardcoded fallback for unbet candidates
+    return None
 
 
 def _extract_candidates(view: dict, live_daily: dict) -> dict:
@@ -181,17 +174,17 @@ def _extract_candidates(view: dict, live_daily: dict) -> dict:
             "away_en": r.get("away_en") or r.get("away") or "",
             "kickoff_time": r.get("kickoff_display") or "",
             "grade": r.get("grade") or "A",
-            "script_type": r.get("script_type") or "",
+            "script_type": r.get("script_type") or None,
             "ht_score": r.get("ht_score"),
             "source_hash": view.get("source_hash") or view.get("brief_sha256") or "",
-            "default_line": defaults["default_line"],
-            "default_odds": defaults["default_odds"],
-            "default_stake": defaults["default_stake"],
-            "default_entry_minute": defaults["default_entry_minute"],
-            "default_source": defaults["source"],
-            "default_reason": f"default from {defaults['source']}",
+            "default_line": defaults.get("default_line") if defaults else None,
+            "default_odds": defaults.get("default_odds") if defaults else None,
+            "default_stake": defaults.get("default_stake") if defaults else None,
+            "default_entry_minute": defaults.get("default_entry_minute") if defaults else None,
+            "default_source": defaults.get("source") if defaults else None,
+            "default_reason": f"default from {defaults['source']}" if defaults else None,
             "rating": r.get("grade") or "A",
-            "script": r.get("script_type") or "",
+            "script": r.get("script_type") or None,
             "ht_index": r.get("ht_score"),
             "distribution_text": r.get("distribution_text") or "",
             "time_bin_0_15": r.get("time_bin_0_15") if r.get("time_bin_0_15") is not None else (r.get("time_bins") or {}).get("0_15"),
@@ -218,17 +211,17 @@ def _extract_candidates(view: dict, live_daily: dict) -> dict:
             "away_en": r.get("away_en") or r.get("away") or "",
             "kickoff_time": r.get("kickoff_display") or "",
             "grade": r.get("grade") or "B",
-            "script_type": r.get("script_type") or "",
+            "script_type": r.get("script_type") or None,
             "ht_score": r.get("ht_score"),
             "source_hash": view.get("source_hash") or view.get("brief_sha256") or "",
-            "default_line": defaults["default_line"],
-            "default_odds": defaults["default_odds"],
-            "default_stake": defaults["default_stake"],
-            "default_entry_minute": defaults["default_entry_minute"],
-            "default_source": defaults["source"],
-            "default_reason": f"default from {defaults['source']}",
+            "default_line": defaults.get("default_line") if defaults else None,
+            "default_odds": defaults.get("default_odds") if defaults else None,
+            "default_stake": defaults.get("default_stake") if defaults else None,
+            "default_entry_minute": defaults.get("default_entry_minute") if defaults else None,
+            "default_source": defaults.get("source") if defaults else None,
+            "default_reason": f"default from {defaults['source']}" if defaults else None,
             "rating": r.get("grade") or "B",
-            "script": r.get("script_type") or "",
+            "script": r.get("script_type") or None,
             "ht_index": r.get("ht_score"),
             "distribution_text": r.get("distribution_text") or "",
             "time_bin_0_15": r.get("time_bin_0_15") if r.get("time_bin_0_15") is not None else (r.get("time_bins") or {}).get("0_15"),
