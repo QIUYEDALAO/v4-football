@@ -25,6 +25,67 @@ def _load_json(path: Path) -> dict:
         return {}
 
 
+# —— playbook script & time distribution helpers ——
+
+VALID_PLAYBOOK_SCRIPTS = frozenset({
+    "开局冲击", "中段发力", "尾段压迫", "双段压迫", "均衡压迫", "弱剧本", "数据暂缺"
+})
+
+def _derive_playbook_script(pct_0_15, pct_16_30, pct_31_45, total_goals=None):
+    if pct_0_15 is None or pct_16_30 is None or pct_31_45 is None:
+        return "数据暂缺"
+    if total_goals is not None and total_goals <= 0:
+        return "数据暂缺"
+    segments = [("0_15", pct_0_15), ("16_30", pct_16_30), ("31_45", pct_31_45)]
+    segments.sort(key=lambda x: x[1], reverse=True)
+    top_label, top_val = segments[0]
+    if top_label == "0_15" and top_val >= 40:
+        return "开局冲击"
+    if top_label == "16_30" and top_val >= 40:
+        return "中段发力"
+    if top_label == "31_45" and top_val >= 40:
+        return "尾段压迫"
+    above_35 = [s for _, s in segments if s >= 35]
+    if len(above_35) >= 2:
+        vals_above = sorted(above_35, reverse=True)
+        if vals_above[0] - vals_above[-1] <= 15:
+            return "双段压迫"
+    if all(25 <= s[1] <= 40 for s in segments):
+        return "均衡压迫"
+    return "弱剧本"
+
+
+def _normalize_goal_distribution(time_bins):
+    result = {"fh_goal_dist_0_15_pct": None, "fh_goal_dist_16_30_pct": None, "fh_goal_dist_31_45_pct": None, "fh_goal_dist_total_pct": None, "fh_goal_dist_total_goals": None, "fh_goal_dist_source": None}
+    if not time_bins:
+        return result
+    v015 = time_bins.get("0_15")
+    v1630 = time_bins.get("16_30")
+    v3145 = time_bins.get("31_45")
+    if v015 is None or v1630 is None or v3145 is None:
+        return result
+    total = v015 + v1630 + v3145
+    if total <= 0:
+        return result
+    pct_015 = round(v015 / total * 100, 1)
+    pct_1630 = round(v1630 / total * 100, 1)
+    pct_3145 = round(v3145 / total * 100, 1)
+    s = pct_015 + pct_1630 + pct_3145
+    if abs(s - 100.0) > 0.01:
+        vals = [(pct_015, "0_15"), (pct_1630, "16_30"), (pct_3145, "31_45")]
+        vals.sort(key=lambda x: x[0], reverse=True)
+        diff = 100.0 - s
+        if vals[0][1] == "0_15": pct_015 = round(pct_015 + diff, 1)
+        elif vals[0][1] == "16_30": pct_1630 = round(pct_1630 + diff, 1)
+        else: pct_3145 = round(pct_3145 + diff, 1)
+    result["fh_goal_dist_0_15_pct"] = pct_015
+    result["fh_goal_dist_16_30_pct"] = pct_1630
+    result["fh_goal_dist_31_45_pct"] = pct_3145
+    result["fh_goal_dist_total_pct"] = round(pct_015 + pct_1630 + pct_3145, 1)
+    result["fh_goal_dist_source"] = "normalized_from_per_bin_hit_rates"
+    return result
+
+
 def _find_latest_candidate_view() -> tuple[Optional[Path], dict]:
     candidates = sorted(STATUS.glob("v3v4_dashboard_candidate_view_*.json"))
     if not candidates:
@@ -224,6 +285,20 @@ def _extract_candidates(view: dict, live_daily: dict, scout_data: list | None = 
             "h2h_valid_count": (s.get("factors") or {}).get("h2h_official_sample_size"),
             "h2h_used_count": (s.get("factors") or {}).get("h2h_sample_size"),
             "h2h_used_limit": 10,
+            "playbook_script": "数据暂缺",
+            "fh_goal_dist_0_15_pct": None,
+            "fh_goal_dist_16_30_pct": None,
+            "fh_goal_dist_31_45_pct": None,
+            "fh_goal_dist_total_pct": None,
+            "fh_goal_dist_total_goals": None,
+            "fh_goal_dist_source": None,
+            "playbook_script": "数据暂缺",
+            "fh_goal_dist_0_15_pct": None,
+            "fh_goal_dist_16_30_pct": None,
+            "fh_goal_dist_31_45_pct": None,
+            "fh_goal_dist_total_pct": None,
+            "fh_goal_dist_total_goals": None,
+            "fh_goal_dist_source": None,
             "h2h_low_sample": s.get("h2h_low_sample", False),
             "late_fh_pressure": s.get("late_fh_pressure"),
             "recent_form_sample_size": r.get("recent_form_sample_size") or s.get("recent_form_sample_size"),
@@ -313,6 +388,19 @@ def _extract_candidates(view: dict, live_daily: dict, scout_data: list | None = 
     a_out57 = sum(1 for r in a_candidates if r.get("source_group") == "OUTSIDE_57")
     b_wl57 = sum(1 for r in b_candidates if r.get("source_group") == "WHITELIST_57")
     b_out57 = sum(1 for r in b_candidates if r.get("source_group") == "OUTSIDE_57")
+
+
+    # —— Post-process: derive playbook_script and normalize goal distribution ——
+    for item in (a_candidates + b_candidates):
+        time_bins = item.get("time_bins") or {}
+        dist = _normalize_goal_distribution(time_bins)
+        for k, v in dist.items():
+            if v is not None:
+                item[k] = v
+        pct_015 = item.get("fh_goal_dist_0_15_pct")
+        pct_1630 = item.get("fh_goal_dist_16_30_pct")
+        pct_3145 = item.get("fh_goal_dist_31_45_pct")
+        item["playbook_script"] = _derive_playbook_script(pct_015, pct_1630, pct_3145)
 
     return {
         "scan_date": view.get("scan_date") or "",

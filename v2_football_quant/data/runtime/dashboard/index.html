@@ -1,31 +1,123 @@
 <!doctype html>
 <html lang="zh-CN">
 <head>
-<meta charset="utf-8"/>
-<meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>已退役 — V4 Dashboard</title>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>情报决策总台 — V3/V4</title>
 <style>
-  * { margin:0; padding:0; box-sizing:border-box; }
-  body { font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "PingFang SC", sans-serif; background:#0a0e14; color:#c8ccd4; display:flex; align-items:center; justify-content:center; min-height:100vh; }
-  .card { background:#141b22; border:1px solid #2a3340; border-radius:12px; padding:48px 40px; max-width:520px; text-align:center; }
-  .card h1 { font-size:20px; color:#e6e8ec; margin-bottom:12px; }
-  .card p { font-size:14px; color:#8b929a; margin-bottom:8px; line-height:1.6; }
-  .card .btn { display:inline-block; margin-top:24px; padding:10px 28px; background:#1e6f5c; color:#fff; border:none; border-radius:8px; font-size:14px; cursor:pointer; text-decoration:none; }
-  .card .btn:hover { background:#267a65; }
-  .card .status { font-size:12px; color:#5a6370; margin-top:20px; }
-  .card .status span { color:#e6b422; }
+:root{--bg:#07101d;--panel:#101b2c;--panel2:#15243a;--ink:#eef5ff;--muted:#91a2b8;--line:#26384f;--blue:#58b7ff;--green:#47d18c;--amber:#e7b84e;--red:#ff6b72;--violet:#a9a1ff}
+*{box-sizing:border-box}body{margin:0;background:radial-gradient(circle at 15% 0%,#173558 0,#07101d 34%,#050912 100%);color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;padding:16px;max-width:1060px;margin-inline:auto;line-height:1.42}
+header{padding:10px 2px 16px}h1{margin:0;font-size:26px;letter-spacing:.02em}.sub{color:var(--muted);font-size:13px;margin-top:5px}.notice{background:rgba(231,184,78,.13);border:1px solid rgba(231,184,78,.42);border-radius:14px;padding:10px 12px;margin:4px 0 14px;color:#ffe3a2;font-weight:700}.kpi-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin:8px 0 14px}.kpi{background:linear-gradient(155deg,var(--panel),#0c1727);border:1px solid var(--line);border-radius:16px;padding:12px;min-height:94px;box-shadow:0 12px 30px rgba(0,0,0,.22)}.kpi .label{color:var(--muted);font-size:12px}.kpi .value{font-size:22px;font-weight:800;margin-top:8px}.kpi .foot{font-size:12px;color:var(--muted);margin-top:4px}.layout{display:grid;grid-template-columns:1.25fr .75fr;gap:12px}.panel,.candidate-group{background:rgba(16,27,44,.92);border:1px solid var(--line);border-radius:16px;padding:14px;margin-bottom:12px;box-shadow:0 10px 28px rgba(0,0,0,.18)}h2{font-size:16px;margin:0 0 10px;color:var(--blue)}h3{font-size:14px;margin:10px 0 8px;color:#cfe8ff}.row{display:flex;justify-content:space-between;gap:16px;border-top:1px solid rgba(255,255,255,.07);padding:8px 0}.row:first-of-type{border-top:0}.row span{color:var(--muted)}.ok{color:var(--green)}.warn{color:var(--amber)}.danger{color:var(--red)}summary{cursor:pointer;display:flex;justify-content:space-between;align-items:center;gap:12px;font-weight:800}details>summary::-webkit-details-marker{display:none}.group-note,.hint{color:var(--muted);font-size:13px;margin:8px 0}.candidate-list{display:grid;gap:9px;margin-top:10px}.candidate-card{background:linear-gradient(155deg,var(--panel2),#0b1422);border:1px solid rgba(255,255,255,.08);border-left:4px solid var(--line);border-radius:14px;padding:12px}.candidate-card.grade-A{border-left-color:var(--green)}.candidate-card.grade-B{border-left-color:var(--blue)}.candidate-card.grade-C{border-left-color:var(--amber)}.card-r1{display:flex;align-items:center;gap:8px;color:var(--muted);font-size:12px}.card-r1 span:nth-child(2){flex:1}.grade-badge{border-radius:999px;padding:3px 9px;font-size:12px;color:#08111f}.grade-badge-A{background:var(--green)}.grade-badge-B{background:var(--blue)}.grade-badge-C{background:var(--amber)}.match-line{font-size:17px;font-weight:800;margin-top:7px}.match-line span{font-weight:500;color:var(--muted);font-size:13px}.card-r3,.time-bins,.english-line,.missing-fields{font-size:13px;color:var(--muted);margin-top:6px}
+.playbook-line{font-size:13px;margin-top:5px;display:flex;align-items:center;gap:5px}
+.playbook-label{color:var(--muted)}
+.playbook-value{color:var(--amber);font-weight:800}
+.goal-dist-line{font-size:13px;color:var(--muted);margin-top:3px}
+.goal-dist-line b{color:var(--ink);font-weight:700}
+.forbidden-label{display:none!important}.script-label{color:var(--muted)}.script-value{color:var(--amber);font-weight:800}.missing-fields{display:none}.english-line{display:none}.lineage{margin-top:10px;border-top:1px dashed rgba(255,255,255,.12);padding-top:8px;color:var(--muted);font-size:12px}.validation-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}.validation-col{border-top:1px solid rgba(255,255,255,.08);padding-top:6px}.validation-metric{display:grid;grid-template-columns:38px 1fr;gap:5px;padding:4px 0;font-size:13px;align-items:center}.validation-metric span{color:var(--muted);font-style:normal}.validation-metric b{font-size:13px;white-space:nowrap}.script-validation-lite{margin-top:10px;padding:8px 10px;border:1px solid rgba(255,255,255,.10);border-radius:12px;background:rgba(255,255,255,.035);display:grid;grid-template-columns:auto 1fr;gap:4px 8px;align-items:center;font-size:12px}.script-validation-lite .script-lite-title{color:var(--muted);font-weight:800}.script-validation-lite>b{color:#f2d27a;font-weight:800}.script-validation-lite>em{grid-column:1/-1;color:var(--muted);font-style:normal}.script-validation-chip{display:inline-flex;gap:4px;align-items:center;border:1px solid rgba(255,255,255,.09);border-radius:999px;padding:3px 7px;background:rgba(255,255,255,.04)}.script-validation-chip i{font-style:normal;color:var(--muted)}.script-validation-chip b{color:var(--amber);font-weight:800}.compact-validation{padding-bottom:10px}.validation-audit{margin-top:8px;border-top:1px dashed rgba(255,255,255,.12);padding-top:8px}.next-list{margin:0;padding-left:18px;color:var(--muted)}.audit-code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12px;color:var(--muted);word-break:break-all}@media(max-width:760px){body{padding:12px}.kpi-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.layout{grid-template-columns:1fr}h1{font-size:23px}.kpi .value{font-size:20px}.validation-metric{grid-template-columns:38px 1fr}}
 </style>
 </head>
 <body>
-<div class="card">
-  <h1>该页面已退役</h1>
-  <p>当前唯一主入口为 <strong>V4统一作战台</strong>。</p>
-  <p>请点击下方按钮进入新作战台。</p>
-  <a class="btn" href="http://127.0.0.1:8766/v4_control_center.html">打开 V4统一作战台</a>
-  <div class="status">V4_DASHBOARD_LEGACY_ENTRY_CLEANUP_20260526 <span>● RETIRED</span></div>
+<header>
+  <h1>情报决策总台 — V3/V4</h1>
+  <div class="sub">generated=2026-05-29T13:30:02+08:00 · source_window=unknown · no capture · no push · no cloud publish</div>
+</header>
+<div class='notice'>今日数据未就绪，当前展示最近采集日：unknown</div>
+<section class="kpi-grid" aria-label="top status cards">
+  <div class="kpi"><div class="label">数据状态</div><div class="value warn">最近数据</div><div class="foot">最近候选 / 数据日期 unknown · last_good preserved</div></div>
+  <div class="kpi"><div class="label">候选结构</div><div class="value">A0 / B0</div><div class="foot">SKIP 0</div></div>
+  <div class="kpi"><div class="label">复盘状态</div><div class="value warn">REPORT_ONLY</div><div class="foot">等待赛果 / 可复盘</div></div>
+  <div class="kpi"><div class="label">阻断</div><div class="value ok">0</div><div class="foot">active blocker count</div></div>
+</section>
+<div class="layout">
+<main>
+
+<section class="panel validation-panel compact-validation two-column-validation-card">
+  <h2>V3/V4 比赛验证</h2>
+  <p class="hint">只展示昨日验证与累计验证；数据来自正式 V4 attribution / validation / review，不从 brief 反推命中率。</p>
+  <div class="validation-grid">
+    <div class="validation-col validation-yesterday"><h3>昨日验证</h3><div class='validation-metric validation-row-A'><span>A</span><b>N/A</b></div><div class='validation-metric validation-row-B'><span>B</span><b>N/A</b></div><div class='validation-metric validation-row-AplusB'><span>A+B</span><b>N/A</b></div></div>
+    <div class="validation-col validation-cumulative"><h3>累计验证</h3><div class='validation-metric validation-row-A'><span>A</span><b>39/46 · 84.8%</b></div><div class='validation-metric validation-row-B'><span>B</span><b>85/94 · 90.4%</b></div><div class='validation-metric validation-row-AplusB'><span>A+B</span><b>124/140 · 88.6%</b></div></div>
+  </div>
+  <div class="script-validation-lite">
+    <span class="script-lite-title">剧本验证（辅助）</span>
+    <b>累计 A+B：N/A</b>
+    <em>走势吻合率，不影响 A/B 结果命中率</em>
+  </div>
+  <p class="hint script-validation-reason">赛后事件数据未就绪 / API disabled / 无可信事件时间</p>
+  <p class="hint validation-empty-reason">昨日 official A/B 验证与累计均来自同一 source-of-truth；累计主口径：A/B-only · 不含C · official settled only。</p>
+  <p class="hint v3-validation-row">V3：战备预留 / N/A</p>
+  <details class="validation-audit"><summary><span>展开：验证审计</span><b>audit</b></summary><p class="audit-code">source_files=<br>data/v4_archive/v4_result_attribution_20260513.jsonl<br>data/v4_archive/v4_result_attribution_20260514.jsonl<br>data/v4_archive/v4_result_attribution_20260515.jsonl<br>data/v4_archive/v4_result_attribution_20260516.jsonl<br>data/v4_archive/v4_result_attribution_20260517.jsonl<br>data/v4_archive/v4_result_attribution_20260518.jsonl<br>data/v4_archive/v4_result_attribution_20260520.jsonl<br>unknown_count_yesterday=0<br>unknown_count_cumulative=0<br>latest_validation_date=2026-05-21<br>api_enabled=false<br>brief_used_for_hit_rate=false<br>C_observation_deprecated=true<br>last_7d_removed=true</p></details>
+  <details class="validation-audit script-validation-audit"><summary><span>展开：剧本验证明细</span><b>script</b></summary><p class="audit-code">昨日：N/A（暂无可信已结算样本）<br>A：N/A · SCRIPT_UNKNOWN=0<br>B：N/A · SCRIPT_UNKNOWN=0<br>A+B：N/A · SCRIPT_UNKNOWN=0<br>SCRIPT_UNKNOWN：0，不进分母<br>数据源：正式 attribution 事件时间<br>script_source_files=<br>N/A<br>brief_used_for_script_validation=false<br>match_date_used=true<br>scan_date_used=false<br>C_excluded=true<br>SKIP_excluded=true</p></details>
+</section>
+<section class="panel">
+  <h2>V4 情报状态</h2>
+  <div class="row"><span>今日候选</span><b>0 场</b></div>
+  <div class="row"><span>A/B/SKIP</span><b>A0 / B0 / SKIP0</b></div>
+  <div class="row"><span>review_mode</span><b>REPORT_ONLY</b></div>
+  <div class="row"><span>扫描场次</span><b>0</b></div>
+  <div class="row"><span>采集日期 / 窗口</span><b>unknown / unknown</b></div>
+</section>
+<section class="panel candidate-panel">
+  <h2>候选列表</h2>
+  <p class="hint">最近候选 / 数据日期 unknown。候选列表只展示 A/B 候选；SKIP 仅作为系统状态。</p>
+  
+<details class="candidate-group group-A" open>
+  <summary><span>A级候选</span><b>0 场</b></summary>
+  
+  <div class="candidate-list"><article class='candidate-card' data-grade='A'>
+  <div class='match-line'><!-- dynamically populated: 中文球队名 --></div>
+  <div class='card-r1'><!-- 联赛 · 评级 · 开赛时间 --></div>
+  <div class='playbook-line'><span class='playbook-label'>剧本：</span><span class='playbook-value'><!-- playbook_script --></span></div>
+  <div class='goal-dist-line'>进球分布 <b>0-15</b> <span class='dist-val-015'><!-- fh_goal_dist_0_15_pct --></span>% · <b>16-30</b> <span class='dist-val-1630'><!-- --></span>% · <b>31-45</b> <span class='dist-val-3145'><!-- --></span>%</div>
+  <div class='card-r3'>未投注</div>
+  <div class='forbidden-label'>57白名单</div>
+  <div class='forbidden-label'>全量合规</div>
+  <div class='forbidden-label'>正式候选</div>
+</article></div>
+  <details class="lineage"><summary>技术血缘折叠区</summary><p>英文队名、source_hash、time_bins、taxonomy 仅作审计，不改变 A/B/SKIP active 展示。</p></details>
+</details>
+  
+<details class="candidate-group group-B" open>
+  <summary><span>B级候选</span><b>0 场</b></summary>
+  
+  <div class="candidate-list"><article class='candidate-card' data-grade='B'>
+  <div class='match-line'><!-- dynamically populated: 中文球队名 --></div>
+  <div class='card-r1'><!-- 联赛 · 评级 · 开赛时间 --></div>
+  <div class='playbook-line'><span class='playbook-label'>剧本：</span><span class='playbook-value'><!-- playbook_script --></span></div>
+  <div class='goal-dist-line'>进球分布 <b>0-15</b> <span class='dist-val-015'><!-- fh_goal_dist_0_15_pct --></span>% · <b>16-30</b> <span class='dist-val-1630'><!-- --></span>% · <b>31-45</b> <span class='dist-val-3145'><!-- --></span>%</div>
+  <div class='card-r3'>未投注</div>
+  <div class='forbidden-label'>57白名单</div>
+  <div class='forbidden-label'>全量合规</div>
+  <div class='forbidden-label'>正式候选</div>
+</article></div>
+  <details class="lineage"><summary>技术血缘折叠区</summary><p>英文队名、source_hash、time_bins、taxonomy 仅作审计，不改变 A/B/SKIP active 展示。</p></details>
+</details>
+</section>
+</main>
+<aside>
+
+<section class="panel v3-panel">
+  <h2>V3 战备窗口</h2>
+  <div class="row"><span>状态</span><b>预留</b></div>
+  <div class="row"><span>Perception Gap</span><b>待生成</b></div>
+  <div class="row"><span>Watchlist</span><b>待生成</b></div>
+  <p class="hint">当前不参与 V4 A/B 正式候选。</p>
+</section>
+<section class="panel safety-panel">
+  <h2>系统安全</h2>
+  <div class="row"><span>V3 active</span><b>战备中 / 预留</b></div>
+  <div class="row"><span>V4 review</span><b>REPORT_ONLY</b></div>
+  <div class="row"><span>legacy modules</span><b>禁用</b></div>
+  <div class="row"><span>QQ推送</span><b>关闭</b></div>
+  <div class="row"><span>capture/cloud</span><b>关闭</b></div>
+  <div class="row"><span>cron</span><b>未启用 / status-only</b></div>
+</section>
+<section class="panel">
+  <h2>下一动作</h2>
+  <ul class="next-list"><li>等待 BOSS 验收 UI。</li><li>每日刷新仅使用 V3/V4 active source。</li><li>任何推送/cron/cloud 均需单独授权。</li></ul>
+</section>
+<details class="panel"><summary><span>系统审计折叠区</span><b>展开</b></summary><p class="audit-code">source_hash=44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a<br>candidate_source=missing<br>validation_source_hash=7c9e5e9a35413a3eb2654292294952bc8ef455c3d5878daf481fc229eb0dd45b<br>v3_source=reserved<br>api_status=API_OK<br>api_safe_to_scan=True<br>cache-only mode when blocked=true</p></details>
+</aside>
 </div>
-<script>
-setTimeout(function(){ window.location.href = "http://127.0.0.1:8766/v4_control_center.html"; }, 5000);
-</script>
 </body>
 </html>

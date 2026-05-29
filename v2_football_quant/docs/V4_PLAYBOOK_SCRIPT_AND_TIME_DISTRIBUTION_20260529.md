@@ -1,65 +1,54 @@
-# V4 Playbook Script & Time Distribution Fix
+# V4 Playbook Script & Time Distribution
 
 **Date**: 2026-05-29
 **Status**: V4_PLAYBOOK_SCRIPT_AND_TIME_DISTRIBUTION_PASS
-**Commit**: (see below)
+**HEAD**: 1da6d18 → (new commit)
 
-## Root Cause Analysis
+## Summary
 
-### Time Bins Were Hit Rates, Not Distribution
-The original `time_bins` values were per-bin **hit rates**:
-- Rosenborg: `0_15=0.5 + 16_30=0.2 + 31_45=0.5 = 1.2` (120%!)
-- TransINVEST: `0_15=0.333 + 16_30=0.5 + 31_45=0.333 = 1.166` (117%!)
+1. Added `_derive_playbook_script()` — derives playbook labels from goal distribution
+2. Added `_normalize_goal_distribution()` — normalizes per-bin hit rates into goal distribution percentages
+3. Updated model builder to include `playbook_script` and `fh_goal_dist_*_pct` fields
+4. Updated dashboard HTML with playbook and time distribution display structure
+5. Updated candidate normalizer to pass through new fields
 
-Each bin value represents "fraction of H2H games with at least one goal in this window" — a hit rate. Displaying these as percentages produced nonsense (e.g., "50% + 20% + 50%") that didn't sum to 100%.
+## Playbook Classification Rules
 
-### Playbook Script Was Missing
-No playbook/script field existed. Previous labels like "正式候选" or "HT进球剧本" were placeholder strings unrelated to actual first-half goal timing patterns.
+| Script | Condition |
+|--------|-----------|
+| 开局冲击 | 0-15 highest AND >= 40% |
+| 中段发力 | 16-30 highest AND >= 40% |
+| 尾段压迫 | 31-45 highest AND >= 40% |
+| 双段压迫 | Any two >= 35% AND difference <= 15% |
+| 均衡压迫 | All three in 25%-40% |
+| 弱剧本 | Low-confidence patterns |
+| 数据暂缺 | Missing data or zero goals |
 
-## Fix
+## Current Results (2026-05-30 scan)
 
-### 1. Distribution Normalization
-Hit rates are normalized to goal distribution percentages that sum to exactly 100%:
-```
-dist_pct = hit_rate / sum_of_all_bins * 100
-```
-Rounding adjusted so 0-15 + 16-30 + 31-45 = 100%.
+| Candidate | Playbook | 0-15 | 16-30 | 31-45 | Sum |
+|-----------|----------|------|-------|-------|-----|
+| Rosenborg vs Bodo/Glimt (A) | 尾段压迫 | 41.6% | 16.7% | 41.7% | 100.0% |
+| TransINVEST vs Hegelmann Litauen (B) | 中段发力 | 28.6% | 42.8% | 28.6% | 100.0% |
 
-### 2. Playbook Derivation
-Based on normalized distribution:
+## Time Distribution Note
 
-| Script | Rule |
-|--------|------|
-| 开局冲击 | 0-15 is highest AND ≥40% |
-| 中段发力 | 16-30 is highest AND ≥40% |
-| 尾段压迫 | 31-45 is highest AND ≥40% |
-| 双段压迫 | Two segments ≥35% AND diff ≤15% |
-| 均衡压迫 | All three in 25%-40% range |
-| 数据暂缺 | No time_bins data |
+Current distribution is normalized from per-bin hit rates because raw goal count breakdown is not available in the current scan output. Source: `normalized_from_per_bin_hit_rates`. Future enhancement: capture per-bin goal counts from the API for exact distribution.
 
-### Results
+## Forbidden Labels Removed
 
-| Candidate | Playbook | Distribution |
-|-----------|----------|-------------|
-| Rosenborg (A) | **尾段压迫** | 0-15 41% · 16-30 17% · 31-45 42% |
-| TransINVEST (B) | **中段发力** | 0-15 29% · 16-30 42% · 31-45 29% |
+- 57白名单 → hidden from candidate cards (preserved in model for split stats)
+- 全量合规 → hidden
+- 正式候选 → hidden
+- 候选剧本 → removed
+- HT进球剧本 → removed
 
-### Card Display (Final)
-```
-罗森博格 vs 博德闪耀                      A
-挪超 · A · 05-30 01:00
-剧本：尾段压迫
-进球分布 0-15 41% · 16-30 17% · 31-45 42%
-未投注
-```
+## Protection Gates
 
-### Protection
-| Check | Status |
-|-------|--------|
-| DEFAULT_RULES unchanged | ✓ |
-| A/B thresholds unchanged | ✓ |
-| Validation not recomputed | ✓ |
-| Live bet unchanged | ✓ |
-| Cron unchanged | ✓ |
-| QQ not pushed | ✓ |
-| No secrets | ✓ |
+- [x] DEFAULT_RULES unchanged
+- [x] A/B thresholds unchanged
+- [x] validation not recomputed
+- [x] live bet not modified
+- [x] cron not modified
+- [x] QQ not pushed
+- [x] H2H post-2020 last-10 policy intact

@@ -112,6 +112,12 @@ def _normalize_candidate_rows(view: dict, source_date: str) -> list[dict]:
                 "v4_grade": r.get("grade") or key[0],
                 "v4_script": r.get("script_type") or "",
                 "ht_model_score": r.get("ht_score"),
+                "playbook_script": r.get("playbook_script") or "",
+                "fh_goal_dist_0_15_pct": r.get("fh_goal_dist_0_15_pct"),
+                "fh_goal_dist_16_30_pct": r.get("fh_goal_dist_16_30_pct"),
+                "fh_goal_dist_31_45_pct": r.get("fh_goal_dist_31_45_pct"),
+                "fh_goal_dist_total_pct": r.get("fh_goal_dist_total_pct"),
+                "fh_goal_dist_source": r.get("fh_goal_dist_source"),
                 "official_source": "official_57",
                 "candidate_source_date": source_date,
                 "team_cn_source": {
@@ -125,6 +131,21 @@ def _normalize_candidate_rows(view: dict, source_date: str) -> list[dict]:
                 "team_cn_missing": missing,
             })
     return rows
+
+
+def _read_jsonl(path: Path) -> list[dict]:
+    out: list[dict] = []
+    if not path.exists():
+        return out
+    for ln in path.read_text(encoding="utf-8").splitlines():
+        ln = ln.strip()
+        if not ln:
+            continue
+        try:
+            out.append(json.loads(ln))
+        except Exception:
+            continue
+    return out
 
 
 def _json(handler: BaseHTTPRequestHandler, code: int, payload: dict):
@@ -218,6 +239,40 @@ class H(BaseHTTPRequestHandler):
 
         if u.path == "/api/live_bets/cumulative":
             return _json(self, 200, {"ok": True, "summary": store.cumulative_summary()})
+
+        if u.path == "/api/live_bets/history":
+            days = int(q.get("days", ["30"])[0] or 30)
+            days = max(1, min(days, 90))
+            live_rows: list[dict] = []
+            no_bet_rows: list[dict] = []
+
+            for p in sorted(LIVE.glob("v4_live_bets_*.jsonl"), reverse=True):
+                date = p.stem.replace("v4_live_bets_", "")
+                if not (len(date) == 8 and date.isdigit()):
+                    continue
+                if len({x.get("date") for x in live_rows}) >= days:
+                    break
+                for r in _read_jsonl(p):
+                    rr = dict(r)
+                    rr["record_type"] = "BET"
+                    rr["record_date"] = str(r.get("date") or r.get("bet_date") or date)
+                    live_rows.append(rr)
+
+            for p in sorted(LIVE.glob("v4_no_bet_decisions_*.jsonl"), reverse=True):
+                date = p.stem.replace("v4_no_bet_decisions_", "")
+                if not (len(date) == 8 and date.isdigit()):
+                    continue
+                if len({x.get("record_date") for x in no_bet_rows}) >= days:
+                    break
+                for r in _read_jsonl(p):
+                    rr = dict(r)
+                    rr["record_type"] = "NO_BET"
+                    rr["record_date"] = str(r.get("date") or date)
+                    no_bet_rows.append(rr)
+
+            rows = live_rows + no_bet_rows
+            rows.sort(key=lambda x: str(x.get("recorded_at") or x.get("updated_at") or x.get("created_at") or x.get("record_date") or ""), reverse=True)
+            return _json(self, 200, {"ok": True, "days": days, "rows": rows[:500]})
 
         if u.path == "/api/live_bets/candidates":
             date = q.get("date", [datetime.utcnow().strftime("%Y%m%d")])[0]
