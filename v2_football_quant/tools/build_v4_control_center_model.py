@@ -152,8 +152,18 @@ def _get_default_bet_params(candidates_list: list, live_daily: dict) -> dict | N
     return None
 
 
-def _extract_candidates(view: dict, live_daily: dict) -> dict:
-    """提取今日候选信息（含 WHITELIST_57 / OUTSIDE_57 分层）"""
+def _extract_candidates(view: dict, live_daily: dict, scout_data: list | None = None) -> dict:
+    """提取今日候选信息（含 WHITELIST_57 / OUTSIDE_57 分层）
+    如果提供 scout_data，会用 scout 的真实评分字段补充候选卡片显示。
+    """
+    # Build scout lookup table
+    scout_by_fid: dict[int, dict] = {}
+    if scout_data:
+        for entry in scout_data:
+            fid = entry.get("fixture_id")
+            if fid:
+                scout_by_fid[fid] = entry
+
     defaults = _get_default_bet_params(
         (view.get("A_candidates") or []) + (view.get("B_candidates") or []),
         live_daily,
@@ -165,17 +175,20 @@ def _extract_candidates(view: dict, live_daily: dict) -> dict:
     for r in (view.get("A_candidates") or []):
         if not isinstance(r, dict):
             continue
+        fid = r.get("fixture_id")
+        s = scout_by_fid.get(fid, {}) if scout_by_fid else {}
         a_candidates.append({
-            "fixture_id": r.get("fixture_id"),
+            "fixture_id": fid,
             "league": r.get("league") or "",
             "home_cn": r.get("home_cn") or r.get("home_team_cn") or r.get("home") or "",
             "away_cn": r.get("away_cn") or r.get("away_team_cn") or r.get("away") or "",
             "home_en": r.get("home_en") or r.get("home") or "",
             "away_en": r.get("away_en") or r.get("away") or "",
-            "kickoff_time": r.get("kickoff_display") or "",
+            "kickoff_time": r.get("kickoff_display") or s.get("kickoff", ""),
+            "match_time": s.get("kickoff", ""),
             "grade": r.get("grade") or "A",
-            "script_type": r.get("script_type") or None,
-            "ht_score": r.get("ht_score"),
+            "script_type": s.get("script_type") or r.get("script_type") or "",
+            "ht_score": s.get("ht_score") or r.get("ht_score"),
             "source_hash": view.get("source_hash") or view.get("brief_sha256") or "",
             "default_line": defaults.get("default_line") if defaults else None,
             "default_odds": defaults.get("default_odds") if defaults else None,
@@ -184,8 +197,8 @@ def _extract_candidates(view: dict, live_daily: dict) -> dict:
             "default_source": defaults.get("source") if defaults else None,
             "default_reason": f"default from {defaults['source']}" if defaults else None,
             "rating": r.get("grade") or "A",
-            "script": r.get("script_type") or None,
-            "ht_index": r.get("ht_score"),
+            "script": s.get("script_type") or r.get("script_type") or "",
+            "ht_index": s.get("ht_score") or r.get("ht_score"),
             "distribution_text": r.get("distribution_text") or "",
             "time_bin_0_15": r.get("time_bin_0_15") if r.get("time_bin_0_15") is not None else (r.get("time_bins") or {}).get("0_15"),
             "time_bin_16_30": r.get("time_bin_16_30") if r.get("time_bin_16_30") is not None else (r.get("time_bins") or {}).get("16_30"),
@@ -197,22 +210,42 @@ def _extract_candidates(view: dict, live_daily: dict) -> dict:
             "source_group": r.get("source_group") or "WHITELIST_57",
             "is_in_57_whitelist": r.get("is_in_57_whitelist", True),
             "fixture_universe": view.get("fixture_universe") or "whitelist",
+            # Scoring merge from scout
+            "score_pack": s.get("score_pack", {}),
+            "market_scores": s.get("market_scores", {}),
+            "factors": s.get("factors", {}),
+            "time_bins": s.get("time_bins", {}),
+            "h2h_score": s.get("h2h_score"),
+            "recent_form_summary": s.get("recent_form_summary"),
+            "h2h_policy": s.get("h2h_policy", ""),
+            "h2h_official_count": s.get("h2h_official_count"),
+            "h2h_low_sample": s.get("h2h_low_sample", False),
+            "late_fh_pressure": s.get("late_fh_pressure"),
+            "recent_form_sample_size": r.get("recent_form_sample_size") or s.get("recent_form_sample_size"),
+            "events_complete": s.get("events_complete"),
+            "market_scores_missing": s.get("market_scores_missing", True),
+            "factors_missing": s.get("factors_missing", True),
+            "score_pack_missing": s.get("score_pack_missing", True),
+            "explain_factors_missing": s.get("explain_factors_missing", True),
         })
 
     for r in (view.get("B_candidates") or []):
         if not isinstance(r, dict):
             continue
+        fid = r.get("fixture_id")
+        s = scout_by_fid.get(fid, {}) if scout_by_fid else {}
         b_candidates.append({
-            "fixture_id": r.get("fixture_id"),
+            "fixture_id": fid,
             "league": r.get("league") or "",
             "home_cn": r.get("home_cn") or r.get("home_team_cn") or r.get("home") or "",
             "away_cn": r.get("away_cn") or r.get("away_team_cn") or r.get("away") or "",
             "home_en": r.get("home_en") or r.get("home") or "",
             "away_en": r.get("away_en") or r.get("away") or "",
-            "kickoff_time": r.get("kickoff_display") or "",
+            "kickoff_time": r.get("kickoff_display") or s.get("kickoff", ""),
+            "match_time": s.get("kickoff", ""),
             "grade": r.get("grade") or "B",
-            "script_type": r.get("script_type") or None,
-            "ht_score": r.get("ht_score"),
+            "script_type": s.get("script_type") or r.get("script_type") or "",
+            "ht_score": s.get("ht_score") or r.get("ht_score"),
             "source_hash": view.get("source_hash") or view.get("brief_sha256") or "",
             "default_line": defaults.get("default_line") if defaults else None,
             "default_odds": defaults.get("default_odds") if defaults else None,
@@ -221,8 +254,8 @@ def _extract_candidates(view: dict, live_daily: dict) -> dict:
             "default_source": defaults.get("source") if defaults else None,
             "default_reason": f"default from {defaults['source']}" if defaults else None,
             "rating": r.get("grade") or "B",
-            "script": r.get("script_type") or None,
-            "ht_index": r.get("ht_score"),
+            "script": s.get("script_type") or r.get("script_type") or "",
+            "ht_index": s.get("ht_score") or r.get("ht_score"),
             "distribution_text": r.get("distribution_text") or "",
             "time_bin_0_15": r.get("time_bin_0_15") if r.get("time_bin_0_15") is not None else (r.get("time_bins") or {}).get("0_15"),
             "time_bin_16_30": r.get("time_bin_16_30") if r.get("time_bin_16_30") is not None else (r.get("time_bins") or {}).get("16_30"),
@@ -234,6 +267,23 @@ def _extract_candidates(view: dict, live_daily: dict) -> dict:
             "source_group": r.get("source_group") or "WHITELIST_57",
             "is_in_57_whitelist": r.get("is_in_57_whitelist", True),
             "fixture_universe": view.get("fixture_universe") or "whitelist",
+            # Scoring merge from scout
+            "score_pack": s.get("score_pack", {}),
+            "market_scores": s.get("market_scores", {}),
+            "factors": s.get("factors", {}),
+            "time_bins": s.get("time_bins", {}),
+            "h2h_score": s.get("h2h_score"),
+            "recent_form_summary": s.get("recent_form_summary"),
+            "h2h_policy": s.get("h2h_policy", ""),
+            "h2h_official_count": s.get("h2h_official_count"),
+            "h2h_low_sample": s.get("h2h_low_sample", False),
+            "late_fh_pressure": s.get("late_fh_pressure"),
+            "recent_form_sample_size": r.get("recent_form_sample_size") or s.get("recent_form_sample_size"),
+            "events_complete": s.get("events_complete"),
+            "market_scores_missing": s.get("market_scores_missing", True),
+            "factors_missing": s.get("factors_missing", True),
+            "score_pack_missing": s.get("score_pack_missing", True),
+            "explain_factors_missing": s.get("explain_factors_missing", True),
         })
 
     for r in (view.get("C_candidates") or []):
@@ -665,7 +715,16 @@ def build_model() -> dict:
         s = cv_path.stem.split("_")[-1]
         if len(s) == 8 and s.isdigit():
             candidate_anchor_date = s
-    candidates = _extract_candidates(cv, live_daily)
+    # Load scout for scoring display fields
+    scout_path = ROOT / "data" / "daily_reports" / f"scout_v4_{today_str}.json"
+    try:
+        scout_data: list = json.loads(scout_path.read_text(encoding="utf-8")) if scout_path.exists() else []
+    except Exception:
+        scout_data = []
+    if isinstance(scout_data, dict):
+        scout_data = scout_data.get("results", [])
+
+    candidates = _extract_candidates(cv, live_daily, scout_data=scout_data)
 
     # 2. 昨日验证 — official A/B-only truth file
     vsot_path, vsot = _find_latest_validation_source_of_truth()

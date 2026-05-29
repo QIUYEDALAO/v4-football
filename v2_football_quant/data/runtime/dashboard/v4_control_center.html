@@ -466,7 +466,9 @@ let MODEL={};
 let DISPLAY_CANDIDATES=[];
 const $=id=>document.getElementById(id);
 const safe=(v,f="N/A")=>v===void 0||v===null||v===""?f:String(v).replace(new RegExp("undef"+"ined","gi"),f);
-const srcGroupDisplay=x=>{const sg=first(x.source_group,'');if(sg==='WHITELIST_57')return 'WHITELIST_57';if(sg==='OUTSIDE_57')return 'OUTSIDE_57';return '来源未标记';};
+const srcGroupDisplay=x=>{const sg=first(x.source_group,'');if(sg==='WHITELIST_57')return '57白名单';if(sg==='OUTSIDE_57')return '名单外';return '来源未标记';};
+const uniDisplay=x=>{const u=first(x.fixture_universe,'');if(u==='all_eligible')return '全量合规扫描';if(u==='whitelist')return '白名单扫描';return u||'—';};
+const fmtPct=v=>{const n=Number(v);if(!Number.isFinite(n))return null;return n<=1 ? `${(n*100).toFixed(0)}%` : `${n.toFixed(0)}%`;};
 const num=(v,d=2)=>{const n=Number(v);return Number.isFinite(n)?n.toFixed(d):(0).toFixed(d)};
 const first=(...v)=>v.find(x=>x!==void 0&&x!==null&&x!=="");
 const arr=v=>Array.isArray(v)?v:[];
@@ -599,17 +601,12 @@ function renderCandidates(){
 function renderCandidate(x,i){
   const r=String(first(x.rating,x.grade,'A')).toUpperCase();
   const league=safe(first(x.league_cn,x.league),'联赛');
-  const time=safe(first(x.kickoff_local,x.kickoff_time,x.kickoff,x.time),'开赛时间待定');
+  const time=safe(first(x.kickoff_local,x.kickoff_time,x.match_time,x.kickoff,x.time),'开赛时间待定');
   const script=safe(first(x.script,x.script_type,x.playbook),'正式候选');
   const dl=safe(first(x.default_line,'O1'),'O1');
   const od=first(x.default_odds,null);
   const st=first(x.default_stake,null);
   const mi=first(x.default_entry_minute,null);
-  const fmtPct=v=>{
-    const n=Number(v);
-    if(!Number.isFinite(n)) return null;
-    return n<=1 ? `${(n*100).toFixed(0)}%` : `${n.toFixed(0)}%`;
-  };
   const p0=x.time_bin_0_15!=null?fmtPct(x.time_bin_0_15):null;
   const p1=x.time_bin_16_30!=null?fmtPct(x.time_bin_16_30):null;
   const p2=x.time_bin_31_45!=null?fmtPct(x.time_bin_31_45):null;
@@ -618,11 +615,15 @@ function renderCandidate(x,i){
     ? `进球时间分布 ${distRaw}`
     : ((p0!==null||p1!==null||p2!==null)
       ? `进球时间分布 0-15 ${p0||'—'} · 16-30 ${p1||'—'} · 31-45 ${p2||'—'}`
-      : '进球时间分布：暂无解释数据');
+      : (x.score_pack&&x.score_pack.scores
+        ? `评分摘要 HT ${fmtPct(x.score_pack.scores.HT_LIVE_OVER)||'—'} · 全场 ${fmtPct(x.score_pack.scores.FULLTIME_OVER)||'—'} · 下半场 ${fmtPct(x.score_pack.scores.SECOND_HALF_OVER)||'—'}${x.h2h_official_count?` · H2H样本 ${x.h2h_official_count}场`:''}${x.h2h_score?` · H2H评分 ${fmtPct(x.h2h_score)}`:''}${x.late_fh_pressure!=null?` · 11-45压力 ${fmtPct(x.late_fh_pressure)}`:''}`
+        : (x.market_scores&&Object.keys(x.market_scores).length
+          ? `评分摘要 ${Object.entries(x.market_scores).map(([k,v])=>`${k} ${fmtPct(v)}`).join(' · ')}`
+          : '解释数据缺失，不影响 official grade'));
   const lines=['O0.75','O1','O1.25','O1.5','O2'];
   const lineOpts=lines.map(l=>`<option${l===dl?' selected':''}>${l}</option>`).join('');
   const stateTag=x.no_bet_recorded?(x.no_bet_reason_code==='EARLY_GOAL'?'未投：早进球':'未投：已记录'):(x.settled?'已结算':(x.already_bet?'已投注':'未投注'));
-  return `<article class="candidate"><div class="cand-top"><div><div class="match">${matchName(x)}</div><div class="meta">${league} · ${r} · ${time} · ${script}</div><div class="meta source-meta">${srcGroupDisplay(x)} · ${safe(first(x.fixture_universe),'—')}</div><div class="meta">${binText}</div></div><span class="badge ${r==='A'?'a':'b'}">${r}</span></div><div class="badges"><span class="badge">${stateTag}</span></div><form class="quick-form" onsubmit="event.preventDefault();addBet(${i})"><div class="field"><label>盘口线</label><select id="line-${i}">${lineOpts}</select></div><div class="field"><label>水位</label><input id="odds-${i}" value="${od||''}"/></div><div class="field"><label>金额</label><input id="stake-${i}" value="${st||''}"/></div><div class="field"><label>入场分钟</label><input id="minute-${i}" value="${mi||''}"/></div><button class="btn">保存投注</button><button type="button" class="btn ghost" onclick="markNoBetEarlyGoal(${i})">早进球未投</button><div class="field full"><label>备注</label><textarea id="notes-${i}"></textarea></div></form></article>`;
+  return `<article class="candidate"><div class="cand-top"><div><div class="match">${matchName(x)}</div><div class="meta">${league} · ${r} · ${time} · ${script}</div><div class="meta source-meta">${srcGroupDisplay(x)} · ${uniDisplay(x)}</div><div class="meta">${binText}</div></div><span class="badge ${r==='A'?'a':'b'}">${r}</span></div><div class="badges"><span class="badge">${stateTag}</span></div><form class="quick-form" onsubmit="event.preventDefault();addBet(${i})"><div class="field"><label>盘口线</label><select id="line-${i}">${lineOpts}</select></div><div class="field"><label>水位</label><input id="odds-${i}" value="${od||''}"/></div><div class="field"><label>金额</label><input id="stake-${i}" value="${st||''}"/></div><div class="field"><label>入场分钟</label><input id="minute-${i}" value="${mi||''}"/></div><button class="btn">保存投注</button><button type="button" class="btn ghost" onclick="markNoBetEarlyGoal(${i})">早进球未投</button><div class="field full"><label>备注</label><textarea id="notes-${i}"></textarea></div></form></article>`;
 }
 
 function renderSide(){
