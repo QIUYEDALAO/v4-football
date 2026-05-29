@@ -611,14 +611,22 @@ const time=rawTime?fmtKickoff(rawTime):'开赛时间待定';
   const p1=hasTB?fmtPct(x.time_bin_16_30):null;
   const p2=hasTB?fmtPct(x.time_bin_31_45):null;
   const distRaw=safe(first(x.distribution_text,''),'').trim();
-  const scoreSummary = x.ht_score ? `评分 HT${Math.round(x.ht_score)}` : '';
-  const h2hSample = x.h2h_official_count ? ` · H2H样本${x.h2h_official_count}场` : '';
-  const hasScoreData = scoreSummary || (x.factors && Object.keys(x.factors||{}).length>0);
+  const spScores=(x.score_pack&&x.score_pack.scores)||{};
+  const htVal=spScores.HT_LIVE_OVER;
+  const htReal=htVal!=null?Math.round(Number(htVal)):(x.ht_score!=null?Math.round(Number(x.ht_score)):null);
+  const h2hCnt=x.h2h_official_count||x.h2h_sample_count||null;
+  const pressRaw=x.late_fh_pressure!=null?x.late_fh_pressure:((x.factors&&x.factors.late_fh_pressure!=null)?x.factors.late_fh_pressure:null);
+  const pressPct=pressRaw!=null?Math.round(Number(pressRaw)*100):null;
+  const summaryParts=[];
+  if(htReal!=null) summaryParts.push('HT'+htReal);
+  if(h2hCnt!=null) summaryParts.push('H2H样本'+h2hCnt+'场');
+  if(pressPct!=null) summaryParts.push('11-45压力'+pressPct+'%');
+  const scoreLine=summaryParts.length>0?('评分摘要 '+summaryParts.join(' · ')):'评分摘要暂缺';
   const binText=distRaw
-    ? `进球时间分布 ${distRaw}`
+    ? ('进球时间分布 '+distRaw)
     : (hasTB
-      ? `进球时间分布 0-15 ${p0||'—'} · 16-30 ${p1||'—'} · 31-45 ${p2||'—'}`
-      : (hasScoreData ? `评分摘要${scoreSummary}${h2hSample}` : '评分摘要暂缺'));
+      ? ('进球时间分布 0-15 '+(p0||'—')+' · 16-30 '+(p1||'—')+' · 31-45 '+(p2||'—'))
+      : scoreLine);
   const lines=['O0.75','O1','O1.25','O1.5','O2'];
   const lineOpts=lines.map(l=>`<option${l===dl?' selected':''}>${l}</option>`).join('');
   const stateTag=x.no_bet_recorded?(x.no_bet_reason_code==='EARLY_GOAL'?'未投：早进球':'未投：已记录'):(x.settled?'已结算':(x.already_bet?'已投注':'未投注'));
