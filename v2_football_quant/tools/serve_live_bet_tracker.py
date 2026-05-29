@@ -157,6 +157,13 @@ def _json(handler: BaseHTTPRequestHandler, code: int, payload: dict):
     handler.wfile.write(b)
 
 
+def _append_no_market_exclusion(date: str, rec: dict) -> dict:
+    path = LIVE / f"v4_no_market_exclusions_{date}.jsonl"
+    with open(path, "a", encoding="utf-8") as f:
+        f.write(json.dumps(rec, ensure_ascii=False) + "\n")
+    return rec
+
+
 def _append_no_bet_decision(date: str, rec: dict) -> dict:
     LIVE.mkdir(parents=True, exist_ok=True)
     path = LIVE / f"v4_no_bet_decisions_{date}.jsonl"
@@ -406,6 +413,34 @@ class H(BaseHTTPRequestHandler):
                 "note": payload.get("note") or "",
             }
             saved = _append_no_bet_decision(date, rec)
+            return _json(self, 200, {"ok": True, "record": saved})
+
+        if u.path == "/api/v4_live_bet/no_market":
+            date = str(payload.get("date") or datetime.utcnow().strftime("%Y%m%d"))
+            fixture_id = str(payload.get("fixture_id") or "").strip()
+            if not fixture_id:
+                return _json(self, 400, {"ok": False, "error": "fixture_id_required"})
+            now = datetime.utcnow().isoformat()
+            rec = {
+                "schema_version": "v4.no_market_exclusion.v1",
+                "date": date,
+                "recorded_at": now,
+                "fixture_id": fixture_id,
+                "league": payload.get("league") or "",
+                "home": payload.get("home") or "",
+                "away": payload.get("away") or "",
+                "grade": payload.get("grade") or "",
+                "exclusion_reason": "no_market",
+                "exclusion_source": payload.get("source") or "dashboard_manual",
+                "reason_text": payload.get("reason_text") or "无盘口/未开盘",
+                "excluded_from_betting": True,
+                "excluded_from_validation": True,
+                "excluded_from_stats": True,
+                "action_status": "NO_MARKET",
+                "source": "v4_control_center",
+                "note": payload.get("note") or "",
+            }
+            saved = _append_no_market_exclusion(date, rec)
             return _json(self, 200, {"ok": True, "record": saved})
 
         return _json(self, 404, {"ok": False, "error": "not_found"})

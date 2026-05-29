@@ -226,6 +226,24 @@ def _load_live_records_all() -> list[tuple[str, dict]]:
     return out
 
 
+def _load_no_market_exclusions_for_date(date_str: str) -> list[dict]:
+    p = LIVE_DIR / f"v4_no_market_exclusions_{date_str}.jsonl"
+    out: list[dict] = []
+    if not p.exists():
+        return out
+    for line in p.read_text(encoding="utf-8").splitlines():
+        line = line.strip()
+        if not line:
+            continue
+        try:
+            rec = json.loads(line)
+        except Exception:
+            continue
+        if str(rec.get("date") or "") == date_str and str(rec.get("exclusion_reason") or "").lower() == "no_market":
+            out.append(rec)
+    return out
+
+
 def _load_no_bet_decisions_for_date(date_str: str) -> list[dict]:
     p = LIVE_DIR / f"v4_no_bet_decisions_{date_str}.jsonl"
     out: list[dict] = []
@@ -919,6 +937,12 @@ def build_model() -> dict:
         fid = str(d.get("fixture_id") or "")
         if fid:
             no_bet_by_fixture[fid] = d
+    no_market_exclusions = _load_no_market_exclusions_for_date(today_str)
+    no_market_by_fixture: dict[str, dict[str, Any]] = {}
+    for d in no_market_exclusions:
+        fid = str(d.get("fixture_id") or "")
+        if fid:
+            no_market_by_fixture[fid] = d
     open_bet_items: list[dict[str, Any]] = []
     for rec in raw_records:
         if bool(rec.get("is_test")):
@@ -974,7 +998,13 @@ def build_model() -> dict:
             arr["no_bet_recorded"] = bool(no_bet_rec)
             arr["no_bet_reason_code"] = (no_bet_rec or {}).get("reason_code") or ""
             arr["no_bet_reason_text"] = (no_bet_rec or {}).get("reason_text") or ""
-            if arr["no_bet_recorded"]:
+            nm_rec = no_market_by_fixture.get(fid)
+            arr["no_market_excluded"] = bool(nm_rec)
+            arr["no_market_exclusion_reason"] = (nm_rec or {}).get("exclusion_reason") or ""
+            arr["no_market_exclusion_source"] = (nm_rec or {}).get("exclusion_source") or ""
+            if arr["no_market_excluded"]:
+                arr["pending_action"] = "无盘口已排除"
+            elif arr["no_bet_recorded"]:
                 arr["pending_action"] = "未投：早进球" if arr["no_bet_reason_code"] == "EARLY_GOAL" else "未投：已记录"
             else:
                 arr["pending_action"] = "待结算" if (arr["already_bet"] and not arr["settled"]) else ("待投注" if not arr["already_bet"] else "已结算")
@@ -989,7 +1019,7 @@ def build_model() -> dict:
                     "reason_code": arr.get("no_bet_reason_code") or "",
                     "reason_text": arr.get("no_bet_reason_text") or "",
                 })
-            else:
+            elif not arr.get("no_market_excluded"):
                 pending_bet_candidates.append({
                     "fixture_id": arr.get("fixture_id"),
                     "home_cn": arr.get("home_cn") or "",
@@ -1178,8 +1208,10 @@ def build_model() -> dict:
             "to_retry": pending_validation,
             "errors": system_alerts,
             "no_bet_count": len(no_bet_items),
+            "no_market_excluded_count": len(no_market_exclusions),
             "pending_bet_candidates": pending_bet_candidates,
             "no_bet_items": no_bet_items,
+            "no_market_exclusions": no_market_exclusions,
             "open_bet_items": open_bet_items,
             "retry_items": retry_items,
             "source": "fixture_id_canonical",

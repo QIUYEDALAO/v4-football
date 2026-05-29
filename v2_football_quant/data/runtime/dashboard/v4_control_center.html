@@ -119,7 +119,7 @@ button{cursor:pointer}
 .bet-form-inline select{width:70px}
 .bet-form-inline textarea{flex:1;min-width:120px;height:28px;resize:none}
 .bet-form-inline .btn-save{background:var(--green);color:#08111f;border:none;padding:4px 12px;border-radius:5px;cursor:pointer;font-weight:700;font-size:12px}
-.bet-form-inline .btn-skip{background:rgba(255,107,114,.14);color:var(--red);border:1px solid rgba(255,107,114,.25);padding:4px 12px;border-radius:5px;cursor:pointer;font-size:12px}
+.bet-form-inline .btn-no-market{background:rgba(255,180,70,.16);color:#ffb446;border:1px solid rgba(255,180,70,.24)}.btn-skip{background:rgba(255,107,114,.14);color:var(--red);border:1px solid rgba(255,107,114,.25);padding:4px 12px;border-radius:5px;cursor:pointer;font-size:12px}
 @media(max-width:760px){.candidate-row .playbook-col,.candidate-row .dist-col{display:none}.candidate-row .league-col{font-size:10px;max-width:60px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.candidate-row .teams-col{font-size:12px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.candidate-table th:nth-child(3),.candidate-table th:nth-child(5),.candidate-table th:nth-child(6){display:none}}
 .section-head{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:9px}
 h2{font-size:15px;margin:0}
@@ -620,9 +620,14 @@ function renderListRow(x,i){
   const d015=x.fh_goal_dist_0_15_pct;const d1630=x.fh_goal_dist_16_30_pct;const d3145=x.fh_goal_dist_31_45_pct;
   var distText='进球分布暂缺';
   if(d015!=null&&d1630!=null&&d3145!=null){distText='0-15 '+d015+'% · 16-30 '+d1630+'% · 31-45 '+d3145+'%';}
-  const stateTag=x.no_bet_recorded?(x.no_bet_reason_code==='EARLY_GOAL'?'未投：早进球':'未投：已记录'):(x.settled?'已结算':(x.already_bet?'已投注':'未投注'));
+  var stateTag;
+  if(x.no_market_excluded){stateTag='无盘口已排除';}
+  else if(x.no_bet_recorded){stateTag=x.no_bet_reason_code==='EARLY_GOAL'?'未投：早进球':'未投：已记录';}
+  else if(x.settled){stateTag='已结算';}
+  else if(x.already_bet){stateTag='已投注';}
+  else{stateTag='未投注';}
   const dl=safe(first(x.default_line,'O1'),'O1');
-  const od=first(x.default_odds,'');const st=first(x.default_stake,'');const mi=first(x.default_entry_minute,'');
+  const od=safe(x.default_odds,'');const st=safe(x.default_stake,'');const mi=safe(x.default_entry_minute,'');
   const lines=['O0.75','O1','O1.25','O1.5','O2'];
   const lineOpts=lines.map(function(l){return '<option'+(l===dl?' selected':'')+'>'+l+'</option>';}).join('');
   var row='<tr class="candidate-row grade-'+r+'" onclick="toggleBetPanel('+i+')">';
@@ -643,6 +648,7 @@ function renderListRow(x,i){
   row+='<label>入场</label><input id="minute-'+i+'" value="'+mi+'">';
   row+='<button class="btn-save" onclick="event.stopPropagation();addBet('+i+')">保存投注</button>';
   row+='<button class="btn-skip" onclick="event.stopPropagation();markNoBetEarlyGoal('+i+')">早进球未投</button>';
+  row+='<button class="btn-no-market" onclick="event.stopPropagation();markNoMarket('+i+')">无盘口排除</button>';
   row+='<label>备注</label><textarea id="notes-'+i+'"></textarea>';
   row+='</div></td></tr>';
   return row;
@@ -838,28 +844,55 @@ async function markNoBetEarlyGoal(i){
   }catch(e){ toast('网络错误: '+e.message); }
 }
 
+async function markNoMarket(i){
+  const list=DISPLAY_CANDIDATES.length?DISPLAY_CANDIDATES:getCandidates().filter(x=>['A','B'].includes(String(first(x.rating,x.grade,'')).toUpperCase()));
+  const x=list[i]; if(!x){toast('候选数据缺失');return;}
+  if(!confirm('确认将该候选标记为无盘口排除？\n排除后不再计入待投注和验证统计。'))return;
+  const payload={
+    date:MODEL.today_date||new Date().toISOString().slice(0,10).replace(/-/g,''),
+    fixture_id:first(x.fixture_id,''),
+    league:first(x.league,x.league_cn,''),
+    home:first(x.home_cn,x.home,''),
+    away:first(x.away_cn,x.away,''),
+    grade:first(x.rating,x.grade,'A'),
+    reason:'no_market',
+    reason_text:'无盘口/未开盘，手动排除',
+    source:'dashboard_manual'
+  };
+  if(!payload.fixture_id){ toast('缺少 fixture_id'); return; }
+  try{
+    const r=await fetch('/api/v4_live_bet/no_market',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
+    const d=await r.json();
+    if(d.ok){ toast('已标记无盘口排除'); await loadModel(true); }
+    else { toast('标记失败: '+(d.error||'未知错误')); }
+  }catch(e){ toast('网络错误: '+e.message); }
+}
+
 function buildValidationPanel(){
   const top=MODEL.top_status||{};
   const y=top.yesterday_validation||{};
   const cv=top.cumulative_validation||{};
   const cvd=MODEL.cumulative_validation_detail||{};
   const yvd=MODEL.yesterday_validation_detail||{};
-  const cumA=safe(first(top.cumulative_a_text,cv.A,cvd.A?.display),'暂无');
-  const cumB=safe(first(top.cumulative_b_text,cv.B,cvd.B?.display),'暂无');
-  const cumAB=safe(first(top.cumulative_ab_text,cv.AB,top.cumulative_validation_text,cvd.AB?.display),'暂无');
-  const yestA=safe(first(top.yesterday_a_text,y.A,yvd.hit_rates?.A),'暂无');
-  const yestB=safe(first(top.yesterday_b_text,y.B,yvd.hit_rates?.B),'暂无');
+  // Defensive access: avoid optional chaining that may be unsupported
+  const _a=cvd.A||{}; const _b=cvd.B||{}; const _ab=cvd.AB||{};
+  const _hr=yvd.hit_rates||{};
+  const cumA=safe(first(top.cumulative_a_text,cv.A,_a.display),'暂无');
+  const cumB=safe(first(top.cumulative_b_text,cv.B,_b.display),'暂无');
+  const cumAB=safe(first(top.cumulative_ab_text,cv.AB,top.cumulative_validation_text,_ab.display),'暂无');
+  const yestA=safe(first(top.yesterday_a_text,y.A,_hr.A),'暂无');
+  const yestB=safe(first(top.yesterday_b_text,y.B,_hr.B),'暂无');
   const yestAB=safe(first(top.yesterday_ab_text,y.AB,top.yesterday_validation_text,y.display),'暂无');
-  return `<table>
-    <tr><th>项</th><th>值</th></tr>
-    <tr><td>累计A</td><td>${cumA}</td></tr>
-    <tr><td>累计B</td><td>${cumB}</td></tr>
-    <tr><td>累计AB</td><td>${cumAB}</td></tr>
-    <tr><td>昨日A</td><td>${yestA}</td></tr>
-    <tr><td>昨日B</td><td>${yestB}</td></tr>
-    <tr><td>昨日AB</td><td>${yestAB}</td></tr>
-    <tr><td>来源</td><td>${safe((MODEL.data_sources||{}).yesterday_validation,'official fixture_id summary')}</td></tr>
-  </table>`;
+  return '<table>'+
+    '<tr><th>项</th><th>值</th></tr>'+
+    '<tr><td>累计A</td><td>'+cumA+'</td></tr>'+
+    '<tr><td>累计B</td><td>'+cumB+'</td></tr>'+
+    '<tr><td>累计AB</td><td>'+cumAB+'</td></tr>'+
+    '<tr><td>昨日A</td><td>'+yestA+'</td></tr>'+
+    '<tr><td>昨日B</td><td>'+yestB+'</td></tr>'+
+    '<tr><td>昨日AB</td><td>'+yestAB+'</td></tr>'+
+    '<tr><td>来源</td><td>'+safe((MODEL.data_sources||{}).yesterday_validation,'official fixture_id summary')+'</td></tr>'+
+  '</table>';
 }
 function buildBetApiPanel(){
   return `<table><tr><th>操作</th><th>说明</th></tr>
