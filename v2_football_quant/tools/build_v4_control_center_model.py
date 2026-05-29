@@ -11,6 +11,20 @@ from __future__ import annotations
 import json
 from datetime import datetime, timedelta
 from pathlib import Path
+
+try:
+    from team_cn_resolver import TeamCnResolver
+except ImportError:
+    from tools.team_cn_resolver import TeamCnResolver
+
+# Lazy-init team name resolver
+_team_resolver = None
+
+def _get_team_resolver():
+    global _team_resolver
+    if _team_resolver is None:
+        _team_resolver = TeamCnResolver()
+    return _team_resolver
 from typing import Any, Dict, List, Optional
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -107,6 +121,18 @@ def _normalize_goal_distribution(factors, time_bins):
     result["fh_goal_dist_available"] = False
     return result
 
+
+
+def _resolve_cn_name(name_en: str, name_cn_hint: str = "") -> str:
+    """Resolve Chinese display name for a team."""
+    if not name_en:
+        return ""
+    # If hint is valid Chinese, use it
+    if name_cn_hint and not name_cn_hint.startswith("中文名缺失：") and not name_cn_hint.startswith("CN_MISSING"):
+        return name_cn_hint
+    resolver = _get_team_resolver()
+    cn, _, _, _ = resolver.resolve_one(name_en, name_cn_hint if name_cn_hint else None)
+    return cn
 
 def _find_latest_candidate_view() -> tuple[Optional[Path], dict]:
     candidates = sorted(STATUS.glob("v3v4_dashboard_candidate_view_*.json"))
@@ -263,8 +289,8 @@ def _extract_candidates(view: dict, live_daily: dict, scout_data: list | None = 
         a_candidates.append({
             "fixture_id": fid,
             "league": r.get("league") or "",
-            "home_cn": r.get("home_cn") or r.get("home_team_cn") or r.get("home") or "",
-            "away_cn": r.get("away_cn") or r.get("away_team_cn") or r.get("away") or "",
+            "home_cn": _resolve_cn_name(r.get("home") or r.get("home_en") or "", r.get("home_cn") or r.get("home_team_cn") or ""),
+            "away_cn": _resolve_cn_name(r.get("away") or r.get("away_en") or "", r.get("away_cn") or r.get("away_team_cn") or ""),
             "home_en": r.get("home_en") or r.get("home") or "",
             "away_en": r.get("away_en") or r.get("away") or "",
             "kickoff_time": r.get("kickoff_display") or s.get("kickoff", ""),
@@ -339,8 +365,8 @@ def _extract_candidates(view: dict, live_daily: dict, scout_data: list | None = 
         b_candidates.append({
             "fixture_id": fid,
             "league": r.get("league") or "",
-            "home_cn": r.get("home_cn") or r.get("home_team_cn") or r.get("home") or "",
-            "away_cn": r.get("away_cn") or r.get("away_team_cn") or r.get("away") or "",
+            "home_cn": _resolve_cn_name(r.get("home") or r.get("home_en") or "", r.get("home_cn") or r.get("home_team_cn") or ""),
+            "away_cn": _resolve_cn_name(r.get("away") or r.get("away_en") or "", r.get("away_cn") or r.get("away_team_cn") or ""),
             "home_en": r.get("home_en") or r.get("home") or "",
             "away_en": r.get("away_en") or r.get("away") or "",
             "kickoff_time": r.get("kickoff_display") or s.get("kickoff", ""),
@@ -399,8 +425,8 @@ def _extract_candidates(view: dict, live_daily: dict, scout_data: list | None = 
         skip_candidates.append({
             "fixture_id": r.get("fixture_id"),
             "league": r.get("league") or "",
-            "home_cn": r.get("home_cn") or r.get("home_team_cn") or r.get("home") or "",
-            "away_cn": r.get("away_cn") or r.get("away_team_cn") or r.get("away") or "",
+            "home_cn": _resolve_cn_name(r.get("home") or r.get("home_en") or "", r.get("home_cn") or r.get("home_team_cn") or ""),
+            "away_cn": _resolve_cn_name(r.get("away") or r.get("away_en") or "", r.get("away_cn") or r.get("away_team_cn") or ""),
             "grade": "SKIP",
             "reason": r.get("reason") or r.get("skip_reason") or "",
         })
