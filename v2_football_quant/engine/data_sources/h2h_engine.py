@@ -108,8 +108,15 @@ def _is_non_senior_league(name: str) -> tuple:
             return True, "friendly"
 
     # Reserve / B team
+    # NOTE: bare "ii" removed to avoid false matches on -liiga (Meistriliiga, Esiliiga, Ykkösliiga, etc.)
+    # Only match " ii " as a standalone word; use word-boundary patterns for other suffixes.
     reserve_keywords = [
-        "reserve", "reserves", "ii", " b ", "second team", "2nd team",
+        "reserve", "reserves",
+        " b ", "b team", "b-team",
+        "second team", "2nd team",
+        " ii ",
+        "ii team",
+        "reserve team",
     ]
     for kw in reserve_keywords:
         if kw in n:
