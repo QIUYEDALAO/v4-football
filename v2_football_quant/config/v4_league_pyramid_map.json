@@ -13,7 +13,11 @@
   "pyramid_map": {
     "2": {
       "league_name": "UEFA Champions League",
-      "aliases": ["欧冠", "Champions League", "UCL"],
+      "aliases": [
+        "欧冠",
+        "Champions League",
+        "UCL"
+      ],
       "country": null,
       "pyramid_group": null,
       "tier": null,
@@ -21,7 +25,11 @@
     },
     "3": {
       "league_name": "UEFA Europa League",
-      "aliases": ["欧联杯", "Europa League", "UEL"],
+      "aliases": [
+        "欧联杯",
+        "Europa League",
+        "UEL"
+      ],
       "country": null,
       "pyramid_group": null,
       "tier": null,
@@ -29,7 +37,11 @@
     },
     "10": {
       "league_name": "Friendlies",
-      "aliases": ["友谊赛", "Friendly", "Club Friendlies"],
+      "aliases": [
+        "友谊赛",
+        "Friendly",
+        "Club Friendlies"
+      ],
       "country": null,
       "pyramid_group": null,
       "tier": null,
@@ -37,7 +49,10 @@
     },
     "11": {
       "league_name": "Copa Sudamericana",
-      "aliases": ["南美杯", "Sudamericana"],
+      "aliases": [
+        "南美杯",
+        "Sudamericana"
+      ],
       "country": null,
       "pyramid_group": null,
       "tier": null,
@@ -45,7 +60,10 @@
     },
     "13": {
       "league_name": "Copa Libertadores",
-      "aliases": ["自由杯", "Libertadores"],
+      "aliases": [
+        "自由杯",
+        "Libertadores"
+      ],
       "country": null,
       "pyramid_group": null,
       "tier": null,
@@ -53,7 +71,11 @@
     },
     "39": {
       "league_name": "Premier League",
-      "aliases": ["英超", "EPL", "English Premier League"],
+      "aliases": [
+        "英超",
+        "EPL",
+        "English Premier League"
+      ],
       "country": "England",
       "pyramid_group": "ENG_PRO",
       "tier": 1,
@@ -61,7 +83,10 @@
     },
     "40": {
       "league_name": "Championship",
-      "aliases": ["英冠", "EFL Championship"],
+      "aliases": [
+        "英冠",
+        "EFL Championship"
+      ],
       "country": "England",
       "pyramid_group": "ENG_PRO",
       "tier": 2,
@@ -69,7 +94,10 @@
     },
     "61": {
       "league_name": "Ligue 1",
-      "aliases": ["法甲", "Ligue 1 Uber Eats"],
+      "aliases": [
+        "法甲",
+        "Ligue 1 Uber Eats"
+      ],
       "country": "France",
       "pyramid_group": "FRA_PRO",
       "tier": 1,
@@ -77,7 +105,10 @@
     },
     "62": {
       "league_name": "Ligue 2",
-      "aliases": ["法乙", "Ligue 2 BKT"],
+      "aliases": [
+        "法乙",
+        "Ligue 2 BKT"
+      ],
       "country": "France",
       "pyramid_group": "FRA_PRO",
       "tier": 2,
@@ -85,7 +116,10 @@
     },
     "71": {
       "league_name": "Brasileirão Série A",
-      "aliases": ["巴西甲", "Brasileirão"],
+      "aliases": [
+        "巴西甲",
+        "Brasileirão"
+      ],
       "country": "Brazil",
       "pyramid_group": "BRA_PRO",
       "tier": 1,
@@ -93,7 +127,10 @@
     },
     "78": {
       "league_name": "Bundesliga",
-      "aliases": ["德甲", "German Bundesliga"],
+      "aliases": [
+        "德甲",
+        "German Bundesliga"
+      ],
       "country": "Germany",
       "pyramid_group": "DEU_PRO",
       "tier": 1,
@@ -101,7 +138,10 @@
     },
     "79": {
       "league_name": "2. Bundesliga",
-      "aliases": ["德乙", "German 2. Bundesliga"],
+      "aliases": [
+        "德乙",
+        "German 2. Bundesliga"
+      ],
       "country": "Germany",
       "pyramid_group": "DEU_PRO",
       "tier": 2,
@@ -109,7 +149,10 @@
     },
     "88": {
       "league_name": "Eredivisie",
-      "aliases": ["荷甲", "Dutch Eredivisie"],
+      "aliases": [
+        "荷甲",
+        "Dutch Eredivisie"
+      ],
       "country": "Netherlands",
       "pyramid_group": "NLD_PRO",
       "tier": 1,
@@ -117,7 +160,10 @@
     },
     "94": {
       "league_name": "Primeira Liga",
-      "aliases": ["葡超", "Liga Portugal"],
+      "aliases": [
+        "葡超",
+        "Liga Portugal"
+      ],
       "country": "Portugal",
       "pyramid_group": "PRT_PRO",
       "tier": 1,
@@ -125,7 +171,10 @@
     },
     "98": {
       "league_name": "J1 League",
-      "aliases": ["日职联", "J.League"],
+      "aliases": [
+        "日职联",
+        "J.League"
+      ],
       "country": "Japan",
       "pyramid_group": "JPN_PRO",
       "tier": 1,
@@ -133,7 +182,10 @@
     },
     "103": {
       "league_name": "Eliteserien",
-      "aliases": ["挪超", "Norwegian Eliteserien"],
+      "aliases": [
+        "挪超",
+        "Norwegian Eliteserien"
+      ],
       "country": "Norway",
       "pyramid_group": "NOR_PRO",
       "tier": 1,
@@ -141,7 +193,10 @@
     },
     "106": {
       "league_name": "Ekstraklasa",
-      "aliases": ["波兰超", "Polish Ekstraklasa"],
+      "aliases": [
+        "波兰超",
+        "Polish Ekstraklasa"
+      ],
       "country": "Poland",
       "pyramid_group": "POL_PRO",
       "tier": 1,
@@ -149,7 +204,10 @@
     },
     "113": {
       "league_name": "Allsvenskan",
-      "aliases": ["瑞典超", "Swedish Allsvenskan"],
+      "aliases": [
+        "瑞典超",
+        "Swedish Allsvenskan"
+      ],
       "country": "Sweden",
       "pyramid_group": "SWE_PRO",
       "tier": 1,
@@ -157,7 +215,10 @@
     },
     "119": {
       "league_name": "Superliga",
-      "aliases": ["丹超", "Danish Superliga"],
+      "aliases": [
+        "丹超",
+        "Danish Superliga"
+      ],
       "country": "Denmark",
       "pyramid_group": "DNK_PRO",
       "tier": 1,
@@ -165,7 +226,10 @@
     },
     "128": {
       "league_name": "Liga Profesional Argentina",
-      "aliases": ["阿甲", "Argentine Primera"],
+      "aliases": [
+        "阿甲",
+        "Argentine Primera"
+      ],
       "country": "Argentina",
       "pyramid_group": "ARG_PRO",
       "tier": 1,
@@ -173,7 +237,10 @@
     },
     "135": {
       "league_name": "Serie A",
-      "aliases": ["意甲", "Italian Serie A"],
+      "aliases": [
+        "意甲",
+        "Italian Serie A"
+      ],
       "country": "Italy",
       "pyramid_group": "ITA_PRO",
       "tier": 1,
@@ -181,7 +248,10 @@
     },
     "136": {
       "league_name": "Serie B",
-      "aliases": ["意乙", "Italian Serie B"],
+      "aliases": [
+        "意乙",
+        "Italian Serie B"
+      ],
       "country": "Italy",
       "pyramid_group": "ITA_PRO",
       "tier": 2,
@@ -189,7 +259,11 @@
     },
     "140": {
       "league_name": "La Liga",
-      "aliases": ["西甲", "Spanish La Liga", "Primera División"],
+      "aliases": [
+        "西甲",
+        "Spanish La Liga",
+        "Primera División"
+      ],
       "country": "Spain",
       "pyramid_group": "ESP_PRO",
       "tier": 1,
@@ -197,7 +271,11 @@
     },
     "141": {
       "league_name": "La Liga 2",
-      "aliases": ["西乙", "Spanish Segunda División", "Segunda División"],
+      "aliases": [
+        "西乙",
+        "Spanish Segunda División",
+        "Segunda División"
+      ],
       "country": "Spain",
       "pyramid_group": "ESP_PRO",
       "tier": 2,
@@ -205,7 +283,11 @@
     },
     "144": {
       "league_name": "Pro League",
-      "aliases": ["比甲", "Belgian Pro League", "Jupiler Pro League"],
+      "aliases": [
+        "比甲",
+        "Belgian Pro League",
+        "Jupiler Pro League"
+      ],
       "country": "Belgium",
       "pyramid_group": "BEL_PRO",
       "tier": 1,
@@ -213,7 +295,10 @@
     },
     "164": {
       "league_name": "Besta deild karla",
-      "aliases": ["冰岛超", "Icelandic Besta deild"],
+      "aliases": [
+        "冰岛超",
+        "Icelandic Besta deild"
+      ],
       "country": "Iceland",
       "pyramid_group": "ISL_PRO",
       "tier": 1,
@@ -221,7 +306,10 @@
     },
     "169": {
       "league_name": "Chinese Super League",
-      "aliases": ["中超", "CSL"],
+      "aliases": [
+        "中超",
+        "CSL"
+      ],
       "country": "China",
       "pyramid_group": "CHN_PRO",
       "tier": 1,
@@ -229,7 +317,10 @@
     },
     "172": {
       "league_name": "Parva Liga",
-      "aliases": ["保甲", "Bulgarian First League"],
+      "aliases": [
+        "保甲",
+        "Bulgarian First League"
+      ],
       "country": "Bulgaria",
       "pyramid_group": "BGR_PRO",
       "tier": 1,
@@ -237,7 +328,10 @@
     },
     "179": {
       "league_name": "Scottish Premiership",
-      "aliases": ["苏超", "Scottish Premiership"],
+      "aliases": [
+        "苏超",
+        "Scottish Premiership"
+      ],
       "country": "Scotland",
       "pyramid_group": "SCO_PRO",
       "tier": 1,
@@ -245,7 +339,10 @@
     },
     "188": {
       "league_name": "A-League Men",
-      "aliases": ["澳超", "A-League"],
+      "aliases": [
+        "澳超",
+        "A-League"
+      ],
       "country": "Australia",
       "pyramid_group": "AUS_PRO",
       "tier": 1,
@@ -253,7 +350,10 @@
     },
     "197": {
       "league_name": "Super League Greece",
-      "aliases": ["希腊超", "Greek Super League"],
+      "aliases": [
+        "希腊超",
+        "Greek Super League"
+      ],
       "country": "Greece",
       "pyramid_group": "GRC_PRO",
       "tier": 1,
@@ -261,7 +361,10 @@
     },
     "203": {
       "league_name": "Süper Lig",
-      "aliases": ["土超", "Turkish Süper Lig"],
+      "aliases": [
+        "土超",
+        "Turkish Süper Lig"
+      ],
       "country": "Turkey",
       "pyramid_group": "TUR_PRO",
       "tier": 1,
@@ -269,7 +372,10 @@
     },
     "207": {
       "league_name": "Swiss Super League",
-      "aliases": ["瑞士超", "Swiss Super League"],
+      "aliases": [
+        "瑞士超",
+        "Swiss Super League"
+      ],
       "country": "Switzerland",
       "pyramid_group": "CHE_PRO",
       "tier": 1,
@@ -277,7 +383,11 @@
     },
     "210": {
       "league_name": "Hrvatska NL",
-      "aliases": ["克亚甲", "Croatian HNL", "HNL"],
+      "aliases": [
+        "克亚甲",
+        "Croatian HNL",
+        "HNL"
+      ],
       "country": "Croatia",
       "pyramid_group": "HRV_PRO",
       "tier": 1,
@@ -285,7 +395,10 @@
     },
     "218": {
       "league_name": "Austrian Bundesliga",
-      "aliases": ["奥甲", "Austrian Bundesliga"],
+      "aliases": [
+        "奥甲",
+        "Austrian Bundesliga"
+      ],
       "country": "Austria",
       "pyramid_group": "AUT_PRO",
       "tier": 1,
@@ -293,7 +406,10 @@
     },
     "233": {
       "league_name": "Egyptian Premier League",
-      "aliases": ["埃及超", "Egyptian Premier League"],
+      "aliases": [
+        "埃及超",
+        "Egyptian Premier League"
+      ],
       "country": "Egypt",
       "pyramid_group": "EGY_PRO",
       "tier": 1,
@@ -301,7 +417,10 @@
     },
     "235": {
       "league_name": "Russian Premier League",
-      "aliases": ["俄超", "RPL"],
+      "aliases": [
+        "俄超",
+        "RPL"
+      ],
       "country": "Russia",
       "pyramid_group": "RUS_PRO",
       "tier": 1,
@@ -309,7 +428,10 @@
     },
     "244": {
       "league_name": "Veikkausliiga",
-      "aliases": ["芬超", "Finnish Veikkausliiga"],
+      "aliases": [
+        "芬超",
+        "Finnish Veikkausliiga"
+      ],
       "country": "Finland",
       "pyramid_group": "FIN_PRO",
       "tier": 1,
@@ -317,7 +439,10 @@
     },
     "253": {
       "league_name": "Major League Soccer",
-      "aliases": ["美职业", "MLS"],
+      "aliases": [
+        "美职业",
+        "MLS"
+      ],
       "country": "USA",
       "pyramid_group": "USA_PRO",
       "tier": 1,
@@ -325,7 +450,10 @@
     },
     "262": {
       "league_name": "Liga MX",
-      "aliases": ["墨西联", "Mexican Liga MX"],
+      "aliases": [
+        "墨西联",
+        "Mexican Liga MX"
+      ],
       "country": "Mexico",
       "pyramid_group": "MEX_PRO",
       "tier": 1,
@@ -333,7 +461,10 @@
     },
     "268": {
       "league_name": "Primera División",
-      "aliases": ["乌拉甲", "Uruguayan Primera"],
+      "aliases": [
+        "乌拉甲",
+        "Uruguayan Primera"
+      ],
       "country": "Uruguay",
       "pyramid_group": "URY_PRO",
       "tier": 1,
@@ -341,7 +472,10 @@
     },
     "271": {
       "league_name": "NB I",
-      "aliases": ["匈甲", "Hungarian NB I"],
+      "aliases": [
+        "匈甲",
+        "Hungarian NB I"
+      ],
       "country": "Hungary",
       "pyramid_group": "HUN_PRO",
       "tier": 1,
@@ -349,7 +483,10 @@
     },
     "274": {
       "league_name": "Liga 1",
-      "aliases": ["印尼超", "Indonesian Liga 1"],
+      "aliases": [
+        "印尼超",
+        "Indonesian Liga 1"
+      ],
       "country": "Indonesia",
       "pyramid_group": "IDN_PRO",
       "tier": 1,
@@ -357,7 +494,10 @@
     },
     "283": {
       "league_name": "Liga I",
-      "aliases": ["罗甲", "Romanian Liga I"],
+      "aliases": [
+        "罗甲",
+        "Romanian Liga I"
+      ],
       "country": "Romania",
       "pyramid_group": "ROU_PRO",
       "tier": 1,
@@ -365,7 +505,10 @@
     },
     "286": {
       "league_name": "Super Liga",
-      "aliases": ["塞尔超", "Serbian Super Liga"],
+      "aliases": [
+        "塞尔超",
+        "Serbian Super Liga"
+      ],
       "country": "Serbia",
       "pyramid_group": "SRB_PRO",
       "tier": 1,
@@ -373,7 +516,10 @@
     },
     "292": {
       "league_name": "K League 1",
-      "aliases": ["韩K联", "Korean K League 1"],
+      "aliases": [
+        "韩K联",
+        "Korean K League 1"
+      ],
       "country": "South Korea",
       "pyramid_group": "KOR_PRO",
       "tier": 1,
@@ -381,7 +527,10 @@
     },
     "301": {
       "league_name": "UAE Pro League",
-      "aliases": ["阿联酋超", "UAE Pro League"],
+      "aliases": [
+        "阿联酋超",
+        "UAE Pro League"
+      ],
       "country": "UAE",
       "pyramid_group": "ARE_PRO",
       "tier": 1,
@@ -389,7 +538,11 @@
     },
     "307": {
       "league_name": "Saudi Pro League",
-      "aliases": ["沙特联", "Saudi Pro League", "SPL"],
+      "aliases": [
+        "沙特联",
+        "Saudi Pro League",
+        "SPL"
+      ],
       "country": "Saudi Arabia",
       "pyramid_group": "SAU_PRO",
       "tier": 1,
@@ -397,7 +550,10 @@
     },
     "323": {
       "league_name": "Indian Super League",
-      "aliases": ["印度超", "ISL"],
+      "aliases": [
+        "印度超",
+        "ISL"
+      ],
       "country": "India",
       "pyramid_group": "IND_PRO",
       "tier": 1,
@@ -405,7 +561,10 @@
     },
     "332": {
       "league_name": "Super Liga",
-      "aliases": ["斯洛伐超", "Slovak Super Liga"],
+      "aliases": [
+        "斯洛伐超",
+        "Slovak Super Liga"
+      ],
       "country": "Slovakia",
       "pyramid_group": "SVK_PRO",
       "tier": 1,
@@ -413,7 +572,10 @@
     },
     "333": {
       "league_name": "Ukrainian Premier League",
-      "aliases": ["乌克超", "UPL"],
+      "aliases": [
+        "乌克超",
+        "UPL"
+      ],
       "country": "Ukraine",
       "pyramid_group": "UKR_PRO",
       "tier": 1,
@@ -421,7 +583,11 @@
     },
     "342": {
       "league_name": "Armenian Premier League",
-      "aliases": ["亚美尼亚超", "Premier League", "Fastex Premier League"],
+      "aliases": [
+        "亚美尼亚超",
+        "Premier League",
+        "Fastex Premier League"
+      ],
       "country": "Armenia",
       "pyramid_group": "ARM_PRO",
       "tier": 1,
@@ -429,7 +595,10 @@
     },
     "344": {
       "league_name": "Primera División",
-      "aliases": ["玻利甲", "Bolivian Primera"],
+      "aliases": [
+        "玻利甲",
+        "Bolivian Primera"
+      ],
       "country": "Bolivia",
       "pyramid_group": "BOL_PRO",
       "tier": 1,
@@ -437,7 +606,10 @@
     },
     "345": {
       "league_name": "Fortuna Liga",
-      "aliases": ["捷克甲", "Czech First League"],
+      "aliases": [
+        "捷克甲",
+        "Czech First League"
+      ],
       "country": "Czech Republic",
       "pyramid_group": "CZE_PRO",
       "tier": 1,
@@ -445,7 +617,10 @@
     },
     "357": {
       "league_name": "League of Ireland Premier Division",
-      "aliases": ["爱超", "LOI Premier Division"],
+      "aliases": [
+        "爱超",
+        "LOI Premier Division"
+      ],
       "country": "Ireland",
       "pyramid_group": "IRL_PRO",
       "tier": 1,
@@ -453,7 +628,10 @@
     },
     "362": {
       "league_name": "A Lyga",
-      "aliases": ["立陶甲", "Lithuanian A Lyga"],
+      "aliases": [
+        "立陶甲",
+        "Lithuanian A Lyga"
+      ],
       "country": "Lithuania",
       "pyramid_group": "LTU_PRO",
       "tier": 1,
@@ -461,9 +639,59 @@
     },
     "418": {
       "league_name": "Premyer Liqa",
-      "aliases": ["阿塞超", "Azerbaijan Premier League"],
+      "aliases": [
+        "阿塞超",
+        "Azerbaijan Premier League"
+      ],
       "country": "Azerbaijan",
       "pyramid_group": "AZE_PRO",
+      "tier": 1,
+      "competition_type": "league"
+    },
+    "76": {
+      "league_name": "Serie D",
+      "aliases": [
+        "意丁",
+        "Italian Serie D"
+      ],
+      "country": "Italy",
+      "pyramid_group": "ITA_PRO",
+      "tier": 4,
+      "competition_type": "league"
+    },
+    "170": {
+      "league_name": "League One",
+      "aliases": [
+        "中甲",
+        "China League One",
+        "Chinese League One"
+      ],
+      "country": "China",
+      "pyramid_group": "CHN_PRO",
+      "tier": 2,
+      "competition_type": "league"
+    },
+    "222": {
+      "league_name": "Regionalliga",
+      "aliases": [
+        "奥地联",
+        "Austrian Regionalliga",
+        "Regionalliga Ost"
+      ],
+      "country": "Austria",
+      "pyramid_group": "AUT_PRO",
+      "tier": 3,
+      "competition_type": "league"
+    },
+    "363": {
+      "league_name": "Premier League",
+      "aliases": [
+        "埃塞超",
+        "Ethiopian Premier League",
+        "Ethiopia Premier League"
+      ],
+      "country": "Ethiopia",
+      "pyramid_group": "ETH_PRO",
       "tier": 1,
       "competition_type": "league"
     }
