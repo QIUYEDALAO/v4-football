@@ -160,7 +160,7 @@ def _get_default_bet_params(candidates_list: list, live_daily: dict) -> dict:
 
 
 def _extract_candidates(view: dict, live_daily: dict) -> dict:
-    """提取今日候选信息"""
+    """提取今日候选信息（含 WHITELIST_57 / OUTSIDE_57 分层）"""
     defaults = _get_default_bet_params(
         (view.get("A_candidates") or []) + (view.get("B_candidates") or []),
         live_daily,
@@ -200,6 +200,10 @@ def _extract_candidates(view: dict, live_daily: dict) -> dict:
             "recommended_lines": ["O0.75", "O1", "O1.25", "O1.5", "O2"],
             "already_bet": False,
             "settled": False,
+            # WHITELIST_57 / OUTSIDE_57 分层字段
+            "source_group": r.get("source_group") or "WHITELIST_57",
+            "is_in_57_whitelist": r.get("is_in_57_whitelist", True),
+            "fixture_universe": view.get("fixture_universe") or "whitelist",
         })
 
     for r in (view.get("B_candidates") or []):
@@ -233,6 +237,10 @@ def _extract_candidates(view: dict, live_daily: dict) -> dict:
             "recommended_lines": ["O0.75", "O1", "O1.25", "O1.5", "O2"],
             "already_bet": False,
             "settled": False,
+            # WHITELIST_57 / OUTSIDE_57 分层字段
+            "source_group": r.get("source_group") or "WHITELIST_57",
+            "is_in_57_whitelist": r.get("is_in_57_whitelist", True),
+            "fixture_universe": view.get("fixture_universe") or "whitelist",
         })
 
     for r in (view.get("C_candidates") or []):
@@ -247,13 +255,27 @@ def _extract_candidates(view: dict, live_daily: dict) -> dict:
             "reason": r.get("reason") or r.get("skip_reason") or "",
         })
 
+    # ── Compute split statistics ──
+    a_wl57 = sum(1 for r in a_candidates if r.get("source_group") == "WHITELIST_57")
+    a_out57 = sum(1 for r in a_candidates if r.get("source_group") == "OUTSIDE_57")
+    b_wl57 = sum(1 for r in b_candidates if r.get("source_group") == "WHITELIST_57")
+    b_out57 = sum(1 for r in b_candidates if r.get("source_group") == "OUTSIDE_57")
+
     return {
         "scan_date": view.get("scan_date") or "",
         "source_window": view.get("source_window") or "",
+        "fixture_universe": view.get("fixture_universe") or "whitelist",
+        "source_group": view.get("source_group"),
         "a_count": view.get("A_count") or len(a_candidates),
         "b_count": view.get("B_count") or len(b_candidates),
         "skip_count": view.get("SKIP_count") or len(skip_candidates),
         "scan_total": view.get("scan_total") or 0,
+        "a_whitelist57_count": a_wl57,
+        "a_outside57_count": a_out57,
+        "b_whitelist57_count": b_wl57,
+        "b_outside57_count": b_out57,
+        "ab_whitelist57_count": a_wl57 + b_wl57,
+        "ab_outside57_count": a_out57 + b_out57,
         "a_candidates": a_candidates,
         "b_candidates": b_candidates,
         "skip_candidates": skip_candidates,
@@ -263,46 +285,62 @@ def _extract_candidates(view: dict, live_daily: dict) -> dict:
 
 def _extract_yesterday_validation(vsot: dict, *, today_str: str, vsot_path: Optional[Path] = None) -> dict:
     """从 official A/B-only truth file 提取昨日验证"""
-    # Hot overlay: if fixture-id validation result for target_date is newer than
-    # source_of_truth, prefer it to avoid stale pending display on control center.
+    # Hot overlay: prefer canonical yesterday only; DO NOT fallback to older dates.
     # Canonical yesterday target: dashboard today - 1 day.
+    def _load_hot(date_yyyymmdd: str) -> dict:
+        p = STATUS / f"v4_official_fixture_id_validation_{date_yyyymmdd}.json"
+        if not p.exists():
+            return {}
+        try:
+            return _load_json(p)
+        except Exception:
+            return {}
+
+    def _build_vsot_from_hot(base: dict, hot: dict, d: str) -> dict:
+        a_set = int(hot.get("a_settled", 0) or 0)
+        b_set = int(hot.get("b_settled", 0) or 0)
+        ab_set = int(hot.get("ab_settled", 0) or 0)
+        a_hit = int(hot.get("a_hit", 0) or 0)
+        b_hit = int(hot.get("b_hit", 0) or 0)
+        ab_hit = int(hot.get("ab_hit", 0) or 0)
+        fixtures = hot.get("fixtures") or []
+        hot_rec_a = sum(1 for f in fixtures if str((f or {}).get("grade", "")).upper() == "A")
+        hot_rec_b = sum(1 for f in fixtures if str((f or {}).get("grade", "")).upper() == "B")
+        rec_ab = int(hot.get("total_official_ab", 0) or (hot_rec_a + hot_rec_b) or ab_set)
+        rec_a = int(hot_rec_a or a_set)
+        rec_b = int(hot_rec_b or b_set)
+        return {
+            **base,
+            "yesterday_target_date": d,
+            "recommended": {"A": rec_a, "B": rec_b, "AB": rec_ab},
+            "verified": {"A": a_set, "B": b_set, "AB": ab_set},
+            "pending": {"A": max(0, rec_a - a_set), "B": max(0, rec_b - b_set), "AB": max(0, rec_ab - ab_set)},
+            "yesterday": {
+                "A": {"hit": a_hit, "settled": a_set, "display_rate": "N/A" if a_set <= 0 else f"{a_hit}/{a_set} · {a_hit*100.0/a_set:.1f}%"},
+                "B": {"hit": b_hit, "settled": b_set, "display_rate": "N/A" if b_set <= 0 else f"{b_hit}/{b_set} · {b_hit*100.0/b_set:.1f}%"},
+                "A_plus_B": {"hit": ab_hit, "settled": ab_set, "display_rate": "N/A" if ab_set <= 0 else f"{ab_hit}/{ab_set} · {ab_hit*100.0/ab_set:.1f}%"},
+                "excluded_not_settled": 0,
+                "api_errors": int(hot.get("api_errors", 0) or 0),
+            },
+        }
+
     try:
         canonical_target = (datetime.strptime(today_str, "%Y%m%d") - timedelta(days=1)).strftime("%Y%m%d")
     except Exception:
         canonical_target = str(vsot.get("yesterday_target_date") or "")
     target_date = canonical_target
+    chosen_hot = {}
     if target_date:
-        hot_path = STATUS / f"v4_official_fixture_id_validation_{target_date}.json"
         try:
-            if hot_path.exists() and (vsot_path is None or hot_path.stat().st_mtime >= vsot_path.stat().st_mtime):
-                hot = _load_json(hot_path)
-                a_set = int(hot.get("a_settled", 0) or 0)
-                b_set = int(hot.get("b_settled", 0) or 0)
-                ab_set = int(hot.get("ab_settled", 0) or 0)
-                if ab_set > 0:
-                    a_hit = int(hot.get("a_hit", 0) or 0)
-                    b_hit = int(hot.get("b_hit", 0) or 0)
-                    ab_hit = int(hot.get("ab_hit", 0) or 0)
-                    fixtures = hot.get("fixtures") or []
-                    hot_rec_a = sum(1 for f in fixtures if str((f or {}).get("grade", "")).upper() == "A")
-                    hot_rec_b = sum(1 for f in fixtures if str((f or {}).get("grade", "")).upper() == "B")
-                    rec_ab = int(hot.get("total_official_ab", 0) or (hot_rec_a + hot_rec_b) or ab_set)
-                    rec_a = int(hot_rec_a or a_set)
-                    rec_b = int(hot_rec_b or b_set)
-                    vsot = {
-                        **vsot,
-                        "yesterday_target_date": target_date,
-                        "recommended": {"A": rec_a, "B": rec_b, "AB": rec_ab},
-                        "verified": {"A": a_set, "B": b_set, "AB": ab_set},
-                        "pending": {"A": max(0, rec_a - a_set), "B": max(0, rec_b - b_set), "AB": max(0, rec_ab - ab_set)},
-                        "yesterday": {
-                            "A": {"hit": a_hit, "settled": a_set, "display_rate": "N/A" if a_set <= 0 else f"{a_hit}/{a_set} · {a_hit*100.0/a_set:.1f}%"},
-                            "B": {"hit": b_hit, "settled": b_set, "display_rate": "N/A" if b_set <= 0 else f"{b_hit}/{b_set} · {b_hit*100.0/b_set:.1f}%"},
-                            "A_plus_B": {"hit": ab_hit, "settled": ab_set, "display_rate": "N/A" if ab_set <= 0 else f"{ab_hit}/{ab_set} · {ab_hit*100.0/ab_set:.1f}%"},
-                            "excluded_not_settled": 0,
-                            "api_errors": int(hot.get("api_errors", 0) or 0),
-                        },
-                    }
+            hot = _load_hot(target_date)
+            if hot:
+                # Prefer canonical yesterday only when settled sample exists.
+                # If only recommendation exists but not settled yet, fallback to latest settled day.
+                settled = int(hot.get("ab_settled", 0) or 0)
+                if settled > 0:
+                    chosen_hot = hot
+            if chosen_hot:
+                vsot = _build_vsot_from_hot(vsot, chosen_hot, target_date)
         except Exception:
             pass
 
@@ -311,7 +349,7 @@ def _extract_yesterday_validation(vsot: dict, *, today_str: str, vsot_path: Opti
     verified = vsot.get("verified") or {}
     pending = vsot.get("pending") or {}
 
-    return {
+    out = {
         "target_date": target_date,
         "recommended": {
             "A": recommended.get("A", 0),
@@ -335,6 +373,25 @@ def _extract_yesterday_validation(vsot: dict, *, today_str: str, vsot_path: Opti
         },
         "detail_entry_url": "/intel_ops_console.html#validation",
     }
+    # Force canonical-day semantics:
+    # if canonical yesterday has no settled fixture-id validation file,
+    # do NOT inherit older summary numbers; show zero for yesterday.
+    if not chosen_hot:
+        out["recommended"] = {"A": 0, "B": 0, "AB": 0}
+        out["verified"] = {"A": 0, "B": 0, "AB": 0}
+        out["pending"] = {"A": 0, "B": 0, "AB": 0}
+        out["hit_rates"] = {
+            "A": "0/0 · 0.0%",
+            "B": "0/0 · 0.0%",
+            "AB": "0/0 · 0.0%",
+        }
+    elif int((out.get("verified") or {}).get("AB") or 0) <= 0:
+        out["hit_rates"] = {
+            "A": "0/0 · 0.0%",
+            "B": "0/0 · 0.0%",
+            "AB": "0/0 · 0.0%",
+        }
+    return out
 
 
 def _extract_cumulative_validation(tc: dict, *, vsot: dict, today_str: str) -> dict:
@@ -610,15 +667,22 @@ def build_model() -> dict:
 
     # 1. 今日候选
     cv_path, cv = _find_latest_candidate_view()
+    candidate_anchor_date = ""
+    if cv_path:
+        s = cv_path.stem.split("_")[-1]
+        if len(s) == 8 and s.isdigit():
+            candidate_anchor_date = s
     candidates = _extract_candidates(cv, live_daily)
 
     # 2. 昨日验证 — official A/B-only truth file
     vsot_path, vsot = _find_latest_validation_source_of_truth()
-    yesterday_validation = _extract_yesterday_validation(vsot, today_str=today_str, vsot_path=vsot_path)
+    # 昨日验证锚定到候选批次日（若存在），避免跨日时钟导致读取错位批次。
+    validation_anchor_date = candidate_anchor_date or today_str
+    yesterday_validation = _extract_yesterday_validation(vsot, today_str=validation_anchor_date, vsot_path=vsot_path)
 
     # 3. 验证累计 — 只读取 official A/B-only truth file
     tc_path, tc = _find_latest_true_cumulative()
-    cumulative_validation = _extract_cumulative_validation(tc, vsot=vsot, today_str=today_str)
+    cumulative_validation = _extract_cumulative_validation(tc, vsot=vsot, today_str=validation_anchor_date)
 
     # 4. 实盘 — 只从 live_bets 数据源 (已在上面提取)
     # live_bet 和 live_daily 已在 build_model 开头提取
@@ -763,6 +827,7 @@ def build_model() -> dict:
         "generated_at": datetime.now().isoformat(),
         "page_name": "V4统一作战台",
         "today_date": today_str,
+        "validation_anchor_date": validation_anchor_date,
         "data_sources": {
             "candidates": str(cv_path) if cv_path else "NOT_FOUND",
             "yesterday_validation": str(vsot_path) if vsot_path else "NOT_FOUND",
@@ -839,6 +904,43 @@ def build_model() -> dict:
             "todo_error": system_alerts,
         },
         "candidates": candidates,
+        "whitelist57_outside57_split": {
+            "fixture_universe": candidates.get("fixture_universe", "whitelist"),
+            "ab_all": {
+                "label": "AB 全量",
+                "sample_count": ab_candidate_count,
+                "hit_count": 0,
+                "miss_count": 0,
+                "pending_count": ab_candidate_count,
+                "hit_rate": "-",
+            },
+            "ab_whitelist57": {
+                "label": "AB 白名单内 (57联赛)",
+                "sample_count": candidates.get("ab_whitelist57_count", 0),
+                "hit_count": 0,
+                "miss_count": 0,
+                "pending_count": candidates.get("ab_whitelist57_count", 0),
+                "hit_rate": "-",
+            },
+            "ab_outside57": {
+                "label": "AB 白名单外",
+                "sample_count": candidates.get("ab_outside57_count", 0),
+                "hit_count": 0,
+                "miss_count": 0,
+                "pending_count": candidates.get("ab_outside57_count", 0),
+                "hit_rate": "-",
+            },
+            "a_all": {
+                "sample_count": candidates["a_count"],
+                "whitelist57": candidates.get("a_whitelist57_count", 0),
+                "outside57": candidates.get("a_outside57_count", 0),
+            },
+            "b_all": {
+                "sample_count": candidates["b_count"],
+                "whitelist57": candidates.get("b_whitelist57_count", 0),
+                "outside57": candidates.get("b_outside57_count", 0),
+            },
+        },
         "skip": skip_node,
         "yesterday_validation_detail": yesterday_validation,
         "cumulative_validation_detail": cumulative_validation,
