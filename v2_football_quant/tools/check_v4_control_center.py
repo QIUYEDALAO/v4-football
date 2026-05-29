@@ -141,7 +141,7 @@ def main() -> int:
             blockers.append(f"banned_token_visible:{tok}")
 
     # 9) style/layout unchanged lightweight guard: key class and CSS tokens exist
-    for token in [".topbar", ".kpi-grid", ".primary-layout", ".candidate", ".quick-form", ".nav", ".module-grid"]:
+    for token in [".topbar", ".kpi-grid", ".main-layout", ".candidate", ".bet-inline", ".nav", ".cand-actions"]:
         if token not in html:
             blockers.append(f"layout_css_token_missing:{token}")
 
