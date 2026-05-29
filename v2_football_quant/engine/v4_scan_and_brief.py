@@ -192,10 +192,20 @@ def _run_parallel_scan(args, scan_date: str, today_key: str, wd, log_path: Path)
             "away": r.get("away_team", "?"),
             "league": r.get("league_name", "?"),
             "grade": grade,
-            "market_scores": {},
-            "factors": {},
+            "official_grade": grade,
+            "market_scores": r.get("market_scores", {}) if isinstance(r.get("market_scores"), dict) else {},
+            "factors": r.get("factors", {}) if isinstance(r.get("factors"), dict) else {},
+            "score_pack": r.get("score_pack") if isinstance(r.get("score_pack"), dict) else {},
+            "ht_score": r.get("ht_score"),
+            "h2h_score": r.get("h2h_score"),
+            "recent_form_summary": r.get("recent_form_summary"),
+            "source_trace": r.get("source_trace", "parallel_adapter"),
+            "scoring_complete": r.get("status") == "DONE",
             "ht_ou_lines": [],
         }
+        if not scout_entry["market_scores"] or not scout_entry["factors"]:
+            scout_entry["explain_factors_missing"] = True
+            scout_entry["official_grade_preserved"] = True
         # Merge recommendation summary if available
         rec = r.get("recommendation_summary", {})
         if isinstance(rec, dict):
