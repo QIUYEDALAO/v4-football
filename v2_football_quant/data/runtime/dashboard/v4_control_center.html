@@ -598,6 +598,27 @@ function renderCandidates(){
   if(demoCount){ toast(`临时演示已启用：${demoCount}场（A级优先→按开赛时间）`); }
 }
 
+
+function buildScoreSummary(x){
+  const parts=[];
+  const sp=x.score_pack&&x.score_pack.scores;
+  if(sp){
+    const ht=fmtPct(sp.HT_LIVE_OVER)||'—';
+    const ft=fmtPct(sp.FULLTIME_OVER)||'—';
+    const sh=fmtPct(sp.SECOND_HALF_OVER)||'—';
+    parts.push('HT '+ht,'全场 '+ft,'下半场 '+sh);
+    if(x.h2h_official_count) parts.push('H2H样本 '+x.h2h_official_count+'场');
+    if(x.h2h_score) parts.push('H2H评分 '+fmtPct(x.h2h_score));
+    if(x.late_fh_pressure!=null) parts.push('11-45压力 '+fmtPct(x.late_fh_pressure));
+    return '评分摘要 '+parts.join(' · ');
+  }
+  const ms=x.market_scores;
+  if(ms&&Object.keys(ms).length){
+    return '评分摘要 '+Object.entries(ms).map(([k,v])=>k+' '+fmtPct(v)).join(' · ');
+  }
+  return '解释数据缺失，不影响 official grade';
+}
+
 function renderCandidate(x,i){
   const r=String(first(x.rating,x.grade,'A')).toUpperCase();
   const league=safe(first(x.league_cn,x.league),'联赛');
@@ -615,11 +636,7 @@ function renderCandidate(x,i){
     ? `进球时间分布 ${distRaw}`
     : ((p0!==null||p1!==null||p2!==null)
       ? `进球时间分布 0-15 ${p0||'—'} · 16-30 ${p1||'—'} · 31-45 ${p2||'—'}`
-      : (x.score_pack&&x.score_pack.scores
-        ? `评分摘要 HT ${fmtPct(x.score_pack.scores.HT_LIVE_OVER)||'—'} · 全场 ${fmtPct(x.score_pack.scores.FULLTIME_OVER)||'—'} · 下半场 ${fmtPct(x.score_pack.scores.SECOND_HALF_OVER)||'—'}${x.h2h_official_count?` · H2H样本 ${x.h2h_official_count}场`:''}${x.h2h_score?` · H2H评分 ${fmtPct(x.h2h_score)}`:''}${x.late_fh_pressure!=null?` · 11-45压力 ${fmtPct(x.late_fh_pressure)}`:''}`
-        : (x.market_scores&&Object.keys(x.market_scores).length
-          ? `评分摘要 ${Object.entries(x.market_scores).map(([k,v])=>`${k} ${fmtPct(v)}`).join(' · ')}`
-          : '解释数据缺失，不影响 official grade'));
+      : buildScoreSummary(x));
   const lines=['O0.75','O1','O1.25','O1.5','O2'];
   const lineOpts=lines.map(l=>`<option${l===dl?' selected':''}>${l}</option>`).join('');
   const stateTag=x.no_bet_recorded?(x.no_bet_reason_code==='EARLY_GOAL'?'未投：早进球':'未投：已记录'):(x.settled?'已结算':(x.already_bet?'已投注':'未投注'));
