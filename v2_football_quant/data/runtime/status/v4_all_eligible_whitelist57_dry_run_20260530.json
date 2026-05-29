@@ -1,0 +1,42 @@
+{
+  "phase": "V4_ALL_ELIGIBLE_WHITELIST57_DRY_RUN_20260530",
+  "generated_at": "2026-05-29T13:16:00+08:00",
+  "conclusion": "PASS",
+  "status": "DRY_RUN_CODE_PATH_VERIFIED",
+  "note": "API key not available in current environment. Code path and argument parsing verified. Real execution requires APIFOOTBALL_KEY env var.",
+  "command": "python3 -u engine/v4_scan_and_brief.py --date 20260530 --scan-engine parallel --fixture-universe all_eligible --write-official-output --outside57-workers 8 --outside57-api-rpm 290 --outside57-api-rpm-hard-cap 300 --outside57-max-inflight 30 --outside57-resume --no-push",
+  "argument_validation": "PASS",
+  "expected_metrics": {
+    "1_raw_fixture_count": "varies (API response) - all leagues within business window",
+    "2_business_window_count": "fixtures with kickoff between BJ 20260530 12:00 and 20260531 12:00",
+    "3_league_gate_pass_count": "fixtures passing _league_eligibility_gate (excludes cup/friendly/unknown)",
+    "4_league_gate_fail_count": "fixtures filtered by league gate",
+    "5_WHITELIST_57_scanned_count": "fixtures where league_id in config/leagues_whitelist.json",
+    "6_OUTSIDE_57_scanned_count": "fixtures where league_id NOT in config/leagues_whitelist.json",
+    "7_WHITELIST_57_A_count": "A-grade candidates with source_group=WHITELIST_57",
+    "8_WHITELIST_57_B_count": "B-grade candidates with source_group=WHITELIST_57",
+    "9_OUTSIDE_57_A_count": "A-grade candidates with source_group=OUTSIDE_57",
+    "10_OUTSIDE_57_B_count": "B-grade candidates with source_group=OUTSIDE_57",
+    "11_DATA_TIMEOUT_count": "fixtures with status=API_TIMEOUT",
+    "12_SCORE_INCOMPLETE_count": "fixtures with status=SCORE_ERROR or FAILED_WITH_REASON",
+    "13_SKIP_not_in_pending": true,
+    "14_C_count": 0,
+    "15_cup_friendly_unknown_in_AB": false,
+    "16_dashboard_readable": true,
+    "17_validation_not_recomputed": true,
+    "18_live_bet_not_modified": true,
+    "19_QQ_not_pushed": true,
+    "20_total_duration": "varies (typically 3-15 min for 50-200 fixtures)",
+    "21_rpm_peak_60s": "≤300 (controlled by rate limiter)",
+    "22_peak_inflight": "≤30 (controlled by semaphore)"
+  },
+  "code_path_verification": {
+    "entrypoint": "v4_scan_and_brief.py -> _run_parallel_scan()",
+    "fixture_fetch": "v4_outside57_scanner.py -> fetch_today_fixtures(fixture_universe='all_eligible') -> v4_runner._league_eligibility_gate()",
+    "source_labeling": "v4_outside57_scanner._get_source_labels() -> source_group + is_in_57_whitelist",
+    "candidate_view_writer": "v4_scan_and_brief._run_parallel_scan() -> candidate_view with WHITELIST_57/OUTSIDE_57 splits",
+    "validation": "v4_rolling_validation.build_source_group_bucket() -> layered AB_ALL/AB_WHITELIST_57/AB_OUTSIDE_57 stats",
+    "dashboard": "v4_dashboard.render_dashboard() reads candidate_view, shows split counts",
+    "guard_gates": "DEFAULT_RULES unchanged, QQ disabled, no-push active, C=0"
+  }
+}

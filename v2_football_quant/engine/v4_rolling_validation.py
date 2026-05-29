@@ -158,6 +158,93 @@ def build_grade_bucket(records: list[dict]) -> dict:
     return {"grade_buckets": buckets, "counts": counts}
 
 
+def build_source_group_bucket(records: list[dict]) -> dict:
+    """Build layered split statistics by source_group (WHITELIST_57 / OUTSIDE_57 / UNKNOWN_LEGACY).
+
+    Only official A/B (not SKIP, not C, not DATA_TIMEOUT, not SCORE_INCOMPLETE)
+    enter the validation source.
+    """
+    groups = {
+        "AB_ALL": {"sample_count": 0, "hit_count": 0, "miss_count": 0, "hit_rate": 0.0, "pending_count": 0},
+        "AB_WHITELIST_57": {"sample_count": 0, "hit_count": 0, "miss_count": 0, "hit_rate": 0.0, "pending_count": 0},
+        "AB_OUTSIDE_57": {"sample_count": 0, "hit_count": 0, "miss_count": 0, "hit_rate": 0.0, "pending_count": 0},
+        "AB_UNKNOWN_LEGACY": {"sample_count": 0, "hit_count": 0, "miss_count": 0, "hit_rate": 0.0, "pending_count": 0},
+        "A_ALL": {"sample_count": 0, "hit_count": 0, "miss_count": 0, "hit_rate": 0.0, "pending_count": 0},
+        "A_WHITELIST_57": {"sample_count": 0, "hit_count": 0, "miss_count": 0, "hit_rate": 0.0, "pending_count": 0},
+        "A_OUTSIDE_57": {"sample_count": 0, "hit_count": 0, "miss_count": 0, "hit_rate": 0.0, "pending_count": 0},
+        "B_ALL": {"sample_count": 0, "hit_count": 0, "miss_count": 0, "hit_rate": 0.0, "pending_count": 0},
+        "B_WHITELIST_57": {"sample_count": 0, "hit_count": 0, "miss_count": 0, "hit_rate": 0.0, "pending_count": 0},
+        "B_OUTSIDE_57": {"sample_count": 0, "hit_count": 0, "miss_count": 0, "hit_rate": 0.0, "pending_count": 0},
+    }
+
+    for rec in records:
+        cl = classify_rolling_sample(rec)
+        if cl.get("excluded"):
+            continue
+        if cl.get("bucket") not in ("hit", "miss"):
+            if cl.get("bucket") in ("skip", "c_observation"):
+                continue
+            continue
+        if cl.get("grade") not in ("A", "B"):
+            continue
+
+        grade = cl["grade"]
+        bucket = cl["bucket"]
+        source_group = rec.get("source_group")
+
+        # Resolve source_group
+        if source_group in ("WHITELIST_57", "OUTSIDE_57"):
+            sg = source_group
+        else:
+            sg = "UNKNOWN_LEGACY"
+
+        is_hit = (bucket == "hit")
+
+        # AB_ALL
+        groups["AB_ALL"]["sample_count"] += 1
+        if is_hit:
+            groups["AB_ALL"]["hit_count"] += 1
+        else:
+            groups["AB_ALL"]["miss_count"] += 1
+
+        # AB_<source_group>
+        sg_ab_key = f"AB_{sg}"
+        if sg_ab_key in groups:
+            groups[sg_ab_key]["sample_count"] += 1
+            if is_hit:
+                groups[sg_ab_key]["hit_count"] += 1
+            else:
+                groups[sg_ab_key]["miss_count"] += 1
+
+        # A/B_ALL
+        grade_all_key = f"{grade}_ALL"
+        if grade_all_key in groups:
+            groups[grade_all_key]["sample_count"] += 1
+            if is_hit:
+                groups[grade_all_key]["hit_count"] += 1
+            else:
+                groups[grade_all_key]["miss_count"] += 1
+
+        # A/B_<source_group>
+        grade_sg_key = f"{grade}_{sg}"
+        if grade_sg_key in groups:
+            groups[grade_sg_key]["sample_count"] += 1
+            if is_hit:
+                groups[grade_sg_key]["hit_count"] += 1
+            else:
+                groups[grade_sg_key]["miss_count"] += 1
+
+    # Compute hit rates
+    for key, stats in groups.items():
+        total = stats["hit_count"] + stats["miss_count"]
+        stats["hit_rate"] = round(stats["hit_count"] / total, 4) if total > 0 else 0.0
+
+    return {
+        "schema_version": "v4_rolling_validation_layered.v1",
+        "layered_stats": groups,
+    }
+
+
 def validate_rolling_input(records: list[dict]) -> list[str]:
     """Validate that records have required fields for rolling."""
     errors = []

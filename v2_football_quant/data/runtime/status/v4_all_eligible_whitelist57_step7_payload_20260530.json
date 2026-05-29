@@ -1,0 +1,40 @@
+{
+  "phase": "V4_ALL_ELIGIBLE_WHITELIST57_STEP7_PAYLOAD_20260530",
+  "generated_at": "2026-05-30T00:00:00+08:00",
+  "conclusion": "PASS",
+  "payloads": {
+    "1200_V4_DAILY_SCAN_READONLY": {
+      "time": "12:00 BJ",
+      "time_unchanged": true,
+      "entrypoint": "engine/v4_scan_and_brief.py",
+      "entrypoint_unchanged": true,
+      "new_payload": "python3 -u engine/v4_scan_and_brief.py --date $(date +%Y%m%d) --scan-engine parallel --fixture-universe all_eligible --write-official-output --outside57-workers 8 --outside57-api-rpm 290 --outside57-api-rpm-hard-cap 300 --outside57-max-inflight 30 --outside57-resume --no-push",
+      "old_payload": "python3 -u engine/v4_scan_and_brief.py --date $(date +%Y%m%d) --no-push",
+      "key_changes": [
+        "--scan-engine parallel (was serial default)",
+        "--fixture-universe all_eligible (new parameter)",
+        "--write-official-output (new flag)",
+        "--outside57-workers 8",
+        "--outside57-api-rpm 290",
+        "--outside57-api-rpm-hard-cap 300",
+        "--outside57-max-inflight 30",
+        "--outside57-resume",
+        "--no-push retained"
+      ],
+      "no_include_outside_57": true,
+      "not_using_isolated_scanner": true
+    },
+    "1300_V4_VALIDATION_DRY_RUN": {
+      "unchanged": true
+    },
+    "1300_V3V4_DASHBOARD_AFTER_SCAN_REFRESH": {
+      "unchanged": true
+    },
+    "1330_V3V4_DASHBOARD_AFTER_VALIDATION_REFRESH": {
+      "unchanged": true
+    },
+    "1400_V4_VALIDATION_DRY_RUN_FINAL_AND_DASHBOARD_REFRESH": {
+      "unchanged": true
+    }
+  }
+}

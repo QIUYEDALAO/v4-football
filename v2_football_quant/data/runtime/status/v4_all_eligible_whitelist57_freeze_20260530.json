@@ -1,0 +1,157 @@
+{
+  "phase": "V4_ALL_ELIGIBLE_WHITELIST57_FREEZE_20260530",
+  "generated_at": "2026-05-29T00:00:00+08:00",
+  "conclusion": "PASS",
+  "freeze_details": {
+    "cron_1200": {
+      "entrypoint": "engine/v4_scan_and_brief.py",
+      "payload": "python3 -u engine/v4_scan_and_brief.py --date $(date +%Y%m%d) --no-push",
+      "scan_engine": "serial",
+      "fixture_universe_flag": "NOT_PRESENT",
+      "whitelist_only": true,
+      "time_unchanged": true,
+      "no_push": true
+    },
+    "cron_1300": {
+      "tasks": [
+        "V4_VALIDATION_DRY_RUN: engine/v4_ht_result_validator.py",
+        "V3V4_DASHBOARD_AFTER_SCAN_REFRESH: tools/run_v3v4_dashboard_daily_update.py"
+      ],
+      "time_unchanged": true
+    },
+    "cron_1330": {
+      "task": "V3V4_DASHBOARD_AFTER_VALIDATION_REFRESH: tools/run_v3v4_dashboard_daily_update.py",
+      "time_unchanged": true
+    },
+    "cron_1400": {
+      "task": "V4_VALIDATION_DRY_RUN_FINAL_AND_DASHBOARD_REFRESH: tools/run_v3v4_validation_final_and_dashboard_refresh.py",
+      "time_unchanged": true
+    },
+    "business_window": {
+      "timezone": "Asia/Shanghai",
+      "start": "BJ 12:00 day D",
+      "end": "BJ 12:00 day D+1",
+      "confirmed_in_code": "v4_runner.py:L266-L280",
+      "status": "CONFIRMED"
+    },
+    "whitelist_filter": {
+      "current_mode": "HARD_FILTER",
+      "config_path": "config/leagues_whitelist.json",
+      "league_count": 59,
+      "filter_location": "v4_runner.py:L237: if not include_outside_57 and lg_id not in WL_SET: continue",
+      "include_outside_57_flag": "exists but defaults to False",
+      "parallel_mode_adapter_filter": "v4_scan_and_brief.py:L129: official_results = [r for r in results if str(r.get('league_id', '')) in wl_ids]"
+    },
+    "league_ids": {
+      "2": "欧冠",
+      "3": "欧联杯",
+      "10": "友谊赛",
+      "11": "南美杯",
+      "13": "自由杯",
+      "39": "英超",
+      "40": "英冠",
+      "61": "法甲",
+      "62": "法乙",
+      "71": "巴西甲",
+      "78": "德甲",
+      "79": "德乙",
+      "88": "荷甲",
+      "94": "葡超",
+      "98": "日职联",
+      "103": "挪超",
+      "106": "波兰超",
+      "113": "瑞典超",
+      "119": "丹超",
+      "128": "阿甲",
+      "135": "意甲",
+      "136": "意乙",
+      "140": "西甲",
+      "141": "西乙",
+      "144": "比甲",
+      "164": "冰岛超",
+      "169": "中超",
+      "172": "保甲",
+      "179": "苏超",
+      "188": "澳超",
+      "197": "希腊超",
+      "203": "土超",
+      "207": "瑞士超",
+      "210": "克亚甲",
+      "218": "奥甲",
+      "233": "埃及超",
+      "235": "俄超",
+      "244": "芬超",
+      "253": "美职业",
+      "262": "墨西联",
+      "268": "乌拉甲",
+      "271": "匈甲",
+      "274": "印尼超",
+      "283": "罗甲",
+      "286": "塞尔超",
+      "292": "韩K联",
+      "301": "阿联酋超",
+      "307": "沙特联",
+      "323": "印度超",
+      "332": "斯洛伐超",
+      "333": "乌克超",
+      "342": "亚美尼亚超",
+      "344": "玻利甲",
+      "345": "捷克甲",
+      "357": "爱超",
+      "362": "立陶甲",
+      "418": "阿塞超"
+    },
+    "candidate_view_schema": {
+      "schema_version": "v3v4_dashboard_candidate_view.v1",
+      "fields": [
+        "A_count", "B_count", "C_count", "SKIP_count",
+        "scan_total", "formal_recommendation_count",
+        "A_candidates", "B_candidates", "C_candidates",
+        "C_observation_only", "actual_send", "qq_sent",
+        "V4_QQ_ENABLED", "parsed_from_brief", "fallback_used",
+        "builder_script"
+      ],
+      "source_group_missing": true,
+      "is_in_57_whitelist_missing": true,
+      "fixture_universe_missing": true,
+      "C_count_always_zero": true,
+      "whitelist_only_filter": true
+    },
+    "validation_stats": {
+      "file": "engine/v4_rolling_validation.py",
+      "current_stats_fields": ["A", "B"],
+      "source_group_split": "NOT_PRESENT",
+      "layered_stats": "NOT_PRESENT",
+      "legacy_unknown_bucket": "NOT_PRESENT"
+    },
+    "dashboard": {
+      "file": "engine/v4_dashboard.py",
+      "reads_candidate_view": true,
+      "reads_scout": true,
+      "source_group_display": "NOT_PRESENT",
+      "whitelist_outside_split_display": "NOT_PRESENT"
+    },
+    "live_bet_pending_rules": {
+      "only_A_B_enter_pending": true,
+      "SKIP_not_in_pending": true,
+      "DATA_TIMEOUT_not_in_pending": true,
+      "SCORE_INCOMPLETE_not_in_pending": true,
+      "C_not_in_pending": true
+    },
+    "DEFAULT_RULES": {
+      "hash_sha256_16": "95d5c23488588915",
+      "rule_version": "v4_ht_recommend_20260513",
+      "file": "engine/v4_match_intelligence.py",
+      "A_min_ht_score": 70,
+      "B_min_ht_score": 60,
+      "C_min_ht_score": 50,
+      "min_for_ab": 3,
+      "min_sample_policy": "A downgrade to B if < 5, mark medium if < 8"
+    }
+  },
+  "answer": {
+    "is_whitelist_hard_filter_active": true,
+    "filter_location_confirmed": "v4_runner.py:L237 + v4_scan_and_brief.py:L129",
+    "can_freeze_proceed": true
+  }
+}

@@ -561,6 +561,8 @@ def _rows_json(rows: list[dict]) -> str:
             "htDecisionReason": ht_decision.get("reason", ""),
             "htRecGrade": rec_grade or "-",
             "htRecStatus": ht_rec.get("status", "-"),
+            "sourceGroup": r.get("source_group", "UNKNOWN"),
+            "isIn57Whitelist": bool(r.get("is_in_57_whitelist", False)),
             "htRecReason": ht_rec.get("reason", ""),
             "htRecScriptType": ht_rec.get("script_type", "-"),
             "htRecReasons": "；".join(ht_rec.get("reasons", []) or []),
@@ -691,6 +693,7 @@ def render_dashboard(date_str: str, window_mode: str = "natural") -> Path:
     live_entries = _load_json(BASE_DIR / "data" / "paper_trading" / f"v4_live_entries_{key}.json", [])
     review = _load_json(REPORT_DIR / f"v4_review_{key}.json", {})
     validation = _load_json(REPORT_DIR / f"v4_ht_recommend_validation_{key}.json", {})
+    candidate_view = _load_json(BASE_DIR / "data" / "runtime" / "status" / f"v3v4_dashboard_candidate_view_{key}.json", {})
     if not scout:
         raise FileNotFoundError(f"没有可渲染的 V4 情报数据: {scout_path}")
     rows = _enrich_records(
@@ -701,6 +704,17 @@ def render_dashboard(date_str: str, window_mode: str = "natural") -> Path:
         key,
         window_mode,
     )
+
+    # ── Merge source_group from candidate_view ──
+    cv_a_candidates = candidate_view.get("A_candidates", []) if isinstance(candidate_view, dict) else []
+    cv_b_candidates = candidate_view.get("B_candidates", []) if isinstance(candidate_view, dict) else []
+    cv_all = cv_a_candidates + cv_b_candidates
+    cv_source_map = {str(c.get("fixture_id")): c for c in cv_all}
+    for row in rows:
+        fid = str(row.get("fixture_id", ""))
+        cv_entry = cv_source_map.get(fid, {})
+        row["source_group"] = cv_entry.get("source_group") or row.get("source_group", "UNKNOWN")
+        row["is_in_57_whitelist"] = bool(cv_entry.get("is_in_57_whitelist", row.get("is_in_57_whitelist", False)))
 
     counts = {"S": 0, "A": 0, "B": 0}
     for r in rows:
@@ -928,6 +942,7 @@ def render_dashboard(date_str: str, window_mode: str = "natural") -> Path:
         <span class="pill"><b id="visibleCount">0</b> / {len(rows)} 场</span>
         <span class="pill">时间口径：{html.escape(mode_text)}</span>
         <span class="pill">A级: <b id="cntHTA">0</b> · B级: <b id="cntHTB">0</b> · C级: <b id="cntHTC">0</b> · SKIP: <b id="cntHTSkip">0</b></span>
+        <span class="pill">57白名单内: <b id="cntHTA_WL">0</b>A / <b id="cntHTB_WL">0</b>B · 57外: <b id="cntHTA_OUT">0</b>A / <b id="cntHTB_OUT">0</b>B</span>
         <span class="pill">覆盖率(A+B): <b id="cntABRatio">0%</b> <span id="cntABHealth"></span></span>
       </div>
       <div class="health-panel health-yellow" id="healthPanel">
@@ -1151,6 +1166,14 @@ def render_dashboard(date_str: str, window_mode: str = "natural") -> Path:
       el('cntHTB').textContent = String(htB);
       el('cntHTC').textContent = String(htC);
       el('cntHTSkip').textContent = String(htSkip);
+      const htA_WL = rows.filter(r => r.htRecGrade === 'A' && r.sourceGroup === 'WHITELIST_57').length;
+      const htB_WL = rows.filter(r => r.htRecGrade === 'B' && r.sourceGroup === 'WHITELIST_57').length;
+      const htA_OUT = rows.filter(r => r.htRecGrade === 'A' && r.sourceGroup === 'OUTSIDE_57').length;
+      const htB_OUT = rows.filter(r => r.htRecGrade === 'B' && r.sourceGroup === 'OUTSIDE_57').length;
+      el('cntHTA_WL').textContent = String(htA_WL);
+      el('cntHTB_WL').textContent = String(htB_WL);
+      el('cntHTA_OUT').textContent = String(htA_OUT);
+      el('cntHTB_OUT').textContent = String(htB_OUT);
       el('skipCount').textContent = String(htSkip);
       el('skipReasons').textContent = skipReasonTop.length ? skipReasonTop.join(' | ') : '暂无';
       el('cntABRatio').textContent = abRatio.toFixed(1) + '%';

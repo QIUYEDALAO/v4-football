@@ -210,12 +210,45 @@ def _cached_api_client(base_client):
     return _get
 
 
+def _league_eligibility_gate(league_id: str, league_name: str, league_type: str | None = None) -> tuple[bool, str]:
+    """League eligibility gate for all_eligible mode.
+
+    Excludes cup, friendly, unknown competition, and bad metadata.
+    Returns (is_eligible, gate_reason).
+    """
+    name_lower = str(league_name or "").lower()
+    type_lower = str(league_type or "").lower()
+
+    exclude_keywords = [
+        "friendly", "friendlies", "amistoso", "amical", "amicale",
+        "club friendly", "international friendly",
+        "cup", "coppa", "copa", "pokal", "beker", "coupe",
+        "fa cup", "carabao", "efl cup", "dfb pokal",
+        "super cup", "supercopa", "supercoppa", "trophee",
+        "community shield", "recopa",
+        "world cup", "euro ", "copa america", "afcon",
+        "nations league", "concacaf", "caf champ",
+        "champions league qualifying", "europa league qualifying",
+        "world", "olympics", "asia cup",
+        "unknown", "test", "fake",
+    ]
+    for kw in exclude_keywords:
+        if kw in name_lower:
+            return False, f"LEAGUE_GATE_EXCLUDED:{kw}"
+
+    if type_lower == "cup":
+        return False, "LEAGUE_GATE_EXCLUDED:type_is_cup"
+
+    return True, "LEAGUE_GATE_PASS"
+
+
 def fetch_today_fixtures(
     lookahead_hours: float | None = None,
     min_hours_to_kickoff: float | None = None,
     api_client=api_get,
     scan_base_date: date | None = None,
     include_outside_57: bool = False,
+    fixture_universe: str = "whitelist",
 ):
     """拉取白名单联赛 + 今日/明日未开赛比赛。
 
@@ -234,7 +267,18 @@ def fetch_today_fixtures(
         if not resp: continue
         for f in resp.get("response", []):
             lg_id = str(f["league"]["id"])
-            if not include_outside_57 and lg_id not in WL_SET: continue
+            lg_name_raw = f["league"].get("name", "")
+            lg_type_raw = f["league"].get("type", "")
+
+            # ── Fixture universe gate ──
+            if fixture_universe == "whitelist":
+                if not include_outside_57 and lg_id not in WL_SET:
+                    continue
+            elif fixture_universe == "all_eligible":
+                eligible, gate_reason = _league_eligibility_gate(lg_id, lg_name_raw, lg_type_raw)
+                if not eligible:
+                    continue
+
             status = f["fixture"]["status"]["short"]
             # Backfill mode (historical date) should keep all statuses.
             # Real-time mode:
@@ -409,6 +453,8 @@ def run_v4_scan(
     scan_date: str | None = None,
     use_watchdog: bool = True,
     generate_dashboard: bool = False,
+    include_outside_57: bool = False,
+    fixture_universe: str = "whitelist",
 ):
     t0 = time.perf_counter()
     logger.info(f"🔭 V4 球探扫描 | {run_tag} | {datetime.now().strftime('%H:%M')}")
@@ -460,6 +506,8 @@ def run_v4_scan(
         min_hours_to_kickoff=min_hours_to_kickoff,
         api_client=api_client,
         scan_base_date=scan_dt,
+        include_outside_57=include_outside_57,
+        fixture_universe=fixture_universe,
     )
     
     # ── 任务监控（仅独立运行时启用；wrapper模式下由调用方管理）──
@@ -883,6 +931,17 @@ if __name__ == "__main__":
         default=None,
         help="可选：扫描基准日期 YYYYMMDD（用于回填universe文件）",
     )
+    parser.add_argument(
+        "--include-outside-57",
+        action="store_true",
+        help="扫描全部联赛（含白名单之外）",
+    )
+    parser.add_argument(
+        "--fixture-universe",
+        choices=["whitelist", "all_eligible"],
+        default="whitelist",
+        help="Fixture universe mode: whitelist (57 leagues only) or all_eligible (all compliant leagues with gate)",
+    )
     args = parser.parse_args()
     run_v4_scan(
         run_tag=args.run_tag,
@@ -891,4 +950,6 @@ if __name__ == "__main__":
         scan_mode=args.scan_mode,
         recent_prewarm=args.recent_prewarm,
         scan_date=args.date,
+        include_outside_57=args.include_outside_57,
+        fixture_universe=args.fixture_universe,
     )

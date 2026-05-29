@@ -77,12 +77,15 @@ def _run_parallel_scan(args, scan_date: str, today_key: str, wd, log_path: Path)
     """Run parallel outside57 scanner and write official output if requested."""
     from engine.v4_outside57_scanner import run_outside57_scan
 
+    fixture_universe = getattr(args, "fixture_universe", "whitelist")
     print(f"[adapter] parallel scan engine: workers={args.outside57_workers}, "
           f"rpm={args.outside57_api_rpm}/{args.outside57_api_rpm_hard_cap}, "
-          f"inflight={args.outside57_max_inflight}", flush=True)
+          f"inflight={args.outside57_max_inflight}, "
+          f"universe={fixture_universe}", flush=True)
 
     summary = run_outside57_scan(
         include_outside_57=bool(args.include_outside_57),
+        fixture_universe=fixture_universe,
         workers=args.outside57_workers,
         worker_max=args.outside57_workers,
         api_rpm=args.outside57_api_rpm,
@@ -124,16 +127,22 @@ def _run_parallel_scan(args, scan_date: str, today_key: str, wd, log_path: Path)
     a_list, b_list, skip_list = [], [], []
     scout_list = []
 
-    # Official candidate_view ONLY includes whitelist league fixtures.
-    # Outside_57 fixtures do NOT enter candidate_view, scout, or brief paths.
-    official_results = [r for r in results if str(r.get("league_id", "")) in wl_ids]
-    print(f"[adapter] official filter: {len(official_results)}/{len(results)} whitelist fixtures", flush=True)
+    # ── Fixture universe filter ──
+    # whitelist: only whitelist league fixtures enter official candidate_view
+    # all_eligible: all league-gated fixtures (whitelist + outside57) enter official candidate_view
+    if fixture_universe == "all_eligible":
+        official_results = results  # all league-gated results
+        print(f"[adapter] official filter: {len(official_results)}/{len(results)} all_eligible fixtures", flush=True)
+    else:
+        official_results = [r for r in results if str(r.get("league_id", "")) in wl_ids]
+        print(f"[adapter] official filter: {len(official_results)}/{len(results)} whitelist fixtures", flush=True)
 
     for r in official_results:
         grade = str(r.get("grade", "SKIP")).strip().upper()
         lid = str(r.get("league_id", ""))
-        is_whitelist = True
-        is_outside57 = False
+        source_group = r.get("source_group", "UNKNOWN")
+        is_in_57 = bool(r.get("is_in_57_whitelist", lid in wl_ids))
+        is_outside57 = not is_in_57
 
         # Build common fields
         entry = {
@@ -146,7 +155,12 @@ def _run_parallel_scan(args, scan_date: str, today_key: str, wd, log_path: Path)
             "grade": grade,
             "official_candidate": grade in ("A", "B"),
             "skip": grade == "SKIP",
-            "outside57": is_outside57 or (not is_whitelist),
+            "outside57": is_outside57,
+            "source_group": source_group,
+            "is_in_57_whitelist": is_in_57,
+            "fixture_universe": fixture_universe,
+            "scoring_complete": r.get("status") == "DONE",
+            "recent_form_sample_size": 10,
             "h2h_valid": bool(r.get("h2h_valid", False)),
             "filter_reason": str(r.get("h2h_reason", "") or ""),
             "ht_score": r.get("ht_score"),
@@ -192,9 +206,17 @@ def _run_parallel_scan(args, scan_date: str, today_key: str, wd, log_path: Path)
                     scout_entry[k] = rec[k]
         scout_list.append(scout_entry)
 
+    # ── Compute split statistics ──
+    timeout_count = sum(1 for r in official_results if r.get("status") in ("API_TIMEOUT", "DATA_TIMEOUT"))
+    score_incomplete_count = sum(1 for r in official_results if r.get("status") in ("SCORE_ERROR", "SCORE_INCOMPLETE", "FAILED_WITH_REASON"))
+    whitelist_a = [e for e in a_list if e.get("source_group") == "WHITELIST_57"]
+    whitelist_b = [e for e in b_list if e.get("source_group") == "WHITELIST_57"]
+    outside_a = [e for e in a_list if e.get("source_group") == "OUTSIDE_57"]
+    outside_b = [e for e in b_list if e.get("source_group") == "OUTSIDE_57"]
+
     # Build candidate_view (no C grade)
     candidate_view = {
-        "schema_version": "v3v4_dashboard_candidate_view.v1",
+        "schema_version": "v3v4_dashboard_candidate_view.v2",
         "generated_at": datetime.now(LOCAL_TZ).isoformat(),
         "scan_date": today_key,
         "source_window": "daily_1200",
@@ -204,12 +226,19 @@ def _run_parallel_scan(args, scan_date: str, today_key: str, wd, log_path: Path)
         "brief_sha256": "",
         "scout_path": str(scout_path),
         "scout_sha256": "",
+        "fixture_universe": fixture_universe,
         "A_count": len(a_list),
         "B_count": len(b_list),
         "C_count": 0,
         "SKIP_count": len(skip_list),
+        "DATA_TIMEOUT_count": timeout_count,
+        "SCORE_INCOMPLETE_count": score_incomplete_count,
         "scan_total": len(results),
         "formal_recommendation_count": len(a_list) + len(b_list),
+        "A_WHITELIST_57_count": len(whitelist_a),
+        "A_OUTSIDE_57_count": len(outside_a),
+        "B_WHITELIST_57_count": len(whitelist_b),
+        "B_OUTSIDE_57_count": len(outside_b),
         "A_candidates": a_list,
         "B_candidates": b_list,
         "C_candidates": [],
@@ -270,6 +299,8 @@ def main():
                         help="Preflight only — validate paths, do not execute")
     parser.add_argument("--scan-mode", default="fast", choices=["fast","full"])
     parser.add_argument("--include-outside-57", action="store_true", help="扫描全部联赛（含白名单之外）")
+    parser.add_argument("--fixture-universe", default="whitelist", choices=["whitelist", "all_eligible"],
+                        help="Fixture universe: whitelist (57 leagues only) or all_eligible (all compliant leagues with league gate)")
     parser.add_argument("--scan-engine", default="serial", choices=["serial","parallel"],
                         help="Scan engine: serial=existing v4_scan_worker, parallel=v4_outside57_scanner")
     parser.add_argument("--write-official-output", action="store_true",
@@ -385,7 +416,8 @@ def main():
                 [sys.executable, "-u", str(BASE_DIR / "engine" / "v4_scan_worker.py"),
                  "--date", scan_date, "--window", args.window,
                  "--lookahead-hours", str(args.lookahead_hours),
-                 "--scan-mode", args.scan_mode]
+                 "--scan-mode", args.scan_mode,
+                 "--fixture-universe", getattr(args, "fixture_universe", "whitelist")]
                 + (["--include-outside-57"] if args.include_outside_57 else []),
                 stdout=log_fh, stderr=subprocess.STDOUT,
             )

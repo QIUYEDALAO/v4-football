@@ -21,6 +21,9 @@ def main():
     parser.add_argument("--window", default="midday")
     parser.add_argument("--lookahead-hours", type=float, default=24.0)
     parser.add_argument("--scan-mode", default="fast", choices=["fast", "full"])
+    parser.add_argument("--include-outside-57", action="store_true", help="扫描全部联赛（含白名单之外）")
+    parser.add_argument("--fixture-universe", default="whitelist", choices=["whitelist", "all_eligible"],
+                        help="Fixture universe mode")
     args = parser.parse_args()
 
     from engine.v4_runner import run_v4_scan
@@ -33,6 +36,8 @@ def main():
         scan_date=args.date,
         use_watchdog=False,
         generate_dashboard=False,
+        include_outside_57=args.include_outside_57,
+        fixture_universe=args.fixture_universe,
     )
 
     if result is None:

@@ -75,6 +75,24 @@ OUTSIDE57_MARKER = {
     "not_for_qq_recommendation": True,
 }
 
+# ── 57 whitelist source labels ──
+_WL_IDS: set = set()
+try:
+    wl_raw = json.loads((BASE_DIR / "config" / "leagues_whitelist.json").read_text(encoding="utf-8"))
+    _WL_IDS = set(str(k) for k in wl_raw.get("leagueId", {}).keys())
+except Exception:
+    pass
+
+
+def _get_source_labels(league_id) -> dict:
+    """Return source_group, is_in_57_whitelist for a given league_id."""
+    lid = str(league_id) if league_id is not None else ""
+    is_in = lid in _WL_IDS
+    return {
+        "source_group": "WHITELIST_57" if is_in else "OUTSIDE_57",
+        "is_in_57_whitelist": is_in,
+    }
+
 
 # ╔══════════════════════════════════════════════════════════════════════════════╗
 # ║  GLOBAL RATE LIMITER                                                        ║
@@ -435,6 +453,7 @@ def _process_one_fixture(
     fixture_id = fx["id"]
     home_id = fx["homeId"]
     away_id = fx["awayId"]
+    source_labels = _get_source_labels(fx["league"])
     result_base = {
         "fixture_id": fixture_id,
         "home_team": fx["home"],
@@ -443,6 +462,7 @@ def _process_one_fixture(
         "league_name": fx["league_name"],
         "country": fx.get("country"),
         "kickoff_time": fx["kickoff"],
+        **source_labels,
         **OUTSIDE57_MARKER,
         "processed_at": datetime.now(CN_TZ).isoformat(),
     }
@@ -644,6 +664,7 @@ def run_outside57_scan(
     scan_mode: str = "full",
     scan_date_str: str | None = None,
     include_outside_57: bool = False,
+    fixture_universe: str = "whitelist",
     pre_fetched_fixtures: list | None = None,
 ) -> dict:
     """outside_57 并行全量扫描主入口。
@@ -687,6 +708,7 @@ def run_outside57_scan(
         api_client=api.call,
         scan_base_date=date.today(),
         include_outside_57=include_outside_57,
+        fixture_universe=fixture_universe,
     )
 
     input_fixture_count = len(fixtures)
@@ -888,6 +910,8 @@ def main():
     parser.add_argument("--run-id", default=None)
     parser.add_argument("--scan-mode", default="full")
     parser.add_argument("--output", default=None)
+    parser.add_argument("--include-outside-57", action="store_true", help="Include non-whitelist leagues")
+    parser.add_argument("--fixture-universe", default="whitelist", choices=["whitelist", "all_eligible"])
     args = parser.parse_args()
 
     workers = max(1, min(args.workers, args.worker_max))
@@ -895,7 +919,8 @@ def main():
     # Standalone: default to include_outside_57=True (this IS the outside_57 scanner)
     # When called from v4_scan_and_brief.py adapter, this flag is controlled by args.include_outside_57
     summary = run_outside57_scan(
-        include_outside_57=True,
+        include_outside_57=args.include_outside_57,
+        fixture_universe=args.fixture_universe,
         workers=workers,
         worker_max=args.worker_max,
         api_rpm=args.api_rpm,
