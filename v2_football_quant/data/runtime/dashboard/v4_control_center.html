@@ -70,33 +70,29 @@ button{cursor:pointer}
 .hint{font-size:10.5px;color:var(--muted);line-height:1.35}
 .green{color:var(--green)}.blue{color:var(--blue)}.yellow{color:var(--yellow)}.red{color:var(--red)}.purple{color:var(--purple)}.orange{color:var(--orange)}
 .primary-layout{
-  grid-template-columns:1.25fr .75fr;
+  grid-template-columns:minmax(0, 1.6fr) minmax(340px, 0.9fr);
   margin-top:10px;
-  align-items:start;
-  --pane-h:440px;
-  --action-zone-h:var(--pane-h);
-  --action-zone-h-two:auto;
-  --action-zone-h-four:auto;
+  align-items:stretch;
 }
-.primary-layout.mode-2{--action-zone-h:auto}
-.primary-layout.mode-4{--action-zone-h:auto}
+.primary-layout.mode-2{}
+.primary-layout.mode-4{}
 .side-sticky{
   position:static;
-  align-self:start;
+  align-self:stretch;
   height:auto;
   min-height:unset;
   max-height:none;
-  overflow:visible;
+  overflow:auto;
 }
 .candidate-panel{
   display:flex;
   flex-direction:column;
-  overflow:visible;
+  overflow:hidden;
   height:auto;
-  min-height:unset;
+  min-height:0;
   max-height:none;
 }
-.candidate-list{overflow:visible;padding-right:3px;max-height:none}
+.candidate-list{overflow-y:auto;padding-right:3px;max-height:100%}
 .candidate-list::-webkit-scrollbar{width:8px}
 .candidate-list::-webkit-scrollbar-thumb{background:rgba(143,165,196,.32);border-radius:999px}
 /* 列表布局 */
@@ -523,11 +519,11 @@ function buildDemoCandidates(list,total){
 function sortCandidates(list){
   const rank=v=>String(first(v.rating,v.grade,'B')).toUpperCase()==='A'?0:1;
   return [...list].sort((a,b)=>{
-    const ra=rank(a), rb=rank(b);
-    if(ra!==rb) return ra-rb;
     const ta=String(first(a.kickoff_local,a.kickoff_time,a.time,''));
     const tb=String(first(b.kickoff_local,b.kickoff_time,b.time,''));
     if(ta!==tb) return ta.localeCompare(tb);
+    const ra=rank(a), rb=rank(b);
+    if(ra!==rb) return ra-rb;
     return String(first(a.fixture_id,'')).localeCompare(String(first(b.fixture_id,'')));
   });
 }
@@ -563,17 +559,17 @@ function renderTop(){
   $('kpiCandidates').textContent=`A${a}/B${b}/SKIP${sk}`;
   $('kpiCandidatesHint').textContent='';
 
-  const yv=top.yesterday_validation||{};
-  const yA=safe(first(top.yesterday_a_text,yv.A),'暂无');
-  const yB=safe(first(top.yesterday_b_text,yv.B),'暂无');
-  const yAB=safe(first(top.yesterday_ab_text,yv.AB,top.yesterday_validation_text,yv.display),'暂无');
-  $('kpiYesterday').textContent=yAB; $('kpiYesterdayHint').textContent='';
+  const yv=top.yesterday_validation||MODEL.yesterday_validation_detail||{};
+  const yA=safe(first(top.yesterday_a_text,yv.A,top.yesterday_validation?.A),'暂无');
+  const yB=safe(first(top.yesterday_b_text,yv.B,top.yesterday_validation?.B),'暂无');
+  const yAB=safe(first(top.yesterday_ab_text,yv.AB,top.yesterday_validation_text,yv.display,top.yesterday_validation?.display),'暂无');
+  $('kpiYesterday').textContent=yAB; $('kpiYesterdayHint').textContent=yA+' | '+yB;
 
-  const cv=top.cumulative_validation||{};
-  const cA=safe(first(top.cumulative_a_text,cv.A),'暂无');
-  const cB=safe(first(top.cumulative_b_text,cv.B),'暂无');
-  const cAB=safe(first(top.cumulative_ab_text,cv.AB,top.cumulative_validation_text,cv.display),'暂无');
-  $('kpiCumulative').textContent=cAB; $('kpiCumulativeHint').textContent='';
+  const cv=top.cumulative_validation||MODEL.cumulative_validation_detail||{};
+  const cA=safe(first(top.cumulative_a_text,cv.A,top.cumulative_validation?.A),'暂无');
+  const cB=safe(first(top.cumulative_b_text,cv.B,top.cumulative_validation?.B),'暂无');
+  const cAB=safe(first(top.cumulative_ab_text,cv.AB,top.cumulative_validation_text,cv.display,top.cumulative_validation?.display),'暂无');
+  $('kpiCumulative').textContent=cAB; $('kpiCumulativeHint').textContent=cA+' | '+cB;
 
   const live=MODEL.live_bet_summary||{};
   const kGross='today_'+'gross'+'_pnl';
