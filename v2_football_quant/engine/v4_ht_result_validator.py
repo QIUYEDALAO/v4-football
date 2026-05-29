@@ -239,6 +239,30 @@ def _league_calibration(details: list[dict]) -> list[dict]:
     return out
 
 
+def _load_no_market_excluded_fixtures() -> set[int]:
+    """
+    Load all no-market exclusions across all dates and return a deduped set of fixture_ids.
+    This ensures no-market fixtures are skipped regardless of date alignment.
+    """
+    excluded: set[int] = set()
+    live_dir = BASE_DIR / "data" / "runtime" / "live_bets"
+    if not live_dir.exists():
+        return excluded
+    for p in sorted(live_dir.glob("v4_no_market_exclusions_*.jsonl")):
+        for line in p.read_text(encoding="utf-8").splitlines():
+            line = line.strip()
+            if not line:
+                continue
+            try:
+                rec = json.loads(line)
+            except Exception:
+                continue
+            fid = rec.get("fixture_id")
+            if fid:
+                excluded.add(int(fid))
+    return excluded
+
+
 def run_validation(date_str: str, sleep_ms: int = 120) -> dict:
     key = _date_key(date_str)
     scout_path = REPORT_DIR / f"scout_v4_{key}.json"
@@ -248,16 +272,30 @@ def run_validation(date_str: str, sleep_ms: int = 120) -> dict:
 
     rows = scout if isinstance(scout, list) else scout.get("results", [])
     target_match_date = _target_match_date(date_str)
+    
+    # Load NO_MARKET excluded fixture IDs (across all dates)
+    no_market_excluded_fixtures = _load_no_market_excluded_fixtures()
+    
     filtered_rows = []
     contaminated_rows = []
     non_target_rows = 0
     c_deprecated_rows = 0
+    no_market_skipped_count = 0
+    no_market_skipped_ids: list[int] = []
     for rec in rows:
+        fid = rec.get("fixture_id")
         record_date = _record_match_date(rec)
         ko_date = _kickoff_date(rec)
+        
+        # Skip NO_MARKET fixtures before any processing
+        if fid and int(fid) in no_market_excluded_fixtures:
+            no_market_skipped_count += 1
+            no_market_skipped_ids.append(int(fid))
+            continue
+        
         if ko_date and record_date and record_date != ko_date:
             contaminated_rows.append({
-                "fixture_id": rec.get("fixture_id"),
+                "fixture_id": fid,
                 "date": rec.get("date"),
                 "match_date": rec.get("match_date"),
                 "kickoff": rec.get("kickoff"),
@@ -274,6 +312,9 @@ def run_validation(date_str: str, sleep_ms: int = 120) -> dict:
             c_deprecated_rows += 1
             continue
         filtered_rows.append(rec)
+    
+    print(f"[VALIDATION] NO_MARKET skipped: {no_market_skipped_count} fixtures — {no_market_skipped_ids}", flush=True)
+    
     rows = filtered_rows
     details = []
     pending = 0
@@ -375,6 +416,8 @@ def run_validation(date_str: str, sleep_ms: int = 120) -> dict:
         "c_deprecated_rows_excluded": c_deprecated_rows,
         "c_observation_active": False,
         "c_excluded_from_ab": True,
+        "no_market_excluded_count": no_market_skipped_count,
+        "no_market_excluded_fixtures": no_market_skipped_ids,
         "generated_at": datetime.now().isoformat(),
         "rule_version": str(rules.get("rule_version") or "-"),
         "total_matches": len(details),

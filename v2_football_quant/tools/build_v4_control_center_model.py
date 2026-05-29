@@ -227,10 +227,14 @@ def _load_live_records_all() -> list[tuple[str, dict]]:
 
 
 def _load_no_market_exclusions_for_date(date_str: str) -> list[dict]:
+    """Load no-market exclusions and deduplicate by (date, fixture_id).
+    Returns the DEDUPLICATED list (each fixture_id counted once).
+    Use `len()` for no_market_excluded_count.
+    """
     p = LIVE_DIR / f"v4_no_market_exclusions_{date_str}.jsonl"
-    out: list[dict] = []
+    raw: list[dict] = []
     if not p.exists():
-        return out
+        return []
     for line in p.read_text(encoding="utf-8").splitlines():
         line = line.strip()
         if not line:
@@ -240,6 +244,14 @@ def _load_no_market_exclusions_for_date(date_str: str) -> list[dict]:
         except Exception:
             continue
         if str(rec.get("date") or "") == date_str and str(rec.get("exclusion_reason") or "").lower() == "no_market":
+            raw.append(rec)
+    # Dedup by (date, fixture_id): keep the first record
+    seen: set[tuple[str, str]] = set()
+    out: list[dict] = []
+    for rec in raw:
+        key = (str(rec.get("date") or ""), str(rec.get("fixture_id") or ""))
+        if key not in seen:
+            seen.add(key)
             out.append(rec)
     return out
 

@@ -158,10 +158,37 @@ def _json(handler: BaseHTTPRequestHandler, code: int, payload: dict):
 
 
 def _append_no_market_exclusion(date: str, rec: dict) -> dict:
+    """Append no-market exclusion with idempotency: same fixture_id on same date only written once.
+    Returns {"status": "excluded", "record": ...} for new, or {"status": "already_excluded", "record": ...} for duplicate.
+    """
+    LIVE.mkdir(parents=True, exist_ok=True)
     path = LIVE / f"v4_no_market_exclusions_{date}.jsonl"
-    with open(path, "a", encoding="utf-8") as f:
-        f.write(json.dumps(rec, ensure_ascii=False) + "\n")
-    return rec
+    fid = str(rec.get("fixture_id") or "")
+    if not fid:
+        return {"status": "error", "error": "fixture_id_required"}
+    existing: list[dict] = []
+    already = None
+    if path.exists():
+        for ln in path.read_text(encoding="utf-8").splitlines():
+            ln = ln.strip()
+            if not ln:
+                continue
+            try:
+                existing.append(json.loads(ln))
+            except Exception:
+                continue
+        for x in existing:
+            if str(x.get("fixture_id") or "") == fid and str(x.get("date") or "") == date:
+                already = x
+                break
+    if already:
+        return {"status": "already_excluded", "record": already}
+    existing.append(rec)
+    path.write_text(
+        "\n".join(json.dumps(x, ensure_ascii=False) for x in existing) + "\n",
+        encoding="utf-8",
+    )
+    return {"status": "excluded", "record": rec}
 
 
 def _append_no_bet_decision(date: str, rec: dict) -> dict:
@@ -441,7 +468,7 @@ class H(BaseHTTPRequestHandler):
                 "note": payload.get("note") or "",
             }
             saved = _append_no_market_exclusion(date, rec)
-            return _json(self, 200, {"ok": True, "record": saved})
+            return _json(self, 200, {"ok": True, "status": saved.get("status", "error"), "record": saved.get("record", {})})
 
         return _json(self, 404, {"ok": False, "error": "not_found"})
 
