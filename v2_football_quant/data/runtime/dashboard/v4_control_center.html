@@ -75,42 +75,42 @@ button{cursor:pointer}
   align-items:start;
   --pane-h:440px;
   --action-zone-h:var(--pane-h);
-  --action-zone-h-two:440px;
-  --action-zone-h-four:440px;
+  --action-zone-h-two:auto;
+  --action-zone-h-four:auto;
 }
-.primary-layout.mode-2{--action-zone-h:var(--action-zone-h-two)}
-.primary-layout.mode-4{--action-zone-h:var(--action-zone-h-four)}
+.primary-layout.mode-2{--action-zone-h:auto}
+.primary-layout.mode-4{--action-zone-h:auto}
 .side-sticky{
   position:static;
   align-self:start;
-  height:var(--action-zone-h);
-  min-height:var(--action-zone-h);
-  max-height:var(--action-zone-h);
-  overflow:auto;
+  height:auto;
+  min-height:unset;
+  max-height:none;
+  overflow:visible;
 }
 .candidate-panel{
   display:flex;
   flex-direction:column;
-  overflow:hidden;
-  height:var(--pane-h);
-  min-height:var(--pane-h);
-  max-height:var(--action-zone-h);
+  overflow:visible;
+  height:auto;
+  min-height:unset;
+  max-height:none;
 }
-.candidate-list{overflow:auto;padding-right:3px;max-height:calc(var(--action-zone-h) - 74px)}
+.candidate-list{overflow:visible;padding-right:3px;max-height:none}
 .candidate-list::-webkit-scrollbar{width:8px}
 .candidate-list::-webkit-scrollbar-thumb{background:rgba(143,165,196,.32);border-radius:999px}
 /* 列表布局 */
-.candidate-table{width:100%;border-collapse:collapse;font-size:13px}
+.candidate-table{width:100%;border-collapse:collapse;font-size:13px;table-layout:fixed}
 .candidate-table th{text-align:left;padding:4px 6px;color:var(--muted);font-weight:600;font-size:11px;border-bottom:1px solid var(--line);position:sticky;top:0;background:var(--panel);z-index:1}
 .candidate-row{cursor:pointer;transition:background .12s}
 .candidate-row:hover{background:rgba(88,183,255,.06)}
 .candidate-row td{padding:5px 6px;border-bottom:1px solid rgba(255,255,255,.05);vertical-align:middle}
-.candidate-row .time-col{white-space:nowrap;font-variant-numeric:tabular-nums;min-width:68px;font-size:12px}
-.candidate-row .grade-col{text-align:center;min-width:24px;font-weight:700}
-.candidate-row .league-col{color:var(--muted);font-size:12px;max-width:90px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.candidate-row .teams-col{font-weight:700;font-size:14px;max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.candidate-row .playbook-col{color:var(--amber);font-weight:600;font-size:12px;white-space:nowrap}
-.candidate-row .dist-col{color:var(--muted);font-size:11px;white-space:nowrap}
+.candidate-row .time-col{white-space:nowrap;font-variant-numeric:tabular-nums;font-size:12px}
+.candidate-row .grade-col{text-align:center;font-weight:700}
+.candidate-row .league-col{color:var(--muted);font-size:11px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.candidate-row .teams-col{font-weight:700;font-size:13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.candidate-row .playbook-col{color:var(--amber);font-weight:600;font-size:11px;white-space:nowrap}
+.candidate-row .dist-col{color:var(--muted);font-size:10.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .candidate-row .status-col{white-space:nowrap;font-size:11px}
 .candidate-row .action-col{text-align:right;white-space:nowrap}
 .expand-btn{background:rgba(255,255,255,.06);border:1px solid var(--line);color:var(--ink);padding:2px 9px;border-radius:5px;cursor:pointer;font-size:11px}
@@ -127,7 +127,7 @@ button{cursor:pointer}
 .bet-form-inline textarea{flex:1;min-width:120px;height:28px;resize:none}
 .bet-form-inline .btn-save{background:var(--green);color:#08111f;border:none;padding:4px 12px;border-radius:5px;cursor:pointer;font-weight:700;font-size:12px}
 .bet-form-inline .btn-skip{background:rgba(255,107,114,.14);color:var(--red);border:1px solid rgba(255,107,114,.25);padding:4px 12px;border-radius:5px;cursor:pointer;font-size:12px}
-@media(max-width:760px){.candidate-row .playbook-col,.candidate-row .dist-col,.candidate-row .league-col{display:none}.candidate-row .teams-col{font-size:13px;max-width:130px}}
+@media(max-width:760px){.candidate-row .playbook-col,.candidate-row .dist-col{display:none}.candidate-row .league-col{font-size:10px;max-width:60px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.candidate-row .teams-col{font-size:12px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.candidate-table th:nth-child(3),.candidate-table th:nth-child(5),.candidate-table th:nth-child(6){display:none}}
 .section-head{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:9px}
 h2{font-size:15px;margin:0}
 .btn{
@@ -603,7 +603,7 @@ function renderCandidates(){
   const el=$('candidateList');
   DISPLAY_CANDIDATES=list;
   if(!list.length){el.innerHTML='<div class="note">今日暂无 A/B 候选。</div>';return;}
-  var h='<table class="candidate-table"><thead><tr><th>时间</th><th></th><th>联赛</th><th>对阵</th><th>剧本</th><th>进球分布</th><th>状态</th><th></th></tr></thead><tbody>';
+  var h='<table class="candidate-table"><thead><tr><th style="width:10%">时间</th><th style="width:5%"></th><th style="width:14%">联赛</th><th style="width:25%">对阵</th><th style="width:10%">剧本</th><th style="width:26%">进球分布</th><th style="width:6%">状态</th><th style="width:4%"></th></tr></thead><tbody>';
   list.forEach(function(x,i){h+=renderListRow(x,i);});
   h+='</tbody></table>';
   el.innerHTML=h;
