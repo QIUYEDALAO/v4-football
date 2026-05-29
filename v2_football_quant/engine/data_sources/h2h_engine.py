@@ -362,43 +362,45 @@ def _score_market_fit(
 
 
 def _parse_goal_events(api_client, fixture_id: int) -> dict:
+    """Parse goal events for a fixture. Returns both boolean hit flags and integer goal counts per bin.
+
+    Returns dict with two sub-dicts:
+        "bins": {bin_key: bool} — whether at least one goal occurred in the bin
+        "goal_counts": {bin_key_fh: int} — count of first-half goals in 0_15, 16_30, 31_45
+    """
     bins = {
-        "0_10": False,
-        "11_15": False,
-        "0_15": False,
-        "11_30": False,
-        "11_45": False,
-        "16_30": False,
-        "16_45": False,
-        "31_45": False,
-        "46_60": False,
-        "61_75": False,
-        "76_90": False,
+        "0_10": False, "11_15": False, "0_15": False,
+        "11_30": False, "11_45": False, "16_30": False,
+        "16_45": False, "31_45": False,
+        "46_60": False, "61_75": False, "76_90": False,
     }
+    goal_counts = {"0_15": 0, "16_30": 0, "31_45": 0}
     try:
         resp = api_client(f"fixtures/events?fixture={fixture_id}")
         if not resp or "response" not in resp:
-            return bins
+            return {"bins": bins, "goal_counts": goal_counts}
         for event in resp["response"]:
             if event.get("type") != "Goal":
                 continue
             elapsed = event.get("time", {}).get("elapsed", 0) or 0
-            if elapsed <= 10:
-                bins["0_10"] = True
-                bins["0_15"] = True
-            elif elapsed <= 15:
-                bins["11_15"] = True
-                bins["0_15"] = True
-                bins["11_30"] = True
-                bins["11_45"] = True
+            # First-half goal counting
+            if elapsed <= 15:
+                goal_counts["0_15"] += 1
             elif elapsed <= 30:
-                bins["16_30"] = True
-                bins["11_30"] = True
-                bins["11_45"] = True
-                bins["16_45"] = True
+                goal_counts["16_30"] += 1
             elif elapsed <= 45:
-                bins["31_45"] = True
-                bins["11_45"] = True
+                goal_counts["31_45"] += 1
+            # Boolean bin flags (existing logic)
+            if elapsed <= 10:
+                bins["0_10"] = True; bins["0_15"] = True
+            elif elapsed <= 15:
+                bins["11_15"] = True; bins["0_15"] = True
+                bins["11_30"] = True; bins["11_45"] = True
+            elif elapsed <= 30:
+                bins["16_30"] = True; bins["11_30"] = True
+                bins["11_45"] = True; bins["16_45"] = True
+            elif elapsed <= 45:
+                bins["31_45"] = True; bins["11_45"] = True
                 bins["16_45"] = True
             elif elapsed <= 60:
                 bins["46_60"] = True
@@ -408,7 +410,7 @@ def _parse_goal_events(api_client, fixture_id: int) -> dict:
                 bins["76_90"] = True
     except Exception:
         pass
-    return bins
+    return {"bins": bins, "goal_counts": goal_counts}
 
 
 def _query_recent_goal_profile(api_client, team_id: int, last_n: int = 10, include_events: bool = True) -> dict:
@@ -697,23 +699,25 @@ def evaluate_h2h_edge(home_id: int, away_id: int, api_client, mode: str = "full"
 
     # 进球时间分桶 (基于 official_matches)
     time_bins = {
-        "0_10": 0,
-        "11_15": 0,
-        "0_15": 0,
-        "11_30": 0,
-        "11_45": 0,
-        "16_30": 0,
-        "16_45": 0,
-        "31_45": 0,
+        "0_10": 0, "11_15": 0, "0_15": 0,
+        "11_30": 0, "11_45": 0, "16_30": 0,
+        "16_45": 0, "31_45": 0,
     }
     second_half_bins = {"46_60": 0, "61_75": 0, "76_90": 0}
+    # Real first-half goal counts from events
+    fh_goals_0_15 = 0
+    fh_goals_16_30 = 0
+    fh_goals_31_45 = 0
+    events_available = False
     if not fast_mode:
         for m in official_matches:
             fid = m.get("fixture", {}).get("id")
             if not fid:
                 continue
             try:
-                bins = _parse_goal_events(api_client, fid)
+                parsed = _parse_goal_events(api_client, fid)
+                bins = parsed["bins"]
+                gc = parsed["goal_counts"]
                 if bins["0_10"]: time_bins["0_10"] += 1
                 if bins["11_15"]: time_bins["11_15"] += 1
                 if bins["0_15"]: time_bins["0_15"] += 1
@@ -725,6 +729,10 @@ def evaluate_h2h_edge(home_id: int, away_id: int, api_client, mode: str = "full"
                 if bins["46_60"]: second_half_bins["46_60"] += 1
                 if bins["61_75"]: second_half_bins["61_75"] += 1
                 if bins["76_90"]: second_half_bins["76_90"] += 1
+                fh_goals_0_15 += gc["0_15"]
+                fh_goals_16_30 += gc["16_30"]
+                fh_goals_31_45 += gc["31_45"]
+                events_available = True
             except Exception:
                 pass
 
@@ -919,6 +927,12 @@ def evaluate_h2h_edge(home_id: int, away_id: int, api_client, mode: str = "full"
                 "excluded_reasons": excluded_reasons,
                 "pyramid_unknown_count": pyramid_unknown_count,
                 "h2h_scope": pool_info["h2h_scope"],
+                "fh_goals_0_15": 0,
+                "fh_goals_16_30": 0,
+                "fh_goals_31_45": 0,
+                "fh_goals_total": 0,
+                "fh_goal_dist_source": "events_missing",
+                "fh_goal_dist_available": False,
                 "cross_tier_used": pool_info["cross_tier_used"],
                 "h2h_low_sample": pool_info["h2h_low_sample"],
             },
@@ -991,6 +1005,13 @@ def evaluate_h2h_edge(home_id: int, away_id: int, api_client, mode: str = "full"
             "ft_0_0_count": ft_zero_count,
             "time_bins": time_bins,
             "time_bin_source": "H2H" if _h2h_tb_has_data else ("RECENT_DISCOUNTED" if recent_time_bins else "NONE"),
+            # Real first-half goal counts from events
+            "fh_goals_0_15": fh_goals_0_15,
+            "fh_goals_16_30": fh_goals_16_30,
+            "fh_goals_31_45": fh_goals_31_45,
+            "fh_goals_total": fh_goals_0_15 + fh_goals_16_30 + fh_goals_31_45,
+            "fh_goal_dist_source": "events_goal_counts" if events_available else "events_missing",
+            "fh_goal_dist_available": events_available,
             "late_fh_pressure": late_fh_pressure,
             "early_only_flag": early_only_flag,
             "pullback_fit": pullback_fit,

@@ -55,34 +55,56 @@ def _derive_playbook_script(pct_0_15, pct_16_30, pct_31_45, total_goals=None):
     return "弱剧本"
 
 
-def _normalize_goal_distribution(time_bins):
-    result = {"fh_goal_dist_0_15_pct": None, "fh_goal_dist_16_30_pct": None, "fh_goal_dist_31_45_pct": None, "fh_goal_dist_total_pct": None, "fh_goal_dist_total_goals": None, "fh_goal_dist_source": None}
-    if not time_bins:
-        return result
-    v015 = time_bins.get("0_15")
-    v1630 = time_bins.get("16_30")
-    v3145 = time_bins.get("31_45")
-    if v015 is None or v1630 is None or v3145 is None:
-        return result
-    total = v015 + v1630 + v3145
-    if total <= 0:
-        return result
-    pct_015 = round(v015 / total * 100, 1)
-    pct_1630 = round(v1630 / total * 100, 1)
-    pct_3145 = round(v3145 / total * 100, 1)
-    s = pct_015 + pct_1630 + pct_3145
-    if abs(s - 100.0) > 0.01:
-        vals = [(pct_015, "0_15"), (pct_1630, "16_30"), (pct_3145, "31_45")]
-        vals.sort(key=lambda x: x[0], reverse=True)
-        diff = 100.0 - s
-        if vals[0][1] == "0_15": pct_015 = round(pct_015 + diff, 1)
-        elif vals[0][1] == "16_30": pct_1630 = round(pct_1630 + diff, 1)
-        else: pct_3145 = round(pct_3145 + diff, 1)
-    result["fh_goal_dist_0_15_pct"] = pct_015
-    result["fh_goal_dist_16_30_pct"] = pct_1630
-    result["fh_goal_dist_31_45_pct"] = pct_3145
-    result["fh_goal_dist_total_pct"] = round(pct_015 + pct_1630 + pct_3145, 1)
-    result["fh_goal_dist_source"] = "normalized_from_per_bin_hit_rates"
+def _normalize_goal_distribution(factors, time_bins):
+    """Compute first-half goal distribution from REAL event goal counts.
+    
+    Priority:
+    1. Real goal counts from events (fh_goals_* fields in factors)
+    2. If events unavailable: return events_missing marker
+    3. NEVER fall back to normalized hit rates for main display
+    """
+    result = {
+        "fh_goal_dist_0_15_pct": None,
+        "fh_goal_dist_16_30_pct": None,
+        "fh_goal_dist_31_45_pct": None,
+        "fh_goal_dist_total_pct": None,
+        "fh_goal_dist_total_goals": None,
+        "fh_goal_dist_source": None,
+        "fh_goal_dist_available": False,
+    }
+    
+    factors = factors or {}
+    
+    goals_015 = factors.get("fh_goals_0_15")
+    goals_1630 = factors.get("fh_goals_16_30")
+    goals_3145 = factors.get("fh_goals_31_45")
+    
+    if goals_015 is not None and goals_1630 is not None and goals_3145 is not None:
+        total_goals = goals_015 + goals_1630 + goals_3145
+        if total_goals > 0:
+            pct_015 = round(goals_015 / total_goals * 100, 1)
+            pct_1630 = round(goals_1630 / total_goals * 100, 1)
+            pct_3145 = round(goals_3145 / total_goals * 100, 1)
+            s = pct_015 + pct_1630 + pct_3145
+            if abs(s - 100.0) > 0.01:
+                vals = [(pct_015, "0_15"), (pct_1630, "16_30"), (pct_3145, "31_45")]
+                vals.sort(key=lambda x: x[0], reverse=True)
+                diff = 100.0 - s
+                if vals[0][1] == "0_15": pct_015 = round(pct_015 + diff, 1)
+                elif vals[0][1] == "16_30": pct_1630 = round(pct_1630 + diff, 1)
+                else: pct_3145 = round(pct_3145 + diff, 1)
+            
+            result["fh_goal_dist_0_15_pct"] = pct_015
+            result["fh_goal_dist_16_30_pct"] = pct_1630
+            result["fh_goal_dist_31_45_pct"] = pct_3145
+            result["fh_goal_dist_total_pct"] = round(pct_015 + pct_1630 + pct_3145, 1)
+            result["fh_goal_dist_total_goals"] = total_goals
+            result["fh_goal_dist_source"] = "events_goal_counts"
+            result["fh_goal_dist_available"] = True
+            return result
+    
+    result["fh_goal_dist_source"] = "events_missing"
+    result["fh_goal_dist_available"] = False
     return result
 
 
@@ -390,17 +412,28 @@ def _extract_candidates(view: dict, live_daily: dict, scout_data: list | None = 
     b_out57 = sum(1 for r in b_candidates if r.get("source_group") == "OUTSIDE_57")
 
 
-    # —— Post-process: derive playbook_script and normalize goal distribution ——
+    # —— Post-process: derive playbook_script from REAL goal distribution ——
     for item in (a_candidates + b_candidates):
+        factors = item.get("factors") or {}
         time_bins = item.get("time_bins") or {}
-        dist = _normalize_goal_distribution(time_bins)
+        dist = _normalize_goal_distribution(factors, time_bins)
         for k, v in dist.items():
             if v is not None:
                 item[k] = v
+        # Also preserve per-bin hit rates as debug-only fields (renamed)
+        if time_bins:
+            item["fh_bin_hit_rate_0_15_pct"] = round(time_bins.get("0_15", 0) * 100, 1)
+            item["fh_bin_hit_rate_16_30_pct"] = round(time_bins.get("16_30", 0) * 100, 1)
+            item["fh_bin_hit_rate_31_45_pct"] = round(time_bins.get("31_45", 0) * 100, 1)
+        # Derive playbook from real distribution only
         pct_015 = item.get("fh_goal_dist_0_15_pct")
         pct_1630 = item.get("fh_goal_dist_16_30_pct")
         pct_3145 = item.get("fh_goal_dist_31_45_pct")
-        item["playbook_script"] = _derive_playbook_script(pct_015, pct_1630, pct_3145)
+        total_goals = item.get("fh_goal_dist_total_goals")
+        if item.get("fh_goal_dist_available"):
+            item["playbook_script"] = _derive_playbook_script(pct_015, pct_1630, pct_3145, total_goals)
+        else:
+            item["playbook_script"] = "数据暂缺"
 
     return {
         "scan_date": view.get("scan_date") or "",

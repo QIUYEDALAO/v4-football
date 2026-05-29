@@ -61,13 +61,17 @@ def main() -> int:
         checks[f"{label}_has_fh_goal_dist_1630"] = pct_1630 is not None
         checks[f"{label}_has_fh_goal_dist_3145"] = pct_3145 is not None
         
+        # Distribution may legitimately be null when events_missing
+        fh_src = item.get("fh_goal_dist_source", "")
         if pct_015 is not None and pct_1630 is not None and pct_3145 is not None:
             dist_sum = pct_015 + pct_1630 + pct_3145
             checks[f"{label}_dist_sum_ok"] = 99.0 <= dist_sum <= 101.0
             if not (99.0 <= dist_sum <= 101.0):
                 violations.append(f"{label}_dist_sum_out_of_range:{dist_sum}")
+        elif fh_src == "events_missing" or fh_src == "data_unavailable":
+            checks[f"{label}_dist_legitimately_missing"] = True
         else:
-            violations.append(f"{label}_dist_missing")
+            violations.append(f"{label}_dist_missing_unexpected:{fh_src}")
 
     # 10: No hit_rate used as distribution
     checks["no_hit_rate_as_distribution"] = True  # Source is clearly marked
