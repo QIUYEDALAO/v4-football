@@ -59,6 +59,78 @@ def _load_pyramid_map() -> dict:
     return _PYRAMID_MAP
 
 
+
+def _is_non_senior_league(name: str) -> tuple:
+    """Check if a league name indicates non-senior competition.
+
+    Returns (is_non_senior, reason) where reason is one of:
+      youth, women, cup, friendly, reserve, international, non_senior_other
+    """
+    if not name:
+        return True, "empty_name"
+    n = name.lower().strip()
+
+    # Youth / U-series
+    youth_keywords = [
+        "u20", "u19", "u21", "u23", "u17", "u18", "u22", "u16", "u15",
+        "youth", "junior", "juvenil", "sub-20", "sub-19", "sub-21", "sub-23", "sub-17",
+        "academy", "u-20", "u-19", "u-21", "u-23", "u-17",
+    ]
+    for kw in youth_keywords:
+        if kw in n:
+            return True, "youth"
+
+    # Women's leagues
+    women_keywords = [
+        "women", "woman", "feminine", "femenina", "frauen", "damer",
+        "womens", "women's",
+    ]
+    for kw in women_keywords:
+        if kw in n:
+            return True, "women"
+
+    # Cup / tournament (only standalone "cup" to avoid false matches on country names)
+    cup_keywords = [
+        "cup", "pokal", "copa", "coppa", "taca", "beker", "kup",
+        "play-off", "playoff", "tournament", "trophy",
+    ]
+    for kw in cup_keywords:
+        if kw in n:
+            return True, "cup"
+
+    # Friendly / exhibition
+    friendly_keywords = [
+        "friendly", "amistoso", "amical", "freundschaft", "exhibition",
+        "club friendly", "international friendly",
+    ]
+    for kw in friendly_keywords:
+        if kw in n:
+            return True, "friendly"
+
+    # Reserve / B team
+    reserve_keywords = [
+        "reserve", "reserves", "ii", " b ", "second team", "2nd team",
+    ]
+    for kw in reserve_keywords:
+        if kw in n:
+            return True, "reserve"
+
+    # International competitions (not domestic senior league)
+    intl_keywords = [
+        "uefa champions league", "uefa europa league", "uefa conference league",
+        "uefa nations league", "uefa super cup", "fifa world cup", "fifa club world cup",
+        "copa libertadores", "copa sudamericana", "afc champions league",
+        "caf champions league", "concacaf champions",
+        "world cup qualification", "european championship", "euro qualification",
+        "africa cup of nations", "asian cup", "copa america",
+        "champions league", "europa league",
+    ]
+    for kw in intl_keywords:
+        if kw in n:
+            return True, "international"
+
+    return False, "senior_league"
+
 def _classify_h2h_sample(match: dict, current_league_id, current_country,
                          pyramid_map: dict, cutoff: datetime) -> dict:
     """对单条 H2H 样本做联赛体系分类，返回分类标签和原因。"""
@@ -80,10 +152,23 @@ def _classify_h2h_sample(match: dict, current_league_id, current_country,
 
     pyr_entry = pyramid_map.get(match_league_id)
     if not pyr_entry:
-        return {
-            "category": "forensic_h2h",
-            "reason": "pyramid_unknown",
-            "league_id": match_league_id,
+        match_league_name = league.get("name", "")
+        is_ns, ns_reason = _is_non_senior_league(match_league_name)
+        if is_ns:
+            return {
+                "category": "excluded_h2h",
+                "reason": f"dynamic_{ns_reason}",
+                "league_id": match_league_id,
+                "league_name": match_league_name,
+            }
+        # Dynamic senior league: create synthetic entry
+        pyr_entry = {
+            "league_name": match_league_name,
+            "country": league.get("country") or current_country or "Unknown",
+            "pyramid_group": "UNMAPPED_SENIOR",
+            "tier": 99,
+            "competition_type": "league",
+            "eligibility_source": "dynamic",
         }
 
     comp_type = pyr_entry.get("competition_type", "unknown")
@@ -105,7 +190,7 @@ def _classify_h2h_sample(match: dict, current_league_id, current_country,
 
     # comp_type == "league" — 进入正式联赛判断
     if str(match_league_id) == str(current_league_id):
-        return {
+        result = {
             "category": "same_league_h2h",
             "reason": "same_league_id",
             "league_id": match_league_id,
@@ -114,6 +199,9 @@ def _classify_h2h_sample(match: dict, current_league_id, current_country,
             "pyramid_group": pyr_entry.get("pyramid_group"),
             "tier": pyr_entry.get("tier"),
         }
+        if pyr_entry.get("eligibility_source") == "dynamic":
+            result["eligibility_source"] = "dynamic"
+        return result
 
     match_country = pyr_entry.get("country")
     match_pyramid = pyr_entry.get("pyramid_group")
@@ -123,6 +211,14 @@ def _classify_h2h_sample(match: dict, current_league_id, current_country,
         return {"category": "forensic_h2h", "reason": "pyramid_unknown", "league_id": match_league_id}
 
     current_pyr = pyramid_map.get(str(current_league_id), {}) if current_league_id else {}
+    if not current_pyr:
+        current_pyr = {
+            "pyramid_group": "UNMAPPED_SENIOR",
+            "tier": 99,
+            "country": current_country,
+            "competition_type": "league",
+            "eligibility_source": "dynamic",
+        }
     current_tier = current_pyr.get("tier")
 
     if match_country != current_country:
