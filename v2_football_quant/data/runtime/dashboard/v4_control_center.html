@@ -74,25 +74,22 @@ button{cursor:pointer}
   margin-top:10px;
   align-items:stretch;
 }
-.primary-layout.mode-2{}
-.primary-layout.mode-4{}
+
+
 .side-sticky{
   position:static;
-  align-self:stretch;
-  height:auto;
-  min-height:unset;
-  max-height:none;
+  height:100%;
+  min-height:0;
   overflow:auto;
 }
 .candidate-panel{
   display:flex;
   flex-direction:column;
   overflow:hidden;
-  height:auto;
+  height:100%;
   min-height:0;
-  max-height:none;
 }
-.candidate-list{overflow-y:auto;padding-right:3px;max-height:100%}
+.candidate-list{flex:1;min-height:0;overflow-y:auto;padding-right:3px}
 .candidate-list::-webkit-scrollbar{width:8px}
 .candidate-list::-webkit-scrollbar-thumb{background:rgba(143,165,196,.32);border-radius:999px}
 /* 列表布局 */
@@ -259,12 +256,12 @@ th{color:var(--muted);font-weight:650}
 @media(max-width:980px){
   .kpi-grid{grid-template-columns:repeat(3,1fr)}
   .primary-layout,.module-grid,.chart-layout{grid-template-columns:1fr}
-  .candidate-panel{height:auto;min-height:unset;max-height:none}
+  .candidate-panel{height:auto;min-height:unset;max-height:none;overflow:visible}
   .summary-grid{grid-template-columns:repeat(2,1fr)}
   .quick-form{grid-template-columns:repeat(2,1fr)}
   .quick-form button{grid-column:1/-1}
   .side-sticky{position:static;height:auto;min-height:unset;max-height:none;overflow:visible}
-  .candidate-list{overflow:visible;grid-template-columns:1fr;max-height:none}
+  .candidate-list{overflow:visible;grid-template-columns:1fr;max-height:none;flex:unset}
 }
 @media(max-width:540px){
   .app{padding:10px 9px 84px}
@@ -844,12 +841,23 @@ async function markNoBetEarlyGoal(i){
 function buildValidationPanel(){
   const top=MODEL.top_status||{};
   const y=top.yesterday_validation||{};
+  const cv=top.cumulative_validation||{};
+  const cvd=MODEL.cumulative_validation_detail||{};
+  const yvd=MODEL.yesterday_validation_detail||{};
+  const cumA=safe(first(top.cumulative_a_text,cv.A,cvd.A?.display),'暂无');
+  const cumB=safe(first(top.cumulative_b_text,cv.B,cvd.B?.display),'暂无');
+  const cumAB=safe(first(top.cumulative_ab_text,cv.AB,top.cumulative_validation_text,cvd.AB?.display),'暂无');
+  const yestA=safe(first(top.yesterday_a_text,y.A,yvd.hit_rates?.A),'暂无');
+  const yestB=safe(first(top.yesterday_b_text,y.B,yvd.hit_rates?.B),'暂无');
+  const yestAB=safe(first(top.yesterday_ab_text,y.AB,top.yesterday_validation_text,y.display),'暂无');
   return `<table>
     <tr><th>项</th><th>值</th></tr>
-    <tr><td>昨日A</td><td>${safe(first(top.yesterday_a_text,y.A),'N/A')}</td></tr>
-    <tr><td>昨日B</td><td>${safe(first(top.yesterday_b_text,y.B),'N/A')}</td></tr>
-    <tr><td>昨日A+B</td><td>${safe(first(top.yesterday_ab_text,y.AB),'N/A')}</td></tr>
-    <tr><td>累计A+B</td><td>${safe(first(top.cumulative_ab_text,(top.cumulative_validation||{}).AB),'N/A')}</td></tr>
+    <tr><td>累计A</td><td>${cumA}</td></tr>
+    <tr><td>累计B</td><td>${cumB}</td></tr>
+    <tr><td>累计AB</td><td>${cumAB}</td></tr>
+    <tr><td>昨日A</td><td>${yestA}</td></tr>
+    <tr><td>昨日B</td><td>${yestB}</td></tr>
+    <tr><td>昨日AB</td><td>${yestAB}</td></tr>
     <tr><td>来源</td><td>${safe((MODEL.data_sources||{}).yesterday_validation,'official fixture_id summary')}</td></tr>
   </table>`;
 }
