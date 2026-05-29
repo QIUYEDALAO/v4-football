@@ -188,9 +188,16 @@ def _run_parallel_scan(args, scan_date: str, today_key: str, wd, log_path: Path)
             "scan_date": today_key,
             "scout_file_date": today_key,
             "kickoff": r.get("kickoff_time", "?"),
+            "kickoff_bj": r.get("kickoff_time", "?"),
             "home": r.get("home_team", "?"),
             "away": r.get("away_team", "?"),
             "league": r.get("league_name", "?"),
+            "fixture_universe": fixture_universe,
+            "is_in_57_whitelist": is_in_57,
+            "source_group": source_group,
+            "country": r.get("country", "?"),
+            "league_name": r.get("league_name", "?"),
+            "league_id": r.get("league_id"),
             "grade": grade,
             "official_grade": grade,
             "market_scores": r.get("market_scores", {}) if isinstance(r.get("market_scores"), dict) else {},
@@ -214,6 +221,10 @@ def _run_parallel_scan(args, scan_date: str, today_key: str, wd, log_path: Path)
                       "recent_form_avg", "late_fh_pressure"):
                 if k in rec:
                     scout_entry[k] = rec[k]
+        # BOSS guard: if league_id is truly missing, flag it
+        if scout_entry.get("league_id") is None:
+            scout_entry["metadata_missing"] = True
+            scout_entry["metadata_missing_reason"] = "league_id_null_in_scan_result"
         scout_list.append(scout_entry)
 
     # ── Compute split statistics ──
