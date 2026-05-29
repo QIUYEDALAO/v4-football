@@ -126,7 +126,7 @@ function renderCandidate(x,i){
   const r=String(first(x.rating,x.grade,"A")).toUpperCase();
   const league=safe(first(x.league_cn,x.league),"联赛");
   const time=safe(first(x.kickoff_local,x.kickoff_time,x.kickoff,x.time),"开赛时间待定");
-  
+  const script=safe(first(x.script,x.script_type,x.playbook),"正式候选");
   const dl=safe(first(x.default_line,"O1"),"O1");
   const od=first(x.default_odds,null);
   const st=first(x.default_stake,null);
