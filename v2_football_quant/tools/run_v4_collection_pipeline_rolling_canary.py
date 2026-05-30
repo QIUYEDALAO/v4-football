@@ -223,8 +223,8 @@ def main() -> int:
 
     if args.max_fixtures <= 0:
         raise SystemExit("--max-fixtures must be positive")
-    if args.max_fixtures > 5:
-        raise SystemExit("--max-fixtures must be <= 5 for rolling canary")
+    if args.max_fixtures > 15:
+        raise SystemExit("--max-fixtures must be <= 15 for rolling canary")
 
     dates = _parse_dates(args.dates)
     output_dir = Path(args.output_dir)

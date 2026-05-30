@@ -159,6 +159,27 @@ def _grade_map(rows: list[dict[str, Any]]) -> dict[str, str]:
     return m
 
 
+def _fixture_id_set(rows: list[dict[str, Any]]) -> set[str]:
+    out: set[str] = set()
+    for r in rows:
+        fid = str(r.get("fixture_id") or "").strip()
+        if fid:
+            out.add(fid)
+    return out
+
+
+def _ab_fixture_id_set(rows: list[dict[str, Any]]) -> set[str]:
+    out: set[str] = set()
+    for r in rows:
+        fid = str(r.get("fixture_id") or "").strip()
+        if not fid:
+            continue
+        g = str(r.get("official_grade") or r.get("grade") or "").upper()
+        if g in {"A", "B"}:
+            out.add(fid)
+    return out
+
+
 def _safe_explained(flag: bool, detail: str) -> dict[str, Any]:
     return {"ok": bool(flag), "detail": detail}
 
@@ -216,8 +237,8 @@ def main() -> int:
 
     if args.max_fixtures <= 0:
         raise SystemExit("--max-fixtures must be positive")
-    if args.max_fixtures > 5:
-        raise SystemExit("--max-fixtures must be <= 5 for canary compare")
+    if args.max_fixtures > 15:
+        raise SystemExit("--max-fixtures must be <= 15 for canary compare")
 
     _load_env_file(Path.home() / ".openclaw" / ".env")
 
@@ -265,6 +286,11 @@ def main() -> int:
 
     off_grade_map = _grade_map(off_scout_rows)
     lazy_grade_map = _grade_map(lazy_scout_rows)
+    off_fixture_ids = _fixture_id_set(off_scout_rows)
+    lazy_fixture_ids = _fixture_id_set(lazy_scout_rows)
+    off_ab_fixture_ids = _ab_fixture_id_set(off_scout_rows)
+    missing_official_ids_in_lazy = sorted(off_fixture_ids - lazy_fixture_ids)
+    missing_official_ab_ids_in_lazy = sorted(off_ab_fixture_ids - lazy_fixture_ids)
     common_ids = sorted(set(off_grade_map) & set(lazy_grade_map))
     mismatch_ids = [fid for fid in common_ids if off_grade_map.get(fid) != lazy_grade_map.get(fid)]
 
@@ -284,6 +310,14 @@ def main() -> int:
         "no_validation": {"ok": True, "detail": "canary tool does not run validation"},
         "no_live_bet_mutation": {"ok": True, "detail": "canary tool does not write live bet files"},
         "no_qq_push": {"ok": True, "detail": "command forces --no-push and QQ is hard-disabled"},
+        "official_fixture_ids_covered_by_lazy": _safe_explained(
+            len(missing_official_ids_in_lazy) == 0,
+            f"official={len(off_fixture_ids)},lazy={len(lazy_fixture_ids)},missing={len(missing_official_ids_in_lazy)}",
+        ),
+        "official_ab_fixture_ids_covered_by_lazy": _safe_explained(
+            len(missing_official_ab_ids_in_lazy) == 0,
+            f"official_ab={len(off_ab_fixture_ids)},missing={len(missing_official_ab_ids_in_lazy)}",
+        ),
         "canary_status": "PASS" if (off_summary["scout_row_count"] > 0 and lazy_summary["scout_row_count"] > 0 and grade_same) else "WARN",
         "official_command": cmd_off,
         "lazy_command": cmd_lazy,
@@ -298,6 +332,11 @@ def main() -> int:
         "scan_engine": "serial",
         "official_legacy": off_summary,
         "rf_lazy_shadow": lazy_summary,
+        "official_fixture_ids": sorted(off_fixture_ids),
+        "lazy_fixture_ids": sorted(lazy_fixture_ids),
+        "official_ab_fixture_ids": sorted(off_ab_fixture_ids),
+        "missing_official_fixture_ids_in_lazy": missing_official_ids_in_lazy,
+        "missing_official_ab_fixture_ids_in_lazy": missing_official_ab_ids_in_lazy,
         "comparison": cmpv,
         "generated_at": datetime.now(TZ).isoformat(),
     }
