@@ -101,6 +101,7 @@ button{cursor:pointer}
 .candidate-row .time-col{white-space:nowrap;font-variant-numeric:tabular-nums;font-size:12px}
 .candidate-row .grade-col{text-align:center;font-weight:700}
 .candidate-row .league-col{color:var(--muted);font-size:11px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.candidate-row .shadow-col{font-size:11px;color:#dbe8fb;white-space:nowrap}
 .candidate-row .teams-col{font-weight:700;font-size:13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .candidate-row .playbook-col{color:var(--amber);font-weight:600;font-size:11px;white-space:nowrap}
 .candidate-row .dist-col{color:var(--muted);font-size:10.5px;white-space:normal;word-break:keep-all}
@@ -112,6 +113,10 @@ button{cursor:pointer}
 .bet-row-panel{display:none}
 .bet-row-panel.open{display:table-row}
 .bet-row-panel td{padding:8px 6px;background:rgba(16,27,44,.7)}
+.shadow-review{margin-bottom:8px;padding:8px;border:1px solid rgba(92,200,255,.24);border-radius:8px;background:rgba(92,200,255,.08);font-size:12px;line-height:1.55}
+.shadow-review .t{font-weight:800;margin-bottom:4px}
+.shadow-review .k{color:var(--muted)}
+.shadow-disclaimer{margin-top:6px;color:#ffdca0}
 .bet-form-inline{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
 .bet-form-inline label{color:var(--muted);font-size:11px;min-width:40px}
 .bet-form-inline input,.bet-form-inline select,.bet-form-inline textarea{background:var(--panel2);border:1px solid var(--line);color:var(--ink);padding:4px 7px;border-radius:5px;font-size:12px}
@@ -472,12 +477,39 @@ th{color:var(--muted);font-weight:650}
 let MODEL={};
 let DISPLAY_CANDIDATES=[];
 const $=id=>document.getElementById(id);
-const safe=(v,f="N/A")=>v===void 0||v===null||v===""?f:String(v).replace(new RegExp("undef"+"ined","gi"),f);
+const safe=(v,f="N/A")=>{
+  if(v===void 0||v===null) return f;
+  const s=String(v).trim();
+  if(!s) return f;
+  const low=s.toLowerCase();
+  if(low==="undefined"||low==="null"||low==="nan") return f;
+  return s;
+};
 const srcGroupDisplay=x=>{const sg=first(x.source_group,"");if(sg==="WHITELIST_57")return"57组";if(sg==="OUTSIDE_57")return"扩展组";return"来源未标记";};
 const uniDisplay=x=>{const u=first(x.fixture_universe,"");if(u==="all_eligible")return"全量";if(u==="whitelist")return"白名单组";return u||"";};
 const num=(v,d=2)=>{const n=Number(v);return Number.isFinite(n)?n.toFixed(d):(0).toFixed(d)};
 const first=(...v)=>v.find(x=>x!==void 0&&x!==null&&x!=="");
 const arr=v=>Array.isArray(v)?v:[];
+const SHADOW_ENUM_CN={
+  HOT_DRIVER_ACCEPTABLE:"强侧驱动，弱侧保底",
+  HOT_DRIVER_SUPPORTIVE:"强侧极热，弱侧支持",
+  H2H_NO_BONUS:"H2H不支持，不降级",
+  H2H_STRONG_BONUS:"H2H近5强支持",
+  MARKET_NO_DATA:"缺少可用初盘数据",
+  MARKET_STRONG_CONFIRM:"初盘强确认",
+  MARKET_WEAK_CONFIRM:"初盘弱确认",
+  MARKET_NEUTRAL:"初盘中性",
+  MARKET_WEAK_VETO:"初盘弱反向",
+  MARKET_HARD_VETO:"初盘强反向",
+  OBSERVE_ONLY:"观察模式",
+  BILATERAL_ACTIVE:"双边活跃",
+  HOT_DRIVER:"强侧驱动",
+  STRONG_DRIVER:"强驱动",
+  RECENT5_HEATING_EXCEPTION:"升温破格",
+  DATA_MISSING:"数据不足",
+  NO_MARKET:"无盘口"
+};
+const shadowCn=v=>SHADOW_ENUM_CN[String(v||"").toUpperCase()]||safe(v,"数据缺失");
 
 function normalizeModel(raw){const m=(raw&&raw.model)?raw.model:raw||{};return typeof m==="object"&&m?m:{}};
 function getCandidatesNode(){ return MODEL.candidates||MODEL.today_candidates||{}; }
@@ -596,8 +628,8 @@ function renderCandidates(){
   const list=sortCandidates(demoCount?buildDemoCandidates(base,demoCount):base);
   const el=$('candidateList');
   DISPLAY_CANDIDATES=list;
-  if(!list.length){el.innerHTML='<div class="note">今日暂无 A/B 候选。</div>';return;}
-  var h='<table class="candidate-table"><thead><tr><th style="width:10%">时间</th><th style="width:5%"></th><th style="width:14%">联赛</th><th style="width:25%">对阵</th><th style="width:10%">剧本</th><th style="width:26%">进球分布</th><th style="width:6%">状态</th><th style="width:4%"></th></tr></thead><tbody>';
+  if(!list.length){el.innerHTML='<div class="note">今日暂无 A/B 候选。</div><div class="note" style="margin-top:8px">RF影子观察仅用于复盘，不作为投注推荐。</div>';return;}
+  var h='<table class="candidate-table"><thead><tr><th style="width:9%">时间</th><th style="width:6%">官方</th><th style="width:8%">RF影子</th><th style="width:8%">盘口后</th><th style="width:26%">对阵</th><th style="width:10%">剧本</th><th style="width:23%">进球分布</th><th style="width:6%">状态</th><th style="width:4%"></th></tr></thead><tbody>';
   list.forEach(function(x,i){h+=renderListRow(x,i);});
   h+='</tbody></table>';
   el.innerHTML=h;
@@ -612,6 +644,9 @@ function renderCandidates(){
 
 function renderListRow(x,i){
   const r=String(first(x.rating,x.grade,'A')).toUpperCase();
+  const official=String(first(x.official_grade,x.grade,'无')).toUpperCase();
+  const rfShadow=safe(x.rf_shadow_grade,'数据缺失');
+  const marketShadow=safe(x.market_adjusted_shadow_grade,'数据缺失');
   const league=safe(first(x.league_cn,x.league),'联赛');
   const fmtKickoff=v=>{if(!v)return null;const s=String(v);const m=s.match(/(\d{4})-(\d{2})-(\d{2})[T ](\d{2}):(\d{2})/);if(m)return m[2]+'-'+m[3]+' '+m[4]+':'+m[5];return (s||'').slice(0,16).replace('T',' ');};
   const rawTime=first(x.kickoff_bj,x.kickoff_time_bj,x.kickoff_local,x.kickoff_time,x.kickoff,x.time,null);
@@ -627,14 +662,24 @@ function renderListRow(x,i){
   else if(x.settled){stateTag='已结算';}
   else if(x.already_bet){stateTag='已投注';}
   else{stateTag='未投注';}
+  const shadowBadge=`RF:${safe(rfShadow,'数据缺失')} / 盘后:${safe(marketShadow,'数据缺失')}`;
+  const diffText=safe(x.official_vs_shadow_reason,'官方与影子差异待观察');
+  const shadowRoute=shadowCn(x.rf_shadow_route);
+  const balanceReason=safe(x.rf_balance_reason,'数据缺失');
+  const h2hReason=shadowCn(first(x.h2h_recent5_bonus_reason,x.h2h_recent5_support_status));
+  const openMarketReason=shadowCn(first(x.opening_market_reason,x.opening_market_support_status));
+  const marketAdjustReason=safe(x.market_adjustment_reason,'数据缺失');
+  const observeMode=shadowCn(x.collection_plan_mode||'OBSERVE_ONLY');
+  const isOfficialCandidate=['A','B'].includes(official);
   const dl=safe(first(x.default_line,'O1'),'O1');
   const od=safe(x.default_odds,'');const st=safe(x.default_stake,'');const mi=safe(x.default_entry_minute,'');
   const lines=['O0.75','O1','O1.25','O1.5','O2'];
   const lineOpts=lines.map(function(l){return '<option'+(l===dl?' selected':'')+'>'+l+'</option>';}).join('');
   var row='<tr class="candidate-row grade-'+r+'" onclick="toggleBetPanel('+i+')">';
   row+='<td class="time-col">'+time+'</td>';
-  row+='<td class="grade-col"><span style="display:inline-block;width:7px;height:7px;border-radius:50%;background:'+(r==='A'?'var(--green)':'var(--blue)')+';margin-right:3px;vertical-align:middle"></span>'+r+'</td>';
-  row+='<td class="league-col" title="'+league+'">'+league+'</td>';
+  row+='<td class="grade-col"><span style="display:inline-block;width:7px;height:7px;border-radius:50%;background:'+(official==='A'?'var(--green)':'var(--blue)')+';margin-right:3px;vertical-align:middle"></span>'+safe(official,'无')+'</td>';
+  row+='<td class="shadow-col">'+safe(rfShadow,'数据缺失')+'</td>';
+  row+='<td class="shadow-col">'+safe(marketShadow,'数据缺失')+'</td>';
   row+='<td class="teams-col" title="'+matchName(x)+'">'+matchName(x)+'</td>';
   row+='<td class="playbook-col">'+playbook+'</td>';
   row+='<td class="dist-col">'+distText+'</td>';
@@ -642,16 +687,33 @@ function renderListRow(x,i){
   row+='<td class="action-col"><button class="expand-btn" id="ebtn'+i+'">展开</button></td>';
   row+='</tr>';
   // Bet form panel row
-  row+='<tr class="bet-row-panel" id="bpanel'+i+'"><td colspan="8"><div class="bet-form-inline">';
-  row+='<label>盘口线</label><select id="line-'+i+'">'+lineOpts+'</select>';
-  row+='<label>水位</label><input id="odds-'+i+'" value="'+od+'">';
-  row+='<label>金额</label><input id="stake-'+i+'" value="'+st+'">';
-  row+='<label>入场</label><input id="minute-'+i+'" value="'+mi+'">';
-  row+='<button class="btn-save" onclick="event.stopPropagation();addBet('+i+')">保存投注</button>';
-  row+='<button class="btn-skip" onclick="event.stopPropagation();markNoBetEarlyGoal('+i+')">早进球未投</button>';
-  row+='<button class="btn-no-market" onclick="event.stopPropagation();markNoMarket('+i+')">无盘口排除</button>';
-  row+='<label>备注</label><textarea id="notes-'+i+'"></textarea>';
-  row+='</div></td></tr>';
+  row+='<tr class="bet-row-panel" id="bpanel'+i+'"><td colspan="9">';
+  row+='<div class="shadow-review"><div class="t">【RF影子观察】</div>';
+  row+='<div><span class="k">联赛：</span>'+league+'</div>';
+  row+='<div><span class="k">官方等级：</span>'+safe(official,'无')+'　<span class="k">RF影子：</span>'+safe(rfShadow,'数据缺失')+'　<span class="k">盘口调整后：</span>'+safe(marketShadow,'数据缺失')+'</div>';
+  row+='<div><span class="k">影子路线：</span>'+shadowRoute+'　<span class="k">差异：</span>'+safe(diffText,'待观察')+'</div>';
+  row+='<div><span class="k">近期状态：</span>'+safe(x.rf_shadow_reason,'数据缺失')+'</div>';
+  row+='<div><span class="k">双方平衡：</span>'+balanceReason+'</div>';
+  row+='<div><span class="k">H2H近5：</span>'+h2hReason+'</div>';
+  row+='<div><span class="k">初盘判断：</span>'+openMarketReason+'</div>';
+  row+='<div><span class="k">盘口调整说明：</span>'+marketAdjustReason+'</div>';
+  row+='<div><span class="k">采集模式：</span>'+observeMode+'</div>';
+  row+='<div class="shadow-disclaimer">影子观察，不作为投注推荐。</div></div>';
+  if(isOfficialCandidate){
+    row+='<div class="bet-form-inline">';
+    row+='<label>盘口线</label><select id="line-'+i+'">'+lineOpts+'</select>';
+    row+='<label>水位</label><input id="odds-'+i+'" value="'+od+'">';
+    row+='<label>金额</label><input id="stake-'+i+'" value="'+st+'">';
+    row+='<label>入场</label><input id="minute-'+i+'" value="'+mi+'">';
+    row+='<button class="btn-save" onclick="event.stopPropagation();addBet('+i+')">保存投注</button>';
+    row+='<button class="btn-skip" onclick="event.stopPropagation();markNoBetEarlyGoal('+i+')">早进球未投</button>';
+    row+='<button class="btn-no-market" onclick="event.stopPropagation();markNoMarket('+i+')">无盘口排除</button>';
+    row+='<label>备注</label><textarea id="notes-'+i+'"></textarea>';
+    row+='</div>';
+  }else{
+    row+='<div class="note">该行仅影子观察，投注操作已禁用。</div>';
+  }
+  row+='</td></tr>';
   return row;
 }
 var openBetPanel=-1;

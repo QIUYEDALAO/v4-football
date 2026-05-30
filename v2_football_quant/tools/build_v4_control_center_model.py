@@ -285,6 +285,57 @@ def _rf_clean(v: Any, default: Any) -> Any:
     return v
 
 
+def _norm_grade(v: Any) -> str:
+    g = str(v or "").strip().upper()
+    return g if g in {"A", "B", "C", "SKIP"} else ""
+
+
+def _grade_rank(g: str) -> int:
+    return {"A": 4, "B": 3, "C": 2, "SKIP": 1}.get(g, 0)
+
+
+def _build_shadow_review_fields(official_grade_raw: Any, rf_shadow: dict[str, Any]) -> dict[str, Any]:
+    official = _norm_grade(official_grade_raw)
+    rf_grade = _norm_grade(rf_shadow.get("rf_shadow_grade"))
+    market_grade = _norm_grade(rf_shadow.get("market_adjusted_shadow_grade"))
+    effective_shadow = market_grade or rf_grade
+
+    if not official and not effective_shadow:
+        diff = "DATA_MISSING"
+        status = "DATA_MISSING"
+        reason = "官方与影子等级均缺失"
+    elif not official and effective_shadow:
+        diff = "SHADOW_ONLY"
+        status = "NO_OFFICIAL_CANDIDATE"
+        reason = "官方暂无等级，影子仅供观察"
+    elif official and not effective_shadow:
+        diff = "OFFICIAL_ONLY"
+        status = "FIELD_MISSING"
+        reason = "官方有等级，影子字段缺失"
+    else:
+        o_rank = _grade_rank(official)
+        s_rank = _grade_rank(effective_shadow)
+        status = "READY"
+        if o_rank == s_rank:
+            diff = "SAME"
+            reason = f"官方与影子一致（{official}）"
+        elif s_rank > o_rank:
+            diff = "SHADOW_HIGHER"
+            reason = f"影子高于官方（官方{official} → 影子{effective_shadow}）"
+        else:
+            diff = "SHADOW_LOWER"
+            reason = f"影子低于官方（官方{official} → 影子{effective_shadow}）"
+
+    note = "影子观察，不作为投注推荐"
+    return {
+        "official_grade": official or "无",
+        "shadow_review_status": status,
+        "shadow_review_note": note,
+        "official_vs_shadow_diff": diff,
+        "official_vs_shadow_reason": reason,
+    }
+
+
 def _merge_rf_shadow_fields(candidate_row: dict, scout_row: dict) -> dict:
     out: dict[str, Any] = {}
     for k in RF_RATE_FIELDS:
@@ -324,7 +375,7 @@ def _merge_rf_shadow_fields(candidate_row: dict, scout_row: dict) -> dict:
     for k in COLLECTION_PLAN_NUM_FIELDS:
         out[k] = _rf_clean(candidate_row.get(k, scout_row.get(k)), 0)
     for k in RF_SHADOW_GRADE_TEXT_FIELDS:
-        out[k] = _rf_clean(candidate_row.get(k, scout_row.get(k)), "")
+        out[k] = _rf_clean(candidate_row.get(k, scout_row.get(k)), "数据缺失")
     for k in RF_SHADOW_GRADE_BOOL_FIELDS:
         out[k] = bool(candidate_row.get(k, scout_row.get(k), False))
     for k in RF_SHADOW_GRADE_NUM_FIELDS:
@@ -462,6 +513,8 @@ def _extract_candidates(view: dict, live_daily: dict, scout_data: list | None = 
         fid = r.get("fixture_id")
         s = scout_by_fid.get(fid, {}) if scout_by_fid else {}
         rf_shadow = _merge_rf_shadow_fields(r, s)
+        official_grade_raw = r.get("official_grade") or s.get("official_grade") or r.get("grade") or s.get("grade")
+        shadow_review = _build_shadow_review_fields(official_grade_raw, rf_shadow)
         a_candidates.append({
             "fixture_id": fid,
             "league": r.get("league") or "",
@@ -472,6 +525,7 @@ def _extract_candidates(view: dict, live_daily: dict, scout_data: list | None = 
             "kickoff_time": r.get("kickoff_display") or s.get("kickoff", ""),
             "match_time": s.get("kickoff", ""),
             "grade": r.get("grade") or "A",
+            "official_grade": shadow_review["official_grade"],
             "script_type": s.get("script_type") or r.get("script_type") or "",
             "ht_score": s.get("ht_score") or r.get("ht_score"),
             "source_hash": view.get("source_hash") or view.get("brief_sha256") or "",
@@ -532,6 +586,7 @@ def _extract_candidates(view: dict, live_daily: dict, scout_data: list | None = 
             "score_pack_missing": s.get("score_pack_missing", True),
             "explain_factors_missing": s.get("explain_factors_missing", True),
             **rf_shadow,
+            **shadow_review,
         })
 
     for r in (view.get("B_candidates") or []):
@@ -540,6 +595,8 @@ def _extract_candidates(view: dict, live_daily: dict, scout_data: list | None = 
         fid = r.get("fixture_id")
         s = scout_by_fid.get(fid, {}) if scout_by_fid else {}
         rf_shadow = _merge_rf_shadow_fields(r, s)
+        official_grade_raw = r.get("official_grade") or s.get("official_grade") or r.get("grade") or s.get("grade")
+        shadow_review = _build_shadow_review_fields(official_grade_raw, rf_shadow)
         b_candidates.append({
             "fixture_id": fid,
             "league": r.get("league") or "",
@@ -550,6 +607,7 @@ def _extract_candidates(view: dict, live_daily: dict, scout_data: list | None = 
             "kickoff_time": r.get("kickoff_display") or s.get("kickoff", ""),
             "match_time": s.get("kickoff", ""),
             "grade": r.get("grade") or "B",
+            "official_grade": shadow_review["official_grade"],
             "script_type": s.get("script_type") or r.get("script_type") or "",
             "ht_score": s.get("ht_score") or r.get("ht_score"),
             "source_hash": view.get("source_hash") or view.get("brief_sha256") or "",
@@ -596,6 +654,7 @@ def _extract_candidates(view: dict, live_daily: dict, scout_data: list | None = 
             "score_pack_missing": s.get("score_pack_missing", True),
             "explain_factors_missing": s.get("explain_factors_missing", True),
             **rf_shadow,
+            **shadow_review,
         })
 
     for r in (view.get("C_candidates") or []):
