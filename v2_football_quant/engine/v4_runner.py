@@ -34,10 +34,7 @@ from engine.data_sources.h2h_engine import (
     recent_profile_cache_stats,
     reset_recent_profile_cache_stats,
 )
-from engine.rf_shadow_fields import (
-    build_recent_form_shadow_from_recent,
-    build_rf_shadow_grade_layer,
-)
+from engine.rf_shadow_fields import build_recent_form_shadow_from_recent
 from engine.data_sources.league_baseline import baseline_for_fixture
 from engine.data_sources.lineup_strength import LineupStrengthAnalyzer
 from engine.data_sources.motivation import evaluate_match_motivation
@@ -421,47 +418,6 @@ def _best_pre_live_line(ht_ou_lines: list) -> dict | None:
     return valid[0]
 
 
-def _shadow_prefilter_decision(rf_phase3: dict, best_line: dict | None) -> tuple[bool, str]:
-    """Shadow-only prefilter. Returns (h2h_required, reason)."""
-    market_status = str(rf_phase3.get("opening_market_support_status") or "MARKET_NO_DATA").upper()
-    rf_grade = str(rf_phase3.get("rf_shadow_grade") or "DATA_MISSING").upper()
-    rf_route = str(rf_phase3.get("rf_shadow_route") or "").upper()
-
-    if best_line is None or market_status == "MARKET_NO_MARKET" or rf_route == "NO_MARKET":
-        return False, "NO_MARKET"
-    if market_status == "MARKET_HARD_VETO":
-        return False, "MARKET_HARD_VETO"
-    if rf_grade in {"SKIP", "LOW_SAMPLE", "DATA_MISSING"} or rf_route in {"SKIP", "NO_BET"}:
-        return False, "OBVIOUS_SKIP"
-    return True, "PREFILTER_PASS"
-
-
-def _shadow_events_requirement(rf_phase3: dict, best_line: dict | None) -> tuple[bool, str]:
-    rf_grade = str(rf_phase3.get("rf_shadow_grade") or "DATA_MISSING").upper()
-    market_status = str(rf_phase3.get("opening_market_support_status") or "MARKET_NO_DATA").upper()
-    line_float = best_line.get("line_float") if best_line else None
-
-    if rf_grade in {"A", "B", "C"}:
-        return True, f"RF_SHADOW_{rf_grade}"
-    if (
-        line_float is not None
-        and line_float >= 1.25
-        and market_status not in {"MARKET_NO_MARKET", "MARKET_HARD_VETO"}
-    ):
-        return True, "PENDING_CANDIDATE"
-    return False, "NOT_AB_C_OR_PENDING"
-
-
-def _shadow_cpl_requirement(rf_phase3: dict) -> tuple[bool, str]:
-    rf_grade = str(rf_phase3.get("rf_shadow_grade") or "DATA_MISSING").upper()
-    market_status = str(rf_phase3.get("opening_market_support_status") or "MARKET_NO_DATA").upper()
-    if rf_grade in {"A", "B"}:
-        return True, f"RF_SHADOW_{rf_grade}"
-    if rf_grade == "C" and market_status in {"MARKET_STRONG_CONFIRM", "MARKET_WEAK_CONFIRM"}:
-        return True, "KEY_C_PLACEHOLDER"
-    return False, "NOT_AB_OR_KEY_C"
-
-
 def _query_injury_health(api_client, team_id: int, team_name: str) -> dict:
     """查询球队伤病/停赛情况（轻量版）"""
     try:
@@ -648,97 +604,8 @@ def run_v4_scan(
             })
             continue
 
-        collection = {
-            "collection_stage": "INIT",
-            "rf_collected": False,
-            "market_collected": False,
-            "prefilter_done": False,
-            "h2h_required": False,
-            "h2h_skipped_reason": "",
-            "h2h_collected": False,
-            "events_required": False,
-            "events_skipped_reason": "",
-            "events_collected": False,
-            "cpl_required": False,
-            "cpl_skipped_reason": "",
-            "cpl_collected": False,
-            "expensive_calls_saved": 0,
-            "collection_reason": "",
-        }
-
-        # Step 1: RF first
-        home_recent_raw = api_client(f"fixtures?team={fx['homeId']}&last=10&status=FT")
-        away_recent_raw = api_client(f"fixtures?team={fx['awayId']}&last=10&status=FT")
-        rf_shadow = build_recent_form_shadow_from_recent(
-            home_recent_raw,
-            fx["homeId"],
-            away_recent_raw,
-            fx["awayId"],
-        )
-        collection["rf_collected"] = True
-        collection["collection_stage"] = "RF_COLLECTED"
-
-        # Step 2: Opening market before H2H
-        odds_resp = api_client(f"odds?fixture={fx['id']}")
-        ht_ou_lines = _capture_ht_ou_lines(odds_resp) if odds_resp else []
-        best_line = _best_pre_live_line(ht_ou_lines)
-        collection["market_collected"] = True
-        collection["collection_stage"] = "MARKET_COLLECTED"
-
-        rf_phase3 = build_rf_shadow_grade_layer(
-            {
-                **rf_shadow,
-                "prematch_ht_line": best_line["line_float"] if best_line else None,
-                "prematch_over_odds": best_line.get("over") if best_line else None,
-                "prematch_under_odds": best_line.get("under") if best_line else None,
-            },
-            factors=dict(rf_shadow),
-        )
-
-        # Step 3: RF prefilter decides whether H2H is worth the cost
-        h2h_required, prefilter_reason = _shadow_prefilter_decision(rf_phase3, best_line)
-        collection["prefilter_done"] = True
-        collection["h2h_required"] = bool(h2h_required)
-        collection["h2h_skipped_reason"] = "" if h2h_required else prefilter_reason
-        collection["collection_reason"] = f"SHADOW_PREFILTER_{prefilter_reason}"
-        collection["collection_stage"] = "PREFILTER_DONE"
-
-        if not h2h_required:
-            collection["events_required"] = False
-            collection["events_skipped_reason"] = "H2H_SKIPPED"
-            collection["cpl_required"] = False
-            collection["cpl_skipped_reason"] = "H2H_SKIPPED"
-            collection["collection_stage"] = "PREFILTER_SKIP_DONE"
-            collection["expensive_calls_saved"] = 3
-            append_jsonl(universe_out, {
-                "fixture_id": fx["id"],
-                **_scout_date_fields(fx["kickoff"], scan_dt, today_key, window, country=fx.get("country"), league_name=fx.get("league_name"), fixture_timezone=fx.get("fixture_timezone")),
-                "league_id": fx["league"],
-                "league_name": fx["league_name"],
-                "country": None,
-                "home_team": fx["home"],
-                "away_team": fx["away"],
-                "kickoff_time": fx["kickoff"],
-                "prematch_ht_line": best_line["line_float"] if best_line else None,
-                "prematch_over_odds": best_line.get("over") if best_line else None,
-                "prematch_under_odds": best_line.get("under") if best_line else None,
-                "api_coverage_level": "UNKNOWN",
-                "is_candidate": False,
-                "candidate_score": None,
-                "filter_result": "SKIP",
-                "filter_reason": f"PREFILTER_{prefilter_reason}",
-                "run_tag": run_tag,
-                "logged_at": datetime.now().isoformat(),
-                **collection,
-            })
-            stats["below_threshold"] += 1
-            continue
-
-        events_required, events_reason = _shadow_events_requirement(rf_phase3, best_line)
-        collection["events_required"] = bool(events_required)
-        collection["events_skipped_reason"] = "" if events_required else events_reason
-
         logger.info(f"  ⏳ H2H: {fx.get('league_name','?')} | {fx['home']} vs {fx['away']}")
+        import traceback, sys
         result = evaluate_h2h_edge(
             fx["homeId"],
             fx["awayId"],
@@ -747,24 +614,13 @@ def run_v4_scan(
             current_league_id=fx["league"],
             current_league_name=fx["league_name"],
             current_country=fx.get("country"),
-            include_h2h_events=events_required,
-            include_recent_events=events_required,
         )
-        collection["h2h_collected"] = True
-        collection["events_collected"] = bool(events_required and result.get("valid"))
-        collection["collection_stage"] = "H2H_COLLECTED"
-        if not events_required:
-            collection["expensive_calls_saved"] += 1
-
-        h2h_valid = bool(result.get("valid"))
-        h2h_reason = result.get("reason", "")
         if not result.get("valid"):
             logger.info(f"  ⏭️ SKIP: {result.get('reason','?')}")
-            cpl_required, cpl_reason = _shadow_cpl_requirement(rf_phase3)
-            collection["cpl_required"] = bool(cpl_required)
-            collection["cpl_skipped_reason"] = "H2H_INVALID"
-            collection["collection_stage"] = "H2H_INVALID_SKIP"
-            collection["expensive_calls_saved"] += 1
+        h2h_valid = bool(result.get("valid"))
+        h2h_reason = result.get("reason", "")
+
+        if not result["valid"]:
             append_jsonl(universe_out, {
                 "fixture_id": fx["id"],
                 **_scout_date_fields(fx["kickoff"], scan_dt, today_key, window, country=fx.get("country"), league_name=fx.get("league_name"), fixture_timezone=fx.get("fixture_timezone")),
@@ -774,9 +630,9 @@ def run_v4_scan(
                 "home_team": fx["home"],
                 "away_team": fx["away"],
                 "kickoff_time": fx["kickoff"],
-                "prematch_ht_line": best_line["line_float"] if best_line else None,
-                "prematch_over_odds": best_line.get("over") if best_line else None,
-                "prematch_under_odds": best_line.get("under") if best_line else None,
+                "prematch_ht_line": None,
+                "prematch_over_odds": None,
+                "prematch_under_odds": None,
                 "api_coverage_level": "UNKNOWN",
                 "is_candidate": False,
                 "candidate_score": None,
@@ -784,7 +640,6 @@ def run_v4_scan(
                 "filter_reason": f"H2H_{h2h_reason or 'INVALID'}",
                 "run_tag": run_tag,
                 "logged_at": datetime.now().isoformat(),
-                **collection,
             })
             if "API_ERROR" in result.get("reason", ""):
                 stats["api_error"] += 1
@@ -793,12 +648,27 @@ def run_v4_scan(
             else:
                 stats["below_threshold"] += 1
             continue
-
         stats["valid_h2h_count"] += 1
 
-        factors = dict(result.get("factors") or {})
+        # ── 庄家盘口阵地：捕获所有 HT OU 线 ──
+        odds_resp = api_client(f"odds?fixture={fx['id']}")
+        ht_ou_lines = _capture_ht_ou_lines(odds_resp) if odds_resp else []
+
+        # fast模式：先做轻量前筛，避免每场都触发 5-6 个重模块
+        factors = result.get("factors", {})
+        home_recent_raw = api_client(f"fixtures?team={fx['homeId']}&last=10&status=FT")
+        away_recent_raw = api_client(f"fixtures?team={fx['awayId']}&last=10&status=FT")
+        rf_shadow = build_recent_form_shadow_from_recent(
+            home_recent_raw,
+            fx["homeId"],
+            away_recent_raw,
+            fx["awayId"],
+        )
+        factors = dict(factors or {})
         factors.update(rf_shadow)
-        factors.update(rf_phase3)
+        market_focus = result.get("market_focus")
+        best_line = _best_pre_live_line(ht_ou_lines)
+        prelim_candidate = bool(market_focus == "HT_LIVE_OVER" and best_line and best_line["line_float"] >= 1.25)
 
         # 覆盖率评估始终执行（轻量+有缓存），避免 fast 模式出现“假 BASIC/WATCH_ONLY”。
         data_coverage = evaluate_fixture_coverage(
@@ -810,8 +680,6 @@ def run_v4_scan(
         )
 
         # ── 重模块：full模式全部跑；fast模式仅对预候选跑 ──
-        market_focus = result.get("market_focus")
-        prelim_candidate = bool(market_focus == "HT_LIVE_OVER" and best_line and best_line["line_float"] >= 1.25)
         run_heavy = (scan_mode == "full") or prelim_candidate
         if run_heavy:
             league_baseline = baseline_for_fixture(fx, api_client)
@@ -831,15 +699,6 @@ def run_v4_scan(
             context_obs = {"weather": {"status": "SKIPPED_FAST_MODE"}, "pitch": {"status": "SKIPPED_FAST_MODE"}, "referee": {"status": "SKIPPED_FAST_MODE"}}
         league_adjustment = league_baseline.get("adjustment", {})
         motivation_gate = (motivation.get("gate") or {})
-
-        cpl_required, cpl_reason = _shadow_cpl_requirement(rf_phase3)
-        collection["cpl_required"] = bool(cpl_required)
-        collection["cpl_skipped_reason"] = "" if cpl_required else cpl_reason
-        collection["cpl_collected"] = False
-        if not cpl_required:
-            collection["expensive_calls_saved"] += 1
-        collection["collection_stage"] = "FULL_CONTEXT_DONE"
-        factors.update(collection)
 
         # ── 提取因子 ──
         tb = factors.get("time_bins", {})
@@ -945,7 +804,6 @@ def run_v4_scan(
             "league_replay_status": lg_status,
             "run_tag": run_tag,
             "logged_at": datetime.now().isoformat(),
-            **collection,
         })
 
         # ── 球探快照（纯数据，零交易字段）──
@@ -974,9 +832,7 @@ def run_v4_scan(
             },
             "context_observation": context_obs,
             "lineup_gate": lineup_gate,
-            **collection,
             **rf_shadow,
-            **rf_phase3,
         })
         stats["scouted"] += 1
 

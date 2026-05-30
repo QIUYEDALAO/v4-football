@@ -585,17 +585,8 @@ def reset_recent_profile_cache_stats() -> None:
     _RECENT_PROFILE_STATS["misses"] = 0
 
 
-def evaluate_h2h_edge(
-    home_id: int,
-    away_id: int,
-    api_client,
-    mode: str = "full",
-    current_league_id=None,
-    current_league_name=None,
-    current_country=None,
-    include_h2h_events: bool = True,
-    include_recent_events: bool = True,
-) -> dict:
+def evaluate_h2h_edge(home_id: int, away_id: int, api_client, mode: str = "full",
+                       current_league_id=None, current_league_name=None, current_country=None) -> dict:
     endpoint = f"fixtures/headtohead?h2h={home_id}-{away_id}"
     resp = api_client(endpoint)
 
@@ -718,7 +709,7 @@ def evaluate_h2h_edge(
     fh_goals_16_30 = 0
     fh_goals_31_45 = 0
     events_available = False
-    if include_h2h_events and not fast_mode:
+    if not fast_mode:
         for m in official_matches:
             fid = m.get("fixture", {}).get("id")
             if not fid:
@@ -772,19 +763,17 @@ def evaluate_h2h_edge(
     # recent_last_n=10: 使用最近10场有效比赛作为评分样本
     # 若API返回不足10场，按实际有效样本数计算，并标记low_sample
     recent_last_n = 10
-    recent_events_flag = bool(include_recent_events and RECENT_PROFILE_INCLUDE_EVENTS)
-
     home_recent = _query_recent_goal_profile(
         api_client,
         home_id,
         last_n=recent_last_n,
-        include_events=recent_events_flag,
+        include_events=RECENT_PROFILE_INCLUDE_EVENTS,
     )
     away_recent = _query_recent_goal_profile(
         api_client,
         away_id,
         last_n=recent_last_n,
-        include_events=recent_events_flag,
+        include_events=RECENT_PROFILE_INCLUDE_EVENTS,
     )
 
     recent_form_avg = (home_recent["ht_over"] + away_recent["ht_over"]) / 2
@@ -816,7 +805,7 @@ def evaluate_h2h_edge(
         3,
     )
     # recent不拉events时，时间分布回退到H2H时间分布，避免“全0”误伤解释层
-    if not recent_events_flag:
+    if not RECENT_PROFILE_INCLUDE_EVENTS:
         recent_time_bins = dict(time_bins)
         recent_second_half_bins = dict(second_half_bins)
         recent_late_fh_pressure = late_fh_pressure
