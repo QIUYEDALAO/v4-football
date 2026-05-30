@@ -34,6 +34,7 @@ from engine.data_sources.h2h_engine import (
     recent_profile_cache_stats,
     reset_recent_profile_cache_stats,
 )
+from engine.rf_shadow_fields import build_recent_form_shadow_from_recent
 from engine.data_sources.league_baseline import baseline_for_fixture
 from engine.data_sources.lineup_strength import LineupStrengthAnalyzer
 from engine.data_sources.motivation import evaluate_match_motivation
@@ -655,6 +656,16 @@ def run_v4_scan(
 
         # fast模式：先做轻量前筛，避免每场都触发 5-6 个重模块
         factors = result.get("factors", {})
+        home_recent_raw = api_client(f"fixtures?team={fx['homeId']}&last=10&status=FT")
+        away_recent_raw = api_client(f"fixtures?team={fx['awayId']}&last=10&status=FT")
+        rf_shadow = build_recent_form_shadow_from_recent(
+            home_recent_raw,
+            fx["homeId"],
+            away_recent_raw,
+            fx["awayId"],
+        )
+        factors = dict(factors or {})
+        factors.update(rf_shadow)
         market_focus = result.get("market_focus")
         best_line = _best_pre_live_line(ht_ou_lines)
         prelim_candidate = bool(market_focus == "HT_LIVE_OVER" and best_line and best_line["line_float"] >= 1.25)
@@ -821,6 +832,7 @@ def run_v4_scan(
             },
             "context_observation": context_obs,
             "lineup_gate": lineup_gate,
+            **rf_shadow,
         })
         stats["scouted"] += 1
 

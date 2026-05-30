@@ -24,6 +24,7 @@ import sys
 import time
 from datetime import datetime, timezone, timedelta
 from pathlib import Path
+from typing import Any
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(BASE_DIR))
@@ -51,6 +52,181 @@ REQUIRED_KEYWORDS = [
 
 HARD_TIMEOUT = 3600  # 60 min
 SOFT_TIMEOUT = 1800  # 30 min
+
+RF_RATE_FIELDS = [
+    "home_recent10_fh_involved_rate",
+    "away_recent10_fh_involved_rate",
+    "combined_recent10_fh_involved_rate",
+    "home_recent10_fh_score_rate",
+    "away_recent10_fh_score_rate",
+    "home_recent10_fh_concede_rate",
+    "away_recent10_fh_concede_rate",
+    "home_recent5_fh_involved_rate",
+    "away_recent5_fh_involved_rate",
+    "combined_recent5_fh_involved_rate",
+    "home_recent5_fh_score_rate",
+    "away_recent5_fh_score_rate",
+    "home_recent5_fh_concede_rate",
+    "away_recent5_fh_concede_rate",
+]
+RF_INT_FIELDS = [
+    "recent10_sample_count_home",
+    "recent10_sample_count_away",
+    "recent10_window_days_home",
+    "recent10_window_days_away",
+]
+
+
+def _pick_rf_shadow(record: dict, factors: dict) -> dict:
+    out = {}
+    for k in RF_RATE_FIELDS:
+        if record.get(k) is not None:
+            out[k] = record.get(k)
+        elif factors.get(k) is not None:
+            out[k] = factors.get(k)
+        else:
+            out[k] = "DATA_MISSING"
+    for k in RF_INT_FIELDS:
+        if record.get(k) is not None:
+            out[k] = record.get(k)
+        elif factors.get(k) is not None:
+            out[k] = factors.get(k)
+        else:
+            out[k] = 0
+    out["recent_freshness_status"] = record.get("recent_freshness_status") or factors.get("recent_freshness_status") or "UNKNOWN"
+    out["recent5_momentum_status"] = record.get("recent5_momentum_status") or factors.get("recent5_momentum_status") or "DATA_MISSING"
+    out["recent_form_primary_score"] = (
+        record.get("recent_form_primary_score")
+        if record.get("recent_form_primary_score") is not None
+        else (factors.get("recent_form_primary_score") if factors.get("recent_form_primary_score") is not None else "DATA_MISSING")
+    )
+    out["recent_form_primary_level"] = record.get("recent_form_primary_level") or factors.get("recent_form_primary_level") or "DATA_MISSING"
+    out["recent_form_primary_reason"] = record.get("recent_form_primary_reason") or factors.get("recent_form_primary_reason") or "RF 数据缺失"
+    return out
+
+
+def _build_candidate_view_from_scout(today_key: str, fixture_universe: str, scout_path: Path) -> Path:
+    candidate_path = BASE_DIR / "data" / "runtime" / "status" / f"v3v4_dashboard_candidate_view_{today_key}.json"
+    try:
+        wl = json.loads((BASE_DIR / "config" / "leagues_whitelist.json").read_text())
+        wl_ids = set(str(k) for k in wl.get("leagueId", {}).keys())
+    except Exception:
+        wl_ids = set()
+
+    try:
+        scout_rows = json.loads(scout_path.read_text(encoding="utf-8"))
+    except Exception:
+        scout_rows = []
+    if not isinstance(scout_rows, list):
+        scout_rows = []
+
+    a_list, b_list, skip_list = [], [], []
+    from engine.v4_match_intelligence import build_ht_recommendation
+    for r in scout_rows:
+        if not isinstance(r, dict):
+            continue
+        factors = r.get("factors") if isinstance(r.get("factors"), dict) else {}
+        grade_raw: Any = r.get("official_grade") or r.get("grade")
+        if not grade_raw:
+            try:
+                rec = build_ht_recommendation(
+                    {
+                        "market_scores": r.get("market_scores") or {},
+                        "factors": factors,
+                        "market_focus": r.get("market_focus"),
+                        "best_focus_by_score": r.get("best_focus_by_score"),
+                    }
+                )
+                grade_raw = rec.get("grade")
+            except Exception:
+                grade_raw = None
+        grade = str(grade_raw or "SKIP").strip().upper()
+        lid = str(r.get("league_id", ""))
+        source_group = r.get("source_group") or ("WHITELIST_57" if lid in wl_ids else "OUTSIDE_57")
+        is_in_57 = bool(r.get("is_in_57_whitelist", lid in wl_ids))
+        shadow = _pick_rf_shadow(r, factors)
+
+        row = {
+            "fixture_id": r.get("fixture_id"),
+            "home": r.get("home", "?"),
+            "away": r.get("away", "?"),
+            "league": r.get("league", "?"),
+            "league_id": int(r.get("league_id", 0)) if r.get("league_id") is not None else 0,
+            "kickoff": r.get("kickoff", "?"),
+            "grade": grade,
+            "official_candidate": grade in ("A", "B"),
+            "skip": grade == "SKIP",
+            "outside57": not is_in_57,
+            "source_group": source_group,
+            "is_in_57_whitelist": is_in_57,
+            "fixture_universe": fixture_universe,
+            "scoring_complete": True,
+            "recent_form_sample_size": r.get("recent_form_sample_size"),
+            "h2h_valid": True,
+            "filter_reason": str(r.get("h2h_reason", "") or ""),
+            "ht_score": r.get("ht_score"),
+            "prematch_line": r.get("prematch_ht_line"),
+            "prematch_over_odds": r.get("prematch_over_odds"),
+            "prematch_under_odds": r.get("prematch_under_odds"),
+            "api_coverage_level": r.get("api_coverage_level", "UNKNOWN"),
+            "is_candidate": grade in ("A", "B"),
+            "recent_form_low_sample": r.get("recent_form_low_sample", False),
+            "candidate_score": r.get("best_score"),
+            **shadow,
+        }
+        if grade == "A":
+            a_list.append(row)
+        elif grade == "B":
+            b_list.append(row)
+        else:
+            skip_list.append(row)
+
+    timeout_count = 0
+    score_incomplete_count = 0
+    whitelist_a = [e for e in a_list if e.get("source_group") == "WHITELIST_57"]
+    whitelist_b = [e for e in b_list if e.get("source_group") == "WHITELIST_57"]
+    outside_a = [e for e in a_list if e.get("source_group") == "OUTSIDE_57"]
+    outside_b = [e for e in b_list if e.get("source_group") == "OUTSIDE_57"]
+    candidate_view = {
+        "schema_version": "v3v4_dashboard_candidate_view.v2",
+        "generated_at": datetime.now(LOCAL_TZ).isoformat(),
+        "scan_date": today_key,
+        "source_window": "daily_1200",
+        "source_path": str(candidate_path),
+        "source_hash": "",
+        "brief_path": "",
+        "brief_sha256": "",
+        "scout_path": str(scout_path),
+        "scout_sha256": "",
+        "fixture_universe": fixture_universe,
+        "A_count": len(a_list),
+        "B_count": len(b_list),
+        "C_count": 0,
+        "SKIP_count": len(skip_list),
+        "DATA_TIMEOUT_count": timeout_count,
+        "SCORE_INCOMPLETE_count": score_incomplete_count,
+        "scan_total": len(scout_rows),
+        "formal_recommendation_count": len(a_list) + len(b_list),
+        "A_WHITELIST_57_count": len(whitelist_a),
+        "A_OUTSIDE_57_count": len(outside_a),
+        "B_WHITELIST_57_count": len(whitelist_b),
+        "B_OUTSIDE_57_count": len(outside_b),
+        "A_candidates": a_list,
+        "B_candidates": b_list,
+        "C_candidates": [],
+        "C_observation_only": True,
+        "actual_send": False,
+        "qq_sent": False,
+        "V4_QQ_ENABLED": False,
+        "parsed_from_brief": False,
+        "fallback_used": True,
+        "fallback_reason": "serial_worker_scout_adapter",
+        "builder_script": "v4_scan_and_brief.py",
+    }
+    candidate_path.parent.mkdir(parents=True, exist_ok=True)
+    candidate_path.write_text(json.dumps(candidate_view, ensure_ascii=False, indent=2), encoding="utf-8")
+    print(f"[adapter] wrote candidate_view(serial): A={len(a_list)} B={len(b_list)} SKIP={len(skip_list)} total={len(scout_rows)}", flush=True)
+    return candidate_path
 
 
 def _content_guard(text: str) -> bool:
@@ -126,28 +302,6 @@ def _run_parallel_scan(args, scan_date: str, today_key: str, wd, log_path: Path)
 
     a_list, b_list, skip_list = [], [], []
     scout_list = []
-    rf_rate_fields = [
-        "home_recent10_fh_involved_rate",
-        "away_recent10_fh_involved_rate",
-        "combined_recent10_fh_involved_rate",
-        "home_recent10_fh_score_rate",
-        "away_recent10_fh_score_rate",
-        "home_recent10_fh_concede_rate",
-        "away_recent10_fh_concede_rate",
-        "home_recent5_fh_involved_rate",
-        "away_recent5_fh_involved_rate",
-        "combined_recent5_fh_involved_rate",
-        "home_recent5_fh_score_rate",
-        "away_recent5_fh_score_rate",
-        "home_recent5_fh_concede_rate",
-        "away_recent5_fh_concede_rate",
-    ]
-    rf_int_fields = [
-        "recent10_sample_count_home",
-        "recent10_sample_count_away",
-        "recent10_window_days_home",
-        "recent10_window_days_away",
-    ]
 
     # ── Fixture universe filter ──
     # whitelist: only whitelist league fixtures enter official candidate_view
@@ -166,24 +320,7 @@ def _run_parallel_scan(args, scan_date: str, today_key: str, wd, log_path: Path)
         is_in_57 = bool(r.get("is_in_57_whitelist", lid in wl_ids))
         is_outside57 = not is_in_57
         factors = r.get("factors") if isinstance(r.get("factors"), dict) else {}
-
-        def _pick_shadow(key: str, default):
-            if r.get(key) is not None:
-                return r.get(key)
-            if factors.get(key) is not None:
-                return factors.get(key)
-            return default
-
-        shadow = {}
-        for k in rf_rate_fields:
-            shadow[k] = _pick_shadow(k, "DATA_MISSING")
-        for k in rf_int_fields:
-            shadow[k] = _pick_shadow(k, 0)
-        shadow["recent_freshness_status"] = _pick_shadow("recent_freshness_status", "UNKNOWN")
-        shadow["recent5_momentum_status"] = _pick_shadow("recent5_momentum_status", "DATA_MISSING")
-        shadow["recent_form_primary_score"] = _pick_shadow("recent_form_primary_score", "DATA_MISSING")
-        shadow["recent_form_primary_level"] = _pick_shadow("recent_form_primary_level", "DATA_MISSING")
-        shadow["recent_form_primary_reason"] = _pick_shadow("recent_form_primary_reason", "RF 数据缺失")
+        shadow = _pick_rf_shadow(r, factors)
 
         # Build common fields
         entry = {
@@ -537,6 +674,13 @@ def main():
             wd.finish(status="FAILED", error="scout校验失败")
             return
 
+        # Serial production path adapter: generate official candidate_view from fresh scout.
+        candidate_path = _build_candidate_view_from_scout(
+            today_key=today_key,
+            fixture_universe=getattr(args, "fixture_universe", "whitelist"),
+            scout_path=scout_path,
+        )
+
         # Step 3: 生成双版本简报
         from engine.v4_openclaw_brief import build_brief
         from engine.v4_qq_formatter import format_qq
@@ -596,6 +740,7 @@ def main():
             "V4_QQ_ENABLED": V4_QQ_ENABLED,
             "runner_exit_code": rc,
             "source_paths": {
+                "candidate_view": str(candidate_path),
                 "scout": str(scout_path),
                 "brief": str(brief_path),
                 "brief_qq": str(qq_path),
@@ -632,7 +777,7 @@ def main():
             print("[WATCHDOG] brief generated, push skipped (safety gate)", flush=True)
 
         GLOBAL_LOCK.unlink(missing_ok=True)
-        wd.finish(status="DONE", output_files={"scout": str(scout_path), "brief": str(brief_path), "brief_qq": str(qq_path), "scan_push": str(push_marker_path), "scan_log": str(log_path)})
+        wd.finish(status="DONE", output_files={"candidate_view": str(candidate_path), "scout": str(scout_path), "brief": str(brief_path), "brief_qq": str(qq_path), "scan_push": str(push_marker_path), "scan_log": str(log_path)})
 
     except Exception as e:
         GLOBAL_LOCK.unlink(missing_ok=True)

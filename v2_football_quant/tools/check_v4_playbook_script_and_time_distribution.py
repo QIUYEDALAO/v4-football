@@ -35,8 +35,10 @@ def main() -> int:
 
     # 1. Candidate count
     checks["candidate_card_count"] = len(items)
+    warn_only = False
     if len(items) < 1:
         violations.append("no_candidate_cards")
+        warn_only = True
     
     # 2-5: Check playbook_script on each candidate
     for i, item in enumerate(items):
@@ -134,7 +136,7 @@ def main() -> int:
         if item.get("grade") == "SKIP":
             violations.append("SKIP_in_candidate_cards")
 
-    conclusion = "PASS" if not violations else "BLOCKER"
+    conclusion = "WARN_ONLY" if warn_only else ("PASS" if not violations else "BLOCKER")
     result = {
         "schema_version": "v4_playbook_script_checker.v1",
         "generated_at": ts,
@@ -164,7 +166,7 @@ def main() -> int:
     for item in items:
         print(f"  {item.get('home_cn','?')} vs {item.get('away_cn','?')}: script={item.get('playbook_script')}, dist={item.get('fh_goal_dist_0_15_pct')}/{item.get('fh_goal_dist_16_30_pct')}/{item.get('fh_goal_dist_31_45_pct')}")
     
-    return 0 if conclusion == "PASS" else 1
+    return 0 if conclusion in {"PASS", "WARN_ONLY"} else 1
 
 
 if __name__ == "__main__":

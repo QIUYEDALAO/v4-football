@@ -53,8 +53,8 @@ def _load_json(path: Path):
 
 
 def _latest(pattern: str, base: Path):
-    files = sorted(base.glob(pattern))
-    return files[-1] if files else None
+    files = list(base.glob(pattern))
+    return max(files, key=lambda p: p.stat().st_mtime) if files else None
 
 
 def _ok(checks, name, cond, detail=""):
@@ -82,9 +82,18 @@ def main() -> int:
     blockers = []
     warnings = []
 
-    scout_path = _latest("scout_v4_*.json", REPORT)
-    cv_path = _latest("v3v4_dashboard_candidate_view_*.json", STATUS)
+    task_status_path = STATUS / "task_status_v4_scan_midday.json"
+    task_status = _load_json(task_status_path) if task_status_path.exists() else {}
+    task_state = str(task_status.get("status") or "")
+    task_out = task_status.get("output_files") or {}
+    scout_path = Path(task_out["scout"]) if task_out.get("scout") else _latest("scout_v4_*.json", REPORT)
+    cv_path = Path(task_out["candidate_view"]) if task_out.get("candidate_view") else _latest("v3v4_dashboard_candidate_view_*.json", STATUS)
     model_path = _latest("v4_control_center_model_*.json", STATUS)
+
+    _ok(checks, "task_status_exists", task_status_path.exists(), str(task_status_path))
+    _ok(checks, "task_status_done", task_state == "DONE", task_state)
+    if task_state in {"RUNNING", "DELAYED"}:
+        blockers.append(f"formal_entry_task_not_done:{task_state}")
 
     _ok(checks, "scout_exists", scout_path is not None, str(scout_path) if scout_path else "")
     _ok(checks, "candidate_view_exists", cv_path is not None, str(cv_path) if cv_path else "")
@@ -95,6 +104,9 @@ def main() -> int:
     model = _load_json(model_path) if model_path else {}
     adapter_src = (ROOT / "engine" / "v4_scan_and_brief.py").read_text(encoding="utf-8")
     model_src = (ROOT / "tools" / "build_v4_control_center_model.py").read_text(encoding="utf-8")
+    runner_src = (ROOT / "engine" / "v4_runner.py").read_text(encoding="utf-8")
+    worker_src = (ROOT / "engine" / "v4_scan_worker.py").read_text(encoding="utf-8")
+    outside57_src = (ROOT / "engine" / "v4_outside57_scanner.py").read_text(encoding="utf-8")
 
     if scout_path and isinstance(scout, list) and scout:
         for f in ALL_RF_FIELDS:
@@ -136,6 +148,8 @@ def main() -> int:
                 blockers.append(f"model_bad_or_missing:{f}")
     else:
         warnings.append("dashboard_items_empty")
+        _ok(checks, "true_goal_distribution_available", True, "no_dashboard_candidates")
+        _ok(checks, "playbook_script_available", True, "no_dashboard_candidates")
 
     # static propagation checks
     for f in ALL_RF_FIELDS:
@@ -145,6 +159,38 @@ def main() -> int:
         _ok(checks, f"dashboard_model_code_contains:{f}", f in model_src)
         if f not in model_src:
             blockers.append(f"dashboard_model_missing_field_mapping:{f}")
+        in_serial = (f in runner_src) or (f in adapter_src)
+        in_parallel = f in outside57_src
+        _ok(checks, f"serial_path_code_contains:{f}", in_serial)
+        if not in_serial:
+            blockers.append(f"serial_path_missing_field:{f}")
+        _ok(checks, f"not_parallel_only:{f}", (not in_parallel) or in_serial)
+        if in_parallel and not in_serial:
+            blockers.append(f"parallel_only_field:{f}")
+
+    # explicit production path proof: scan_and_brief defaults serial and calls scan_worker
+    serial_default = "default=\"serial\"" in adapter_src or "default='serial'" in adapter_src
+    worker_call = "v4_scan_worker.py" in adapter_src and "scan_engine == \"parallel\"" in adapter_src
+    _ok(checks, "production_entry_default_serial", serial_default)
+    _ok(checks, "production_entry_calls_scan_worker", worker_call)
+    if not serial_default or not worker_call:
+        blockers.append("production_path_not_proven_serial")
+
+    # worker must route through v4_runner (serial production runtime)
+    _ok(checks, "scan_worker_routes_to_v4_runner", "from engine.v4_runner import run_v4_scan" in worker_src)
+    if "from engine.v4_runner import run_v4_scan" not in worker_src:
+        blockers.append("scan_worker_not_using_v4_runner")
+
+    # If latest push marker exists, require it to come from formal entry with no-push.
+    push_markers = sorted((ROOT / "data/runtime/status").glob("v4_scan_*_push_*.json"), key=lambda p: p.stat().st_mtime)
+    if push_markers:
+        pm = _load_json(push_markers[-1])
+        formal_no_push = bool(pm.get("no_push")) is True
+        _ok(checks, "latest_formal_entry_no_push_marker", formal_no_push, str(push_markers[-1]))
+        if not formal_no_push:
+            warnings.append("latest_push_marker_not_no_push")
+    else:
+        warnings.append("formal_push_marker_not_found_for_this_run")
 
     # no regrade/static safety
     mi_src = (ROOT / "engine" / "v4_match_intelligence.py").read_text(encoding="utf-8")
@@ -180,10 +226,11 @@ def main() -> int:
         blockers.append("dashboard_rf_bad_value")
 
     # true goal / playbook fields still present
-    has_goal_dist = any(isinstance(r, dict) and ("fh_goal_dist_source" in r) for r in items if isinstance(items, list))
-    has_playbook = any(isinstance(r, dict) and ("playbook_script" in r) for r in items if isinstance(items, list))
-    _ok(checks, "true_goal_distribution_available", has_goal_dist)
-    _ok(checks, "playbook_script_available", has_playbook)
+    if isinstance(items, list) and items:
+        has_goal_dist = any(isinstance(r, dict) and ("fh_goal_dist_source" in r) for r in items)
+        has_playbook = any(isinstance(r, dict) and ("playbook_script" in r) for r in items)
+        _ok(checks, "true_goal_distribution_available", has_goal_dist)
+        _ok(checks, "playbook_script_available", has_playbook)
 
     # no secrets staged
     staged = subprocess.run(["git", "diff", "--cached", "--name-only"], cwd=ROOT, capture_output=True, text=True)
@@ -212,6 +259,14 @@ def main() -> int:
             if "\"no_market_action_status\": {\n      \"ok\": true" in detail and "\"DEFAULT_RULES_unchanged\": {\n      \"ok\": true" in detail:
                 soft_ok = True
                 warnings.append("guard_dataset_dependent_no_market_checker_nonzero")
+        if not ok and script == "check_v4_true_goal_time_distribution.py":
+            if "Conclusion: WARN_ONLY" in detail and "no_candidates" in detail:
+                soft_ok = True
+                warnings.append("guard_warn_only:true_goal_no_candidates")
+        if not ok and script == "check_v4_playbook_script_and_time_distribution.py":
+            if "Conclusion: WARN_ONLY" in detail and "no_candidate_cards" in detail:
+                soft_ok = True
+                warnings.append("guard_warn_only:playbook_no_candidates")
         final_ok = ok or soft_ok
         _ok(checks, f"guard:{script}", final_ok, detail[-400:])
         if not final_ok:

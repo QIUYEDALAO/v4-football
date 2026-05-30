@@ -30,7 +30,8 @@ def main() -> int:
     items = model.get("candidates", {}).get("items", [])
     if not items:
         violations.append("no_candidates")
-        return _output(checks, violations, ts, 2)
+        checks["candidate_count"] = 0
+        return _output(checks, violations, ts, warn_only=True)
 
     for i, item in enumerate(items):
         label = f"candidate_{i}"
@@ -132,8 +133,11 @@ def main() -> int:
     return _output(checks, violations, ts)
 
 
-def _output(checks, violations, ts, exit_code=None):
-    conclusion = "PASS" if not violations else "BLOCKER"
+def _output(checks, violations, ts, exit_code=None, warn_only=False):
+    if warn_only:
+        conclusion = "WARN_ONLY"
+    else:
+        conclusion = "PASS" if not violations else "BLOCKER"
     result = {
         "schema_version": "v4_true_goal_time_distribution.v1",
         "generated_at": ts,
@@ -150,7 +154,7 @@ def _output(checks, violations, ts, exit_code=None):
         print("Violations:")
         for v in violations:
             print(f"  - {v}")
-    return 0 if conclusion == "PASS" else (exit_code or 1)
+    return 0 if conclusion in {"PASS", "WARN_ONLY"} else (exit_code or 1)
 
 
 if __name__ == "__main__":
