@@ -76,6 +76,70 @@ RF_INT_FIELDS = [
     "recent10_window_days_away",
 ]
 
+RF_SHADOW_FIELDS = [
+    "rf_shadow_grade",
+    "rf_shadow_score",
+    "rf_shadow_route",
+    "rf_shadow_reason",
+    "rf_shadow_confidence",
+    "rf_entry_rule",
+    "rf_recent10_gate_status",
+    "rf_recent5_grade_status",
+    "rf_heating_exception",
+    "rf_heating_exception_reason",
+    "rf_balance_status",
+    "rf_balance_driver_side",
+    "rf_balance_driver_level",
+    "rf_balance_weak_side_status",
+    "rf_balance_adjustment",
+    "rf_balance_reason",
+    "h2h_recent5_fh_involved_count",
+    "h2h_recent5_sample_count",
+    "h2h_recent5_support_status",
+    "h2h_recent5_bonus_level",
+    "h2h_recent5_bonus_reason",
+    "h2h_assist_status",
+    "h2h_assist_strength",
+    "h2h_assist_reason",
+    "h2h_sample_age_status",
+    "h2h_low_sample",
+    "h2h_ignored_reason",
+    "opening_market_available",
+    "opening_market_snapshot_time",
+    "opening_market_source",
+    "opening_ft_ou_line",
+    "opening_ft_ou_over_odds",
+    "opening_ft_ou_under_odds",
+    "opening_ht_ou_line",
+    "opening_ht_ou_over_odds",
+    "opening_ht_ou_under_odds",
+    "opening_ah_line",
+    "opening_favorite_side",
+    "opening_market_support_status",
+    "opening_market_confirm_level",
+    "opening_market_veto_level",
+    "opening_market_reason",
+    "opening_market_role",
+    "opening_market_data_status",
+    "market_adjusted_shadow_grade",
+    "market_adjustment_reason",
+    "collection_stage",
+    "rf_collected",
+    "market_collected",
+    "prefilter_done",
+    "h2h_required",
+    "h2h_skipped_reason",
+    "h2h_collected",
+    "events_required",
+    "events_skipped_reason",
+    "events_collected",
+    "cpl_required",
+    "cpl_skipped_reason",
+    "cpl_collected",
+    "expensive_calls_saved",
+    "collection_reason",
+]
+
 
 def _pick_rf_shadow(record: dict, factors: dict) -> dict:
     out = {}
@@ -102,6 +166,39 @@ def _pick_rf_shadow(record: dict, factors: dict) -> dict:
     )
     out["recent_form_primary_level"] = record.get("recent_form_primary_level") or factors.get("recent_form_primary_level") or "DATA_MISSING"
     out["recent_form_primary_reason"] = record.get("recent_form_primary_reason") or factors.get("recent_form_primary_reason") or "RF 数据缺失"
+    for k in RF_SHADOW_FIELDS:
+        rv = record.get(k)
+        if rv is None:
+            rv = factors.get(k)
+        if rv is None:
+            if k in {
+                "rf_shadow_score",
+                "rf_shadow_confidence",
+                "h2h_recent5_fh_involved_count",
+                "h2h_recent5_sample_count",
+                "expensive_calls_saved",
+            }:
+                rv = 0
+            elif k in {
+                "opening_market_available",
+                "rf_heating_exception",
+                "h2h_low_sample",
+                "rf_collected",
+                "market_collected",
+                "prefilter_done",
+                "h2h_required",
+                "h2h_collected",
+                "events_required",
+                "events_collected",
+                "cpl_required",
+                "cpl_collected",
+            }:
+                rv = False
+            elif k.startswith("opening_") and k.endswith("_odds"):
+                rv = None
+            else:
+                rv = "DATA_MISSING"
+        out[k] = rv
     return out
 
 
