@@ -418,6 +418,76 @@ def _best_pre_live_line(ht_ou_lines: list) -> dict | None:
     return valid[0]
 
 
+def _build_observe_only_collection_plan(
+    rf_shadow: dict,
+    best_line: dict | None,
+    no_market_excluded: bool = False,
+) -> dict:
+    """Observe-only pipeline plan. Never controls actual scan execution."""
+    plan = {
+        "collection_plan_mode": "OBSERVE_ONLY",
+        "collection_plan_observe_only": True,
+        "planned_collection_stage": "OBSERVE_PLAN_READY",
+        "planned_h2h_required": True,
+        "planned_h2h_skipped_reason": "",
+        "planned_events_required": True,
+        "planned_events_skipped_reason": "",
+        "planned_cpl_required": False,
+        "planned_cpl_skipped_reason": "CPL_NOT_ENABLED",
+        "planned_expensive_calls_saved": 0,
+        "planned_collection_reason": "PLAN_PASS",
+    }
+
+    primary_level = str(rf_shadow.get("recent_form_primary_level") or "DATA_MISSING").upper()
+    best_line_value = best_line.get("line_float") if best_line else None
+    best_over = best_line.get("over") if best_line else None
+    market_hard_veto = bool(
+        best_line is not None and (
+            (best_line_value is not None and best_line_value <= 0.5)
+            or (best_over is not None and best_over >= 2.20)
+        )
+    )
+    obvious_skip = primary_level in {"WEAK", "LOW_SAMPLE", "DATA_MISSING", "EXPIRED_SAMPLE"}
+
+    if no_market_excluded or best_line is None:
+        plan["planned_h2h_required"] = False
+        plan["planned_h2h_skipped_reason"] = "NO_MARKET"
+    elif market_hard_veto:
+        plan["planned_h2h_required"] = False
+        plan["planned_h2h_skipped_reason"] = "MARKET_HARD_VETO"
+    elif obvious_skip:
+        plan["planned_h2h_required"] = False
+        plan["planned_h2h_skipped_reason"] = "OBVIOUS_SKIP"
+
+    if not plan["planned_h2h_required"]:
+        plan["planned_events_required"] = False
+        plan["planned_events_skipped_reason"] = "H2H_PLANNED_SKIP"
+        plan["planned_cpl_required"] = False
+        plan["planned_cpl_skipped_reason"] = "H2H_PLANNED_SKIP"
+    else:
+        plan["planned_events_required"] = bool(
+            primary_level in {"STRONG", "MEDIUM"} or (best_line_value is not None and best_line_value >= 1.25)
+        )
+        if not plan["planned_events_required"]:
+            plan["planned_events_skipped_reason"] = "NOT_PRIORITY"
+        plan["planned_cpl_required"] = bool(
+            primary_level == "STRONG" and (best_line_value is not None and best_line_value >= 1.25)
+        )
+        plan["planned_cpl_skipped_reason"] = "" if plan["planned_cpl_required"] else "NOT_AB_OR_KEY_C"
+
+    saved = 0
+    if not plan["planned_h2h_required"]:
+        saved += 1
+    if not plan["planned_events_required"]:
+        saved += 1
+    if not plan["planned_cpl_required"]:
+        saved += 1
+    plan["planned_expensive_calls_saved"] = saved
+    reason = plan["planned_h2h_skipped_reason"] or "PASS"
+    plan["planned_collection_reason"] = f"PLAN_{reason}"
+    return plan
+
+
 def _query_injury_health(api_client, team_id: int, team_name: str) -> dict:
     """查询球队伤病/停赛情况（轻量版）"""
     try:
@@ -581,6 +651,26 @@ def run_v4_scan(
         lg_policy = league_status_map.get(str(fx["league"]), {})
         lg_status = str(lg_policy.get("status") or "UNKNOWN")
         if lg_status == "DISABLED":
+            disabled_plan = {
+                "collection_plan_mode": "OBSERVE_ONLY",
+                "collection_plan_observe_only": True,
+                "planned_collection_stage": "OBSERVE_PLAN_READY",
+                "planned_h2h_required": False,
+                "planned_h2h_skipped_reason": "LEAGUE_DISABLED",
+                "planned_events_required": False,
+                "planned_events_skipped_reason": "LEAGUE_DISABLED",
+                "planned_cpl_required": False,
+                "planned_cpl_skipped_reason": "LEAGUE_DISABLED",
+                "planned_expensive_calls_saved": 3,
+                "planned_collection_reason": "PLAN_LEAGUE_DISABLED",
+            }
+            disabled_actual = {
+                "actual_h2h_collected": False,
+                "actual_events_collected": False,
+                "actual_cpl_collected": False,
+                "actual_collection_stage": "LEAGUE_DISABLED_SKIP",
+                "actual_collection_reason": "LEAGUE_DISABLED_BY_REPLAY_TIER",
+            }
             append_jsonl(universe_out, {
                 "fixture_id": fx["id"],
                 **_scout_date_fields(fx["kickoff"], scan_dt, today_key, window, country=fx.get("country"), league_name=fx.get("league_name"), fixture_timezone=fx.get("fixture_timezone")),
@@ -601,11 +691,12 @@ def run_v4_scan(
                 "league_replay_status": lg_status,
                 "run_tag": run_tag,
                 "logged_at": datetime.now().isoformat(),
+                **disabled_plan,
+                **disabled_actual,
             })
             continue
 
         logger.info(f"  ⏳ H2H: {fx.get('league_name','?')} | {fx['home']} vs {fx['away']}")
-        import traceback, sys
         result = evaluate_h2h_edge(
             fx["homeId"],
             fx["awayId"],
@@ -619,6 +710,15 @@ def run_v4_scan(
             logger.info(f"  ⏭️ SKIP: {result.get('reason','?')}")
         h2h_valid = bool(result.get("valid"))
         h2h_reason = result.get("reason", "")
+
+        actual_flags = {
+            "actual_h2h_collected": True,
+            # Legacy chain: fast mode skips events in h2h_engine by design.
+            "actual_events_collected": bool(scan_mode != "fast" and h2h_valid),
+            "actual_cpl_collected": False,
+            "actual_collection_stage": "H2H_DONE",
+            "actual_collection_reason": "LEGACY_CHAIN_EXECUTED",
+        }
 
         if not result["valid"]:
             append_jsonl(universe_out, {
@@ -640,6 +740,20 @@ def run_v4_scan(
                 "filter_reason": f"H2H_{h2h_reason or 'INVALID'}",
                 "run_tag": run_tag,
                 "logged_at": datetime.now().isoformat(),
+                "collection_plan_mode": "OBSERVE_ONLY",
+                "collection_plan_observe_only": True,
+                "planned_collection_stage": "OBSERVE_PLAN_PENDING",
+                "planned_h2h_required": True,
+                "planned_h2h_skipped_reason": "",
+                "planned_events_required": False,
+                "planned_events_skipped_reason": "NO_PLAN_FOR_INVALID_H2H",
+                "planned_cpl_required": False,
+                "planned_cpl_skipped_reason": "NO_PLAN_FOR_INVALID_H2H",
+                "planned_expensive_calls_saved": 0,
+                "planned_collection_reason": "PLAN_PENDING",
+                **actual_flags,
+                "actual_collection_stage": "H2H_DONE_INVALID",
+                "actual_collection_reason": f"H2H_INVALID:{h2h_reason or 'INVALID'}",
             })
             if "API_ERROR" in result.get("reason", ""):
                 stats["api_error"] += 1
@@ -669,6 +783,11 @@ def run_v4_scan(
         market_focus = result.get("market_focus")
         best_line = _best_pre_live_line(ht_ou_lines)
         prelim_candidate = bool(market_focus == "HT_LIVE_OVER" and best_line and best_line["line_float"] >= 1.25)
+        observe_plan = _build_observe_only_collection_plan(
+            rf_shadow=rf_shadow,
+            best_line=best_line,
+            no_market_excluded=bool(result.get("no_market_excluded", False)),
+        )
 
         # 覆盖率评估始终执行（轻量+有缓存），避免 fast 模式出现“假 BASIC/WATCH_ONLY”。
         data_coverage = evaluate_fixture_coverage(
@@ -804,6 +923,10 @@ def run_v4_scan(
             "league_replay_status": lg_status,
             "run_tag": run_tag,
             "logged_at": datetime.now().isoformat(),
+            **observe_plan,
+            **actual_flags,
+            "actual_collection_stage": "FULL_CHAIN_DONE",
+            "actual_collection_reason": "LEGACY_CHAIN_DONE",
         })
 
         # ── 球探快照（纯数据，零交易字段）──
@@ -833,6 +956,10 @@ def run_v4_scan(
             "context_observation": context_obs,
             "lineup_gate": lineup_gate,
             **rf_shadow,
+            **observe_plan,
+            **actual_flags,
+            "actual_collection_stage": "SCOUT_ROW_WRITTEN",
+            "actual_collection_reason": "LEGACY_CHAIN_SCOUT_WRITTEN",
         })
         stats["scouted"] += 1
 

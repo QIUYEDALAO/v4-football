@@ -76,6 +76,28 @@ RF_INT_FIELDS = [
     "recent10_window_days_away",
 ]
 
+COLLECTION_PLAN_FIELDS = [
+    "collection_plan_mode",
+    "collection_plan_observe_only",
+    "planned_collection_stage",
+    "planned_h2h_required",
+    "planned_h2h_skipped_reason",
+    "planned_events_required",
+    "planned_events_skipped_reason",
+    "planned_cpl_required",
+    "planned_cpl_skipped_reason",
+    "planned_expensive_calls_saved",
+    "planned_collection_reason",
+]
+
+COLLECTION_ACTUAL_FIELDS = [
+    "actual_h2h_collected",
+    "actual_events_collected",
+    "actual_cpl_collected",
+    "actual_collection_stage",
+    "actual_collection_reason",
+]
+
 
 def _pick_rf_shadow(record: dict, factors: dict) -> dict:
     out = {}
@@ -102,6 +124,32 @@ def _pick_rf_shadow(record: dict, factors: dict) -> dict:
     )
     out["recent_form_primary_level"] = record.get("recent_form_primary_level") or factors.get("recent_form_primary_level") or "DATA_MISSING"
     out["recent_form_primary_reason"] = record.get("recent_form_primary_reason") or factors.get("recent_form_primary_reason") or "RF 数据缺失"
+    for k in COLLECTION_PLAN_FIELDS:
+        v = record.get(k)
+        if v is None:
+            v = factors.get(k)
+        if v is None:
+            if k == "collection_plan_mode":
+                v = "OBSERVE_ONLY"
+            elif k == "collection_plan_observe_only":
+                v = True
+            elif k == "planned_expensive_calls_saved":
+                v = 0
+            elif k.endswith("_required"):
+                v = False
+            else:
+                v = ""
+        out[k] = v
+    for k in COLLECTION_ACTUAL_FIELDS:
+        v = record.get(k)
+        if v is None:
+            v = factors.get(k)
+        if v is None:
+            if k.endswith("_collected"):
+                v = False
+            else:
+                v = ""
+        out[k] = v
     return out
 
 
@@ -527,6 +575,8 @@ def main():
     scan_date = args.scan_date or args.date
     if not scan_date:
         parser.error("--scan-date (or --date) is required")
+    # Legacy compatibility: downstream helpers still read args.date.
+    args.date = str(scan_date)
     today_key = str(scan_date).replace("-", "")
 
     from engine.task_watchdog import v4_scan_watchdog

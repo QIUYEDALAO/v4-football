@@ -212,6 +212,31 @@ RF_INT_FIELDS = (
     "recent10_window_days_away",
 )
 
+COLLECTION_PLAN_TEXT_FIELDS = (
+    "collection_plan_mode",
+    "planned_collection_stage",
+    "planned_h2h_skipped_reason",
+    "planned_events_skipped_reason",
+    "planned_cpl_skipped_reason",
+    "planned_collection_reason",
+    "actual_collection_stage",
+    "actual_collection_reason",
+)
+
+COLLECTION_PLAN_BOOL_FIELDS = (
+    "collection_plan_observe_only",
+    "planned_h2h_required",
+    "planned_events_required",
+    "planned_cpl_required",
+    "actual_h2h_collected",
+    "actual_events_collected",
+    "actual_cpl_collected",
+)
+
+COLLECTION_PLAN_NUM_FIELDS = (
+    "planned_expensive_calls_saved",
+)
+
 
 def _rf_clean(v: Any, default: Any) -> Any:
     if v is None:
@@ -255,6 +280,12 @@ def _merge_rf_shadow_fields(candidate_row: dict, scout_row: dict) -> dict:
         candidate_row.get("recent_form_primary_reason", scout_row.get("recent_form_primary_reason")),
         "RF 数据缺失",
     )
+    for k in COLLECTION_PLAN_TEXT_FIELDS:
+        out[k] = _rf_clean(candidate_row.get(k, scout_row.get(k)), "")
+    for k in COLLECTION_PLAN_BOOL_FIELDS:
+        out[k] = bool(candidate_row.get(k, scout_row.get(k), False))
+    for k in COLLECTION_PLAN_NUM_FIELDS:
+        out[k] = _rf_clean(candidate_row.get(k, scout_row.get(k)), 0)
     return out
 
 
