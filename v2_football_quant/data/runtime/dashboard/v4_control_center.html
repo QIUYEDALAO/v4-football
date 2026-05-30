@@ -510,6 +510,18 @@ const SHADOW_ENUM_CN={
   NO_MARKET:"无盘口"
 };
 const shadowCn=v=>SHADOW_ENUM_CN[String(v||"").toUpperCase()]||safe(v,"数据缺失");
+const collectionModeCn=v=>{
+  const s=String(v||"").trim().toLowerCase();
+  if(s==="rf_lazy_shadow") return "RF懒加载影子";
+  if(s==="official_legacy") return "正式旧链路";
+  if(String(v||"").toUpperCase()==="OBSERVE_ONLY") return "观察模式";
+  return "正式旧链路";
+};
+const collectionStateCn=(required,collected,skipReason)=>{
+  if(collected) return "已查";
+  if(required) return "待查/未命中";
+  return "跳过（"+safe(skipReason,"无")+"）";
+};
 
 function normalizeModel(raw){const m=(raw&&raw.model)?raw.model:raw||{};return typeof m==="object"&&m?m:{}};
 function getCandidatesNode(){ return MODEL.candidates||MODEL.today_candidates||{}; }
@@ -669,7 +681,20 @@ function renderListRow(x,i){
   const h2hReason=shadowCn(first(x.h2h_recent5_bonus_reason,x.h2h_recent5_support_status));
   const openMarketReason=shadowCn(first(x.opening_market_reason,x.opening_market_support_status));
   const marketAdjustReason=safe(x.market_adjustment_reason,'数据缺失');
-  const observeMode=shadowCn(x.collection_plan_mode||'OBSERVE_ONLY');
+  const modeRaw=String(first(x.collection_mode,'official_legacy')).toLowerCase();
+  const observeMode=collectionModeCn(modeRaw);
+  const collectionStage=safe(first(x.collection_stage,x.actual_collection_stage),'未记录');
+  const h2hState=(modeRaw==='official_legacy')
+    ? '已查（旧链路）'
+    : collectionStateCn(Boolean(x.h2h_required),Boolean(x.h2h_collected),x.h2h_skipped_reason);
+  const eventsState=(modeRaw==='official_legacy')
+    ? '按旧链路执行'
+    : collectionStateCn(Boolean(x.events_required),Boolean(x.events_collected),x.events_skipped_reason);
+  const cplState=(modeRaw==='official_legacy')
+    ? '占位未启用'
+    : collectionStateCn(Boolean(x.cpl_required),Boolean(x.cpl_collected),x.cpl_skipped_reason);
+  const savedCalls=safe(first(x.expensive_calls_saved,0),'0');
+  const collectionReason=safe(x.collection_reason,'未记录');
   const isOfficialCandidate=['A','B'].includes(official);
   const dl=safe(first(x.default_line,'O1'),'O1');
   const od=safe(x.default_odds,'');const st=safe(x.default_stake,'');const mi=safe(x.default_entry_minute,'');
@@ -698,6 +723,12 @@ function renderListRow(x,i){
   row+='<div><span class="k">初盘判断：</span>'+openMarketReason+'</div>';
   row+='<div><span class="k">盘口调整说明：</span>'+marketAdjustReason+'</div>';
   row+='<div><span class="k">采集模式：</span>'+observeMode+'</div>';
+  row+='<div><span class="k">采集阶段：</span>'+collectionStage+'</div>';
+  row+='<div><span class="k">H2H：</span>'+h2hState+'</div>';
+  row+='<div><span class="k">Events：</span>'+eventsState+'</div>';
+  row+='<div><span class="k">CPL：</span>'+cplState+'</div>';
+  row+='<div><span class="k">节省请求（估算）：</span>'+savedCalls+'</div>';
+  row+='<div><span class="k">采集说明：</span>'+collectionReason+'</div>';
   row+='<div class="shadow-disclaimer">影子观察，不作为投注推荐。</div></div>';
   if(isOfficialCandidate){
     row+='<div class="bet-form-inline">';

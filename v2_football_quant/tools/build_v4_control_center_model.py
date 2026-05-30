@@ -237,6 +237,31 @@ COLLECTION_PLAN_NUM_FIELDS = (
     "planned_expensive_calls_saved",
 )
 
+COLLECTION_LAZY_TEXT_FIELDS = (
+    "collection_mode",
+    "collection_stage",
+    "h2h_skipped_reason",
+    "events_skipped_reason",
+    "cpl_skipped_reason",
+    "collection_reason",
+)
+
+COLLECTION_LAZY_BOOL_FIELDS = (
+    "rf_collected",
+    "market_collected",
+    "prefilter_done",
+    "h2h_required",
+    "h2h_collected",
+    "events_required",
+    "events_collected",
+    "cpl_required",
+    "cpl_collected",
+)
+
+COLLECTION_LAZY_NUM_FIELDS = (
+    "expensive_calls_saved",
+)
+
 RF_SHADOW_GRADE_TEXT_FIELDS = (
     "rf_shadow_grade",
     "rf_shadow_route",
@@ -373,6 +398,13 @@ def _merge_rf_shadow_fields(candidate_row: dict, scout_row: dict) -> dict:
     for k in COLLECTION_PLAN_BOOL_FIELDS:
         out[k] = bool(candidate_row.get(k, scout_row.get(k), False))
     for k in COLLECTION_PLAN_NUM_FIELDS:
+        out[k] = _rf_clean(candidate_row.get(k, scout_row.get(k)), 0)
+    for k in COLLECTION_LAZY_TEXT_FIELDS:
+        default_text = "official_legacy" if k == "collection_mode" else ""
+        out[k] = _rf_clean(candidate_row.get(k, scout_row.get(k)), default_text)
+    for k in COLLECTION_LAZY_BOOL_FIELDS:
+        out[k] = bool(candidate_row.get(k, scout_row.get(k), False))
+    for k in COLLECTION_LAZY_NUM_FIELDS:
         out[k] = _rf_clean(candidate_row.get(k, scout_row.get(k)), 0)
     for k in RF_SHADOW_GRADE_TEXT_FIELDS:
         out[k] = _rf_clean(candidate_row.get(k, scout_row.get(k)), "数据缺失")

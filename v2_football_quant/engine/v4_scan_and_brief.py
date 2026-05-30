@@ -626,6 +626,18 @@ def main():
                         help="Fixture universe: whitelist (57 leagues only) or all_eligible (all compliant leagues with league gate)")
     parser.add_argument("--scan-engine", default="serial", choices=["serial","parallel"],
                         help="Scan engine: serial=existing v4_scan_worker, parallel=v4_outside57_scanner")
+    parser.add_argument(
+        "--collection-mode",
+        default="official_legacy",
+        choices=["official_legacy", "rf_lazy_shadow"],
+        help="Collection pipeline mode: official_legacy (default) or rf_lazy_shadow (explicit shadow lazy mode)",
+    )
+    parser.add_argument(
+        "--max-fixtures",
+        type=int,
+        default=None,
+        help="Optional small-sample cap for dry-run/no-push verification. Applied at fixture pool stage.",
+    )
     parser.add_argument("--write-official-output", action="store_true",
                         help="In parallel mode, write official candidate_view/scout/brief")
     parser.add_argument("--outside57-workers", type=int, default=8)
@@ -634,6 +646,8 @@ def main():
     parser.add_argument("--outside57-max-inflight", type=int, default=30)
     parser.add_argument("--outside57-resume", action="store_true")
     args = parser.parse_args()
+    if args.max_fixtures is not None and int(args.max_fixtures) <= 0:
+        parser.error("--max-fixtures must be a positive integer")
 
     # Resolve scan_date: --scan-date takes priority over --date
     scan_date = args.scan_date or args.date
@@ -693,6 +707,8 @@ def main():
             "no_hourly": args.no_hourly,
             "push_mode": args.push,
             "V4_QQ_ENABLED": False,
+            "collection_mode": args.collection_mode,
+            "max_fixtures": args.max_fixtures,
         }, ensure_ascii=False))
         return
 
@@ -737,13 +753,21 @@ def main():
 
     try:
         with open(str(log_path), "w") as log_fh:
+            worker_cmd = [
+                sys.executable, "-u", str(BASE_DIR / "engine" / "v4_scan_worker.py"),
+                "--date", scan_date,
+                "--window", args.window,
+                "--lookahead-hours", str(args.lookahead_hours),
+                "--scan-mode", args.scan_mode,
+                "--fixture-universe", getattr(args, "fixture_universe", "whitelist"),
+                "--collection-mode", str(args.collection_mode or "official_legacy"),
+            ]
+            if args.include_outside_57:
+                worker_cmd.append("--include-outside-57")
+            if args.max_fixtures is not None:
+                worker_cmd.extend(["--max-fixtures", str(int(args.max_fixtures))])
             child = subprocess.Popen(
-                [sys.executable, "-u", str(BASE_DIR / "engine" / "v4_scan_worker.py"),
-                 "--date", scan_date, "--window", args.window,
-                 "--lookahead-hours", str(args.lookahead_hours),
-                 "--scan-mode", args.scan_mode,
-                 "--fixture-universe", getattr(args, "fixture_universe", "whitelist")]
-                + (["--include-outside-57"] if args.include_outside_57 else []),
+                worker_cmd,
                 stdout=log_fh, stderr=subprocess.STDOUT,
             )
 
