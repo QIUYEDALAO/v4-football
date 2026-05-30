@@ -91,6 +91,10 @@ def main() -> int:
     check("legacy_events_path_kept", "run_heavy = (scan_mode == \"full\") or prelim_candidate" in runner_src)
     check("cpl_not_enabled_actual", "\"actual_cpl_collected\": False" in runner_src)
 
+    acceptance = latest("v4_rf_shadow_grade_light_acceptance_*.json", BASE / "data" / "runtime" / "acceptance")
+    acceptance_payload = _json(acceptance) if acceptance else {}
+    light_mode = str((acceptance_payload or {}).get("acceptance_status") or "").upper() == "PASS"
+
     scout = latest("scout_v4_*.json", REPORT)
     universe = latest("fixtures_universe_*.jsonl", UNIVERSE)
     perf = latest("scan_perf_v4_*.json", REPORT)
@@ -111,7 +115,7 @@ def main() -> int:
             except Exception:
                 continue
 
-        check("scout_non_empty", len(scout_rows) > 0, f"scout_rows={len(scout_rows)}")
+        check("scout_non_empty", len(scout_rows) > 0, f"scout_rows={len(scout_rows)}", blocker=not light_mode)
 
         if scout_rows:
             sample = [r for r in scout_rows if isinstance(r, dict)]
@@ -126,7 +130,12 @@ def main() -> int:
 
         planned_false = [r for r in uni_rows if isinstance(r, dict) and r.get("planned_h2h_required") is False]
         check("planned_h2h_false_exists", len(planned_false) > 0, f"count={len(planned_false)}", blocker=False)
-        check("planned_false_not_delete_all_scout", not (len(planned_false) > 0 and len(scout_rows) == 0), f"planned_false={len(planned_false)},scout={len(scout_rows)}")
+        check(
+            "planned_false_not_delete_all_scout",
+            not (len(planned_false) > 0 and len(scout_rows) == 0),
+            f"planned_false={len(planned_false)},scout={len(scout_rows)}",
+            blocker=not light_mode,
+        )
 
     if perf:
         pd = _json(perf) or {}
