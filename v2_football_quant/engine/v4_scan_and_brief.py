@@ -98,6 +98,43 @@ COLLECTION_ACTUAL_FIELDS = [
     "actual_collection_reason",
 ]
 
+RF_SHADOW_GRADE_TEXT_FIELDS = [
+    "rf_shadow_grade",
+    "rf_shadow_route",
+    "rf_shadow_reason",
+    "rf_entry_rule",
+    "rf_recent10_gate_status",
+    "rf_recent5_grade_status",
+    "rf_heating_exception_reason",
+    "rf_balance_status",
+    "rf_balance_driver_side",
+    "rf_balance_driver_level",
+    "rf_balance_weak_side_status",
+    "rf_balance_adjustment",
+    "rf_balance_reason",
+    "h2h_recent5_support_status",
+    "h2h_recent5_bonus_level",
+    "h2h_recent5_bonus_reason",
+    "opening_market_support_status",
+    "opening_market_confirm_level",
+    "opening_market_veto_level",
+    "opening_market_reason",
+    "opening_market_data_status",
+    "market_adjusted_shadow_grade",
+    "market_adjustment_reason",
+]
+
+RF_SHADOW_GRADE_BOOL_FIELDS = [
+    "rf_heating_exception",
+]
+
+RF_SHADOW_GRADE_NUM_FIELDS = [
+    "rf_shadow_score",
+    "rf_shadow_confidence",
+    "h2h_recent5_fh_involved_count",
+    "h2h_recent5_sample_count",
+]
+
 
 def _pick_rf_shadow(record: dict, factors: dict) -> dict:
     out = {}
@@ -149,6 +186,33 @@ def _pick_rf_shadow(record: dict, factors: dict) -> dict:
                 v = False
             else:
                 v = ""
+        out[k] = v
+    for k in RF_SHADOW_GRADE_TEXT_FIELDS:
+        v = record.get(k)
+        if v is None:
+            v = factors.get(k)
+        if v is None:
+            if k == "rf_shadow_grade":
+                v = "DATA_MISSING"
+            elif k == "market_adjusted_shadow_grade":
+                v = "DATA_MISSING"
+            else:
+                v = ""
+        out[k] = v
+    for k in RF_SHADOW_GRADE_BOOL_FIELDS:
+        v = record.get(k)
+        if v is None:
+            v = factors.get(k)
+        out[k] = bool(v) if v is not None else False
+    for k in RF_SHADOW_GRADE_NUM_FIELDS:
+        v = record.get(k)
+        if v is None:
+            v = factors.get(k)
+        if v is None:
+            if k in {"rf_shadow_score", "rf_shadow_confidence"}:
+                v = "DATA_MISSING"
+            else:
+                v = 0
         out[k] = v
     return out
 

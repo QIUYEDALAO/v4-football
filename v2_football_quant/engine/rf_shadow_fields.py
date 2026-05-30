@@ -3,6 +3,13 @@ from __future__ import annotations
 from datetime import datetime, timezone
 from typing import Any, Optional
 
+# Phase 3 rule freeze: V4-RF-CPL shadow-only grading
+# - 10G7 entry gate + recent5 grading
+# - recent5 heating exceptions (6/10+5/5 => B, 5/10+5/5 => C observe)
+# - team balance adjustment (no min(home,away) hard cut)
+# - h2h recent5 bonus-only (cannot downgrade, cannot create A/B)
+# - opening market confirm/veto (cannot create A/B, only keep/downgrade shadow)
+
 
 def _safe_rate(hit: int, sample: int) -> float | None:
     if sample <= 0:
@@ -223,4 +230,441 @@ def build_recent_form_shadow_from_recent(
         "recent_form_primary_score": primary_score,
         "recent_form_primary_level": primary_level,
         "recent_form_primary_reason": primary_reason,
+    }
+
+
+def _to_float(v: Any) -> Optional[float]:
+    try:
+        if v is None or v == "":
+            return None
+        return float(v)
+    except Exception:
+        return None
+
+
+def _to_int(v: Any, default: int = 0) -> int:
+    try:
+        if v is None or v == "":
+            return default
+        return int(v)
+    except Exception:
+        return default
+
+
+def _rate_to_count(rate: Any, sample: int, max_cap: int) -> Optional[int]:
+    rv = _to_float(rate)
+    if rv is None or sample <= 0:
+        return None
+    cnt = int(round(rv * sample))
+    cnt = max(0, min(sample, cnt))
+    return max(0, min(max_cap, cnt))
+
+
+def _side_level(recent10_cnt: int, recent5_cnt: int) -> str:
+    if recent10_cnt >= 7 and recent5_cnt == 5:
+        return "HOT_DRIVER"
+    if recent10_cnt >= 7 and recent5_cnt >= 4:
+        return "STRONG_DRIVER"
+    return "NONE"
+
+
+def _weak_side_status(recent10_cnt: int, recent5_cnt: int) -> str:
+    if recent10_cnt <= 4 and recent5_cnt <= 2:
+        return "DANGEROUS_DRAG"
+    if recent10_cnt >= 7 and recent5_cnt >= 4:
+        return "SUPPORTIVE"
+    if recent10_cnt >= 6 and recent5_cnt >= 3:
+        return "ACCEPTABLE"
+    if recent10_cnt >= 6 and recent5_cnt <= 2:
+        return "COOLING"
+    if recent10_cnt == 5 or recent5_cnt <= 3:
+        return "WEAK"
+    return "NONE"
+
+
+def _grade_rank(g: str) -> int:
+    return {"A": 4, "B": 3, "C": 2, "SKIP": 1, "LOW_SAMPLE": 0, "DATA_MISSING": 0}.get(g, 0)
+
+
+def _downgrade_once(g: str) -> str:
+    if g == "A":
+        return "B"
+    if g == "B":
+        return "C"
+    if g == "C":
+        return "SKIP"
+    return g
+
+
+def _market_support_status(record: dict) -> dict[str, Any]:
+    no_market_excluded = bool(record.get("no_market_excluded")) or str(record.get("pending_action", "")).startswith("无盘口")
+    ht_line = _to_float(record.get("prematch_ht_line"))
+    over_odds = _to_float(record.get("prematch_over_odds"))
+    under_odds = _to_float(record.get("prematch_under_odds"))
+    available = any(v is not None for v in (ht_line, over_odds, under_odds))
+
+    if no_market_excluded:
+        status = "MARKET_NO_MARKET"
+    elif not available:
+        status = "MARKET_NO_DATA"
+    else:
+        if (ht_line is not None and ht_line <= 0.5) or (over_odds is not None and over_odds >= 2.20):
+            status = "MARKET_HARD_VETO"
+        elif (ht_line is not None and ht_line < 1.0) or (over_odds is not None and over_odds > 2.05):
+            status = "MARKET_WEAK_VETO"
+        elif (ht_line is not None and ht_line >= 1.25) and (over_odds is None or over_odds <= 1.85):
+            status = "MARKET_STRONG_CONFIRM"
+        elif (ht_line is not None and ht_line >= 1.0) and (over_odds is None or over_odds <= 1.95):
+            status = "MARKET_WEAK_CONFIRM"
+        else:
+            status = "MARKET_NEUTRAL"
+
+    confirm_level = {
+        "MARKET_STRONG_CONFIRM": "HIGH",
+        "MARKET_WEAK_CONFIRM": "LOW",
+    }.get(status, "NONE")
+    veto_level = {
+        "MARKET_HARD_VETO": "HARD",
+        "MARKET_WEAK_VETO": "WEAK",
+    }.get(status, "NONE")
+    reason = {
+        "MARKET_STRONG_CONFIRM": "初盘上半场线位支持强确认",
+        "MARKET_WEAK_CONFIRM": "初盘上半场线位支持弱确认",
+        "MARKET_NEUTRAL": "初盘对上半场方向中性",
+        "MARKET_WEAK_VETO": "初盘线位偏弱，给出弱反向",
+        "MARKET_HARD_VETO": "初盘线位明显反向，给出强veto",
+        "MARKET_NO_DATA": "缺少可用初盘数据",
+        "MARKET_NO_MARKET": "无盘口，shadow 不进入待投",
+    }[status]
+
+    return {
+        "opening_market_available": available,
+        "opening_market_snapshot_time": record.get("logged_at") or record.get("generated_at") or "UNKNOWN",
+        "opening_market_source": "prematch_snapshot_from_scan",
+        "opening_ft_ou_line": None,
+        "opening_ft_ou_over_odds": None,
+        "opening_ft_ou_under_odds": None,
+        "opening_ht_ou_line": ht_line,
+        "opening_ht_ou_over_odds": over_odds,
+        "opening_ht_ou_under_odds": under_odds,
+        "opening_ah_line": None,
+        "opening_favorite_side": "UNKNOWN",
+        "opening_market_support_status": status,
+        "opening_market_confirm_level": confirm_level,
+        "opening_market_veto_level": veto_level,
+        "opening_market_reason": reason,
+        "opening_market_role": "CONFIRM_OR_VETO_SHADOW_ONLY",
+        "opening_market_data_status": "HAS_DATA" if available else ("NO_MARKET" if no_market_excluded else "NO_DATA"),
+    }
+
+
+def build_rf_shadow_grade_layer(record: dict, factors: dict | None = None) -> dict[str, Any]:
+    factors = factors or {}
+
+    h10_n = _to_int(record.get("recent10_sample_count_home"), 0)
+    a10_n = _to_int(record.get("recent10_sample_count_away"), 0)
+    h10_cnt = _rate_to_count(record.get("home_recent10_fh_involved_rate"), h10_n, 10)
+    a10_cnt = _rate_to_count(record.get("away_recent10_fh_involved_rate"), a10_n, 10)
+
+    h5_n = min(5, h10_n) if h10_n > 0 else 0
+    a5_n = min(5, a10_n) if a10_n > 0 else 0
+    h5_cnt = _rate_to_count(record.get("home_recent5_fh_involved_rate"), h5_n, 5)
+    a5_cnt = _rate_to_count(record.get("away_recent5_fh_involved_rate"), a5_n, 5)
+
+    c10_rate = _to_float(record.get("combined_recent10_fh_involved_rate"))
+    c5_rate = _to_float(record.get("combined_recent5_fh_involved_rate"))
+    c10_cnt = int(round(c10_rate * 10)) if c10_rate is not None else None
+    c5_cnt = int(round(c5_rate * 5)) if c5_rate is not None else None
+
+    market = _market_support_status(record)
+    market_status = market["opening_market_support_status"]
+
+    missing_core = c10_cnt is None or c5_cnt is None
+    low_sample = min(h10_n, a10_n) < 5
+
+    rf_recent10_gate_status = "RECENT10_DATA_MISSING"
+    rf_entry_rule = "ENTRY_DATA_MISSING"
+    rf_heating_exception = False
+    rf_heating_exception_reason = ""
+
+    if not missing_core:
+        if c10_cnt >= 7:
+            rf_recent10_gate_status = "RECENT10_GATE_PASS_7_OF_10"
+            rf_entry_rule = "ENTRY_PASS_10G7"
+        elif c10_cnt == 6 and c5_cnt == 5:
+            rf_recent10_gate_status = "RECENT10_GATE_BREAK_6_OF_10"
+            rf_entry_rule = "ENTRY_BREAK_B_6OF10_5OF5"
+            rf_heating_exception = True
+            rf_heating_exception_reason = "近5强势升温，近10基础不足，破格B"
+        elif c10_cnt == 5 and c5_cnt == 5:
+            rf_recent10_gate_status = "RECENT10_GATE_OBSERVE_5_OF_10"
+            rf_entry_rule = "ENTRY_C_OBSERVE_5OF10_5OF5"
+            rf_heating_exception = True
+            rf_heating_exception_reason = "短期升温观察，稳定性不足"
+        elif c10_cnt <= 4:
+            rf_recent10_gate_status = "RECENT10_GATE_BLOCK_LE_4_OF_10"
+            rf_entry_rule = "ENTRY_BLOCK_LE4"
+        else:
+            rf_recent10_gate_status = "RECENT10_GATE_PARTIAL"
+            rf_entry_rule = "ENTRY_PARTIAL"
+
+    rf_recent5_grade_status = "RECENT5_DATA_MISSING"
+    if c5_cnt is not None:
+        if c5_cnt == 5:
+            rf_recent5_grade_status = "RECENT5_A_BASE_5_OF_5"
+        elif c5_cnt == 4:
+            rf_recent5_grade_status = "RECENT5_B_BASE_4_OF_5"
+        elif c5_cnt == 3:
+            rf_recent5_grade_status = "RECENT5_C_OBSERVE_3_OF_5"
+        else:
+            rf_recent5_grade_status = "RECENT5_WEAK_LE_2_OF_5"
+
+    # Base grade from recent10 gate + recent5 grade
+    if missing_core:
+        rf_shadow_grade = "DATA_MISSING"
+    elif low_sample:
+        rf_shadow_grade = "LOW_SAMPLE"
+    elif market_status == "MARKET_NO_MARKET":
+        rf_shadow_grade = "SKIP"
+    elif c10_cnt <= 4:
+        rf_shadow_grade = "C" if (c5_cnt or 0) >= 3 else "SKIP"
+    elif c10_cnt == 5 and c5_cnt == 5:
+        rf_shadow_grade = "C"
+    elif c10_cnt == 6 and c5_cnt == 5:
+        rf_shadow_grade = "B"
+    elif c10_cnt >= 7:
+        if c5_cnt == 5:
+            rf_shadow_grade = "A"
+        elif c5_cnt == 4:
+            rf_shadow_grade = "B"
+        elif c5_cnt == 3:
+            rf_shadow_grade = "C"
+        else:
+            rf_shadow_grade = "SKIP"
+    else:
+        rf_shadow_grade = "C"
+
+    # Team balance
+    home_lvl = _side_level(h10_cnt or 0, h5_cnt or 0)
+    away_lvl = _side_level(a10_cnt or 0, a5_cnt or 0)
+    rf_balance_status = "NO_DRIVER"
+    rf_balance_driver_side = "NONE"
+    rf_balance_driver_level = "NONE"
+    rf_balance_weak_side_status = "NONE"
+    rf_balance_adjustment = "NO_CHANGE"
+    rf_balance_reason = "无强侧驱动，按普通RF入池规则"
+
+    if home_lvl in {"HOT_DRIVER", "STRONG_DRIVER"} and away_lvl in {"HOT_DRIVER", "STRONG_DRIVER"}:
+        rf_balance_status = "BALANCED_ACTIVE"
+        rf_balance_driver_side = "BOTH"
+        rf_balance_driver_level = "HOT_DRIVER" if home_lvl == "HOT_DRIVER" and away_lvl == "HOT_DRIVER" else "STRONG_DRIVER"
+        rf_balance_reason = "双方均为强驱动，双边活跃"
+    else:
+        driver_side = None
+        driver_level = None
+        weak10 = 0
+        weak5 = 0
+        if home_lvl in {"HOT_DRIVER", "STRONG_DRIVER"}:
+            driver_side = "HOME"
+            driver_level = home_lvl
+            weak10, weak5 = (a10_cnt or 0), (a5_cnt or 0)
+        elif away_lvl in {"HOT_DRIVER", "STRONG_DRIVER"}:
+            driver_side = "AWAY"
+            driver_level = away_lvl
+            weak10, weak5 = (h10_cnt or 0), (h5_cnt or 0)
+        if driver_side:
+            rf_balance_driver_side = driver_side
+            rf_balance_driver_level = driver_level
+            weak_status = _weak_side_status(weak10, weak5)
+            rf_balance_weak_side_status = weak_status
+            if driver_level == "HOT_DRIVER":
+                if weak_status == "SUPPORTIVE":
+                    rf_balance_status = "HOT_DRIVER_SUPPORTIVE"
+                    rf_balance_adjustment = "KEEP_A_BASE"
+                    rf_balance_reason = "强侧驱动+弱侧支持，可维持A基础"
+                elif weak_status == "ACCEPTABLE":
+                    rf_balance_status = "HOT_DRIVER_ACCEPTABLE"
+                    rf_balance_adjustment = "DOWNGRADE_TO_B"
+                    rf_balance_reason = "强侧驱动，弱侧保底，不给A但不排除"
+                elif weak_status == "COOLING":
+                    rf_balance_status = "HOT_DRIVER_COOLING"
+                    rf_balance_adjustment = "DOWNGRADE_TO_C"
+                    rf_balance_reason = "强侧驱动但弱侧降温，降至观察层"
+                elif weak_status == "WEAK":
+                    rf_balance_status = "HOT_DRIVER_WEAK"
+                    rf_balance_adjustment = "REQUIRE_DOMINANT_FAVORITE_CONFIRMATION"
+                    rf_balance_reason = "强侧驱动但弱侧偏弱，需要单边压制确认"
+                else:
+                    rf_balance_status = "HOT_DRIVER_DANGEROUS_DRAG"
+                    rf_balance_adjustment = "SKIP_OR_C"
+                    rf_balance_reason = "弱侧危险拖累，默认C/SKIP"
+            elif driver_level == "STRONG_DRIVER" and weak_status == "ACCEPTABLE":
+                rf_balance_status = "STRONG_DRIVER_ACCEPTABLE"
+                rf_balance_adjustment = "DOWNGRADE_TO_C"
+                rf_balance_reason = "强驱动但非HOT，弱侧仅保底，降为B/C观察"
+
+    balance_adjusted_grade = rf_shadow_grade
+    if balance_adjusted_grade in {"A", "B", "C"}:
+        if rf_balance_adjustment == "DOWNGRADE_TO_B":
+            # Team-balance rule: HOT_DRIVER + ACCEPTABLE should settle at B (not A, not SKIP).
+            balance_adjusted_grade = "B"
+        elif rf_balance_adjustment == "DOWNGRADE_TO_C":
+            if balance_adjusted_grade == "A":
+                balance_adjusted_grade = "C"
+            elif balance_adjusted_grade == "B":
+                balance_adjusted_grade = "C"
+        elif rf_balance_adjustment in {"SKIP_OR_C", "REQUIRE_DOMINANT_FAVORITE_CONFIRMATION"}:
+            balance_adjusted_grade = "C" if (c5_cnt or 0) >= 3 else "SKIP"
+
+    # H2H recent5 bonus-only (no downgrade, no grade manufacture)
+    h2h_sample_base = _to_int(factors.get("h2h_official_sample_size"), _to_int(factors.get("h2h_sample_size"), 0))
+    h2h_recent5_sample_count = min(5, max(0, h2h_sample_base))
+    h2h_rate = _to_float(factors.get("h2h_ht_goal_rate"))
+    h2h_recent5_fh_involved_count = _rate_to_count(h2h_rate, h2h_recent5_sample_count, 5) or 0
+    h2h_total = _to_int(factors.get("h2h_total"), 0)
+    h2h_3y_count = _to_int(factors.get("h2h_3y_count"), h2h_sample_base)
+    h2h_sample_age_status = "H2H_STALE" if (h2h_total > 0 and h2h_3y_count <= 0) else "H2H_FRESH"
+
+    if h2h_recent5_sample_count < 3:
+        h2h_recent5_support_status = "H2H_LOW_SAMPLE"
+        h2h_recent5_bonus_level = "NONE"
+        h2h_recent5_bonus_reason = "H2H样本不足，忽略"
+        h2h_assist_status = "H2H_IGNORED"
+        h2h_assist_strength = "NONE"
+        h2h_ignored_reason = "LOW_SAMPLE"
+    elif h2h_sample_age_status == "H2H_STALE":
+        h2h_recent5_support_status = "H2H_STALE"
+        h2h_recent5_bonus_level = "NONE"
+        h2h_recent5_bonus_reason = "H2H样本过旧，忽略"
+        h2h_assist_status = "H2H_IGNORED"
+        h2h_assist_strength = "NONE"
+        h2h_ignored_reason = "STALE"
+    elif h2h_recent5_fh_involved_count >= 4:
+        h2h_recent5_support_status = "H2H_STRONG_BONUS"
+        h2h_recent5_bonus_level = "STRONG_BONUS"
+        h2h_recent5_bonus_reason = "H2H近5支持强，仅加分不降级"
+        h2h_assist_status = "H2H_ASSIST_ACTIVE"
+        h2h_assist_strength = "STRONG"
+        h2h_ignored_reason = ""
+    elif h2h_recent5_fh_involved_count == 3:
+        h2h_recent5_support_status = "H2H_LIGHT_BONUS"
+        h2h_recent5_bonus_level = "LIGHT_BONUS"
+        h2h_recent5_bonus_reason = "H2H近5支持轻度，仅加分不降级"
+        h2h_assist_status = "H2H_ASSIST_ACTIVE"
+        h2h_assist_strength = "LIGHT"
+        h2h_ignored_reason = ""
+    else:
+        h2h_recent5_support_status = "H2H_NO_BONUS"
+        h2h_recent5_bonus_level = "NO_BONUS"
+        h2h_recent5_bonus_reason = "H2H不支持，不降级"
+        h2h_assist_status = "H2H_IGNORED"
+        h2h_assist_strength = "NONE"
+        h2h_ignored_reason = "NO_BONUS"
+
+    # Opening market confirm/veto (shadow only)
+    market_adjusted_shadow_grade = balance_adjusted_grade
+    market_adjustment_reason = "盘口仅作确认，不单独制造A/B"
+    if market_status == "MARKET_NO_MARKET":
+        market_adjusted_shadow_grade = "SKIP"
+        market_adjustment_reason = "无盘口，shadow 标注SKIP且不进入待投"
+    elif market_status == "MARKET_HARD_VETO":
+        if market_adjusted_shadow_grade == "A":
+            market_adjusted_shadow_grade = "C"
+        elif market_adjusted_shadow_grade == "B":
+            market_adjusted_shadow_grade = "C"
+        elif market_adjusted_shadow_grade == "C":
+            market_adjusted_shadow_grade = "SKIP"
+        market_adjustment_reason = "初盘强反向，shadow 降级（不影响official）"
+    elif market_status == "MARKET_WEAK_VETO":
+        market_adjusted_shadow_grade = _downgrade_once(market_adjusted_shadow_grade)
+        market_adjustment_reason = "初盘弱反向，shadow 降一级（不影响official）"
+    elif market_status == "MARKET_NEUTRAL" and market_adjusted_shadow_grade == "A":
+        market_adjusted_shadow_grade = "B"
+        market_adjustment_reason = "初盘中性，对A保守降为B（shadow）"
+    elif market_status == "MARKET_STRONG_CONFIRM":
+        market_adjustment_reason = "初盘强确认，提升信心不改级别"
+    elif market_status == "MARKET_WEAK_CONFIRM":
+        market_adjustment_reason = "初盘弱确认，保留级别"
+    elif market_status == "MARKET_NO_DATA":
+        market_adjustment_reason = "初盘缺失，保持shadow级别并降低信心"
+
+    # route and confidence
+    if market_status == "MARKET_NO_MARKET":
+        rf_shadow_route = "NO_MARKET"
+    elif missing_core:
+        rf_shadow_route = "DATA_MISSING"
+    elif rf_balance_adjustment == "REQUIRE_DOMINANT_FAVORITE_CONFIRMATION":
+        rf_shadow_route = "DOMINANT_FAVORITE_PENDING"
+    elif market_status in {"MARKET_HARD_VETO", "MARKET_WEAK_VETO"}:
+        rf_shadow_route = "MARKET_VETO"
+    elif rf_heating_exception:
+        rf_shadow_route = "RECENT5_HEATING_EXCEPTION"
+    elif rf_balance_driver_level == "HOT_DRIVER":
+        rf_shadow_route = "HOT_DRIVER"
+    elif rf_balance_driver_level == "STRONG_DRIVER":
+        rf_shadow_route = "STRONG_DRIVER"
+    else:
+        rf_shadow_route = "BILATERAL_ACTIVE"
+
+    rf_shadow_score = _to_float(record.get("recent_form_primary_score"))
+    if rf_shadow_score is None and c10_rate is not None and c5_rate is not None:
+        rf_shadow_score = round((c10_rate * 0.7 + c5_rate * 0.3) * 100, 1)
+
+    confidence = int(round(rf_shadow_score or 50.0))
+    if h2h_recent5_support_status == "H2H_STRONG_BONUS":
+        confidence += 8
+    elif h2h_recent5_support_status == "H2H_LIGHT_BONUS":
+        confidence += 3
+    if market_status == "MARKET_STRONG_CONFIRM":
+        confidence += 8
+    elif market_status == "MARKET_WEAK_CONFIRM":
+        confidence += 3
+    elif market_status == "MARKET_NEUTRAL":
+        confidence -= 4
+    elif market_status == "MARKET_WEAK_VETO":
+        confidence -= 12
+    elif market_status == "MARKET_HARD_VETO":
+        confidence -= 25
+    elif market_status in {"MARKET_NO_DATA", "MARKET_NO_MARKET"}:
+        confidence -= 8
+    if low_sample:
+        confidence -= 12
+    rf_shadow_confidence = max(0, min(100, confidence))
+
+    rf_shadow_reason = (
+        f"近10门槛={rf_recent10_gate_status}; 近5评级={rf_recent5_grade_status}; "
+        f"Balance={rf_balance_status}; H2H={h2h_recent5_support_status}; Market={market_status}"
+    )
+
+    return {
+        "rf_shadow_grade": rf_shadow_grade,
+        "rf_shadow_score": rf_shadow_score if rf_shadow_score is not None else "DATA_MISSING",
+        "rf_shadow_route": rf_shadow_route,
+        "rf_shadow_reason": rf_shadow_reason,
+        "rf_shadow_confidence": rf_shadow_confidence,
+        "rf_entry_rule": rf_entry_rule,
+        "rf_recent10_gate_status": rf_recent10_gate_status,
+        "rf_recent5_grade_status": rf_recent5_grade_status,
+        "rf_heating_exception": rf_heating_exception,
+        "rf_heating_exception_reason": rf_heating_exception_reason or "N/A",
+        "rf_balance_status": rf_balance_status,
+        "rf_balance_driver_side": rf_balance_driver_side,
+        "rf_balance_driver_level": rf_balance_driver_level,
+        "rf_balance_weak_side_status": rf_balance_weak_side_status,
+        "rf_balance_adjustment": rf_balance_adjustment,
+        "rf_balance_reason": rf_balance_reason,
+        "h2h_recent5_fh_involved_count": h2h_recent5_fh_involved_count,
+        "h2h_recent5_sample_count": h2h_recent5_sample_count,
+        "h2h_recent5_support_status": h2h_recent5_support_status,
+        "h2h_recent5_bonus_level": h2h_recent5_bonus_level,
+        "h2h_recent5_bonus_reason": h2h_recent5_bonus_reason,
+        "h2h_assist_status": h2h_assist_status,
+        "h2h_assist_strength": h2h_assist_strength,
+        "h2h_assist_reason": h2h_recent5_bonus_reason,
+        "h2h_sample_age_status": h2h_sample_age_status,
+        "h2h_low_sample": h2h_recent5_support_status == "H2H_LOW_SAMPLE",
+        "h2h_ignored_reason": h2h_ignored_reason or "N/A",
+        **market,
+        "market_adjusted_shadow_grade": market_adjusted_shadow_grade,
+        "market_adjustment_reason": market_adjustment_reason,
     }

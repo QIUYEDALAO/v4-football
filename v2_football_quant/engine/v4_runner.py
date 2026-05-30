@@ -34,7 +34,10 @@ from engine.data_sources.h2h_engine import (
     recent_profile_cache_stats,
     reset_recent_profile_cache_stats,
 )
-from engine.rf_shadow_fields import build_recent_form_shadow_from_recent
+from engine.rf_shadow_fields import (
+    build_recent_form_shadow_from_recent,
+    build_rf_shadow_grade_layer,
+)
 from engine.data_sources.league_baseline import baseline_for_fixture
 from engine.data_sources.lineup_strength import LineupStrengthAnalyzer
 from engine.data_sources.motivation import evaluate_match_motivation
@@ -778,10 +781,22 @@ def run_v4_scan(
             away_recent_raw,
             fx["awayId"],
         )
+        best_line = _best_pre_live_line(ht_ou_lines)
+        rf_shadow_layer = build_rf_shadow_grade_layer(
+            {
+                **rf_shadow,
+                "prematch_ht_line": best_line["line_float"] if best_line else None,
+                "prematch_over_odds": best_line.get("over") if best_line else None,
+                "prematch_under_odds": best_line.get("under") if best_line else None,
+                "no_market_excluded": bool(result.get("no_market_excluded", False)),
+                "logged_at": datetime.now().isoformat(),
+            },
+            factors=factors,
+        )
+        rf_shadow = {**rf_shadow, **rf_shadow_layer}
         factors = dict(factors or {})
         factors.update(rf_shadow)
         market_focus = result.get("market_focus")
-        best_line = _best_pre_live_line(ht_ou_lines)
         prelim_candidate = bool(market_focus == "HT_LIVE_OVER" and best_line and best_line["line_float"] >= 1.25)
         observe_plan = _build_observe_only_collection_plan(
             rf_shadow=rf_shadow,
