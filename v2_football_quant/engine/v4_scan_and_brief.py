@@ -126,6 +126,28 @@ def _run_parallel_scan(args, scan_date: str, today_key: str, wd, log_path: Path)
 
     a_list, b_list, skip_list = [], [], []
     scout_list = []
+    rf_rate_fields = [
+        "home_recent10_fh_involved_rate",
+        "away_recent10_fh_involved_rate",
+        "combined_recent10_fh_involved_rate",
+        "home_recent10_fh_score_rate",
+        "away_recent10_fh_score_rate",
+        "home_recent10_fh_concede_rate",
+        "away_recent10_fh_concede_rate",
+        "home_recent5_fh_involved_rate",
+        "away_recent5_fh_involved_rate",
+        "combined_recent5_fh_involved_rate",
+        "home_recent5_fh_score_rate",
+        "away_recent5_fh_score_rate",
+        "home_recent5_fh_concede_rate",
+        "away_recent5_fh_concede_rate",
+    ]
+    rf_int_fields = [
+        "recent10_sample_count_home",
+        "recent10_sample_count_away",
+        "recent10_window_days_home",
+        "recent10_window_days_away",
+    ]
 
     # ── Fixture universe filter ──
     # whitelist: only whitelist league fixtures enter official candidate_view
@@ -143,6 +165,25 @@ def _run_parallel_scan(args, scan_date: str, today_key: str, wd, log_path: Path)
         source_group = r.get("source_group", "UNKNOWN")
         is_in_57 = bool(r.get("is_in_57_whitelist", lid in wl_ids))
         is_outside57 = not is_in_57
+        factors = r.get("factors") if isinstance(r.get("factors"), dict) else {}
+
+        def _pick_shadow(key: str, default):
+            if r.get(key) is not None:
+                return r.get(key)
+            if factors.get(key) is not None:
+                return factors.get(key)
+            return default
+
+        shadow = {}
+        for k in rf_rate_fields:
+            shadow[k] = _pick_shadow(k, "DATA_MISSING")
+        for k in rf_int_fields:
+            shadow[k] = _pick_shadow(k, 0)
+        shadow["recent_freshness_status"] = _pick_shadow("recent_freshness_status", "UNKNOWN")
+        shadow["recent5_momentum_status"] = _pick_shadow("recent5_momentum_status", "DATA_MISSING")
+        shadow["recent_form_primary_score"] = _pick_shadow("recent_form_primary_score", "DATA_MISSING")
+        shadow["recent_form_primary_level"] = _pick_shadow("recent_form_primary_level", "DATA_MISSING")
+        shadow["recent_form_primary_reason"] = _pick_shadow("recent_form_primary_reason", "RF 数据缺失")
 
         # Build common fields
         entry = {
@@ -171,6 +212,7 @@ def _run_parallel_scan(args, scan_date: str, today_key: str, wd, log_path: Path)
             "is_candidate": grade in ("A", "B"),
             "recent_form_low_sample": r.get("recent_form_low_sample", False),
             "candidate_score": r.get("candidate_score"),
+            **shadow,
         }
 
         if grade == "A":
@@ -219,6 +261,7 @@ def _run_parallel_scan(args, scan_date: str, today_key: str, wd, log_path: Path)
             "factors_missing": r.get("factors_missing", False),
             "score_pack_missing": r.get("score_pack_missing", False),
             "ht_ou_lines": [],
+            **shadow,
         }
         if not scout_entry["market_scores"] or not scout_entry["factors"]:
             scout_entry["explain_factors_missing"] = True

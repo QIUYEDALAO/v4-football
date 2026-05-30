@@ -9,6 +9,7 @@
 from __future__ import annotations
 
 import json
+import math
 from datetime import datetime, timedelta
 from pathlib import Path
 
@@ -187,6 +188,76 @@ def _safe_float(v: Any, default: float = 0.0) -> float:
         return default
 
 
+RF_RATE_FIELDS = (
+    "home_recent10_fh_involved_rate",
+    "away_recent10_fh_involved_rate",
+    "combined_recent10_fh_involved_rate",
+    "home_recent10_fh_score_rate",
+    "away_recent10_fh_score_rate",
+    "home_recent10_fh_concede_rate",
+    "away_recent10_fh_concede_rate",
+    "home_recent5_fh_involved_rate",
+    "away_recent5_fh_involved_rate",
+    "combined_recent5_fh_involved_rate",
+    "home_recent5_fh_score_rate",
+    "away_recent5_fh_score_rate",
+    "home_recent5_fh_concede_rate",
+    "away_recent5_fh_concede_rate",
+)
+
+RF_INT_FIELDS = (
+    "recent10_sample_count_home",
+    "recent10_sample_count_away",
+    "recent10_window_days_home",
+    "recent10_window_days_away",
+)
+
+
+def _rf_clean(v: Any, default: Any) -> Any:
+    if v is None:
+        return default
+    if isinstance(v, float) and math.isnan(v):
+        return default
+    if isinstance(v, str) and v.strip() == "":
+        return default
+    return v
+
+
+def _merge_rf_shadow_fields(candidate_row: dict, scout_row: dict) -> dict:
+    out: dict[str, Any] = {}
+    for k in RF_RATE_FIELDS:
+        raw = candidate_row.get(k)
+        if raw is None:
+            raw = scout_row.get(k)
+        out[k] = _rf_clean(raw, "DATA_MISSING")
+    for k in RF_INT_FIELDS:
+        raw = candidate_row.get(k)
+        if raw is None:
+            raw = scout_row.get(k)
+        out[k] = _rf_clean(raw, 0)
+    out["recent_freshness_status"] = _rf_clean(
+        candidate_row.get("recent_freshness_status", scout_row.get("recent_freshness_status")),
+        "UNKNOWN",
+    )
+    out["recent5_momentum_status"] = _rf_clean(
+        candidate_row.get("recent5_momentum_status", scout_row.get("recent5_momentum_status")),
+        "DATA_MISSING",
+    )
+    out["recent_form_primary_score"] = _rf_clean(
+        candidate_row.get("recent_form_primary_score", scout_row.get("recent_form_primary_score")),
+        "DATA_MISSING",
+    )
+    out["recent_form_primary_level"] = _rf_clean(
+        candidate_row.get("recent_form_primary_level", scout_row.get("recent_form_primary_level")),
+        "DATA_MISSING",
+    )
+    out["recent_form_primary_reason"] = _rf_clean(
+        candidate_row.get("recent_form_primary_reason", scout_row.get("recent_form_primary_reason")),
+        "RF 数据缺失",
+    )
+    return out
+
+
 def _norm_date_from_record(rec: dict, fallback_date: str) -> tuple[str, bool]:
     d = str(rec.get("bet_date") or rec.get("date") or "").strip()
     if d and len(d) == 8 and d.isdigit():
@@ -316,6 +387,7 @@ def _extract_candidates(view: dict, live_daily: dict, scout_data: list | None = 
             continue
         fid = r.get("fixture_id")
         s = scout_by_fid.get(fid, {}) if scout_by_fid else {}
+        rf_shadow = _merge_rf_shadow_fields(r, s)
         a_candidates.append({
             "fixture_id": fid,
             "league": r.get("league") or "",
@@ -385,6 +457,7 @@ def _extract_candidates(view: dict, live_daily: dict, scout_data: list | None = 
             "factors_missing": s.get("factors_missing", True),
             "score_pack_missing": s.get("score_pack_missing", True),
             "explain_factors_missing": s.get("explain_factors_missing", True),
+            **rf_shadow,
         })
 
     for r in (view.get("B_candidates") or []):
@@ -392,6 +465,7 @@ def _extract_candidates(view: dict, live_daily: dict, scout_data: list | None = 
             continue
         fid = r.get("fixture_id")
         s = scout_by_fid.get(fid, {}) if scout_by_fid else {}
+        rf_shadow = _merge_rf_shadow_fields(r, s)
         b_candidates.append({
             "fixture_id": fid,
             "league": r.get("league") or "",
@@ -447,6 +521,7 @@ def _extract_candidates(view: dict, live_daily: dict, scout_data: list | None = 
             "factors_missing": s.get("factors_missing", True),
             "score_pack_missing": s.get("score_pack_missing", True),
             "explain_factors_missing": s.get("explain_factors_missing", True),
+            **rf_shadow,
         })
 
     for r in (view.get("C_candidates") or []):
