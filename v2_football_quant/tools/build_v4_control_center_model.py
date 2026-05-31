@@ -289,6 +289,13 @@ RF_SHADOW_GRADE_TEXT_FIELDS = (
     "season_aware_shadow_reason",
     "rf_shadow_route",
     "rf_shadow_reason",
+    "rf_shadow_reason_code",
+    "rf_primary_signal_level",
+    "rf_recent10_signal",
+    "rf_recent5_signal",
+    "rf_freshness_signal",
+    "rf_balance_signal",
+    "rf_collection_stage_used",
     "rf_entry_rule",
     "rf_recent10_gate_status",
     "rf_recent5_grade_status",
@@ -299,9 +306,16 @@ RF_SHADOW_GRADE_TEXT_FIELDS = (
     "rf_balance_weak_side_status",
     "rf_balance_adjustment",
     "rf_balance_reason",
+    "recent5_bilateral_gate",
+    "recent5_bilateral_gate_mode",
+    "recent5_bilateral_gate_reason",
+    "recent5_hot_anchor_team",
+    "recent5_bilateral_gate_cap_action",
     "h2h_recent5_support_status",
     "h2h_recent5_bonus_level",
     "h2h_recent5_bonus_reason",
+    "h2h_bonus_status",
+    "h2h_bonus_reason",
     "opening_market_support_status",
     "opening_market_confirm_level",
     "opening_market_veto_level",
@@ -320,11 +334,21 @@ RF_SHADOW_GRADE_TEXT_FIELDS = (
     "no_ht_ou_reason",
     "market_adjusted_shadow_grade",
     "market_adjustment_reason",
+    "market_adjusted_shadow_reason",
+    "market_policy_action",
+    "market_veto_status",
+    "market_risk_flag",
+    "time_bin_shadow_status",
+    "playbook_script",
+    "cpl_shadow_status",
+    "cpl_shadow_reason",
 )
 
 RF_SHADOW_GRADE_BOOL_FIELDS = (
     "rf_heating_exception",
     "season_aware_shadow_applied",
+    "recent5_dual_heat_pass",
+    "recent5_bilateral_gate_exception_used",
 )
 
 RF_SHADOW_GRADE_NUM_FIELDS = (
@@ -333,6 +357,9 @@ RF_SHADOW_GRADE_NUM_FIELDS = (
     "h2h_recent5_fh_involved_count",
     "h2h_recent5_sample_count",
     "opening_market_bookmaker_priority",
+    "home_recent5_pass_count",
+    "away_recent5_pass_count",
+    "recent5_other_side_count",
 )
 
 SEASON_AWARE_TEXT_FIELDS = (

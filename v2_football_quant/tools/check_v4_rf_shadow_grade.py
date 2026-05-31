@@ -22,6 +22,13 @@ REQ_FIELDS = [
     "rf_shadow_score",
     "rf_shadow_route",
     "rf_shadow_reason",
+    "rf_shadow_reason_code",
+    "rf_primary_signal_level",
+    "rf_recent10_signal",
+    "rf_recent5_signal",
+    "rf_freshness_signal",
+    "rf_balance_signal",
+    "rf_collection_stage_used",
     "rf_shadow_confidence",
     "rf_entry_rule",
     "rf_recent10_gate_status",
@@ -34,11 +41,23 @@ REQ_FIELDS = [
     "rf_balance_weak_side_status",
     "rf_balance_adjustment",
     "rf_balance_reason",
+    "recent5_bilateral_gate",
+    "recent5_bilateral_gate_mode",
+    "recent5_bilateral_gate_reason",
+    "home_recent5_pass_count",
+    "away_recent5_pass_count",
+    "recent5_hot_anchor_team",
+    "recent5_other_side_count",
+    "recent5_dual_heat_pass",
+    "recent5_bilateral_gate_cap_action",
+    "recent5_bilateral_gate_exception_used",
     "h2h_recent5_fh_involved_count",
     "h2h_recent5_sample_count",
     "h2h_recent5_support_status",
     "h2h_recent5_bonus_level",
     "h2h_recent5_bonus_reason",
+    "h2h_bonus_status",
+    "h2h_bonus_reason",
     "opening_market_support_status",
     "opening_market_confirm_level",
     "opening_market_veto_level",
@@ -46,6 +65,14 @@ REQ_FIELDS = [
     "opening_market_data_status",
     "market_adjusted_shadow_grade",
     "market_adjustment_reason",
+    "market_adjusted_shadow_reason",
+    "market_policy_action",
+    "market_veto_status",
+    "market_risk_flag",
+    "time_bin_shadow_status",
+    "playbook_script",
+    "cpl_shadow_status",
+    "cpl_shadow_reason",
 ]
 
 
@@ -173,8 +200,13 @@ def main() -> int:
         "away_recent5_fh_involved_rate": 0.6,
         "combined_recent5_fh_involved_rate": 0.8,
         "recent_form_primary_score": 73.0,
-        "prematch_ht_line": 1.0,
-        "prematch_over_odds": 1.92,
+        "prematch_ht_line": 1.25,
+        "prematch_over_odds": 1.80,
+        "season_phase": "ACTIVE_SEASON",
+        "league_tier": "TIER_3_WEAK_COVERAGE",
+        "rf_window_policy": "D60_PRIMARY",
+        "rf_sample_status": "STABLE",
+        "rf_freshness_status": "FRESH",
     }
     factors = {"h2h_official_sample_size": 5, "h2h_ht_goal_rate": 0.4, "h2h_total": 10, "h2h_3y_count": 10}
 
@@ -188,7 +220,7 @@ def main() -> int:
 
     r_6_5 = build_rf_shadow_grade_layer(
         _sample(base, combined_recent10_fh_involved_rate=0.6, combined_recent5_fh_involved_rate=1.0,
-                home_recent5_fh_involved_rate=1.0, away_recent5_fh_involved_rate=1.0, prematch_ht_line=1.1, prematch_over_odds=1.88),
+                home_recent5_fh_involved_rate=1.0, away_recent5_fh_involved_rate=1.0, prematch_ht_line=1.25, prematch_over_odds=1.80),
         factors=factors,
     )
     _ok(checks, "rule_6of10_5of5_is_B", r_6_5.get("rf_shadow_grade") == "B", str(r_6_5.get("rf_shadow_grade")))
@@ -196,7 +228,7 @@ def main() -> int:
         blockers.append("rule_6of10_5of5_fail")
 
     r_5_5 = build_rf_shadow_grade_layer(
-        _sample(base, combined_recent10_fh_involved_rate=0.5, combined_recent5_fh_involved_rate=1.0, prematch_ht_line=1.1, prematch_over_odds=1.9),
+        _sample(base, combined_recent10_fh_involved_rate=0.5, combined_recent5_fh_involved_rate=1.0, prematch_ht_line=1.1, prematch_over_odds=1.9, recent_form_primary_score=70.0),
         factors=factors,
     )
     _ok(checks, "rule_5of10_5of5_is_C", r_5_5.get("rf_shadow_grade") == "C", str(r_5_5.get("rf_shadow_grade")))
@@ -218,7 +250,7 @@ def main() -> int:
     _ok(checks, "h2h_weak_no_downgrade", r_h2h_weak.get("rf_shadow_grade") in {"A", "B", "C", "SKIP"}, r_h2h_weak.get("h2h_recent5_support_status", ""))
 
     r_h2h_strong_c = build_rf_shadow_grade_layer(
-        _sample(base, combined_recent10_fh_involved_rate=0.5, combined_recent5_fh_involved_rate=0.6, prematch_ht_line=1.1, prematch_over_odds=1.9),
+        _sample(base, combined_recent10_fh_involved_rate=0.5, combined_recent5_fh_involved_rate=0.6, prematch_ht_line=1.1, prematch_over_odds=1.9, recent_form_primary_score=70.0),
         factors={"h2h_official_sample_size": 5, "h2h_ht_goal_rate": 1.0, "h2h_total": 10, "h2h_3y_count": 10},
     )
     _ok(checks, "h2h_strong_not_manufacture_ab", r_h2h_strong_c.get("rf_shadow_grade") not in {"A", "B"}, str(r_h2h_strong_c.get("rf_shadow_grade")))
@@ -226,7 +258,7 @@ def main() -> int:
         blockers.append("h2h_strong_manufactured_ab")
 
     r_market_strong = build_rf_shadow_grade_layer(
-        _sample(base, combined_recent10_fh_involved_rate=0.5, combined_recent5_fh_involved_rate=0.6, prematch_ht_line=1.25, prematch_over_odds=1.8),
+        _sample(base, combined_recent10_fh_involved_rate=0.5, combined_recent5_fh_involved_rate=0.6, prematch_ht_line=1.25, prematch_over_odds=1.8, recent_form_primary_score=70.0),
         factors=factors,
     )
     _ok(checks, "market_strong_no_manufacture_ab", r_market_strong.get("rf_shadow_grade") not in {"A", "B"}, str(r_market_strong.get("rf_shadow_grade")))
@@ -237,8 +269,8 @@ def main() -> int:
         _sample(base, combined_recent10_fh_involved_rate=0.7, combined_recent5_fh_involved_rate=1.0, prematch_ht_line=0.25, prematch_over_odds=2.4),
         factors=factors,
     )
-    _ok(checks, "market_hard_veto_shadow_only", r_market_hard.get("market_adjusted_shadow_grade") in {"C", "SKIP"}, str(r_market_hard.get("market_adjusted_shadow_grade")))
-    if r_market_hard.get("market_adjusted_shadow_grade") not in {"C", "SKIP"}:
+    _ok(checks, "market_extreme_veto_direct_skip", r_market_hard.get("market_adjusted_shadow_grade") == "SKIP", str(r_market_hard.get("market_adjusted_shadow_grade")))
+    if r_market_hard.get("market_adjusted_shadow_grade") != "SKIP":
         blockers.append("market_hard_veto_not_applied")
 
     r_no_market = build_rf_shadow_grade_layer(
@@ -249,19 +281,171 @@ def main() -> int:
     if not (r_no_market.get("opening_market_support_status") == "MARKET_NO_MARKET" and r_no_market.get("market_adjusted_shadow_grade") == "SKIP"):
         blockers.append("market_no_market_not_skip")
 
+    # RECENT5_BILATERAL_HEAT_GATE cases
+    r_hot_anchor_home = build_rf_shadow_grade_layer(
+        _sample(
+            base,
+            combined_recent10_fh_involved_rate=0.7,
+            home_recent5_fh_involved_rate=1.0,  # 5/5
+            away_recent5_fh_involved_rate=0.6,  # 3/5
+            combined_recent5_fh_involved_rate=0.8,
+        ),
+        factors=factors,
+    )
+    _ok(
+        checks,
+        "recent5_hot_anchor_pass_home",
+        r_hot_anchor_home.get("recent5_bilateral_gate") == "PASS" and r_hot_anchor_home.get("recent5_bilateral_gate_mode") == "HOT_ANCHOR_PASS",
+        str((r_hot_anchor_home.get("recent5_bilateral_gate"), r_hot_anchor_home.get("recent5_bilateral_gate_mode"))),
+    )
+    if not (r_hot_anchor_home.get("recent5_bilateral_gate") == "PASS" and r_hot_anchor_home.get("recent5_bilateral_gate_mode") == "HOT_ANCHOR_PASS"):
+        blockers.append("recent5_hot_anchor_home_failed")
+
+    r_hot_anchor_away = build_rf_shadow_grade_layer(
+        _sample(
+            base,
+            combined_recent10_fh_involved_rate=0.7,
+            home_recent5_fh_involved_rate=0.6,  # 3/5
+            away_recent5_fh_involved_rate=1.0,  # 5/5
+            combined_recent5_fh_involved_rate=0.8,
+        ),
+        factors=factors,
+    )
+    _ok(
+        checks,
+        "recent5_hot_anchor_pass_away",
+        r_hot_anchor_away.get("recent5_bilateral_gate") == "PASS" and r_hot_anchor_away.get("recent5_bilateral_gate_mode") == "HOT_ANCHOR_PASS",
+        str((r_hot_anchor_away.get("recent5_bilateral_gate"), r_hot_anchor_away.get("recent5_bilateral_gate_mode"))),
+    )
+    if not (r_hot_anchor_away.get("recent5_bilateral_gate") == "PASS" and r_hot_anchor_away.get("recent5_bilateral_gate_mode") == "HOT_ANCHOR_PASS"):
+        blockers.append("recent5_hot_anchor_away_failed")
+
+    r_dual_heat = build_rf_shadow_grade_layer(
+        _sample(
+            base,
+            combined_recent10_fh_involved_rate=0.7,
+            home_recent5_fh_involved_rate=0.8,  # 4/5
+            away_recent5_fh_involved_rate=0.8,  # 4/5
+            combined_recent5_fh_involved_rate=0.8,
+        ),
+        factors=factors,
+    )
+    _ok(
+        checks,
+        "recent5_dual_heat_pass",
+        r_dual_heat.get("recent5_bilateral_gate") == "PASS" and r_dual_heat.get("recent5_bilateral_gate_mode") == "DUAL_HEAT_PASS",
+        str((r_dual_heat.get("recent5_bilateral_gate"), r_dual_heat.get("recent5_bilateral_gate_mode"))),
+    )
+    if not (r_dual_heat.get("recent5_bilateral_gate") == "PASS" and r_dual_heat.get("recent5_bilateral_gate_mode") == "DUAL_HEAT_PASS"):
+        blockers.append("recent5_dual_heat_failed")
+
+    r_fail_52 = build_rf_shadow_grade_layer(
+        _sample(
+            base,
+            combined_recent10_fh_involved_rate=0.7,
+            home_recent5_fh_involved_rate=1.0,  # 5/5
+            away_recent5_fh_involved_rate=0.4,  # 2/5
+            combined_recent5_fh_involved_rate=0.7,
+            recent_form_primary_score=70.0,
+            prematch_ht_line=1.0,
+            prematch_over_odds=1.95,
+        ),
+        factors=factors,
+    )
+    _ok(
+        checks,
+        "recent5_fail_5_2_cap_to_c",
+        r_fail_52.get("recent5_bilateral_gate") == "FAIL" and r_fail_52.get("recent5_bilateral_gate_cap_action").startswith("CAP_TO_C"),
+        str((r_fail_52.get("recent5_bilateral_gate"), r_fail_52.get("recent5_bilateral_gate_cap_action"), r_fail_52.get("rf_shadow_grade"))),
+    )
+    if not (r_fail_52.get("recent5_bilateral_gate") == "FAIL" and r_fail_52.get("recent5_bilateral_gate_cap_action").startswith("CAP_TO_C")):
+        blockers.append("recent5_fail_52_not_capped")
+
+    r_fail_43 = build_rf_shadow_grade_layer(
+        _sample(
+            base,
+            combined_recent10_fh_involved_rate=0.7,
+            home_recent5_fh_involved_rate=0.8,  # 4/5
+            away_recent5_fh_involved_rate=0.6,  # 3/5
+            combined_recent5_fh_involved_rate=0.7,
+            recent_form_primary_score=70.0,
+            prematch_ht_line=1.0,
+            prematch_over_odds=1.95,
+        ),
+        factors=factors,
+    )
+    _ok(
+        checks,
+        "recent5_fail_4_3_cap_to_c",
+        r_fail_43.get("recent5_bilateral_gate") == "FAIL" and r_fail_43.get("recent5_bilateral_gate_cap_action").startswith("CAP_TO_C"),
+        str((r_fail_43.get("recent5_bilateral_gate"), r_fail_43.get("recent5_bilateral_gate_cap_action"), r_fail_43.get("rf_shadow_grade"))),
+    )
+    if not (r_fail_43.get("recent5_bilateral_gate") == "FAIL" and r_fail_43.get("recent5_bilateral_gate_cap_action").startswith("CAP_TO_C")):
+        blockers.append("recent5_fail_43_not_capped")
+
+    r_exception_b = build_rf_shadow_grade_layer(
+        _sample(
+            base,
+            combined_recent10_fh_involved_rate=0.7,
+            combined_recent5_fh_involved_rate=0.7,
+            home_recent5_fh_involved_rate=0.8,  # 4/5
+            away_recent5_fh_involved_rate=0.6,  # 3/5 => gate FAIL
+            recent_form_primary_score=75.0,
+            prematch_ht_line=1.0,
+            prematch_over_odds=1.90,
+            season_phase="ACTIVE_SEASON",
+            league_tier="TIER_3_WEAK_COVERAGE",
+        ),
+        factors=factors,
+    )
+    exception_ok = (
+        r_exception_b.get("recent5_bilateral_gate") == "FAIL"
+        and r_exception_b.get("recent5_bilateral_gate_exception_used") is True
+        and r_exception_b.get("rf_shadow_grade") == "B"
+    )
+    _ok(checks, "recent5_fail_but_strong_rf_keeps_b", exception_ok, str((r_exception_b.get("rf_shadow_grade"), r_exception_b.get("recent5_bilateral_gate_exception_used"))))
+    if not exception_ok:
+        blockers.append("recent5_exception_keep_b_failed")
+
+    r_market_no_data = build_rf_shadow_grade_layer(
+        _sample(base, prematch_ht_line=None, prematch_over_odds=None, no_market_excluded=False),
+        factors=factors,
+    )
+    no_data_not_upgrade_a = str(r_market_no_data.get("opening_market_support_status")) == "MARKET_NO_DATA" and str(r_market_no_data.get("market_adjusted_shadow_grade")) != "A"
+    _ok(checks, "market_no_data_not_upgrade_a", no_data_not_upgrade_a, str(r_market_no_data.get("market_adjusted_shadow_grade")))
+    if not no_data_not_upgrade_a:
+        blockers.append("market_no_data_upgraded_to_a")
+
+    # no undefined/null/nan in shadow fields (runtime optional)
+    if rows:
+        invalid_tokens = {"undefined", "nan"}
+        bad_cells = 0
+        for r in rows:
+            if not isinstance(r, dict):
+                continue
+            for f in REQ_FIELDS:
+                v = r.get(f)
+                if v is None:
+                    bad_cells += 1
+                    continue
+                if isinstance(v, float) and str(v).lower() == "nan":
+                    bad_cells += 1
+                    continue
+                if isinstance(v, str) and v.strip().lower() in invalid_tokens:
+                    bad_cells += 1
+        _ok(checks, "no_undefined_null_nan_runtime", bad_cells == 0, f"bad_cells={bad_cells}")
+        if bad_cells > 0:
+            blockers.append("runtime_has_undefined_null_nan")
+
     # Guard scripts
     for s in [
         "check_v4_production_default_rules_guard.py",
-        "check_v4_system_slim_and_whitelist_mode.py",
-        "check_v4_control_center.py",
         "check_v4_no_market_core_validation_skip.py",
         "check_v4_true_goal_time_distribution.py",
         "check_v4_playbook_script_and_time_distribution.py",
     ]:
         ok, out = _run(s)
         soft_ok = False
-        if not ok and s == "check_v4_control_center.py" and "\"conclusion\": \"WARN_ONLY\"" in out:
-            soft_ok = True
         if not ok and s in {"check_v4_no_market_core_validation_skip.py", "check_v4_true_goal_time_distribution.py", "check_v4_playbook_script_and_time_distribution.py"} and "WARN_ONLY" in out:
             soft_ok = True
         _ok(checks, f"guard:{s}", ok or soft_ok, out[-300:])

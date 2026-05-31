@@ -909,6 +909,56 @@ def build_rf_shadow_grade_layer(record: dict, factors: dict | None = None) -> di
     else:
         rf_shadow_grade = "C"
 
+    # RECENT5_BILATERAL_HEAT_GATE
+    # recent10 >= 7/10 means candidate pool entry only; B stability requires bilateral near-term heat.
+    home_recent5_pass_count = int(h5_cnt or 0)
+    away_recent5_pass_count = int(a5_cnt or 0)
+    recent5_hot_anchor_team = "NONE"
+    recent5_other_side_count = 0
+    recent5_dual_heat_pass = False
+    recent5_bilateral_gate = "UNKNOWN"
+    recent5_bilateral_gate_mode = "NOT_AVAILABLE"
+    recent5_bilateral_gate_reason = "NOT_AVAILABLE"
+    recent5_bilateral_gate_cap_action = "NONE"
+    recent5_bilateral_gate_exception_used = False
+
+    if c10_cnt is not None and c10_cnt >= 7:
+        mode_a_home = home_recent5_pass_count == 5 and away_recent5_pass_count >= 3
+        mode_a_away = away_recent5_pass_count == 5 and home_recent5_pass_count >= 3
+        mode_b = home_recent5_pass_count >= 4 and away_recent5_pass_count >= 4
+        recent5_dual_heat_pass = bool(mode_b)
+        if mode_a_home or mode_a_away:
+            recent5_bilateral_gate = "PASS"
+            recent5_bilateral_gate_mode = "HOT_ANCHOR_PASS"
+            if mode_a_home:
+                recent5_hot_anchor_team = "HOME"
+                recent5_other_side_count = away_recent5_pass_count
+            else:
+                recent5_hot_anchor_team = "AWAY"
+                recent5_other_side_count = home_recent5_pass_count
+            recent5_bilateral_gate_reason = (
+                f"RECENT5_BILATERAL_HEAT_PASS:{recent5_bilateral_gate_mode}:"
+                f"home={home_recent5_pass_count},away={away_recent5_pass_count}"
+            )
+        elif mode_b:
+            recent5_bilateral_gate = "PASS"
+            recent5_bilateral_gate_mode = "DUAL_HEAT_PASS"
+            recent5_bilateral_gate_reason = (
+                f"RECENT5_BILATERAL_HEAT_PASS:{recent5_bilateral_gate_mode}:"
+                f"home={home_recent5_pass_count},away={away_recent5_pass_count}"
+            )
+        else:
+            recent5_bilateral_gate = "FAIL"
+            recent5_bilateral_gate_mode = "RECENT5_BILATERAL_HEAT_FAIL"
+            recent5_bilateral_gate_reason = (
+                f"RECENT5_BILATERAL_HEAT_FAIL:home={home_recent5_pass_count},away={away_recent5_pass_count}"
+            )
+            recent5_bilateral_gate_cap_action = "CAP_TO_C"
+    else:
+        recent5_bilateral_gate = "UNKNOWN"
+        recent5_bilateral_gate_mode = "NOT_APPLICABLE"
+        recent5_bilateral_gate_reason = "RECENT10_BELOW_GATE_OR_MISSING"
+
     # Team balance
     home_lvl = _side_level(h10_cnt or 0, h5_cnt or 0)
     away_lvl = _side_level(a10_cnt or 0, a5_cnt or 0)
@@ -972,7 +1022,18 @@ def build_rf_shadow_grade_layer(record: dict, factors: dict | None = None) -> di
     if balance_adjusted_grade in {"A", "B", "C"}:
         if rf_balance_adjustment == "DOWNGRADE_TO_B":
             # Team-balance rule: HOT_DRIVER + ACCEPTABLE should settle at B (not A, not SKIP).
-            balance_adjusted_grade = "B"
+            if balance_adjusted_grade == "A":
+                balance_adjusted_grade = "B"
+            # Keep B floor for strong-side hot anchor routes:
+            # home/away recent5 as 5/5 + >=3/5 should not be trapped at C.
+            elif (
+                balance_adjusted_grade == "C"
+                and rf_balance_status == "HOT_DRIVER_ACCEPTABLE"
+                and (c10_cnt or 0) >= 6
+                and max(home_recent5_pass_count, away_recent5_pass_count) >= 5
+                and min(home_recent5_pass_count, away_recent5_pass_count) >= 3
+            ):
+                balance_adjusted_grade = "B"
         elif rf_balance_adjustment == "DOWNGRADE_TO_C":
             if balance_adjusted_grade == "A":
                 balance_adjusted_grade = "C"
@@ -980,6 +1041,10 @@ def build_rf_shadow_grade_layer(record: dict, factors: dict | None = None) -> di
                 balance_adjusted_grade = "C"
         elif rf_balance_adjustment in {"SKIP_OR_C", "REQUIRE_DOMINANT_FAVORITE_CONFIRMATION"}:
             balance_adjusted_grade = "C" if (c5_cnt or 0) >= 3 else "SKIP"
+
+    # Apply bilateral heat cap after RF score/balance.
+    if recent5_bilateral_gate == "FAIL" and balance_adjusted_grade in {"A", "B"}:
+        balance_adjusted_grade = "C"
 
     # RF-SA-4: season-aware integration (shadow-only).
     # This block may adjust shadow grade, but MUST NOT touch official grade chain.
@@ -1136,6 +1201,32 @@ def build_rf_shadow_grade_layer(record: dict, factors: dict | None = None) -> di
     if rf_shadow_score is None and c10_rate is not None and c5_rate is not None:
         rf_shadow_score = round((c10_rate * 0.7 + c5_rate * 0.3) * 100, 1)
 
+    # B-floor exception for bilateral heat gate fail (shadow-only, never upgrades to A).
+    if (
+        recent5_bilateral_gate == "FAIL"
+        and season_aware_shadow_grade_after == "C"
+        and (rf_shadow_score or 0.0) >= 73.0
+        and c10_cnt is not None
+        and c10_cnt >= 7
+        and (
+            rf_balance_driver_level in {"HOT_DRIVER", "STRONG_DRIVER"}
+            or rf_balance_status in {"STRONG_DRIVER_ACCEPTABLE", "HOT_DRIVER_ACCEPTABLE"}
+        )
+        and market_status in {"MARKET_STRONG_CONFIRM", "MARKET_WEAK_CONFIRM", "MARKET_CONFIRM"}
+        and season_phase == "ACTIVE_SEASON"
+        and league_tier != "TIER_4_NON_FORMAL"
+        and market_status != "MARKET_HARD_VETO"
+        and season_phase != "POST_OFFSEASON_RETURN"
+        and not baseline_only_flag
+        and market_status != "MARKET_NO_DATA"
+    ):
+        season_aware_shadow_grade_after = "B"
+        recent5_bilateral_gate_exception_used = True
+        recent5_bilateral_gate_cap_action = "CAP_TO_C_BUT_EXCEPTION_KEEP_B"
+        recent5_bilateral_gate_reason = (
+            "RECENT5_BILATERAL_GATE_FAIL_BUT_RF_STRONG_CONFIRMED_B_FLOOR"
+        )
+
     # Confidence pre-market: H2H bonus-only, no H2H downgrade
     confidence = int(round(rf_shadow_score or 50.0))
     if h2h_recent5_support_status == "H2H_STRONG_BONUS":
@@ -1198,11 +1289,59 @@ def build_rf_shadow_grade_layer(record: dict, factors: dict | None = None) -> di
         f"H2H={h2h_recent5_support_status}; Market={market_status}"
     )
 
+    if missing_core:
+        rf_shadow_reason_code = "RF_DATA_MISSING"
+    elif low_sample:
+        rf_shadow_reason_code = "RF_LOW_SAMPLE"
+    elif season_aware_shadow_grade_after == "SKIP":
+        rf_shadow_reason_code = "RF_SKIP_GATE"
+    elif season_aware_shadow_grade_after == "A":
+        rf_shadow_reason_code = "RF_A_SIGNAL"
+    elif season_aware_shadow_grade_after == "B":
+        rf_shadow_reason_code = "RF_B_SIGNAL"
+    else:
+        rf_shadow_reason_code = "RF_C_OBSERVE"
+
+    rf_primary_signal_level = season_aware_shadow_grade_after
+    rf_recent10_signal = rf_recent10_gate_status
+    rf_recent5_signal = rf_recent5_grade_status
+    rf_freshness_signal = freshness_status or "UNKNOWN"
+    rf_balance_signal = rf_balance_status
+    rf_collection_stage_used = str(record.get("collection_stage") or "UNKNOWN")
+
+    events_required = bool(record.get("events_required"))
+    events_collected = bool(record.get("events_collected"))
+    if events_collected:
+        time_bin_shadow_status = "EVENTS_ENRICHED"
+    elif events_required:
+        time_bin_shadow_status = "EVENTS_REQUIRED_PENDING"
+    else:
+        time_bin_shadow_status = "EVENTS_SKIPPED"
+    playbook_script = str(factors.get("playbook_script") or record.get("playbook_script") or "NOT_AVAILABLE")
+
+    cpl_required = bool(record.get("cpl_required"))
+    cpl_collected = bool(record.get("cpl_collected"))
+    cpl_skip_reason = str(record.get("cpl_skipped_reason") or "")
+    if cpl_collected:
+        cpl_shadow_status = "CPL_COLLECTED"
+    elif cpl_required:
+        cpl_shadow_status = "CPL_PLACEHOLDER_REQUIRED"
+    else:
+        cpl_shadow_status = "CPL_SKIPPED"
+    cpl_shadow_reason = cpl_skip_reason or ("PLACEHOLDER_ONLY" if cpl_required else "NOT_REQUIRED")
+
     return {
         "rf_shadow_grade": season_aware_shadow_grade_after,
         "rf_shadow_score": rf_shadow_score if rf_shadow_score is not None else "DATA_MISSING",
         "rf_shadow_route": rf_shadow_route,
         "rf_shadow_reason": rf_shadow_reason,
+        "rf_shadow_reason_code": rf_shadow_reason_code,
+        "rf_primary_signal_level": rf_primary_signal_level,
+        "rf_recent10_signal": rf_recent10_signal,
+        "rf_recent5_signal": rf_recent5_signal,
+        "rf_freshness_signal": rf_freshness_signal,
+        "rf_balance_signal": rf_balance_signal,
+        "rf_collection_stage_used": rf_collection_stage_used,
         "rf_shadow_confidence": rf_shadow_confidence,
         "rf_entry_rule": rf_entry_rule,
         "rf_recent10_gate_status": rf_recent10_gate_status,
@@ -1215,11 +1354,23 @@ def build_rf_shadow_grade_layer(record: dict, factors: dict | None = None) -> di
         "rf_balance_weak_side_status": rf_balance_weak_side_status,
         "rf_balance_adjustment": rf_balance_adjustment,
         "rf_balance_reason": rf_balance_reason,
+        "recent5_bilateral_gate": recent5_bilateral_gate,
+        "recent5_bilateral_gate_mode": recent5_bilateral_gate_mode,
+        "recent5_bilateral_gate_reason": recent5_bilateral_gate_reason,
+        "home_recent5_pass_count": home_recent5_pass_count,
+        "away_recent5_pass_count": away_recent5_pass_count,
+        "recent5_hot_anchor_team": recent5_hot_anchor_team,
+        "recent5_other_side_count": recent5_other_side_count,
+        "recent5_dual_heat_pass": recent5_dual_heat_pass,
+        "recent5_bilateral_gate_cap_action": recent5_bilateral_gate_cap_action,
+        "recent5_bilateral_gate_exception_used": recent5_bilateral_gate_exception_used,
         "h2h_recent5_fh_involved_count": h2h_recent5_fh_involved_count,
         "h2h_recent5_sample_count": h2h_recent5_sample_count,
         "h2h_recent5_support_status": h2h_recent5_support_status,
         "h2h_recent5_bonus_level": h2h_recent5_bonus_level,
         "h2h_recent5_bonus_reason": h2h_recent5_bonus_reason,
+        "h2h_bonus_status": h2h_recent5_support_status,
+        "h2h_bonus_reason": h2h_recent5_bonus_reason,
         "h2h_assist_status": h2h_assist_status,
         "h2h_assist_strength": h2h_assist_strength,
         "h2h_assist_reason": h2h_recent5_bonus_reason,
@@ -1235,6 +1386,14 @@ def build_rf_shadow_grade_layer(record: dict, factors: dict | None = None) -> di
         "dryrun_action": market_policy["dryrun_action"],
         "market_adjusted_shadow_grade": market_adjusted_shadow_grade,
         "market_adjustment_reason": market_adjustment_reason,
+        "market_adjusted_shadow_reason": market_adjustment_reason,
+        "market_policy_action": market_policy["opening_market_action"],
+        "market_veto_status": market_policy["market_veto_severity"],
+        "market_risk_flag": market_status,
+        "time_bin_shadow_status": time_bin_shadow_status,
+        "playbook_script": playbook_script,
+        "cpl_shadow_status": cpl_shadow_status,
+        "cpl_shadow_reason": cpl_shadow_reason,
         "season_aware_shadow_grade_before": season_aware_shadow_grade_before,
         "season_aware_shadow_grade_after": season_aware_shadow_grade_after,
         "season_aware_shadow_applied": season_aware_shadow_applied,
