@@ -392,19 +392,36 @@ def build_season_aware_recent_form_shadow_fields(
     a5_days = _estimate_recent5_window(a10_days, a10_n, a5_n)
     max10_days = max(h10_days, a10_days)
 
-    current_season_home = _to_int(record.get("current_season_match_count_home"), 0)
-    current_season_away = _to_int(record.get("current_season_match_count_away"), 0)
+    current_season_home_raw = _to_int(record.get("current_season_match_count_home"), 0)
+    current_season_away_raw = _to_int(record.get("current_season_match_count_away"), 0)
     days_since_home = _to_int(record.get("days_since_last_official_match_home"), 999)
     days_since_away = _to_int(record.get("days_since_last_official_match_away"), 999)
     max_days_since = max(days_since_home, days_since_away)
     min_days_since = min(days_since_home, days_since_away)
+    # Conservative fallback: do not inflate current-season signal with broad historical windows.
+    current_season_home = current_season_home_raw
+    current_season_away = current_season_away_raw
     current_count_reason = "from_record"
     if current_season_home <= 0:
-        current_season_home = min(10, max(0, h60))
-        current_count_reason = "fallback_recent60_home"
+        if days_since_home <= 90:
+            current_season_home = min(5, max(0, h60))
+            current_count_reason = "fallback_recent60_home_capped5"
+        else:
+            current_season_home = 0
+            current_count_reason = "fallback_zero_home_long_gap"
     if current_season_away <= 0:
-        current_season_away = min(10, max(0, a60))
-        current_count_reason = "fallback_recent60_away" if current_count_reason == "from_record" else "fallback_recent60_both"
+        if days_since_away <= 90:
+            current_season_away = min(5, max(0, a60))
+            if current_count_reason == "from_record":
+                current_count_reason = "fallback_recent60_away_capped5"
+            else:
+                current_count_reason = "fallback_recent60_both_capped5"
+        else:
+            current_season_away = 0
+            if current_count_reason == "from_record":
+                current_count_reason = "fallback_zero_away_long_gap"
+            else:
+                current_count_reason = "fallback_mixed_with_long_gap"
     current_season_min = min(x for x in (current_season_home, current_season_away) if x > 0) if (
         current_season_home > 0 or current_season_away > 0
     ) else 0
@@ -448,7 +465,7 @@ def build_season_aware_recent_form_shadow_fields(
     if inferred_phase == "ACTIVE_SEASON":
         rf_window_policy = "D60_PRIMARY"
     elif inferred_phase == "SHORT_BREAK":
-        rf_window_policy = "D90_SHORT_BREAK"
+        rf_window_policy = "D90_SHORT_BREAK_FALLBACK"
     elif inferred_phase in {"POST_OFFSEASON_RETURN", "OFFSEASON"}:
         rf_window_policy = "BASELINE_ONLY"
     elif inferred_phase == "EARLY_SEASON":
@@ -456,7 +473,36 @@ def build_season_aware_recent_form_shadow_fields(
     else:
         rf_window_policy = "UNKNOWN_POLICY"
 
-    min_sample = min(h10_n, a10_n)
+    def _scaled_days(total_days: int, sample_count: int, used_count: int) -> int:
+        if total_days <= 0 or sample_count <= 0 or used_count <= 0:
+            return 0
+        return max(1, int(round(total_days * (used_count / float(max(sample_count, 1))))))
+
+    if inferred_phase == "ACTIVE_SEASON":
+        used10_home = min(h10_n, h60)
+        used10_away = min(a10_n, a60)
+    elif inferred_phase == "SHORT_BREAK":
+        used10_home = min(h10_n, h90)
+        used10_away = min(a10_n, a90)
+    elif inferred_phase == "EARLY_SEASON":
+        # Early season: use current-season constrained sample, never pretend mature sample volume.
+        used10_home = min(h10_n, max(0, current_season_home))
+        used10_away = min(a10_n, max(0, current_season_away))
+    elif inferred_phase in {"POST_OFFSEASON_RETURN", "OFFSEASON"}:
+        used10_home = min(h10_n, 2)
+        used10_away = min(a10_n, 2)
+    else:  # UNKNOWN
+        used10_home = min(h10_n, h60)
+        used10_away = min(a10_n, a60)
+
+    used5_home = min(5, used10_home)
+    used5_away = min(5, used10_away)
+    used10_days_home = _scaled_days(h10_days, h10_n, used10_home)
+    used10_days_away = _scaled_days(a10_days, a10_n, used10_away)
+    used5_days_home = _scaled_days(h10_days, h10_n, used5_home)
+    used5_days_away = _scaled_days(a10_days, a10_n, used5_away)
+
+    min_sample = min(used10_home, used10_away)
     if min_sample >= 8:
         rf_sample_status = "SUFFICIENT"
     elif min_sample >= 6:
@@ -468,9 +514,12 @@ def build_season_aware_recent_form_shadow_fields(
     else:
         rf_sample_status = "NO_SAMPLE"
 
-    freshness = str(record.get("recent_freshness_status") or "UNKNOWN").upper()
-    if freshness not in {"FRESH", "NORMAL", "STALE", "EXPIRED", "UNKNOWN"}:
-        freshness = "UNKNOWN"
+    if inferred_phase in {"POST_OFFSEASON_RETURN", "OFFSEASON"}:
+        freshness = "EXPIRED"
+    else:
+        freshness = str(record.get("recent_freshness_status") or "UNKNOWN").upper()
+        if freshness not in {"FRESH", "NORMAL", "STALE", "EXPIRED", "UNKNOWN"}:
+            freshness = "UNKNOWN"
 
     rf_early_season_penalty = inferred_phase == "EARLY_SEASON"
     rf_short_break_penalty = inferred_phase == "SHORT_BREAK"
@@ -504,6 +553,8 @@ def build_season_aware_recent_form_shadow_fields(
         f"tier={tier}",
         f"tier_reason={tier_reason}",
         f"window_policy={rf_window_policy}",
+        f"used10={used10_home}/{used10_away}",
+        f"used5={used5_home}/{used5_away}",
         f"sample={rf_sample_status}",
         f"freshness={freshness}",
     ]
@@ -522,14 +573,14 @@ def build_season_aware_recent_form_shadow_fields(
         "recent60_match_count_away": a60,
         "recent90_match_count_home": h90,
         "recent90_match_count_away": a90,
-        "recent10_used_count_home": min(h10_n, 10),
-        "recent10_used_count_away": min(a10_n, 10),
-        "recent5_used_count_home": h5_n,
-        "recent5_used_count_away": a5_n,
-        "recent10_window_days_home": h10_days,
-        "recent10_window_days_away": a10_days,
-        "recent5_window_days_home": h5_days,
-        "recent5_window_days_away": a5_days,
+        "recent10_used_count_home": used10_home,
+        "recent10_used_count_away": used10_away,
+        "recent5_used_count_home": used5_home,
+        "recent5_used_count_away": used5_away,
+        "recent10_window_days_home": used10_days_home,
+        "recent10_window_days_away": used10_days_away,
+        "recent5_window_days_home": used5_days_home,
+        "recent5_window_days_away": used5_days_away,
         "current_season_match_count_home": current_season_home,
         "current_season_match_count_away": current_season_away,
         "days_since_last_official_match_home": days_since_home,
