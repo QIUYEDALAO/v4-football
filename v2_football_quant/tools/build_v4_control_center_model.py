@@ -470,14 +470,20 @@ def _merge_rf_shadow_fields(candidate_row: dict, scout_row: dict) -> dict:
     for k in COLLECTION_PLAN_TEXT_FIELDS:
         out[k] = _rf_clean(candidate_row.get(k, scout_row.get(k)), "")
     for k in COLLECTION_PLAN_BOOL_FIELDS:
-        out[k] = bool(candidate_row.get(k, scout_row.get(k), False))
+        raw = candidate_row.get(k)
+        if raw is None:
+            raw = scout_row.get(k, False)
+        out[k] = bool(raw)
     for k in COLLECTION_PLAN_NUM_FIELDS:
         out[k] = _rf_clean(candidate_row.get(k, scout_row.get(k)), 0)
     for k in COLLECTION_LAZY_TEXT_FIELDS:
         default_text = "official_legacy" if k == "collection_mode" else ""
         out[k] = _rf_clean(candidate_row.get(k, scout_row.get(k)), default_text)
     for k in COLLECTION_LAZY_BOOL_FIELDS:
-        out[k] = bool(candidate_row.get(k, scout_row.get(k), False))
+        raw = candidate_row.get(k)
+        if raw is None:
+            raw = scout_row.get(k, False)
+        out[k] = bool(raw)
     for k in COLLECTION_LAZY_NUM_FIELDS:
         out[k] = _rf_clean(candidate_row.get(k, scout_row.get(k)), 0)
     for k in COLLECTION_LAZY_EXTRA_TEXT_FIELDS:
@@ -485,7 +491,10 @@ def _merge_rf_shadow_fields(candidate_row: dict, scout_row: dict) -> dict:
     for k in RF_SHADOW_GRADE_TEXT_FIELDS:
         out[k] = _rf_clean(candidate_row.get(k, scout_row.get(k)), "数据缺失")
     for k in RF_SHADOW_GRADE_BOOL_FIELDS:
-        out[k] = bool(candidate_row.get(k, scout_row.get(k), False))
+        raw = candidate_row.get(k)
+        if raw is None:
+            raw = scout_row.get(k, False)
+        out[k] = bool(raw)
     for k in RF_SHADOW_GRADE_NUM_FIELDS:
         out[k] = _rf_clean(candidate_row.get(k, scout_row.get(k)), "DATA_MISSING" if k in {"rf_shadow_score", "rf_shadow_confidence"} else 0)
     for k in SEASON_AWARE_TEXT_FIELDS:
@@ -499,7 +508,10 @@ def _merge_rf_shadow_fields(candidate_row: dict, scout_row: dict) -> dict:
             default_text = ""
         out[k] = _rf_clean(candidate_row.get(k, scout_row.get(k)), default_text)
     for k in SEASON_AWARE_BOOL_FIELDS:
-        out[k] = bool(candidate_row.get(k, scout_row.get(k), False))
+        raw = candidate_row.get(k)
+        if raw is None:
+            raw = scout_row.get(k, False)
+        out[k] = bool(raw)
     for k in SEASON_AWARE_NUM_FIELDS:
         out[k] = _rf_clean(candidate_row.get(k, scout_row.get(k)), 0)
     return out
