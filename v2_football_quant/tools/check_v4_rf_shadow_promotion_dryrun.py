@@ -100,7 +100,7 @@ def main() -> int:
             args.date,
             "--sensitivity",
             "--rescue-thresholds",
-            "77,75,73.5",
+            "77,73.5",
         ], capture_output=True, text=True)
         _ok(checks, "runner_sensitivity_exec_ok", sp.returncode == 0, (sp.stdout + sp.stderr)[-400:])
         if sp.returncode != 0:
@@ -169,8 +169,8 @@ def main() -> int:
         blockers.append("invalid_official_artifact_status")
 
     rescue_threshold = float(report.get("rescue_threshold") or 0.0)
-    _ok(checks, "default_rescue_threshold_is_77", abs(rescue_threshold - 77.0) < 1e-9, str(rescue_threshold))
-    if abs(rescue_threshold - 77.0) >= 1e-9:
+    _ok(checks, "default_rescue_threshold_is_73_5", abs(rescue_threshold - 73.5) < 1e-9, str(rescue_threshold))
+    if abs(rescue_threshold - 73.5) >= 1e-9:
         blockers.append("default_rescue_threshold_changed")
 
     if off_status == "MISSING":
@@ -277,8 +277,8 @@ def main() -> int:
             and int((off_dist or {}).get("C", 0)) == 0
             and int((off_dist or {}).get("SKIP", 0)) == 55
             and int(shadow_after.get("A", 0)) == 1
-            and int(shadow_after.get("B", 0)) == 32
-            and int(shadow_after.get("C", 0)) == 39
+            and int(shadow_after.get("B", 0)) == 35
+            and int(shadow_after.get("C", 0)) == 36
             and int(shadow_after.get("SKIP", 0)) == 20
         )
         _ok(checks, "default_replay_distribution_unchanged", default_dist_ok, f"official={off_dist},shadow={shadow_after}")
@@ -322,9 +322,9 @@ def main() -> int:
     naming_status = str(safety_market.get("market_rescue_naming_status") or "")
     safety_status = str(safety_market.get("market_rescue_safety_status") or "")
 
-    _ok(checks, "market_assisted_rescue_to_B_count_expected_5", assisted_cnt == 5, str(assisted_cnt))
-    if assisted_cnt != 5:
-        blockers.append("market_assisted_rescue_count_not_5")
+    _ok(checks, "market_assisted_rescue_to_B_count_expected_8", assisted_cnt == 8, str(assisted_cnt))
+    if assisted_cnt != 8:
+        blockers.append("market_assisted_rescue_count_not_8")
 
     _ok(checks, "market_alone_manufactured_AB_count_zero", alone_cnt == 0, str(alone_cnt))
     if alone_cnt != 0:
@@ -363,7 +363,7 @@ def main() -> int:
         blockers.append("missing_sensitivity_threshold_results")
         threshold_results = {}
 
-    required_tags = ["77", "75", "73.5"]
+    required_tags = ["77", "73.5"]
     for tag in required_tags:
         present = tag in threshold_results
         _ok(checks, f"sensitivity_has_threshold_{tag}", present)
@@ -388,6 +388,18 @@ def main() -> int:
         _ok(checks, f"sensitivity_{tag}_A_not_expanded", a_cnt <= 1, str(a_cnt))
         if a_cnt > 1:
             blockers.append(f"sensitivity_{tag}_a_expanded:{a_cnt}")
+
+        assisted_sens = int(summary.get("market_assisted_rescue_to_B_count") or 0)
+        expected_assisted = 5 if tag == "77" else 8 if tag == "73.5" else None
+        if expected_assisted is not None:
+            _ok(
+                checks,
+                f"sensitivity_{tag}_market_assisted_rescue_to_B_count_expected_{expected_assisted}",
+                assisted_sens == expected_assisted,
+                str(assisted_sens),
+            )
+            if assisted_sens != expected_assisted:
+                blockers.append(f"sensitivity_{tag}_market_assisted_rescue_to_B_count_unexpected:{assisted_sens}")
 
     if "73.5" in threshold_results:
         new_rescues = threshold_results["73.5"].get("new_rescues_vs_default", [])

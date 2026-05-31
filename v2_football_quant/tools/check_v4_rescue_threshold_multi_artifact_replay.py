@@ -84,8 +84,8 @@ def main() -> int:
     if abs(float(report.get("candidate_threshold") or 0) - 73.5) >= 1e-9:
         blockers.append("candidate_threshold_invalid")
 
-    _ok(checks, "default_threshold_unchanged_77", abs(float(report.get("default_rescue_threshold") or 0) - 77.0) < 1e-9, str(report.get("default_rescue_threshold")))
-    if abs(float(report.get("default_rescue_threshold") or 0) - 77.0) >= 1e-9:
+    _ok(checks, "default_threshold_unchanged_73_5", abs(float(report.get("default_rescue_threshold") or 0) - 73.5) < 1e-9, str(report.get("default_rescue_threshold")))
+    if abs(float(report.get("default_rescue_threshold") or 0) - 73.5) >= 1e-9:
         blockers.append("default_threshold_changed")
 
     total = int(report.get("artifact_count_total") or 0)

@@ -24,6 +24,8 @@ STATUS_DIR = ROOT / "data" / "runtime" / "status"
 OUT_DIR = ROOT / "data" / "runtime" / "acceptance"
 
 GRADE_RANK = {"A": 4, "B": 3, "C": 2, "SKIP": 1, "": 0, "NONE": 0}
+DEFAULT_RESCUE_THRESHOLD = 73.5
+BASELINE_RESCUE_THRESHOLD = 77.0
 
 
 def _norm_grade(v: Any) -> str:
@@ -536,7 +538,7 @@ def build_report(
     source_artifact: str | None,
     official_artifact: str | None,
     strict_field_coverage: bool,
-    rescue_threshold: float = 77.0,
+    rescue_threshold: float = DEFAULT_RESCUE_THRESHOLD,
 ) -> dict[str, Any]:
     scout, scout_path = _load_scout(date, source_artifact)
     official = _resolve_official_artifact(date, official_artifact)
@@ -1092,11 +1094,11 @@ def build_sensitivity_report(
     for t in thresholds:
         if t not in uniq_thresholds:
             uniq_thresholds.append(t)
-    if 77.0 not in uniq_thresholds:
-        uniq_thresholds.insert(0, 77.0)
+    if BASELINE_RESCUE_THRESHOLD not in uniq_thresholds:
+        uniq_thresholds.insert(0, BASELINE_RESCUE_THRESHOLD)
 
     threshold_results: dict[str, dict[str, Any]] = {}
-    default_tag = _threshold_tag(77.0)
+    default_tag = _threshold_tag(BASELINE_RESCUE_THRESHOLD)
 
     for t in uniq_thresholds:
         tag = _threshold_tag(t)
@@ -1151,7 +1153,7 @@ def build_sensitivity_report(
         "generated_at": datetime.now().isoformat(),
         "scan_date": date,
         "strict_field_coverage": bool(strict_field_coverage),
-        "default_rescue_threshold": 77.0,
+        "default_rescue_threshold": DEFAULT_RESCUE_THRESHOLD,
         "sensitivity_thresholds": [float(t) for t in uniq_thresholds],
         "threshold_results": threshold_results,
         "disclaimer": "SENSITIVITY REPLAY ONLY. No official/pending/QQ mutation.",
@@ -1379,7 +1381,7 @@ def build_multi_artifact_report(
         "min_fixtures": int(min_fixtures),
         "baseline_threshold": float(baseline_threshold),
         "candidate_threshold": float(candidate_threshold),
-        "default_rescue_threshold": 77.0,
+        "default_rescue_threshold": DEFAULT_RESCUE_THRESHOLD,
         "artifact_count_total": len(artifacts),
         "artifact_count_sufficient": len(sufficient_artifacts),
         "artifact_count_sample_too_small": len(sample_too_small_artifacts),
@@ -1507,13 +1509,13 @@ def main() -> int:
     ap.add_argument("--source-artifact", default="", help="optional scout artifact path")
     ap.add_argument("--official-artifact", default="", help="optional official candidate_view artifact path")
     ap.add_argument("--strict-field-coverage", action="store_true", help="block baseline-ready when coverage incomplete")
-    ap.add_argument("--rescue-threshold", type=float, default=77.0, help="single rescue threshold for shadow replay (default=77)")
-    ap.add_argument("--rescue-thresholds", default="77,75,73.5", help="comma-separated thresholds for --sensitivity mode")
+    ap.add_argument("--rescue-threshold", type=float, default=DEFAULT_RESCUE_THRESHOLD, help=f"single rescue threshold for shadow replay (default={DEFAULT_RESCUE_THRESHOLD})")
+    ap.add_argument("--rescue-thresholds", default="77,73.5", help="comma-separated thresholds for --sensitivity mode")
     ap.add_argument("--sensitivity", action="store_true", help="run shadow-only multi-threshold sensitivity replay")
     ap.add_argument("--multi-artifact", action="store_true", help="run multi-artifact replay over local scout artifacts")
     ap.add_argument("--min-fixtures", type=int, default=30, help="minimum fixtures to count artifact as sufficient in multi-artifact mode")
     ap.add_argument("--artifact-glob", default=str(SCOUT_DIR / "scout_v4_*.json"), help="glob for scout artifacts in multi-artifact mode")
-    ap.add_argument("--baseline-threshold", type=float, default=77.0, help="baseline threshold for multi-artifact compare")
+    ap.add_argument("--baseline-threshold", type=float, default=BASELINE_RESCUE_THRESHOLD, help="baseline threshold for multi-artifact compare")
     ap.add_argument("--candidate-threshold", type=float, default=73.5, help="candidate threshold for multi-artifact compare")
     args = ap.parse_args()
 
@@ -1539,7 +1541,7 @@ def main() -> int:
             source_artifact=args.source_artifact.strip() or None,
             official_artifact=args.official_artifact.strip() or None,
             strict_field_coverage=bool(args.strict_field_coverage),
-            thresholds=thresholds or [77.0, 75.0, 73.5],
+            thresholds=thresholds or [BASELINE_RESCUE_THRESHOLD, DEFAULT_RESCUE_THRESHOLD],
         )
         jp, mp = write_outputs(report, date, sensitivity=True)
     else:
