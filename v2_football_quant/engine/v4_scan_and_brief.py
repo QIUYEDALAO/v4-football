@@ -120,6 +120,11 @@ RF_SHADOW_GRADE_TEXT_FIELDS = [
     "opening_market_veto_level",
     "opening_market_reason",
     "opening_market_data_status",
+    "opening_market_bookmaker_used",
+    "opening_market_market_name",
+    "opening_market_bet_name",
+    "opening_market_source",
+    "no_ht_ou_reason",
     "market_adjusted_shadow_grade",
     "market_adjustment_reason",
 ]
@@ -133,6 +138,7 @@ RF_SHADOW_GRADE_NUM_FIELDS = [
     "rf_shadow_confidence",
     "h2h_recent5_fh_involved_count",
     "h2h_recent5_sample_count",
+    "opening_market_bookmaker_priority",
 ]
 
 

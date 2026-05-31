@@ -41,6 +41,7 @@ from engine.rf_shadow_fields import (
     build_recent_form_shadow_from_recent,
     build_rf_shadow_grade_layer,
 )
+from engine.market_bookmaker_fallback import capture_ht_ou_snapshot
 from engine.data_sources.league_baseline import baseline_for_fixture
 from engine.data_sources.lineup_strength import LineupStrengthAnalyzer
 from engine.data_sources.motivation import evaluate_match_motivation
@@ -373,47 +374,8 @@ def fetch_today_fixtures(
 
 
 def _capture_ht_ou_lines(odds_resp: dict) -> list:
-    """从 Pinnacle 半场大小球中捕获所有可用盘口线（含 0.75/1.25）。"""
-    lines = []
-    if not odds_resp or not odds_resp.get("response"):
-        return lines
-    for bo in odds_resp["response"][0].get("bookmakers", []):
-        if "Pinnacle" not in bo.get("name", ""):
-            continue
-        for bet in bo.get("bets", []):
-            name_lower = bet.get("name", "").lower()
-            if ("over/under" not in name_lower and "over under" not in name_lower) or "first half" not in name_lower:
-                continue
-            # 按盘口线聚合 Over/Under 配对
-            line_map = {}
-            for v in bet.get("values", []):
-                val_str = v.get("value", "")  # e.g. "Over 0.5" or "0.5"
-                odd_val = float(v.get("odd", 0))
-                # 提取纯数字线
-                import re
-                nums = re.findall(r'[\d.]+', val_str)
-                line_num = nums[0] if nums else val_str
-                entry = line_map.setdefault(line_num, {"over": None, "under": None})
-                if "over" in val_str.lower():
-                    entry["over"] = odd_val
-                elif "under" in val_str.lower():
-                    entry["under"] = odd_val
-                else:
-                    # 无标签：先填over再填under
-                    if entry["over"] is None:
-                        entry["over"] = odd_val
-                    else:
-                        entry["under"] = odd_val
-            # 按盘口数排序输出
-            for line_num in sorted(line_map.keys(), key=float):
-                entry = line_map[line_num]
-                lines.append({
-                    "line": line_num,
-                    "over": entry["over"],
-                    "under": entry["under"],
-                })
-            return lines
-    return lines
+    """Capture HT OU lines with bookmaker fallback (Pinnacle priority)."""
+    return capture_ht_ou_snapshot(odds_resp).get("ht_ou_lines", [])
 
 
 def _best_pre_live_line(ht_ou_lines: list) -> dict | None:
@@ -1008,21 +970,31 @@ def run_v4_scan(
                 fx["awayId"],
             )
 
-            ht_ou_lines = _capture_ht_ou_lines(odds_resp) if odds_resp else []
+            odds_snapshot = capture_ht_ou_snapshot(odds_resp)
+            ht_ou_lines = odds_snapshot.get("ht_ou_lines", [])
             best_line = _best_pre_live_line(ht_ou_lines)
 
+            market_input = {
+                **rf_shadow_base,
+                "prematch_ht_line": best_line["line_float"] if best_line else None,
+                "prematch_over_odds": best_line.get("over") if best_line else None,
+                "prematch_under_odds": best_line.get("under") if best_line else None,
+                "no_market_excluded": False,
+                "logged_at": datetime.now().isoformat(),
+                "opening_market_bookmaker_used": odds_snapshot.get("bookmaker_used", ""),
+                "opening_market_bookmaker_priority": odds_snapshot.get("bookmaker_priority", 0),
+                "opening_market_market_name": odds_snapshot.get("market_name", ""),
+                "opening_market_bet_name": odds_snapshot.get("bet_name", ""),
+                "opening_market_source": odds_snapshot.get("market_source", "NO_ODDS"),
+                "no_ht_ou_reason": odds_snapshot.get("no_ht_ou_reason", ""),
+            }
             market_stub = build_rf_shadow_grade_layer(
-                {
-                    **rf_shadow_base,
-                    "prematch_ht_line": best_line["line_float"] if best_line else None,
-                    "prematch_over_odds": best_line.get("over") if best_line else None,
-                    "prematch_under_odds": best_line.get("under") if best_line else None,
-                    "no_market_excluded": False,
-                    "logged_at": datetime.now().isoformat(),
-                },
+                market_input,
                 factors={},
             )
-            rf_shadow = {**rf_shadow_base, **market_stub}
+            rf_shadow = {**market_input, **market_stub}
+            if odds_snapshot.get("market_source") == "NO_HT_OU":
+                rf_shadow["opening_market_data_status"] = "API_HAS_ODDS_BUT_NO_HT_OU"
             h2h_required, h2h_skip_reason = _build_lazy_prefilter_decision(fx=fx, rf_shadow=rf_shadow, lg_status=lg_status)
             prefilter_elapsed = _safe_s(time.perf_counter() - fixture_prefilter_t0)
             with cache_lock:
@@ -1039,6 +1011,7 @@ def run_v4_scan(
                     "home_recent_raw": home_recent_raw,
                     "away_recent_raw": away_recent_raw,
                     "odds_resp": odds_resp,
+                    "odds_snapshot": odds_snapshot,
                     "ht_ou_lines": ht_ou_lines,
                     "best_line": best_line,
                     "coverage_snapshot": coverage_snapshot,
@@ -1232,18 +1205,25 @@ def run_v4_scan(
 
             factors = h2h_result.get("factors", {}) if isinstance(h2h_result, dict) else {}
             # Rebuild shadow with H2H info if collected, still shadow-only.
-            rf_shadow_layer = build_rf_shadow_grade_layer(
-                {
-                    **rf_shadow,
-                    "prematch_ht_line": best_line["line_float"] if best_line else None,
-                    "prematch_over_odds": best_line.get("over") if best_line else None,
-                    "prematch_under_odds": best_line.get("under") if best_line else None,
-                    "no_market_excluded": (market_status == "MARKET_NO_MARKET"),
-                    "logged_at": datetime.now().isoformat(),
-                },
-                factors=factors,
-            )
+            odds_snapshot = prefetched.get("odds_snapshot") or {}
+            market_input = {
+                **rf_shadow,
+                "prematch_ht_line": best_line["line_float"] if best_line else None,
+                "prematch_over_odds": best_line.get("over") if best_line else None,
+                "prematch_under_odds": best_line.get("under") if best_line else None,
+                "no_market_excluded": (market_status == "MARKET_NO_MARKET"),
+                "logged_at": datetime.now().isoformat(),
+                "opening_market_bookmaker_used": odds_snapshot.get("bookmaker_used", rf_shadow.get("opening_market_bookmaker_used", "")),
+                "opening_market_bookmaker_priority": odds_snapshot.get("bookmaker_priority", rf_shadow.get("opening_market_bookmaker_priority", 0)),
+                "opening_market_market_name": odds_snapshot.get("market_name", rf_shadow.get("opening_market_market_name", "")),
+                "opening_market_bet_name": odds_snapshot.get("bet_name", rf_shadow.get("opening_market_bet_name", "")),
+                "opening_market_source": odds_snapshot.get("market_source", rf_shadow.get("opening_market_source", "NO_ODDS")),
+                "no_ht_ou_reason": odds_snapshot.get("no_ht_ou_reason", rf_shadow.get("no_ht_ou_reason", "")),
+            }
+            rf_shadow_layer = build_rf_shadow_grade_layer(market_input, factors=factors)
             rf_shadow = {**rf_shadow, **rf_shadow_layer}
+            if (odds_snapshot.get("market_source") or rf_shadow.get("opening_market_source")) == "NO_HT_OU":
+                rf_shadow["opening_market_data_status"] = "API_HAS_ODDS_BUT_NO_HT_OU"
             factors = dict(factors or {})
             factors.update(rf_shadow)
 
@@ -1548,7 +1528,8 @@ def run_v4_scan(
 
         # ── 庄家盘口阵地：捕获所有 HT OU 线 ──
         odds_resp = api_client(f"odds?fixture={fx['id']}")
-        ht_ou_lines = _capture_ht_ou_lines(odds_resp) if odds_resp else []
+        odds_snapshot = capture_ht_ou_snapshot(odds_resp)
+        ht_ou_lines = odds_snapshot.get("ht_ou_lines", [])
 
         # fast模式：先做轻量前筛，避免每场都触发 5-6 个重模块
         factors = result.get("factors", {})
@@ -1561,18 +1542,24 @@ def run_v4_scan(
             fx["awayId"],
         )
         best_line = _best_pre_live_line(ht_ou_lines)
-        rf_shadow_layer = build_rf_shadow_grade_layer(
-            {
-                **rf_shadow,
-                "prematch_ht_line": best_line["line_float"] if best_line else None,
-                "prematch_over_odds": best_line.get("over") if best_line else None,
-                "prematch_under_odds": best_line.get("under") if best_line else None,
-                "no_market_excluded": bool(result.get("no_market_excluded", False)),
-                "logged_at": datetime.now().isoformat(),
-            },
-            factors=factors,
-        )
-        rf_shadow = {**rf_shadow, **rf_shadow_layer}
+        market_input = {
+            **rf_shadow,
+            "prematch_ht_line": best_line["line_float"] if best_line else None,
+            "prematch_over_odds": best_line.get("over") if best_line else None,
+            "prematch_under_odds": best_line.get("under") if best_line else None,
+            "no_market_excluded": bool(result.get("no_market_excluded", False)),
+            "logged_at": datetime.now().isoformat(),
+            "opening_market_bookmaker_used": odds_snapshot.get("bookmaker_used", ""),
+            "opening_market_bookmaker_priority": odds_snapshot.get("bookmaker_priority", 0),
+            "opening_market_market_name": odds_snapshot.get("market_name", ""),
+            "opening_market_bet_name": odds_snapshot.get("bet_name", ""),
+            "opening_market_source": odds_snapshot.get("market_source", "NO_ODDS"),
+            "no_ht_ou_reason": odds_snapshot.get("no_ht_ou_reason", ""),
+        }
+        rf_shadow_layer = build_rf_shadow_grade_layer(market_input, factors=factors)
+        rf_shadow = {**market_input, **rf_shadow_layer}
+        if odds_snapshot.get("market_source") == "NO_HT_OU":
+            rf_shadow["opening_market_data_status"] = "API_HAS_ODDS_BUT_NO_HT_OU"
         factors = dict(factors or {})
         factors.update(rf_shadow)
         market_focus = result.get("market_focus")

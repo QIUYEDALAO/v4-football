@@ -496,6 +496,11 @@ const SHADOW_ENUM_CN={
   H2H_NO_BONUS:"H2H不支持，不降级",
   H2H_STRONG_BONUS:"H2H近5强支持",
   MARKET_NO_DATA:"缺少可用初盘数据",
+  API_HAS_ODDS_BUT_NO_HT_OU:"API有盘口但无可用半场大小球",
+  PINNACLE_PRIMARY:"Pinnacle主源",
+  BOOKMAKER_FALLBACK:"Bookmaker回退",
+  NO_HT_OU:"无半场大小球",
+  NO_ODDS:"无盘口数据",
   MARKET_STRONG_CONFIRM:"初盘强确认",
   MARKET_WEAK_CONFIRM:"初盘弱确认",
   MARKET_NEUTRAL:"初盘中性",
@@ -693,6 +698,10 @@ function renderListRow(x,i){
   const balanceReason=safe(x.rf_balance_reason,'数据缺失');
   const h2hReason=shadowCn(first(x.h2h_recent5_bonus_reason,x.h2h_recent5_support_status));
   const openMarketReason=shadowCn(first(x.opening_market_reason,x.opening_market_support_status));
+  const marketBookmaker=safe(first(x.opening_market_bookmaker_used,''),'未命中');
+  const marketSource=shadowCn(first(x.opening_market_source,'')); 
+  const marketBetName=safe(first(x.opening_market_bet_name,x.opening_market_market_name,''),'未记录');
+  const noHtOuReason=shadowCn(first(x.no_ht_ou_reason,x.opening_market_data_status,''));
   const marketAdjustReason=safe(x.market_adjustment_reason,'数据缺失');
   const modeRaw=String(first(x.collection_mode,'official_legacy')).toLowerCase();
   const observeMode=collectionModeCn(modeRaw);
@@ -749,6 +758,9 @@ function renderListRow(x,i){
   row+='<div><span class="k">双方平衡：</span>'+balanceReason+'</div>';
   row+='<div><span class="k">H2H近5：</span>'+h2hReason+'</div>';
   row+='<div><span class="k">初盘判断：</span>'+openMarketReason+'</div>';
+  row+='<div><span class="k">盘口来源：</span>'+marketSource+'　<span class="k">bookmaker：</span>'+marketBookmaker+'</div>';
+  row+='<div><span class="k">盘口市场：</span>'+marketBetName+'</div>';
+  row+='<div><span class="k">缺失原因：</span>'+noHtOuReason+'</div>';
   row+='<div><span class="k">盘口调整说明：</span>'+marketAdjustReason+'</div>';
   row+='<div><span class="k">采集模式：</span>'+observeMode+'</div>';
   row+='<div><span class="k">采集阶段：</span>'+collectionStage+'</div>';
