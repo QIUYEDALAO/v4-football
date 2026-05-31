@@ -30,7 +30,11 @@ def _to_num(v: Any) -> float | None:
     try:
         if v is None or v == "":
             return None
-        return float(v)
+        x = float(v)
+        # Some feeds encode decimal odds as 67 => 1.67, 26 => 1.26.
+        if 10.0 <= x < 1000.0:
+            x = 1.0 + (x / 100.0)
+        return x
     except Exception:
         return None
 
@@ -176,4 +180,3 @@ def capture_ht_ou_snapshot(odds_resp: dict | None) -> dict[str, Any]:
         "bookmaker_count": len(bookmakers),
         "ht_ou_detected": True,
     }
-

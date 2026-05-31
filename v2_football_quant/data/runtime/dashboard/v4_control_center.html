@@ -506,6 +506,15 @@ const SHADOW_ENUM_CN={
   MARKET_NEUTRAL:"初盘中性",
   MARKET_WEAK_VETO:"初盘弱反向",
   MARKET_HARD_VETO:"初盘强反向",
+  MARKET_LIGHT_CONFLICT:"盘口轻冲突",
+  MARKET_STRONG_CONFLICT:"盘口强冲突",
+  MARKET_EXTREME_VETO:"盘口极端熔断",
+  EXTREME_VETO_SKIP:"极端盘口直接跳过",
+  STRONG_DOWNGRADE:"强冲突降级",
+  LIGHT_DOWNGRADE:"轻冲突降级",
+  NO_DATA_DOWNGRADE:"无盘口数据降级",
+  NO_MARKET_SKIP:"无盘口跳过",
+  KEEP:"保持等级",
   MARKET_HARD_VETO_BEFORE_H2H:"初盘强反向，H2H前跳过",
   MARKET_NO_DATA_RF_NOT_STRONG:"初盘缺失且RF不强，H2H前跳过",
   OBSERVE_ONLY:"观察模式",
@@ -702,6 +711,11 @@ function renderListRow(x,i){
   const marketSource=shadowCn(first(x.opening_market_source,'')); 
   const marketBetName=safe(first(x.opening_market_bet_name,x.opening_market_market_name,''),'未记录');
   const noHtOuReason=shadowCn(first(x.no_ht_ou_reason,x.opening_market_data_status,''));
+  const marketConflict=shadowCn(first(x.opening_market_conflict_level,''));
+  const marketAction=shadowCn(first(x.opening_market_action,x.dryrun_action,''));
+  const marketVetoSeverity=safe(first(x.market_veto_severity,''),'NONE');
+  const marketVetoReason=safe(first(x.market_veto_reason,''),'未记录');
+  const marketPolicyVersion=safe(first(x.market_policy_version,''),'未记录');
   const marketAdjustReason=safe(x.market_adjustment_reason,'数据缺失');
   const modeRaw=String(first(x.collection_mode,'official_legacy')).toLowerCase();
   const observeMode=collectionModeCn(modeRaw);
@@ -761,6 +775,9 @@ function renderListRow(x,i){
   row+='<div><span class="k">盘口来源：</span>'+marketSource+'　<span class="k">bookmaker：</span>'+marketBookmaker+'</div>';
   row+='<div><span class="k">盘口市场：</span>'+marketBetName+'</div>';
   row+='<div><span class="k">缺失原因：</span>'+noHtOuReason+'</div>';
+  row+='<div><span class="k">冲突分层：</span>'+marketConflict+'　<span class="k">动作：</span>'+marketAction+'</div>';
+  row+='<div><span class="k">veto级别：</span>'+marketVetoSeverity+'　<span class="k">veto原因：</span>'+marketVetoReason+'</div>';
+  row+='<div><span class="k">策略版本：</span>'+marketPolicyVersion+'</div>';
   row+='<div><span class="k">盘口调整说明：</span>'+marketAdjustReason+'</div>';
   row+='<div><span class="k">采集模式：</span>'+observeMode+'</div>';
   row+='<div><span class="k">采集阶段：</span>'+collectionStage+'</div>';

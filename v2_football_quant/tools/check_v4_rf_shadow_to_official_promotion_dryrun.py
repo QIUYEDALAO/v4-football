@@ -199,7 +199,9 @@ def main() -> int:
             print(f"  ❌ dryrun A fixture {c.get('fixture_id')} has MARKET_NO_DATA")
     for cand_key in ["dryrun_a_candidates", "dryrun_b_candidates"]:
         for c in report.get(cand_key, []):
-            if c.get("opening_market_available") is False:
+            status = str(c.get("opening_market_support_status") or "").upper()
+            data_status = str(c.get("opening_market_data_status") or "").upper()
+            if status == "MARKET_NO_MARKET" or data_status == "NO_MARKET" or bool(c.get("no_market_excluded")):
                 no_market_ab_ok = False
                 print(f"  ❌ {cand_key} fixture {c.get('fixture_id')} has NO_MARKET")
     if no_data_a_ok:

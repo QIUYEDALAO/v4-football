@@ -296,6 +296,104 @@ def _downgrade_once(g: str) -> str:
     return g
 
 
+def _is_extreme_veto(ht_line: Optional[float], over_odds: Optional[float], market_status: str) -> bool:
+    if market_status != "MARKET_HARD_VETO":
+        return False
+    if ht_line is not None and ht_line <= 0.25:
+        return True
+    if over_odds is not None and over_odds >= 2.55:
+        return True
+    if ht_line is not None and over_odds is not None and ht_line <= 0.5 and over_odds >= 2.40:
+        return True
+    return False
+
+
+def _apply_market_promotion_policy(
+    *,
+    base_grade: str,
+    market_status: str,
+    confidence_before_market: int,
+    ht_line: Optional[float],
+    over_odds: Optional[float],
+) -> dict[str, Any]:
+    """RF-first market policy: downgrade/risk by conflict level, no broad hard kill."""
+    if ht_line is not None and 3.0 < ht_line <= 30.0:
+        ht_line = ht_line / 10.0
+    if over_odds is not None and 10.0 <= over_odds < 1000.0:
+        over_odds = 1.0 + (over_odds / 100.0)
+
+    policy_version = "V4_RF_MARKET_POLICY_20260531"
+    conflict_level = "MARKET_CONFIRM"
+    action = "KEEP"
+    veto_severity = "NONE"
+    veto_reason = ""
+    adjusted = base_grade
+    reason = "盘口仅作确认，不单独制造A/B"
+
+    if market_status == "MARKET_NO_MARKET":
+        conflict_level = "MARKET_NO_MARKET"
+        action = "NO_MARKET_SKIP"
+        adjusted = "SKIP"
+        reason = "无盘口，shadow 标注SKIP且不进入待投"
+    elif market_status == "MARKET_NO_DATA":
+        conflict_level = "MARKET_NO_DATA"
+        action = "NO_DATA_DOWNGRADE"
+        if adjusted == "A":
+            adjusted = "B"
+        elif adjusted == "B":
+            adjusted = "B" if confidence_before_market >= 70 else "C"
+        elif adjusted == "C":
+            adjusted = "C" if confidence_before_market >= 55 else "SKIP"
+        reason = "盘口缺失，不升A；强RF保留B/C观察"
+    elif market_status in {"MARKET_STRONG_CONFIRM", "MARKET_WEAK_CONFIRM"}:
+        conflict_level = "MARKET_CONFIRM"
+        action = "KEEP"
+        reason = "盘口确认，仅提升信心不改主因子级别"
+    elif market_status == "MARKET_NEUTRAL":
+        conflict_level = "MARKET_LIGHT_CONFLICT"
+        action = "LIGHT_DOWNGRADE"
+        adjusted = _downgrade_once(adjusted)
+        reason = "盘口中性偏保守，轻度降级"
+    elif market_status == "MARKET_WEAK_VETO":
+        conflict_level = "MARKET_LIGHT_CONFLICT"
+        action = "LIGHT_DOWNGRADE"
+        adjusted = _downgrade_once(adjusted)
+        reason = "盘口轻微反向，降一级进入观察层"
+    elif market_status == "MARKET_HARD_VETO":
+        if _is_extreme_veto(ht_line, over_odds, market_status):
+            conflict_level = "MARKET_EXTREME_VETO"
+            action = "EXTREME_VETO_SKIP"
+            veto_severity = "EXTREME"
+            adjusted = "SKIP"
+            reason = "极端盘口异常，触发EXTREME_VETO直接SKIP"
+            veto_reason = "EXTREME_VETO"
+        else:
+            conflict_level = "MARKET_STRONG_CONFLICT"
+            action = "STRONG_DOWNGRADE"
+            veto_severity = "STRONG"
+            if adjusted == "A":
+                adjusted = "C" if confidence_before_market >= 55 else "SKIP"
+            elif adjusted == "B":
+                adjusted = "C" if confidence_before_market >= 45 else "SKIP"
+            elif adjusted == "C":
+                adjusted = "SKIP"
+            reason = "明显盘口反向，强RF降至C观察，弱RF可SKIP"
+            veto_reason = "STRONG_CONFLICT"
+
+    if veto_reason == "":
+        veto_reason = conflict_level
+    return {
+        "market_adjusted_shadow_grade": adjusted,
+        "market_adjustment_reason": reason,
+        "opening_market_conflict_level": conflict_level,
+        "opening_market_action": action,
+        "market_veto_severity": veto_severity,
+        "market_veto_reason": veto_reason,
+        "market_policy_version": policy_version,
+        "dryrun_action": action,
+    }
+
+
 def _market_support_status(record: dict) -> dict[str, Any]:
     no_market_excluded = bool(record.get("no_market_excluded")) or str(record.get("pending_action", "")).startswith("无盘口")
     ht_line = _to_float(record.get("prematch_ht_line"))
@@ -561,32 +659,30 @@ def build_rf_shadow_grade_layer(record: dict, factors: dict | None = None) -> di
         h2h_assist_strength = "NONE"
         h2h_ignored_reason = "NO_BONUS"
 
-    # Opening market confirm/veto (shadow only)
-    market_adjusted_shadow_grade = balance_adjusted_grade
-    market_adjustment_reason = "盘口仅作确认，不单独制造A/B"
-    if market_status == "MARKET_NO_MARKET":
-        market_adjusted_shadow_grade = "SKIP"
-        market_adjustment_reason = "无盘口，shadow 标注SKIP且不进入待投"
-    elif market_status == "MARKET_HARD_VETO":
-        if market_adjusted_shadow_grade == "A":
-            market_adjusted_shadow_grade = "C"
-        elif market_adjusted_shadow_grade == "B":
-            market_adjusted_shadow_grade = "C"
-        elif market_adjusted_shadow_grade == "C":
-            market_adjusted_shadow_grade = "SKIP"
-        market_adjustment_reason = "初盘强反向，shadow 降级（不影响official）"
-    elif market_status == "MARKET_WEAK_VETO":
-        market_adjusted_shadow_grade = _downgrade_once(market_adjusted_shadow_grade)
-        market_adjustment_reason = "初盘弱反向，shadow 降一级（不影响official）"
-    elif market_status == "MARKET_NEUTRAL" and market_adjusted_shadow_grade == "A":
-        market_adjusted_shadow_grade = "B"
-        market_adjustment_reason = "初盘中性，对A保守降为B（shadow）"
-    elif market_status == "MARKET_STRONG_CONFIRM":
-        market_adjustment_reason = "初盘强确认，提升信心不改级别"
-    elif market_status == "MARKET_WEAK_CONFIRM":
-        market_adjustment_reason = "初盘弱确认，保留级别"
-    elif market_status == "MARKET_NO_DATA":
-        market_adjustment_reason = "初盘缺失，保持shadow级别并降低信心"
+    rf_shadow_score = _to_float(record.get("recent_form_primary_score"))
+    if rf_shadow_score is None and c10_rate is not None and c5_rate is not None:
+        rf_shadow_score = round((c10_rate * 0.7 + c5_rate * 0.3) * 100, 1)
+
+    # Confidence pre-market: H2H bonus-only, no H2H downgrade
+    confidence = int(round(rf_shadow_score or 50.0))
+    if h2h_recent5_support_status == "H2H_STRONG_BONUS":
+        confidence += 8
+    elif h2h_recent5_support_status == "H2H_LIGHT_BONUS":
+        confidence += 3
+    if low_sample:
+        confidence -= 12
+    confidence_before_market = max(0, min(100, confidence))
+
+    # Opening market policy (shadow only; RF is primary)
+    market_policy = _apply_market_promotion_policy(
+        base_grade=balance_adjusted_grade,
+        market_status=market_status,
+        confidence_before_market=confidence_before_market,
+        ht_line=_to_float(record.get("prematch_ht_line")),
+        over_odds=_to_float(record.get("prematch_over_odds")),
+    )
+    market_adjusted_shadow_grade = market_policy["market_adjusted_shadow_grade"]
+    market_adjustment_reason = market_policy["market_adjustment_reason"]
 
     # route and confidence
     if market_status == "MARKET_NO_MARKET":
@@ -606,15 +702,7 @@ def build_rf_shadow_grade_layer(record: dict, factors: dict | None = None) -> di
     else:
         rf_shadow_route = "BILATERAL_ACTIVE"
 
-    rf_shadow_score = _to_float(record.get("recent_form_primary_score"))
-    if rf_shadow_score is None and c10_rate is not None and c5_rate is not None:
-        rf_shadow_score = round((c10_rate * 0.7 + c5_rate * 0.3) * 100, 1)
-
-    confidence = int(round(rf_shadow_score or 50.0))
-    if h2h_recent5_support_status == "H2H_STRONG_BONUS":
-        confidence += 8
-    elif h2h_recent5_support_status == "H2H_LIGHT_BONUS":
-        confidence += 3
+    confidence = int(confidence_before_market)
     if market_status == "MARKET_STRONG_CONFIRM":
         confidence += 8
     elif market_status == "MARKET_WEAK_CONFIRM":
@@ -665,6 +753,12 @@ def build_rf_shadow_grade_layer(record: dict, factors: dict | None = None) -> di
         "h2h_low_sample": h2h_recent5_support_status == "H2H_LOW_SAMPLE",
         "h2h_ignored_reason": h2h_ignored_reason or "N/A",
         **market,
+        "opening_market_conflict_level": market_policy["opening_market_conflict_level"],
+        "opening_market_action": market_policy["opening_market_action"],
+        "market_veto_severity": market_policy["market_veto_severity"],
+        "market_veto_reason": market_policy["market_veto_reason"],
+        "market_policy_version": market_policy["market_policy_version"],
+        "dryrun_action": market_policy["dryrun_action"],
         "market_adjusted_shadow_grade": market_adjusted_shadow_grade,
         "market_adjustment_reason": market_adjustment_reason,
     }
