@@ -969,6 +969,8 @@ def run_v4_scan(
                 fx["homeId"],
                 away_recent_raw,
                 fx["awayId"],
+                kickoff_iso=fx.get("kickoff"),
+                season_hint=season_hint,
             )
 
             odds_snapshot = capture_ht_ou_snapshot(odds_resp)
@@ -1559,6 +1561,8 @@ def run_v4_scan(
             fx["homeId"],
             away_recent_raw,
             fx["awayId"],
+            kickoff_iso=fx.get("kickoff"),
+            season_hint=int(fx.get("season") or infer_season(fx.get("kickoff"))),
         )
         best_line = _best_pre_live_line(ht_ou_lines)
         market_input = {

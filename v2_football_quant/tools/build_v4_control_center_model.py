@@ -332,10 +332,13 @@ RF_SHADOW_GRADE_NUM_FIELDS = (
 
 SEASON_AWARE_TEXT_FIELDS = (
     "season_phase",
+    "season_phase_reason_code",
     "league_tier",
+    "league_tier_reason_code",
     "rf_window_policy",
     "rf_sample_status",
     "rf_freshness_status",
+    "current_season_count_reason_code",
     "rf_season_aware_reason",
     "rf_season_adjusted_shadow_grade",
 )
@@ -481,7 +484,14 @@ def _merge_rf_shadow_fields(candidate_row: dict, scout_row: dict) -> dict:
     for k in RF_SHADOW_GRADE_NUM_FIELDS:
         out[k] = _rf_clean(candidate_row.get(k, scout_row.get(k)), "DATA_MISSING" if k in {"rf_shadow_score", "rf_shadow_confidence"} else 0)
     for k in SEASON_AWARE_TEXT_FIELDS:
-        default_text = "UNKNOWN" if k == "season_phase" else ("UNKNOWN_TIER" if k == "league_tier" else "")
+        if k == "season_phase":
+            default_text = "UNKNOWN"
+        elif k == "league_tier":
+            default_text = "UNKNOWN_TIER"
+        elif k in {"season_phase_reason_code", "league_tier_reason_code", "current_season_count_reason_code"}:
+            default_text = "UNKNOWN_REASON"
+        else:
+            default_text = ""
         out[k] = _rf_clean(candidate_row.get(k, scout_row.get(k)), default_text)
     for k in SEASON_AWARE_BOOL_FIELDS:
         out[k] = bool(candidate_row.get(k, scout_row.get(k), False))

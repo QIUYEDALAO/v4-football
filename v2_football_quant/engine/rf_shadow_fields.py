@@ -93,12 +93,14 @@ def summarize_recent(samples: list[dict]) -> dict:
         window_days = 0
     else:
         window_days = None
+    last_dt = max(dts) if dts else None
     return {
         "sample_count": n,
         "involved_rate": _safe_rate(involved, n),
         "score_rate": _safe_rate(scored, n),
         "concede_rate": _safe_rate(conceded, n),
         "window_days": window_days,
+        "last_dt": last_dt,
     }
 
 
@@ -128,6 +130,9 @@ def build_recent_form_shadow_from_recent(
     home_id: int,
     away_recent_resp: dict | None,
     away_id: int,
+    *,
+    kickoff_iso: str | None = None,
+    season_hint: int | None = None,
 ) -> dict[str, Any]:
     home10_samples = build_team_fh_samples(home_recent_resp, home_id, max_n=10)
     away10_samples = build_team_fh_samples(away_recent_resp, away_id, max_n=10)
@@ -207,6 +212,46 @@ def build_recent_form_shadow_from_recent(
                     f"近10跨度 {max(home10['window_days'] or 0, away10['window_days'] or 0)} 天，样本 {freshness}，仅参考"
                 )
 
+    # season-aware helper signals (shadow-only, best-effort)
+    ref_dt = None
+    if isinstance(kickoff_iso, str) and kickoff_iso.strip():
+        try:
+            ref_dt = datetime.fromisoformat(kickoff_iso.replace("Z", "+00:00"))
+            if ref_dt.tzinfo is None:
+                ref_dt = ref_dt.replace(tzinfo=timezone.utc)
+            else:
+                ref_dt = ref_dt.astimezone(timezone.utc)
+        except Exception:
+            ref_dt = None
+    if ref_dt is None:
+        ref_dt = datetime.now(timezone.utc)
+
+    def _days_since(last_dt: Optional[datetime]) -> int:
+        if not isinstance(last_dt, datetime):
+            return 999
+        return max(0, int((ref_dt - last_dt).total_seconds() // 86400))
+
+    def _count_current_season(samples: list[dict]) -> int:
+        if not samples:
+            return 0
+        count = 0
+        for s in samples:
+            dt = s.get("dt")
+            if not isinstance(dt, datetime):
+                continue
+            age_days = max(0, int((ref_dt - dt).total_seconds() // 86400))
+            if age_days <= 120:
+                count += 1
+                continue
+            if season_hint and dt.year in {int(season_hint), int(season_hint) + 1} and age_days <= 220:
+                count += 1
+        return max(0, min(10, count))
+
+    days_since_home = _days_since(home10.get("last_dt"))
+    days_since_away = _days_since(away10.get("last_dt"))
+    current_season_count_home = _count_current_season(home10_samples)
+    current_season_count_away = _count_current_season(away10_samples)
+
     return {
         "home_recent10_fh_involved_rate": h10_inv,
         "away_recent10_fh_involved_rate": a10_inv,
@@ -231,6 +276,10 @@ def build_recent_form_shadow_from_recent(
         "recent_form_primary_score": primary_score,
         "recent_form_primary_level": primary_level,
         "recent_form_primary_reason": primary_reason,
+        "days_since_last_official_match_home": days_since_home,
+        "days_since_last_official_match_away": days_since_away,
+        "current_season_match_count_home": current_season_count_home,
+        "current_season_match_count_away": current_season_count_away,
     }
 
 
@@ -306,6 +355,9 @@ def build_season_aware_recent_form_shadow_fields(
     )
     country_name = str(fixture_meta.get("country") or record.get("country") or "")
     tier, tier_reason = _infer_league_tier(league_name, country_name)
+    league_type = str(fixture_meta.get("league_type") or "").lower()
+    if any(tok in league_type for tok in ("friendly", "friendlies", "youth", "women", "u17", "u19", "u21", "u23")):
+        tier, tier_reason = "TIER_4_NON_FORMAL", "league_type_non_formal"
 
     h10_n = _to_int(record.get("recent10_sample_count_home"), 0)
     a10_n = _to_int(record.get("recent10_sample_count_away"), 0)
@@ -342,6 +394,17 @@ def build_season_aware_recent_form_shadow_fields(
 
     current_season_home = _to_int(record.get("current_season_match_count_home"), 0)
     current_season_away = _to_int(record.get("current_season_match_count_away"), 0)
+    days_since_home = _to_int(record.get("days_since_last_official_match_home"), 999)
+    days_since_away = _to_int(record.get("days_since_last_official_match_away"), 999)
+    max_days_since = max(days_since_home, days_since_away)
+    min_days_since = min(days_since_home, days_since_away)
+    current_count_reason = "from_record"
+    if current_season_home <= 0:
+        current_season_home = min(10, max(0, h60))
+        current_count_reason = "fallback_recent60_home"
+    if current_season_away <= 0:
+        current_season_away = min(10, max(0, a60))
+        current_count_reason = "fallback_recent60_away" if current_count_reason == "from_record" else "fallback_recent60_both"
     current_season_min = min(x for x in (current_season_home, current_season_away) if x > 0) if (
         current_season_home > 0 or current_season_away > 0
     ) else 0
@@ -349,7 +412,10 @@ def build_season_aware_recent_form_shadow_fields(
     inferred_phase = ""
     phase_reason = ""
     payload_phase = _normalize_phase_from_payload(season_phase_payload)
-    if payload_phase in {
+    if tier == "TIER_4_NON_FORMAL":
+        inferred_phase = "UNKNOWN"
+        phase_reason = "non_formal_tier_guard"
+    elif payload_phase in {
         "ACTIVE_SEASON",
         "SHORT_BREAK",
         "EARLY_SEASON",
@@ -360,21 +426,21 @@ def build_season_aware_recent_form_shadow_fields(
         inferred_phase = payload_phase
         phase_reason = "season_phase_payload"
     elif current_season_min > 0 and current_season_min <= 5:
-        if max10_days > 60:
+        if max_days_since > 60 or max10_days > 60:
             inferred_phase = "POST_OFFSEASON_RETURN"
             phase_reason = "current_season_1_5_with_long_gap"
         else:
             inferred_phase = "EARLY_SEASON"
             phase_reason = "current_season_1_5"
-    elif max10_days <= 60 and min(h10_n, a10_n) >= 6:
+    elif max10_days <= 60 and min(h10_n, a10_n) >= 6 and min_days_since <= 21:
         inferred_phase = "ACTIVE_SEASON"
-        phase_reason = "recent10_window_le_60_and_sample_ge_6"
-    elif 60 < max10_days <= 90:
+        phase_reason = "recent10_window_le_60_sample_ge_6_recently_active"
+    elif (60 < max10_days <= 90) or (21 < min_days_since <= 45 and min(h90, a90) >= 4):
         inferred_phase = "SHORT_BREAK"
-        phase_reason = "recent10_window_61_90"
-    elif max10_days > 180 and max(h10_n, a10_n) <= 2:
+        phase_reason = "short_break_window_or_gap_signal"
+    elif max_days_since > 120 and max(h90, a90) <= 2:
         inferred_phase = "OFFSEASON"
-        phase_reason = "window_very_long_with_low_sample"
+        phase_reason = "long_gap_with_low_recent90"
     else:
         inferred_phase = "UNKNOWN"
         phase_reason = "insufficient_confidence_for_phase"
@@ -466,8 +532,8 @@ def build_season_aware_recent_form_shadow_fields(
         "recent5_window_days_away": a5_days,
         "current_season_match_count_home": current_season_home,
         "current_season_match_count_away": current_season_away,
-        "days_since_last_official_match_home": 0,
-        "days_since_last_official_match_away": 0,
+        "days_since_last_official_match_home": days_since_home,
+        "days_since_last_official_match_away": days_since_away,
         "last_season_baseline_available": bool(baseline_available),
         "last_season_baseline_score": round(float(baseline_score), 3),
         "rf_baseline_only_flag": bool(rf_baseline_only_flag),
@@ -475,6 +541,9 @@ def build_season_aware_recent_form_shadow_fields(
         "rf_freshness_status": freshness,
         "rf_early_season_penalty": bool(rf_early_season_penalty),
         "rf_short_break_penalty": bool(rf_short_break_penalty),
+        "season_phase_reason_code": phase_reason,
+        "league_tier_reason_code": tier_reason,
+        "current_season_count_reason_code": current_count_reason,
         "rf_season_aware_reason": " | ".join(reason_parts),
         "rf_season_adjusted_shadow_grade": season_adjusted,
     }

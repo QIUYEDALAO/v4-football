@@ -43,8 +43,28 @@ REQUIRED_SEASON_FIELDS = [
     "rf_season_aware_reason",
     "rf_season_adjusted_shadow_grade",
 ]
+REASON_CODE_FIELDS = [
+    "season_phase_reason_code",
+    "league_tier_reason_code",
+    "current_season_count_reason_code",
+]
 
 BAD_STRINGS = {"undefined", "null", "nan"}
+ALLOWED_SEASON_PHASE = {
+    "ACTIVE_SEASON",
+    "SHORT_BREAK",
+    "EARLY_SEASON",
+    "POST_OFFSEASON_RETURN",
+    "OFFSEASON",
+    "UNKNOWN",
+}
+ALLOWED_LEAGUE_TIER = {
+    "TIER_1_ELITE",
+    "TIER_2_MAINSTREAM",
+    "TIER_3_WEAK_COVERAGE",
+    "TIER_4_NON_FORMAL",
+    "UNKNOWN_TIER",
+}
 
 
 def _latest(pattern: str, base: Path) -> Path | None:
@@ -85,6 +105,15 @@ def _dist(rows: list[dict], key: str) -> dict[str, int]:
         k = str(r.get(key) or "UNKNOWN").strip() or "UNKNOWN"
         out[k] = out.get(k, 0) + 1
     return out
+
+
+def _to_int(v: Any, default: int = -1) -> int:
+    try:
+        if v is None or v == "":
+            return default
+        return int(v)
+    except Exception:
+        return default
 
 
 def _find_dryrun(date_key: str) -> Path | None:
@@ -143,11 +172,54 @@ def main() -> int:
     if bad_fields:
         blockers.append("bad_values:" + ",".join(bad_fields))
 
+    reason_fields_in_scout = {f: all((f in row) for row in scout_rows) for f in REASON_CODE_FIELDS}
+    has_all_reason_fields_in_scout = all(reason_fields_in_scout.values())
+    _ok(checks, "reason_code_fields_present_in_scout", has_all_reason_fields_in_scout, json.dumps(reason_fields_in_scout, ensure_ascii=False))
+    if not has_all_reason_fields_in_scout:
+        warnings.append("legacy_scout_missing_reason_code_fields")
+        rf_src = (ROOT / "engine" / "rf_shadow_fields.py").read_text(encoding="utf-8")
+        reason_source_ok = all(f'"{k}"' in rf_src for k in REASON_CODE_FIELDS)
+        _ok(checks, "reason_code_fields_emitted_by_detector_source", reason_source_ok)
+        if not reason_source_ok:
+            blockers.append("reason_code_detector_source_missing")
+
+    invalid_phase = sorted(
+        {
+            str(row.get("season_phase") or "UNKNOWN").strip().upper()
+            for row in scout_rows
+            if str(row.get("season_phase") or "UNKNOWN").strip().upper() not in ALLOWED_SEASON_PHASE
+        }
+    )
+    invalid_tier = sorted(
+        {
+            str(row.get("league_tier") or "UNKNOWN_TIER").strip().upper()
+            for row in scout_rows
+            if str(row.get("league_tier") or "UNKNOWN_TIER").strip().upper() not in ALLOWED_LEAGUE_TIER
+        }
+    )
+    _ok(checks, "season_phase_enum_valid", len(invalid_phase) == 0, ",".join(invalid_phase))
+    _ok(checks, "league_tier_enum_valid", len(invalid_tier) == 0, ",".join(invalid_tier))
+    if invalid_phase:
+        blockers.append("invalid_season_phase_enum")
+    if invalid_tier:
+        blockers.append("invalid_league_tier_enum")
+
+    bad_current_count = False
+    for row in scout_rows:
+        h = _to_int(row.get("current_season_match_count_home"))
+        a = _to_int(row.get("current_season_match_count_away"))
+        if h < 0 or a < 0:
+            bad_current_count = True
+            break
+    _ok(checks, "current_season_match_count_non_negative", not bad_current_count)
+    if bad_current_count:
+        blockers.append("current_season_match_count_invalid")
+
     # 11 dashboard model has fields
     items = ((model.get("candidates") or {}).get("items") or [])
     if items:
         model_missing = []
-        for f in REQUIRED_SEASON_FIELDS:
+        for f in [*REQUIRED_SEASON_FIELDS, *REASON_CODE_FIELDS]:
             ok = all((f in x and not _is_bad(x.get(f))) for x in items if isinstance(x, dict))
             _ok(checks, f"model_items_has_{f}", ok)
             if not ok:
@@ -157,7 +229,7 @@ def main() -> int:
     else:
         warnings.append("candidate_items_empty")
         src = (ROOT / "tools" / "build_v4_control_center_model.py").read_text(encoding="utf-8")
-        for f in REQUIRED_SEASON_FIELDS:
+        for f in [*REQUIRED_SEASON_FIELDS, *REASON_CODE_FIELDS]:
             ok = f in src
             _ok(checks, f"model_builder_contains_{f}", ok)
             if not ok:
@@ -171,7 +243,10 @@ def main() -> int:
         miss_dry = []
         dry_need = [
             "season_phase",
+            "season_phase_reason_code",
             "league_tier",
+            "league_tier_reason_code",
+            "current_season_count_reason_code",
             "rf_sample_status",
             "rf_freshness_status",
             "rf_season_aware_reason",
@@ -186,7 +261,18 @@ def main() -> int:
             blockers.append("dryrun_missing:" + ",".join(miss_dry))
     else:
         d = dryrun.get("season_aware_field_distribution") or {}
-        ok = all(k in d for k in ("season_phase", "league_tier", "rf_sample_status", "rf_freshness_status"))
+        ok = all(
+            k in d
+            for k in (
+                "season_phase",
+                "season_phase_reason_code",
+                "league_tier",
+                "league_tier_reason_code",
+                "current_season_count_reason_code",
+                "rf_sample_status",
+                "rf_freshness_status",
+            )
+        )
         _ok(checks, "dryrun_distribution_fallback_exists", ok)
         if not ok:
             blockers.append("dryrun_distribution_missing")

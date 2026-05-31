@@ -173,7 +173,10 @@ def build_dryrun_report(scout_data: list, candidate_view: dict, scan_date: str) 
     rf_ab_downgraded_to_c_observe = 0
     market_no_data_preserved_observe = 0
     season_phase_distribution: dict[str, int] = {}
+    season_phase_reason_distribution: dict[str, int] = {}
     league_tier_distribution: dict[str, int] = {}
+    league_tier_reason_distribution: dict[str, int] = {}
+    current_season_count_reason_distribution: dict[str, int] = {}
     rf_sample_status_distribution: dict[str, int] = {}
     rf_freshness_status_distribution: dict[str, int] = {}
 
@@ -205,7 +208,10 @@ def build_dryrun_report(scout_data: list, candidate_view: dict, scan_date: str) 
         dryrun_grades[dryrun_grade] = dryrun_grades.get(dryrun_grade, 0) + 1
 
         _bump(season_phase_distribution, fixture.get("season_phase", "UNKNOWN"))
+        _bump(season_phase_reason_distribution, fixture.get("season_phase_reason_code", "UNKNOWN_REASON"))
         _bump(league_tier_distribution, fixture.get("league_tier", "UNKNOWN_TIER"))
+        _bump(league_tier_reason_distribution, fixture.get("league_tier_reason_code", "UNKNOWN_REASON"))
+        _bump(current_season_count_reason_distribution, fixture.get("current_season_count_reason_code", "UNKNOWN_REASON"))
         _bump(rf_sample_status_distribution, fixture.get("rf_sample_status", "UNKNOWN"))
         _bump(rf_freshness_status_distribution, fixture.get("rf_freshness_status", fixture.get("recent_freshness_status", "UNKNOWN")))
 
@@ -241,7 +247,10 @@ def build_dryrun_report(scout_data: list, candidate_view: dict, scan_date: str) 
             "rf_shadow_score": fixture.get("rf_shadow_score"),
             "rf_shadow_confidence": fixture.get("rf_shadow_confidence"),
             "season_phase": fixture.get("season_phase", "UNKNOWN"),
+            "season_phase_reason_code": fixture.get("season_phase_reason_code", "UNKNOWN_REASON"),
             "league_tier": fixture.get("league_tier", "UNKNOWN_TIER"),
+            "league_tier_reason_code": fixture.get("league_tier_reason_code", "UNKNOWN_REASON"),
+            "current_season_count_reason_code": fixture.get("current_season_count_reason_code", "UNKNOWN_REASON"),
             "rf_window_policy": fixture.get("rf_window_policy", ""),
             "rf_sample_status": fixture.get("rf_sample_status", "UNKNOWN"),
             "rf_freshness_status": fixture.get("rf_freshness_status", fixture.get("recent_freshness_status", "UNKNOWN")),
@@ -307,7 +316,10 @@ def build_dryrun_report(scout_data: list, candidate_view: dict, scan_date: str) 
         "extreme_veto_count": int(dryrun_grades.get("DRYRUN_EXTREME_VETO", 0)),
         "season_aware_field_distribution": {
             "season_phase": season_phase_distribution,
+            "season_phase_reason_code": season_phase_reason_distribution,
             "league_tier": league_tier_distribution,
+            "league_tier_reason_code": league_tier_reason_distribution,
+            "current_season_count_reason_code": current_season_count_reason_distribution,
             "rf_sample_status": rf_sample_status_distribution,
             "rf_freshness_status": rf_freshness_status_distribution,
         },
