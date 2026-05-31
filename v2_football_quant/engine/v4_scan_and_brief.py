@@ -915,8 +915,12 @@ def main():
     parser.add_argument("--lookahead-hours", type=float, default=24.0)
     parser.add_argument("--push", default="never", choices=["always","conditional","never"],
                         help="Push mode. Default never. Must be explicit to enable push.")
-    parser.add_argument("--no-push", action="store_true", default=True,
-                        help="Disable all push paths (default True)")
+    parser.add_argument(
+        "--no-push",
+        action=argparse.BooleanOptionalAction,
+        default=True,
+        help="Disable all push paths (default True). Use --no-no-push to explicitly allow push path checks.",
+    )
     parser.add_argument("--no-d13", action="store_true", default=True,
                         help="Prohibit D13 execution")
     parser.add_argument("--no-v33", action="store_true", default=True,

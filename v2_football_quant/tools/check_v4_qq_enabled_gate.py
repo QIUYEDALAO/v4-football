@@ -105,6 +105,29 @@ else:
     _ck("no_hardcoded_V4_QQ_ENABLED_False", True)
 
 # ──────────────────────────────────────────────
+# 5b. Verify --no-push gate is closable from CLI
+# ──────────────────────────────────────────────
+no_push_uses_boolean_optional = "--no-push" in source and "argparse.BooleanOptionalAction" in source
+_ck(
+    "no_push_uses_boolean_optional_action",
+    no_push_uses_boolean_optional,
+    "expected argparse.BooleanOptionalAction for --no-push",
+)
+
+no_push_default_true = '--no-push' in source and 'default=True' in source
+_ck("no_push_default_true", no_push_default_true, "expected default=True for --no-push")
+
+legacy_no_push_lock = 'parser.add_argument("--no-push", action="store_true", default=True' in source
+_ck("legacy_no_push_store_true_default_true_removed", not legacy_no_push_lock, "legacy store_true+default=True must be removed")
+if legacy_no_push_lock:
+    _block("legacy_no_push_lock_still_exists")
+
+has_effective_gate = "effective_no_push = args.no_push or env_no_push" in source
+_ck("effective_no_push_gate_present", has_effective_gate, "expected effective_no_push = args.no_push or env_no_push")
+if not has_effective_gate:
+    _block("effective_no_push_gate_missing")
+
+# ──────────────────────────────────────────────
 # 6. _parse_bool_env exists and is callable
 # ──────────────────────────────────────────────
 _ck("_parse_bool_env_function_exists", callable(_parse_bool_env),
