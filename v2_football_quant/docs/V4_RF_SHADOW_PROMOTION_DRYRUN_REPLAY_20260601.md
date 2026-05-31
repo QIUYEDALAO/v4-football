@@ -1,56 +1,87 @@
 # V4_RF_SHADOW_PROMOTION_DRYRUN_REPLAY_20260601
 
-## 目标
-Phase 3C 只做 RF shadow promotion 的 dryrun/replay 对比：
-- current official 口径
-- vs shadow dryrun 口径（基于 `rf_shadow_grade` / `market_adjusted_shadow_grade` / `recent5_bilateral_gate`）
+## 阶段定义
+本轮为 **Phase 3D-F — V4_RF_SHADOW_PROMOTION_REPLAY_FIELD_COMPLETENESS_FIX**。
+只做 dryrun/replay 字段完整性修复，不做 official promotion，不做上线切换。
 
-本轮不是正式切换，不改 production 默认，不改 official grade。
+## 核心结论口径
+`sufficient fixture sample` 不等于 `sufficient field coverage`。
 
-## 本轮边界（强约束）
-1. 不改变 official grade。
-2. 不改变 production_grade_mode。
-3. 不写 pending_bet_candidates。
-4. 不推 QQ。
-5. 不重算 validation。
-6. 不修改 live bet。
-7. 不修改 cron。
-8. 不提交 runtime artifact。
+Promotion replay 判断必须同时满足：
+1. sample_count sufficient；
+2. official artifact present；
+3. recent5 bilateral gate field coverage sufficient；
+4. B-floor exception field coverage sufficient；
+5. market/H2H/events/CPL safety field coverage sufficient。
 
-## Dryrun 输出字段
-- `shadow_dryrun_grade`
-- `shadow_dryrun_score`
-- `shadow_dryrun_reason`
-- `shadow_dryrun_reason_code`
-- `shadow_dryrun_source`
-- `current_official_grade`
-- `official_vs_shadow_delta`
-- `promotion_delta_reason`
-- `dryrun_allowed_to_promote`
-- `dryrun_block_reason`
+任一条件不满足，不得给出 promotion-ready 类结论。
 
-以上字段均为 dryrun/replay 观察字段，不进入 official 推荐链路。
+## 本轮新增修复点
+1. **official artifact resolver**
+- 优先读取 `--official-artifact`
+- 否则读取 `data/runtime/status/v3v4_dashboard_candidate_view_<date>.json`
+- 若不存在，标记 `official_artifact_status=MISSING`
+- 不再把 missing official 伪装为 `0/0/0/0`
 
-## recent5 bilateral gate 口径
-- 统计 `PASS / HOT_ANCHOR_PASS / DUAL_HEAT_PASS / FAIL`。
-- `FAIL` 默认 `cap_to_C`，不直接 SKIP，不删 scout row。
-- `RF_STRONG_CONFIRMED_B_FLOOR_EXCEPTION` 仅允许保 B，不允许升 A。
+2. **delta 分类修复**
+- 新增区分：`OFFICIAL_MISSING_SHADOW_ONLY`
+- 与 `TRUE_SHADOW_ONLY` 分离，避免误把 artifact 缺失当业务结果
 
-## 安全守卫
-1. `MARKET_NO_DATA` 不升 A。
-2. `MARKET_EXTREME_VETO` 必须 SKIP。
-3. market/H2H/Events/CPL 不得制造 official A/B。
-4. H2H 只做 add-only，不降级。
-5. Events 不制造 A/B。
-6. CPL 不影响 official。
+3. **recent5 gate coverage 修复**
+- 新增：
+  - `recent5_gate_field_coverage_status`
+  - `recent5_gate_reconstructable`
+  - `recent5_gate_available_count`
+  - `recent5_gate_unknown_count`
+  - `recent5_gate_missing_fields`
+- 缺字段时输出 UNKNOWN，不得按 0 计作 PASS。
+
+4. **B-floor coverage 修复**
+- 新增：
+  - `bfloor_exception_field_coverage_status`
+  - `bfloor_exception_available_count`
+  - `bfloor_exception_unknown_count`
+  - `bfloor_exception_missing_fields`
+- 例外仍只允许保 B，不允许升 A。
+
+5. **safety coverage 修复**
+- 新增：
+  - `safety_field_coverage_status`
+  - `market_safety_coverage_status`
+  - `h2h_safety_coverage_status`
+  - `events_safety_coverage_status`
+  - `cpl_safety_coverage_status`
+  - `safety_unknown_count`
+  - `safety_missing_fields`
+- 缺字段不再默认 NO。
+
+6. **strict mode**
+- `--strict-field-coverage` 打开后：
+  - official missing 或 recent5 coverage incomplete 时，不允许 baseline-ready。
 
 ## 产物与工具
-- Runner: `tools/run_v4_rf_shadow_promotion_dryrun_replay.py`
-- Checker: `tools/check_v4_rf_shadow_promotion_dryrun.py`
-- Runtime artifact（不提交）：
+- Runner：`tools/run_v4_rf_shadow_promotion_dryrun_replay.py`
+- Checker：`tools/check_v4_rf_shadow_promotion_dryrun.py`
+- Runtime artifact（仅观察，不提交）：
   - `data/runtime/acceptance/v4_rf_shadow_promotion_dryrun_replay_<date>.json`
   - `data/runtime/acceptance/v4_rf_shadow_promotion_dryrun_replay_<date>.md`
 
-## 结论口径
-本阶段是 dryrun/replay 对比层，不是 official promotion。
-后续若要接入正式 promotion，必须 BOSS 单独授权并经过 OpenClaw 验收。
+## 安全红线（保持不变）
+1. 不改 official grade。
+2. 不改 production_grade_mode。
+3. 不写 pending。
+4. 不推 QQ。
+5. 不重算 validation。
+6. 不改 live bet。
+7. 不改 cron。
+8. 不调 API，不重扫。
+
+## 结论状态码
+- `SUFFICIENT_SAMPLE_REPLAY_BASELINE_READY`
+- `SUFFICIENT_SAMPLE_BUT_FIELD_COVERAGE_INCOMPLETE`
+- `OFFICIAL_ARTIFACT_MISSING_BLOCKER`
+- `RECENT5_GATE_COVERAGE_INCOMPLETE_BLOCKER`
+- `FAIL_NEED_CODE_REVIEW`
+
+## 说明
+本阶段仍是 dryrun-only。后续如要进入正式 promotion 或生产切换，必须 BOSS 单独授权并经过 OpenClaw 验收。
