@@ -895,7 +895,7 @@ def _run_parallel_scan(args, scan_date: str, today_key: str, wd, log_path: Path)
         brief_text = build_brief(args.date)
         brief_path = REPORT_DIR / f"v4_openclaw_brief_{today_key}.txt"
         brief_path.write_text(brief_text, encoding="utf-8")
-        qq_text = format_qq(args.date, window=args.window)
+        qq_text = format_qq(args.date, window=args.window, mode="official_recommendation")
         qq_path = REPORT_DIR / f"v4_openclaw_brief_qq_{today_key}.txt"
         qq_path.write_text(qq_text, encoding="utf-8")
         print(f"[adapter] wrote brief/qq", flush=True)
@@ -1151,7 +1151,7 @@ def main():
         brief_path.write_text(brief_text, encoding="utf-8")
         brief_sha256 = hashlib.sha256(brief_text.encode("utf-8")).hexdigest()
         
-        qq_text = format_qq(args.date, window=args.window)
+        qq_text = format_qq(args.date, window=args.window, mode="official_recommendation")
         qq_path = REPORT_DIR / f"v4_openclaw_brief_qq_{today_key}.txt"
         qq_path.write_text(qq_text, encoding="utf-8")
 

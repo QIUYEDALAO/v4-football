@@ -105,7 +105,121 @@ def _ratio_to_pct(rate_str):
         return f"{int(pct)}%" if pct == int(pct) else f"{pct:.1f}%"
     except (ValueError, ZeroDivisionError):
         return rate_str
-def format_qq(date_str: str, window: str = "midday") -> str:
+def _extract_mode_source(full: str) -> tuple[str, str]:
+    mode = "season_aware_rf"
+    source = "market_adjusted_shadow_grade"
+    m = re.search(r"production_grade_mode\s*=\s*([A-Za-z0-9_\-]+)", full)
+    if m:
+        mode = m.group(1).strip()
+    s = re.search(r"official_grade_source\s*=\s*([A-Za-z0-9_\-]+)", full)
+    if s:
+        source = s.group(1).strip()
+    return mode, source
+
+
+def _parse_official_rows_from_candidate_view(key: str) -> tuple[list[dict], list[dict], dict]:
+    cv_path = STATUS_DIR / f"v3v4_dashboard_candidate_view_{key}.json"
+    cv = {}
+    if cv_path.exists():
+        try:
+            cv = json.loads(cv_path.read_text(encoding="utf-8"))
+        except Exception:
+            cv = {}
+    if not isinstance(cv, dict):
+        cv = {}
+
+    def _row(item: dict) -> dict:
+        return {
+            "home": str(item.get("home") or item.get("home_team") or "-"),
+            "away": str(item.get("away") or item.get("away_team") or "-"),
+            "league": str(item.get("league") or item.get("league_name") or "-"),
+            "kickoff": str(item.get("kickoff") or item.get("time") or "-"),
+            "reason": str(item.get("official_reason") or item.get("market_adjustment_reason") or "无"),
+            "rf_score": item.get("rf_shadow_score"),
+        }
+
+    a_rows_raw = cv.get("A_candidates") if isinstance(cv.get("A_candidates"), list) else []
+    b_rows_raw = cv.get("B_candidates") if isinstance(cv.get("B_candidates"), list) else []
+    a_rows = [
+        _row(x) for x in a_rows_raw
+        if isinstance(x, dict)
+        and str(x.get("official_grade") or x.get("grade") or "").upper() == "A"
+        and bool(x.get("official_candidate", True))
+    ]
+    b_rows = [
+        _row(x) for x in b_rows_raw
+        if isinstance(x, dict)
+        and str(x.get("official_grade") or x.get("grade") or "").upper() == "B"
+        and bool(x.get("official_candidate", True))
+    ]
+    return a_rows, b_rows, cv
+
+
+def _format_official_qq(date_str: str, window: str = "midday") -> str:
+    key = date_str.replace("-", "")
+    bp = REPORT_DIR / f"v4_openclaw_brief_{key}.txt"
+    if not bp.exists():
+        return "V4简报未生成"
+    full = bp.read_text().replace("\r\n", "\n")
+    now = datetime.now(LOCAL_TZ).strftime("%Y-%m-%d %H:%M")
+    window_cn = {"late": "凌晨", "early": "早场", "noon": "午间", "midday": "午间", "evening": "傍晚", "night": "晚间"}
+    w_name = window_cn.get(window, window)
+    mode, source = _extract_mode_source(full)
+    a_rows, b_rows, cv = _parse_official_rows_from_candidate_view(key)
+    a_count = int(cv.get("A_count", len(a_rows)) or 0) if isinstance(cv, dict) else len(a_rows)
+    b_count = int(cv.get("B_count", len(b_rows)) or 0) if isinstance(cv, dict) else len(b_rows)
+    total = int(cv.get("scan_total", 0) or 0) if isinstance(cv, dict) else 0
+
+    lines: list[str] = []
+    lines.append("【V4今日正式推荐】")
+    lines.append(f"窗口：{w_name}")
+    lines.append(f"日期：{key[:4]}-{key[4:6]}-{key[6:]}")
+    lines.append(f"生成时间：{now}")
+    lines.append(f"production_grade_mode={mode}")
+    lines.append(f"official_grade_source={source}")
+    lines.append("engine_default_rescue_threshold=73.5")
+    if total > 0:
+        lines.append(f"扫描{total}场｜A={a_count}｜B={b_count}")
+    else:
+        lines.append(f"A={a_count}｜B={b_count}")
+    lines.append(SEP)
+
+    if a_rows:
+        lines.append(f"【A级{len(a_rows)}场】")
+        for i, r in enumerate(a_rows, 1):
+            lines.append(f"{i}. {_cn(r['home'])} vs {_cn(r['away'])}｜{_league_cn(r['league'])}｜{r['kickoff']}")
+            lines.append(f"   原因：{r['reason']}")
+        lines.append(SEP)
+    else:
+        lines.append("【A级0场】")
+        lines.append(SEP)
+
+    if b_rows:
+        lines.append(f"【B级{len(b_rows)}场】")
+        for i, r in enumerate(b_rows, 1):
+            lines.append(f"{i}. {_cn(r['home'])} vs {_cn(r['away'])}｜{_league_cn(r['league'])}｜{r['kickoff']}")
+            lines.append(f"   原因：{r['reason']}")
+            if i < len(b_rows):
+                lines.append(SUB_SEP)
+        lines.append(SEP)
+    else:
+        lines.append("【B级0场】")
+        lines.append(SEP)
+
+    lines.append("风险提示：仅系统正式候选，不夸大胜率，不建议倍投。")
+    lines.append("⚠️ 以 official A/B 为准，非正式观察条目不进入正式推荐。")
+    return "\n".join(lines)
+
+
+def format_qq(date_str: str, window: str = "midday", mode: str = "official_recommendation") -> str:
+    mode_norm = str(mode or "official_recommendation").strip().lower()
+    if mode_norm == "official_recommendation":
+        result = _format_official_qq(date_str, window=window)
+        key = date_str.replace("-", "")
+        qq_path = REPORT_DIR / f"v4_openclaw_brief_qq_{key}.txt"
+        qq_path.write_text(result, encoding="utf-8")
+        return result
+
     key = date_str.replace("-","")
     bp = REPORT_DIR / f"v4_openclaw_brief_{key}.txt"
     if not bp.exists():
@@ -228,7 +342,7 @@ def format_qq(date_str: str, window: str = "midday") -> str:
     else:
         L.append("样本不足，仅观察")
     L.append(SEP)
-    # Conclusion - NO "重点A级前2"
+    # Conclusion - template-test mode only
     a_n = int(a_count) if a_count.isdigit() else 0
     b_n = int(b_count) if b_count.isdigit() else 0
     total_ab = a_n + b_n
@@ -255,5 +369,6 @@ if __name__ == "__main__":
     p = argparse.ArgumentParser()
     p.add_argument("--date", required=True)
     p.add_argument("--window", default="midday")
+    p.add_argument("--mode", default="official_recommendation", choices=["official_recommendation", "template_test"])
     a = p.parse_args()
-    print(format_qq(a.date, a.window))
+    print(format_qq(a.date, a.window, mode=a.mode))
