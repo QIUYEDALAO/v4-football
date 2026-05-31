@@ -123,6 +123,7 @@ def main() -> int:
     tuning = report.get("tuning_summary", {}) if isinstance(report.get("tuning_summary"), dict) else {}
     recent5_stats = report.get("recent5_bilateral_gate_stats", {}) if isinstance(report.get("recent5_bilateral_gate_stats"), dict) else {}
     dist = report.get("distribution", {}) if isinstance(report.get("distribution"), dict) else {}
+    safety_market = report.get("safety_market_h2h_events_cpl", {}) if isinstance(report.get("safety_market_h2h_events_cpl"), dict) else {}
 
     # official missing must not be fake 0/0/0/0
     off_status = str(official.get("official_artifact_status") or "")
@@ -243,6 +244,56 @@ def main() -> int:
     _ok(checks, "safety_violations_zero", safety_violations == 0, str(safety_violations))
     if safety_violations != 0:
         blockers.append("safety_violations_nonzero")
+
+    # market-assisted rescue field rename cleanup
+    for k in [
+        "market_assisted_rescue_to_B_count",
+        "market_assisted_rescue_to_B_list",
+        "market_alone_manufactured_AB_count",
+        "market_alone_manufactured_AB_list",
+        "market_rescue_safety_status",
+        "market_rescue_naming_status",
+    ]:
+        ok = k in safety_market
+        _ok(checks, f"market_field:{k}", ok, str(safety_market.get(k)))
+        if not ok:
+            blockers.append(f"missing_market_field:{k}")
+
+    assisted_cnt = int(safety_market.get("market_assisted_rescue_to_B_count") or 0)
+    alone_cnt = int(safety_market.get("market_alone_manufactured_AB_count") or 0)
+    assisted_list = safety_market.get("market_assisted_rescue_to_B_list") or []
+    alone_list = safety_market.get("market_alone_manufactured_AB_list") or []
+    naming_status = str(safety_market.get("market_rescue_naming_status") or "")
+    safety_status = str(safety_market.get("market_rescue_safety_status") or "")
+
+    _ok(checks, "market_assisted_rescue_to_B_count_expected_5", assisted_cnt == 5, str(assisted_cnt))
+    if assisted_cnt != 5:
+        blockers.append("market_assisted_rescue_count_not_5")
+
+    _ok(checks, "market_alone_manufactured_AB_count_zero", alone_cnt == 0, str(alone_cnt))
+    if alone_cnt != 0:
+        blockers.append("market_alone_manufactured_nonzero")
+
+    _ok(checks, "market_assisted_list_count_match", isinstance(assisted_list, list) and len(assisted_list) == assisted_cnt, str(len(assisted_list) if isinstance(assisted_list, list) else type(assisted_list)))
+    if not (isinstance(assisted_list, list) and len(assisted_list) == assisted_cnt):
+        blockers.append("market_assisted_list_mismatch")
+
+    _ok(checks, "market_alone_list_count_match", isinstance(alone_list, list) and len(alone_list) == alone_cnt, str(len(alone_list) if isinstance(alone_list, list) else type(alone_list)))
+    if not (isinstance(alone_list, list) and len(alone_list) == alone_cnt):
+        blockers.append("market_alone_list_mismatch")
+
+    _ok(checks, "market_rescue_naming_status_ok", naming_status == "RENAMED_SPLIT_ACTIVE", naming_status)
+    if naming_status != "RENAMED_SPLIT_ACTIVE":
+        blockers.append("market_rescue_naming_status_invalid")
+
+    _ok(checks, "market_rescue_safety_status_clean", safety_status == "CLEAN", safety_status)
+    if safety_status != "CLEAN":
+        blockers.append("market_rescue_safety_status_not_clean")
+
+    # legacy alias kept for compatibility but must not drive violation logic
+    legacy_alias = safety_market.get("market_manufactured_AB_found")
+    _ok(checks, "legacy_market_field_present", legacy_alias is not None, str(legacy_alias))
+    _ok(checks, "legacy_market_field_deprecated_flag", bool(safety_market.get("market_manufactured_AB_found_deprecated")) is True, str(safety_market.get("market_manufactured_AB_found_deprecated")))
 
     bfloor_detected = int(bfloor_stats.get("rf_strong_confirmed_b_floor_exception_count") or 0)
     bfloor_rescued = int(bfloor_stats.get("bfloor_detected_rescued_count") or 0)

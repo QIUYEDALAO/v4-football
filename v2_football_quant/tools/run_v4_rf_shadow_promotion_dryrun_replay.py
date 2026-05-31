@@ -578,7 +578,10 @@ def build_report(date: str, source_artifact: str | None, official_artifact: str 
 
     market_no_data_a_found = 0
     market_extreme_veto_non_skip_found = 0
-    market_manufactured_ab_found = 0
+    market_assisted_rescue_to_b_count = 0
+    market_assisted_rescue_to_b_list: list[int] = []
+    market_alone_manufactured_ab_count = 0
+    market_alone_manufactured_ab_list: list[int] = []
     market_hard_veto_old_behavior_restored = 0
     h2h_downgrade_found = 0
     h2h_manufactured_ab_found = 0
@@ -731,7 +734,17 @@ def build_report(date: str, source_artifact: str | None, official_artifact: str 
         if _is_extreme_veto(row) and dry_grade != "SKIP":
             market_extreme_veto_non_skip_found += 1
         if source_grade not in {"A", "B"} and dry_grade in {"A", "B"}:
-            market_manufactured_ab_found += 1
+            # Split legal market-assisted rescue (C->B under RF-strong boundaries)
+            # from illegal market-alone manufactured A/B.
+            is_legal_market_assisted_rescue = bool(rescue["recent5_rescue_to_B"]) and dry_grade == "B"
+            if is_legal_market_assisted_rescue:
+                market_assisted_rescue_to_b_count += 1
+                if isinstance(fid, int):
+                    market_assisted_rescue_to_b_list.append(fid)
+            else:
+                market_alone_manufactured_ab_count += 1
+                if isinstance(fid, int):
+                    market_alone_manufactured_ab_list.append(fid)
         if str(row.get("opening_market_support_status") or "").upper() == "MARKET_HARD_VETO" and dry_grade == "SKIP":
             market_hard_veto_old_behavior_restored += 1
 
@@ -814,6 +827,7 @@ def build_report(date: str, source_artifact: str | None, official_artifact: str 
     safety_violations_count = (
         market_no_data_a_found
         + market_extreme_veto_non_skip_found
+        + market_alone_manufactured_ab_count
         + h2h_manufactured_ab_found
         + events_manufactured_ab_found
         + cpl_changed_official_found
@@ -821,6 +835,10 @@ def build_report(date: str, source_artifact: str | None, official_artifact: str 
         + cpl_touched_validation_found
         + rescue_to_a_count
     )
+
+    market_rescue_safety_status = "CLEAN" if market_alone_manufactured_ab_count == 0 else "VIOLATION"
+    market_rescue_naming_status = "RENAMED_SPLIT_ACTIVE"
+    market_manufactured_ab_found_legacy_alias = market_assisted_rescue_to_b_count
 
     recent5_cov_status = _coverage_status(recent5_available, recent5_unknown)
     bfloor_cov_status = _coverage_status(bfloor_available, bfloor_unknown)
@@ -935,7 +953,14 @@ def build_report(date: str, source_artifact: str | None, official_artifact: str 
         "safety_market_h2h_events_cpl": {
             "market_no_data_A_found": market_no_data_a_found,
             "market_extreme_veto_non_skip_found": market_extreme_veto_non_skip_found,
-            "market_manufactured_AB_found": market_manufactured_ab_found,
+            "market_assisted_rescue_to_B_count": market_assisted_rescue_to_b_count,
+            "market_assisted_rescue_to_B_list": sorted(market_assisted_rescue_to_b_list),
+            "market_alone_manufactured_AB_count": market_alone_manufactured_ab_count,
+            "market_alone_manufactured_AB_list": sorted(market_alone_manufactured_ab_list),
+            "market_rescue_safety_status": market_rescue_safety_status,
+            "market_rescue_naming_status": market_rescue_naming_status,
+            "market_manufactured_AB_found": market_manufactured_ab_found_legacy_alias,
+            "market_manufactured_AB_found_deprecated": True,
             "market_hard_veto_old_behavior_restored": market_hard_veto_old_behavior_restored,
             "h2h_downgrade_found": h2h_downgrade_found,
             "h2h_manufactured_AB_found": h2h_manufactured_ab_found,
@@ -978,6 +1003,8 @@ def build_report(date: str, source_artifact: str | None, official_artifact: str 
             "shadow_a_before": shadow_before_dist["A"],
             "shadow_a_after": shadow_after_dist["A"],
             "safety_violations_count": safety_violations_count,
+            "market_assisted_rescue_to_B_count": market_assisted_rescue_to_b_count,
+            "market_alone_manufactured_AB_count": market_alone_manufactured_ab_count,
         },
         "rows": rows_out,
         "disclaimer": "DRYRUN/REPLAY ONLY. No official/pending/QQ mutation.",
@@ -1018,6 +1045,8 @@ def write_outputs(report: dict[str, Any], date: str) -> tuple[Path, Path]:
         f"- B->B before/after = {cov['b_to_b_before']} / {cov['b_to_b_after']}",
         f"- recent5 rescue_to_B = {s5s['recent5_rescue_to_B_count']}",
         f"- bfloor rescue_to_B  = {bfs['bfloor_rescue_to_B_count']}",
+        f"- market assisted rescue_to_B = {report['safety_market_h2h_events_cpl']['market_assisted_rescue_to_B_count']}",
+        f"- market alone manufactured A/B = {report['safety_market_h2h_events_cpl']['market_alone_manufactured_AB_count']}",
         "",
         "## coverage",
         f"- recent5_gate: {s5c['recent5_gate_field_coverage_status']} (available={s5c['recent5_gate_available_count']}, unknown={s5c['recent5_gate_unknown_count']})",

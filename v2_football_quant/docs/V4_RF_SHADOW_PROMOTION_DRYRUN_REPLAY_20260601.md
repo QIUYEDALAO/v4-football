@@ -59,6 +59,14 @@ Promotion replay 判断必须同时满足：
 - `--strict-field-coverage` 打开后：
   - official missing 或 recent5 coverage incomplete 时，不允许 baseline-ready。
 
+7. **market rescue 字段重命名清理（Phase 3F-N）**
+- 新增：
+  - `market_assisted_rescue_to_B_count/list`（合法 rescue）
+  - `market_alone_manufactured_AB_count/list`（非法 market-alone 制造）
+  - `market_rescue_safety_status`
+  - `market_rescue_naming_status`
+- 旧字段 `market_manufactured_AB_found` 保留为 deprecated alias，仅用于兼容旧读取方，禁止作为 safety violation blocker。
+
 ## 产物与工具
 - Runner：`tools/run_v4_rf_shadow_promotion_dryrun_replay.py`
 - Checker：`tools/check_v4_rf_shadow_promotion_dryrun.py`

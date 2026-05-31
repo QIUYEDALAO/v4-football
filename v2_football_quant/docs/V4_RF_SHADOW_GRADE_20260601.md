@@ -106,3 +106,8 @@
 - 救援只允许 `C -> B`，不允许 `-> A`。
 - `TIER_4_NON_FORMAL`、`MARKET_EXTREME_VETO`、`POST_OFFSEASON_RETURN/baseline-only`、`MARKET_NO_DATA` A 风险场景必须阻断。
 - 本补充仅作用 shadow/dryrun，不改变 official/pending/QQ/validation/live bet/cron。
+
+### Phase 3F-N 命名澄清
+- 合法口径：`market_assisted_rescue_to_B_*`（代表市场“辅助”RF 强场景 C→B）。
+- 非法口径：`market_alone_manufactured_AB_*`（代表仅依赖 market 制造 A/B）。
+- 历史字段 `market_manufactured_AB_found` 仅保留 deprecated alias，不再作为 safety violation 判断。
