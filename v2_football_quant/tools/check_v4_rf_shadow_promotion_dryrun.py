@@ -98,9 +98,13 @@ def main() -> int:
     for k in [
         "official_artifact",
         "recent5_coverage",
+        "recent5_bilateral_gate_stats",
         "bfloor_coverage",
+        "bfloor_stats",
         "safety_coverage",
         "safety_checks",
+        "coverage",
+        "tuning_summary",
         "distribution",
         "final_replay_conclusion",
     ]:
@@ -112,8 +116,12 @@ def main() -> int:
     official = report.get("official_artifact", {}) if isinstance(report.get("official_artifact"), dict) else {}
     recent5 = report.get("recent5_coverage", {}) if isinstance(report.get("recent5_coverage"), dict) else {}
     bfloor = report.get("bfloor_coverage", {}) if isinstance(report.get("bfloor_coverage"), dict) else {}
+    bfloor_stats = report.get("bfloor_stats", {}) if isinstance(report.get("bfloor_stats"), dict) else {}
     safety_cov = report.get("safety_coverage", {}) if isinstance(report.get("safety_coverage"), dict) else {}
     safety = report.get("safety_checks", {}) if isinstance(report.get("safety_checks"), dict) else {}
+    coverage = report.get("coverage", {}) if isinstance(report.get("coverage"), dict) else {}
+    tuning = report.get("tuning_summary", {}) if isinstance(report.get("tuning_summary"), dict) else {}
+    recent5_stats = report.get("recent5_bilateral_gate_stats", {}) if isinstance(report.get("recent5_bilateral_gate_stats"), dict) else {}
     dist = report.get("distribution", {}) if isinstance(report.get("distribution"), dict) else {}
 
     # official missing must not be fake 0/0/0/0
@@ -154,6 +162,18 @@ def main() -> int:
         if not ok:
             blockers.append(f"missing_recent5_field:{k}")
 
+    for k in [
+        "recent5_rescue_to_B_count",
+        "recent5_rescue_blocked_tier4_count",
+        "recent5_rescue_blocked_extreme_veto_count",
+        "recent5_rescue_blocked_baseline_only_count",
+        "recent5_rescue_blocked_market_no_data_A_count",
+    ]:
+        ok = k in recent5_stats
+        _ok(checks, f"recent5_stat:{k}", ok, str(recent5_stats.get(k)))
+        if not ok:
+            blockers.append(f"missing_recent5_stat:{k}")
+
     # UNKNOWN not counted as zero-pass
     r5_unknown = int(recent5.get("recent5_gate_unknown_count") or 0)
     r5_available = int(recent5.get("recent5_gate_available_count") or 0)
@@ -173,6 +193,71 @@ def main() -> int:
         _ok(checks, f"bfloor_field:{k}", ok)
         if not ok:
             blockers.append(f"missing_bfloor_field:{k}")
+
+    for k in [
+        "bfloor_rescue_to_B_count",
+        "bfloor_detected_but_noop_count",
+        "bfloor_detected_blocked_count",
+        "bfloor_detected_rescued_count",
+        "rescue_to_A_count",
+        "exception_to_B_count",
+    ]:
+        ok = k in bfloor_stats
+        _ok(checks, f"bfloor_stat:{k}", ok, str(bfloor_stats.get(k)))
+        if not ok:
+            blockers.append(f"missing_bfloor_stat:{k}")
+
+    # tuning boundaries
+    rescue_to_a = int(bfloor_stats.get("rescue_to_A_count") or 0)
+    _ok(checks, "rescue_to_A_count_zero", rescue_to_a == 0, str(rescue_to_a))
+    if rescue_to_a != 0:
+        blockers.append("rescue_to_a_nonzero")
+
+    shadow_before = dist.get("shadow_dryrun_grade_before_tuning", {}) if isinstance(dist.get("shadow_dryrun_grade_before_tuning"), dict) else {}
+    shadow_after = dist.get("shadow_dryrun_grade_after_tuning", {}) if isinstance(dist.get("shadow_dryrun_grade_after_tuning"), dict) else {}
+    official_b = int((off_dist or {}).get("B", 0)) if isinstance(off_dist, dict) else 0
+    shadow_a_before = int(shadow_before.get("A", 0))
+    shadow_a_after = int(shadow_after.get("A", 0))
+    shadow_b_after = int(shadow_after.get("B", 0))
+
+    _ok(checks, "shadow_A_not_expanded", shadow_a_after <= shadow_a_before, f"before={shadow_a_before},after={shadow_a_after}")
+    if shadow_a_after > shadow_a_before:
+        blockers.append("shadow_a_expanded")
+
+    _ok(checks, "shadow_B_not_above_official_B", shadow_b_after <= official_b, f"shadow_B={shadow_b_after},official_B={official_b}")
+    if shadow_b_after > official_b:
+        blockers.append("shadow_b_above_official_b")
+
+    b_to_c_before = int(coverage.get("b_to_c_before") or 0)
+    b_to_c_after = int(coverage.get("b_to_c_after") or 0)
+    _ok(checks, "B_to_C_reduced_or_equal", b_to_c_after <= b_to_c_before, f"before={b_to_c_before},after={b_to_c_after}")
+    if b_to_c_after > b_to_c_before:
+        blockers.append("b_to_c_increased")
+
+    skip_to_b_after = int(coverage.get("skip_to_b_after") or 0)
+    _ok(checks, "SKIP_to_B_not_expanded", skip_to_b_after == 0, str(skip_to_b_after))
+    if skip_to_b_after != 0:
+        blockers.append("skip_to_b_nonzero")
+
+    safety_violations = int(tuning.get("safety_violations_count") or 0)
+    _ok(checks, "safety_violations_zero", safety_violations == 0, str(safety_violations))
+    if safety_violations != 0:
+        blockers.append("safety_violations_nonzero")
+
+    bfloor_detected = int(bfloor_stats.get("rf_strong_confirmed_b_floor_exception_count") or 0)
+    bfloor_rescued = int(bfloor_stats.get("bfloor_detected_rescued_count") or 0)
+    bfloor_blocked = int(bfloor_stats.get("bfloor_detected_blocked_count") or 0)
+    bfloor_noop = int(bfloor_stats.get("bfloor_detected_but_noop_count") or 0)
+    detected_accounted = bfloor_detected == (bfloor_rescued + bfloor_blocked + bfloor_noop)
+    _ok(checks, "bfloor_detected_accounted", detected_accounted, f"detected={bfloor_detected},rescued={bfloor_rescued},blocked={bfloor_blocked},noop={bfloor_noop}")
+    if not detected_accounted:
+        blockers.append("bfloor_detected_not_accounted")
+
+    if bfloor_detected > 0 and bfloor_blocked < bfloor_detected:
+        ex_to_b = int(bfloor_stats.get("exception_to_B_count") or 0)
+        _ok(checks, "bfloor_exception_to_B_positive_when_safe_detected", ex_to_b > 0, str(ex_to_b))
+        if ex_to_b <= 0:
+            blockers.append("bfloor_exception_to_B_not_positive")
 
     # safety coverage fields
     for k in [

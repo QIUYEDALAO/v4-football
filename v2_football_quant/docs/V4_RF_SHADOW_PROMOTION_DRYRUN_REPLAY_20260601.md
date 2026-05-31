@@ -85,3 +85,8 @@ Promotion replay 判断必须同时满足：
 
 ## 说明
 本阶段仍是 dryrun-only。后续如要进入正式 promotion 或生产切换，必须 BOSS 单独授权并经过 OpenClaw 验收。
+
+## Phase 3F 调优补充
+- replay 增加 `shadow_dryrun_grade_before_tuning` 与 `shadow_dryrun_grade_after_tuning`，用于对比 B→C / B→B 变化。
+- 新增 recent5/B-floor rescue 统计与阻断统计（tier4 / extreme veto / baseline-only / market-no-data）。
+- 目标是减少不合理 B→C，不扩大 A，不越过 official B 上限，不触发任何 official/pending/QQ 变更。

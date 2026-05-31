@@ -390,9 +390,9 @@ def main() -> int:
             combined_recent5_fh_involved_rate=0.7,
             home_recent5_fh_involved_rate=0.8,  # 4/5
             away_recent5_fh_involved_rate=0.6,  # 3/5 => gate FAIL
-            recent_form_primary_score=75.0,
-            prematch_ht_line=1.0,
-            prematch_over_odds=1.90,
+            recent_form_primary_score=78.0,
+            prematch_ht_line=1.25,
+            prematch_over_odds=1.80,
             season_phase="ACTIVE_SEASON",
             league_tier="TIER_3_WEAK_COVERAGE",
         ),
@@ -406,6 +406,78 @@ def main() -> int:
     _ok(checks, "recent5_fail_but_strong_rf_keeps_b", exception_ok, str((r_exception_b.get("rf_shadow_grade"), r_exception_b.get("recent5_bilateral_gate_exception_used"))))
     if not exception_ok:
         blockers.append("recent5_exception_keep_b_failed")
+
+    _ok(
+        checks,
+        "recent5_rescue_reason_present",
+        str(r_exception_b.get("recent5_rescue_reason") or "") in {
+            "RECENT5_BILATERAL_GATE_FAIL_BUT_RF_STRONG_CONFIRMED_RESCUE",
+            "RECENT5_FAIL_HIGH_RF_STRONG_MARKET_RESCUE_TO_B",
+        },
+        str(r_exception_b.get("recent5_rescue_reason")),
+    )
+    if str(r_exception_b.get("recent5_rescue_reason") or "") not in {
+        "RECENT5_BILATERAL_GATE_FAIL_BUT_RF_STRONG_CONFIRMED_RESCUE",
+        "RECENT5_FAIL_HIGH_RF_STRONG_MARKET_RESCUE_TO_B",
+    }:
+        blockers.append("recent5_rescue_reason_missing")
+
+    _ok(
+        checks,
+        "recent5_rescue_only_to_B",
+        r_exception_b.get("rf_shadow_grade") == "B" and r_exception_b.get("market_adjusted_shadow_grade") in {"B", "C", "SKIP"},
+        str((r_exception_b.get("rf_shadow_grade"), r_exception_b.get("market_adjusted_shadow_grade"))),
+    )
+    if not (r_exception_b.get("rf_shadow_grade") == "B" and r_exception_b.get("market_adjusted_shadow_grade") in {"B", "C", "SKIP"}):
+        blockers.append("recent5_rescue_not_bounded_to_b")
+
+    r_exception_tier4 = build_rf_shadow_grade_layer(
+        _sample(
+            base,
+            combined_recent10_fh_involved_rate=0.7,
+            combined_recent5_fh_involved_rate=0.7,
+            home_recent5_fh_involved_rate=0.8,
+            away_recent5_fh_involved_rate=0.6,
+            recent_form_primary_score=80.0,
+            prematch_ht_line=1.0,
+            prematch_over_odds=1.90,
+            season_phase="ACTIVE_SEASON",
+            league_tier="TIER_4_NON_FORMAL",
+        ),
+        factors=factors,
+    )
+    _ok(
+        checks,
+        "recent5_rescue_tier4_blocked",
+        r_exception_tier4.get("rf_shadow_grade") not in {"A", "B"},
+        str((r_exception_tier4.get("rf_shadow_grade"), r_exception_tier4.get("recent5_rescue_block_reason"))),
+    )
+    if r_exception_tier4.get("rf_shadow_grade") in {"A", "B"}:
+        blockers.append("recent5_rescue_tier4_not_blocked")
+
+    r_exception_extreme = build_rf_shadow_grade_layer(
+        _sample(
+            base,
+            combined_recent10_fh_involved_rate=0.7,
+            combined_recent5_fh_involved_rate=0.7,
+            home_recent5_fh_involved_rate=0.8,
+            away_recent5_fh_involved_rate=0.6,
+            recent_form_primary_score=80.0,
+            prematch_ht_line=0.25,
+            prematch_over_odds=2.4,
+            season_phase="ACTIVE_SEASON",
+            league_tier="TIER_3_WEAK_COVERAGE",
+        ),
+        factors=factors,
+    )
+    _ok(
+        checks,
+        "recent5_rescue_extreme_veto_blocked",
+        r_exception_extreme.get("market_adjusted_shadow_grade") == "SKIP",
+        str((r_exception_extreme.get("market_adjusted_shadow_grade"), r_exception_extreme.get("recent5_rescue_block_reason"))),
+    )
+    if r_exception_extreme.get("market_adjusted_shadow_grade") != "SKIP":
+        blockers.append("recent5_rescue_extreme_veto_not_blocked")
 
     r_market_no_data = build_rf_shadow_grade_layer(
         _sample(base, prematch_ht_line=None, prematch_over_odds=None, no_market_excluded=False),

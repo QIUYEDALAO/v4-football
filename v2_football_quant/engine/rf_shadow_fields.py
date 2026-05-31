@@ -909,6 +909,8 @@ def build_rf_shadow_grade_layer(record: dict, factors: dict | None = None) -> di
     else:
         rf_shadow_grade = "C"
 
+    pre_recent5_base_grade = rf_shadow_grade
+
     # RECENT5_BILATERAL_HEAT_GATE
     # recent10 >= 7/10 means candidate pool entry only; B stability requires bilateral near-term heat.
     home_recent5_pass_count = int(h5_cnt or 0)
@@ -1043,6 +1045,7 @@ def build_rf_shadow_grade_layer(record: dict, factors: dict | None = None) -> di
             balance_adjusted_grade = "C" if (c5_cnt or 0) >= 3 else "SKIP"
 
     # Apply bilateral heat cap after RF score/balance.
+    pre_gate_balance_grade = balance_adjusted_grade
     if recent5_bilateral_gate == "FAIL" and balance_adjusted_grade in {"A", "B"}:
         balance_adjusted_grade = "C"
 
@@ -1201,31 +1204,94 @@ def build_rf_shadow_grade_layer(record: dict, factors: dict | None = None) -> di
     if rf_shadow_score is None and c10_rate is not None and c5_rate is not None:
         rf_shadow_score = round((c10_rate * 0.7 + c5_rate * 0.3) * 100, 1)
 
-    # B-floor exception for bilateral heat gate fail (shadow-only, never upgrades to A).
-    if (
-        recent5_bilateral_gate == "FAIL"
-        and season_aware_shadow_grade_after == "C"
-        and (rf_shadow_score or 0.0) >= 73.0
-        and c10_cnt is not None
-        and c10_cnt >= 7
-        and (
+    # RECENT5 gate rescue (shadow-only; never modifies official chain).
+    recent5_rescue_to_b = False
+    recent5_rescue_reason = "NONE"
+    recent5_rescue_block_reason = "NONE"
+
+    bfloor_rescue_to_b = False
+    bfloor_rescue_reason = "NONE"
+    bfloor_rescue_block_reason = "NONE"
+
+    if recent5_bilateral_gate == "FAIL":
+        score = float(rf_shadow_score or 0.0)
+        pre_cap_shadow_b = pre_gate_balance_grade == "B"
+        pre_base_shadow_b = pre_recent5_base_grade == "B"
+        current_official_grade = str(record.get("official_grade") or record.get("grade") or "").strip().upper()
+        if current_official_grade not in {"A", "B", "C", "SKIP"}:
+            current_official_grade = ""
+        official_b = current_official_grade == "B"
+        recent10_pass = c10_cnt is not None and c10_cnt >= 7
+        balance_ok = (
             rf_balance_driver_level in {"HOT_DRIVER", "STRONG_DRIVER"}
-            or rf_balance_status in {"STRONG_DRIVER_ACCEPTABLE", "HOT_DRIVER_ACCEPTABLE"}
+            or rf_balance_status in {"HOT_DRIVER_ACCEPTABLE", "STRONG_DRIVER_ACCEPTABLE"}
         )
-        and market_status in {"MARKET_STRONG_CONFIRM", "MARKET_WEAK_CONFIRM", "MARKET_CONFIRM"}
-        and season_phase == "ACTIVE_SEASON"
-        and league_tier != "TIER_4_NON_FORMAL"
-        and market_status != "MARKET_HARD_VETO"
-        and season_phase != "POST_OFFSEASON_RETURN"
-        and not baseline_only_flag
-        and market_status != "MARKET_NO_DATA"
-    ):
+        market_confirm = market_status in {"MARKET_STRONG_CONFIRM", "MARKET_CONFIRM"}
+        market_strong = market_status == "MARKET_STRONG_CONFIRM"
+        not_tier4 = league_tier != "TIER_4_NON_FORMAL"
+        not_extreme_veto = str(market.get("opening_market_conflict_level") or "").upper() != "MARKET_EXTREME_VETO"
+        not_baseline_only = (not baseline_only_flag) and season_phase != "POST_OFFSEASON_RETURN"
+        no_market_no_data_a_risk = market_status != "MARKET_NO_DATA"
+        active_season = season_phase == "ACTIVE_SEASON"
+        eligible_base = (official_b or pre_cap_shadow_b or pre_base_shadow_b)
+
+        if not eligible_base:
+            recent5_rescue_block_reason = "NOT_B_BASELINE"
+        elif not recent10_pass:
+            recent5_rescue_block_reason = "RECENT10_NOT_PASS"
+        elif not not_tier4:
+            recent5_rescue_block_reason = "TIER4_BLOCKED"
+        elif not not_extreme_veto:
+            recent5_rescue_block_reason = "MARKET_EXTREME_VETO_BLOCKED"
+        elif not not_baseline_only:
+            recent5_rescue_block_reason = "BASELINE_ONLY_BLOCKED"
+        elif not no_market_no_data_a_risk:
+            recent5_rescue_block_reason = "MARKET_NO_DATA_BLOCKED"
+        elif not active_season:
+            recent5_rescue_block_reason = "SEASON_NOT_ACTIVE"
+        elif score >= 77.0 and market_confirm and balance_ok:
+            if season_aware_shadow_grade_after == "C":
+                season_aware_shadow_grade_after = "B"
+                recent5_rescue_to_b = True
+                bfloor_rescue_to_b = True
+                recent5_bilateral_gate_exception_used = True
+                recent5_bilateral_gate_cap_action = "CAP_TO_C_BUT_RESCUE_TO_B"
+                recent5_bilateral_gate_reason = "RECENT5_BILATERAL_GATE_FAIL_BUT_RF_STRONG_CONFIRMED_RESCUE"
+                recent5_rescue_reason = "RECENT5_BILATERAL_GATE_FAIL_BUT_RF_STRONG_CONFIRMED_RESCUE"
+                bfloor_rescue_reason = "RF_STRONG_CONFIRMED_B_FLOOR_RESCUE_TO_B"
+            else:
+                recent5_rescue_block_reason = "NO_C_TO_B_PATH"
+                bfloor_rescue_block_reason = "NO_C_TO_B_PATH"
+        elif score >= 80.0 and market_strong:
+            if season_aware_shadow_grade_after == "C":
+                season_aware_shadow_grade_after = "B"
+                recent5_rescue_to_b = True
+                bfloor_rescue_to_b = True
+                recent5_bilateral_gate_exception_used = True
+                recent5_bilateral_gate_cap_action = "CAP_TO_C_BUT_RESCUE_TO_B"
+                recent5_bilateral_gate_reason = "RECENT5_FAIL_HIGH_RF_STRONG_MARKET_RESCUE_TO_B"
+                recent5_rescue_reason = "RECENT5_FAIL_HIGH_RF_STRONG_MARKET_RESCUE_TO_B"
+                bfloor_rescue_reason = "RF_STRONG_CONFIRMED_B_FLOOR_RESCUE_TO_B"
+            else:
+                recent5_rescue_block_reason = "NO_C_TO_B_PATH"
+                bfloor_rescue_block_reason = "NO_C_TO_B_PATH"
+        else:
+            if score < 77.0:
+                recent5_rescue_block_reason = "RF_SCORE_BELOW_77"
+            elif not market_confirm:
+                recent5_rescue_block_reason = "MARKET_NOT_CONFIRM"
+            elif not balance_ok:
+                recent5_rescue_block_reason = "BALANCE_NOT_STRONG"
+            else:
+                recent5_rescue_block_reason = "RESCUE_CONDITION_NOT_MET"
+
+        if not bfloor_rescue_to_b and bfloor_rescue_block_reason == "NONE":
+            bfloor_rescue_block_reason = recent5_rescue_block_reason
+
+    # Hard guard: rescue can only keep B, never A.
+    if season_aware_shadow_grade_after == "A" and recent5_bilateral_gate_exception_used:
         season_aware_shadow_grade_after = "B"
-        recent5_bilateral_gate_exception_used = True
-        recent5_bilateral_gate_cap_action = "CAP_TO_C_BUT_EXCEPTION_KEEP_B"
-        recent5_bilateral_gate_reason = (
-            "RECENT5_BILATERAL_GATE_FAIL_BUT_RF_STRONG_CONFIRMED_B_FLOOR"
-        )
+        recent5_bilateral_gate_cap_action = "RESCUE_TO_B_ONLY"
 
     # Confidence pre-market: H2H bonus-only, no H2H downgrade
     confidence = int(round(rf_shadow_score or 50.0))
@@ -1364,6 +1430,12 @@ def build_rf_shadow_grade_layer(record: dict, factors: dict | None = None) -> di
         "recent5_dual_heat_pass": recent5_dual_heat_pass,
         "recent5_bilateral_gate_cap_action": recent5_bilateral_gate_cap_action,
         "recent5_bilateral_gate_exception_used": recent5_bilateral_gate_exception_used,
+        "recent5_rescue_to_B": recent5_rescue_to_b,
+        "recent5_rescue_reason": recent5_rescue_reason,
+        "recent5_rescue_block_reason": recent5_rescue_block_reason,
+        "bfloor_rescue_to_B": bfloor_rescue_to_b,
+        "bfloor_rescue_reason": bfloor_rescue_reason,
+        "bfloor_rescue_block_reason": bfloor_rescue_block_reason,
         "h2h_recent5_fh_involved_count": h2h_recent5_fh_involved_count,
         "h2h_recent5_sample_count": h2h_recent5_sample_count,
         "h2h_recent5_support_status": h2h_recent5_support_status,

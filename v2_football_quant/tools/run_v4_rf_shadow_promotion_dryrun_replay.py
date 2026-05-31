@@ -383,6 +383,136 @@ def _bfloor_reconstructable(row: dict[str, Any], r5: dict[str, Any]) -> tuple[bo
     return True, [], cond
 
 
+def _apply_recent5_bfloor_rescue(
+    row: dict[str, Any],
+    before_grade: str,
+    current_official_grade: str,
+    r5: dict[str, Any],
+) -> dict[str, Any]:
+    out = {
+        "after_grade": before_grade,
+        "recent5_rescue_to_B": False,
+        "recent5_rescue_reason": "NONE",
+        "recent5_rescue_block_reason": "NONE",
+        "bfloor_rescue_to_B": False,
+        "bfloor_rescue_block_reason": "NONE",
+        "rescue_to_A": False,
+        "blocked_tier4": False,
+        "blocked_extreme_veto": False,
+        "blocked_baseline_only": False,
+        "blocked_market_no_data_a": False,
+        "blocked_not_b_baseline": False,
+    }
+
+    gate = str(r5.get("gate") or "UNKNOWN").upper()
+    if gate != "FAIL":
+        out["recent5_rescue_block_reason"] = "RECENT5_GATE_NOT_FAIL"
+        out["bfloor_rescue_block_reason"] = "RECENT5_GATE_NOT_FAIL"
+        return out
+
+    score = _safe_num(row.get("rf_shadow_score"), 0.0)
+    recent10_pass = (_recent10_count(row) or 0) >= 7
+    bal_lvl = str(row.get("rf_balance_driver_level") or "").upper()
+    bal_status = str(row.get("rf_balance_status") or "").upper()
+    balance_ok = bal_lvl in {"HOT_DRIVER", "STRONG_DRIVER"} or bal_status in {"HOT_DRIVER_ACCEPTABLE", "STRONG_DRIVER_ACCEPTABLE"}
+    market = str(row.get("opening_market_support_status") or "").upper()
+    conflict = str(row.get("opening_market_conflict_level") or "").upper()
+    phase = str(row.get("season_phase") or "").upper()
+    tier = str(row.get("league_tier") or "").upper()
+    baseline_only = _safe_bool(row.get("rf_baseline_only_flag"), False) or phase == "POST_OFFSEASON_RETURN"
+    pre_cap_shadow_b = str(row.get("season_aware_shadow_grade_before") or "").upper() == "B"
+    r5_status = str(row.get("rf_recent5_grade_status") or "").upper()
+    pre_base_shadow_b = (
+        recent10_pass
+        and ("RECENT5_B_BASE_4_OF_5" in r5_status or "RECENT5_A_BASE_5_OF_5" in r5_status)
+    )
+    official_b = current_official_grade == "B"
+    eligible_base = official_b or pre_cap_shadow_b or pre_base_shadow_b
+
+    if not eligible_base:
+        out["recent5_rescue_block_reason"] = "NOT_B_BASELINE"
+        out["bfloor_rescue_block_reason"] = "NOT_B_BASELINE"
+        out["blocked_not_b_baseline"] = True
+        return out
+
+    if tier == "TIER_4_NON_FORMAL":
+        out["recent5_rescue_block_reason"] = "TIER4_BLOCKED"
+        out["bfloor_rescue_block_reason"] = "TIER4_BLOCKED"
+        out["blocked_tier4"] = True
+        return out
+
+    if conflict == "MARKET_EXTREME_VETO":
+        out["recent5_rescue_block_reason"] = "MARKET_EXTREME_VETO_BLOCKED"
+        out["bfloor_rescue_block_reason"] = "MARKET_EXTREME_VETO_BLOCKED"
+        out["blocked_extreme_veto"] = True
+        return out
+
+    if baseline_only:
+        out["recent5_rescue_block_reason"] = "BASELINE_ONLY_BLOCKED"
+        out["bfloor_rescue_block_reason"] = "BASELINE_ONLY_BLOCKED"
+        out["blocked_baseline_only"] = True
+        return out
+
+    if market == "MARKET_NO_DATA":
+        out["recent5_rescue_block_reason"] = "MARKET_NO_DATA_BLOCKED"
+        out["bfloor_rescue_block_reason"] = "MARKET_NO_DATA_BLOCKED"
+        out["blocked_market_no_data_a"] = True
+        return out
+
+    if phase != "ACTIVE_SEASON":
+        out["recent5_rescue_block_reason"] = "SEASON_NOT_ACTIVE"
+        out["bfloor_rescue_block_reason"] = "SEASON_NOT_ACTIVE"
+        return out
+
+    if before_grade == "SKIP" and not pre_cap_shadow_b:
+        out["recent5_rescue_block_reason"] = "SKIP_NOT_PRECAP_B"
+        out["bfloor_rescue_block_reason"] = "SKIP_NOT_PRECAP_B"
+        return out
+
+    market_confirm = market in {"MARKET_STRONG_CONFIRM", "MARKET_CONFIRM"}
+    if score >= 77.0 and recent10_pass and market_confirm and balance_ok and before_grade == "C":
+        out["after_grade"] = "B"
+        out["recent5_rescue_to_B"] = True
+        out["bfloor_rescue_to_B"] = True
+        out["recent5_rescue_reason"] = "RECENT5_BILATERAL_GATE_FAIL_BUT_RF_STRONG_CONFIRMED_RESCUE"
+        out["recent5_rescue_block_reason"] = "NONE"
+        out["bfloor_rescue_block_reason"] = "NONE"
+        return out
+
+    if score >= 80.0 and market == "MARKET_STRONG_CONFIRM" and recent10_pass and before_grade == "C":
+        out["after_grade"] = "B"
+        out["recent5_rescue_to_B"] = True
+        out["bfloor_rescue_to_B"] = True
+        out["recent5_rescue_reason"] = "RECENT5_FAIL_HIGH_RF_STRONG_MARKET_RESCUE_TO_B"
+        out["recent5_rescue_block_reason"] = "NONE"
+        out["bfloor_rescue_block_reason"] = "NONE"
+        return out
+
+    if score < 77.0:
+        out["recent5_rescue_block_reason"] = "RF_SCORE_BELOW_77"
+        out["bfloor_rescue_block_reason"] = "RF_SCORE_BELOW_77"
+    elif not recent10_pass:
+        out["recent5_rescue_block_reason"] = "RECENT10_NOT_PASS"
+        out["bfloor_rescue_block_reason"] = "RECENT10_NOT_PASS"
+    elif not market_confirm:
+        out["recent5_rescue_block_reason"] = "MARKET_NOT_CONFIRM"
+        out["bfloor_rescue_block_reason"] = "MARKET_NOT_CONFIRM"
+    elif not balance_ok:
+        out["recent5_rescue_block_reason"] = "BALANCE_NOT_STRONG"
+        out["bfloor_rescue_block_reason"] = "BALANCE_NOT_STRONG"
+    elif before_grade != "C":
+        out["recent5_rescue_block_reason"] = "NO_C_TO_B_PATH"
+        out["bfloor_rescue_block_reason"] = "NO_C_TO_B_PATH"
+    else:
+        out["recent5_rescue_block_reason"] = "RESCUE_CONDITION_NOT_MET"
+        out["bfloor_rescue_block_reason"] = "RESCUE_CONDITION_NOT_MET"
+
+    if out["after_grade"] == "A":
+        out["after_grade"] = "B"
+        out["rescue_to_A"] = True
+    return out
+
+
 def _coverage_status(available: int, unknown: int) -> str:
     if available <= 0 and unknown > 0:
         return "MISSING"
@@ -405,7 +535,8 @@ def build_report(date: str, source_artifact: str | None, official_artifact: str 
     off_dist = official["distribution"]
 
     rows_out: list[dict[str, Any]] = []
-    shadow_dist = {"A": 0, "B": 0, "C": 0, "SKIP": 0}
+    shadow_before_dist = {"A": 0, "B": 0, "C": 0, "SKIP": 0}
+    shadow_after_dist = {"A": 0, "B": 0, "C": 0, "SKIP": 0}
     delta_dist: dict[str, int] = {}
 
     # recent5 coverage counters
@@ -429,6 +560,17 @@ def build_report(date: str, source_artifact: str | None, official_artifact: str 
     tier4_exception_block = 0
     extreme_exception_block = 0
     market_no_data_a_block = 0
+    bfloor_detected_noop_count = 0
+    bfloor_detected_blocked_count = 0
+    bfloor_detected_rescued_count = 0
+
+    recent5_rescue_to_b_count = 0
+    rescue_to_a_count = 0
+    rescue_blocked_tier4_count = 0
+    rescue_blocked_extreme_veto_count = 0
+    rescue_blocked_baseline_only_count = 0
+    rescue_blocked_market_no_data_a_count = 0
+    bfloor_rescue_to_b_count = 0
 
     # safety counters
     market_unknown = h2h_unknown = events_unknown = cpl_unknown = 0
@@ -464,11 +606,8 @@ def build_report(date: str, source_artifact: str | None, official_artifact: str 
             current_official = "NOT_AVAILABLE"
             official_missing_count += 1
 
-        dry_grade, dry_source, dry_code, allowed = _dryrun_grade(row)
-        shadow_dist[dry_grade] += 1
-
-        delta, delta_reason = _official_shadow_delta(current_official, dry_grade, official["status"])
-        delta_dist[delta] = delta_dist.get(delta, 0) + 1
+        dry_grade_before, dry_source, dry_code, allowed_before = _dryrun_grade(row)
+        shadow_before_dist[dry_grade_before] += 1
 
         # recent5 gate coverage/reconstruction
         r5 = _reconstruct_recent5_gate(row)
@@ -503,10 +642,47 @@ def build_report(date: str, source_artifact: str | None, official_artifact: str 
 
         if bf_exception:
             bfloor_exception_cnt += 1
-            if dry_grade == "B":
+
+        # apply shadow-only tuning rescue
+        rescue = _apply_recent5_bfloor_rescue(
+            row=row,
+            before_grade=dry_grade_before,
+            current_official_grade=current_official,
+            r5=r5,
+        )
+        dry_grade = str(rescue["after_grade"])
+        allowed = dry_grade in {"A", "B"}
+        shadow_after_dist[dry_grade] += 1
+
+        if rescue["recent5_rescue_to_B"]:
+            recent5_rescue_to_b_count += 1
+        if rescue["bfloor_rescue_to_B"]:
+            bfloor_rescue_to_b_count += 1
+        if rescue["rescue_to_A"]:
+            rescue_to_a_count += 1
+        if rescue["blocked_tier4"]:
+            rescue_blocked_tier4_count += 1
+        if rescue["blocked_extreme_veto"]:
+            rescue_blocked_extreme_veto_count += 1
+        if rescue["blocked_baseline_only"]:
+            rescue_blocked_baseline_only_count += 1
+        if rescue["blocked_market_no_data_a"]:
+            rescue_blocked_market_no_data_a_count += 1
+
+        if bf_exception:
+            if rescue["bfloor_rescue_to_B"]:
                 exception_to_b += 1
-            if dry_grade == "A":
-                exception_to_a += 1
+                bfloor_detected_rescued_count += 1
+            elif rescue["bfloor_rescue_block_reason"] not in {"NONE", "RECENT5_GATE_NOT_FAIL"}:
+                bfloor_detected_blocked_count += 1
+            else:
+                bfloor_detected_noop_count += 1
+
+        if dry_grade == "A" and rescue["recent5_rescue_to_B"]:
+            exception_to_a += 1
+
+        delta, delta_reason = _official_shadow_delta(current_official, dry_grade, official["status"])
+        delta_dist[delta] = delta_dist.get(delta, 0) + 1
 
         # explicit blocks
         if str(row.get("league_tier") or "").upper() == "TIER_4_NON_FORMAL" and gate == "FAIL" and dry_grade not in {"A", "B"}:
@@ -562,10 +738,20 @@ def build_report(date: str, source_artifact: str | None, official_artifact: str 
         h2h_status = str(row.get("h2h_recent5_support_status") or "").upper()
         if h2h_status in {"H2H_NO_BONUS", "H2H_LOW_SAMPLE"} and GRADE_RANK.get(dry_grade, 0) < GRADE_RANK.get(source_grade, 0):
             h2h_downgrade_found += 1
-        if h2h_status in {"H2H_STRONG_BONUS", "H2H_LIGHT_BONUS"} and source_grade not in {"A", "B"} and dry_grade in {"A", "B"}:
+        if (
+            h2h_status in {"H2H_STRONG_BONUS", "H2H_LIGHT_BONUS"}
+            and source_grade not in {"A", "B"}
+            and dry_grade in {"A", "B"}
+            and not rescue["recent5_rescue_to_B"]
+        ):
             h2h_manufactured_ab_found += 1
 
-        if _safe_bool(row.get("events_collected"), False) and source_grade not in {"A", "B"} and dry_grade in {"A", "B"}:
+        if (
+            _safe_bool(row.get("events_collected"), False)
+            and source_grade not in {"A", "B"}
+            and dry_grade in {"A", "B"}
+            and not rescue["recent5_rescue_to_B"]
+        ):
             events_manufactured_ab_found += 1
 
         if _safe_bool(row.get("cpl_collected"), False) and _norm_grade(current_official) != _norm_grade(current_official):
@@ -584,6 +770,8 @@ def build_report(date: str, source_artifact: str | None, official_artifact: str 
             "away": _safe_text(row.get("away"), ""),
             "current_official_grade": current_official,
             "shadow_dryrun_grade": dry_grade,
+            "shadow_dryrun_grade_before_tuning": dry_grade_before,
+            "shadow_dryrun_grade_after_tuning": dry_grade,
             "shadow_dryrun_score": _safe_num(row.get("rf_shadow_score"), 0.0),
             "shadow_dryrun_reason": _safe_text(row.get("rf_shadow_reason")),
             "shadow_dryrun_reason_code": dry_code,
@@ -597,11 +785,42 @@ def build_report(date: str, source_artifact: str | None, official_artifact: str 
             "recent5_bilateral_gate_reason": _safe_text(r5.get("reason")),
             "recent5_bilateral_gate_cap_action": cap,
             "recent5_bilateral_gate_exception_used": bool(r5.get("exception_used")),
+            "recent5_rescue_to_B": bool(rescue["recent5_rescue_to_B"]),
+            "recent5_rescue_reason": str(rescue["recent5_rescue_reason"]),
+            "recent5_rescue_block_reason": str(rescue["recent5_rescue_block_reason"]),
+            "bfloor_rescue_to_B": bool(rescue["bfloor_rescue_to_B"]),
+            "bfloor_rescue_block_reason": str(rescue["bfloor_rescue_block_reason"]),
             "is_shadow_only_row": bool(is_shadow_only),
             "is_pending_bet_candidate": in_pending,
         })
 
     shadow_only_pending = sum(1 for r in rows_out if r["is_shadow_only_row"] and r["is_pending_bet_candidate"])
+
+    def _transition_count(official_g: str, shadow_g: str, field: str) -> int:
+        return sum(
+            1
+            for r in rows_out
+            if str(r.get("current_official_grade") or "").upper() == official_g
+            and str(r.get(field) or "").upper() == shadow_g
+        )
+
+    b_to_c_before = _transition_count("B", "C", "shadow_dryrun_grade_before_tuning")
+    b_to_c_after = _transition_count("B", "C", "shadow_dryrun_grade_after_tuning")
+    b_to_b_before = _transition_count("B", "B", "shadow_dryrun_grade_before_tuning")
+    b_to_b_after = _transition_count("B", "B", "shadow_dryrun_grade_after_tuning")
+    skip_to_b_after = _transition_count("SKIP", "B", "shadow_dryrun_grade_after_tuning")
+    skip_to_c_after = _transition_count("SKIP", "C", "shadow_dryrun_grade_after_tuning")
+
+    safety_violations_count = (
+        market_no_data_a_found
+        + market_extreme_veto_non_skip_found
+        + h2h_manufactured_ab_found
+        + events_manufactured_ab_found
+        + cpl_changed_official_found
+        + cpl_touched_live_bet_found
+        + cpl_touched_validation_found
+        + rescue_to_a_count
+    )
 
     recent5_cov_status = _coverage_status(recent5_available, recent5_unknown)
     bfloor_cov_status = _coverage_status(bfloor_available, bfloor_unknown)
@@ -649,7 +868,9 @@ def build_report(date: str, source_artifact: str | None, official_artifact: str 
             "current_official_grade_distribution": off_dist,
         },
         "distribution": {
-            "shadow_dryrun_grade": shadow_dist,
+            "shadow_dryrun_grade_before_tuning": shadow_before_dist,
+            "shadow_dryrun_grade_after_tuning": shadow_after_dist,
+            "shadow_dryrun_grade": shadow_after_dist,
             "official_vs_shadow_delta": delta_dist,
         },
         "replay_fields_presence": {
@@ -677,6 +898,11 @@ def build_report(date: str, source_artifact: str | None, official_artifact: str 
             "dual_heat_pass_count": dual_heat,
             "recent5_bilateral_gate_fail_count": recent5_fail,
             "recent5_fail_cap_to_C_count": fail_cap_to_c,
+            "recent5_rescue_to_B_count": recent5_rescue_to_b_count,
+            "recent5_rescue_blocked_tier4_count": rescue_blocked_tier4_count,
+            "recent5_rescue_blocked_extreme_veto_count": rescue_blocked_extreme_veto_count,
+            "recent5_rescue_blocked_baseline_only_count": rescue_blocked_baseline_only_count,
+            "recent5_rescue_blocked_market_no_data_A_count": rescue_blocked_market_no_data_a_count,
         },
         "bfloor_coverage": {
             "bfloor_exception_field_coverage_status": bfloor_cov_status,
@@ -691,6 +917,11 @@ def build_report(date: str, source_artifact: str | None, official_artifact: str 
             "tier4_exception_block_count": tier4_exception_block,
             "extreme_veto_exception_block_count": extreme_exception_block,
             "market_no_data_A_block_count": market_no_data_a_block,
+            "bfloor_rescue_to_B_count": bfloor_rescue_to_b_count,
+            "bfloor_detected_but_noop_count": bfloor_detected_noop_count,
+            "bfloor_detected_blocked_count": bfloor_detected_blocked_count,
+            "bfloor_detected_rescued_count": bfloor_detected_rescued_count,
+            "rescue_to_A_count": rescue_to_a_count,
         },
         "safety_coverage": {
             "safety_field_coverage_status": safety_cov_status,
@@ -721,6 +952,12 @@ def build_report(date: str, source_artifact: str | None, official_artifact: str 
             "official_ab_fixture_covered_by_scout_count": len(official_ab_fixture_ids & scout_fixture_ids),
             "official_ab_fixture_coverage_ok": len(official_ab_fixture_ids & scout_fixture_ids) == len(official_ab_fixture_ids) if official["status"] == "FOUND" else False,
             "shadow_only_rows_entered_pending_count": shadow_only_pending,
+            "b_to_c_before": b_to_c_before,
+            "b_to_c_after": b_to_c_after,
+            "b_to_b_before": b_to_b_before,
+            "b_to_b_after": b_to_b_after,
+            "skip_to_b_after": skip_to_b_after,
+            "skip_to_c_after": skip_to_c_after,
         },
         "safety_checks": {
             "official_grade_changed": False,
@@ -734,6 +971,14 @@ def build_report(date: str, source_artifact: str | None, official_artifact: str 
             "full_rescan_executed": False,
         },
         "final_replay_conclusion": final_conclusion,
+        "tuning_summary": {
+            "official_ab_cap": int(off_dist["A"]) + int(off_dist["B"]) if isinstance(off_dist, dict) else "NOT_AVAILABLE",
+            "shadow_ab_before": shadow_before_dist["A"] + shadow_before_dist["B"],
+            "shadow_ab_after": shadow_after_dist["A"] + shadow_after_dist["B"],
+            "shadow_a_before": shadow_before_dist["A"],
+            "shadow_a_after": shadow_after_dist["A"],
+            "safety_violations_count": safety_violations_count,
+        },
         "rows": rows_out,
         "disclaimer": "DRYRUN/REPLAY ONLY. No official/pending/QQ mutation.",
     }
@@ -748,10 +993,14 @@ def write_outputs(report: dict[str, Any], date: str) -> tuple[Path, Path]:
     json_path.write_text(json.dumps(report, ensure_ascii=False, indent=2), encoding="utf-8")
 
     off = report["official_artifact"]
-    dist = report["distribution"]["shadow_dryrun_grade"]
+    dist_before = report["distribution"]["shadow_dryrun_grade_before_tuning"]
+    dist_after = report["distribution"]["shadow_dryrun_grade_after_tuning"]
     s5c = report["recent5_coverage"]
+    s5s = report["recent5_bilateral_gate_stats"]
     bfc = report["bfloor_coverage"]
+    bfs = report["bfloor_stats"]
     sfc = report["safety_coverage"]
+    cov = report["coverage"]
 
     lines = [
         f"# V4 RF Shadow Promotion Dryrun Replay ({date})",
@@ -762,8 +1011,13 @@ def write_outputs(report: dict[str, Any], date: str) -> tuple[Path, Path]:
         f"- official_artifact_status: {off['official_artifact_status']}",
         f"- final_replay_conclusion: {report['final_replay_conclusion']}",
         "",
-        "## shadow dryrun",
-        f"- A/B/C/SKIP = {dist['A']}/{dist['B']}/{dist['C']}/{dist['SKIP']}",
+        "## shadow dryrun（before -> after）",
+        f"- A/B/C/SKIP before = {dist_before['A']}/{dist_before['B']}/{dist_before['C']}/{dist_before['SKIP']}",
+        f"- A/B/C/SKIP after  = {dist_after['A']}/{dist_after['B']}/{dist_after['C']}/{dist_after['SKIP']}",
+        f"- B->C before/after = {cov['b_to_c_before']} / {cov['b_to_c_after']}",
+        f"- B->B before/after = {cov['b_to_b_before']} / {cov['b_to_b_after']}",
+        f"- recent5 rescue_to_B = {s5s['recent5_rescue_to_B_count']}",
+        f"- bfloor rescue_to_B  = {bfs['bfloor_rescue_to_B_count']}",
         "",
         "## coverage",
         f"- recent5_gate: {s5c['recent5_gate_field_coverage_status']} (available={s5c['recent5_gate_available_count']}, unknown={s5c['recent5_gate_unknown_count']})",

@@ -99,3 +99,10 @@
 
 ## 结论
 本阶段是 shadow grade 层建设，不代表 production promotion。后续如需正式提升 shadow 到 official，必须另行 BOSS 单独授权。
+
+## Phase 3F 调优补充（Shadow-only）
+- recent5 gate 保留，不取消。
+- 对 gate FAIL 增加最小救援：`RECENT5_BILATERAL_GATE_FAIL_BUT_RF_STRONG_CONFIRMED_RESCUE`、`RECENT5_FAIL_HIGH_RF_STRONG_MARKET_RESCUE_TO_B`。
+- 救援只允许 `C -> B`，不允许 `-> A`。
+- `TIER_4_NON_FORMAL`、`MARKET_EXTREME_VETO`、`POST_OFFSEASON_RETURN/baseline-only`、`MARKET_NO_DATA` A 风险场景必须阻断。
+- 本补充仅作用 shadow/dryrun，不改变 official/pending/QQ/validation/live bet/cron。
