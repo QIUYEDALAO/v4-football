@@ -981,6 +981,112 @@ def build_rf_shadow_grade_layer(record: dict, factors: dict | None = None) -> di
         elif rf_balance_adjustment in {"SKIP_OR_C", "REQUIRE_DOMINANT_FAVORITE_CONFIRMATION"}:
             balance_adjusted_grade = "C" if (c5_cnt or 0) >= 3 else "SKIP"
 
+    # RF-SA-4: season-aware integration (shadow-only).
+    # This block may adjust shadow grade, but MUST NOT touch official grade chain.
+    season_phase = str(record.get("season_phase") or "UNKNOWN").upper()
+    league_tier = str(record.get("league_tier") or "UNKNOWN_TIER").upper()
+    window_policy = str(record.get("rf_window_policy") or "UNKNOWN_POLICY").upper()
+    sample_status = str(record.get("rf_sample_status") or "UNKNOWN").upper()
+    freshness_status = str(record.get("rf_freshness_status") or "UNKNOWN").upper()
+    early_penalty = bool(record.get("rf_early_season_penalty"))
+    short_break_penalty = bool(record.get("rf_short_break_penalty"))
+    baseline_only_flag = bool(record.get("rf_baseline_only_flag"))
+    baseline_available = bool(record.get("last_season_baseline_available"))
+    baseline_score = _to_float(record.get("last_season_baseline_score")) or 0.0
+
+    season_aware_shadow_grade_before = balance_adjusted_grade
+    season_aware_shadow_grade_after = balance_adjusted_grade
+    season_aware_actions: list[str] = []
+    season_aware_reasons: list[str] = []
+
+    def _cap_to(max_grade: str) -> None:
+        nonlocal season_aware_shadow_grade_after
+        if _grade_rank(season_aware_shadow_grade_after) > _grade_rank(max_grade):
+            season_aware_shadow_grade_after = max_grade
+
+    if season_phase == "ACTIVE_SEASON":
+        season_aware_actions.append("ACTIVE_D60_PRIMARY")
+        season_aware_reasons.append("ACTIVE_SEASON 使用60天主窗口")
+    elif season_phase == "SHORT_BREAK":
+        season_aware_actions.append("SHORT_BREAK_FALLBACK_D90")
+        season_aware_reasons.append("SHORT_BREAK 使用90天fallback并处罚")
+        if short_break_penalty:
+            _cap_to("B")
+            if freshness_status in {"STALE", "EXPIRED"}:
+                _cap_to("C")
+    elif season_phase == "EARLY_SEASON":
+        season_aware_actions.append("EARLY_SEASON_GUARD")
+        season_aware_reasons.append("EARLY_SEASON 样本限制，限制强信号")
+        if early_penalty:
+            _cap_to("B")
+        if sample_status in {"LOW_SAMPLE", "VERY_LOW_SAMPLE", "NO_SAMPLE"}:
+            _cap_to("C")
+    elif season_phase == "POST_OFFSEASON_RETURN":
+        season_aware_actions.append("POST_OFFSEASON_BASELINE_ONLY")
+        season_aware_reasons.append("POST_OFFSEASON_RETURN 仅baseline参考")
+        _cap_to("C")
+    elif season_phase == "OFFSEASON":
+        season_aware_actions.append("OFFSEASON_CONSERVATIVE")
+        season_aware_reasons.append("OFFSEASON 保守处理")
+        _cap_to("SKIP")
+    else:  # UNKNOWN and any invalid phase
+        season_aware_actions.append("UNKNOWN_SAFE_DEFAULT")
+        season_aware_reasons.append("UNKNOWN 安全默认，不强行升格")
+        _cap_to("B")
+
+    if baseline_only_flag:
+        season_aware_actions.append("BASELINE_ONLY_FLAG")
+        season_aware_reasons.append("baseline_only_flag 启用")
+        _cap_to("C")
+        if not baseline_available:
+            season_aware_actions.append("BASELINE_NOT_AVAILABLE")
+            season_aware_reasons.append("baseline 不可用，保守观察")
+        elif baseline_score < 0.45:
+            season_aware_actions.append("BASELINE_LOW_SCORE")
+            season_aware_reasons.append("baseline分数偏低，维持保守")
+
+    if league_tier == "TIER_1_ELITE":
+        season_aware_actions.append("TIER1_CONTEXT")
+        season_aware_reasons.append("主流顶级联赛，保持正常shadow解释")
+    elif league_tier == "TIER_2_MAINSTREAM":
+        season_aware_actions.append("TIER2_CONTEXT")
+        season_aware_reasons.append("主流联赛，按常规shadow处理")
+    elif league_tier == "TIER_3_WEAK_COVERAGE":
+        season_aware_actions.append("TIER3_CONSERVATIVE")
+        season_aware_reasons.append("弱覆盖联赛，限制强信号")
+        _cap_to("B")
+    elif league_tier == "TIER_4_NON_FORMAL":
+        season_aware_actions.append("TIER4_NON_FORMAL_GUARD")
+        season_aware_reasons.append("非正式赛事，禁止强shadow等级")
+        _cap_to("C")
+        if season_phase in {"UNKNOWN", "OFFSEASON"}:
+            _cap_to("SKIP")
+    else:  # UNKNOWN_TIER
+        season_aware_actions.append("UNKNOWN_TIER_SAFE")
+        season_aware_reasons.append("联赛层级未知，保守处理")
+        _cap_to("B")
+
+    if sample_status in {"VERY_LOW_SAMPLE", "NO_SAMPLE"}:
+        season_aware_actions.append("LOW_SAMPLE_HARD_GUARD")
+        season_aware_reasons.append("样本极低，降为观察或跳过")
+        _cap_to("SKIP")
+    elif sample_status == "LOW_SAMPLE":
+        season_aware_actions.append("LOW_SAMPLE_SOFT_GUARD")
+        season_aware_reasons.append("样本偏低，避免高等级")
+        _cap_to("C")
+
+    if window_policy == "UNKNOWN_POLICY":
+        season_aware_actions.append("WINDOW_UNKNOWN_SAFE")
+        season_aware_reasons.append("窗口策略未知，保守处理")
+        _cap_to("C")
+
+    if freshness_status in {"STALE", "EXPIRED"} and season_aware_shadow_grade_after in {"A", "B"}:
+        season_aware_actions.append("FRESHNESS_GUARD")
+        season_aware_reasons.append(f"样本新鲜度={freshness_status}，下调强信号")
+        _cap_to("C")
+
+    season_aware_shadow_applied = season_aware_shadow_grade_after != season_aware_shadow_grade_before
+
     # H2H recent5 bonus-only (no downgrade, no grade manufacture)
     h2h_sample_base = _to_int(factors.get("h2h_official_sample_size"), _to_int(factors.get("h2h_sample_size"), 0))
     h2h_recent5_sample_count = min(5, max(0, h2h_sample_base))
@@ -1042,7 +1148,7 @@ def build_rf_shadow_grade_layer(record: dict, factors: dict | None = None) -> di
 
     # Opening market policy (shadow only; RF is primary)
     market_policy = _apply_market_promotion_policy(
-        base_grade=balance_adjusted_grade,
+        base_grade=season_aware_shadow_grade_after,
         market_status=market_status,
         confidence_before_market=confidence_before_market,
         ht_line=_to_float(record.get("prematch_ht_line")),
@@ -1088,11 +1194,12 @@ def build_rf_shadow_grade_layer(record: dict, factors: dict | None = None) -> di
 
     rf_shadow_reason = (
         f"近10门槛={rf_recent10_gate_status}; 近5评级={rf_recent5_grade_status}; "
-        f"Balance={rf_balance_status}; H2H={h2h_recent5_support_status}; Market={market_status}"
+        f"Balance={rf_balance_status}; SeasonAware={season_aware_shadow_grade_before}->{season_aware_shadow_grade_after}; "
+        f"H2H={h2h_recent5_support_status}; Market={market_status}"
     )
 
     return {
-        "rf_shadow_grade": rf_shadow_grade,
+        "rf_shadow_grade": season_aware_shadow_grade_after,
         "rf_shadow_score": rf_shadow_score if rf_shadow_score is not None else "DATA_MISSING",
         "rf_shadow_route": rf_shadow_route,
         "rf_shadow_reason": rf_shadow_reason,
@@ -1128,4 +1235,9 @@ def build_rf_shadow_grade_layer(record: dict, factors: dict | None = None) -> di
         "dryrun_action": market_policy["dryrun_action"],
         "market_adjusted_shadow_grade": market_adjusted_shadow_grade,
         "market_adjustment_reason": market_adjustment_reason,
+        "season_aware_shadow_grade_before": season_aware_shadow_grade_before,
+        "season_aware_shadow_grade_after": season_aware_shadow_grade_after,
+        "season_aware_shadow_applied": season_aware_shadow_applied,
+        "season_aware_shadow_action": "|".join(season_aware_actions) if season_aware_actions else "NO_ACTION",
+        "season_aware_shadow_reason": " | ".join(season_aware_reasons) if season_aware_reasons else "NO_REASON",
     }

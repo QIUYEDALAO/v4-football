@@ -283,6 +283,10 @@ COLLECTION_LAZY_EXTRA_TEXT_FIELDS = (
 
 RF_SHADOW_GRADE_TEXT_FIELDS = (
     "rf_shadow_grade",
+    "season_aware_shadow_grade_before",
+    "season_aware_shadow_grade_after",
+    "season_aware_shadow_action",
+    "season_aware_shadow_reason",
     "rf_shadow_route",
     "rf_shadow_reason",
     "rf_entry_rule",
@@ -320,6 +324,7 @@ RF_SHADOW_GRADE_TEXT_FIELDS = (
 
 RF_SHADOW_GRADE_BOOL_FIELDS = (
     "rf_heating_exception",
+    "season_aware_shadow_applied",
 )
 
 RF_SHADOW_GRADE_NUM_FIELDS = (

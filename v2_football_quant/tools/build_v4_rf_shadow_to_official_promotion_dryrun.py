@@ -172,6 +172,9 @@ def build_dryrun_report(scout_data: list, candidate_view: dict, scan_date: str) 
     rejected_no_market = []
     rf_ab_downgraded_to_c_observe = 0
     market_no_data_preserved_observe = 0
+    season_aware_shadow_changed_count = 0
+    season_aware_shadow_unchanged_count = 0
+    season_aware_shadow_action_distribution: dict[str, int] = {}
     season_phase_distribution: dict[str, int] = {}
     season_phase_reason_distribution: dict[str, int] = {}
     league_tier_distribution: dict[str, int] = {}
@@ -214,6 +217,11 @@ def build_dryrun_report(scout_data: list, candidate_view: dict, scan_date: str) 
         _bump(current_season_count_reason_distribution, fixture.get("current_season_count_reason_code", "UNKNOWN_REASON"))
         _bump(rf_sample_status_distribution, fixture.get("rf_sample_status", "UNKNOWN"))
         _bump(rf_freshness_status_distribution, fixture.get("rf_freshness_status", fixture.get("recent_freshness_status", "UNKNOWN")))
+        _bump(season_aware_shadow_action_distribution, fixture.get("season_aware_shadow_action", "NO_ACTION"))
+        if bool(fixture.get("season_aware_shadow_applied")):
+            season_aware_shadow_changed_count += 1
+        else:
+            season_aware_shadow_unchanged_count += 1
 
         entry = {
             "fixture_id": fixture.get("fixture_id"),
@@ -228,6 +236,11 @@ def build_dryrun_report(scout_data: list, candidate_view: dict, scan_date: str) 
             "market_adjusted_shadow_grade_replay": policy.get("market_adjusted_shadow_grade", masg),
             "dryrun_grade": dryrun_grade,
             "rf_shadow_reason": fixture.get("rf_shadow_reason", ""),
+            "season_aware_shadow_grade_before": fixture.get("season_aware_shadow_grade_before", fixture.get("rf_shadow_grade", "")),
+            "season_aware_shadow_grade_after": fixture.get("season_aware_shadow_grade_after", fixture.get("rf_shadow_grade", "")),
+            "season_aware_shadow_applied": bool(fixture.get("season_aware_shadow_applied", False)),
+            "season_aware_shadow_action": fixture.get("season_aware_shadow_action", "NO_ACTION"),
+            "season_aware_shadow_reason": fixture.get("season_aware_shadow_reason", ""),
             "rf_balance_reason": fixture.get("rf_balance_reason", ""),
             "h2h_recent5_bonus_reason": fixture.get("h2h_recent5_bonus_reason", ""),
             "opening_market_support_status": fixture.get("opening_market_support_status", ""),
@@ -313,6 +326,11 @@ def build_dryrun_report(scout_data: list, candidate_view: dict, scan_date: str) 
         "rejected_by_no_market": rejected_no_market,
         "rf_ab_downgraded_to_c_observe_count": rf_ab_downgraded_to_c_observe,
         "market_no_data_preserved_observe_count": market_no_data_preserved_observe,
+        "season_aware_shadow_delta": {
+            "changed_count": season_aware_shadow_changed_count,
+            "unchanged_count": season_aware_shadow_unchanged_count,
+            "action_distribution": season_aware_shadow_action_distribution,
+        },
         "extreme_veto_count": int(dryrun_grades.get("DRYRUN_EXTREME_VETO", 0)),
         "season_aware_field_distribution": {
             "season_phase": season_phase_distribution,
