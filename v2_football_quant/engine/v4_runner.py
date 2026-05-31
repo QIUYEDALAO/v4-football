@@ -871,12 +871,8 @@ def run_v4_scan(
 
         h2h_required_total = sum(1 for r in lazy_prefetch_rows if r["h2h_required"])
         logger.info(
-            "  🧮 H2H hard-gate: raw=%s | requested=%s | budget_limit=%s(%.0f%%) | required=%s",
-            raw_total,
-            len(requested_rows),
-            budget_limit,
-            H2H_MAX_REQUIRED_RATIO * 100,
-            h2h_required_total,
+            f"  🧮 H2H hard-gate: raw={raw_total} | requested={len(requested_rows)} | "
+            f"budget_limit={budget_limit}({H2H_MAX_REQUIRED_RATIO * 100:.0f}%) | required={h2h_required_total}"
         )
 
     for i, fx in enumerate(fixtures):
