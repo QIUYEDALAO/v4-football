@@ -164,7 +164,7 @@ def _format_card(r: dict[str, Any]) -> str:
     )
 
 
-def build_brief(date_str: str) -> str:
+def _build_brief_legacy(date_str: str) -> str:
     key = _date_key(date_str)
     scout_path = REPORT_DIR / f"scout_v4_{key}.json"
     scout = _load_json(scout_path, [])
@@ -317,11 +317,133 @@ def build_brief(date_str: str) -> str:
     return "\n".join(lines)
 
 
+def _kickoff_label(raw: Any) -> str:
+    s = str(raw or "").strip()
+    if not s:
+        return "-"
+    try:
+        dt = datetime.fromisoformat(s.replace("Z", "+00:00"))
+        return dt.strftime("%m-%d %H:%M")
+    except Exception:
+        return s[-16:-3] if len(s) >= 16 else s
+
+
+def _brief_line(item: dict[str, Any]) -> str:
+    home = team_name_cn(str(item.get("home") or item.get("home_team") or "-"))
+    away = team_name_cn(str(item.get("away") or item.get("away_team") or "-"))
+    league = str(item.get("league") or item.get("league_name") or "-")
+    kickoff = _kickoff_label(item.get("kickoff") or item.get("kickoff_time"))
+    grade = str(item.get("official_grade") or item.get("grade") or "-").upper()
+    rf_score = item.get("rf_shadow_score")
+    market_grade = str(item.get("market_adjusted_shadow_grade") or "-").upper()
+    reason = str(item.get("official_reason") or item.get("market_adjustment_reason") or "无")
+    return (
+        f"- {home} vs {away}｜{league}｜{kickoff}｜{grade}\n"
+        f"  rf_score={rf_score if rf_score is not None else '-'}｜shadow={market_grade}\n"
+        f"  原因：{reason}"
+    )
+
+
+def _build_brief_season_aware(date_str: str, candidate_view_path: Path | None = None) -> str:
+    key = _date_key(date_str)
+    cv_path = candidate_view_path or (STATUS_DIR / f"v3v4_dashboard_candidate_view_{key}.json")
+    cv = _load_json(cv_path, {})
+    if not isinstance(cv, dict):
+        cv = {}
+    mode = str(cv.get("production_grade_mode") or "season_aware_rf")
+    source = str(cv.get("official_grade_source") or "market_adjusted_shadow_grade")
+
+    a_rows_raw = cv.get("A_candidates") or []
+    b_rows_raw = cv.get("B_candidates") or []
+    a_rows = [
+        r for r in a_rows_raw
+        if isinstance(r, dict)
+        and str(r.get("official_grade") or r.get("grade") or "").upper() == "A"
+        and bool(r.get("official_candidate", True))
+    ]
+    b_rows = [
+        r for r in b_rows_raw
+        if isinstance(r, dict)
+        and str(r.get("official_grade") or r.get("grade") or "").upper() == "B"
+        and bool(r.get("official_candidate", True))
+    ]
+    c_count = int(cv.get("C_count", 0) or 0)
+    skip_count = int(cv.get("SKIP_count", 0) or 0)
+    total = int(cv.get("scan_total", len(a_rows) + len(b_rows) + c_count + skip_count) or 0)
+    ab_total = len(a_rows) + len(b_rows)
+    ab_ratio = _pct_value(ab_total, total)
+
+    lines: list[str] = []
+    lines.append("【V4 情报系统】")
+    lines.append(f"V4上半场情报 · {mode} 正式推荐")
+    lines.append(f"日期：{key}")
+    lines.append(f"production_grade_mode={mode}")
+    lines.append(f"official_grade_source={source}")
+    lines.append("")
+    lines.append("📊 概览")
+    lines.append(f"A级强推荐：{len(a_rows)}场")
+    lines.append(f"B级达标推荐：{len(b_rows)}场")
+    lines.append(f"C级观察：{c_count}场（不进主推荐）")
+    lines.append(f"HT_SKIP跳过：{skip_count}场")
+    lines.append(f"全量扫描：{total}场｜A+B覆盖率：{ab_ratio}")
+    lines.append("━" * 40)
+
+    if a_rows:
+        lines.append("🔥 A级强推荐")
+        for r in a_rows:
+            lines.append(_brief_line(r))
+        lines.append("━" * 40)
+    else:
+        lines.append("🔥 A级强推荐：(无)")
+        lines.append("━" * 40)
+
+    if b_rows:
+        lines.append("🟢 B级达标推荐")
+        for r in b_rows:
+            lines.append(_brief_line(r))
+        lines.append("━" * 40)
+    else:
+        lines.append("🟢 B级达标推荐：(无)")
+        lines.append("━" * 40)
+
+    if ab_total == 0:
+        lines.append("今日无A/B上半场主推荐。")
+    else:
+        lines.append(f"V4最终结论：今日 A/B 主推荐 {ab_total} 场（A={len(a_rows)}, B={len(b_rows)}）。")
+    lines.append("风险提示：仅 official A/B 可作为主推荐；C观察、影子条目、演练条目不进入主推荐。")
+    lines.append("⚠️ V4最终结论以 official A/B 为准。")
+
+    text = "\n".join(lines)
+    out_path = REPORT_DIR / f"v4_openclaw_brief_{key}.txt"
+    out_path.parent.mkdir(parents=True, exist_ok=True)
+    out_path.write_text(text, encoding="utf-8")
+    return text
+
+
+def build_brief(
+    date_str: str,
+    production_grade_mode: str = "official_legacy",
+    candidate_view_path: Path | None = None,
+) -> str:
+    mode = str(production_grade_mode or "official_legacy").strip().lower()
+    if mode == "season_aware_rf":
+        return _build_brief_season_aware(date_str, candidate_view_path=candidate_view_path)
+    return _build_brief_legacy(date_str)
+
+
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--date", required=True, help="YYYYMMDD or YYYY-MM-DD")
+    parser.add_argument(
+        "--production-grade-mode",
+        default="official_legacy",
+        choices=["official_legacy", "season_aware_rf"],
+        help="Brief mode. season_aware_rf reads official A/B from candidate_view.",
+    )
+    parser.add_argument("--candidate-view-path", default="", help="Optional candidate_view path override")
     args = parser.parse_args()
-    print(build_brief(args.date))
+    cv_path = Path(args.candidate_view_path) if args.candidate_view_path else None
+    print(build_brief(args.date, production_grade_mode=args.production_grade_mode, candidate_view_path=cv_path))
 
 
 if __name__ == "__main__":

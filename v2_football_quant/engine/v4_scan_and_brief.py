@@ -1102,9 +1102,14 @@ def main():
         from engine.v4_openclaw_brief import build_brief
         from engine.v4_qq_formatter import format_qq
         
-        brief_text = build_brief(args.date)
+        brief_text = build_brief(
+            args.date,
+            production_grade_mode=str(args.production_grade_mode or "official_legacy"),
+            candidate_view_path=candidate_path,
+        )
         brief_path = REPORT_DIR / f"v4_openclaw_brief_{today_key}.txt"
         brief_path.write_text(brief_text, encoding="utf-8")
+        brief_sha256 = hashlib.sha256(brief_text.encode("utf-8")).hexdigest()
         
         qq_text = format_qq(args.date, window=args.window)
         qq_path = REPORT_DIR / f"v4_openclaw_brief_qq_{today_key}.txt"
@@ -1140,15 +1145,30 @@ def main():
         marker_dir.mkdir(parents=True, exist_ok=True)
         now_ts = datetime.now(LOCAL_TZ).isoformat()
         msg_hash = hashlib.md5(qq_text.encode()).hexdigest()[:16]
+        sent_marker_path = marker_dir / f"v4_scan_{args.window}_sent_{scan_date}.json"
+        duplicate_sent = sent_marker_path.exists()
 
         qq_route_guard = {
             "official_only": True,
             "allow_grades": ["A", "B"],
             "block_shadow_only": True,
             "block_dryrun": True,
+            "brief_path": str(brief_path),
+            "brief_sha256": brief_sha256,
+            "candidate_count": int(ab_count),
+            "sent_marker_path": str(sent_marker_path),
+            "duplicate_sent_exists": duplicate_sent,
             "guard_status": "PASS",
-            "allowed_to_send": bool(ab_count > 0 and (not effective_no_push) and V4_QQ_ENABLED),
-            "reason": "blocked_by_no_push_or_hard_gate" if (effective_no_push or not V4_QQ_ENABLED) else ("no_ab" if ab_count <= 0 else "eligible"),
+            "allowed_to_send": bool(ab_count > 0 and (not effective_no_push) and V4_QQ_ENABLED and (not duplicate_sent)),
+            "reason": (
+                "duplicate_sent_marker_exists"
+                if duplicate_sent
+                else (
+                    "blocked_by_no_push_or_hard_gate"
+                    if (effective_no_push or not V4_QQ_ENABLED)
+                    else ("no_ab" if ab_count <= 0 else "eligible")
+                )
+            ),
         }
 
         push_marker = {
@@ -1167,6 +1187,7 @@ def main():
             "ab_gt_zero": ab_count > 0,
             "message_hash": msg_hash,
             "brief_file": str(brief_path.name),
+            "brief_sha256": brief_sha256,
             "qq_file": str(qq_path.name),
             "generated_at": now_ts,
             "pushed": False,
@@ -1183,6 +1204,7 @@ def main():
                 "brief": str(brief_path),
                 "brief_qq": str(qq_path),
                 "log": str(log_path),
+                "sent_marker_path": str(sent_marker_path),
             },
             "safety_gates": {
                 "V4_QQ_ENABLED": V4_QQ_ENABLED,
