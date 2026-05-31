@@ -29,6 +29,15 @@ from typing import Any
 BASE_DIR = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(BASE_DIR))
 
+
+def _parse_bool_env(name: str, default: bool = False) -> bool:
+    """读取环境变量为布尔值。可接受: 1/true/yes/on → True, 其他 → False."""
+    val = os.environ.get(name, "")
+    if not val:
+        return default
+    return val.strip().lower() in ("1", "true", "yes", "on")
+
+
 REPORT_DIR = BASE_DIR / "data" / "daily_reports"
 LOG_DIR = BASE_DIR / "data" / "runtime" / "logs"
 LOCK_DIR = BASE_DIR / "data" / "runtime" / "locks"
@@ -573,7 +582,7 @@ def _build_candidate_view_from_scout(
         "C_observation_only": True,
         "actual_send": False,
         "qq_sent": False,
-        "V4_QQ_ENABLED": False,
+        "V4_QQ_ENABLED": _parse_bool_env("V4_QQ_ENABLED", False),
         "parsed_from_brief": False,
         "fallback_used": True,
         "fallback_reason": "serial_worker_scout_adapter",
@@ -837,7 +846,7 @@ def _run_parallel_scan(args, scan_date: str, today_key: str, wd, log_path: Path)
         "C_observation_only": True,
         "actual_send": False,
         "qq_sent": False,
-        "V4_QQ_ENABLED": False,
+        "V4_QQ_ENABLED": _parse_bool_env("V4_QQ_ENABLED", False),
         "parsed_from_brief": False,
         "fallback_used": True,
         "fallback_reason": "parallel_engine_adapter",
@@ -981,7 +990,7 @@ def main():
             "no_v33": args.no_v33,
             "no_hourly": args.no_hourly,
             "push_mode": args.push,
-            "V4_QQ_ENABLED": False,
+            "V4_QQ_ENABLED": _parse_bool_env("V4_QQ_ENABLED", False),
             "collection_mode": args.collection_mode,
             "max_fixtures": args.max_fixtures,
             "production_grade_mode": args.production_grade_mode,
@@ -998,8 +1007,8 @@ def main():
     else:
         args_push_effective = args.push
 
-    # ── V4_QQ_ENABLED hard gate: QQ push is DISABLED ──
-    V4_QQ_ENABLED = False  # hardcoded false — BOSS controlled
+    # ── V4_QQ_ENABLED gate: controlled by env var V4_QQ_ENABLED ──
+    V4_QQ_ENABLED = _parse_bool_env("V4_QQ_ENABLED", False)  # env override, default False
 
     # Global lock
     LOCK_DIR.mkdir(parents=True, exist_ok=True)
@@ -1160,11 +1169,12 @@ def main():
             "duplicate_sent_exists": duplicate_sent,
             "guard_status": "PASS",
             "allowed_to_send": bool(ab_count > 0 and (not effective_no_push) and V4_QQ_ENABLED and (not duplicate_sent)),
+            "real_send_allowed": bool(ab_count > 0 and (not effective_no_push) and V4_QQ_ENABLED and (not duplicate_sent)),
             "reason": (
                 "duplicate_sent_marker_exists"
                 if duplicate_sent
                 else (
-                    "blocked_by_no_push_or_hard_gate"
+                    "blocked_by_no_push_or_env_gate"
                     if (effective_no_push or not V4_QQ_ENABLED)
                     else ("no_ab" if ab_count <= 0 else "eligible")
                 )
