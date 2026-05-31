@@ -388,6 +388,7 @@ def _apply_recent5_bfloor_rescue(
     before_grade: str,
     current_official_grade: str,
     r5: dict[str, Any],
+    rescue_threshold: float,
 ) -> dict[str, Any]:
     out = {
         "after_grade": before_grade,
@@ -470,7 +471,7 @@ def _apply_recent5_bfloor_rescue(
         return out
 
     market_confirm = market in {"MARKET_STRONG_CONFIRM", "MARKET_CONFIRM"}
-    if score >= 77.0 and recent10_pass and market_confirm and balance_ok and before_grade == "C":
+    if score >= rescue_threshold and recent10_pass and market_confirm and balance_ok and before_grade == "C":
         out["after_grade"] = "B"
         out["recent5_rescue_to_B"] = True
         out["bfloor_rescue_to_B"] = True
@@ -488,9 +489,10 @@ def _apply_recent5_bfloor_rescue(
         out["bfloor_rescue_block_reason"] = "NONE"
         return out
 
-    if score < 77.0:
-        out["recent5_rescue_block_reason"] = "RF_SCORE_BELOW_77"
-        out["bfloor_rescue_block_reason"] = "RF_SCORE_BELOW_77"
+    if score < rescue_threshold:
+        threshold_tag = str(rescue_threshold).rstrip("0").rstrip(".")
+        out["recent5_rescue_block_reason"] = f"RF_SCORE_BELOW_{threshold_tag}"
+        out["bfloor_rescue_block_reason"] = f"RF_SCORE_BELOW_{threshold_tag}"
     elif not recent10_pass:
         out["recent5_rescue_block_reason"] = "RECENT10_NOT_PASS"
         out["bfloor_rescue_block_reason"] = "RECENT10_NOT_PASS"
@@ -521,7 +523,13 @@ def _coverage_status(available: int, unknown: int) -> str:
     return "COMPLETE"
 
 
-def build_report(date: str, source_artifact: str | None, official_artifact: str | None, strict_field_coverage: bool) -> dict[str, Any]:
+def build_report(
+    date: str,
+    source_artifact: str | None,
+    official_artifact: str | None,
+    strict_field_coverage: bool,
+    rescue_threshold: float = 77.0,
+) -> dict[str, Any]:
     scout, scout_path = _load_scout(date, source_artifact)
     official = _resolve_official_artifact(date, official_artifact)
 
@@ -652,6 +660,7 @@ def build_report(date: str, source_artifact: str | None, official_artifact: str 
             before_grade=dry_grade_before,
             current_official_grade=current_official,
             r5=r5,
+            rescue_threshold=rescue_threshold,
         )
         dry_grade = str(rescue["after_grade"])
         allowed = dry_grade in {"A", "B"}
@@ -873,6 +882,7 @@ def build_report(date: str, source_artifact: str | None, official_artifact: str 
         "generated_at": datetime.now().isoformat(),
         "scan_date": date,
         "strict_field_coverage": bool(strict_field_coverage),
+        "rescue_threshold": rescue_threshold,
         "source": {
             "scout_path": str(scout_path),
             "source_row_count": source_row_count,
@@ -1012,12 +1022,172 @@ def build_report(date: str, source_artifact: str | None, official_artifact: str 
     return report
 
 
-def write_outputs(report: dict[str, Any], date: str) -> tuple[Path, Path]:
+def _threshold_tag(v: float) -> str:
+    return str(v).rstrip("0").rstrip(".")
+
+
+def _threshold_summary(report: dict[str, Any]) -> dict[str, Any]:
+    off_dist = report.get("official_artifact", {}).get("current_official_grade_distribution", {})
+    after = report.get("distribution", {}).get("shadow_dryrun_grade_after_tuning", {})
+    cov = report.get("coverage", {})
+    bfs = report.get("bfloor_stats", {})
+    s5s = report.get("recent5_bilateral_gate_stats", {})
+    safety = report.get("safety_market_h2h_events_cpl", {})
+
+    rescued_rows = [
+        {
+            "fixture_id": r.get("fixture_id"),
+            "home": r.get("home"),
+            "away": r.get("away"),
+            "shadow_dryrun_grade_after_tuning": r.get("shadow_dryrun_grade_after_tuning"),
+            "recent5_rescue_reason": r.get("recent5_rescue_reason"),
+            "bfloor_rescue_block_reason": r.get("bfloor_rescue_block_reason"),
+        }
+        for r in (report.get("rows") or [])
+        if isinstance(r, dict) and bool(r.get("recent5_rescue_to_B"))
+    ]
+
+    return {
+        "official_A_B_C_SKIP": {
+            "A": int((off_dist or {}).get("A", 0)) if isinstance(off_dist, dict) else 0,
+            "B": int((off_dist or {}).get("B", 0)) if isinstance(off_dist, dict) else 0,
+            "C": int((off_dist or {}).get("C", 0)) if isinstance(off_dist, dict) else 0,
+            "SKIP": int((off_dist or {}).get("SKIP", 0)) if isinstance(off_dist, dict) else 0,
+        },
+        "shadow_A_B_C_SKIP": {
+            "A": int((after or {}).get("A", 0)),
+            "B": int((after or {}).get("B", 0)),
+            "C": int((after or {}).get("C", 0)),
+            "SKIP": int((after or {}).get("SKIP", 0)),
+        },
+        "B_to_C": int(cov.get("b_to_c_after") or 0),
+        "B_to_B": int(cov.get("b_to_b_after") or 0),
+        "rescue_to_B_count": int(s5s.get("recent5_rescue_to_B_count") or 0),
+        "rescue_to_A_count": int(bfs.get("rescue_to_A_count") or 0),
+        "SKIP_to_B_count": int(cov.get("skip_to_b_after") or 0),
+        "market_assisted_rescue_to_B_count": int(safety.get("market_assisted_rescue_to_B_count") or 0),
+        "market_alone_manufactured_AB_count": int(safety.get("market_alone_manufactured_AB_count") or 0),
+        "safety_violations_count": int(report.get("tuning_summary", {}).get("safety_violations_count") or 0),
+        "rescued_fixture_list": rescued_rows,
+        "market_alone_manufactured_AB_list": list(safety.get("market_alone_manufactured_AB_list") or []),
+    }
+
+
+def build_sensitivity_report(
+    date: str,
+    source_artifact: str | None,
+    official_artifact: str | None,
+    strict_field_coverage: bool,
+    thresholds: list[float],
+) -> dict[str, Any]:
+    uniq_thresholds: list[float] = []
+    for t in thresholds:
+        if t not in uniq_thresholds:
+            uniq_thresholds.append(t)
+    if 77.0 not in uniq_thresholds:
+        uniq_thresholds.insert(0, 77.0)
+
+    threshold_results: dict[str, dict[str, Any]] = {}
+    default_tag = _threshold_tag(77.0)
+
+    for t in uniq_thresholds:
+        tag = _threshold_tag(t)
+        rep = build_report(
+            date=date,
+            source_artifact=source_artifact,
+            official_artifact=official_artifact,
+            strict_field_coverage=strict_field_coverage,
+            rescue_threshold=float(t),
+        )
+        threshold_results[tag] = {
+            "rescue_threshold": float(t),
+            "summary": _threshold_summary(rep),
+            "final_replay_conclusion": rep.get("final_replay_conclusion"),
+            "official_vs_shadow_delta": rep.get("distribution", {}).get("official_vs_shadow_delta", {}),
+            "safety_checks": rep.get("safety_checks", {}),
+        }
+
+    default_rescue_ids = {
+        int(x.get("fixture_id"))
+        for x in threshold_results[default_tag]["summary"]["rescued_fixture_list"]
+        if isinstance(x, dict) and isinstance(x.get("fixture_id"), int)
+    }
+
+    for tag, item in threshold_results.items():
+        cur_ids = {
+            int(x.get("fixture_id"))
+            for x in item["summary"]["rescued_fixture_list"]
+            if isinstance(x, dict) and isinstance(x.get("fixture_id"), int)
+        }
+        new_ids = sorted(cur_ids - default_rescue_ids)
+        new_rows = [
+            r for r in item["summary"]["rescued_fixture_list"]
+            if isinstance(r, dict) and isinstance(r.get("fixture_id"), int) and int(r["fixture_id"]) in new_ids
+        ]
+        risk_flags = []
+        if item["summary"]["rescue_to_A_count"] > 0:
+            risk_flags.append("RESCUE_TO_A_NONZERO")
+        if item["summary"]["SKIP_to_B_count"] > 0:
+            risk_flags.append("SKIP_TO_B_NONZERO")
+        if item["summary"]["market_alone_manufactured_AB_count"] > 0:
+            risk_flags.append("MARKET_ALONE_MANUFACTURED_AB_NONZERO")
+        if item["summary"]["safety_violations_count"] > 0:
+            risk_flags.append("SAFETY_VIOLATIONS_NONZERO")
+        item["new_rescues_vs_default"] = new_rows
+        item["new_risk_fixture_list"] = list(item["summary"]["market_alone_manufactured_AB_list"])
+        item["risk_flags"] = risk_flags
+
+    return {
+        "schema_version": "v4_rf_shadow_promotion_dryrun_replay.sensitivity.v1",
+        "phase": "Phase 3H - V4_RESCUE_THRESHOLD_SENSITIVITY_REPLAY_SHADOW_ONLY",
+        "generated_at": datetime.now().isoformat(),
+        "scan_date": date,
+        "strict_field_coverage": bool(strict_field_coverage),
+        "default_rescue_threshold": 77.0,
+        "sensitivity_thresholds": [float(t) for t in uniq_thresholds],
+        "threshold_results": threshold_results,
+        "disclaimer": "SENSITIVITY REPLAY ONLY. No official/pending/QQ mutation.",
+    }
+
+
+def write_outputs(report: dict[str, Any], date: str, sensitivity: bool = False) -> tuple[Path, Path]:
     OUT_DIR.mkdir(parents=True, exist_ok=True)
-    json_path = OUT_DIR / f"v4_rf_shadow_promotion_dryrun_replay_{date}.json"
-    md_path = OUT_DIR / f"v4_rf_shadow_promotion_dryrun_replay_{date}.md"
+    if sensitivity:
+        json_path = OUT_DIR / f"v4_rf_shadow_promotion_dryrun_replay_sensitivity_{date}.json"
+        md_path = OUT_DIR / f"v4_rf_shadow_promotion_dryrun_replay_sensitivity_{date}.md"
+    else:
+        json_path = OUT_DIR / f"v4_rf_shadow_promotion_dryrun_replay_{date}.json"
+        md_path = OUT_DIR / f"v4_rf_shadow_promotion_dryrun_replay_{date}.md"
 
     json_path.write_text(json.dumps(report, ensure_ascii=False, indent=2), encoding="utf-8")
+
+    if sensitivity:
+        lines = [
+            f"# V4 RF Shadow Promotion Sensitivity Replay ({date})",
+            "",
+            "> shadow-only threshold sensitivity。不是 official promotion，不写 pending，不推 QQ。",
+            "",
+            f"- default_rescue_threshold: {report.get('default_rescue_threshold')}",
+            f"- thresholds: {', '.join(str(x) for x in report.get('sensitivity_thresholds', []))}",
+            "",
+            "## per-threshold summary",
+        ]
+        for tag, item in (report.get("threshold_results") or {}).items():
+            s = item.get("summary") or {}
+            sh = s.get("shadow_A_B_C_SKIP") or {}
+            off = s.get("official_A_B_C_SKIP") or {}
+            lines.extend([
+                f"- threshold={tag}:",
+                f"  - official A/B/C/SKIP = {off.get('A',0)}/{off.get('B',0)}/{off.get('C',0)}/{off.get('SKIP',0)}",
+                f"  - shadow  A/B/C/SKIP = {sh.get('A',0)}/{sh.get('B',0)}/{sh.get('C',0)}/{sh.get('SKIP',0)}",
+                f"  - B->C={s.get('B_to_C',0)} | B->B={s.get('B_to_B',0)}",
+                f"  - rescue_to_B={s.get('rescue_to_B_count',0)} | rescue_to_A={s.get('rescue_to_A_count',0)}",
+                f"  - SKIP_to_B={s.get('SKIP_to_B_count',0)} | market_alone={s.get('market_alone_manufactured_AB_count',0)} | safety={s.get('safety_violations_count',0)}",
+                f"  - new_rescues_vs_default={len(item.get('new_rescues_vs_default') or [])}",
+                f"  - risk_flags={','.join(item.get('risk_flags') or []) or 'NONE'}",
+            ])
+        md_path.write_text("\n".join(lines), encoding="utf-8")
+        return json_path, md_path
 
     off = report["official_artifact"]
     dist_before = report["distribution"]["shadow_dryrun_grade_before_tuning"]
@@ -1063,25 +1233,46 @@ def main() -> int:
     ap.add_argument("--source-artifact", default="", help="optional scout artifact path")
     ap.add_argument("--official-artifact", default="", help="optional official candidate_view artifact path")
     ap.add_argument("--strict-field-coverage", action="store_true", help="block baseline-ready when coverage incomplete")
+    ap.add_argument("--rescue-threshold", type=float, default=77.0, help="single rescue threshold for shadow replay (default=77)")
+    ap.add_argument("--rescue-thresholds", default="77,75,73.5", help="comma-separated thresholds for --sensitivity mode")
+    ap.add_argument("--sensitivity", action="store_true", help="run shadow-only multi-threshold sensitivity replay")
     args = ap.parse_args()
 
     date = args.date.strip() or _latest_date()
-    report = build_report(
-        date=date,
-        source_artifact=args.source_artifact.strip() or None,
-        official_artifact=args.official_artifact.strip() or None,
-        strict_field_coverage=bool(args.strict_field_coverage),
-    )
-    jp, mp = write_outputs(report, date)
+    if args.sensitivity:
+        thresholds: list[float] = []
+        for raw in str(args.rescue_thresholds or "").split(","):
+            raw = raw.strip()
+            if not raw:
+                continue
+            thresholds.append(float(raw))
+        report = build_sensitivity_report(
+            date=date,
+            source_artifact=args.source_artifact.strip() or None,
+            official_artifact=args.official_artifact.strip() or None,
+            strict_field_coverage=bool(args.strict_field_coverage),
+            thresholds=thresholds or [77.0, 75.0, 73.5],
+        )
+        jp, mp = write_outputs(report, date, sensitivity=True)
+    else:
+        report = build_report(
+            date=date,
+            source_artifact=args.source_artifact.strip() or None,
+            official_artifact=args.official_artifact.strip() or None,
+            strict_field_coverage=bool(args.strict_field_coverage),
+            rescue_threshold=float(args.rescue_threshold),
+        )
+        jp, mp = write_outputs(report, date, sensitivity=False)
 
     print(json.dumps({
         "status": "PASS",
         "scan_date": date,
+        "sensitivity": bool(args.sensitivity),
         "json": str(jp),
         "md": str(mp),
-        "source_row_count": report["source"]["source_row_count"],
-        "official_artifact_status": report["official_artifact"]["official_artifact_status"],
-        "final_replay_conclusion": report["final_replay_conclusion"],
+        "source_row_count": report.get("source", {}).get("source_row_count"),
+        "official_artifact_status": report.get("official_artifact", {}).get("official_artifact_status"),
+        "final_replay_conclusion": report.get("final_replay_conclusion"),
     }, ensure_ascii=False, indent=2))
     return 0
 

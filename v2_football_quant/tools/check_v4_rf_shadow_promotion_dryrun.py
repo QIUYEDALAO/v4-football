@@ -28,6 +28,14 @@ def _latest_report(date: str | None) -> Path | None:
     return fs[-1] if fs else None
 
 
+def _latest_sensitivity_report(date: str | None) -> Path | None:
+    if date:
+        p = OUT / f"v4_rf_shadow_promotion_dryrun_replay_sensitivity_{date}.json"
+        return p if p.exists() else None
+    fs = sorted(OUT.glob("v4_rf_shadow_promotion_dryrun_replay_sensitivity_*.json"))
+    return fs[-1] if fs else None
+
+
 def _read_json(p: Path) -> Any:
     return json.loads(p.read_text(encoding="utf-8"))
 
@@ -58,6 +66,9 @@ def main() -> int:
             ("arg_source_artifact_exists", "--source-artifact"),
             ("arg_official_artifact_exists", "--official-artifact"),
             ("arg_strict_field_coverage_exists", "--strict-field-coverage"),
+            ("arg_rescue_threshold_exists", "--rescue-threshold"),
+            ("arg_rescue_thresholds_exists", "--rescue-thresholds"),
+            ("arg_sensitivity_exists", "--sensitivity"),
         ]:
             ok = pat in src
             _ok(checks, key, ok)
@@ -77,6 +88,19 @@ def main() -> int:
         if p.returncode != 0:
             blockers.append("runner_exec_failed")
 
+        sp = subprocess.run([
+            sys.executable,
+            str(runner),
+            "--date",
+            args.date,
+            "--sensitivity",
+            "--rescue-thresholds",
+            "77,75,73.5",
+        ], capture_output=True, text=True)
+        _ok(checks, "runner_sensitivity_exec_ok", sp.returncode == 0, (sp.stdout + sp.stderr)[-400:])
+        if sp.returncode != 0:
+            blockers.append("runner_sensitivity_exec_failed")
+
     report_path = _latest_report(args.date)
     _ok(checks, "report_exists", report_path is not None, str(report_path) if report_path else "")
     if report_path is None:
@@ -93,6 +117,13 @@ def main() -> int:
         return 2
 
     report = _read_json(report_path)
+    sensitivity_path = _latest_sensitivity_report(args.date)
+    _ok(checks, "sensitivity_report_exists", sensitivity_path is not None, str(sensitivity_path) if sensitivity_path else "")
+    if sensitivity_path is None:
+        blockers.append("missing_sensitivity_report")
+        sensitivity = {}
+    else:
+        sensitivity = _read_json(sensitivity_path)
 
     # required coverage sections
     for k in [
@@ -131,6 +162,11 @@ def main() -> int:
     _ok(checks, "official_artifact_status_present", off_status in {"FOUND", "MISSING", "CONFLICT"}, off_status)
     if off_status not in {"FOUND", "MISSING", "CONFLICT"}:
         blockers.append("invalid_official_artifact_status")
+
+    rescue_threshold = float(report.get("rescue_threshold") or 0.0)
+    _ok(checks, "default_rescue_threshold_is_77", abs(rescue_threshold - 77.0) < 1e-9, str(rescue_threshold))
+    if abs(rescue_threshold - 77.0) >= 1e-9:
+        blockers.append("default_rescue_threshold_changed")
 
     if off_status == "MISSING":
         bad_zero = isinstance(off_dist, dict) and all(int(off_dist.get(k, 0) or 0) == 0 for k in ["A", "B", "C", "SKIP"])
@@ -229,6 +265,21 @@ def main() -> int:
     if shadow_b_after > official_b:
         blockers.append("shadow_b_above_official_b")
 
+    if off_status == "FOUND":
+        default_dist_ok = (
+            int((off_dist or {}).get("A", 0)) == 1
+            and int((off_dist or {}).get("B", 0)) == 36
+            and int((off_dist or {}).get("C", 0)) == 0
+            and int((off_dist or {}).get("SKIP", 0)) == 55
+            and int(shadow_after.get("A", 0)) == 1
+            and int(shadow_after.get("B", 0)) == 32
+            and int(shadow_after.get("C", 0)) == 39
+            and int(shadow_after.get("SKIP", 0)) == 20
+        )
+        _ok(checks, "default_replay_distribution_unchanged", default_dist_ok, f"official={off_dist},shadow={shadow_after}")
+        if not default_dist_ok:
+            blockers.append("default_replay_distribution_changed")
+
     b_to_c_before = int(coverage.get("b_to_c_before") or 0)
     b_to_c_after = int(coverage.get("b_to_c_after") or 0)
     _ok(checks, "B_to_C_reduced_or_equal", b_to_c_after <= b_to_c_before, f"before={b_to_c_before},after={b_to_c_after}")
@@ -294,6 +345,50 @@ def main() -> int:
     legacy_alias = safety_market.get("market_manufactured_AB_found")
     _ok(checks, "legacy_market_field_present", legacy_alias is not None, str(legacy_alias))
     _ok(checks, "legacy_market_field_deprecated_flag", bool(safety_market.get("market_manufactured_AB_found_deprecated")) is True, str(safety_market.get("market_manufactured_AB_found_deprecated")))
+
+    # sensitivity coverage
+    thresholds = sensitivity.get("sensitivity_thresholds") if isinstance(sensitivity, dict) else None
+    threshold_results = sensitivity.get("threshold_results") if isinstance(sensitivity, dict) else None
+    _ok(checks, "sensitivity_thresholds_present", isinstance(thresholds, list), str(thresholds))
+    if not isinstance(thresholds, list):
+        blockers.append("missing_sensitivity_thresholds")
+        thresholds = []
+    _ok(checks, "sensitivity_threshold_results_present", isinstance(threshold_results, dict), str(type(threshold_results)))
+    if not isinstance(threshold_results, dict):
+        blockers.append("missing_sensitivity_threshold_results")
+        threshold_results = {}
+
+    required_tags = ["77", "75", "73.5"]
+    for tag in required_tags:
+        present = tag in threshold_results
+        _ok(checks, f"sensitivity_has_threshold_{tag}", present)
+        if not present:
+            blockers.append(f"missing_threshold_result:{tag}")
+            continue
+        summary = threshold_results[tag].get("summary", {}) if isinstance(threshold_results[tag], dict) else {}
+        for key, expected in [
+            ("rescue_to_A_count", 0),
+            ("SKIP_to_B_count", 0),
+            ("market_alone_manufactured_AB_count", 0),
+            ("safety_violations_count", 0),
+        ]:
+            val = int(summary.get(key) or 0)
+            ok = val == expected
+            _ok(checks, f"sensitivity_{tag}_{key}_safe", ok, str(val))
+            if not ok:
+                blockers.append(f"sensitivity_{tag}_{key}_unsafe:{val}")
+
+        shadow = summary.get("shadow_A_B_C_SKIP", {}) if isinstance(summary.get("shadow_A_B_C_SKIP"), dict) else {}
+        a_cnt = int(shadow.get("A", 0))
+        _ok(checks, f"sensitivity_{tag}_A_not_expanded", a_cnt <= 1, str(a_cnt))
+        if a_cnt > 1:
+            blockers.append(f"sensitivity_{tag}_a_expanded:{a_cnt}")
+
+    if "73.5" in threshold_results:
+        new_rescues = threshold_results["73.5"].get("new_rescues_vs_default", [])
+        _ok(checks, "sensitivity_73_5_new_rescues_list_present", isinstance(new_rescues, list), str(type(new_rescues)))
+        if not isinstance(new_rescues, list):
+            blockers.append("sensitivity_73_5_new_rescues_missing")
 
     bfloor_detected = int(bfloor_stats.get("rf_strong_confirmed_b_floor_exception_count") or 0)
     bfloor_rescued = int(bfloor_stats.get("bfloor_detected_rescued_count") or 0)
