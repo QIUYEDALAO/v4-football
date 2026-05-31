@@ -14,6 +14,7 @@ from typing import Any
 ROOT = Path(__file__).resolve().parents[1]
 TOOLS = ROOT / "tools"
 OUT = ROOT / "data" / "runtime" / "acceptance"
+ENGINE_RF = ROOT / "engine" / "rf_shadow_fields.py"
 
 
 def _ok(checks: list[dict[str, Any]], name: str, ok: bool, detail: str = "") -> None:
@@ -58,6 +59,31 @@ def main() -> int:
     _ok(checks, "runner_exists", runner.exists(), str(runner))
     if not runner.exists():
         blockers.append("missing_runner")
+
+    _ok(checks, "engine_rf_shadow_fields_exists", ENGINE_RF.exists(), str(ENGINE_RF))
+    if not ENGINE_RF.exists():
+        blockers.append("missing_engine_rf_shadow_fields")
+    else:
+        engine_src = ENGINE_RF.read_text(encoding="utf-8", errors="replace")
+        has_default_735 = "DEFAULT_RESCUE_THRESHOLD = 73.5" in engine_src
+        _ok(checks, "engine_default_rescue_threshold_is_73_5", has_default_735)
+        if not has_default_735:
+            blockers.append("engine_default_rescue_threshold_not_73_5")
+
+        no_legacy_hardcoded_gate = "score >= 77.0 and market_confirm and balance_ok" not in engine_src
+        _ok(checks, "engine_no_hardcoded_77_rescue_gate", no_legacy_hardcoded_gate)
+        if not no_legacy_hardcoded_gate:
+            blockers.append("engine_hardcoded_77_rescue_gate_found")
+
+        no_legacy_hardcoded_below = "score < 77.0" not in engine_src
+        _ok(checks, "engine_no_hardcoded_77_below_gate", no_legacy_hardcoded_below)
+        if not no_legacy_hardcoded_below:
+            blockers.append("engine_hardcoded_77_below_gate_found")
+
+        uses_threshold_var = "score >= rescue_threshold and market_confirm and balance_ok" in engine_src
+        _ok(checks, "engine_uses_rescue_threshold_variable", uses_threshold_var)
+        if not uses_threshold_var:
+            blockers.append("engine_not_using_rescue_threshold_variable")
 
     if runner.exists():
         src = runner.read_text(encoding="utf-8", errors="replace")

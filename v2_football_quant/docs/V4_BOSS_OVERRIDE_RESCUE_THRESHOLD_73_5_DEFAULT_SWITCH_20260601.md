@@ -42,6 +42,7 @@
 - shadow A/B/C/SKIP = `1/32/39/20`
 
 ## 风险说明
+- 口径修正：`artifact_count_sufficient=15`，其中 `official-present sufficient=2`、`official-missing sufficient=13`，aggregate `fixture_count=157`。
 当前 official-present sufficient artifact 仍有限（历史多日 candidate_view 缺失）。  
 本次切换依据：BOSS override + 现有 replay/canary 安全门通过。  
 不等同于“已完成实盘收益验证”。

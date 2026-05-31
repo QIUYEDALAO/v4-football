@@ -120,6 +120,19 @@ def main() -> int:
     if len(sufficient_with_official) == 0:
         blockers.append("no_sufficient_official_found")
 
+    sufficient_missing_official = [
+        x for x in artifact_results
+        if isinstance(x, dict)
+        and str(x.get("sample_status")) == "SAMPLE_SUFFICIENT"
+        and str(x.get("official_artifact_status")) == "MISSING"
+    ]
+    _ok(checks, "official_present_sufficient_count_is_2", len(sufficient_with_official) == 2, str(len(sufficient_with_official)))
+    if len(sufficient_with_official) != 2:
+        blockers.append("official_present_sufficient_count_unexpected")
+    _ok(checks, "official_missing_sufficient_count_is_13", len(sufficient_missing_official) == 13, str(len(sufficient_missing_official)))
+    if len(sufficient_missing_official) != 13:
+        blockers.append("official_missing_sufficient_count_unexpected")
+
     for i, x in enumerate(sufficient_with_official):
         ca = int(x.get("candidate_A_expansion") or 0)
         cs = int(x.get("candidate_SKIP_to_B") or 0)
@@ -142,6 +155,9 @@ def main() -> int:
     agg_safety = report.get("aggregate_safety_summary", {}) if isinstance(report.get("aggregate_safety_summary"), dict) else {}
     _ok(checks, "aggregate_present", isinstance(agg, dict), str(type(agg)))
     _ok(checks, "aggregate_safety_present", isinstance(agg_safety, dict), str(type(agg_safety)))
+    _ok(checks, "aggregate_fixture_count_157", int(agg.get("fixture_count") or 0) == 157, str(agg.get("fixture_count")))
+    if int(agg.get("fixture_count") or 0) != 157:
+        blockers.append("aggregate_fixture_count_unexpected")
 
     _ok(checks, "aggregate_candidate_a_expansion_zero", int(agg_safety.get("candidate_A_expansion_total") or 0) == 0, str(agg_safety.get("candidate_A_expansion_total")))
     if int(agg_safety.get("candidate_A_expansion_total") or 0) != 0:

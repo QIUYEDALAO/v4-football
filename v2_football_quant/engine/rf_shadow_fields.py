@@ -11,6 +11,8 @@ from typing import Any, Optional
 # - h2h recent5 bonus-only (cannot downgrade, cannot create A/B)
 # - opening market confirm/veto (cannot create A/B, only keep/downgrade shadow)
 
+DEFAULT_RESCUE_THRESHOLD = 73.5
+
 
 def _safe_rate(hit: int, sample: int) -> float | None:
     if sample <= 0:
@@ -1235,6 +1237,9 @@ def build_rf_shadow_grade_layer(record: dict, factors: dict | None = None) -> di
         active_season = season_phase == "ACTIVE_SEASON"
         eligible_base = (official_b or pre_cap_shadow_b or pre_base_shadow_b)
 
+        rescue_threshold = DEFAULT_RESCUE_THRESHOLD
+        rescue_threshold_tag = str(rescue_threshold).rstrip("0").rstrip(".")
+
         if not eligible_base:
             recent5_rescue_block_reason = "NOT_B_BASELINE"
         elif not recent10_pass:
@@ -1249,7 +1254,7 @@ def build_rf_shadow_grade_layer(record: dict, factors: dict | None = None) -> di
             recent5_rescue_block_reason = "MARKET_NO_DATA_BLOCKED"
         elif not active_season:
             recent5_rescue_block_reason = "SEASON_NOT_ACTIVE"
-        elif score >= 77.0 and market_confirm and balance_ok:
+        elif score >= rescue_threshold and market_confirm and balance_ok:
             if season_aware_shadow_grade_after == "C":
                 season_aware_shadow_grade_after = "B"
                 recent5_rescue_to_b = True
@@ -1276,8 +1281,8 @@ def build_rf_shadow_grade_layer(record: dict, factors: dict | None = None) -> di
                 recent5_rescue_block_reason = "NO_C_TO_B_PATH"
                 bfloor_rescue_block_reason = "NO_C_TO_B_PATH"
         else:
-            if score < 77.0:
-                recent5_rescue_block_reason = "RF_SCORE_BELOW_77"
+            if score < rescue_threshold:
+                recent5_rescue_block_reason = f"RF_SCORE_BELOW_{rescue_threshold_tag}"
             elif not market_confirm:
                 recent5_rescue_block_reason = "MARKET_NOT_CONFIRM"
             elif not balance_ok:
