@@ -265,6 +265,20 @@ COLLECTION_LAZY_NUM_FIELDS = (
     "h2h_timeout_seconds",
     "h2h_required_total",
     "h2h_required_ratio_cap",
+    "prefilter_elapsed_ms",
+    "recent_home_elapsed_ms",
+    "recent_away_elapsed_ms",
+    "odds_elapsed_ms",
+    "coverage_elapsed_ms",
+    "h2h_elapsed_ms",
+    "events_elapsed_ms",
+    "api_call_count",
+    "cache_hit_count",
+    "cache_miss_count",
+)
+
+COLLECTION_LAZY_EXTRA_TEXT_FIELDS = (
+    "slowest_stage",
 )
 
 RF_SHADOW_GRADE_TEXT_FIELDS = (
@@ -411,6 +425,8 @@ def _merge_rf_shadow_fields(candidate_row: dict, scout_row: dict) -> dict:
         out[k] = bool(candidate_row.get(k, scout_row.get(k), False))
     for k in COLLECTION_LAZY_NUM_FIELDS:
         out[k] = _rf_clean(candidate_row.get(k, scout_row.get(k)), 0)
+    for k in COLLECTION_LAZY_EXTRA_TEXT_FIELDS:
+        out[k] = _rf_clean(candidate_row.get(k, scout_row.get(k)), "")
     for k in RF_SHADOW_GRADE_TEXT_FIELDS:
         out[k] = _rf_clean(candidate_row.get(k, scout_row.get(k)), "数据缺失")
     for k in RF_SHADOW_GRADE_BOOL_FIELDS:

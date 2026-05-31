@@ -710,6 +710,17 @@ function renderListRow(x,i){
   const h2hTimeoutSec=safe(first(x.h2h_timeout_seconds,''),'');
   const h2hRequiredTotal=safe(first(x.h2h_required_total,''),'');
   const h2hRatioCap=safe(first(x.h2h_required_ratio_cap,''),'');
+  const prefilterMs=safe(first(x.prefilter_elapsed_ms,0),'0');
+  const recentHomeMs=safe(first(x.recent_home_elapsed_ms,0),'0');
+  const recentAwayMs=safe(first(x.recent_away_elapsed_ms,0),'0');
+  const oddsMs=safe(first(x.odds_elapsed_ms,0),'0');
+  const coverageMs=safe(first(x.coverage_elapsed_ms,0),'0');
+  const h2hMs=safe(first(x.h2h_elapsed_ms,0),'0');
+  const eventsMs=safe(first(x.events_elapsed_ms,0),'0');
+  const slowestStage=safe(first(x.slowest_stage,''),'未记录');
+  const apiCallCount=safe(first(x.api_call_count,0),'0');
+  const cacheHitCount=safe(first(x.cache_hit_count,0),'0');
+  const cacheMissCount=safe(first(x.cache_miss_count,0),'0');
   const savedCalls=safe(first(x.expensive_calls_saved,0),'0');
   const collectionReason=safe(x.collection_reason,'未记录');
   const isOfficialCandidate=['A','B'].includes(official);
@@ -746,6 +757,8 @@ function renderListRow(x,i){
   row+='<div><span class="k">H2H超时阈值：</span>'+(h2hTimeoutSec?`${h2hTimeoutSec}秒`:'未记录')+'　<span class="k">H2H需查总数：</span>'+(h2hRequiredTotal||'未记录')+'　<span class="k">比例上限：</span>'+(h2hRatioCap?`${h2hRatioCap}`:'未记录')+'</div>';
   row+='<div><span class="k">Events：</span>'+eventsState+'</div>';
   row+='<div><span class="k">CPL：</span>'+cplState+'</div>';
+  row+='<div><span class="k">耗时(ms)：</span>prefilter '+prefilterMs+' | recent(H/A) '+recentHomeMs+'/'+recentAwayMs+' | odds '+oddsMs+' | coverage '+coverageMs+' | h2h '+h2hMs+' | events '+eventsMs+'</div>';
+  row+='<div><span class="k">慢因：</span>'+safe(slowestStage,'未记录')+'　<span class="k">API调用：</span>'+apiCallCount+'　<span class="k">cache hit/miss：</span>'+cacheHitCount+'/'+cacheMissCount+'</div>';
   row+='<div><span class="k">节省请求（估算）：</span>'+savedCalls+'</div>';
   row+='<div><span class="k">采集说明：</span>'+collectionReason+'</div>';
   row+='<div class="shadow-disclaimer">影子观察，不作为投注推荐。</div></div>';

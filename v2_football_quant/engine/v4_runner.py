@@ -16,17 +16,19 @@ from __future__ import annotations
 import argparse
 import json, ssl, certifi, time, sys
 import signal
+import threading
 import urllib.request
 from urllib.parse import urlsplit, parse_qsl, urlencode
 from pathlib import Path
 from datetime import datetime, date, timedelta, timezone
 from zoneinfo import ZoneInfo
+from concurrent.futures import ThreadPoolExecutor
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(BASE_DIR))
 
 from config.secrets import API_KEY, API_HOST
-from engine.data_sources.api_coverage import evaluate_fixture_coverage
+from engine.data_sources.api_coverage import evaluate_fixture_coverage, fetch_league_coverage, infer_season
 from engine.net_utils import _rpm_wait, api_get as _net_api_get, api_preflight, get_api_guard_snapshot
 from engine.task_watchdog import v4_scan_watchdog
 from engine.data_sources.h2h_engine import (
@@ -191,6 +193,7 @@ def api_get(endpoint: str):
 def _cached_api_client(base_client):
     cache: dict[str, dict | None] = {}
     stats = {"calls_total": 0, "cache_hits": 0, "cache_misses": 0}
+    cache_lock = threading.Lock()
 
     def _normalize_endpoint(endpoint: str) -> str:
         if "?" not in endpoint:
@@ -202,14 +205,17 @@ def _cached_api_client(base_client):
         return f"{split.path}?{normalized_q}"
 
     def _get(endpoint: str):
-        stats["calls_total"] += 1
+        with cache_lock:
+            stats["calls_total"] += 1
         key = _normalize_endpoint(endpoint)
-        if key in cache:
-            stats["cache_hits"] += 1
-            return cache[key]
-        stats["cache_misses"] += 1
+        with cache_lock:
+            if key in cache:
+                stats["cache_hits"] += 1
+                return cache[key]
+            stats["cache_misses"] += 1
         resp = base_client(endpoint)
-        cache[key] = resp
+        with cache_lock:
+            cache[key] = resp
         return resp
 
     _get._stats = stats
@@ -457,6 +463,24 @@ def _fixture_non_formal_reason(fx: dict) -> str:
 def _safe_float(v, default: float = 0.0) -> float:
     try:
         if v is None or v == "":
+            return default
+        return float(v)
+    except Exception:
+        return default
+
+
+def _safe_ms(seconds: float | int | None) -> int:
+    try:
+        if seconds is None:
+            return 0
+        return max(0, int(round(float(seconds) * 1000)))
+    except Exception:
+        return 0
+
+
+def _safe_s(v, default: float = 0.0) -> float:
+    try:
+        if v is None:
             return default
         return float(v)
     except Exception:
@@ -762,6 +786,48 @@ def run_v4_scan(
     stats = {"total": len(fixtures), "no_h2h": 0, "below_threshold": 0,
              "api_error": 0, "scouted": 0, "no_odds": 0, "valid_h2h_count": 0}
 
+    runtime_profile = {
+        "total_elapsed_seconds": 0.0,
+        "raw_fixture_count": len(fixtures),
+        "scout_row_count": 0,
+        "avg_seconds_per_fixture": 0.0,
+        "prefilter_total_seconds": 0.0,
+        "recent_form_total_seconds": 0.0,
+        "odds_total_seconds": 0.0,
+        "coverage_total_seconds": 0.0,
+        "h2h_total_seconds": 0.0,
+        "events_total_seconds": 0.0,
+        "dashboard_build_seconds": 0.0,
+        "api_call_count_total": 0,
+        "recent_api_call_count": 0,
+        "odds_api_call_count": 0,
+        "coverage_api_call_count": 0,
+        "h2h_api_call_count": 0,
+        "events_api_call_count": 0,
+        "cache_hit_total": 0,
+        "cache_miss_total": 0,
+        "recent_cache_hit": 0,
+        "recent_cache_miss": 0,
+        "odds_cache_hit": 0,
+        "odds_cache_miss": 0,
+        "coverage_cache_hit": 0,
+        "coverage_cache_miss": 0,
+        "h2h_cache_hit": 0,
+        "h2h_cache_miss": 0,
+        "events_cache_hit": 0,
+        "events_cache_miss": 0,
+        "prefilter_parallel_enabled": collection_mode == "rf_lazy_shadow",
+        "prefilter_parallel_max_workers": 4 if collection_mode == "rf_lazy_shadow" else 0,
+        "slowest_fixtures_top5": [],
+    }
+
+    cache_lock = threading.Lock()
+    recent_form_cache: dict[tuple[int, int, int], dict | None] = {}
+    odds_cache: dict[int, dict | None] = {}
+    coverage_cache: dict[tuple[int, int], dict] = {}
+    h2h_result_cache: dict[tuple[int, int], dict] = {}
+    events_cache: dict[int, dict] = {}
+
     # 预热 recent profile：按 team_id 去重，只拉一次，H2H 阶段直接复用缓存
     prewarm_info = {"enabled": False, "teams_total": 0, "warmed": 0, "skipped": 0, "cache_size": 0}
     if str(recent_prewarm).lower() == "on":
@@ -797,6 +863,63 @@ def run_v4_scan(
 
     cov_rank = {"UNKNOWN": 1, "BASIC": 2, "GOOD": 3, "FULL": 4}
 
+    def _calls_total() -> int:
+        return int((getattr(api_client, "_stats", {}) or {}).get("calls_total", 0))
+
+    def _fetch_recent_cached(team_id: int, last_n: int = 10, include_events: int = 0):
+        key = (int(team_id), int(last_n), int(include_events))
+        with cache_lock:
+            if key in recent_form_cache:
+                runtime_profile["recent_cache_hit"] += 1
+                runtime_profile["cache_hit_total"] += 1
+                return recent_form_cache[key], True, 0
+            runtime_profile["recent_cache_miss"] += 1
+            runtime_profile["cache_miss_total"] += 1
+        endpoint = f"fixtures?team={int(team_id)}&last={int(last_n)}&status=FT"
+        before = _calls_total()
+        resp = api_client(endpoint)
+        delta = max(0, _calls_total() - before)
+        with cache_lock:
+            recent_form_cache[key] = resp
+            runtime_profile["recent_api_call_count"] += delta
+        return resp, False, delta
+
+    def _fetch_odds_cached(fixture_id: int):
+        key = int(fixture_id)
+        with cache_lock:
+            if key in odds_cache:
+                runtime_profile["odds_cache_hit"] += 1
+                runtime_profile["cache_hit_total"] += 1
+                return odds_cache[key], True, 0
+            runtime_profile["odds_cache_miss"] += 1
+            runtime_profile["cache_miss_total"] += 1
+        before = _calls_total()
+        resp = api_client(f"odds?fixture={key}")
+        delta = max(0, _calls_total() - before)
+        with cache_lock:
+            odds_cache[key] = resp
+            runtime_profile["odds_api_call_count"] += delta
+        return resp, False, delta
+
+    def _fetch_coverage_cached(fx: dict):
+        league_id = int(fx.get("league") or fx.get("league_id") or 0)
+        season = int(fx.get("season") or infer_season(fx.get("kickoff")))
+        key = (league_id, season)
+        with cache_lock:
+            if key in coverage_cache:
+                runtime_profile["coverage_cache_hit"] += 1
+                runtime_profile["cache_hit_total"] += 1
+                return coverage_cache[key], True, 0, season
+            runtime_profile["coverage_cache_miss"] += 1
+            runtime_profile["cache_miss_total"] += 1
+        before = _calls_total()
+        cov = fetch_league_coverage(api_client, league_id, season) if league_id else {}
+        delta = max(0, _calls_total() - before)
+        with cache_lock:
+            coverage_cache[key] = cov or {}
+            runtime_profile["coverage_api_call_count"] += delta
+        return cov or {}, False, delta, season
+
     lazy_prefetch_by_fixture: dict[int, dict] = {}
     h2h_required_total = 0
     h2h_processed = 0
@@ -804,10 +927,80 @@ def run_v4_scan(
         logger.info("  🧭 rf_lazy_shadow 预判阶段：RF + OpeningMarket + H2H hard gate")
         lazy_prefetch_rows: list[dict] = []
         for fx in fixtures:
+            fixture_prefilter_t0 = time.perf_counter()
             lg_policy = league_status_map.get(str(fx["league"]), {})
             lg_status = str(lg_policy.get("status") or "UNKNOWN")
-            home_recent_raw = api_client(f"fixtures?team={fx['homeId']}&last=10&status=FT")
-            away_recent_raw = api_client(f"fixtures?team={fx['awayId']}&last=10&status=FT")
+
+            recent_home_elapsed = 0.0
+            recent_away_elapsed = 0.0
+            odds_elapsed = 0.0
+            coverage_elapsed = 0.0
+            prefilter_api_calls = 0
+            prefilter_hits = 0
+            prefilter_misses = 0
+
+            def _task_recent_home():
+                t = time.perf_counter()
+                resp, hit, calls = _fetch_recent_cached(fx["homeId"], last_n=10, include_events=0)
+                return ("home_recent", resp, _safe_s(time.perf_counter() - t), bool(hit), int(calls))
+
+            def _task_recent_away():
+                t = time.perf_counter()
+                resp, hit, calls = _fetch_recent_cached(fx["awayId"], last_n=10, include_events=0)
+                return ("away_recent", resp, _safe_s(time.perf_counter() - t), bool(hit), int(calls))
+
+            def _task_odds():
+                t = time.perf_counter()
+                resp, hit, calls = _fetch_odds_cached(fx["id"])
+                return ("odds", resp, _safe_s(time.perf_counter() - t), bool(hit), int(calls))
+
+            def _task_coverage():
+                t = time.perf_counter()
+                cov, hit, calls, season = _fetch_coverage_cached(fx)
+                return ("coverage", {"coverage": cov, "season": season}, _safe_s(time.perf_counter() - t), bool(hit), int(calls))
+
+            home_recent_raw = None
+            away_recent_raw = None
+            odds_resp = None
+            coverage_snapshot = {}
+            season_hint = int(fx.get("season") or infer_season(fx.get("kickoff")))
+            with ThreadPoolExecutor(max_workers=4, thread_name_prefix="v4_rf_prefilter") as ex:
+                futures = [
+                    ex.submit(_task_recent_home),
+                    ex.submit(_task_recent_away),
+                    ex.submit(_task_odds),
+                    ex.submit(_task_coverage),
+                ]
+                for fut in futures:
+                    try:
+                        stage_name, payload, stage_elapsed, cache_hit, call_delta = fut.result()
+                    except Exception:
+                        # keep row, degrade to safe defaults
+                        stage_name, payload, stage_elapsed, cache_hit, call_delta = "unknown", None, 0.0, False, 0
+                    prefilter_api_calls += int(call_delta)
+                    prefilter_hits += 1 if cache_hit else 0
+                    prefilter_misses += 0 if cache_hit else 1
+                    if stage_name == "home_recent":
+                        home_recent_raw = payload
+                        recent_home_elapsed = stage_elapsed
+                    elif stage_name == "away_recent":
+                        away_recent_raw = payload
+                        recent_away_elapsed = stage_elapsed
+                    elif stage_name == "odds":
+                        odds_resp = payload
+                        odds_elapsed = stage_elapsed
+                    elif stage_name == "coverage":
+                        coverage_snapshot = dict(payload or {})
+                        season_hint = int(coverage_snapshot.get("season") or season_hint)
+                        coverage_elapsed = stage_elapsed
+
+            if home_recent_raw is None:
+                home_recent_raw = {"response": []}
+            if away_recent_raw is None:
+                away_recent_raw = {"response": []}
+            if odds_resp is None:
+                odds_resp = {"response": []}
+
             rf_shadow_base = build_recent_form_shadow_from_recent(
                 home_recent_raw,
                 fx["homeId"],
@@ -815,7 +1008,6 @@ def run_v4_scan(
                 fx["awayId"],
             )
 
-            odds_resp = api_client(f"odds?fixture={fx['id']}")
             ht_ou_lines = _capture_ht_ou_lines(odds_resp) if odds_resp else []
             best_line = _best_pre_live_line(ht_ou_lines)
 
@@ -832,6 +1024,12 @@ def run_v4_scan(
             )
             rf_shadow = {**rf_shadow_base, **market_stub}
             h2h_required, h2h_skip_reason = _build_lazy_prefilter_decision(fx=fx, rf_shadow=rf_shadow, lg_status=lg_status)
+            prefilter_elapsed = _safe_s(time.perf_counter() - fixture_prefilter_t0)
+            with cache_lock:
+                runtime_profile["prefilter_total_seconds"] += prefilter_elapsed
+                runtime_profile["recent_form_total_seconds"] += (recent_home_elapsed + recent_away_elapsed)
+                runtime_profile["odds_total_seconds"] += odds_elapsed
+                runtime_profile["coverage_total_seconds"] += coverage_elapsed
 
             lazy_prefetch_rows.append(
                 {
@@ -843,9 +1041,19 @@ def run_v4_scan(
                     "odds_resp": odds_resp,
                     "ht_ou_lines": ht_ou_lines,
                     "best_line": best_line,
+                    "coverage_snapshot": coverage_snapshot,
+                    "season_hint": season_hint,
                     "rf_shadow": rf_shadow,
                     "h2h_required": h2h_required,
                     "h2h_skipped_reason": h2h_skip_reason,
+                    "prefilter_elapsed_ms": _safe_ms(prefilter_elapsed),
+                    "recent_home_elapsed_ms": _safe_ms(recent_home_elapsed),
+                    "recent_away_elapsed_ms": _safe_ms(recent_away_elapsed),
+                    "odds_elapsed_ms": _safe_ms(odds_elapsed),
+                    "coverage_elapsed_ms": _safe_ms(coverage_elapsed),
+                    "api_call_count_prefilter": int(prefilter_api_calls),
+                    "cache_hit_count_prefilter": int(prefilter_hits),
+                    "cache_miss_count_prefilter": int(prefilter_misses),
                 }
             )
 
@@ -936,6 +1144,18 @@ def run_v4_scan(
             best_line = prefetched.get("best_line")
             ht_ou_lines = prefetched.get("ht_ou_lines") or []
             odds_resp = prefetched.get("odds_resp")
+            prefilter_elapsed_ms = int(prefetched.get("prefilter_elapsed_ms") or 0)
+            recent_home_elapsed_ms = int(prefetched.get("recent_home_elapsed_ms") or 0)
+            recent_away_elapsed_ms = int(prefetched.get("recent_away_elapsed_ms") or 0)
+            odds_elapsed_ms = int(prefetched.get("odds_elapsed_ms") or 0)
+            coverage_elapsed_ms = int(prefetched.get("coverage_elapsed_ms") or 0)
+            prefilter_api_call_count = int(prefetched.get("api_call_count_prefilter") or 0)
+            prefilter_cache_hit_count = int(prefetched.get("cache_hit_count_prefilter") or 0)
+            prefilter_cache_miss_count = int(prefetched.get("cache_miss_count_prefilter") or 0)
+            h2h_elapsed_ms = 0
+            events_elapsed_ms = 0
+            h2h_cache_hit = False
+            h2h_api_delta = 0
             rf_collected = True
             collection_stage = "RF_COLLECTED"
             market_collected = True
@@ -964,27 +1184,51 @@ def run_v4_scan(
                     f"{fx.get('league_name','?')} | {fx['home']} vs {fx['away']}"
                 )
                 try:
-                    h2h_result = _run_h2h_with_timeout(
-                        lambda: evaluate_h2h_edge(
-                            fx["homeId"],
-                            fx["awayId"],
-                            api_client,
-                            mode="full",
-                            current_league_id=fx["league"],
-                            current_league_name=fx["league_name"],
-                            current_country=fx.get("country"),
-                        ),
-                        timeout_seconds=h2h_timeout_seconds,
-                    )
-                    h2h_collected = True
+                    h2h_key = (int(fx["homeId"]), int(fx["awayId"]))
+                    with cache_lock:
+                        cached_h2h = h2h_result_cache.get(h2h_key)
+                    if cached_h2h is not None:
+                        h2h_result = cached_h2h
+                        h2h_collected = True
+                        h2h_cache_hit = True
+                        with cache_lock:
+                            runtime_profile["h2h_cache_hit"] += 1
+                            runtime_profile["cache_hit_total"] += 1
+                    else:
+                        with cache_lock:
+                            runtime_profile["h2h_cache_miss"] += 1
+                            runtime_profile["cache_miss_total"] += 1
+                        h2h_started = time.perf_counter()
+                        before_calls = _calls_total()
+                        h2h_result = _run_h2h_with_timeout(
+                            lambda: evaluate_h2h_edge(
+                                fx["homeId"],
+                                fx["awayId"],
+                                api_client,
+                                mode="full",
+                                current_league_id=fx["league"],
+                                current_league_name=fx["league_name"],
+                                current_country=fx.get("country"),
+                            ),
+                            timeout_seconds=h2h_timeout_seconds,
+                        )
+                        h2h_elapsed_ms = _safe_ms(time.perf_counter() - h2h_started)
+                        h2h_api_delta = max(0, _calls_total() - before_calls)
+                        with cache_lock:
+                            h2h_result_cache[h2h_key] = h2h_result
+                            runtime_profile["h2h_api_call_count"] += h2h_api_delta
+                        h2h_collected = True
                 except TimeoutError:
                     h2h_required = False
                     h2h_timed_out = True
                     h2h_skipped_reason = "H2H_TIMEOUT_SKIP"
                     h2h_result = {"valid": False, "reason": "H2H_TIMEOUT_SKIP", "factors": {}, "market_scores": {}}
+                    h2h_elapsed_ms = _safe_ms(float(h2h_timeout_seconds))
                 collection_stage = "H2H_ENRICHED" if h2h_collected and h2h_result.get("valid") else "H2H_REQUIRED"
             else:
                 collection_stage = "H2H_SKIPPED"
+            with cache_lock:
+                runtime_profile["h2h_total_seconds"] += (float(h2h_elapsed_ms) / 1000.0)
 
             factors = h2h_result.get("factors", {}) if isinstance(h2h_result, dict) else {}
             # Rebuild shadow with H2H info if collected, still shadow-only.
@@ -1027,8 +1271,22 @@ def run_v4_scan(
                     events_skipped_reason = "API_BUDGET_SAVE"
                 else:
                     events_skipped_reason = "NOT_SHADOW_CANDIDATE"
+            events_key = int(fx["id"])
+            with cache_lock:
+                if events_key in events_cache:
+                    runtime_profile["events_cache_hit"] += 1
+                    runtime_profile["cache_hit_total"] += 1
+                else:
+                    runtime_profile["events_cache_miss"] += 1
+                    runtime_profile["cache_miss_total"] += 1
+                    events_cache[events_key] = {
+                        "required": bool(events_required),
+                        "collected": bool(events_required and h2h_collected and h2h_result.get("valid")),
+                    }
             events_collected = bool(events_required and h2h_collected and h2h_result.get("valid"))
             collection_stage = "EVENTS_ENRICHED" if events_collected else "EVENTS_SKIPPED"
+            with cache_lock:
+                runtime_profile["events_total_seconds"] += (float(events_elapsed_ms) / 1000.0)
 
             # Step 6: lazy CPL placeholder only
             cpl_required = bool(
@@ -1058,6 +1316,7 @@ def run_v4_scan(
                 f"events_skip={events_skipped_reason or 'NONE'}|official=UNCHANGED"
             )
 
+            coverage_eval_t0 = time.perf_counter()
             data_coverage = evaluate_fixture_coverage(
                 fx,
                 api_client,
@@ -1065,6 +1324,7 @@ def run_v4_scan(
                 pre_odds_resp=odds_resp,
                 ht_ou_lines=ht_ou_lines,
             )
+            coverage_elapsed_ms += _safe_ms(time.perf_counter() - coverage_eval_t0)
 
             result = h2h_result
             ht_score = float((result.get("market_scores") or {}).get("HT_LIVE_OVER") or 0.0)
@@ -1123,6 +1383,28 @@ def run_v4_scan(
                 "cpl_collected": cpl_collected,
                 "expensive_calls_saved": expensive_calls_saved,
                 "collection_reason": collection_reason,
+                "prefilter_elapsed_ms": int(prefilter_elapsed_ms),
+                "recent_home_elapsed_ms": int(recent_home_elapsed_ms),
+                "recent_away_elapsed_ms": int(recent_away_elapsed_ms),
+                "odds_elapsed_ms": int(odds_elapsed_ms),
+                "coverage_elapsed_ms": int(coverage_elapsed_ms),
+                "h2h_elapsed_ms": int(h2h_elapsed_ms),
+                "events_elapsed_ms": int(events_elapsed_ms),
+                "api_call_count": int(prefilter_api_call_count + h2h_api_delta),
+                "cache_hit_count": int(prefilter_cache_hit_count + (1 if h2h_cache_hit else 0)),
+                "cache_miss_count": int(prefilter_cache_miss_count + (0 if h2h_cache_hit else 1 if h2h_required else 0)),
+                "slowest_stage": max(
+                    [
+                        ("prefilter", int(prefilter_elapsed_ms)),
+                        ("recent_home", int(recent_home_elapsed_ms)),
+                        ("recent_away", int(recent_away_elapsed_ms)),
+                        ("odds", int(odds_elapsed_ms)),
+                        ("coverage", int(coverage_elapsed_ms)),
+                        ("h2h", int(h2h_elapsed_ms)),
+                        ("events", int(events_elapsed_ms)),
+                    ],
+                    key=lambda x: x[1],
+                )[0],
             }
 
             append_jsonl(universe_out, {
@@ -1179,6 +1461,16 @@ def run_v4_scan(
                 "actual_collection_stage": "SCOUT_ROW_WRITTEN",
                 "actual_collection_reason": "RF_LAZY_SHADOW_SCOUT_WRITTEN",
             })
+            runtime_profile["slowest_fixtures_top5"].append(
+                {
+                    "fixture_id": int(fx["id"]),
+                    "match": f"{fx['home']} vs {fx['away']}",
+                    "prefilter_elapsed_ms": int(prefilter_elapsed_ms),
+                    "h2h_elapsed_ms": int(h2h_elapsed_ms),
+                    "api_call_count": int(prefilter_api_call_count + h2h_api_delta),
+                    "slowest_stage": lazy_flags.get("slowest_stage", "prefilter"),
+                }
+            )
             stats["scouted"] += 1
             if h2h_collected and result.get("valid"):
                 stats["valid_h2h_count"] += 1
@@ -1495,6 +1787,21 @@ def run_v4_scan(
 
     elapsed = round(time.perf_counter() - t0, 2)
     api_stats = getattr(api_client, "_stats", {})
+    runtime_profile["total_elapsed_seconds"] = float(elapsed)
+    runtime_profile["raw_fixture_count"] = int(stats["total"])
+    runtime_profile["scout_row_count"] = int(stats["scouted"])
+    runtime_profile["avg_seconds_per_fixture"] = round(
+        float(elapsed) / max(1, int(stats["total"])),
+        4,
+    )
+    runtime_profile["api_call_count_total"] = int(api_stats.get("calls_total", 0))
+    runtime_profile["cache_hit_total"] = int(runtime_profile.get("cache_hit_total", 0))
+    runtime_profile["cache_miss_total"] = int(runtime_profile.get("cache_miss_total", 0))
+    runtime_profile["slowest_fixtures_top5"] = sorted(
+        runtime_profile.get("slowest_fixtures_top5", []),
+        key=lambda x: int(x.get("prefilter_elapsed_ms", 0)) + int(x.get("h2h_elapsed_ms", 0)),
+        reverse=True,
+    )[:5]
     perf = {
         "date": scan_dt.isoformat(),
         "scan_date": scan_dt.isoformat(),
@@ -1520,6 +1827,7 @@ def run_v4_scan(
         "fallback_count": get_api_guard_snapshot().get("fallback_count", 0),
         "recent_prewarm": prewarm_info,
         "recent_profile_cache": recent_profile_cache_stats(),
+        "runtime_cost_profile": runtime_profile,
         "generated_at": datetime.now().isoformat(),
     }
     perf_path = REPORT_DIR / f"scan_perf_v4_{today_str}.json"
