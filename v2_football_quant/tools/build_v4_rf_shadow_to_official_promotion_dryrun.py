@@ -182,10 +182,29 @@ def build_dryrun_report(scout_data: list, candidate_view: dict, scan_date: str) 
         if rsg in ("A", "B") and has_no_market(fixture):
             rejected_no_market.append(entry)
 
+    cv_a = int(candidate_view.get("A_count", 0) or 0)
+    cv_b = int(candidate_view.get("B_count", 0) or 0)
+    cv_c = int(candidate_view.get("C_count", 0) or 0)
+    cv_skip_raw = int(candidate_view.get("SKIP_count", 0) or 0)
+    source_row_count = len(scout_data)
+    cv_skip = cv_skip_raw if cv_skip_raw > 0 else max(0, source_row_count - cv_a - cv_b - cv_c)
+    official_total = cv_a + cv_b + cv_c + cv_skip
+    dryrun_total = sum(dryrun_grades.values())
+
     report = {
         "report_type": "V4_RF_SHADOW_TO_OFFICIAL_PROMOTION_DRYRUN",
         "scan_date": scan_date,
         "generated_at": datetime.now().isoformat(),
+        "source_row_count": source_row_count,
+        "official_total": official_total,
+        "dryrun_total": dryrun_total,
+        "official_grade_distribution_from_candidate_view": {
+            "A": cv_a,
+            "B": cv_b,
+            "C": cv_c,
+            "SKIP": cv_skip,
+            "SKIP_raw": cv_skip_raw,
+        },
         "disclaimer": "This is a dry-run simulation only. Not an official recommendation. "
                      "Does not affect pending bets, validation, live bets, QQ, or cron.",
         "official_grades_before_dryrun": official_grades,
@@ -259,7 +278,7 @@ def write_markdown(report: dict, scan_date: str):
     lines.append(f"| B | {og.get('B',0)} | {rsg.get('B',0)} | {masg.get('B',0)} | {dr_display['DRYRUN_B']} |")
     lines.append(f"| C | {og.get('C',0)} | {rsg.get('C',0)} | {masg.get('C',0)} | {dr_display['DRYRUN_C_OBSERVE']} |")
     lines.append(f"| SKIP | {og.get('SKIP',0)} | {rsg.get('SKIP',0)} | {masg.get('SKIP',0)} | {dr_skip_total} |")
-    lines.append(f"| NONE | {og.get('NONE',43)} | — | — | — |")
+    lines.append(f"| NONE | {og.get('NONE',0)} | — | — | — |")
     lines.append("")
     lines.append(f"**Dry-run VETO (hard market veto blocking shadow A/B)**: {drg.get('DRYRUN_VETO',0)}")
     lines.append("")
