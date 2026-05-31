@@ -362,6 +362,28 @@ RF_SHADOW_GRADE_NUM_FIELDS = (
     "recent5_other_side_count",
 )
 
+RF_SHADOW_PROMOTION_DRYRUN_TEXT_FIELDS = (
+    "shadow_dryrun_grade",
+    "shadow_dryrun_reason",
+    "shadow_dryrun_reason_code",
+    "shadow_dryrun_source",
+    "current_official_grade",
+    "official_vs_shadow_delta",
+    "promotion_delta_reason",
+    "dryrun_block_reason",
+)
+
+RF_SHADOW_PROMOTION_DRYRUN_BOOL_FIELDS = (
+    "dryrun_allowed_to_promote",
+)
+
+RF_SHADOW_PROMOTION_DRYRUN_NUM_FIELDS = (
+    "shadow_dryrun_score",
+    "recent5_bilateral_gate_pass_count",
+    "recent5_fail_cap_to_C_count",
+    "rf_strong_confirmed_b_floor_exception_count",
+)
+
 SEASON_AWARE_TEXT_FIELDS = (
     "season_phase",
     "season_phase_reason_code",
@@ -524,6 +546,15 @@ def _merge_rf_shadow_fields(candidate_row: dict, scout_row: dict) -> dict:
         out[k] = bool(raw)
     for k in RF_SHADOW_GRADE_NUM_FIELDS:
         out[k] = _rf_clean(candidate_row.get(k, scout_row.get(k)), "DATA_MISSING" if k in {"rf_shadow_score", "rf_shadow_confidence"} else 0)
+    for k in RF_SHADOW_PROMOTION_DRYRUN_TEXT_FIELDS:
+        out[k] = _rf_clean(candidate_row.get(k, scout_row.get(k)), "NOT_AVAILABLE")
+    for k in RF_SHADOW_PROMOTION_DRYRUN_BOOL_FIELDS:
+        raw = candidate_row.get(k)
+        if raw is None:
+            raw = scout_row.get(k, False)
+        out[k] = bool(raw)
+    for k in RF_SHADOW_PROMOTION_DRYRUN_NUM_FIELDS:
+        out[k] = _rf_clean(candidate_row.get(k, scout_row.get(k)), 0)
     for k in SEASON_AWARE_TEXT_FIELDS:
         if k == "season_phase":
             default_text = "UNKNOWN"
