@@ -241,6 +241,7 @@ COLLECTION_LAZY_TEXT_FIELDS = (
     "collection_mode",
     "collection_stage",
     "h2h_skipped_reason",
+    "h2h_budget_exceeded_reason",
     "events_skipped_reason",
     "cpl_skipped_reason",
     "collection_reason",
@@ -252,6 +253,7 @@ COLLECTION_LAZY_BOOL_FIELDS = (
     "prefilter_done",
     "h2h_required",
     "h2h_collected",
+    "h2h_timed_out",
     "events_required",
     "events_collected",
     "cpl_required",
@@ -260,6 +262,9 @@ COLLECTION_LAZY_BOOL_FIELDS = (
 
 COLLECTION_LAZY_NUM_FIELDS = (
     "expensive_calls_saved",
+    "h2h_timeout_seconds",
+    "h2h_required_total",
+    "h2h_required_ratio_cap",
 )
 
 RF_SHADOW_GRADE_TEXT_FIELDS = (

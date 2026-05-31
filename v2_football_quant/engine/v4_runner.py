@@ -15,6 +15,7 @@ from __future__ import annotations
 
 import argparse
 import json, ssl, certifi, time, sys
+import signal
 import urllib.request
 from urllib.parse import urlsplit, parse_qsl, urlencode
 from pathlib import Path
@@ -70,6 +71,8 @@ with open(BASE_DIR / "config" / "leagues_whitelist.json") as f:
 WL_SET = set(str(k) for k in LEAGUE_CN.keys())
 SCAN_PROFILE_STABLE_FULL_24H = "stable_full_24h"
 LOCAL_TZ = timezone(timedelta(hours=8))
+H2H_MAX_REQUIRED_RATIO = 0.35
+H2H_PER_FIXTURE_TIMEOUT_SECONDS = 20
 
 # Match-date validation must use the match-local calendar date, not the
 # operator/CST scan date. Country mapping is intentionally conservative; if a
@@ -341,6 +344,7 @@ def fetch_today_fixtures(
                 "awayId": f["teams"]["away"]["id"],
                 "league": lg_id,
                 "league_name": LEAGUE_CN.get(lg_id, f["league"]["name"]),
+                "league_type": lg_type_raw,
                 "country": f.get("league", {}).get("country"),
                 "fixture_timezone": f.get("fixture", {}).get("timezone"),
                 "kickoff": kickoff,
@@ -419,6 +423,143 @@ def _best_pre_live_line(ht_ou_lines: list) -> dict | None:
         return None
     valid.sort(key=lambda x: x["line_float"], reverse=True)
     return valid[0]
+
+
+def _fixture_non_formal_reason(fx: dict) -> str:
+    """Return hard pre-H2H skip reason for non-formal fixtures."""
+    league_name = str(fx.get("league_name") or "").lower()
+    league_type = str(fx.get("league_type") or "").lower()
+    country = str(fx.get("country") or "").lower()
+    haystack = f"{league_name} {league_type} {country}"
+
+    friendly_tokens = (
+        "friendly", "friendlies", "友谊", "amic", "amistoso",
+    )
+    youth_tokens = (
+        "u17", "u18", "u19", "u20", "u21", "u22", "u23", "青年", "预备",
+    )
+    women_tokens = ("women", "woman", "女足", "女子", "femin")
+    non_formal_tokens = ("cup", "杯", "copa", "coppa", "pokal", "beker", "super cup", "supercup")
+
+    if any(t in haystack for t in friendly_tokens):
+        return "FRIENDLY_SKIP_H2H"
+    if any(t in haystack for t in youth_tokens):
+        return "YOUTH_SKIP_H2H"
+    if any(t in haystack for t in women_tokens):
+        return "NON_FORMAL_SKIP_H2H"
+    if league_type and league_type != "league":
+        return "NON_FORMAL_SKIP_H2H"
+    if any(t in haystack for t in non_formal_tokens):
+        return "NON_FORMAL_SKIP_H2H"
+    return ""
+
+
+def _safe_float(v, default: float = 0.0) -> float:
+    try:
+        if v is None or v == "":
+            return default
+        return float(v)
+    except Exception:
+        return default
+
+
+def _build_lazy_prefilter_decision(
+    fx: dict,
+    rf_shadow: dict,
+    lg_status: str,
+) -> tuple[bool, str]:
+    """Hard H2H gate before any H2H API call in rf_lazy_shadow mode."""
+    market_status = str(rf_shadow.get("opening_market_support_status") or "").upper()
+    gate10 = str(rf_shadow.get("rf_recent10_gate_status") or "").upper()
+    gate5 = str(rf_shadow.get("rf_recent5_grade_status") or "").upper()
+    base_shadow_grade = str(rf_shadow.get("rf_shadow_grade") or "").upper()
+    market_adjusted_grade = str(rf_shadow.get("market_adjusted_shadow_grade") or "").upper()
+    route = str(rf_shadow.get("rf_shadow_route") or "").upper()
+    entry_rule = str(rf_shadow.get("rf_entry_rule") or "").upper()
+    balance_driver_level = str(rf_shadow.get("rf_balance_driver_level") or "").upper()
+    balance_weak = str(rf_shadow.get("rf_balance_weak_side_status") or "").upper()
+
+    if lg_status not in {"ENABLED", "WATCH_ONLY", "UNKNOWN"}:
+        return False, "NON_FORMAL_SKIP_H2H"
+
+    non_formal_reason = _fixture_non_formal_reason(fx)
+    if non_formal_reason:
+        return False, non_formal_reason
+
+    if market_status == "MARKET_HARD_VETO":
+        return False, "MARKET_HARD_VETO_BEFORE_H2H"
+    if market_status == "MARKET_NO_MARKET":
+        return False, "NO_MARKET_BEFORE_H2H"
+    if market_status == "MARKET_NO_DATA" and base_shadow_grade not in {"A", "B"}:
+        return False, "MARKET_NO_DATA_RF_NOT_STRONG"
+
+    if base_shadow_grade == "SKIP":
+        return False, "RF_SHADOW_SKIP"
+    if market_adjusted_grade == "SKIP":
+        return False, "MARKET_ADJUSTED_SKIP"
+    if base_shadow_grade in {"DATA_MISSING", "LOW_SAMPLE"}:
+        return False, "DATA_MISSING_SKIP_H2H"
+
+    if "LE_4" in gate10 or "BLOCK" in gate10:
+        return False, "RECENT10_BELOW_GATE"
+    if "WEAK_LE_2" in gate5 and route not in {"DOMINANT_FAVORITE_PENDING", "STRONG_FAVORITE_PENDING"}:
+        return False, "RECENT5_COLD"
+
+    candidate_prefilter = bool(
+        market_adjusted_grade in {"A", "B", "C"}
+        or base_shadow_grade in {"A", "B", "C"}
+        or entry_rule in {"ENTRY_6OF10_WITH_5OF5_B_EXCEPTION", "ENTRY_5OF10_WITH_5OF5_C_OBSERVE"}
+        or route in {"DOMINANT_FAVORITE_PENDING", "STRONG_FAVORITE_PENDING", "BC_EDGE_PENDING", "RECENT5_HEATING_EXCEPTION"}
+        or (balance_driver_level in {"HOT_DRIVER", "STRONG_DRIVER"} and balance_weak in {"ACCEPTABLE", "SUPPORTIVE"})
+    )
+    if not candidate_prefilter:
+        return False, "NOT_CANDIDATE"
+    return True, ""
+
+
+def _lazy_h2h_priority(packet: dict) -> tuple[int, float]:
+    """Lower tuple value means higher priority for H2H budget allocation."""
+    rf_shadow = packet.get("rf_shadow") or {}
+    market_grade = str(rf_shadow.get("market_adjusted_shadow_grade") or "").upper()
+    base_grade = str(rf_shadow.get("rf_shadow_grade") or "").upper()
+    route = str(rf_shadow.get("rf_shadow_route") or "").upper()
+    balance_driver = str(rf_shadow.get("rf_balance_driver_level") or "").upper()
+    balance_weak = str(rf_shadow.get("rf_balance_weak_side_status") or "").upper()
+    confidence = _safe_float(rf_shadow.get("rf_shadow_confidence"), 0.0)
+    score = _safe_float(rf_shadow.get("rf_shadow_score"), 0.0)
+
+    grade = market_grade or base_grade
+    if grade == "A":
+        bucket = 0
+    elif grade == "B":
+        bucket = 1
+    elif grade == "C":
+        bucket = 2
+    elif route in {"BC_EDGE_PENDING", "RECENT5_HEATING_EXCEPTION"}:
+        bucket = 3
+    elif balance_driver in {"HOT_DRIVER", "STRONG_DRIVER"} and balance_weak in {"ACCEPTABLE", "SUPPORTIVE"}:
+        bucket = 4
+    else:
+        bucket = 5
+    return bucket, -(confidence * 100.0 + score)
+
+
+def _run_h2h_with_timeout(callable_fn, timeout_seconds: int):
+    """Run H2H call with SIGALRM timeout; raises TimeoutError on timeout."""
+    if timeout_seconds <= 0:
+        return callable_fn()
+
+    def _handler(_signum, _frame):
+        raise TimeoutError(f"h2h timeout>{timeout_seconds}s")
+
+    old_handler = signal.getsignal(signal.SIGALRM)
+    signal.signal(signal.SIGALRM, _handler)
+    signal.alarm(timeout_seconds)
+    try:
+        return callable_fn()
+    finally:
+        signal.alarm(0)
+        signal.signal(signal.SIGALRM, old_handler)
 
 
 def _build_observe_only_collection_plan(
@@ -656,10 +797,92 @@ def run_v4_scan(
 
     cov_rank = {"UNKNOWN": 1, "BASIC": 2, "GOOD": 3, "FULL": 4}
 
+    lazy_prefetch_by_fixture: dict[int, dict] = {}
+    h2h_required_total = 0
+    h2h_processed = 0
+    if collection_mode == "rf_lazy_shadow":
+        logger.info("  🧭 rf_lazy_shadow 预判阶段：RF + OpeningMarket + H2H hard gate")
+        lazy_prefetch_rows: list[dict] = []
+        for fx in fixtures:
+            lg_policy = league_status_map.get(str(fx["league"]), {})
+            lg_status = str(lg_policy.get("status") or "UNKNOWN")
+            home_recent_raw = api_client(f"fixtures?team={fx['homeId']}&last=10&status=FT")
+            away_recent_raw = api_client(f"fixtures?team={fx['awayId']}&last=10&status=FT")
+            rf_shadow_base = build_recent_form_shadow_from_recent(
+                home_recent_raw,
+                fx["homeId"],
+                away_recent_raw,
+                fx["awayId"],
+            )
+
+            odds_resp = api_client(f"odds?fixture={fx['id']}")
+            ht_ou_lines = _capture_ht_ou_lines(odds_resp) if odds_resp else []
+            best_line = _best_pre_live_line(ht_ou_lines)
+
+            market_stub = build_rf_shadow_grade_layer(
+                {
+                    **rf_shadow_base,
+                    "prematch_ht_line": best_line["line_float"] if best_line else None,
+                    "prematch_over_odds": best_line.get("over") if best_line else None,
+                    "prematch_under_odds": best_line.get("under") if best_line else None,
+                    "no_market_excluded": False,
+                    "logged_at": datetime.now().isoformat(),
+                },
+                factors={},
+            )
+            rf_shadow = {**rf_shadow_base, **market_stub}
+            h2h_required, h2h_skip_reason = _build_lazy_prefilter_decision(fx=fx, rf_shadow=rf_shadow, lg_status=lg_status)
+
+            lazy_prefetch_rows.append(
+                {
+                    "fixture_id": int(fx["id"]),
+                    "fx": fx,
+                    "lg_status": lg_status,
+                    "home_recent_raw": home_recent_raw,
+                    "away_recent_raw": away_recent_raw,
+                    "odds_resp": odds_resp,
+                    "ht_ou_lines": ht_ou_lines,
+                    "best_line": best_line,
+                    "rf_shadow": rf_shadow,
+                    "h2h_required": h2h_required,
+                    "h2h_skipped_reason": h2h_skip_reason,
+                }
+            )
+
+        raw_total = len(lazy_prefetch_rows)
+        budget_limit = int(raw_total * H2H_MAX_REQUIRED_RATIO)
+        budget_limit = max(1, budget_limit) if raw_total > 0 else 0
+        requested_rows = [r for r in lazy_prefetch_rows if r["h2h_required"]]
+        requested_rows.sort(key=_lazy_h2h_priority)
+        allowed_ids = {int(r["fixture_id"]) for r in requested_rows[:budget_limit]}
+
+        for row in lazy_prefetch_rows:
+            fid = int(row["fixture_id"])
+            if row["h2h_required"] and fid not in allowed_ids:
+                row["h2h_required"] = False
+                row["h2h_skipped_reason"] = "H2H_BUDGET_EXCEEDED"
+                row["h2h_budget_exceeded_reason"] = "H2H_BUDGET_EXCEEDED"
+            else:
+                row["h2h_budget_exceeded_reason"] = ""
+            row["h2h_budget_limit"] = budget_limit
+            row["h2h_required_ratio_cap"] = H2H_MAX_REQUIRED_RATIO
+            row["h2h_timeout_seconds"] = H2H_PER_FIXTURE_TIMEOUT_SECONDS
+            lazy_prefetch_by_fixture[fid] = row
+
+        h2h_required_total = sum(1 for r in lazy_prefetch_rows if r["h2h_required"])
+        logger.info(
+            "  🧮 H2H hard-gate: raw=%s | requested=%s | budget_limit=%s(%.0f%%) | required=%s",
+            raw_total,
+            len(requested_rows),
+            budget_limit,
+            H2H_MAX_REQUIRED_RATIO * 100,
+            h2h_required_total,
+        )
+
     for i, fx in enumerate(fixtures):
         if (i + 1) % 10 == 0 and wd:
             wd.heartbeat(current=i+1, total=len(fixtures), item=f"{fx.get('home','?')} vs {fx.get('away','?')}", api_calls=getattr(api_client, "_stats", {}).get("calls_total",0))
-        if (i + 1) % 20 == 0:
+        if collection_mode != "rf_lazy_shadow" and (i + 1) % 20 == 0:
             logger.info(f"  H2H 查询: {i+1}/{len(fixtures)}")
 
         lg_policy = league_status_map.get(str(fx["league"]), {})
@@ -711,100 +934,59 @@ def run_v4_scan(
             continue
 
         if collection_mode == "rf_lazy_shadow":
-            # Step 1/2: RF first + opening market before H2H
+            prefetched = lazy_prefetch_by_fixture.get(int(fx["id"])) or {}
             collection_stage = "RAW_FIXTURE"
-            home_recent_raw = api_client(f"fixtures?team={fx['homeId']}&last=10&status=FT")
-            away_recent_raw = api_client(f"fixtures?team={fx['awayId']}&last=10&status=FT")
-            rf_shadow = build_recent_form_shadow_from_recent(
-                home_recent_raw,
-                fx["homeId"],
-                away_recent_raw,
-                fx["awayId"],
-            )
+            rf_shadow = dict(prefetched.get("rf_shadow") or {})
+            best_line = prefetched.get("best_line")
+            ht_ou_lines = prefetched.get("ht_ou_lines") or []
+            odds_resp = prefetched.get("odds_resp")
             rf_collected = True
             collection_stage = "RF_COLLECTED"
-            odds_resp = api_client(f"odds?fixture={fx['id']}")
-            ht_ou_lines = _capture_ht_ou_lines(odds_resp) if odds_resp else []
-            best_line = _best_pre_live_line(ht_ou_lines)
             market_collected = True
             collection_stage = "MARKET_CHECKED"
-            market_stub = build_rf_shadow_grade_layer(
-                {
-                    **rf_shadow,
-                    "prematch_ht_line": best_line["line_float"] if best_line else None,
-                    "prematch_over_odds": best_line.get("over") if best_line else None,
-                    "prematch_under_odds": best_line.get("under") if best_line else None,
-                    "no_market_excluded": False,
-                    "logged_at": datetime.now().isoformat(),
-                },
-                factors={},
-            )
-            rf_shadow = {**rf_shadow, **market_stub}
-
-            # Step 3: RF prefilter before H2H
-            market_status = str(rf_shadow.get("opening_market_support_status") or "").upper()
-            gate10 = str(rf_shadow.get("rf_recent10_gate_status") or "").upper()
-            gate5 = str(rf_shadow.get("rf_recent5_grade_status") or "").upper()
-            base_shadow_grade = str(rf_shadow.get("rf_shadow_grade") or "").upper()
-            route = str(rf_shadow.get("rf_shadow_route") or "").upper()
-            entry_rule = str(rf_shadow.get("rf_entry_rule") or "").upper()
-            balance_status = str(rf_shadow.get("rf_balance_status") or "").upper()
-            obvious_skip = base_shadow_grade in {"SKIP", "DATA_MISSING", "LOW_SAMPLE"}
             prefilter_done = True
             collection_stage = "RF_PREFILTERED"
 
-            candidate_prefilter = bool(
-                base_shadow_grade in {"A", "B", "C"}
-                or entry_rule in {"ENTRY_6OF10_WITH_5OF5_B_EXCEPTION", "ENTRY_5OF10_WITH_5OF5_C_OBSERVE"}
-                or route in {"DOMINANT_FAVORITE_PENDING", "STRONG_FAVORITE_PENDING", "BC_EDGE_PENDING", "RECENT5_HEATING_EXCEPTION"}
-                or balance_status == "HOT_DRIVER_ACCEPTABLE"
-            )
-
-            h2h_required = True
-            h2h_skipped_reason = ""
-            if lg_status not in {"ENABLED", "WATCH_ONLY", "UNKNOWN"}:
-                h2h_required = False
-                h2h_skipped_reason = "NON_FORMAL_FIXTURE"
-            elif market_status == "MARKET_NO_MARKET":
-                h2h_required = False
-                h2h_skipped_reason = "NO_MARKET"
-            elif "LE_4" in gate10 or "BLOCK" in gate10:
-                h2h_required = False
-                h2h_skipped_reason = "RECENT10_BELOW_GATE"
-            elif "WEAK_LE_2" in gate5 and route not in {"DOMINANT_FAVORITE_PENDING", "STRONG_FAVORITE_PENDING"}:
-                h2h_required = False
-                h2h_skipped_reason = "RECENT5_COLD"
-            elif market_status == "MARKET_HARD_VETO" and base_shadow_grade not in {"A", "B"}:
-                h2h_required = False
-                h2h_skipped_reason = "MARKET_HARD_VETO"
-            elif base_shadow_grade in {"DATA_MISSING", "LOW_SAMPLE"}:
-                h2h_required = False
-                h2h_skipped_reason = "DATA_MISSING"
-            elif obvious_skip:
-                h2h_required = False
-                h2h_skipped_reason = "RF_TOO_WEAK"
-            elif not candidate_prefilter:
-                h2h_required = False
-                h2h_skipped_reason = "NOT_CANDIDATE"
+            market_status = str(rf_shadow.get("opening_market_support_status") or "").upper()
+            base_shadow_grade = str(rf_shadow.get("rf_shadow_grade") or "").upper()
+            route = str(rf_shadow.get("rf_shadow_route") or "").upper()
+            h2h_required = bool(prefetched.get("h2h_required"))
+            h2h_skipped_reason = str(prefetched.get("h2h_skipped_reason") or "")
+            h2h_budget_exceeded_reason = str(prefetched.get("h2h_budget_exceeded_reason") or "")
+            h2h_timeout_seconds = int(prefetched.get("h2h_timeout_seconds") or H2H_PER_FIXTURE_TIMEOUT_SECONDS)
 
             h2h_result = {"valid": False, "reason": h2h_skipped_reason or "RF_PREFILTER_SKIP", "factors": {}, "market_scores": {}}
             h2h_collected = False
+            h2h_timed_out = False
             events_collected = False
 
-            # Step 4: lazy H2H
+            # Step 4: lazy H2H (hard gate + budget + timeout)
             if h2h_required:
-                logger.info(f"  ⏳ H2H(lazy): {fx.get('league_name','?')} | {fx['home']} vs {fx['away']}")
-                h2h_result = evaluate_h2h_edge(
-                    fx["homeId"],
-                    fx["awayId"],
-                    api_client,
-                    mode="full",
-                    current_league_id=fx["league"],
-                    current_league_name=fx["league_name"],
-                    current_country=fx.get("country"),
+                h2h_processed += 1
+                logger.info(
+                    f"  ⏳ H2H(lazy required {h2h_processed}/{max(h2h_required_total,1)}): "
+                    f"{fx.get('league_name','?')} | {fx['home']} vs {fx['away']}"
                 )
-                h2h_collected = True
-                collection_stage = "H2H_ENRICHED" if h2h_result.get("valid") else "H2H_REQUIRED"
+                try:
+                    h2h_result = _run_h2h_with_timeout(
+                        lambda: evaluate_h2h_edge(
+                            fx["homeId"],
+                            fx["awayId"],
+                            api_client,
+                            mode="full",
+                            current_league_id=fx["league"],
+                            current_league_name=fx["league_name"],
+                            current_country=fx.get("country"),
+                        ),
+                        timeout_seconds=h2h_timeout_seconds,
+                    )
+                    h2h_collected = True
+                except TimeoutError:
+                    h2h_required = False
+                    h2h_timed_out = True
+                    h2h_skipped_reason = "H2H_TIMEOUT_SKIP"
+                    h2h_result = {"valid": False, "reason": "H2H_TIMEOUT_SKIP", "factors": {}, "market_scores": {}}
+                collection_stage = "H2H_ENRICHED" if h2h_collected and h2h_result.get("valid") else "H2H_REQUIRED"
             else:
                 collection_stage = "H2H_SKIPPED"
 
@@ -843,7 +1025,7 @@ def run_v4_scan(
                     events_skipped_reason = "MARKET_HARD_VETO"
                 elif base_shadow_grade in {"DATA_MISSING", "LOW_SAMPLE"}:
                     events_skipped_reason = "DATA_MISSING"
-                elif obvious_skip:
+                elif base_shadow_grade in {"SKIP", "DATA_MISSING", "LOW_SAMPLE"}:
                     events_skipped_reason = "RF_TOO_WEAK"
                 elif not h2h_required:
                     events_skipped_reason = "API_BUDGET_SAVE"
@@ -871,6 +1053,8 @@ def run_v4_scan(
                 collection_stage = "CPL_SKIPPED"
 
             expensive_calls_saved = int((not h2h_required)) + int((not events_required)) + int((not cpl_required))
+            if h2h_budget_exceeded_reason:
+                expensive_calls_saved += 1
             collection_stage = "SHADOW_FINALIZED"
             collection_reason = (
                 f"mode=rf_lazy_shadow|h2h_required={h2h_required}|events_required={events_required}|"
@@ -930,6 +1114,11 @@ def run_v4_scan(
                 "h2h_required": h2h_required,
                 "h2h_skipped_reason": h2h_skipped_reason,
                 "h2h_collected": h2h_collected,
+                "h2h_budget_exceeded_reason": h2h_budget_exceeded_reason,
+                "h2h_timeout_seconds": h2h_timeout_seconds,
+                "h2h_timed_out": h2h_timed_out,
+                "h2h_required_total": h2h_required_total,
+                "h2h_required_ratio_cap": H2H_MAX_REQUIRED_RATIO,
                 "events_required": events_required,
                 "events_skipped_reason": events_skipped_reason,
                 "events_collected": events_collected,

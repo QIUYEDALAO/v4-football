@@ -501,13 +501,26 @@ const SHADOW_ENUM_CN={
   MARKET_NEUTRAL:"初盘中性",
   MARKET_WEAK_VETO:"初盘弱反向",
   MARKET_HARD_VETO:"初盘强反向",
+  MARKET_HARD_VETO_BEFORE_H2H:"初盘强反向，H2H前跳过",
+  MARKET_NO_DATA_RF_NOT_STRONG:"初盘缺失且RF不强，H2H前跳过",
   OBSERVE_ONLY:"观察模式",
   BILATERAL_ACTIVE:"双边活跃",
   HOT_DRIVER:"强侧驱动",
   STRONG_DRIVER:"强驱动",
   RECENT5_HEATING_EXCEPTION:"升温破格",
   DATA_MISSING:"数据不足",
-  NO_MARKET:"无盘口"
+  NO_MARKET:"无盘口",
+  NO_MARKET_BEFORE_H2H:"无盘口，H2H前跳过",
+  RF_SHADOW_SKIP:"RF影子判定跳过",
+  MARKET_ADJUSTED_SKIP:"盘口后影子判定跳过",
+  FRIENDLY_SKIP_H2H:"友谊赛，H2H前跳过",
+  YOUTH_SKIP_H2H:"U系列赛事，H2H前跳过",
+  NON_FORMAL_SKIP_H2H:"非正式赛事，H2H前跳过",
+  RECENT10_BELOW_GATE:"近10低于门槛，H2H前跳过",
+  RECENT5_COLD:"近5偏冷，H2H前跳过",
+  DATA_MISSING_SKIP_H2H:"关键数据缺失，H2H前跳过",
+  H2H_BUDGET_EXCEEDED:"H2H预算触顶，跳过",
+  H2H_TIMEOUT_SKIP:"H2H超时，跳过"
 };
 const shadowCn=v=>SHADOW_ENUM_CN[String(v||"").toUpperCase()]||safe(v,"数据缺失");
 const collectionModeCn=v=>{
@@ -693,6 +706,10 @@ function renderListRow(x,i){
   const cplState=(modeRaw==='official_legacy')
     ? '占位未启用'
     : collectionStateCn(Boolean(x.cpl_required),Boolean(x.cpl_collected),x.cpl_skipped_reason);
+  const h2hBudgetReason=safe(x.h2h_budget_exceeded_reason,'');
+  const h2hTimeoutSec=safe(first(x.h2h_timeout_seconds,''),'');
+  const h2hRequiredTotal=safe(first(x.h2h_required_total,''),'');
+  const h2hRatioCap=safe(first(x.h2h_required_ratio_cap,''),'');
   const savedCalls=safe(first(x.expensive_calls_saved,0),'0');
   const collectionReason=safe(x.collection_reason,'未记录');
   const isOfficialCandidate=['A','B'].includes(official);
@@ -725,6 +742,8 @@ function renderListRow(x,i){
   row+='<div><span class="k">采集模式：</span>'+observeMode+'</div>';
   row+='<div><span class="k">采集阶段：</span>'+collectionStage+'</div>';
   row+='<div><span class="k">H2H：</span>'+h2hState+'</div>';
+  row+='<div><span class="k">H2H预算：</span>'+(h2hBudgetReason?shadowCn(h2hBudgetReason):'未触发')+'</div>';
+  row+='<div><span class="k">H2H超时阈值：</span>'+(h2hTimeoutSec?`${h2hTimeoutSec}秒`:'未记录')+'　<span class="k">H2H需查总数：</span>'+(h2hRequiredTotal||'未记录')+'　<span class="k">比例上限：</span>'+(h2hRatioCap?`${h2hRatioCap}`:'未记录')+'</div>';
   row+='<div><span class="k">Events：</span>'+eventsState+'</div>';
   row+='<div><span class="k">CPL：</span>'+cplState+'</div>';
   row+='<div><span class="k">节省请求（估算）：</span>'+savedCalls+'</div>';
