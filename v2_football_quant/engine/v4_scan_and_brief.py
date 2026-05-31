@@ -179,6 +179,20 @@ def _cap_grade(g: str, cap: str) -> str:
     return gg
 
 
+def _to_float(v: Any, default: float = 0.0) -> float:
+    try:
+        return float(v)
+    except Exception:
+        return default
+
+
+def _to_int(v: Any, default: int = 0) -> int:
+    try:
+        return int(v)
+    except Exception:
+        return default
+
+
 def _resolve_official_grade_from_shadow(
     row: dict[str, Any],
     factors: dict[str, Any],
@@ -228,6 +242,15 @@ def _resolve_official_grade_from_shadow(
     baseline_only = bool(row.get("rf_baseline_only_flag") or factors.get("rf_baseline_only_flag"))
     h2h_status = str(row.get("h2h_recent5_support_status") or factors.get("h2h_recent5_support_status") or "").upper()
     rf_grade = str(row.get("rf_shadow_grade") or factors.get("rf_shadow_grade") or "").upper()
+    rf_score = _to_float(row.get("rf_shadow_score") if row.get("rf_shadow_score") is not None else factors.get("rf_shadow_score"), 0.0)
+    recent5_status = str(row.get("rf_recent5_grade_status") or factors.get("rf_recent5_grade_status") or "").upper()
+    recent10_status = str(row.get("rf_recent10_gate_status") or factors.get("rf_recent10_gate_status") or "").upper()
+    balance_status = str(row.get("rf_balance_status") or factors.get("rf_balance_status") or "").upper()
+    driver_level = str(row.get("rf_balance_driver_level") or factors.get("rf_balance_driver_level") or "").upper()
+    used5_home = _to_int(row.get("recent5_used_count_home") if row.get("recent5_used_count_home") is not None else factors.get("recent5_used_count_home"), 0)
+    used5_away = _to_int(row.get("recent5_used_count_away") if row.get("recent5_used_count_away") is not None else factors.get("recent5_used_count_away"), 0)
+    used10_home = _to_int(row.get("recent10_used_count_home") if row.get("recent10_used_count_home") is not None else factors.get("recent10_used_count_home"), 0)
+    used10_away = _to_int(row.get("recent10_used_count_away") if row.get("recent10_used_count_away") is not None else factors.get("recent10_used_count_away"), 0)
 
     risk_flags: list[str] = []
     reasons: list[str] = []
@@ -271,6 +294,43 @@ def _resolve_official_grade_from_shadow(
         grade = "C"
         risk_flags.append("BASELINE_STANDALONE_BLOCK")
         reasons.append("baseline不得单独制造A/B")
+
+    # B-floor guard for season-aware production route:
+    # Strong RF + active season + confirmed market should not be mechanically pinned below B.
+    b_floor_tier_ok = league_tier in {"TIER_1_ELITE", "TIER_2_MAINSTREAM", "TIER_3_WEAK_COVERAGE"}
+    b_floor_recent5_ok = (
+        recent5_status in {"RECENT5_A_BASE_5_OF_5", "RECENT5_B_BASE_4_OF_5"}
+        or (used5_home >= 4 and used5_away >= 4)
+    )
+    b_floor_recent10_ok = (
+        recent10_status.startswith("RECENT10_GATE_PASS_7_OF_10")
+        or (used10_home >= 7 and used10_away >= 7)
+    )
+    b_floor_balance_ok = (
+        ("HOT_DRIVER" in balance_status)
+        or ("STRONG_DRIVER" in balance_status)
+        or driver_level in {"HOT_DRIVER", "STRONG_DRIVER"}
+    )
+    b_floor_market_ok = market_status in {"MARKET_STRONG_CONFIRM", "MARKET_WEAK_CONFIRM", "MARKET_NEUTRAL"}
+    b_floor_hard_risk = (
+        market_conflict == "MARKET_EXTREME_VETO"
+        or market_status in {"MARKET_EXTREME_VETO", "MARKET_NO_DATA", "MARKET_NO_MARKET"}
+        or league_tier == "TIER_4_NON_FORMAL"
+        or (season_phase == "POST_OFFSEASON_RETURN" and baseline_only)
+    )
+    b_floor_match = (
+        season_phase == "ACTIVE_SEASON"
+        and b_floor_tier_ok
+        and rf_score >= 73.0
+        and b_floor_recent5_ok
+        and b_floor_recent10_ok
+        and b_floor_balance_ok
+        and b_floor_market_ok
+        and not b_floor_hard_risk
+    )
+    if b_floor_match and grade in {"C", "SKIP"}:
+        grade = "B"
+        reasons.append("RF_STRONG_CONFIRMED_B_FLOOR")
 
     official_permission = (
         grade in {"A", "B"}
