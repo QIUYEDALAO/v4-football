@@ -69,6 +69,11 @@ def main() -> int:
             ("arg_rescue_threshold_exists", "--rescue-threshold"),
             ("arg_rescue_thresholds_exists", "--rescue-thresholds"),
             ("arg_sensitivity_exists", "--sensitivity"),
+            ("arg_multi_artifact_exists", "--multi-artifact"),
+            ("arg_min_fixtures_exists", "--min-fixtures"),
+            ("arg_artifact_glob_exists", "--artifact-glob"),
+            ("arg_baseline_threshold_exists", "--baseline-threshold"),
+            ("arg_candidate_threshold_exists", "--candidate-threshold"),
         ]:
             ok = pat in src
             _ok(checks, key, ok)

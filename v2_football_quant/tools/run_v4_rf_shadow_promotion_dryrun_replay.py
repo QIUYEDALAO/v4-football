@@ -16,6 +16,7 @@ import json
 from datetime import datetime
 from pathlib import Path
 from typing import Any
+import glob
 
 ROOT = Path(__file__).resolve().parents[1]
 SCOUT_DIR = ROOT / "data" / "daily_reports"
@@ -70,6 +71,13 @@ def _latest_date() -> str:
     if not files:
         raise FileNotFoundError("No scout_v4_*.json found")
     return files[-1].stem.split("_")[-1]
+
+
+def _date_from_scout_path(path: Path) -> str:
+    name = path.stem
+    if name.startswith("scout_v4_"):
+        return name.split("_")[-1]
+    return "UNKNOWN_DATE"
 
 
 def _load_json(path: Path) -> Any:
@@ -1150,9 +1158,252 @@ def build_sensitivity_report(
     }
 
 
+def build_multi_artifact_report(
+    artifact_glob: str,
+    min_fixtures: int,
+    baseline_threshold: float,
+    candidate_threshold: float,
+    strict_field_coverage: bool,
+) -> dict[str, Any]:
+    artifacts = [Path(p) for p in sorted(glob.glob(artifact_glob))]
+
+    artifact_results: list[dict[str, Any]] = []
+    sufficient_artifacts: list[str] = []
+    sample_too_small_artifacts: list[str] = []
+    official_missing_artifacts: list[str] = []
+
+    sufficient_and_official_found: list[dict[str, Any]] = []
+
+    expected_rescue_names = {
+        "BK HACKEN VS HAMMARBY FF",
+        "HUACHIPATO VS U. CATOLICA",
+        "GUAYAQUIL CITY FC VS INDEPENDIENTE DEL VALLE",
+    }
+
+    for ap in artifacts:
+        try:
+            rows = _load_json(ap)
+        except Exception:
+            rows = []
+        fixture_count = len(rows) if isinstance(rows, list) else 0
+        date = _date_from_scout_path(ap)
+
+        sample_status = "SAMPLE_SUFFICIENT" if fixture_count >= min_fixtures else "SAMPLE_TOO_SMALL_WARN_ONLY"
+        if sample_status == "SAMPLE_TOO_SMALL_WARN_ONLY":
+            sample_too_small_artifacts.append(str(ap))
+            artifact_results.append({
+                "artifact_path": str(ap),
+                "date": date,
+                "fixture_count": fixture_count,
+                "sample_status": sample_status,
+                "official_artifact_status": "NOT_EVALUATED",
+                "field_coverage_status": "NOT_EVALUATED",
+                "baseline_threshold_result": "NOT_EVALUATED",
+                "candidate_threshold_result": "NOT_EVALUATED",
+                "candidate_new_rescues_vs_baseline": [],
+                "candidate_A_expansion": 0,
+                "candidate_SKIP_to_B": 0,
+                "candidate_market_alone": 0,
+                "candidate_safety_violations": 0,
+                "candidate_unexpected_rescues": [],
+            })
+            continue
+
+        sufficient_artifacts.append(str(ap))
+        baseline = build_report(
+            date=date,
+            source_artifact=str(ap),
+            official_artifact=None,
+            strict_field_coverage=strict_field_coverage,
+            rescue_threshold=baseline_threshold,
+        )
+        candidate = build_report(
+            date=date,
+            source_artifact=str(ap),
+            official_artifact=None,
+            strict_field_coverage=strict_field_coverage,
+            rescue_threshold=candidate_threshold,
+        )
+
+        official_status = str(baseline.get("official_artifact", {}).get("official_artifact_status") or "MISSING")
+        if official_status != "FOUND":
+            official_missing_artifacts.append(str(ap))
+
+        baseline_rescues = {
+            int(r.get("fixture_id"))
+            for r in (baseline.get("rows") or [])
+            if isinstance(r, dict) and isinstance(r.get("fixture_id"), int) and bool(r.get("recent5_rescue_to_B"))
+        }
+        candidate_rescues = [
+            r for r in (candidate.get("rows") or [])
+            if isinstance(r, dict) and isinstance(r.get("fixture_id"), int) and bool(r.get("recent5_rescue_to_B"))
+        ]
+        candidate_rescue_ids = {int(r["fixture_id"]) for r in candidate_rescues}
+
+        new_rescues = [
+            {
+                "fixture_id": int(r["fixture_id"]),
+                "home": _safe_text(r.get("home"), ""),
+                "away": _safe_text(r.get("away"), ""),
+            }
+            for r in candidate_rescues
+            if int(r["fixture_id"]) not in baseline_rescues
+        ]
+        unexpected_rescues = []
+        for nr in new_rescues:
+            pair = f"{str(nr.get('home') or '').strip()} VS {str(nr.get('away') or '').strip()}".upper()
+            if pair not in expected_rescue_names:
+                unexpected_rescues.append(nr)
+
+        baseline_after = baseline.get("distribution", {}).get("shadow_dryrun_grade_after_tuning", {})
+        candidate_after = candidate.get("distribution", {}).get("shadow_dryrun_grade_after_tuning", {})
+
+        field_coverage_status = {
+            "recent5_gate_field_coverage_status": baseline.get("recent5_coverage", {}).get("recent5_gate_field_coverage_status"),
+            "bfloor_exception_field_coverage_status": baseline.get("bfloor_coverage", {}).get("bfloor_exception_field_coverage_status"),
+            "safety_field_coverage_status": baseline.get("safety_coverage", {}).get("safety_field_coverage_status"),
+        }
+
+        result = {
+            "artifact_path": str(ap),
+            "date": date,
+            "fixture_count": fixture_count,
+            "sample_status": sample_status,
+            "official_artifact_status": official_status,
+            "field_coverage_status": field_coverage_status,
+            "baseline_threshold_result": {
+                "rescue_threshold": baseline_threshold,
+                "official_A_B_C_SKIP": baseline.get("official_artifact", {}).get("current_official_grade_distribution"),
+                "shadow_A_B_C_SKIP": baseline_after,
+                "B_to_C": int(baseline.get("coverage", {}).get("b_to_c_after") or 0),
+                "B_to_B": int(baseline.get("coverage", {}).get("b_to_b_after") or 0),
+                "rescue_to_B_count": int(baseline.get("recent5_bilateral_gate_stats", {}).get("recent5_rescue_to_B_count") or 0),
+                "rescue_to_A_count": int(baseline.get("bfloor_stats", {}).get("rescue_to_A_count") or 0),
+                "SKIP_to_B_count": int(baseline.get("coverage", {}).get("skip_to_b_after") or 0),
+                "market_alone_manufactured_AB_count": int(baseline.get("safety_market_h2h_events_cpl", {}).get("market_alone_manufactured_AB_count") or 0),
+                "safety_violations_count": int(baseline.get("tuning_summary", {}).get("safety_violations_count") or 0),
+            },
+            "candidate_threshold_result": {
+                "rescue_threshold": candidate_threshold,
+                "official_A_B_C_SKIP": candidate.get("official_artifact", {}).get("current_official_grade_distribution"),
+                "shadow_A_B_C_SKIP": candidate_after,
+                "B_to_C": int(candidate.get("coverage", {}).get("b_to_c_after") or 0),
+                "B_to_B": int(candidate.get("coverage", {}).get("b_to_b_after") or 0),
+                "rescue_to_B_count": int(candidate.get("recent5_bilateral_gate_stats", {}).get("recent5_rescue_to_B_count") or 0),
+                "rescue_to_A_count": int(candidate.get("bfloor_stats", {}).get("rescue_to_A_count") or 0),
+                "SKIP_to_B_count": int(candidate.get("coverage", {}).get("skip_to_b_after") or 0),
+                "market_alone_manufactured_AB_count": int(candidate.get("safety_market_h2h_events_cpl", {}).get("market_alone_manufactured_AB_count") or 0),
+                "safety_violations_count": int(candidate.get("tuning_summary", {}).get("safety_violations_count") or 0),
+            },
+            "candidate_new_rescues_vs_baseline": new_rescues,
+            "candidate_A_expansion": max(0, int((candidate_after or {}).get("A", 0)) - int((baseline_after or {}).get("A", 0))),
+            "candidate_SKIP_to_B": int(candidate.get("coverage", {}).get("skip_to_b_after") or 0),
+            "candidate_market_alone": int(candidate.get("safety_market_h2h_events_cpl", {}).get("market_alone_manufactured_AB_count") or 0),
+            "candidate_safety_violations": int(candidate.get("tuning_summary", {}).get("safety_violations_count") or 0),
+            "candidate_unexpected_rescues": unexpected_rescues,
+        }
+        artifact_results.append(result)
+
+        if official_status == "FOUND":
+            sufficient_and_official_found.append(result)
+
+    aggregate = {
+        "fixture_count": 0,
+        "baseline_shadow_A_B_C_SKIP": {"A": 0, "B": 0, "C": 0, "SKIP": 0},
+        "candidate_shadow_A_B_C_SKIP": {"A": 0, "B": 0, "C": 0, "SKIP": 0},
+        "baseline_B_to_C": 0,
+        "baseline_B_to_B": 0,
+        "baseline_rescue_to_B_count": 0,
+        "baseline_rescue_to_A_count": 0,
+        "baseline_SKIP_to_B_count": 0,
+        "baseline_market_alone_manufactured_AB_count": 0,
+        "baseline_safety_violations_count": 0,
+        "candidate_B_to_C": 0,
+        "candidate_B_to_B": 0,
+        "candidate_rescue_to_B_count": 0,
+        "candidate_rescue_to_A_count": 0,
+        "candidate_SKIP_to_B_count": 0,
+        "candidate_market_alone_manufactured_AB_count": 0,
+        "candidate_safety_violations_count": 0,
+        "candidate_new_rescues_vs_77": [],
+        "candidate_unexpected_rescues": [],
+    }
+
+    for r in sufficient_and_official_found:
+        aggregate["fixture_count"] += int(r.get("fixture_count") or 0)
+        bsh = r.get("baseline_threshold_result", {}).get("shadow_A_B_C_SKIP", {}) or {}
+        csh = r.get("candidate_threshold_result", {}).get("shadow_A_B_C_SKIP", {}) or {}
+        for g in ["A", "B", "C", "SKIP"]:
+            aggregate["baseline_shadow_A_B_C_SKIP"][g] += int(bsh.get(g, 0) or 0)
+            aggregate["candidate_shadow_A_B_C_SKIP"][g] += int(csh.get(g, 0) or 0)
+        aggregate["baseline_B_to_C"] += int(r.get("baseline_threshold_result", {}).get("B_to_C") or 0)
+        aggregate["baseline_B_to_B"] += int(r.get("baseline_threshold_result", {}).get("B_to_B") or 0)
+        aggregate["baseline_rescue_to_B_count"] += int(r.get("baseline_threshold_result", {}).get("rescue_to_B_count") or 0)
+        aggregate["baseline_rescue_to_A_count"] += int(r.get("baseline_threshold_result", {}).get("rescue_to_A_count") or 0)
+        aggregate["baseline_SKIP_to_B_count"] += int(r.get("baseline_threshold_result", {}).get("SKIP_to_B_count") or 0)
+        aggregate["baseline_market_alone_manufactured_AB_count"] += int(r.get("baseline_threshold_result", {}).get("market_alone_manufactured_AB_count") or 0)
+        aggregate["baseline_safety_violations_count"] += int(r.get("baseline_threshold_result", {}).get("safety_violations_count") or 0)
+
+        aggregate["candidate_B_to_C"] += int(r.get("candidate_threshold_result", {}).get("B_to_C") or 0)
+        aggregate["candidate_B_to_B"] += int(r.get("candidate_threshold_result", {}).get("B_to_B") or 0)
+        aggregate["candidate_rescue_to_B_count"] += int(r.get("candidate_threshold_result", {}).get("rescue_to_B_count") or 0)
+        aggregate["candidate_rescue_to_A_count"] += int(r.get("candidate_threshold_result", {}).get("rescue_to_A_count") or 0)
+        aggregate["candidate_SKIP_to_B_count"] += int(r.get("candidate_threshold_result", {}).get("SKIP_to_B_count") or 0)
+        aggregate["candidate_market_alone_manufactured_AB_count"] += int(r.get("candidate_threshold_result", {}).get("market_alone_manufactured_AB_count") or 0)
+        aggregate["candidate_safety_violations_count"] += int(r.get("candidate_threshold_result", {}).get("safety_violations_count") or 0)
+        aggregate["candidate_new_rescues_vs_77"].extend(r.get("candidate_new_rescues_vs_baseline") or [])
+        aggregate["candidate_unexpected_rescues"].extend(r.get("candidate_unexpected_rescues") or [])
+
+    aggregate_safety_summary = {
+        "candidate_A_expansion_total": sum(int(x.get("candidate_A_expansion") or 0) for x in sufficient_and_official_found),
+        "candidate_SKIP_to_B_total": aggregate["candidate_SKIP_to_B_count"],
+        "candidate_market_alone_total": aggregate["candidate_market_alone_manufactured_AB_count"],
+        "candidate_safety_violations_total": aggregate["candidate_safety_violations_count"],
+    }
+
+    if len(sufficient_artifacts) == 0:
+        decision = "NO_SUFFICIENT_ARTIFACT"
+    elif aggregate_safety_summary["candidate_A_expansion_total"] > 0 or aggregate_safety_summary["candidate_SKIP_to_B_total"] > 0 or aggregate_safety_summary["candidate_market_alone_total"] > 0 or aggregate_safety_summary["candidate_safety_violations_total"] > 0:
+        decision = "CANDIDATE_BLOCKED_BY_SAFETY"
+    elif len(sufficient_artifacts) == 1:
+        decision = "ONLY_ONE_SUFFICIENT_ARTIFACT_WARN_ONLY"
+    else:
+        decision = "CANDIDATE_73_5_MULTI_ARTIFACT_REVIEW_READY"
+
+    return {
+        "schema_version": "v4_rf_shadow_promotion_dryrun_replay.multi_artifact.v1",
+        "phase": "Phase 3I - V4_RESCUE_THRESHOLD_73_5_CANDIDATE_MULTI_ARTIFACT_REPLAY",
+        "generated_at": datetime.now().isoformat(),
+        "multi_artifact_mode": True,
+        "artifact_glob": artifact_glob,
+        "min_fixtures": int(min_fixtures),
+        "baseline_threshold": float(baseline_threshold),
+        "candidate_threshold": float(candidate_threshold),
+        "default_rescue_threshold": 77.0,
+        "artifact_count_total": len(artifacts),
+        "artifact_count_sufficient": len(sufficient_artifacts),
+        "artifact_count_sample_too_small": len(sample_too_small_artifacts),
+        "artifact_count_official_missing": len(official_missing_artifacts),
+        "artifact_results": artifact_results,
+        "aggregate_summary": aggregate,
+        "aggregate_safety_summary": aggregate_safety_summary,
+        "candidate_threshold_summary": {
+            "candidate_threshold": float(candidate_threshold),
+            "baseline_threshold": float(baseline_threshold),
+            "candidate_new_rescues_vs_77_count": len(aggregate["candidate_new_rescues_vs_77"]),
+            "candidate_unexpected_rescues_count": len(aggregate["candidate_unexpected_rescues"]),
+        },
+        "next_decision_status": decision,
+        "disclaimer": "MULTI-ARTIFACT SHADOW REPLAY ONLY. No official/pending/QQ mutation.",
+    }
+
+
 def write_outputs(report: dict[str, Any], date: str, sensitivity: bool = False) -> tuple[Path, Path]:
     OUT_DIR.mkdir(parents=True, exist_ok=True)
-    if sensitivity:
+    if report.get("multi_artifact_mode") is True:
+        json_path = OUT_DIR / f"v4_rf_shadow_promotion_dryrun_replay_multi_artifact_{date}.json"
+        md_path = OUT_DIR / f"v4_rf_shadow_promotion_dryrun_replay_multi_artifact_{date}.md"
+    elif sensitivity:
         json_path = OUT_DIR / f"v4_rf_shadow_promotion_dryrun_replay_sensitivity_{date}.json"
         md_path = OUT_DIR / f"v4_rf_shadow_promotion_dryrun_replay_sensitivity_{date}.md"
     else:
@@ -1160,6 +1411,29 @@ def write_outputs(report: dict[str, Any], date: str, sensitivity: bool = False) 
         md_path = OUT_DIR / f"v4_rf_shadow_promotion_dryrun_replay_{date}.md"
 
     json_path.write_text(json.dumps(report, ensure_ascii=False, indent=2), encoding="utf-8")
+
+    if report.get("multi_artifact_mode") is True:
+        lines = [
+            f"# V4 RF Shadow Multi-Artifact Replay ({date})",
+            "",
+            "> candidate-threshold replay only。不是 official promotion，不写 pending，不推 QQ。",
+            "",
+            f"- artifact_count_total: {report.get('artifact_count_total')}",
+            f"- artifact_count_sufficient: {report.get('artifact_count_sufficient')}",
+            f"- artifact_count_sample_too_small: {report.get('artifact_count_sample_too_small')}",
+            f"- artifact_count_official_missing: {report.get('artifact_count_official_missing')}",
+            f"- baseline_threshold: {report.get('baseline_threshold')}",
+            f"- candidate_threshold: {report.get('candidate_threshold')}",
+            f"- next_decision_status: {report.get('next_decision_status')}",
+            "",
+            "## aggregate",
+            f"- baseline shadow A/B/C/SKIP = {report['aggregate_summary']['baseline_shadow_A_B_C_SKIP']['A']}/{report['aggregate_summary']['baseline_shadow_A_B_C_SKIP']['B']}/{report['aggregate_summary']['baseline_shadow_A_B_C_SKIP']['C']}/{report['aggregate_summary']['baseline_shadow_A_B_C_SKIP']['SKIP']}",
+            f"- candidate shadow A/B/C/SKIP = {report['aggregate_summary']['candidate_shadow_A_B_C_SKIP']['A']}/{report['aggregate_summary']['candidate_shadow_A_B_C_SKIP']['B']}/{report['aggregate_summary']['candidate_shadow_A_B_C_SKIP']['C']}/{report['aggregate_summary']['candidate_shadow_A_B_C_SKIP']['SKIP']}",
+            f"- candidate new rescues vs 77 = {len(report['aggregate_summary']['candidate_new_rescues_vs_77'])}",
+            f"- candidate unexpected rescues = {len(report['aggregate_summary']['candidate_unexpected_rescues'])}",
+        ]
+        md_path.write_text("\n".join(lines), encoding="utf-8")
+        return json_path, md_path
 
     if sensitivity:
         lines = [
@@ -1236,10 +1510,24 @@ def main() -> int:
     ap.add_argument("--rescue-threshold", type=float, default=77.0, help="single rescue threshold for shadow replay (default=77)")
     ap.add_argument("--rescue-thresholds", default="77,75,73.5", help="comma-separated thresholds for --sensitivity mode")
     ap.add_argument("--sensitivity", action="store_true", help="run shadow-only multi-threshold sensitivity replay")
+    ap.add_argument("--multi-artifact", action="store_true", help="run multi-artifact replay over local scout artifacts")
+    ap.add_argument("--min-fixtures", type=int, default=30, help="minimum fixtures to count artifact as sufficient in multi-artifact mode")
+    ap.add_argument("--artifact-glob", default=str(SCOUT_DIR / "scout_v4_*.json"), help="glob for scout artifacts in multi-artifact mode")
+    ap.add_argument("--baseline-threshold", type=float, default=77.0, help="baseline threshold for multi-artifact compare")
+    ap.add_argument("--candidate-threshold", type=float, default=73.5, help="candidate threshold for multi-artifact compare")
     args = ap.parse_args()
 
     date = args.date.strip() or _latest_date()
-    if args.sensitivity:
+    if args.multi_artifact:
+        report = build_multi_artifact_report(
+            artifact_glob=str(args.artifact_glob),
+            min_fixtures=int(args.min_fixtures),
+            baseline_threshold=float(args.baseline_threshold),
+            candidate_threshold=float(args.candidate_threshold),
+            strict_field_coverage=bool(args.strict_field_coverage),
+        )
+        jp, mp = write_outputs(report, date, sensitivity=False)
+    elif args.sensitivity:
         thresholds: list[float] = []
         for raw in str(args.rescue_thresholds or "").split(","):
             raw = raw.strip()
@@ -1267,6 +1555,7 @@ def main() -> int:
     print(json.dumps({
         "status": "PASS",
         "scan_date": date,
+        "multi_artifact_mode": bool(args.multi_artifact),
         "sensitivity": bool(args.sensitivity),
         "json": str(jp),
         "md": str(mp),
