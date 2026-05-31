@@ -100,6 +100,10 @@ COLLECTION_ACTUAL_FIELDS = [
 
 RF_SHADOW_GRADE_TEXT_FIELDS = [
     "rf_shadow_grade",
+    "season_aware_shadow_grade_before",
+    "season_aware_shadow_grade_after",
+    "season_aware_shadow_action",
+    "season_aware_shadow_reason",
     "rf_shadow_route",
     "rf_shadow_reason",
     "rf_entry_rule",
@@ -133,10 +137,22 @@ RF_SHADOW_GRADE_TEXT_FIELDS = [
     "no_ht_ou_reason",
     "market_adjusted_shadow_grade",
     "market_adjustment_reason",
+    "season_phase",
+    "league_tier",
+    "rf_window_policy",
+    "rf_sample_status",
+    "rf_freshness_status",
+    "rf_season_aware_reason",
+    "rf_season_adjusted_shadow_grade",
 ]
 
 RF_SHADOW_GRADE_BOOL_FIELDS = [
     "rf_heating_exception",
+    "season_aware_shadow_applied",
+    "rf_early_season_penalty",
+    "rf_short_break_penalty",
+    "rf_baseline_only_flag",
+    "last_season_baseline_available",
 ]
 
 RF_SHADOW_GRADE_NUM_FIELDS = [
@@ -145,7 +161,135 @@ RF_SHADOW_GRADE_NUM_FIELDS = [
     "h2h_recent5_fh_involved_count",
     "h2h_recent5_sample_count",
     "opening_market_bookmaker_priority",
+    "last_season_baseline_score",
+    "current_season_match_count_home",
+    "current_season_match_count_away",
 ]
+
+
+def _rank_grade(g: str) -> int:
+    return {"A": 4, "B": 3, "C": 2, "SKIP": 1}.get(str(g or "").upper(), 1)
+
+
+def _cap_grade(g: str, cap: str) -> str:
+    gg = str(g or "SKIP").upper()
+    cc = str(cap or "SKIP").upper()
+    if _rank_grade(gg) > _rank_grade(cc):
+        return cc
+    return gg
+
+
+def _resolve_official_grade_from_shadow(
+    row: dict[str, Any],
+    factors: dict[str, Any],
+    production_grade_mode: str,
+) -> dict[str, Any]:
+    """
+    Resolve official grade route with rollback support.
+
+    - official_legacy: keep historical chain (caller may still fallback to build_ht_recommendation)
+    - season_aware_rf: derive official grade from RF-SA-4 shadow outputs with production guards
+    """
+    mode = str(production_grade_mode or "official_legacy").strip().lower()
+    if mode != "season_aware_rf":
+        return {
+            "official_grade": "",
+            "official_grade_source": "official_legacy",
+            "official_permission": False,
+            "official_reason": "official_legacy path",
+            "official_risk_flags": [],
+            "shadow_only_blocked": True,
+        }
+
+    market_grade = str(
+        row.get("market_adjusted_shadow_grade")
+        or factors.get("market_adjusted_shadow_grade")
+        or row.get("rf_season_adjusted_shadow_grade")
+        or factors.get("rf_season_adjusted_shadow_grade")
+        or row.get("rf_shadow_grade")
+        or factors.get("rf_shadow_grade")
+        or "SKIP"
+    ).upper()
+    grade = market_grade if market_grade in {"A", "B", "C", "SKIP"} else "SKIP"
+
+    market_status = str(
+        row.get("opening_market_support_status")
+        or factors.get("opening_market_support_status")
+        or ""
+    ).upper()
+    market_conflict = str(
+        row.get("opening_market_conflict_level")
+        or factors.get("opening_market_conflict_level")
+        or ""
+    ).upper()
+    season_phase = str(row.get("season_phase") or factors.get("season_phase") or "UNKNOWN").upper()
+    league_tier = str(row.get("league_tier") or factors.get("league_tier") or "UNKNOWN_TIER").upper()
+    rf_window_policy = str(row.get("rf_window_policy") or factors.get("rf_window_policy") or "UNKNOWN_POLICY").upper()
+    baseline_only = bool(row.get("rf_baseline_only_flag") or factors.get("rf_baseline_only_flag"))
+    h2h_status = str(row.get("h2h_recent5_support_status") or factors.get("h2h_recent5_support_status") or "").upper()
+    rf_grade = str(row.get("rf_shadow_grade") or factors.get("rf_shadow_grade") or "").upper()
+
+    risk_flags: list[str] = []
+    reasons: list[str] = []
+
+    if market_conflict == "MARKET_EXTREME_VETO" or market_status == "MARKET_EXTREME_VETO":
+        grade = "SKIP"
+        risk_flags.append("MARKET_EXTREME_VETO")
+        reasons.append("极端反向盘口，直接跳过")
+
+    if market_status in {"MARKET_NO_DATA", "MARKET_NO_MARKET"} and grade == "A":
+        grade = "B"
+        risk_flags.append("MARKET_NO_DATA_RISK")
+        reasons.append("无可用初盘，禁止A，降为B观察")
+
+    if league_tier == "TIER_4_NON_FORMAL" and grade in {"A", "B"}:
+        grade = "C"
+        risk_flags.append("TIER4_NON_FORMAL_RISK")
+        reasons.append("非正式赛事，不允许A/B正式推荐")
+
+    if season_phase == "POST_OFFSEASON_RETURN" and baseline_only and grade in {"A", "B"}:
+        grade = "C"
+        risk_flags.append("BASELINE_ONLY_RISK")
+        reasons.append("休赛期回归仅baseline参考，不允许A/B")
+
+    if season_phase in {"UNKNOWN", "OFFSEASON"} and grade == "A":
+        grade = "B"
+        risk_flags.append("UNKNOWN_PHASE_RISK")
+        reasons.append("赛季阶段未知/休赛期，禁止A级强升格")
+
+    if league_tier == "UNKNOWN_TIER" and grade == "A":
+        grade = "B"
+        risk_flags.append("UNKNOWN_TIER_RISK")
+        reasons.append("联赛层级未知，禁止A级强升格")
+
+    # H2H add-only boundary: low sample should not trigger downgrade.
+    if h2h_status == "H2H_LOW_SAMPLE":
+        reasons.append("H2H低样本仅标注，不触发降级")
+
+    # Baseline must not be standalone A/B signal.
+    if baseline_only and rf_grade not in {"A", "B"} and grade in {"A", "B"}:
+        grade = "C"
+        risk_flags.append("BASELINE_STANDALONE_BLOCK")
+        reasons.append("baseline不得单独制造A/B")
+
+    official_permission = (
+        grade in {"A", "B"}
+        and market_conflict != "MARKET_EXTREME_VETO"
+        and league_tier != "TIER_4_NON_FORMAL"
+    )
+    reasons.append(f"season_phase={season_phase}")
+    reasons.append(f"league_tier={league_tier}")
+    reasons.append(f"rf_window_policy={rf_window_policy}")
+    reasons.append(f"source=market_adjusted_shadow_grade({market_grade})")
+
+    return {
+        "official_grade": grade,
+        "official_grade_source": "market_adjusted_shadow_grade",
+        "official_permission": official_permission,
+        "official_reason": " | ".join(reasons),
+        "official_risk_flags": risk_flags,
+        "shadow_only_blocked": grade not in {"A", "B"},
+    }
 
 
 def _pick_rf_shadow(record: dict, factors: dict) -> dict:
@@ -229,7 +373,12 @@ def _pick_rf_shadow(record: dict, factors: dict) -> dict:
     return out
 
 
-def _build_candidate_view_from_scout(today_key: str, fixture_universe: str, scout_path: Path) -> Path:
+def _build_candidate_view_from_scout(
+    today_key: str,
+    fixture_universe: str,
+    scout_path: Path,
+    production_grade_mode: str = "official_legacy",
+) -> Path:
     candidate_path = BASE_DIR / "data" / "runtime" / "status" / f"v3v4_dashboard_candidate_view_{today_key}.json"
     try:
         wl = json.loads((BASE_DIR / "config" / "leagues_whitelist.json").read_text())
@@ -246,29 +395,41 @@ def _build_candidate_view_from_scout(today_key: str, fixture_universe: str, scou
 
     a_list, b_list, skip_list = [], [], []
     from engine.v4_match_intelligence import build_ht_recommendation
+    mode = str(production_grade_mode or "official_legacy").strip().lower()
     for r in scout_rows:
         if not isinstance(r, dict):
             continue
         factors = r.get("factors") if isinstance(r.get("factors"), dict) else {}
-        grade_raw: Any = r.get("official_grade") or r.get("grade")
-        if not grade_raw:
-            try:
-                rec = build_ht_recommendation(
-                    {
-                        "market_scores": r.get("market_scores") or {},
-                        "factors": factors,
-                        "market_focus": r.get("market_focus"),
-                        "best_focus_by_score": r.get("best_focus_by_score"),
-                    }
-                )
-                grade_raw = rec.get("grade")
-            except Exception:
-                grade_raw = None
+        resolved = _resolve_official_grade_from_shadow(r, factors, mode)
+        grade_raw: Any = None
+        if mode == "season_aware_rf":
+            grade_raw = resolved.get("official_grade")
+        else:
+            grade_raw = r.get("official_grade") or r.get("grade")
+            if not grade_raw:
+                try:
+                    rec = build_ht_recommendation(
+                        {
+                            "market_scores": r.get("market_scores") or {},
+                            "factors": factors,
+                            "market_focus": r.get("market_focus"),
+                            "best_focus_by_score": r.get("best_focus_by_score"),
+                        }
+                    )
+                    grade_raw = rec.get("grade")
+                except Exception:
+                    grade_raw = None
+            if not resolved.get("official_reason"):
+                resolved["official_reason"] = "official_legacy path"
+                resolved["official_grade_source"] = "legacy_ht_recommendation"
         grade = str(grade_raw or "SKIP").strip().upper()
+        if grade not in {"A", "B", "C", "SKIP"}:
+            grade = "SKIP"
         lid = str(r.get("league_id", ""))
         source_group = r.get("source_group") or ("WHITELIST_57" if lid in wl_ids else "OUTSIDE_57")
         is_in_57 = bool(r.get("is_in_57_whitelist", lid in wl_ids))
         shadow = _pick_rf_shadow(r, factors)
+        official_permission = bool(resolved.get("official_permission")) if mode == "season_aware_rf" else grade in {"A", "B"}
 
         row = {
             "fixture_id": r.get("fixture_id"),
@@ -278,6 +439,12 @@ def _build_candidate_view_from_scout(today_key: str, fixture_universe: str, scou
             "league_id": int(r.get("league_id", 0)) if r.get("league_id") is not None else 0,
             "kickoff": r.get("kickoff", "?"),
             "grade": grade,
+            "official_grade": grade,
+            "official_grade_source": resolved.get("official_grade_source", "official_legacy"),
+            "official_reason": resolved.get("official_reason", ""),
+            "official_risk_flags": resolved.get("official_risk_flags", []),
+            "production_grade_mode": mode,
+            "rollback_available": True,
             "official_candidate": grade in ("A", "B"),
             "skip": grade == "SKIP",
             "outside57": not is_in_57,
@@ -294,13 +461,14 @@ def _build_candidate_view_from_scout(today_key: str, fixture_universe: str, scou
             "prematch_under_odds": r.get("prematch_under_odds"),
             "api_coverage_level": r.get("api_coverage_level", "UNKNOWN"),
             "is_candidate": grade in ("A", "B"),
+            "official_permission": official_permission,
             "recent_form_low_sample": r.get("recent_form_low_sample", False),
             "candidate_score": r.get("best_score"),
             **shadow,
         }
-        if grade == "A":
+        if grade == "A" and official_permission:
             a_list.append(row)
-        elif grade == "B":
+        elif grade == "B" and official_permission:
             b_list.append(row)
         else:
             skip_list.append(row)
@@ -323,6 +491,10 @@ def _build_candidate_view_from_scout(today_key: str, fixture_universe: str, scou
         "scout_path": str(scout_path),
         "scout_sha256": "",
         "fixture_universe": fixture_universe,
+        "production_grade_mode": mode,
+        "rollback_mode": "official_legacy",
+        "rollback_available": True,
+        "official_grade_source": "market_adjusted_shadow_grade" if mode == "season_aware_rf" else "legacy_ht_recommendation",
         "A_count": len(a_list),
         "B_count": len(b_list),
         "C_count": 0,
@@ -437,14 +609,24 @@ def _run_parallel_scan(args, scan_date: str, today_key: str, wd, log_path: Path)
         official_results = [r for r in results if str(r.get("league_id", "")) in wl_ids]
         print(f"[adapter] official filter: {len(official_results)}/{len(results)} whitelist fixtures", flush=True)
 
+    mode = str(getattr(args, "production_grade_mode", "official_legacy") or "official_legacy").strip().lower()
     for r in official_results:
-        grade = str(r.get("grade", "SKIP")).strip().upper()
+        factors = r.get("factors") if isinstance(r.get("factors"), dict) else {}
+        shadow = _pick_rf_shadow(r, factors)
+        resolved = _resolve_official_grade_from_shadow(r, factors, mode)
+        grade_raw: Any
+        if mode == "season_aware_rf":
+            grade_raw = resolved.get("official_grade")
+        else:
+            grade_raw = r.get("official_grade") or r.get("grade", "SKIP")
+        grade = str(grade_raw or "SKIP").strip().upper()
+        if grade not in {"A", "B", "C", "SKIP"}:
+            grade = "SKIP"
         lid = str(r.get("league_id", ""))
         source_group = r.get("source_group", "UNKNOWN")
         is_in_57 = bool(r.get("is_in_57_whitelist", lid in wl_ids))
         is_outside57 = not is_in_57
-        factors = r.get("factors") if isinstance(r.get("factors"), dict) else {}
-        shadow = _pick_rf_shadow(r, factors)
+        official_permission = bool(resolved.get("official_permission")) if mode == "season_aware_rf" else grade in {"A", "B"}
 
         # Build common fields
         entry = {
@@ -455,7 +637,14 @@ def _run_parallel_scan(args, scan_date: str, today_key: str, wd, log_path: Path)
             "league_id": int(r.get("league_id", 0)) if r.get("league_id") else 0,
             "kickoff": r.get("kickoff_time", "?"),
             "grade": grade,
-            "official_candidate": grade in ("A", "B"),
+            "official_grade": grade,
+            "official_grade_source": resolved.get("official_grade_source", "official_legacy"),
+            "official_reason": resolved.get("official_reason", ""),
+            "official_risk_flags": resolved.get("official_risk_flags", []),
+            "official_permission": official_permission,
+            "production_grade_mode": mode,
+            "rollback_available": True,
+            "official_candidate": grade in ("A", "B") and official_permission,
             "skip": grade == "SKIP",
             "outside57": is_outside57,
             "source_group": source_group,
@@ -470,15 +659,15 @@ def _run_parallel_scan(args, scan_date: str, today_key: str, wd, log_path: Path)
             "prematch_over_odds": r.get("prematch_over_odds"),
             "prematch_under_odds": r.get("prematch_under_odds"),
             "api_coverage_level": r.get("api_coverage_level", "UNKNOWN"),
-            "is_candidate": grade in ("A", "B"),
+            "is_candidate": grade in ("A", "B") and official_permission,
             "recent_form_low_sample": r.get("recent_form_low_sample", False),
             "candidate_score": r.get("candidate_score"),
             **shadow,
         }
 
-        if grade == "A":
+        if grade == "A" and official_permission:
             a_list.append(entry)
-        elif grade == "B":
+        elif grade == "B" and official_permission:
             b_list.append(entry)
         else:
             skip_list.append(entry)
@@ -503,6 +692,10 @@ def _run_parallel_scan(args, scan_date: str, today_key: str, wd, log_path: Path)
             "league_id": r.get("league_id"),
             "grade": grade,
             "official_grade": grade,
+            "official_grade_source": resolved.get("official_grade_source", "official_legacy"),
+            "official_reason": resolved.get("official_reason", ""),
+            "official_risk_flags": resolved.get("official_risk_flags", []),
+            "production_grade_mode": mode,
             "market_scores": r.get("market_scores", {}) if isinstance(r.get("market_scores"), dict) else {},
             "factors": r.get("factors", {}) if isinstance(r.get("factors"), dict) else {},
             "score_pack": r.get("score_pack") if isinstance(r.get("score_pack"), dict) else {},
@@ -562,6 +755,10 @@ def _run_parallel_scan(args, scan_date: str, today_key: str, wd, log_path: Path)
         "scout_path": str(scout_path),
         "scout_sha256": "",
         "fixture_universe": fixture_universe,
+        "production_grade_mode": mode,
+        "rollback_mode": "official_legacy",
+        "rollback_available": True,
+        "official_grade_source": "market_adjusted_shadow_grade" if mode == "season_aware_rf" else "legacy_ht_recommendation",
         "A_count": len(a_list),
         "B_count": len(b_list),
         "C_count": 0,
@@ -638,6 +835,12 @@ def main():
                         help="Fixture universe: whitelist (57 leagues only) or all_eligible (all compliant leagues with league gate)")
     parser.add_argument("--scan-engine", default="serial", choices=["serial","parallel"],
                         help="Scan engine: serial=existing v4_scan_worker, parallel=v4_outside57_scanner")
+    parser.add_argument(
+        "--production-grade-mode",
+        default=os.environ.get("V4_PRODUCTION_GRADE_MODE", "season_aware_rf"),
+        choices=["official_legacy", "season_aware_rf"],
+        help="Official output mode: season_aware_rf (BOSS override) or official_legacy (rollback)",
+    )
     parser.add_argument(
         "--collection-mode",
         default="official_legacy",
@@ -721,6 +924,8 @@ def main():
             "V4_QQ_ENABLED": False,
             "collection_mode": args.collection_mode,
             "max_fixtures": args.max_fixtures,
+            "production_grade_mode": args.production_grade_mode,
+            "rollback_available": True,
         }, ensure_ascii=False))
         return
 
@@ -773,6 +978,7 @@ def main():
                 "--scan-mode", args.scan_mode,
                 "--fixture-universe", getattr(args, "fixture_universe", "whitelist"),
                 "--collection-mode", str(args.collection_mode or "official_legacy"),
+                "--production-grade-mode", str(args.production_grade_mode or "official_legacy"),
             ]
             if args.include_outside_57:
                 worker_cmd.append("--include-outside-57")
@@ -829,6 +1035,7 @@ def main():
             today_key=today_key,
             fixture_universe=getattr(args, "fixture_universe", "whitelist"),
             scout_path=scout_path,
+            production_grade_mode=str(args.production_grade_mode or "official_legacy"),
         )
 
         # Step 3: 生成双版本简报
@@ -848,20 +1055,25 @@ def main():
             wd.finish(status="FAILED", error="内容守卫拦截")
             return
 
-        # ── 解析A/B数量 ──
+        # ── 解析A/B数量（以 official candidate_view 为准，文本仅回退）──
         ab_count = 0
-        import re
-        a_match = re.search(r'A级.*?[：:]\s*(\d+)', qq_text)
-        b_match = re.search(r'B级.*?[：:]\s*(\d+)', qq_text)
-        if a_match:
-            ab_count += int(a_match.group(1))
-        if b_match:
-            ab_count += int(b_match.group(1))
-        # Fallback: check QQ brief text
+        a_count = 0
+        b_count = 0
+        try:
+            cv = json.loads(candidate_path.read_text(encoding="utf-8"))
+            a_count = int(cv.get("A_count", 0) or 0)
+            b_count = int(cv.get("B_count", 0) or 0)
+            ab_count = a_count + b_count
+        except Exception:
+            ab_count = 0
         if ab_count == 0:
-            m = re.search(r'A0\s*B(\d+)', qq_text)
-            if m:
-                ab_count = int(m.group(1))
+            import re
+            a_match = re.search(r'A级.*?[：:]\s*(\d+)', qq_text)
+            b_match = re.search(r'B级.*?[：:]\s*(\d+)', qq_text)
+            if a_match:
+                ab_count += int(a_match.group(1))
+            if b_match:
+                ab_count += int(b_match.group(1))
 
         # ── 写入 push marker（无论delivery如何）──
         marker_dir = BASE_DIR / "data" / "runtime" / "status"
@@ -869,12 +1081,28 @@ def main():
         now_ts = datetime.now(LOCAL_TZ).isoformat()
         msg_hash = hashlib.md5(qq_text.encode()).hexdigest()[:16]
 
+        qq_route_guard = {
+            "official_only": True,
+            "allow_grades": ["A", "B"],
+            "block_shadow_only": True,
+            "block_dryrun": True,
+            "guard_status": "PASS",
+            "allowed_to_send": bool(ab_count > 0 and (not effective_no_push) and V4_QQ_ENABLED),
+            "reason": "blocked_by_no_push_or_hard_gate" if (effective_no_push or not V4_QQ_ENABLED) else ("no_ab" if ab_count <= 0 else "eligible"),
+        }
+
         push_marker = {
             "date": today_key,
             "window": args.window,
             "scan_date": scan_date,
+            "production_grade_mode": str(args.production_grade_mode or "official_legacy"),
+            "rollback_mode": "official_legacy",
+            "rollback_available": True,
+            "official_grade_source": "market_adjusted_shadow_grade" if str(args.production_grade_mode or "").lower() == "season_aware_rf" else "legacy_ht_recommendation",
             "template_id": "v4_scan_brief_qq_v1",
             "ab_count": ab_count,
+            "A_count": a_count,
+            "B_count": b_count,
             "status": "GENERATED",
             "ab_gt_zero": ab_count > 0,
             "message_hash": msg_hash,
@@ -902,6 +1130,7 @@ def main():
                 "push_mode": args_push_effective,
                 "env_no_push": env_no_push,
             },
+            "qq_route_guard": qq_route_guard,
         }
         push_marker_path = marker_dir / f"v4_scan_{args.window}_push_{scan_date}.json"
         with open(push_marker_path, "w") as f:

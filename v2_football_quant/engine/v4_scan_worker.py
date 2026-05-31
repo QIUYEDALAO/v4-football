@@ -25,6 +25,7 @@ def main():
     parser.add_argument("--fixture-universe", default="whitelist", choices=["whitelist", "all_eligible"],
                         help="Fixture universe mode")
     parser.add_argument("--collection-mode", default="official_legacy", choices=["official_legacy", "rf_lazy_shadow"])
+    parser.add_argument("--production-grade-mode", default="official_legacy", choices=["official_legacy", "season_aware_rf"])
     parser.add_argument("--max-fixtures", type=int, default=None)
     args = parser.parse_args()
     if args.max_fixtures is not None and int(args.max_fixtures) <= 0:
@@ -43,6 +44,7 @@ def main():
         include_outside_57=args.include_outside_57,
         fixture_universe=args.fixture_universe,
         collection_mode=args.collection_mode,
+        production_grade_mode=args.production_grade_mode,
         max_fixtures=args.max_fixtures,
     )
 

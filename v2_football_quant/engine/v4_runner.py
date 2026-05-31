@@ -658,6 +658,7 @@ def run_v4_scan(
     include_outside_57: bool = False,
     fixture_universe: str = "whitelist",
     collection_mode: str = "official_legacy",
+    production_grade_mode: str = "official_legacy",
     max_fixtures: int | None = None,
 ):
     t0 = time.perf_counter()
@@ -716,6 +717,9 @@ def run_v4_scan(
     collection_mode = str(collection_mode or "official_legacy").strip().lower()
     if collection_mode not in {"official_legacy", "rf_lazy_shadow"}:
         raise ValueError(f"unsupported collection_mode={collection_mode}")
+    production_grade_mode = str(production_grade_mode or "official_legacy").strip().lower()
+    if production_grade_mode not in {"official_legacy", "season_aware_rf"}:
+        raise ValueError(f"unsupported production_grade_mode={production_grade_mode}")
     if max_fixtures is not None and int(max_fixtures) <= 0:
         raise ValueError(f"max_fixtures must be positive, got {max_fixtures}")
     if max_fixtures is not None:
@@ -738,7 +742,10 @@ def run_v4_scan(
     league_status_map = _load_league_status_map()
     window_label = f"{lookahead_hours:g}h内" if lookahead_hours is not None else "今日+明日全部"
     logger.info(f"📥 前置漏斗: {len(fixtures)} 场白名单 + {window_label}")
-    logger.info(f"  📦 collection_mode={collection_mode} | fixture_universe={fixture_universe}")
+    logger.info(
+        f"  📦 collection_mode={collection_mode} | fixture_universe={fixture_universe} | "
+        f"production_grade_mode={production_grade_mode}"
+    )
 
     if not fixtures:
         logger.info("无符合条件的比赛")
@@ -1917,6 +1924,12 @@ if __name__ == "__main__":
         help="Collection mode: official_legacy (default) or rf_lazy_shadow (explicit shadow lazy mode)",
     )
     parser.add_argument(
+        "--production-grade-mode",
+        choices=["official_legacy", "season_aware_rf"],
+        default="official_legacy",
+        help="Official output mode: official_legacy (rollback) or season_aware_rf (BOSS override).",
+    )
+    parser.add_argument(
         "--max-fixtures",
         type=int,
         default=None,
@@ -1935,5 +1948,6 @@ if __name__ == "__main__":
         include_outside_57=args.include_outside_57,
         fixture_universe=args.fixture_universe,
         collection_mode=args.collection_mode,
+        production_grade_mode=args.production_grade_mode,
         max_fixtures=args.max_fixtures,
     )
