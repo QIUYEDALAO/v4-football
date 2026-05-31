@@ -746,6 +746,20 @@ function renderListRow(x,i){
   const cacheMissCount=safe(first(x.cache_miss_count,0),'0');
   const savedCalls=safe(first(x.expensive_calls_saved,0),'0');
   const collectionReason=safe(x.collection_reason,'未记录');
+  const seasonPhase=safe(first(x.season_phase,'UNKNOWN'),'UNKNOWN');
+  const leagueTier=safe(first(x.league_tier,'UNKNOWN_TIER'),'UNKNOWN_TIER');
+  const rfWindowPolicy=safe(first(x.rf_window_policy,''),'');
+  const rfSampleStatus=safe(first(x.rf_sample_status,'UNKNOWN'),'UNKNOWN');
+  const rfFreshnessStatus=safe(first(x.rf_freshness_status,x.recent_freshness_status,'UNKNOWN'),'UNKNOWN');
+  const recent60H=safe(first(x.recent60_match_count_home,0),'0');
+  const recent60A=safe(first(x.recent60_match_count_away,0),'0');
+  const recent90H=safe(first(x.recent90_match_count_home,0),'0');
+  const recent90A=safe(first(x.recent90_match_count_away,0),'0');
+  const recent10DaysH=safe(first(x.recent10_window_days_home,0),'0');
+  const recent10DaysA=safe(first(x.recent10_window_days_away,0),'0');
+  const recent5DaysH=safe(first(x.recent5_window_days_home,0),'0');
+  const recent5DaysA=safe(first(x.recent5_window_days_away,0),'0');
+  const seasonAwareReason=safe(first(x.rf_season_aware_reason,''),'');
   const isOfficialCandidate=['A','B'].includes(official);
   const dl=safe(first(x.default_line,'O1'),'O1');
   const od=safe(x.default_odds,'');const st=safe(x.default_stake,'');const mi=safe(x.default_entry_minute,'');
@@ -790,6 +804,11 @@ function renderListRow(x,i){
   row+='<div><span class="k">慢因：</span>'+safe(slowestStage,'未记录')+'　<span class="k">API调用：</span>'+apiCallCount+'　<span class="k">cache hit/miss：</span>'+cacheHitCount+'/'+cacheMissCount+'</div>';
   row+='<div><span class="k">节省请求（估算）：</span>'+savedCalls+'</div>';
   row+='<div><span class="k">采集说明：</span>'+collectionReason+'</div>';
+  row+='<div><span class="k">赛季阶段：</span>'+shadowCn(seasonPhase)+'　<span class="k">联赛层级：</span>'+shadowCn(leagueTier)+'</div>';
+  row+='<div><span class="k">窗口策略：</span>'+shadowCn(rfWindowPolicy)+'　<span class="k">样本状态：</span>'+shadowCn(rfSampleStatus)+'　<span class="k">新鲜度：</span>'+shadowCn(rfFreshnessStatus)+'</div>';
+  row+='<div><span class="k">近60场计数(H/A)：</span>'+recent60H+'/'+recent60A+'　<span class="k">近90场计数(H/A)：</span>'+recent90H+'/'+recent90A+'</div>';
+  row+='<div><span class="k">recent10窗口天数(H/A)：</span>'+recent10DaysH+'/'+recent10DaysA+'　<span class="k">recent5窗口天数(H/A)：</span>'+recent5DaysH+'/'+recent5DaysA+'</div>';
+  row+='<div><span class="k">Season-aware说明：</span>'+safe(seasonAwareReason,'未记录')+'</div>';
   row+='<div class="shadow-disclaimer">影子观察，不作为投注推荐。</div></div>';
   if(isOfficialCandidate){
     row+='<div class="bet-form-inline">';

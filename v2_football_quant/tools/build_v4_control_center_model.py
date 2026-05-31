@@ -330,6 +330,41 @@ RF_SHADOW_GRADE_NUM_FIELDS = (
     "opening_market_bookmaker_priority",
 )
 
+SEASON_AWARE_TEXT_FIELDS = (
+    "season_phase",
+    "league_tier",
+    "rf_window_policy",
+    "rf_sample_status",
+    "rf_freshness_status",
+    "rf_season_aware_reason",
+    "rf_season_adjusted_shadow_grade",
+)
+
+SEASON_AWARE_BOOL_FIELDS = (
+    "last_season_baseline_available",
+    "rf_baseline_only_flag",
+    "rf_early_season_penalty",
+    "rf_short_break_penalty",
+)
+
+SEASON_AWARE_NUM_FIELDS = (
+    "recent60_match_count_home",
+    "recent60_match_count_away",
+    "recent90_match_count_home",
+    "recent90_match_count_away",
+    "recent10_used_count_home",
+    "recent10_used_count_away",
+    "recent5_used_count_home",
+    "recent5_used_count_away",
+    "recent5_window_days_home",
+    "recent5_window_days_away",
+    "current_season_match_count_home",
+    "current_season_match_count_away",
+    "days_since_last_official_match_home",
+    "days_since_last_official_match_away",
+    "last_season_baseline_score",
+)
+
 
 def _rf_clean(v: Any, default: Any) -> Any:
     if v is None:
@@ -445,6 +480,13 @@ def _merge_rf_shadow_fields(candidate_row: dict, scout_row: dict) -> dict:
         out[k] = bool(candidate_row.get(k, scout_row.get(k), False))
     for k in RF_SHADOW_GRADE_NUM_FIELDS:
         out[k] = _rf_clean(candidate_row.get(k, scout_row.get(k)), "DATA_MISSING" if k in {"rf_shadow_score", "rf_shadow_confidence"} else 0)
+    for k in SEASON_AWARE_TEXT_FIELDS:
+        default_text = "UNKNOWN" if k == "season_phase" else ("UNKNOWN_TIER" if k == "league_tier" else "")
+        out[k] = _rf_clean(candidate_row.get(k, scout_row.get(k)), default_text)
+    for k in SEASON_AWARE_BOOL_FIELDS:
+        out[k] = bool(candidate_row.get(k, scout_row.get(k), False))
+    for k in SEASON_AWARE_NUM_FIELDS:
+        out[k] = _rf_clean(candidate_row.get(k, scout_row.get(k)), 0)
     return out
 
 

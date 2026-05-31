@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from datetime import datetime, timezone
+import re
 from typing import Any, Optional
 
 # Phase 3 rule freeze: V4-RF-CPL shadow-only grading
@@ -230,6 +231,252 @@ def build_recent_form_shadow_from_recent(
         "recent_form_primary_score": primary_score,
         "recent_form_primary_level": primary_level,
         "recent_form_primary_reason": primary_reason,
+    }
+
+
+def _normalize_phase_from_payload(season_phase_payload: Any) -> str:
+    if isinstance(season_phase_payload, str):
+        p = season_phase_payload.strip().upper()
+        if p:
+            return p
+    if isinstance(season_phase_payload, dict):
+        for key in ("phase", "season_phase", "status", "label"):
+            v = season_phase_payload.get(key)
+            if isinstance(v, str) and v.strip():
+                return v.strip().upper()
+        adj = season_phase_payload.get("adjustment")
+        if isinstance(adj, dict):
+            reason = str(adj.get("reason") or "").upper()
+            if "OFFSEASON" in reason:
+                return "POST_OFFSEASON_RETURN"
+            if "EARLY" in reason:
+                return "EARLY_SEASON"
+    return ""
+
+
+def _infer_league_tier(league_name: str, country: str) -> tuple[str, str]:
+    text = f"{league_name} {country}".strip().lower()
+    if not text:
+        return "UNKNOWN_TIER", "league_name_missing"
+
+    tier4_tokens = (
+        "friendly", "friendlies", "u17", "u18", "u19", "u20", "u21", "u23",
+        "women", "womens", "youth", "reserve", "reserves", "青年", "友谊", "女足", "预备队",
+    )
+    if any(tok in text for tok in tier4_tokens):
+        return "TIER_4_NON_FORMAL", "friendly_or_u_or_women"
+
+    tier1_patterns = (
+        r"\bpremier league\b", r"\bla liga\b", r"\bserie a\b", r"\bbundesliga\b", r"\bligue 1\b",
+        r"\bchampions league\b", r"\beuropa league\b", r"\beuropa conference league\b",
+        r"英超", r"西甲", r"意甲", r"德甲", r"法甲", r"欧冠", r"欧联", r"欧协联",
+    )
+    if any(re.search(p, text) for p in tier1_patterns):
+        return "TIER_1_ELITE", "elite_main_competition"
+
+    tier2_tokens = (
+        "j1", "k league", "a-league", "mls", "serie b", "segunda", "championship",
+        "brazil", "brasileirao", "japan", "korea", "australia", "netherlands", "portugal",
+        "土超", "荷甲", "葡超", "日职", "韩k", "美职", "巴甲",
+    )
+    if any(tok in text for tok in tier2_tokens):
+        return "TIER_2_MAINSTREAM", "mainstream_competition"
+
+    return "TIER_3_WEAK_COVERAGE", "fallback_weak_coverage"
+
+
+def build_season_aware_recent_form_shadow_fields(
+    record: dict[str, Any],
+    *,
+    fixture_meta: dict[str, Any] | None = None,
+    season_phase_payload: Any = None,
+    league_baseline_payload: Any = None,
+) -> dict[str, Any]:
+    """Build season-aware RF shadow fields (best-effort, non-scoring).
+
+    This function only emits observability fields and MUST NOT mutate
+    rf_shadow_grade / market_adjusted_shadow_grade / official grade.
+    """
+    fixture_meta = fixture_meta or {}
+    league_name = str(
+        fixture_meta.get("league_name")
+        or fixture_meta.get("league")
+        or record.get("league")
+        or ""
+    )
+    country_name = str(fixture_meta.get("country") or record.get("country") or "")
+    tier, tier_reason = _infer_league_tier(league_name, country_name)
+
+    h10_n = _to_int(record.get("recent10_sample_count_home"), 0)
+    a10_n = _to_int(record.get("recent10_sample_count_away"), 0)
+    h10_days = _to_int(record.get("recent10_window_days_home"), 0)
+    a10_days = _to_int(record.get("recent10_window_days_away"), 0)
+    h5_n = min(5, h10_n)
+    a5_n = min(5, a10_n)
+
+    def _estimate_recent_count(sample_count: int, window_days: int, target_days: int) -> int:
+        if sample_count <= 0:
+            return 0
+        if window_days <= 0:
+            return min(sample_count, 10)
+        if window_days <= target_days:
+            return min(sample_count, 10)
+        scaled = int(round(sample_count * float(target_days) / float(window_days)))
+        return max(0, min(10, scaled))
+
+    h60 = _estimate_recent_count(h10_n, h10_days, 60)
+    a60 = _estimate_recent_count(a10_n, a10_days, 60)
+    h90 = _estimate_recent_count(h10_n, h10_days, 90)
+    a90 = _estimate_recent_count(a10_n, a10_days, 90)
+
+    def _estimate_recent5_window(window_days: int, sample_count: int, used5: int) -> int:
+        if used5 <= 0:
+            return 0
+        if window_days <= 0 or sample_count <= 0:
+            return 0
+        return max(0, int(round(window_days * (used5 / float(max(sample_count, 1))))))
+
+    h5_days = _estimate_recent5_window(h10_days, h10_n, h5_n)
+    a5_days = _estimate_recent5_window(a10_days, a10_n, a5_n)
+    max10_days = max(h10_days, a10_days)
+
+    current_season_home = _to_int(record.get("current_season_match_count_home"), 0)
+    current_season_away = _to_int(record.get("current_season_match_count_away"), 0)
+    current_season_min = min(x for x in (current_season_home, current_season_away) if x > 0) if (
+        current_season_home > 0 or current_season_away > 0
+    ) else 0
+
+    inferred_phase = ""
+    phase_reason = ""
+    payload_phase = _normalize_phase_from_payload(season_phase_payload)
+    if payload_phase in {
+        "ACTIVE_SEASON",
+        "SHORT_BREAK",
+        "EARLY_SEASON",
+        "POST_OFFSEASON_RETURN",
+        "OFFSEASON",
+        "UNKNOWN",
+    }:
+        inferred_phase = payload_phase
+        phase_reason = "season_phase_payload"
+    elif current_season_min > 0 and current_season_min <= 5:
+        if max10_days > 60:
+            inferred_phase = "POST_OFFSEASON_RETURN"
+            phase_reason = "current_season_1_5_with_long_gap"
+        else:
+            inferred_phase = "EARLY_SEASON"
+            phase_reason = "current_season_1_5"
+    elif max10_days <= 60 and min(h10_n, a10_n) >= 6:
+        inferred_phase = "ACTIVE_SEASON"
+        phase_reason = "recent10_window_le_60_and_sample_ge_6"
+    elif 60 < max10_days <= 90:
+        inferred_phase = "SHORT_BREAK"
+        phase_reason = "recent10_window_61_90"
+    elif max10_days > 180 and max(h10_n, a10_n) <= 2:
+        inferred_phase = "OFFSEASON"
+        phase_reason = "window_very_long_with_low_sample"
+    else:
+        inferred_phase = "UNKNOWN"
+        phase_reason = "insufficient_confidence_for_phase"
+
+    if inferred_phase == "ACTIVE_SEASON":
+        rf_window_policy = "D60_PRIMARY"
+    elif inferred_phase == "SHORT_BREAK":
+        rf_window_policy = "D90_SHORT_BREAK"
+    elif inferred_phase in {"POST_OFFSEASON_RETURN", "OFFSEASON"}:
+        rf_window_policy = "BASELINE_ONLY"
+    elif inferred_phase == "EARLY_SEASON":
+        rf_window_policy = "D60_EARLY_GUARD"
+    else:
+        rf_window_policy = "UNKNOWN_POLICY"
+
+    min_sample = min(h10_n, a10_n)
+    if min_sample >= 8:
+        rf_sample_status = "SUFFICIENT"
+    elif min_sample >= 6:
+        rf_sample_status = "BORDERLINE"
+    elif min_sample >= 3:
+        rf_sample_status = "LOW_SAMPLE"
+    elif min_sample > 0:
+        rf_sample_status = "VERY_LOW_SAMPLE"
+    else:
+        rf_sample_status = "NO_SAMPLE"
+
+    freshness = str(record.get("recent_freshness_status") or "UNKNOWN").upper()
+    if freshness not in {"FRESH", "NORMAL", "STALE", "EXPIRED", "UNKNOWN"}:
+        freshness = "UNKNOWN"
+
+    rf_early_season_penalty = inferred_phase == "EARLY_SEASON"
+    rf_short_break_penalty = inferred_phase == "SHORT_BREAK"
+    rf_baseline_only_flag = inferred_phase in {"POST_OFFSEASON_RETURN", "OFFSEASON"}
+
+    market_grade = str(record.get("market_adjusted_shadow_grade") or "").upper()
+    base_grade = str(record.get("rf_shadow_grade") or "").upper()
+    season_adjusted = market_grade if market_grade in {"A", "B", "C", "SKIP"} else (
+        base_grade if base_grade in {"A", "B", "C", "SKIP"} else "SKIP"
+    )
+    # Shadow-only preview of possible season-aware adjustment; does not mutate active grades.
+    if rf_baseline_only_flag and season_adjusted in {"A", "B"}:
+        season_adjusted = "C"
+    elif rf_short_break_penalty:
+        if season_adjusted == "A":
+            season_adjusted = "B"
+        elif season_adjusted == "B":
+            season_adjusted = "C"
+    elif rf_early_season_penalty and season_adjusted == "A":
+        season_adjusted = "B"
+
+    baseline_available = False
+    baseline_score = 0.0
+    if isinstance(league_baseline_payload, dict):
+        baseline_score = _to_float(league_baseline_payload.get("score")) or 0.0
+        baseline_available = baseline_score > 0
+
+    reason_parts = [
+        f"phase={inferred_phase}",
+        f"phase_reason={phase_reason}",
+        f"tier={tier}",
+        f"tier_reason={tier_reason}",
+        f"window_policy={rf_window_policy}",
+        f"sample={rf_sample_status}",
+        f"freshness={freshness}",
+    ]
+    if rf_early_season_penalty:
+        reason_parts.append("early_season_guard=ON")
+    if rf_short_break_penalty:
+        reason_parts.append("short_break_guard=ON")
+    if rf_baseline_only_flag:
+        reason_parts.append("baseline_only=ON")
+
+    return {
+        "season_phase": inferred_phase,
+        "league_tier": tier,
+        "rf_window_policy": rf_window_policy,
+        "recent60_match_count_home": h60,
+        "recent60_match_count_away": a60,
+        "recent90_match_count_home": h90,
+        "recent90_match_count_away": a90,
+        "recent10_used_count_home": min(h10_n, 10),
+        "recent10_used_count_away": min(a10_n, 10),
+        "recent5_used_count_home": h5_n,
+        "recent5_used_count_away": a5_n,
+        "recent10_window_days_home": h10_days,
+        "recent10_window_days_away": a10_days,
+        "recent5_window_days_home": h5_days,
+        "recent5_window_days_away": a5_days,
+        "current_season_match_count_home": current_season_home,
+        "current_season_match_count_away": current_season_away,
+        "days_since_last_official_match_home": 0,
+        "days_since_last_official_match_away": 0,
+        "last_season_baseline_available": bool(baseline_available),
+        "last_season_baseline_score": round(float(baseline_score), 3),
+        "rf_baseline_only_flag": bool(rf_baseline_only_flag),
+        "rf_sample_status": rf_sample_status,
+        "rf_freshness_status": freshness,
+        "rf_early_season_penalty": bool(rf_early_season_penalty),
+        "rf_short_break_penalty": bool(rf_short_break_penalty),
+        "rf_season_aware_reason": " | ".join(reason_parts),
+        "rf_season_adjusted_shadow_grade": season_adjusted,
     }
 
 

@@ -172,6 +172,14 @@ def build_dryrun_report(scout_data: list, candidate_view: dict, scan_date: str) 
     rejected_no_market = []
     rf_ab_downgraded_to_c_observe = 0
     market_no_data_preserved_observe = 0
+    season_phase_distribution: dict[str, int] = {}
+    league_tier_distribution: dict[str, int] = {}
+    rf_sample_status_distribution: dict[str, int] = {}
+    rf_freshness_status_distribution: dict[str, int] = {}
+
+    def _bump(counter: dict[str, int], key: str) -> None:
+        k = str(key or "").strip() or "UNKNOWN"
+        counter[k] = int(counter.get(k, 0)) + 1
 
     for fixture in scout_data:
         # Official grade
@@ -196,6 +204,11 @@ def build_dryrun_report(scout_data: list, candidate_view: dict, scan_date: str) 
         dryrun_grade, policy = compute_dryrun_grade(fixture, fixture.get("fixture_id"))
         dryrun_grades[dryrun_grade] = dryrun_grades.get(dryrun_grade, 0) + 1
 
+        _bump(season_phase_distribution, fixture.get("season_phase", "UNKNOWN"))
+        _bump(league_tier_distribution, fixture.get("league_tier", "UNKNOWN_TIER"))
+        _bump(rf_sample_status_distribution, fixture.get("rf_sample_status", "UNKNOWN"))
+        _bump(rf_freshness_status_distribution, fixture.get("rf_freshness_status", fixture.get("recent_freshness_status", "UNKNOWN")))
+
         entry = {
             "fixture_id": fixture.get("fixture_id"),
             "kickoff": fixture.get("kickoff", ""),
@@ -204,7 +217,8 @@ def build_dryrun_report(scout_data: list, candidate_view: dict, scan_date: str) 
             "away": fixture.get("away", ""),
             "official_grade": fixture.get("grade", "") or "NONE",
             "rf_shadow_grade": rsg,
-            "market_adjusted_shadow_grade": masg,
+            "market_adjusted_shadow_grade": policy.get("market_adjusted_shadow_grade", masg),
+            "market_adjusted_shadow_grade_source": masg,
             "market_adjusted_shadow_grade_replay": policy.get("market_adjusted_shadow_grade", masg),
             "dryrun_grade": dryrun_grade,
             "rf_shadow_reason": fixture.get("rf_shadow_reason", ""),
@@ -226,6 +240,13 @@ def build_dryrun_report(scout_data: list, candidate_view: dict, scan_date: str) 
             "rf_balance_status": fixture.get("rf_balance_status", ""),
             "rf_shadow_score": fixture.get("rf_shadow_score"),
             "rf_shadow_confidence": fixture.get("rf_shadow_confidence"),
+            "season_phase": fixture.get("season_phase", "UNKNOWN"),
+            "league_tier": fixture.get("league_tier", "UNKNOWN_TIER"),
+            "rf_window_policy": fixture.get("rf_window_policy", ""),
+            "rf_sample_status": fixture.get("rf_sample_status", "UNKNOWN"),
+            "rf_freshness_status": fixture.get("rf_freshness_status", fixture.get("recent_freshness_status", "UNKNOWN")),
+            "rf_season_aware_reason": fixture.get("rf_season_aware_reason", ""),
+            "rf_season_adjusted_shadow_grade": fixture.get("rf_season_adjusted_shadow_grade", fixture.get("market_adjusted_shadow_grade", "")),
         }
 
         if dryrun_grade == "DRYRUN_A":
@@ -284,6 +305,12 @@ def build_dryrun_report(scout_data: list, candidate_view: dict, scan_date: str) 
         "rf_ab_downgraded_to_c_observe_count": rf_ab_downgraded_to_c_observe,
         "market_no_data_preserved_observe_count": market_no_data_preserved_observe,
         "extreme_veto_count": int(dryrun_grades.get("DRYRUN_EXTREME_VETO", 0)),
+        "season_aware_field_distribution": {
+            "season_phase": season_phase_distribution,
+            "league_tier": league_tier_distribution,
+            "rf_sample_status": rf_sample_status_distribution,
+            "rf_freshness_status": rf_freshness_status_distribution,
+        },
         "safety_checks": {
             "official_grade_modified": False,
             "candidate_view_modified": False,

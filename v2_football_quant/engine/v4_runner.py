@@ -40,6 +40,7 @@ from engine.data_sources.h2h_engine import (
 from engine.rf_shadow_fields import (
     build_recent_form_shadow_from_recent,
     build_rf_shadow_grade_layer,
+    build_season_aware_recent_form_shadow_fields,
 )
 from engine.market_bookmaker_fallback import capture_ht_ou_snapshot
 from engine.data_sources.league_baseline import baseline_for_fixture
@@ -995,6 +996,15 @@ def run_v4_scan(
             rf_shadow = {**market_input, **market_stub}
             if odds_snapshot.get("market_source") == "NO_HT_OU":
                 rf_shadow["opening_market_data_status"] = "API_HAS_ODDS_BUT_NO_HT_OU"
+            rf_shadow = {
+                **rf_shadow,
+                **build_season_aware_recent_form_shadow_fields(
+                    rf_shadow,
+                    fixture_meta=fx,
+                    season_phase_payload=None,
+                    league_baseline_payload=None,
+                ),
+            }
             h2h_required, h2h_skip_reason = _build_lazy_prefilter_decision(fx=fx, rf_shadow=rf_shadow, lg_status=lg_status)
             prefilter_elapsed = _safe_s(time.perf_counter() - fixture_prefilter_t0)
             with cache_lock:
@@ -1224,6 +1234,15 @@ def run_v4_scan(
             rf_shadow = {**rf_shadow, **rf_shadow_layer}
             if (odds_snapshot.get("market_source") or rf_shadow.get("opening_market_source")) == "NO_HT_OU":
                 rf_shadow["opening_market_data_status"] = "API_HAS_ODDS_BUT_NO_HT_OU"
+            rf_shadow = {
+                **rf_shadow,
+                **build_season_aware_recent_form_shadow_fields(
+                    rf_shadow,
+                    fixture_meta=fx,
+                    season_phase_payload=None,
+                    league_baseline_payload=None,
+                ),
+            }
             factors = dict(factors or {})
             factors.update(rf_shadow)
 
@@ -1560,8 +1579,6 @@ def run_v4_scan(
         rf_shadow = {**market_input, **rf_shadow_layer}
         if odds_snapshot.get("market_source") == "NO_HT_OU":
             rf_shadow["opening_market_data_status"] = "API_HAS_ODDS_BUT_NO_HT_OU"
-        factors = dict(factors or {})
-        factors.update(rf_shadow)
         market_focus = result.get("market_focus")
         prelim_candidate = bool(market_focus == "HT_LIVE_OVER" and best_line and best_line["line_float"] >= 1.25)
         observe_plan = _build_observe_only_collection_plan(
@@ -1597,6 +1614,17 @@ def run_v4_scan(
             home_health = {"status": "unknown", "missing": []}
             away_health = {"status": "unknown", "missing": []}
             context_obs = {"weather": {"status": "SKIPPED_FAST_MODE"}, "pitch": {"status": "SKIPPED_FAST_MODE"}, "referee": {"status": "SKIPPED_FAST_MODE"}}
+        rf_shadow = {
+            **rf_shadow,
+            **build_season_aware_recent_form_shadow_fields(
+                rf_shadow,
+                fixture_meta=fx,
+                season_phase_payload=season_phase,
+                league_baseline_payload=league_baseline,
+            ),
+        }
+        factors = dict(factors or {})
+        factors.update(rf_shadow)
         league_adjustment = league_baseline.get("adjustment", {})
         motivation_gate = (motivation.get("gate") or {})
 
