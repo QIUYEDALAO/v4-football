@@ -19,6 +19,7 @@ SUPPLEMENT_REPORT = ROOT / "data/runtime/v3_worldcup/supplement_reports/v3_world
 FINAL_SQUAD_REPORT = ROOT / "data/runtime/v3_worldcup/final_squads/v3_worldcup_final_squad_canonicalization_20260602.json"
 SOURCE_GATE_REPORT = ROOT / "data/runtime/v3_worldcup/source_authorization/v3_worldcup_source_authorization_gate_20260602.json"
 DRYRUN_REPORT = ROOT / "data/runtime/v3_worldcup/final_squads/v3_worldcup_authorized_final_squad_ingestion_dryrun_20260602.json"
+WC5D_REVIEW_ARTIFACT = ROOT / "data/runtime/v3_worldcup/final_squads/v3_wc5d_candidate_review_artifact_20260602.json"
 
 CST = timezone(timedelta(hours=8))
 
@@ -62,6 +63,52 @@ def _watch_item(x: dict[str, Any]) -> dict[str, Any]:
     }
 
 
+def _candidate_review_view(payload: dict[str, Any]) -> dict[str, Any]:
+    meta = payload.get("meta") if isinstance(payload.get("meta"), dict) else {}
+    teams = payload.get("teams") if isinstance(payload.get("teams"), list) else []
+    safe = [t for t in teams if isinstance(t, dict) and bool(t.get("safe_for_candidate_review"))]
+    hold = [t for t in teams if isinstance(t, dict) and not bool(t.get("safe_for_candidate_review"))]
+    status_dist = meta.get("status_distribution") if isinstance(meta.get("status_distribution"), dict) else {}
+    by_name = {str(t.get("team_name") or "").strip(): t for t in teams if isinstance(t, dict)}
+    focus_names = ["England", "Uzbekistan", "Turkey", "France", "Sweden", "Haiti"]
+    focus_teams = [by_name[n] for n in focus_names if n in by_name]
+    return {
+        "candidate_review_status": "CANDIDATE_REVIEW_ONLY",
+        "candidate_review_summary": {
+            "source_status": "CANDIDATE_REVIEW_ONLY",
+            "official_final_squad_written": bool(meta.get("official_final_squad_written")),
+            "final_squad_complete": False,
+            "teams_total": len(teams),
+            "teams_safe": int(meta.get("safe_teams") or len(safe)),
+            "teams_hold": int(meta.get("hold_teams") or len(hold)),
+            "api_teams": 48,
+            "api_players": 1381,
+            "wikipedia_teams": 48,
+            "wikipedia_players": 1266,
+            "official_confirmed": int(status_dist.get("OFFICIAL_CONFIRMED") or 0),
+            "primary_blocker": "Turkey final 26 not found",
+        },
+        "candidate_review_counts": {
+            "OFFICIAL_CONFIRMED": int(status_dist.get("OFFICIAL_CONFIRMED") or 0),
+            "API_CLEAN_CANDIDATE": int(status_dist.get("API_CLEAN_CANDIDATE") or 0),
+            "API_WIKI_ALIGNED_CANDIDATE": int(status_dist.get("API_WIKI_ALIGNED_CANDIDATE") or 0),
+            "WIKI_PREFERRED_API_POOL_OVERFULL": int(status_dist.get("WIKI_PREFERRED_API_POOL_OVERFULL") or 0),
+            "API_INCOMPLETE_NEED_REVIEW": int(status_dist.get("API_INCOMPLETE_NEED_REVIEW") or 0),
+            "PROVISIONAL_OVERFULL_NEED_REVIEW": int(status_dist.get("PROVISIONAL_OVERFULL_NEED_REVIEW") or 0),
+        },
+        "candidate_review_safe_teams": safe,
+        "candidate_review_hold_teams": hold,
+        "candidate_review_focus_teams": focus_teams,
+        "candidate_review_safety_guard": {
+            "candidate_review_only": True,
+            "official_final_squad_written": False,
+            "final_squad_complete": False,
+            "no_betting_recommendations": True,
+            "no_v4_changes": True,
+        },
+    }
+
+
 def main() -> int:
     rosters = _load(ROSTERS)
     profiles = _load(PROFILES)
@@ -71,6 +118,7 @@ def main() -> int:
     final_squad = _load(FINAL_SQUAD_REPORT)
     source_gate = _load(SOURCE_GATE_REPORT)
     dryrun = _load(DRYRUN_REPORT)
+    wc5d = _load(WC5D_REVIEW_ARTIFACT)
 
     meta = rosters.get("meta") or {}
     teams_total = _safe_int(meta.get("total_teams") or 46)
@@ -142,6 +190,17 @@ def main() -> int:
         for x in dryrun["warn_only_items"]:
             if x not in warn_only_items:
                 warn_only_items.append(x)
+    candidate_review = _candidate_review_view(wc5d) if wc5d else {
+        "candidate_review_status": "WC5D_MISSING_WARN_ONLY",
+        "candidate_review_summary": {"source_status": "WC5D_MISSING_WARN_ONLY", "official_final_squad_written": False, "final_squad_complete": False, "teams_total": 48, "teams_safe": 0, "teams_hold": 48, "api_teams": 0, "api_players": 0, "wikipedia_teams": 0, "wikipedia_players": 0, "official_confirmed": 0, "primary_blocker": "WC5D artifact missing"},
+        "candidate_review_counts": {"OFFICIAL_CONFIRMED": 0, "API_CLEAN_CANDIDATE": 0, "API_WIKI_ALIGNED_CANDIDATE": 0, "WIKI_PREFERRED_API_POOL_OVERFULL": 0, "API_INCOMPLETE_NEED_REVIEW": 0, "PROVISIONAL_OVERFULL_NEED_REVIEW": 0},
+        "candidate_review_safe_teams": [],
+        "candidate_review_hold_teams": [],
+        "candidate_review_focus_teams": [],
+        "candidate_review_safety_guard": {"candidate_review_only": True, "official_final_squad_written": False, "final_squad_complete": False, "no_betting_recommendations": True, "no_v4_changes": True},
+    }
+    if not wc5d and "WC5D_MISSING_WARN_ONLY" not in warn_only_items:
+        warn_only_items.append("WC5D_MISSING_WARN_ONLY")
 
     now = datetime.now(CST)
     payload = {
@@ -182,6 +241,7 @@ def main() -> int:
         "wc6_ingestion_dryrun_files_parsed": int(dryrun.get("dryrun_files_parsed") or 0) if dryrun else 0,
         "wc6_ingestion_dryrun_official_written": bool(dryrun.get("official_final_squad_written")) if dryrun else False,
         "wc6_ingestion_dryrun_only": bool((dryrun.get("safety_guard") or {}).get("dryrun_only")) if dryrun else True,
+        **candidate_review,
         "perception_gap_watchlist": watch_list,
         "perception_gap_watchlist_count": len(watch_list),
         "undervalued_candidates": undervalued,

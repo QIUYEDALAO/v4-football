@@ -44,6 +44,7 @@ ALLOW_PHRASES = [
     "不构成投注建议",
     "无投注建议",
     "dry-run 不等于 official final squad",
+    "candidate review only",
 ]
 
 

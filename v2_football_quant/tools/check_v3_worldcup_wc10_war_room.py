@@ -64,6 +64,21 @@ def main() -> int:
     add(checks, "source_gate_intake_count_present", int(payload.get("source_authorization_intake_files_found") or 0) >= 0, payload.get("source_authorization_intake_files_found"))
     add(checks, "wc6_dryrun_status_present", bool(payload.get("wc6_ingestion_dryrun_status")), payload.get("wc6_ingestion_dryrun_status"))
     add(checks, "wc6_official_not_written", payload.get("wc6_ingestion_dryrun_official_written") is False, payload.get("wc6_ingestion_dryrun_official_written"))
+    add(checks, "candidate_review_status_present", bool(payload.get("candidate_review_status")), payload.get("candidate_review_status"))
+    csum = payload.get("candidate_review_summary") if isinstance(payload.get("candidate_review_summary"), dict) else {}
+    cc = payload.get("candidate_review_counts") if isinstance(payload.get("candidate_review_counts"), dict) else {}
+    add(checks, "candidate_review_only", csum.get("source_status") in {"CANDIDATE_REVIEW_ONLY", "WC5D_MISSING_WARN_ONLY"}, csum.get("source_status"))
+    add(checks, "candidate_review_not_official", csum.get("official_final_squad_written") is False and csum.get("final_squad_complete") is False, csum)
+    add(checks, "candidate_safe_29", int(csum.get("teams_safe") or 0) in {0, 29}, csum.get("teams_safe"))
+    add(checks, "candidate_hold_19", int(csum.get("teams_hold") or 0) in {48, 19}, csum.get("teams_hold"))
+    add(checks, "candidate_counts_expected", all([
+        int(cc.get("OFFICIAL_CONFIRMED") or 0) in {0, 1},
+        int(cc.get("API_CLEAN_CANDIDATE") or 0) in {0, 25},
+        int(cc.get("API_WIKI_ALIGNED_CANDIDATE") or 0) in {0, 3},
+        int(cc.get("WIKI_PREFERRED_API_POOL_OVERFULL") or 0) in {0, 15},
+        int(cc.get("API_INCOMPLETE_NEED_REVIEW") or 0) in {0, 3},
+        int(cc.get("PROVISIONAL_OVERFULL_NEED_REVIEW") or 0) in {0, 1},
+    ]), cc)
     hints = [str(x.get("action_hint") or "") for x in wl if isinstance(x, dict)]
     add(checks, "action_hint_whitelist", all(h in ALLOW_HINTS for h in hints), hints[:12])
     add(checks, "action_hint_no_bad", all(h not in BAD_HINTS for h in hints), hints[:12])
