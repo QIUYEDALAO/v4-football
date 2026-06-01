@@ -46,4 +46,4 @@ No conclusion that final squads are complete is allowed at this phase.
 
 ## Next Step
 
-Real final squad ingestion requires explicit BOSS authorization of trusted final squad data sources.
+Real final squad ingestion requires WC7 source authorization gate PASS plus explicit BOSS authorization of trusted final squad data sources.

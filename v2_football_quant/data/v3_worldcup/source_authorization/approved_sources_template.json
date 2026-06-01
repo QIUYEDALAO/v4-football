@@ -1,0 +1,26 @@
+{
+  "generated_at": "2026-06-02T00:00:00+08:00",
+  "phase": "V3-WC7",
+  "status": "TEMPLATE_ONLY",
+  "approved_sources": [],
+  "pending_sources": [],
+  "rejected_sources": [],
+  "policy_note": "Template only. No approved real final squad source is configured.",
+  "safety_guard": {
+    "observation_only": true,
+    "no_betting_recommendations": true,
+    "no_qq_push": true,
+    "no_pending_write": true,
+    "no_v4_changes": true,
+    "no_default_rules_change": true,
+    "no_ab_thresholds_change": true,
+    "no_live_bet_change": true,
+    "no_cron_change": true,
+    "no_api_call": true,
+    "no_web_fetch": true,
+    "no_fake_sources": true,
+    "no_fake_final_squad": true,
+    "unauthorized_files_not_ingested": true,
+    "source_gate_required_before_ingestion": true
+  }
+}

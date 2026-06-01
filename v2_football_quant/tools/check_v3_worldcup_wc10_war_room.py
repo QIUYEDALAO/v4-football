@@ -59,6 +59,9 @@ def main() -> int:
     add(checks, "teams_detected_in_baseline_46", int(payload.get("teams_detected_in_baseline") or 0) == 46, payload.get("teams_detected_in_baseline"))
     add(checks, "players_total_baseline_1375", int(payload.get("players_total_baseline") or 0) == 1375, payload.get("players_total_baseline"))
     add(checks, "baseline_pool_not_final_26_flag", payload.get("baseline_pool_not_final_26") is True, payload.get("baseline_pool_not_final_26"))
+    add(checks, "source_gate_status_present", bool(payload.get("source_authorization_gate_status")), payload.get("source_authorization_gate_status"))
+    add(checks, "source_gate_approved_count_present", int(payload.get("source_authorization_approved_sources_count") or 0) >= 0, payload.get("source_authorization_approved_sources_count"))
+    add(checks, "source_gate_intake_count_present", int(payload.get("source_authorization_intake_files_found") or 0) >= 0, payload.get("source_authorization_intake_files_found"))
     hints = [str(x.get("action_hint") or "") for x in wl if isinstance(x, dict)]
     add(checks, "action_hint_whitelist", all(h in ALLOW_HINTS for h in hints), hints[:12])
     add(checks, "action_hint_no_bad", all(h not in BAD_HINTS for h in hints), hints[:12])

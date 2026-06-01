@@ -12,6 +12,7 @@ ROSTERS = V3 / "rosters/worldcup_rosters_20260526.json"
 FS_ROOT = V3 / "final_squads"
 TPL = FS_ROOT / "templates"
 OUT_DIR = ROOT / "data/runtime/v3_worldcup/final_squads"
+SOURCE_GATE_REPORT = ROOT / "data/runtime/v3_worldcup/source_authorization/v3_worldcup_source_authorization_gate_20260602.json"
 
 
 def _load(path: Path) -> dict[str, Any]:
@@ -31,6 +32,7 @@ def _safe_int(v: Any, d: int = 0) -> int:
 
 def main() -> int:
     roster = _load(ROSTERS)
+    source_gate = _load(SOURCE_GATE_REPORT)
     meta = roster.get("meta") if isinstance(roster.get("meta"), dict) else {}
     teams_expected = 48
     teams_detected = _safe_int(meta.get("total_teams"), 46)
@@ -129,6 +131,15 @@ def main() -> int:
         "canonicalization_status_by_team": canonical_by_team,
         "data_status": "TEMPLATE_ONLY" if template_only else "PARTIAL",
         "warn_only_items": warn_only,
+        "source_authorization_status": source_gate.get("status") if source_gate else "DATA_MISSING",
+        "source_authorization": {
+            "approved_sources_count": int(source_gate.get("approved_sources_count") or 0) if source_gate else 0,
+            "intake_files_found": int(source_gate.get("intake_files_found") or 0) if source_gate else 0,
+            "unauthorized_files_found": int(source_gate.get("unauthorized_files_found") or 0) if source_gate else 0,
+            "authorized_files_found": int(source_gate.get("authorized_files_found") or 0) if source_gate else 0,
+            "final_squad_files_ready_for_ingestion": int(source_gate.get("final_squad_files_ready_for_ingestion") or 0) if source_gate else 0,
+            "ingestion_status": "NOT_STARTED",
+        },
         "policy_note": "Final squad canonicalization is observation-only and not a betting recommendation output.",
         "safety_guard": {
             "observation_only": True,

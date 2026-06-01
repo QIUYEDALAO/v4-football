@@ -72,6 +72,17 @@ async function load(){
       <div class="note">missing team list (sample): ${fsMissing.length?fsMissing.join('、'):'N/A'}</div>
       <div class="note warn">当前 1375 为 baseline pool，不是最终 26 人名单。当前系统尚未确认 48 队最终名单。</div>
     </div>
+    <div class="card">
+      <div class="note">source authorization gate: ${n(m.source_authorization_gate_status,'DATA_MISSING')}</div>
+      <div class="grid">
+        <div class="mini"><span>approved sources</span><b>${n(m.source_authorization_approved_sources_count,0)}</b></div>
+        <div class="mini"><span>intake files found</span><b>${n(m.source_authorization_intake_files_found,0)}</b></div>
+        <div class="mini"><span>unauthorized files</span><b>${n(m.source_authorization_unauthorized_files_found,0)}</b></div>
+        <div class="mini"><span>authorized files</span><b>${n(m.source_authorization_authorized_files_found,0)}</b></div>
+        <div class="mini"><span>ready for WC6 ingestion</span><b>${n(m.source_authorization_ready_for_ingestion,0)}</b></div>
+      </div>
+      <div class="note warn">未授权文件不得 ingest。当前没有 approved real final squad source。WC6 ingestion not started。</div>
+    </div>
     <div class="card list">
       <div class="note">Perception Gap Watchlist（每类最多显示 5 条）</div>
       <div class="note">undervalued candidates</div>

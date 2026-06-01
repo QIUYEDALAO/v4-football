@@ -17,6 +17,7 @@ DELTAS = V3 / "team_profiles/roster_delta_20260526.json"
 WATCH = V3 / "market_baseline/v3_perception_gap_roster_watchlist_20260526.json"
 SUPPLEMENT_REPORT = ROOT / "data/runtime/v3_worldcup/supplement_reports/v3_worldcup_supplement_coverage_20260602.json"
 FINAL_SQUAD_REPORT = ROOT / "data/runtime/v3_worldcup/final_squads/v3_worldcup_final_squad_canonicalization_20260602.json"
+SOURCE_GATE_REPORT = ROOT / "data/runtime/v3_worldcup/source_authorization/v3_worldcup_source_authorization_gate_20260602.json"
 
 CST = timezone(timedelta(hours=8))
 
@@ -67,6 +68,7 @@ def main() -> int:
     watch = _load(WATCH)
     supp = _load(SUPPLEMENT_REPORT)
     final_squad = _load(FINAL_SQUAD_REPORT)
+    source_gate = _load(SOURCE_GATE_REPORT)
 
     meta = rosters.get("meta") or {}
     teams_total = _safe_int(meta.get("total_teams") or 46)
@@ -130,6 +132,10 @@ def main() -> int:
         for x in final_squad["warn_only_items"]:
             if x not in warn_only_items:
                 warn_only_items.append(x)
+    if source_gate and isinstance(source_gate.get("warn_only_items"), list):
+        for x in source_gate["warn_only_items"]:
+            if x not in warn_only_items:
+                warn_only_items.append(x)
 
     now = datetime.now(CST)
     payload = {
@@ -160,6 +166,12 @@ def main() -> int:
         "final_squad_missing_team_count": fs_missing_count,
         "final_squad_missing_team_list": fs_missing_list[:8],
         "baseline_pool_not_final_26": True,
+        "source_authorization_gate_status": source_gate.get("status") if source_gate else "DATA_MISSING",
+        "source_authorization_approved_sources_count": int(source_gate.get("approved_sources_count") or 0) if source_gate else 0,
+        "source_authorization_intake_files_found": int(source_gate.get("intake_files_found") or 0) if source_gate else 0,
+        "source_authorization_unauthorized_files_found": int(source_gate.get("unauthorized_files_found") or 0) if source_gate else 0,
+        "source_authorization_authorized_files_found": int(source_gate.get("authorized_files_found") or 0) if source_gate else 0,
+        "source_authorization_ready_for_ingestion": int(source_gate.get("final_squad_files_ready_for_ingestion") or 0) if source_gate else 0,
         "perception_gap_watchlist": watch_list,
         "perception_gap_watchlist_count": len(watch_list),
         "undervalued_candidates": undervalued,

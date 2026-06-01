@@ -1,0 +1,17 @@
+{
+  "manifest_id": "V3_WC7_SOURCE_MANIFEST_TEMPLATE_20260602",
+  "created_at": "2026-06-02T00:00:00+08:00",
+  "files": [],
+  "expected_teams": 48,
+  "expected_players_range": "1104-1248",
+  "source_authorization_status": "TEMPLATE_ONLY",
+  "policy_note": "Template manifest only. Do not point to real files before BOSS authorization.",
+  "safety_guard": {
+    "observation_only": true,
+    "no_betting_recommendations": true,
+    "no_api_call": true,
+    "no_web_fetch": true,
+    "unauthorized_files_not_ingested": true,
+    "source_gate_required_before_ingestion": true
+  }
+}
