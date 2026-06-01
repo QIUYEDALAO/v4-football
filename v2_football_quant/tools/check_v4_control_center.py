@@ -150,6 +150,39 @@ def main() -> int:
         if word.lower() in body_text.lower():
             warnings.append(f"technical_word_visible:{word}")
 
+    # 11) D2 UX refinement contract
+    d2_required = [
+        "单场结论",
+        "official grade",
+        "联赛长期表现",
+        "仅观察，不自动影响评级",
+        "长期低命中预警，不自动排除",
+        "今日无 official A/B",
+        "shadow observation",
+        "不推 QQ、不写 pending",
+        "投注风控卡",
+        "只做展示和入口，不自动下单，不写 live bet",
+        "goNav('league')",
+        "id=\"navSystem\"",
+    ]
+    for token in d2_required:
+        if token not in html:
+            blockers.append(f"d2_ux_token_missing:{token}")
+    if "id=\"navError\"" in html or ">异常</button>" in html:
+        blockers.append("d2_error_tab_not_merged_into_system")
+    for tab_name in ["总览", "联赛", "投注", "验证", "复盘", "系统"]:
+        if tab_name not in html:
+            blockers.append(f"d2_bottom_tab_missing:{tab_name}")
+    audit = model.get("audit", {}) if isinstance(model, dict) else {}
+    if audit.get("strategy_changed") is not False:
+        blockers.append("audit_strategy_changed_not_false")
+    if audit.get("QQ_recommendation_pushed") is not False:
+        blockers.append("audit_qq_push_not_false")
+    if audit.get("validation_recomputed") is not False:
+        blockers.append("audit_validation_recomputed_not_false")
+    if audit.get("cron_schedule_modified") is not False:
+        blockers.append("audit_cron_modified_not_false")
+
     conclusion = "PASS"
     if blockers:
         conclusion = "BLOCKER"

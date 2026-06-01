@@ -104,6 +104,7 @@ button{cursor:pointer}
 }
 .selected-title{font-size:18px;font-weight:950;line-height:1.25;margin-top:5px}
 .decision-cards{display:grid;grid-template-columns:1fr;gap:8px;margin-bottom:9px}
+.decision-stack{display:grid;gap:8px;margin-bottom:9px}
 .selected-form{
   border:1px solid rgba(143,165,196,.14);
   background:rgba(0,0,0,.14);
@@ -195,6 +196,11 @@ button{cursor:pointer}
 .decision-title{font-size:12px;color:var(--muted);margin-bottom:6px}
 .decision-main{font-size:16px;font-weight:900;line-height:1.25}
 .decision-sub{font-size:12px;color:#cddaf0;line-height:1.45;margin-top:6px}
+.evidence-grid{display:grid;grid-template-columns:1fr 1fr;gap:7px}
+.evidence-item{border:1px solid rgba(143,165,196,.12);background:rgba(0,0,0,.13);border-radius:10px;padding:8px;min-width:0}
+.evidence-item span{display:block;font-size:10px;color:var(--muted);margin-bottom:4px}
+.evidence-item b{display:block;font-size:12px;color:#edf6ff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.evidence-item em{display:block;font-style:normal;font-size:10.5px;color:#cbd8ec;margin-top:4px;line-height:1.35}
 .league-mini{display:grid;grid-template-columns:repeat(4,1fr);gap:7px;margin-top:8px}
 .league-mini .mini{border:1px solid rgba(143,165,196,.13);background:rgba(0,0,0,.15);border-radius:10px;padding:7px;min-width:0}
 .league-mini .mini span{display:block;color:var(--muted);font-size:10px}
@@ -204,11 +210,22 @@ button{cursor:pointer}
 .inline-validation span{display:block;font-size:10px;color:var(--muted)}
 .inline-validation b{display:block;font-size:13px;margin-top:3px}
 .single-page-note{border:1px solid rgba(50,217,145,.22);background:rgba(50,217,145,.08);color:#baf7d8;border-radius:12px;padding:9px 10px;font-size:12px;line-height:1.45;margin-bottom:10px}
+.empty-ab-state{border:1px solid rgba(255,209,102,.24);background:rgba(255,209,102,.075);border-radius:15px;padding:12px;margin-bottom:10px}
+.empty-ab-state h3{margin:0 0 8px;font-size:16px}
+.empty-ab-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:8px 0}
+.empty-ab-grid .mini{border:1px solid rgba(143,165,196,.13);background:rgba(0,0,0,.14);border-radius:11px;padding:8px}
+.empty-ab-grid span{display:block;color:var(--muted);font-size:10px}
+.empty-ab-grid b{display:block;font-size:15px;margin-top:4px}
+.risk-card{border:1px solid rgba(92,200,255,.20);background:rgba(92,200,255,.06);border-radius:14px;padding:10px;margin-bottom:9px}
+.risk-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin-top:8px}
+.risk-grid .mini{border:1px solid rgba(143,165,196,.13);background:rgba(0,0,0,.13);border-radius:10px;padding:7px}
+.risk-grid span{display:block;color:var(--muted);font-size:10px}
+.risk-grid b{display:block;font-size:13px;margin-top:3px}
 .audit-fold{margin-top:10px}
 .audit-fold summary{color:#dce8fb}
 .league-table td,.league-table th{font-size:12px}
 @media(max-width:760px){.candidate-row .playbook-col{display:none}
-.candidate-row .time-col{font-size:11px}.candidate-row .grade-col{font-size:12px}.candidate-row .peak-col,.candidate-row .line-col{font-size:10px}.candidate-row .next-col{font-size:10px}.candidate-row .badge{padding:3px 5px;font-size:10px}.candidate-row .dist-col{white-space:normal;word-break:keep-all}.candidate-row .league-col{font-size:10px;max-width:60px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.candidate-row .teams-col{font-size:12px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.candidate-table th:nth-child(3),.candidate-table th:nth-child(5),.candidate-table th:nth-child(6){display:none}.dense-list-panel .candidate-table th{display:table-cell!important}.candidate-detail{grid-template-columns:1fr 1fr}.decision-grid,.inline-validation{grid-template-columns:1fr}.league-mini{grid-template-columns:repeat(2,1fr)}}
+.candidate-row .time-col{font-size:11px}.candidate-row .grade-col{font-size:12px}.candidate-row .peak-col,.candidate-row .line-col{font-size:10px}.candidate-row .next-col{font-size:10px}.candidate-row .badge{padding:3px 5px;font-size:10px}.candidate-row .dist-col{white-space:normal;word-break:keep-all}.candidate-row .league-col{font-size:10px;max-width:60px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.candidate-row .teams-col{font-size:12px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.candidate-table th:nth-child(3),.candidate-table th:nth-child(5),.candidate-table th:nth-child(6){display:none}.dense-list-panel .candidate-table th{display:table-cell!important}.candidate-detail{grid-template-columns:1fr 1fr}.decision-grid,.inline-validation,.evidence-grid{grid-template-columns:1fr}.league-mini{grid-template-columns:repeat(2,1fr)}.risk-grid,.empty-ab-grid{grid-template-columns:1fr 1fr}}
 .section-head{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:9px}
 h2{font-size:15px;margin:0}
 .btn{
@@ -432,31 +449,59 @@ th{color:var(--muted);font-weight:650}
         <div class="meta" id="selectedMatchMeta">点击左侧比赛行后，在这里完成投注/未投注/无盘口记录。</div>
       </section>
 
-      <section class="decision-cards">
+      <section class="decision-stack">
         <div class="decision-card">
-          <div class="decision-title">下注决策</div>
+          <div class="decision-title">单场结论</div>
           <div class="decision-main" id="selectedDecisionMain">等待选择</div>
           <div class="decision-sub" id="selectedDecisionBasis">选择比赛后显示建议依据。</div>
           <div class="league-mini">
-            <div class="mini"><span>盘口</span><b id="selectedLine">-</b></div>
-            <div class="mini"><span>建议金额</span><b id="selectedStake">-</b></div>
-            <div class="mini"><span>水位</span><b id="selectedOdds">-</b></div>
-            <div class="mini"><span>高峰</span><b id="selectedPeak">-</b></div>
+            <div class="mini"><span>official grade</span><b id="selectedOfficialGrade">-</b></div>
+            <div class="mini"><span>状态</span><b id="selectedPlayable">-</b></div>
+            <div class="mini"><span>不投原因</span><b id="selectedNoBetText">-</b></div>
+            <div class="mini"><span>主要风险</span><b id="selectedMainRisk">-</b></div>
           </div>
         </div>
         <div class="decision-card">
-          <div class="decision-title">联赛可信度</div>
+          <div class="decision-title">证据中台</div>
+          <div class="evidence-grid">
+            <div class="evidence-item"><span>RF证据</span><b id="selectedRfEvidence">-</b><em id="selectedRecentEvidence">-</em></div>
+            <div class="evidence-item"><span>market证据</span><b id="selectedMarketEvidence">-</b><em id="selectedMarketAction">-</em></div>
+            <div class="evidence-item"><span>recent5 / H2H</span><b id="selectedRecentH2h">-</b><em id="selectedH2hEvidence">-</em></div>
+            <div class="evidence-item"><span>season phase</span><b id="selectedSeasonPhase">-</b><em id="selectedLeagueTier">-</em></div>
+          </div>
+        </div>
+        <div class="decision-card">
+          <div class="decision-title">联赛长期表现</div>
           <div class="decision-main" id="selectedLeagueMain">等待选择</div>
           <div class="league-mini">
             <div class="mini"><span>AB样本</span><b id="selectedLeagueSample">-</b></div>
             <div class="mini"><span>AB命中</span><b id="selectedLeagueHit">-</b></div>
-            <div class="mini"><span>最佳ROI</span><b id="selectedLeagueRoi">-</b></div>
-            <div class="mini"><span>动作</span><b id="selectedLeagueAction">-</b></div>
+            <div class="mini"><span>观察标签</span><b id="selectedLeagueAction">-</b></div>
+            <div class="mini"><span>评级影响</span><b id="selectedLeagueRoi">仅观察</b></div>
           </div>
         </div>
       </section>
 
+      <section class="risk-card">
+        <div class="decision-title">投注风控卡</div>
+        <div class="risk-grid">
+          <div class="mini"><span>今日可投</span><b id="riskPlayableToday">0</b></div>
+          <div class="mini"><span>已投</span><b id="riskAlreadyBet">0</b></div>
+          <div class="mini"><span>待投注</span><b id="riskPendingBet">0</b></div>
+          <div class="mini"><span>待结算</span><b id="riskPendingSettle">0</b></div>
+          <div class="mini"><span>今日风险</span><b id="riskToday">LOW</b></div>
+          <div class="mini"><span>允许继续</span><b id="riskContinue">观察</b></div>
+        </div>
+        <div class="meta">只做展示和入口，不自动下单，不写 live bet。</div>
+      </section>
+
       <section class="selected-form">
+        <div class="league-mini">
+          <div class="mini"><span>盘口线</span><b id="selectedLine">-</b></div>
+          <div class="mini"><span>水位</span><b id="selectedOdds">-</b></div>
+          <div class="mini"><span>金额</span><b id="selectedStake">-</b></div>
+          <div class="mini"><span>入场分钟</span><b id="selectedPeak">-</b></div>
+        </div>
         <div class="selected-form-grid">
           <div><label>盘口线</label><select id="selectedFormLine" onchange="syncSelectedStakeFromLine()"><option>O0.75</option><option>O1</option><option>O1.25</option><option>O1.5</option><option>O2</option></select></div>
           <div><label>水位</label><input id="selectedFormOdds" value=""></div>
@@ -596,11 +641,11 @@ th{color:var(--muted);font-weight:650}
 <nav class="nav">
   <div class="nav-inner">
     <button class="active" onclick="goNav('overview')"><b>⌂</b>总览</button>
+    <button onclick="goNav('league')"><b>▦</b>联赛</button>
     <button onclick="goNav('bet')"><b>＋</b>投注</button>
     <button onclick="goNav('validation')"><b>✓</b>验证</button>
     <button onclick="goNav('review')"><b>◎</b>复盘</button>
-    <button onclick="goNav('system')"><b>⚙</b>系统</button>
-    <button id="navError" onclick="openPanel('errors')"><b>⚠</b>异常</button>
+    <button id="navSystem" onclick="goNav('system')"><b>⚙</b>系统</button>
   </div>
 </nav>
 
@@ -672,11 +717,11 @@ function leagueTrustMeta(row){
   const tag=safe(row.trust_tag,'DATA_MISSING');
   const sample=safe(row.sample_tag,'DATA_MISSING');
   if(sample==='PENDING_ONLY') return {tag:'PENDING_ONLY', text:'仅待赛', note:'PENDING_ONLY：不参与命中率分母'};
-  if(tag==='LOW_TRUST_ALERT') return {tag, text:'观察风险', note:'LOW_TRUST_ALERT：观察风险，不自动排除'};
-  if(tag==='DO_NOT_CONCLUDE') return {tag, text:'不下结论', note:'DO_NOT_CONCLUDE：样本不足，不下结论'};
-  if(tag==='LOW_SAMPLE_ONLY'||sample==='LOW_SAMPLE'||sample==='VERY_LOW_SAMPLE') return {tag, text:'样本不足', note:'LOW_SAMPLE：样本不足，不下结论'};
+  if(tag==='LOW_TRUST_ALERT') return {tag, text:'长期低命中预警', note:'LOW_TRUST_ALERT：长期低命中预警，不自动排除；仅观察，不自动影响评级'};
+  if(tag==='DO_NOT_CONCLUDE') return {tag, text:'样本不足，不下结论', note:'DO_NOT_CONCLUDE：样本不足，不下结论；仅观察，不自动影响评级'};
+  if(tag==='LOW_SAMPLE_ONLY'||sample==='LOW_SAMPLE'||sample==='VERY_LOW_SAMPLE') return {tag, text:'样本不足，不下结论', note:'LOW_SAMPLE：样本不足，不下结论；仅观察，不自动影响评级'};
   if(tag==='DATA_GAP'||tag==='DATA_MISSING') return {tag, text:'数据缺失', note:'DATA_MISSING：仅展示，不参与判级'};
-  return {tag, text:tag, note:`${tag}：长期观察标签，仅展示，不参与判级`};
+  return {tag, text:tag, note:`${tag}：长期观察标签，仅观察，不自动影响评级`};
 }
 function leagueTrustBadge(name){
   const meta=leagueTrustMeta(leagueTrustFor(name));
@@ -753,6 +798,54 @@ function normalizeModel(raw){const m=(raw&&raw.model)?raw.model:raw||{};return t
 function getCandidatesNode(){ return MODEL.candidates||MODEL.today_candidates||{}; }
 function getCandidates(){ const c=getCandidatesNode(); if(Array.isArray(c.items)&&c.items.length) return c.items; return [...arr(c.a_candidates),...arr(c.b_candidates)]; }
 function getSkipItems(){ const c=getCandidatesNode(); const s=MODEL.skip||{}; if(Array.isArray(s.items)) return s.items; return arr(c.skip_candidates); }
+function skipReasonStats(limit=5){
+  const counts={};
+  for(const x of getSkipItems()){
+    const reason=safe(first(x.reason,x.skip_reason,x.reason_code,'未记录原因'),'未记录原因');
+    counts[reason]=(counts[reason]||0)+1;
+  }
+  return Object.entries(counts).sort((a,b)=>b[1]-a[1]).slice(0,limit).map(([reason,count])=>({reason,count}));
+}
+function shadowObservationSummary(){
+  const c=getCandidatesNode();
+  const skipCount=Number(first(c.skip_count,getSkipItems().length,0));
+  const scanCount=Number(first(c.scan_total,0));
+  const abCount=Number(first(c.a_count,0))+Number(first(c.b_count,0));
+  if(abCount>0) return `official A/B ${abCount} 场，shadow 仅作旁路观察。`;
+  if(scanCount>0 || skipCount>0) return `扫描 ${scanCount} 场，SKIP ${skipCount} 场；shadow-only/C/SKIP 不混入 official 卡片。`;
+  return '暂无候选输入；shadow observation 仅保留为只读观察，不生成 official 卡片。';
+}
+function emptyAbStateHtml(){
+  const c=getCandidatesNode();
+  const scanCount=Number(first(c.scan_total,0));
+  const skipCount=Number(first(c.skip_count,getSkipItems().length,0));
+  const reasons=skipReasonStats(5);
+  const reasonHtml=reasons.length?reasons.map(x=>`<div class="row"><span>${safe(x.reason,'未记录原因')}</span><b>${x.count}</b></div>`).join(''):'<div class="row"><span>暂无 SKIP reason</span><b>0</b></div>';
+  return `<div class="empty-ab-state">
+    <h3>今日无 official A/B</h3>
+    <div class="empty-ab-grid">
+      <div class="mini"><span>scan count</span><b>${scanCount}</b></div>
+      <div class="mini"><span>SKIP count</span><b>${skipCount}</b></div>
+      <div class="mini"><span>official A/B</span><b>0</b></div>
+    </div>
+    <div class="note">shadow observation：${shadowObservationSummary()}</div>
+    <div class="rows" style="margin-top:8px">${reasonHtml}</div>
+    <div class="lock" style="margin-top:8px">原因：今日无 official A/B，因此不推 QQ、不写 pending；C/SKIP/shadow-only 只展示观察，不进入官方推荐卡。</div>
+  </div>`;
+}
+function bettingRiskSnapshot(){
+  const todo=MODEL.todo_summary||{};
+  const live=MODEL.live_bet_summary||{};
+  const se=MODEL.system_errors||{};
+  const pending=Number(first(todo.to_bet,0));
+  const settled=Number(first(todo.to_settle,0));
+  const already=Number(first((MODEL.top_status||{}).today_todo?.already_bet_ab,live.today_real_bet_count,0));
+  const net=Number(first(live.today_net_pnl,live.today_gross_pnl,0));
+  const errors=Number(first(se.active_error_count,0));
+  const risk=errors>0?'系统异常':(net<0?'盈亏回撤':'LOW');
+  const allow=pending>0 && errors===0 ? '允许人工继续' : (errors>0?'暂停观察':'无待投');
+  return {playable:pending, already, pending, settled, risk, allow};
+}
 function getDemoCount(){
   const q = new URLSearchParams(window.location.search);
   const n = Number(q.get('demo_candidates')||'0');
@@ -1061,7 +1154,10 @@ function renderCandidates(){
   DISPLAY_CANDIDATES=list;
   const el=$('candidateList');
   if(!list.length){
-    el.innerHTML='<div class="note">当前筛选下暂无 A/B 候选。</div><div class="note" style="margin-top:8px">可切换“全部”查看完整候选。</div>';
+    const rawAb=getCandidates().filter(x=>['A','B'].includes(candidateGrade(x))).length;
+    el.innerHTML=rawAb===0
+      ? emptyAbStateHtml()
+      : '<div class="note">当前筛选下暂无 A/B 候选。</div><div class="note" style="margin-top:8px">可切换“全部”查看完整候选。</div>';
     renderSelectedCandidate(null);
     return;
   }
@@ -1074,7 +1170,7 @@ function renderCandidates(){
   }
   const counts=groupCounts(all);
   const buckets=['优先队列：30分钟内开赛','18:00 前','18:00-22:00','22:00-02:00'];
-  let h='<div class="single-page-note">密集模式：比赛列表固定滚动；点击任一行，右侧单场决策面板完成 BET / NO_BET / 无盘口。系统异常中心保留在底部导航和抽屉。</div>';
+  let h='<div class="single-page-note">密集模式：比赛列表固定滚动；点击任一行，右侧单场决策面板完成 BET / NO_BET / 无盘口。系统异常已并入系统页红点。</div>';
   h+=`<div class="desk-toolbar"><div class="seg"><button class="${CAND_FILTER==='ALL'?'active':''}" onclick="setCandFilter('ALL')">全部</button><button class="${CAND_FILTER==='TODO'?'active':''}" onclick="setCandFilter('TODO')">待处理</button><button class="${CAND_FILTER==='A'?'active':''}" onclick="setCandFilter('A')">A</button><button class="${CAND_FILTER==='B'?'active':''}" onclick="setCandFilter('B')">B</button><button class="${CAND_FILTER==='SOON'?'active':''}" onclick="setCandFilter('SOON')">30分钟内</button><button class="${CAND_FILTER==='RECORDED'?'active':''}" onclick="setCandFilter('RECORDED')">已记录</button></div><input class="desk-search" value="${safe(CAND_QUERY,'').replace(/"/g,'&quot;')}" placeholder="搜索球队 / 联赛 / 状态" oninput="setCandQuery(this.value)"></div>`;
   h+='<div class="density-bar">'+buckets.map(b=>{const c=counts[b]||{total:0,A:0,B:0,todo:0};return `<div class="density-bucket"><b>${b.replace('优先队列：','')}</b><span>A${c.A||0}/B${c.B||0} · 待投${c.todo||0}</span></div>`;}).join('')+'</div>';
   h+='<table class="candidate-table"><thead><tr><th style="width:12%">时间</th><th style="width:6%">级</th><th style="width:10%">联赛</th><th style="width:29%">对阵</th><th style="width:15%">进球高峰</th><th style="width:13%">盘口建议</th><th style="width:8%">状态</th><th style="width:7%">下一步</th></tr></thead><tbody>';
@@ -1147,6 +1243,18 @@ function renderSelectedCandidate(x){
     $('selectedPeak').textContent='-';
     $('selectedDecisionBasis').textContent='选择比赛后显示建议依据。';
     $('selectedLeagueMain').textContent='等待选择';
+    $('selectedOfficialGrade').textContent='-';
+    $('selectedPlayable').textContent='-';
+    $('selectedNoBetText').textContent='-';
+    $('selectedMainRisk').textContent='-';
+    $('selectedRfEvidence').textContent='-';
+    $('selectedRecentEvidence').textContent='-';
+    $('selectedMarketEvidence').textContent='-';
+    $('selectedMarketAction').textContent='-';
+    $('selectedRecentH2h').textContent='-';
+    $('selectedH2hEvidence').textContent='-';
+    $('selectedSeasonPhase').textContent='-';
+    $('selectedLeagueTier').textContent='-';
     $('selectedLeagueSample').textContent='-';
     $('selectedLeagueHit').textContent='-';
     $('selectedLeagueRoi').textContent='-';
@@ -1167,16 +1275,30 @@ function renderSelectedCandidate(x){
   const leagueMeta=leagueTrustMeta(lg);
   $('selectedMatchTitle').textContent=matchName(x);
   $('selectedMatchMeta').textContent=`${ko.label} · ${league} · official ${grade} · ${safe(first(x.playbook_script,''),'剧本待补')} · 高峰${peak.text}`;
-  $('selectedDecisionMain').textContent=stakeHint(grade,line);
-  $('selectedDecisionBasis').textContent=`依据：${plan.basis}。高峰来自上半场进球分布 ${peak.text}。`;
+  const status=candidateStatus(x);
+  const mainRisk=leagueMeta.tag==='LOW_TRUST_ALERT'?'长期低命中预警':(leagueMeta.tag==='DO_NOT_CONCLUDE'||leagueMeta.tag==='LOW_SAMPLE_ONLY'?'样本不足':safe(first(x.market_risk_flag,x.opening_market_veto_level,'常规观察'),'常规观察'));
+  $('selectedDecisionMain').textContent=`${status.text} · ${stakeHint(grade,line)}`;
+  $('selectedDecisionBasis').textContent=`official ${grade}；${status.next}。主要风险：${mainRisk}。`;
+  $('selectedOfficialGrade').textContent=grade;
+  $('selectedPlayable').textContent=status.text;
+  $('selectedNoBetText').textContent=safe(first(x.no_bet_reason_text,x.no_market_exclusion_reason,''),'无');
+  $('selectedMainRisk').textContent=mainRisk;
   $('selectedLine').textContent=line;
   $('selectedStake').textContent=`${stake||0}元`;
   $('selectedOdds').textContent=odds||'待填';
-  $('selectedPeak').textContent=peak.text;
+  $('selectedPeak').textContent=minute||'待填';
+  $('selectedRfEvidence').textContent=`RF ${safe(x.rf_shadow_grade,'缺失')} / ${safe(x.rf_shadow_confidence,'信心缺失')}`;
+  $('selectedRecentEvidence').textContent=`recent5 ${safe(first(x.rf_recent5_grade_status,x.recent5_bilateral_gate),'缺失')}`;
+  $('selectedMarketEvidence').textContent=`盘后 ${safe(x.market_adjusted_shadow_grade,'缺失')}`;
+  $('selectedMarketAction').textContent=shadowCn(first(x.opening_market_action,x.market_policy_action,x.dryrun_action,''));
+  $('selectedRecentH2h').textContent=`recent5 ${safe(first(x.home_recent5_pass_count,'-'),'-')}/${safe(first(x.away_recent5_pass_count,'-'),'-')} · H2H ${safe(first(x.h2h_used_count,x.h2h_valid_count,'-'),'-')}`;
+  $('selectedH2hEvidence').textContent=shadowCn(first(x.h2h_bonus_status,x.h2h_recent5_support_status,x.h2h_policy,''));
+  $('selectedSeasonPhase').textContent=safe(first(x.season_phase,x.rf_window_policy,'未记录'),'未记录');
+  $('selectedLeagueTier').textContent=safe(first(x.league_tier,x.source_group,''),'未记录');
   $('selectedLeagueMain').textContent=`${league}：${leagueMeta.note}`;
   $('selectedLeagueSample').textContent=lg?`${Number(lg.validated_count||0)}`:'0';
   $('selectedLeagueHit').textContent=lg?pct(lg.hit_rate):'N/A';
-  $('selectedLeagueRoi').textContent='仅观察';
+  $('selectedLeagueRoi').textContent='仅观察，不自动影响评级';
   $('selectedLeagueAction').textContent=leagueMeta.tag;
   $('selectedFormLine').value=line;
   $('selectedFormOdds').value=odds;
@@ -1235,6 +1357,7 @@ function syncSelectedStakeFromLine(){
   $('selectedDecisionBasis').textContent=`依据：手动选择 ${line}，金额按${grade}级风控模板。高峰来自上半场进球分布 ${peak.text}。`;
   $('selectedLine').textContent=line;
   $('selectedStake').textContent=`${stake||0}元`;
+  $('selectedPeak').textContent=$('selectedFormMinute')?.value||'待填';
 }
 function buildSelectedBasePayload(x){
   const line=$('selectedFormLine')?.value||'O1';
@@ -1269,6 +1392,13 @@ function renderSide(){
   $('todoRetry').textContent=tr;
   $('todoError').textContent=safe(first(todo.errors,0),'0');
   const c2=getCandidatesNode();const abA=Number(first(c2.a_count,0));const abB=Number(first(c2.b_count,0));if($('todoBetBadge')) $('todoBetBadge').textContent='A'+abA+'B'+abB;
+  const risk=bettingRiskSnapshot();
+  $('riskPlayableToday').textContent=String(risk.playable);
+  $('riskAlreadyBet').textContent=String(risk.already);
+  $('riskPendingBet').textContent=String(risk.pending);
+  $('riskPendingSettle').textContent=String(risk.settled);
+  $('riskToday').textContent=risk.risk;
+  $('riskContinue').textContent=risk.allow;
 
   const openItems = arr(todo.open_bet_items);
   const listEl = $('openBetList');
@@ -1350,13 +1480,13 @@ function renderSystem(){
   $('systemToolbarStatus').textContent=safe(first(ss.cron_status_text,ss.cron_status,'状态未知'),'状态未知');
 
   const btnErr=$('btnSysError');
-  const navErr=$('navError');
+  const navErr=$('navSystem');
   if(errCount>0){
     if(btnErr){btnErr.textContent='系统异常('+errCount+')';btnErr.classList.add('red');}
-    if(navErr){navErr.classList.add('has-error');navErr.querySelector('b').textContent=blockerCount>0?'⛔':'⚠';}
+    if(navErr){navErr.classList.add('has-error');navErr.querySelector('b').textContent=blockerCount>0?'⛔':'⚙';}
   }else{
     if(btnErr){btnErr.textContent='系统异常';btnErr.classList.remove('red');}
-    if(navErr){navErr.classList.remove('has-error');navErr.querySelector('b').textContent='⚠';}
+    if(navErr){navErr.classList.remove('has-error');navErr.querySelector('b').textContent='⚙';}
   }
 }
 
@@ -1497,7 +1627,20 @@ function buildValidationPanel(){
   '</table>';
 }
 function buildBetApiPanel(){
-  return `<table><tr><th>操作</th><th>说明</th></tr>
+  const risk=bettingRiskSnapshot();
+  return `<div class='risk-card'>
+    <div class='decision-title'>投注风控卡</div>
+    <div class='risk-grid'>
+      <div class='mini'><span>今日可投</span><b>${risk.playable}</b></div>
+      <div class='mini'><span>已投</span><b>${risk.already}</b></div>
+      <div class='mini'><span>待投注</span><b>${risk.pending}</b></div>
+      <div class='mini'><span>待结算</span><b>${risk.settled}</b></div>
+      <div class='mini'><span>今日风险</span><b>${risk.risk}</b></div>
+      <div class='mini'><span>允许继续</span><b>${risk.allow}</b></div>
+    </div>
+    <div class='note'>只做展示和入口，不自动下单，不写 live bet。</div>
+  </div>
+  <table><tr><th>操作</th><th>说明</th></tr>
     <tr><td>新增投注</td><td>记录盘口、水位、金额、入场分钟</td></tr>
     <tr><td>结算投注</td><td>按半场比分结算，自动计算盈亏/流水/返水</td></tr>
     <tr><td>编辑记录</td><td>修正备注与非关键字段，保留审计</td></tr>
@@ -1508,7 +1651,7 @@ function buildReviewPanel(){
   const summary=MODEL.league_performance_summary||{};
   const rows=Object.values(MODEL.league_trust_tags||{}).sort((a,b)=>Number(b.validated_count||0)-Number(a.validated_count||0)).slice(0,16);
   const table=rows.length?`<table class="league-table"><tr><th>联赛</th><th>已验证</th><th>待赛</th><th>命中率</th><th>长期标签</th></tr>${rows.map(x=>{const m=leagueTrustMeta(x);return `<tr><td>${safe(x.league,'未知')}</td><td>${Number(x.validated_count||0)}</td><td>${Number(x.pending_count||0)}</td><td>${Number(x.validated_count||0)>0?pct(x.hit_rate):'不计分母'}</td><td title="${m.note}">${m.tag}</td></tr>`;}).join('')}</table>`:'<div class="note">暂无联赛长期样本。</div>';
-  return `<div class='note'>联赛长期表现库只做 dashboard 风险提示，不自动改判级，不自动排除联赛。LOW_TRUST_ALERT 表示观察风险；LOW_SAMPLE / DO_NOT_CONCLUDE 表示样本不足，不下结论。</div>
+  return `<div class='note'>联赛长期表现库只做 dashboard 风险提示，仅观察，不自动影响评级，不自动排除联赛。LOW_TRUST_ALERT 显示为长期低命中预警，不自动排除；LOW_SAMPLE / DO_NOT_CONCLUDE 显示为样本不足，不下结论。</div>
   <div class='inline-validation'>
     <div class='mini'><span>联赛数</span><b>${safe(summary.league_count,0)}</b></div>
     <div class='mini'><span>AB已验证</span><b>${safe(summary.total_validated,0)}</b></div>
@@ -1522,12 +1665,16 @@ function buildReviewPanel(){
 }
 function buildSystemPanel(){
   const ss=MODEL.system_status||{};
+  const se=MODEL.system_errors||{};
+  const errCount=Number(first(se.active_error_count,0));
+  const blockerCount=Number(first(se.active_blocker_count,0));
+  const errLine=errCount>0?`<div class='lock' style='margin-top:10px'>异常状态已并入系统页：active ${errCount}，blocker ${blockerCount}。红点只提示，不触发 kill/retry。</div>${buildErrorsPanel()}`:"<div class='note' style='margin-top:10px'>异常状态：当前无 active 异常；底部不再单独占用 Tab。</div>";
   return `<table><tr><th>项</th><th>状态</th></tr>
     <tr><td>cron</td><td>${safe(first(ss.cron_status_text,ss.cron_status),'N/A')}</td></tr>
     <tr><td>QQ notify</td><td>${safe(ss.qq_notify_status,'N/A')}</td></tr>
     <tr><td>checker</td><td>${safe(ss.checker_status,'N/A')}</td></tr>
     <tr><td>last_updated_at</td><td>${safe(ss.last_updated_at,'N/A')}</td></tr>
-  </table><div class='lock'>全量扫描 / 策略修改 / 上云发布 / 定时修改均锁定。</div>`;
+  </table><div class='lock'>全量扫描 / 策略修改 / 上云发布 / 定时修改均锁定。</div>${errLine}`;
 }
 function buildErrorsPanel(){
   const se=MODEL.system_errors||{};
@@ -1581,6 +1728,7 @@ function renderErrorItem(x){
 }
 function goNav(tab){
   if(tab==='overview'){ window.scrollTo({top:0,behavior:'smooth'}); return; }
+  if(tab==='league'){ openPanel('review'); return; }
   if(tab==='bet'){ document.querySelector('.candidate-list')?.scrollIntoView({behavior:'smooth',block:'start'}); return; }
   if(tab==='validation'){ openPanel('validation'); return; }
   if(tab==='review'){ openPanel('review'); return; }
