@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import subprocess
 from datetime import datetime
 from pathlib import Path
@@ -12,8 +13,8 @@ ROOT = Path(__file__).resolve().parents[1]
 VALIDATION = ROOT / "data/runtime/validation"
 WEEKLY = ROOT / "data/weekly_reports"
 MONTHLY = ROOT / "data/monthly_reports"
-RUNTIME_SNAP = ROOT / "data/runtime/league_watchlist_snapshots"
-RUNTIME_TREND = ROOT / "data/runtime/league_watchlist_trends"
+RUNTIME_SNAP = Path(os.environ.get("V4_LEAGUE_WATCHLIST_SNAPSHOT_DIR") or (ROOT / "data/runtime/league_watchlist_snapshots"))
+RUNTIME_TREND = Path(os.environ.get("V4_LEAGUE_WATCHLIST_TREND_DIR") or (ROOT / "data/runtime/league_watchlist_trends"))
 WATCHLIST_BUILDER = ROOT / "tools/build_v4_league_watchlist_report.py"
 
 SNAPSHOT_PREFIX = "v4_league_watchlist_snapshot_"
@@ -103,14 +104,17 @@ def flatten_watchlist(watchlist: dict[str, Any]) -> dict[str, dict[str, Any]]:
 
 def current_snapshot_from_watchlist(watchlist: dict[str, Any]) -> dict[str, Any]:
     rows = flatten_watchlist(watchlist)
-    snapshot_id = datetime.now().strftime("%Y%m%d")
+    now = datetime.now()
+    snapshot_date = now.strftime("%Y%m%d")
+    snapshot_id = now.strftime("%Y%m%dT%H%M%S%f")
     dist = {}
     for row in rows.values():
         tag = str(row.get("trust_tag") or "DATA_GAP")
         dist[tag] = dist.get(tag, 0) + 1
     return {
+        "snapshot_date": snapshot_date,
         "snapshot_id": snapshot_id,
-        "generated_at": datetime.now().isoformat(),
+        "generated_at": now.isoformat(),
         "trend_anchor_date": watchlist.get("trend_anchor_date") or "DATA_MISSING",
         "source_ledger_resolved": watchlist.get("source_ledger_resolved") or "NOT_FOUND",
         "total_leagues": int(watchlist.get("total_leagues") or len(rows)),
@@ -127,24 +131,48 @@ def current_snapshot_from_watchlist(watchlist: dict[str, Any]) -> dict[str, Any]
     }
 
 
-def find_previous_snapshot(current_id: str) -> dict[str, Any]:
-    candidates: list[dict[str, Any]] = []
+def _safe_dt(s: str) -> datetime | None:
+    try:
+        return datetime.fromisoformat(s)
+    except Exception:
+        return None
+
+
+def find_previous_snapshot(current: dict[str, Any], current_snapshot_path: Path) -> tuple[dict[str, Any], str]:
+    current_id = str(current.get("snapshot_id") or "")
+    current_gen = _safe_dt(str(current.get("generated_at") or ""))
+    candidates: list[tuple[datetime, dict[str, Any]]] = []
     for path in sorted(RUNTIME_SNAP.glob(f"{SNAPSHOT_PREFIX}*.json")):
+        if path.resolve() == current_snapshot_path.resolve():
+            continue
         snap = load_json(path)
-        if snap and str(snap.get("snapshot_id") or "") != current_id:
-            candidates.append(snap)
+        if not snap:
+            continue
+        prev_id = str(snap.get("snapshot_id") or "")
+        prev_gen = _safe_dt(str(snap.get("generated_at") or ""))
+        if not prev_id or prev_id == current_id or not prev_gen:
+            continue
+        if current_gen and prev_gen >= current_gen:
+            continue
+        snap["snapshot_path"] = str(path)
+        candidates.append((prev_gen, snap))
     if candidates:
-        candidates.sort(key=lambda x: str(x.get("generated_at") or ""))
-        return candidates[-1]
+        candidates.sort(key=lambda x: x[0])
+        return candidates[-1][1], "PASS"
 
     # fallback from weekly/monthly watchlist reports
     fallback_paths = sorted(WEEKLY.glob("v4_league_watchlist_report_*.json")) + sorted(MONTHLY.glob("v4_league_watchlist_report_*.json"))
     if not fallback_paths:
-        return {}
+        return {}, "PASS"
     snap = current_snapshot_from_watchlist(load_json(fallback_paths[-1]))
     if str(snap.get("snapshot_id") or "") == current_id and len(fallback_paths) > 1:
         snap = current_snapshot_from_watchlist(load_json(fallback_paths[-2]))
-    return snap
+    prev_id = str(snap.get("snapshot_id") or "")
+    prev_gen = _safe_dt(str(snap.get("generated_at") or ""))
+    if not prev_id or prev_id == current_id or (current_gen and prev_gen and prev_gen >= current_gen):
+        return {}, "PASS"
+    snap["snapshot_path"] = "FALLBACK_WATCHLIST_REPORT"
+    return snap, "PASS"
 
 
 def tag_delta(curr: dict[str, int], prev: dict[str, int]) -> dict[str, int]:
@@ -224,7 +252,7 @@ def changed_item(league: str, prev: dict[str, Any], curr: dict[str, Any], baseli
     return item
 
 
-def build_trend(current: dict[str, Any], previous: dict[str, Any]) -> dict[str, Any]:
+def build_trend(current: dict[str, Any], previous: dict[str, Any], current_snapshot_path: Path, guard_status: str) -> dict[str, Any]:
     curr_rows = current.get("leagues") or {}
     prev_rows = previous.get("leagues") or {}
     baseline_only = not bool(previous)
@@ -248,15 +276,19 @@ def build_trend(current: dict[str, Any], previous: dict[str, Any]) -> dict[str, 
     trend = {
         "generated_at": datetime.now().isoformat(),
         "trend_anchor_date": current.get("trend_anchor_date") or "DATA_MISSING",
+        "current_snapshot_date": current.get("snapshot_date") or "DATA_MISSING",
         "current_snapshot_id": current.get("snapshot_id") or "DATA_MISSING",
-        "previous_snapshot_id": previous.get("snapshot_id") if previous else "NONE",
+        "current_snapshot_path": str(current_snapshot_path),
+        "previous_snapshot_id": previous.get("snapshot_id") if previous else "",
+        "previous_snapshot_path": previous.get("snapshot_path") if previous else "",
+        "self_reference_guard_status": guard_status,
         "baseline_only": baseline_only,
-        "baseline_only_reason": "当前仅有 baseline 快照，不能判断趋势。" if baseline_only else "",
+        "baseline_only_reason": "NO_PREVIOUS_DISTINCT_SNAPSHOT" if baseline_only else "",
         "total_leagues_current": int(current.get("total_leagues") or len(curr_rows)),
         "total_leagues_previous": int(previous.get("total_leagues") or len(prev_rows)) if previous else 0,
         "tag_distribution_current": current.get("tag_distribution") or {},
         "tag_distribution_previous": previous.get("tag_distribution") or {},
-        "tag_distribution_delta": tag_delta(current.get("tag_distribution") or {}, previous.get("tag_distribution") or {}),
+        "tag_distribution_delta": tag_delta(current.get("tag_distribution") or {}, previous.get("tag_distribution") or {}) if not baseline_only else {},
         "trust_tag_changed_leagues": trust_changed,
         "improved_leagues": improved,
         "worsened_leagues": worsened,
@@ -293,6 +325,7 @@ def render_text(report: dict[str, Any]) -> str:
     if report.get("baseline_only"):
         lines += [
             "当前仅有 baseline 快照，不能判断趋势。",
+            f"baseline_only_reason：{report.get('baseline_only_reason') or 'NO_PREVIOUS_DISTINCT_SNAPSHOT'}",
             "",
             "趋势仅供观察，不自动修改 official grade。",
         ]
@@ -335,10 +368,9 @@ def main() -> int:
         return 2
 
     current_snapshot = current_snapshot_from_watchlist(current_watchlist)
-    previous_snapshot = find_previous_snapshot(current_snapshot["snapshot_id"])
-    trend = build_trend(current_snapshot, previous_snapshot)
-
     snapshot_path = RUNTIME_SNAP / f"{SNAPSHOT_PREFIX}{current_snapshot['snapshot_id']}.json"
+    previous_snapshot, guard_status = find_previous_snapshot(current_snapshot, snapshot_path)
+    trend = build_trend(current_snapshot, previous_snapshot, snapshot_path, guard_status)
     write_json(snapshot_path, current_snapshot)
     write_json(TREND_JSON, trend)
     TREND_TXT.parent.mkdir(parents=True, exist_ok=True)

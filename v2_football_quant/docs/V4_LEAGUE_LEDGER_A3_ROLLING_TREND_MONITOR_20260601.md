@@ -63,3 +63,14 @@ The following are runtime artifacts and should not be committed:
 - `data/weekly_reports/v4_league_watchlist_report_*.json`
 - `data/monthly_reports/v4_league_watchlist_report_*.json`
 
+## A3-FIX Self-Reference Guard
+
+- previous snapshot must be distinct from current snapshot.
+- If no distinct previous snapshot exists, output must be:
+  - `baseline_only=true`
+  - `baseline_only_reason=NO_PREVIOUS_DISTINCT_SNAPSHOT`
+- Baseline-only cannot be interpreted as trend-flat or trend-no-change.
+- Same-day rerun uses unique `snapshot_id` and keeps `snapshot_date` separate.
+- `LOW_TRUST_ALERT` remains observation-only.
+- `PENDING_ONLY` is excluded from denominator.
+- `DO_NOT_CONCLUDE` is sample-insufficient observation, not negative grading.

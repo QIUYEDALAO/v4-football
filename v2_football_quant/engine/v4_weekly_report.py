@@ -139,6 +139,23 @@ def _load_league_watchlist_trend() -> dict[str, Any]:
             "sample_count_delta_top": [],
             "policy_note": "趋势仅供观察，不自动影响 official grade。",
         }
+    current_id = str(trend.get("current_snapshot_id") or "")
+    previous_id = str(trend.get("previous_snapshot_id") or "")
+    guard_status = str(trend.get("self_reference_guard_status") or "WARN_ONLY")
+    if previous_id and current_id and previous_id == current_id:
+        guard_status = "SELF_REFERENCE_PREVIOUS_SNAPSHOT_BLOCKED"
+    if guard_status != "PASS":
+        return {
+            "status": "BLOCKED",
+            "baseline_only": True,
+            "baseline_only_reason": "当前仅有 baseline 快照，不能判断趋势。",
+            "tag_worsened_count": 0,
+            "tag_improved_count": 0,
+            "new_low_trust_alert_count": 0,
+            "pending_to_validated_count": 0,
+            "sample_count_delta_top": [],
+            "policy_note": "趋势仅供观察，不自动影响 official grade。",
+        }
     risk = trend.get("risk_summary") or {}
     return {
         "status": "OK",

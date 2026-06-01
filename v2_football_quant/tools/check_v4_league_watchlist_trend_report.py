@@ -2,8 +2,10 @@
 from __future__ import annotations
 
 import json
+import os
 import subprocess
 import sys
+import tempfile
 from datetime import datetime
 from pathlib import Path
 from typing import Any
@@ -57,29 +59,51 @@ def flatten_changed(payload: dict[str, Any]) -> list[dict[str, Any]]:
     return rows
 
 
-def main() -> int:
-    checks: list[dict[str, Any]] = []
+def run_builder(env: dict[str, str] | None = None) -> tuple[int, str, str]:
     run = subprocess.run(
         [sys.executable, str(BUILDER), "--dry-run"],
         cwd=str(ROOT),
         capture_output=True,
         text=True,
         check=False,
+        env=env,
     )
-    add(checks, "trend_builder_runs", run.returncode == 0, run.stderr or run.stdout[-1000:])
+    return run.returncode, run.stdout, run.stderr
+
+
+def main() -> int:
+    checks: list[dict[str, Any]] = []
+    code, out, err = run_builder()
+    add(checks, "trend_builder_runs", code == 0, err or out[-1000:])
     add(checks, "trend_latest_json_exists", TREND_JSON.exists(), str(TREND_JSON))
     add(checks, "trend_latest_txt_exists", TREND_TXT.exists(), str(TREND_TXT))
 
     payload = load_json(TREND_JSON)
     add(checks, "current_snapshot_id_present", bool(payload.get("current_snapshot_id")), payload.get("current_snapshot_id"))
     add(checks, "baseline_only_field_present", "baseline_only" in payload, payload.get("baseline_only"))
+    add(checks, "self_reference_guard_present", bool(payload.get("self_reference_guard_status")), payload.get("self_reference_guard_status"))
 
     baseline_only = bool(payload.get("baseline_only"))
+    current_id = str(payload.get("current_snapshot_id") or "")
+    previous_id = str(payload.get("previous_snapshot_id") or "")
+    current_path = str(payload.get("current_snapshot_path") or "")
+    previous_path = str(payload.get("previous_snapshot_path") or "")
+
+    if not baseline_only:
+        self_ref_block = bool(previous_id) and previous_id == current_id or bool(previous_path) and previous_path == current_path
+        add(checks, "SELF_REFERENCE_PREVIOUS_SNAPSHOT_BLOCKER", not self_ref_block, {"current_id": current_id, "previous_id": previous_id, "current_path": current_path, "previous_path": previous_path})
+        add(checks, "previous_snapshot_id_required_when_not_baseline", bool(previous_id), previous_id)
+        add(checks, "previous_snapshot_id_not_equal_current", previous_id != current_id, {"current_id": current_id, "previous_id": previous_id})
+        add(checks, "previous_snapshot_path_not_equal_current", bool(previous_path) and previous_path != current_path, {"current_path": current_path, "previous_path": previous_path})
+
     if baseline_only:
         add(checks, "baseline_only_reason_present", bool(payload.get("baseline_only_reason")), payload.get("baseline_only_reason"))
+        add(checks, "baseline_only_reason_value", str(payload.get("baseline_only_reason") or "") == "NO_PREVIOUS_DISTINCT_SNAPSHOT", payload.get("baseline_only_reason"))
+        add(checks, "baseline_only_previous_snapshot_empty", not payload.get("previous_snapshot_id"), payload.get("previous_snapshot_id"))
         changed_rows = flatten_changed(payload)
         allowed = all(row.get("change_type") in {"BASELINE_ONLY"} and row.get("action_hint") == "BASELINE_ONLY_WAIT_NEXT_SNAPSHOT" for row in changed_rows)
         add(checks, "baseline_only_change_lists_safe", (not changed_rows) or allowed, changed_rows[:3])
+        add(checks, "baseline_only_delta_empty", (payload.get("tag_distribution_delta") or {}) == {}, payload.get("tag_distribution_delta"))
     else:
         curr = payload.get("tag_distribution_current") or {}
         prev = payload.get("tag_distribution_previous") or {}
@@ -94,6 +118,44 @@ def main() -> int:
             "trust_tag_changed_leagues_correct",
             all(str(x.get("previous_trust_tag")) != str(x.get("current_trust_tag")) for x in changed if isinstance(x, dict)),
             changed[:3],
+        )
+
+    # isolated baseline-only run
+    with tempfile.TemporaryDirectory(prefix="v4_a3_fix_base_") as td:
+        td_path = Path(td)
+        base_env = dict(os.environ)
+        base_env["V4_LEAGUE_WATCHLIST_SNAPSHOT_DIR"] = str(td_path / "snap")
+        base_env["V4_LEAGUE_WATCHLIST_TREND_DIR"] = str(td_path / "trend")
+        code1, out1, err1 = run_builder(base_env)
+        temp_payload = load_json(td_path / "trend" / "v4_league_watchlist_trend_latest.json")
+        add(checks, "isolated_baseline_run_ok", code1 == 0, err1 or out1[-400:])
+        add(checks, "isolated_baseline_only_true", bool(temp_payload.get("baseline_only")) is True, temp_payload.get("baseline_only"))
+        add(checks, "isolated_baseline_reason", str(temp_payload.get("baseline_only_reason") or "") == "NO_PREVIOUS_DISTINCT_SNAPSHOT", temp_payload.get("baseline_only_reason"))
+        add(checks, "isolated_previous_empty", not temp_payload.get("previous_snapshot_id"), temp_payload.get("previous_snapshot_id"))
+        add(checks, "isolated_change_lists_empty", len(flatten_changed(temp_payload)) == 0, len(flatten_changed(temp_payload)))
+
+    # isolated double-run run
+    with tempfile.TemporaryDirectory(prefix="v4_a3_fix_double_") as td2:
+        td2_path = Path(td2)
+        env2 = dict(os.environ)
+        env2["V4_LEAGUE_WATCHLIST_SNAPSHOT_DIR"] = str(td2_path / "snap")
+        env2["V4_LEAGUE_WATCHLIST_TREND_DIR"] = str(td2_path / "trend")
+        code2a, _, err2a = run_builder(env2)
+        code2b, _, err2b = run_builder(env2)
+        temp2_payload = load_json(td2_path / "trend" / "v4_league_watchlist_trend_latest.json")
+        add(checks, "isolated_double_run_first_ok", code2a == 0, err2a[-300:] if err2a else "")
+        add(checks, "isolated_double_run_second_ok", code2b == 0, err2b[-300:] if err2b else "")
+        add(checks, "isolated_double_run_not_baseline", bool(temp2_payload.get("baseline_only")) is False, temp2_payload.get("baseline_only"))
+        add(
+            checks,
+            "isolated_double_run_distinct_previous",
+            bool(temp2_payload.get("previous_snapshot_id")) and str(temp2_payload.get("previous_snapshot_id")) != str(temp2_payload.get("current_snapshot_id")) and str(temp2_payload.get("previous_snapshot_path") or "") != str(temp2_payload.get("current_snapshot_path") or ""),
+            {
+                "current_snapshot_id": temp2_payload.get("current_snapshot_id"),
+                "previous_snapshot_id": temp2_payload.get("previous_snapshot_id"),
+                "current_snapshot_path": temp2_payload.get("current_snapshot_path"),
+                "previous_snapshot_path": temp2_payload.get("previous_snapshot_path"),
+            },
         )
 
     all_rows = flatten_changed(payload)
