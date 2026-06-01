@@ -219,6 +219,24 @@ def main() -> int:
     if "official_grade = league" in html or "grade = league" in html:
         blockers.append("league_tag_mixed_into_official_grade")
 
+    # 14) D4 league intelligence panel contract
+    d4_required = [
+        "联赛情报",
+        "total leagues",
+        "LOW_TRUST_ALERT 不自动排除",
+        "DO_NOT_CONCLUDE：样本不足，不下结论",
+        "PENDING_ONLY：延期/未完赛，仅记录，不进分母",
+        "趋势仅供观察，不自动改规则",
+        "当前仅有 baseline 快照，不能判断趋势。",
+        "趋势快照异常，已阻断展示",
+    ]
+    for token in d4_required:
+        if token not in html:
+            blockers.append(f"d4_league_intel_token_missing:{token}")
+    lip = model.get("league_intelligence_panel", {}) if isinstance(model, dict) else {}
+    if not isinstance(lip, dict) or not lip:
+        blockers.append("d4_league_intelligence_panel_missing")
+
     conclusion = "PASS"
     if blockers:
         conclusion = "BLOCKER"

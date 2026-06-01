@@ -32,6 +32,9 @@ ROOT = Path(__file__).resolve().parents[1]
 STATUS = ROOT / "data/runtime/status"
 LIVE_DIR = ROOT / "data/runtime/live_bets"
 VALIDATION = ROOT / "data/runtime/validation"
+WEEKLY = ROOT / "data/weekly_reports"
+MONTHLY = ROOT / "data/monthly_reports"
+RUNTIME_TREND = ROOT / "data/runtime/league_watchlist_trends"
 VALIDATION_REVIEW_20260531 = VALIDATION / "v4_official_ab_validation_review_20260531.json"
 VALIDATION_REVIEW_MD_20260531 = ROOT / "data/daily_reports/V4_20260531_OFFICIAL_AB_VALIDATION_REVIEW.md"
 
@@ -182,6 +185,19 @@ def _find_latest_league_hit_rate_stats() -> tuple[Optional[Path], dict]:
 
 def _find_league_performance_ledger() -> tuple[Optional[Path], dict]:
     p = VALIDATION / "v4_league_performance_ledger_latest.json"
+    return (p, _load_json(p)) if p.exists() else (None, {})
+
+
+def _find_latest_league_watchlist_report() -> tuple[Optional[Path], dict]:
+    candidates = sorted(WEEKLY.glob("v4_league_watchlist_report_*.json")) + sorted(MONTHLY.glob("v4_league_watchlist_report_*.json"))
+    if not candidates:
+        return None, {}
+    p = candidates[-1]
+    return p, _load_json(p)
+
+
+def _find_latest_league_watchlist_trend() -> tuple[Optional[Path], dict]:
+    p = RUNTIME_TREND / "v4_league_watchlist_trend_latest.json"
     return (p, _load_json(p)) if p.exists() else (None, {})
 
 
@@ -1342,6 +1358,115 @@ def _extract_league_performance_summary(ledger: dict) -> dict:
     }
 
 
+def _norm_preview_item(row: dict[str, Any]) -> dict[str, Any]:
+    return {
+        "league": row.get("league") or row.get("normalized_league") or "UNKNOWN",
+        "validated_count": int(row.get("validated_count") or 0),
+        "pending_count": int(row.get("pending_count") or 0),
+        "hit_rate": float(row.get("hit_rate") or 0.0),
+        "sample_tag": row.get("sample_tag") or "DATA_MISSING",
+        "trust_tag": row.get("trust_tag") or "DATA_MISSING",
+        "action_hint": row.get("action_hint") or "OBSERVE_ONLY",
+        "explanation": row.get("explanation") or "",
+    }
+
+
+def _preview_group(rows: list[dict[str, Any]]) -> dict[str, Any]:
+    items = [_norm_preview_item(x) for x in rows if isinstance(x, dict)]
+    items.sort(key=lambda x: (x["validated_count"], x["pending_count"], x["hit_rate"]), reverse=True)
+    return {
+        "items": items[:5],
+        "total": len(items),
+        "more_count": max(0, len(items) - 5),
+    }
+
+
+def _extract_league_intelligence_panel(ledger: dict, watchlist: dict, trend: dict, ledger_path: Optional[Path], watchlist_path: Optional[Path], trend_path: Optional[Path]) -> dict[str, Any]:
+    watchlist_counts = {
+        "KEEP": len(watchlist.get("keep_leagues") or []),
+        "WATCH": len(watchlist.get("watch_leagues") or []),
+        "LOW_TRUST_ALERT": len(watchlist.get("low_trust_alert_leagues") or []),
+        "LOW_SAMPLE": len(watchlist.get("low_sample_leagues") or []),
+        "DO_NOT_CONCLUDE": len(watchlist.get("do_not_conclude_leagues") or []),
+        "PENDING_ONLY": len(watchlist.get("pending_only_leagues") or []),
+        "DATA_GAP": len(watchlist.get("data_gap_leagues") or []),
+    }
+    source_ledger = watchlist.get("source_ledger_resolved") or ledger.get("source_ledger_resolved") or (str(ledger_path) if ledger_path else "NOT_FOUND")
+    trend_summary = {
+        "baseline_only": bool(trend.get("baseline_only")),
+        "baseline_only_reason": trend.get("baseline_only_reason") or "",
+        "current_snapshot_id": trend.get("current_snapshot_id") or "",
+        "previous_snapshot_id": trend.get("previous_snapshot_id") or "",
+        "tag_distribution_delta": trend.get("tag_distribution_delta") or {},
+        "trust_tag_changed_count": len(trend.get("trust_tag_changed_leagues") or []),
+        "improved_count": len(trend.get("improved_leagues") or []),
+        "worsened_count": len(trend.get("worsened_leagues") or []),
+        "new_low_trust_alert_count": len(trend.get("new_low_trust_alert_leagues") or []),
+        "pending_to_validated_count": len(trend.get("pending_to_validated_leagues") or []),
+        "self_reference_guard_status": trend.get("self_reference_guard_status") or "WARN_ONLY",
+    }
+    warn_only_items: list[str] = []
+    if trend_summary["baseline_only"]:
+        warn_only_items.append("BASELINE_ONLY_WARN_ONLY")
+    if trend_summary["self_reference_guard_status"] != "PASS":
+        warn_only_items.append("SELF_REFERENCE_GUARD_NOT_PASS")
+    if trend_summary["previous_snapshot_id"] and trend_summary["previous_snapshot_id"] == trend_summary["current_snapshot_id"]:
+        warn_only_items.append("SELF_REFERENCE_PREVIOUS_EQ_CURRENT_BLOCKED")
+
+    watchlist_preview = {
+        "low_sample": _preview_group(watchlist.get("low_sample_leagues") or []),
+        "do_not_conclude": _preview_group(watchlist.get("do_not_conclude_leagues") or []),
+        "pending_only": _preview_group(watchlist.get("pending_only_leagues") or []),
+        "data_gap": _preview_group(watchlist.get("data_gap_leagues") or []),
+        "low_trust_alert": _preview_group(watchlist.get("low_trust_alert_leagues") or []),
+    }
+    status = "PASS"
+    if not ledger and not watchlist and not trend:
+        status = "DATA_MISSING"
+    elif not watchlist or not trend:
+        status = "WARN_ONLY"
+    return {
+        "league_watchlist_counts": watchlist_counts,
+        "league_watchlist_preview": watchlist_preview,
+        "league_watchlist_trend_summary": trend_summary,
+        "league_trend_baseline_only": trend_summary["baseline_only"],
+        "league_trend_self_reference_guard_status": trend_summary["self_reference_guard_status"],
+        "league_trend_warn_only_items": warn_only_items,
+        "league_watchlist_policy_note": "联赛标签仅供观察，不自动影响 official grade。",
+        "league_watchlist_safety_guard": {
+            "league_tags_do_not_affect_official_grade": True,
+            "low_trust_alert_auto_exclude": False,
+            "do_not_conclude_negative_grade": False,
+            "pending_only_excluded_from_denominator": True,
+            "trend_monitor_observe_only": True,
+        },
+        "low_sample_league_list": [x for x in (watchlist.get("low_sample_leagues") or []) if isinstance(x, dict)],
+        "do_not_conclude_league_list": [x for x in (watchlist.get("do_not_conclude_leagues") or []) if isinstance(x, dict)],
+        "pending_only_league_list": [x for x in (watchlist.get("pending_only_leagues") or []) if isinstance(x, dict)],
+        "low_trust_alert_league_list": [x for x in (watchlist.get("low_trust_alert_leagues") or []) if isinstance(x, dict)],
+        "data_gap_league_list": [x for x in (watchlist.get("data_gap_leagues") or []) if isinstance(x, dict)],
+        "league_intelligence_panel": {
+            "status": status,
+            "source_ledger_path": source_ledger,
+            "source_watchlist_path": str(watchlist_path) if watchlist_path else "NOT_FOUND",
+            "source_trend_path": str(trend_path) if trend_path else "NOT_FOUND",
+            "trend_anchor_date": watchlist.get("trend_anchor_date") or ledger.get("trend_anchor_date") or "DATA_MISSING",
+            "total_leagues": int(watchlist.get("total_leagues") or ledger.get("league_count") or 0),
+            "tag_counts": watchlist_counts,
+            "preview_groups": watchlist_preview,
+            "trend_summary": trend_summary,
+            "policy_note": "联赛标签仅供观察，不自动影响 official grade。",
+            "safety_guard": {
+                "league_tags_do_not_affect_official_grade": True,
+                "low_trust_alert_auto_exclude": False,
+                "do_not_conclude_negative_grade": False,
+                "pending_only_excluded_from_denominator": True,
+                "trend_monitor_observe_only": True,
+            },
+        },
+    }
+
+
 def _pct_text(hits: int, total: int) -> str:
     return f"{(hits / total * 100):.1f}%" if total > 0 else "N/A"
 
@@ -1598,6 +1723,16 @@ def build_model() -> dict:
     league_hit_rate = _extract_league_hit_rate_summary(league_stats_raw)
     league_ledger_path, league_ledger_raw = _find_league_performance_ledger()
     league_performance = _extract_league_performance_summary(league_ledger_raw)
+    watchlist_path, watchlist_raw = _find_latest_league_watchlist_report()
+    trend_path, trend_raw = _find_latest_league_watchlist_trend()
+    league_intel = _extract_league_intelligence_panel(
+        league_ledger_raw,
+        watchlist_raw,
+        trend_raw,
+        ledger_path=league_ledger_path,
+        watchlist_path=watchlist_path,
+        trend_path=trend_path,
+    )
     validation_review_path, validation_review_raw, validation_review_md_path = _find_latest_locked_validation_review()
     latest_validation_review = _extract_latest_validation_review(validation_review_raw, validation_review_path, validation_review_md_path)
     latest_league_validation_snapshot = _extract_latest_league_validation_snapshot(validation_review_raw, league_ledger_raw)
@@ -1787,6 +1922,8 @@ def build_model() -> dict:
             "cron_checker": str(cron_path) if cron_path else "NOT_FOUND",
             "league_hit_rate": str(league_stats_path) if league_stats_path else "NOT_FOUND",
             "league_performance_ledger": str(league_ledger_path) if league_ledger_path else "NOT_FOUND",
+            "league_watchlist_report": str(watchlist_path) if watchlist_path else "NOT_FOUND",
+            "league_watchlist_trend": str(trend_path) if trend_path else "NOT_FOUND",
             "latest_validation_review": str(validation_review_path) if validation_review_path else "NOT_FOUND",
             "latest_validation_review_md": str(validation_review_md_path) if validation_review_md_path else "NOT_FOUND",
         },
@@ -1900,6 +2037,7 @@ def build_model() -> dict:
         "cumulative_validation_detail": cumulative_validation,
         "league_hit_rate": league_hit_rate,
         **league_performance,
+        **league_intel,
         "today_candidate_league_tags": today_candidate_league_tags,
         "latest_validation_review": latest_validation_review,
         "latest_league_validation_snapshot": latest_league_validation_snapshot,

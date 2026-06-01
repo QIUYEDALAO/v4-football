@@ -1674,14 +1674,65 @@ function buildBetApiPanel(){
     <tr><td>作废记录</td><td>标记作废，不删除原始记录</td></tr>
   </table><div class='note'>仅本地记录，不自动下注，不连接任何账号。</div>`;
 }
+function renderLeaguePreviewGroup(title,key,emptyText){
+  const panel=MODEL.league_intelligence_panel||{};
+  const groups=(panel.preview_groups||{});
+  const g=groups[key]||{};
+  const items=arr(g.items);
+  if(!items.length){
+    return `<details class='audit-fold'><summary>${title}</summary><div class='note'>${emptyText}</div></details>`;
+  }
+  const cards=items.map(x=>`<div class='mini' style='margin-bottom:7px'>
+    <span>${safe(x.league,'未知联赛')} · ${safe(x.trust_tag,'DATA_MISSING')}</span>
+    <b>${Number(x.validated_count||0)} validated / ${Number(x.pending_count||0)} pending · ${Number(x.validated_count||0)>0?pct(x.hit_rate):'不计分母'}</b>
+    <span>${safe(x.action_hint,'OBSERVE_ONLY')}</span>
+  </div>`).join('');
+  const more=Number(g.more_count||0)>0?`<div class='note'>+${Number(g.more_count||0)} more</div>`:'';
+  return `<details class='audit-fold'><summary>${title}</summary>${cards}${more}</details>`;
+}
 function buildReviewPanel(){
   const summary=MODEL.league_performance_summary||{};
+  const intel=MODEL.league_intelligence_panel||{};
+  const tagCounts=intel.tag_counts||{};
+  const trend=intel.trend_summary||{};
+  const baselineLine=trend.baseline_only?"<div class='note'>当前仅有 baseline 快照，不能判断趋势。</div>":"";
+  const trendBlocked=(safe(trend.previous_snapshot_id,'')&&safe(trend.previous_snapshot_id,'')===safe(trend.current_snapshot_id,''))||safe(trend.self_reference_guard_status,'WARN_ONLY')!=='PASS';
+  const trendGuardLine=trendBlocked?"<div class='lock'>趋势快照异常，已阻断展示</div>":"";
   const snap=MODEL.latest_league_validation_snapshot||{};
   const focus=arr(snap.focus_leagues);
   const focusTable=focus.length?`<table class="league-table"><tr><th>20260531 联赛</th><th>命中</th><th>已验证</th><th>待赛</th><th>命中率</th><th>样本提示</th></tr>${focus.map(x=>`<tr><td>${safe(x.league,'未知')}</td><td>${Number(x.hit_count||0)}/${Number(x.validated_count||0)}</td><td>${Number(x.validated_count||0)}</td><td>${Number(x.pending_count||0)}</td><td>${Number(x.validated_count||0)>0?safe(x.hit_rate,'N/A'):'pending-only'}</td><td>${safe(x.sample_warning,'LOW_SAMPLE')}</td></tr>`).join('')}</table>`:'<div class="note">暂无 20260531 联赛验证快照。</div>';
   const rows=Object.values(MODEL.league_trust_tags||{}).sort((a,b)=>Number(b.validated_count||0)-Number(a.validated_count||0)).slice(0,16);
   const table=rows.length?`<table class="league-table"><tr><th>联赛</th><th>已验证</th><th>待赛</th><th>命中率</th><th>长期标签</th></tr>${rows.map(x=>{const m=leagueTrustMeta(x);return `<tr><td>${safe(x.league,'未知')}</td><td>${Number(x.validated_count||0)}</td><td>${Number(x.pending_count||0)}</td><td>${Number(x.validated_count||0)>0?pct(x.hit_rate):'不计分母'}</td><td title="${m.note}">${m.tag}</td></tr>`;}).join('')}</table>`:'<div class="note">暂无联赛长期样本。</div>';
-  return `<div class='note'>联赛长期表现库只做 dashboard 风险提示，仅观察，不自动影响评级，不自动排除联赛。PENDING_ONLY 显示为延期/未完赛，仅记录，不进分母；DO_NOT_CONCLUDE 显示为样本不足，不下结论，仅观察；LOW_SAMPLE_ONLY 显示为样本偏少，仅辅助参考；LOW_TRUST_ALERT 显示为长期低命中预警，不自动排除；KEEP / WATCH / OBSERVE 仅为展示标签，不自动改评级。</div>
+  return `<div class='decision-title'>联赛情报</div>
+  <div class='note'>联赛标签仅供观察，不自动影响 official grade。</div>
+  <div class='inline-validation'>
+    <div class='mini'><span>total leagues</span><b>${safe(intel.total_leagues,0)}</b></div>
+    <div class='mini'><span>KEEP/WATCH</span><b>${safe(tagCounts.KEEP,0)} / ${safe(tagCounts.WATCH,0)}</b></div>
+    <div class='mini'><span>LOW_TRUST_ALERT</span><b>${safe(tagCounts.LOW_TRUST_ALERT,0)}</b></div>
+    <div class='mini'><span>LOW_SAMPLE</span><b>${safe(tagCounts.LOW_SAMPLE,0)}</b></div>
+    <div class='mini'><span>DO_NOT_CONCLUDE</span><b>${safe(tagCounts.DO_NOT_CONCLUDE,0)}</b></div>
+    <div class='mini'><span>PENDING_ONLY / DATA_GAP</span><b>${safe(tagCounts.PENDING_ONLY,0)} / ${safe(tagCounts.DATA_GAP,0)}</b></div>
+  </div>
+  <div class='note'>trend_anchor_date：${safe(intel.trend_anchor_date,'DATA_MISSING')} · source ledger：${safe(intel.source_ledger_path,'NOT_FOUND')}</div>
+  ${renderLeaguePreviewGroup('LOW_SAMPLE_ONLY preview','low_sample','暂无 LOW_SAMPLE_ONLY')}
+  ${renderLeaguePreviewGroup('DO_NOT_CONCLUDE preview','do_not_conclude','暂无 DO_NOT_CONCLUDE')}
+  ${renderLeaguePreviewGroup('PENDING_ONLY preview','pending_only','暂无 PENDING_ONLY')}
+  ${renderLeaguePreviewGroup('DATA_GAP preview','data_gap','暂无 DATA_GAP')}
+  ${renderLeaguePreviewGroup('LOW_TRUST_ALERT preview','low_trust_alert','暂无长期低命中预警')}
+  <div class='decision-title' style='margin-top:10px'>趋势变化</div>
+  <div class='inline-validation'>
+    <div class='mini'><span>baseline_only</span><b>${String(!!trend.baseline_only)}</b></div>
+    <div class='mini'><span>current_snapshot_id</span><b>${safe(trend.current_snapshot_id,'')}</b></div>
+    <div class='mini'><span>previous_snapshot_id</span><b>${safe(trend.previous_snapshot_id,'')}</b></div>
+    <div class='mini'><span>tag_changed</span><b>${safe(trend.trust_tag_changed_count,0)}</b></div>
+    <div class='mini'><span>improved/worsened</span><b>${safe(trend.improved_count,0)} / ${safe(trend.worsened_count,0)}</b></div>
+    <div class='mini'><span>new_low_trust/pending_to_validated</span><b>${safe(trend.new_low_trust_alert_count,0)} / ${safe(trend.pending_to_validated_count,0)}</b></div>
+  </div>
+  <div class='note'>tag_distribution_delta：${safe(JSON.stringify(trend.tag_distribution_delta||{}),'{}')}</div>
+  ${baselineLine}
+  ${trendGuardLine}
+  <div class='note'>LOW_TRUST_ALERT 不自动排除。DO_NOT_CONCLUDE：样本不足，不下结论。PENDING_ONLY：延期/未完赛，仅记录，不进分母。趋势仅供观察，不自动改规则。</div>
+  <div class='note'>联赛长期表现库只做 dashboard 风险提示，仅观察，不自动影响评级，不自动排除联赛。PENDING_ONLY 显示为延期/未完赛，仅记录，不进分母；DO_NOT_CONCLUDE 显示为样本不足，不下结论，仅观察；LOW_SAMPLE_ONLY 显示为样本偏少，仅辅助参考；LOW_TRUST_ALERT 显示为长期低命中预警，不自动排除；KEEP / WATCH / OBSERVE 仅为展示标签，不自动改评级。</div>
   <div class='decision-title' style='margin-top:10px'>20260531 联赛验证快照</div>
   <div class='note'>单日联赛拆分仅归档观察，不自动修改 DEFAULT_RULES / A-B thresholds / official grade。</div>
   ${focusTable}
