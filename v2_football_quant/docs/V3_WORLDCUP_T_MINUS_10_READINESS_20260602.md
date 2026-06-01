@@ -39,8 +39,8 @@ It is not a betting recommendation system and does not modify V4 logic.
 
 ## Next Suggested Phase
 
-1. V3-WC9 supplement ingestion layer (template-only until source authorization)
-2. V3 group/opener dashboard enrichment
-3. V3 team readiness delta with supplements
-4. V3 friendly/injury watch layer
-5. V3 market perception supplement
+1. V3-WC8 final squad canonicalization layer (48-team readiness and final 23-26 checks)
+2. V3-WC9 supplement ingestion layer (template-only until source authorization)
+3. V3 group/opener dashboard enrichment
+4. V3 team readiness delta with supplements
+5. V3 friendly/injury watch layer

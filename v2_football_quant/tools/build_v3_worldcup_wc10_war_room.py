@@ -16,6 +16,7 @@ PROFILES = V3 / "team_profiles/team_profiles_20260526.json"
 DELTAS = V3 / "team_profiles/roster_delta_20260526.json"
 WATCH = V3 / "market_baseline/v3_perception_gap_roster_watchlist_20260526.json"
 SUPPLEMENT_REPORT = ROOT / "data/runtime/v3_worldcup/supplement_reports/v3_worldcup_supplement_coverage_20260602.json"
+FINAL_SQUAD_REPORT = ROOT / "data/runtime/v3_worldcup/final_squads/v3_worldcup_final_squad_canonicalization_20260602.json"
 
 CST = timezone(timedelta(hours=8))
 
@@ -65,6 +66,7 @@ def main() -> int:
     deltas = _load(DELTAS)
     watch = _load(WATCH)
     supp = _load(SUPPLEMENT_REPORT)
+    final_squad = _load(FINAL_SQUAD_REPORT)
 
     meta = rosters.get("meta") or {}
     teams_total = _safe_int(meta.get("total_teams") or 46)
@@ -118,6 +120,17 @@ def main() -> int:
             if x not in warn_only_items:
                 warn_only_items.append(x)
 
+    fs_status = final_squad.get("status") if final_squad else "DATA_MISSING"
+    fs_found = final_squad.get("final_squad_files_found") if isinstance(final_squad.get("final_squad_files_found"), list) else []
+    fs_missing_count = int(final_squad.get("teams_missing_count") or max(0, 48 - teams_total)) if final_squad else max(0, 48 - teams_total)
+    fs_missing_list = final_squad.get("teams_missing_list") if isinstance(final_squad.get("teams_missing_list"), list) else []
+    fs_complete = int(final_squad.get("final_26_complete_teams_count") or 0) if final_squad else 0
+    fs_coverage_status = final_squad.get("final_squad_coverage_status") if final_squad else "DATA_MISSING"
+    if final_squad and isinstance(final_squad.get("warn_only_items"), list):
+        for x in final_squad["warn_only_items"]:
+            if x not in warn_only_items:
+                warn_only_items.append(x)
+
     now = datetime.now(CST)
     payload = {
         "generated_at": now.isoformat(),
@@ -137,6 +150,16 @@ def main() -> int:
         "friendly_form_coverage_status": friendly_cov or "MISSING",
         "market_baseline_coverage_status": market_cov or "PARTIAL_BASELINE_ONLY",
         "supplement_coverage_by_category": supp_cov or {},
+        "final_squad_status": fs_status,
+        "teams_expected_final_squad": int(final_squad.get("teams_expected") or 48) if final_squad else 48,
+        "teams_detected_in_baseline": int(final_squad.get("teams_detected_in_baseline") or teams_total) if final_squad else teams_total,
+        "players_total_baseline": int(final_squad.get("players_total_baseline") or players_total) if final_squad else players_total,
+        "final_squad_files_found_count": len(fs_found),
+        "final_squad_coverage_status": fs_coverage_status,
+        "final_26_complete_teams_count": fs_complete,
+        "final_squad_missing_team_count": fs_missing_count,
+        "final_squad_missing_team_list": fs_missing_list[:8],
+        "baseline_pool_not_final_26": True,
         "perception_gap_watchlist": watch_list,
         "perception_gap_watchlist_count": len(watch_list),
         "undervalued_candidates": undervalued,

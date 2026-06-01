@@ -49,3 +49,5 @@ Status model:
 ## Next Step
 
 Real supplement ingestion requires explicit BOSS authorization of approved data sources for injuries/friendlies/market/caps and related fields.
+
+WC9 complements WC8 final squad canonicalization and does not replace real final squad source ingestion.

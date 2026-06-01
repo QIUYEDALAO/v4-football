@@ -40,6 +40,7 @@ async function load(){
     const warn=a(m.warn_only_items);
     const supp=m.supplement_coverage_by_category||{};
     const suppRows=Object.keys(supp).map(k=>`<div class="mini"><span>${k}</span><b>${n((supp[k]||{}).coverage_status,'MISSING')}</b></div>`).join('');
+    const fsMissing=a(m.final_squad_missing_team_list);
     const under=a(m.undervalued_candidates), over=a(m.overhyped_risk_candidates);
     root.innerHTML = `
     <div class="card">
@@ -57,6 +58,19 @@ async function load(){
       <div class="note warn">WARN_ONLY: ${warn.join('、')}</div>
       <div class="note">supplement layer: ${n(m.supplement_coverage_status,'DATA_MISSING')}（TEMPLATE_ONLY / MISSING 时不得下结论）</div>
       <div class="grid">${suppRows||'<div class="note">supplement coverage data missing</div>'}</div>
+    </div>
+    <div class="card">
+      <div class="note">final squad layer: ${n(m.final_squad_status,'DATA_MISSING')} / coverage=${n(m.final_squad_coverage_status,'DATA_MISSING')}</div>
+      <div class="grid">
+        <div class="mini"><span>teams_expected</span><b>${n(m.teams_expected_final_squad,48)}</b></div>
+        <div class="mini"><span>teams_detected_baseline</span><b>${n(m.teams_detected_in_baseline,46)}</b></div>
+        <div class="mini"><span>players_total_baseline</span><b>${n(m.players_total_baseline,1375)}</b></div>
+        <div class="mini"><span>final_squad_files_found</span><b>${n(m.final_squad_files_found_count,0)}</b></div>
+        <div class="mini"><span>final_26_complete_teams</span><b>${n(m.final_26_complete_teams_count,0)}</b></div>
+        <div class="mini"><span>missing_team_count</span><b>${n(m.final_squad_missing_team_count,0)}</b></div>
+      </div>
+      <div class="note">missing team list (sample): ${fsMissing.length?fsMissing.join('、'):'N/A'}</div>
+      <div class="note warn">当前 1375 为 baseline pool，不是最终 26 人名单。当前系统尚未确认 48 队最终名单。</div>
     </div>
     <div class="card list">
       <div class="note">Perception Gap Watchlist（每类最多显示 5 条）</div>

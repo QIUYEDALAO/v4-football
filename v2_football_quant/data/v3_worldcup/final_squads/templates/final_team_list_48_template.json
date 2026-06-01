@@ -1,0 +1,17 @@
+{
+  "meta": {
+    "phase": "V3-WC8",
+    "template_only": true,
+    "observation_only": true,
+    "data_status": "TEMPLATE_ONLY",
+    "teams_expected": 48,
+    "note": "Structure-only placeholder. No real 48-team final list is provided in this template."
+  },
+  "teams": [
+    {
+      "team_name": "TEMPLATE_TEAM_01",
+      "fifa_code": null,
+      "data_status": "TEMPLATE_ONLY"
+    }
+  ]
+}

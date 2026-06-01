@@ -54,6 +54,11 @@ def main() -> int:
     add(checks, "guard_no_v4_changes", guard.get("no_v4_changes") is True, guard)
     add(checks, "supplement_coverage_status_present", bool(payload.get("supplement_coverage_status")), payload.get("supplement_coverage_status"))
     add(checks, "supplement_coverage_by_category_present", isinstance(payload.get("supplement_coverage_by_category"), dict), type(payload.get("supplement_coverage_by_category")).__name__)
+    add(checks, "final_squad_status_present", bool(payload.get("final_squad_status")), payload.get("final_squad_status"))
+    add(checks, "teams_expected_final_squad_48", int(payload.get("teams_expected_final_squad") or 0) == 48, payload.get("teams_expected_final_squad"))
+    add(checks, "teams_detected_in_baseline_46", int(payload.get("teams_detected_in_baseline") or 0) == 46, payload.get("teams_detected_in_baseline"))
+    add(checks, "players_total_baseline_1375", int(payload.get("players_total_baseline") or 0) == 1375, payload.get("players_total_baseline"))
+    add(checks, "baseline_pool_not_final_26_flag", payload.get("baseline_pool_not_final_26") is True, payload.get("baseline_pool_not_final_26"))
     hints = [str(x.get("action_hint") or "") for x in wl if isinstance(x, dict)]
     add(checks, "action_hint_whitelist", all(h in ALLOW_HINTS for h in hints), hints[:12])
     add(checks, "action_hint_no_bad", all(h not in BAD_HINTS for h in hints), hints[:12])

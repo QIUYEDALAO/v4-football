@@ -1,0 +1,36 @@
+{
+  "meta": {
+    "phase": "V3-WC8",
+    "template_only": true,
+    "observation_only": true,
+    "data_status": "TEMPLATE_ONLY",
+    "note": "Template placeholder only. This is not a real final squad file."
+  },
+  "teams": [
+    {
+      "team_id": null,
+      "team_name": "TEMPLATE_TEAM",
+      "fifa_code": null,
+      "group": null,
+      "source": "TEMPLATE_PLACEHOLDER",
+      "source_date": "2026-06-02",
+      "data_status": "TEMPLATE_ONLY",
+      "players": [
+        {
+          "player_name": "TEMPLATE_PLAYER",
+          "position": "UNKNOWN",
+          "shirt_number": null,
+          "club": null,
+          "age": null,
+          "caps": null,
+          "goals": null,
+          "goalkeeper_flag": false,
+          "final_squad_status": "TEMPLATE_ONLY",
+          "source": "TEMPLATE_PLACEHOLDER",
+          "source_date": "2026-06-02",
+          "data_status": "TEMPLATE_ONLY"
+        }
+      ]
+    }
+  ]
+}
