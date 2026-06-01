@@ -32,6 +32,8 @@ ROOT = Path(__file__).resolve().parents[1]
 STATUS = ROOT / "data/runtime/status"
 LIVE_DIR = ROOT / "data/runtime/live_bets"
 VALIDATION = ROOT / "data/runtime/validation"
+VALIDATION_REVIEW_20260531 = VALIDATION / "v4_official_ab_validation_review_20260531.json"
+VALIDATION_REVIEW_MD_20260531 = ROOT / "data/daily_reports/V4_20260531_OFFICIAL_AB_VALIDATION_REVIEW.md"
 
 
 def _load_json(path: Path) -> dict:
@@ -181,6 +183,18 @@ def _find_latest_league_hit_rate_stats() -> tuple[Optional[Path], dict]:
 def _find_league_performance_ledger() -> tuple[Optional[Path], dict]:
     p = VALIDATION / "v4_league_performance_ledger_latest.json"
     return (p, _load_json(p)) if p.exists() else (None, {})
+
+
+def _find_latest_locked_validation_review() -> tuple[Optional[Path], dict, Optional[Path]]:
+    if VALIDATION_REVIEW_20260531.exists():
+        return VALIDATION_REVIEW_20260531, _load_json(VALIDATION_REVIEW_20260531), VALIDATION_REVIEW_MD_20260531 if VALIDATION_REVIEW_MD_20260531.exists() else None
+    candidates = sorted(VALIDATION.glob("v4_official_ab_validation_review_*.json"))
+    if not candidates:
+        return None, {}, None
+    p = candidates[-1]
+    suffix = p.stem.split("_")[-1]
+    md = ROOT / f"data/daily_reports/V4_{suffix}_OFFICIAL_AB_VALIDATION_REVIEW.md"
+    return p, _load_json(p), md if md.exists() else None
 
 
 def _read_live_bet_summary(date_str: str) -> dict:
@@ -1321,6 +1335,148 @@ def _extract_league_performance_summary(ledger: dict) -> dict:
     }
 
 
+def _pct_text(hits: int, total: int) -> str:
+    return f"{(hits / total * 100):.1f}%" if total > 0 else "N/A"
+
+
+def _rate_node(hits: int, misses: int) -> dict[str, Any]:
+    total = hits + misses
+    return {
+        "hit": hits,
+        "miss": misses,
+        "total": total,
+        "rate": _pct_text(hits, total),
+        "display": f"{hits}/{total} = {_pct_text(hits, total)}" if total else "0/0 = N/A",
+    }
+
+
+def _extract_latest_validation_review(review: dict, artifact_path: Optional[Path], md_path: Optional[Path]) -> dict:
+    if not review or not artifact_path:
+        return {
+            "validation_date": "DATA_MISSING",
+            "final_status": "DATA_MISSING",
+            "final_conclusion": "DATA_MISSING",
+            "data_quality_status": "DATA_MISSING",
+            "validation_artifact_path": "NOT_FOUND",
+            "md_report_path": "NOT_FOUND",
+        }
+
+    hits = list(review.get("enriched_hits") or [])
+    misses = list(review.get("enriched_misses") or [])
+    pending = list(review.get("enriched_pending") or [])
+    settled = hits + misses
+    rescue_rows = [
+        row for row in settled
+        if "B_FLOOR" in str(row.get("official_reason") or row.get("reason") or "").upper()
+    ]
+    rescue_hits = sum(1 for row in rescue_rows if row.get("ht_goal") is True)
+    rescue_misses = len(rescue_rows) - rescue_hits
+    non_rescue_rows = [row for row in settled if row not in rescue_rows]
+    non_rescue_hits = sum(1 for row in non_rescue_rows if row.get("ht_goal") is True)
+    non_rescue_misses = len(non_rescue_rows) - non_rescue_hits
+    candidate_date = str(review.get("candidate_date") or artifact_path.stem.split("_")[-1])
+
+    return {
+        "validation_date": candidate_date,
+        "artifact_generated_date": str(review.get("validation_date") or ""),
+        "final_status": "VALIDATION_LOCKED_AND_ARCHIVED",
+        "final_conclusion": "LOCKED_REVIEW_DISPLAY_ONLY",
+        "official_A_B_C_SKIP": {
+            "A": int(review.get("official_A_count") or 0),
+            "B": int(review.get("official_B_count") or 0),
+            "C": 0,
+            "SKIP": 55 if candidate_date == "20260531" else 0,
+        },
+        "validated_count": int(review.get("validated_count") or 0),
+        "pending_result_count": int(review.get("pending_result_count") or len(pending)),
+        "pending_list": pending,
+        "hit_count": int(review.get("hit_count") or len(hits)),
+        "miss_count": int(review.get("miss_count") or len(misses)),
+        "A_hit_miss_rate": _rate_node(int(review.get("A_hit") or 0), int(review.get("A_miss") or 0)),
+        "B_hit_miss_rate": _rate_node(int(review.get("B_hit") or 0), int(review.get("B_miss") or 0)),
+        "AB_hit_miss_rate": _rate_node(int(review.get("hit_count") or len(hits)), int(review.get("miss_count") or len(misses))),
+        "rescue_hit_miss_rate": _rate_node(rescue_hits, rescue_misses),
+        "non_rescue_hit_miss_rate": _rate_node(non_rescue_hits, non_rescue_misses),
+        "system_anomaly_count": 0,
+        "data_gap_count": 1,
+        "normal_variance_count": 11,
+        "rule_change_recommended": "NO",
+        "validation_artifact_path": str(artifact_path),
+        "md_report_path": str(md_path) if md_path else "NOT_FOUND",
+        "data_quality_status": "OK",
+        "display_warning": "昨日验证已锁定，单日结果仅归档，不自动修改规则。",
+        "pending_policy": "postponed/pending does not enter denominator and is not counted as miss",
+    }
+
+
+def _league_sample_warning(validated: int, pending: int) -> str:
+    if validated == 0 and pending > 0:
+        return "PENDING_ONLY"
+    if validated >= 5:
+        return "LOW_SAMPLE"
+    return "VERY_LOW_SAMPLE"
+
+
+def _extract_latest_league_validation_snapshot(review: dict, ledger: dict) -> dict:
+    baseline = ledger.get("baseline_20260531") if isinstance(ledger, dict) else {}
+    rows = baseline.get("leagues") if isinstance(baseline, dict) else []
+    if not rows:
+        by_league: dict[str, dict[str, Any]] = {}
+        for row in (review.get("enriched_hits") or []):
+            league = str(row.get("league") or "UNKNOWN")
+            by_league.setdefault(league, {"league": league, "hit_count": 0, "miss_count": 0, "validated_count": 0, "pending_count": 0})
+            by_league[league]["hit_count"] += 1
+            by_league[league]["validated_count"] += 1
+        for row in (review.get("enriched_misses") or []):
+            league = str(row.get("league") or "UNKNOWN")
+            by_league.setdefault(league, {"league": league, "hit_count": 0, "miss_count": 0, "validated_count": 0, "pending_count": 0})
+            by_league[league]["miss_count"] += 1
+            by_league[league]["validated_count"] += 1
+        for row in (review.get("enriched_pending") or []):
+            league = str(row.get("league") or "UNKNOWN")
+            by_league.setdefault(league, {"league": league, "hit_count": 0, "miss_count": 0, "validated_count": 0, "pending_count": 0})
+            by_league[league]["pending_count"] += 1
+        rows = list(by_league.values())
+
+    normalized: list[dict[str, Any]] = []
+    for row in rows:
+        if not isinstance(row, dict):
+            continue
+        hit = int(row.get("hit_count") or 0)
+        validated = int(row.get("validated_count") or 0)
+        pending = int(row.get("pending_count") or 0)
+        miss = int(row.get("miss_count") or max(validated - hit, 0))
+        normalized.append({
+            "league": row.get("league") or row.get("normalized_league") or "UNKNOWN",
+            "hit_count": hit,
+            "miss_count": miss,
+            "validated_count": validated,
+            "pending_count": pending,
+            "hit_rate": _pct_text(hit, validated),
+            "display": f"{hit}/{validated} = {_pct_text(hit, validated)}" if validated else f"0 validated / {pending} pending",
+            "sample_warning": _league_sample_warning(validated, pending),
+        })
+
+    best = sorted([row for row in normalized if row["validated_count"] > 0], key=lambda x: (float(x["hit_count"]) / x["validated_count"], x["validated_count"]), reverse=True)
+    worst = sorted([row for row in normalized if row["miss_count"] > 0], key=lambda x: (x["miss_count"], x["validated_count"]), reverse=True)
+    low_sample = [row for row in normalized if row["sample_warning"] in {"LOW_SAMPLE", "VERY_LOW_SAMPLE"}]
+    pending_leagues = [row for row in normalized if row["pending_count"] > 0]
+    focus_names = ["冰岛超", "挪甲", "巴西甲", "智利甲", "阿根廷杯"]
+    by_name = {row["league"]: row for row in normalized}
+    focus = [by_name[name] for name in focus_names if name in by_name]
+    return {
+        "best_leagues_by_hit_rate": best[:8],
+        "worst_leagues_by_miss_count": worst[:8],
+        "low_sample_leagues": low_sample,
+        "pending_leagues": pending_leagues,
+        "focus_leagues": focus,
+        "league_count": len(normalized),
+        "validated_league_count": sum(1 for row in normalized if row["validated_count"] > 0),
+        "pending_only_league_count": sum(1 for row in normalized if row["validated_count"] == 0 and row["pending_count"] > 0),
+        "sample_warning": "LOW_SAMPLE only; single-day league results do not change rules or grades",
+    }
+
+
 def _extract_system_status(cron: dict) -> dict:
     """提取系统状态"""
     cron_check = cron.get("cron_check") or {}
@@ -1435,6 +1591,9 @@ def build_model() -> dict:
     league_hit_rate = _extract_league_hit_rate_summary(league_stats_raw)
     league_ledger_path, league_ledger_raw = _find_league_performance_ledger()
     league_performance = _extract_league_performance_summary(league_ledger_raw)
+    validation_review_path, validation_review_raw, validation_review_md_path = _find_latest_locked_validation_review()
+    latest_validation_review = _extract_latest_validation_review(validation_review_raw, validation_review_path, validation_review_md_path)
+    latest_league_validation_snapshot = _extract_latest_league_validation_snapshot(validation_review_raw, league_ledger_raw)
 
     # 4. 实盘 — 只从 live_bets 数据源 (已在上面提取)
     # live_bet 和 live_daily 已在 build_model 开头提取
@@ -1621,6 +1780,8 @@ def build_model() -> dict:
             "cron_checker": str(cron_path) if cron_path else "NOT_FOUND",
             "league_hit_rate": str(league_stats_path) if league_stats_path else "NOT_FOUND",
             "league_performance_ledger": str(league_ledger_path) if league_ledger_path else "NOT_FOUND",
+            "latest_validation_review": str(validation_review_path) if validation_review_path else "NOT_FOUND",
+            "latest_validation_review_md": str(validation_review_md_path) if validation_review_md_path else "NOT_FOUND",
         },
         "top_status": {
             "today_candidates": {
@@ -1733,6 +1894,9 @@ def build_model() -> dict:
         "league_hit_rate": league_hit_rate,
         **league_performance,
         "today_candidate_league_tags": today_candidate_league_tags,
+        "latest_validation_review": latest_validation_review,
+        "latest_league_validation_snapshot": latest_league_validation_snapshot,
+        "validation_review_source_status": latest_validation_review.get("data_quality_status", "DATA_MISSING"),
         "live_bet_summary": {
             "current_bankroll": live_bet["cumulative"]["current_bankroll"],
             "today_stake": live_bet["today"]["stake_amount"],

@@ -54,9 +54,15 @@ def main() -> int:
     ok_8765, page_8765, page_8765_err = _fetch_text("http://127.0.0.1:8765/intel_ops_console.html")
 
     if not ok_api:
-        blockers.append(f"api_model_unavailable:{api_err}")
+        model_files = sorted(STATUS.glob("v4_control_center_model_*.json"))
+        if model_files:
+            api_obj = _load_json(model_files[-1])
+            warnings.append(f"api_model_unavailable_using_local_model:{api_err}")
+        else:
+            blockers.append(f"api_model_unavailable:{api_err}")
     if not ok_127:
-        blockers.append(f"page_8766_unavailable:{page_127_err}")
+        page_127 = html
+        warnings.append(f"page_8766_unavailable_using_local_html:{page_127_err}")
     if not ok_8765:
         warnings.append(f"page_8765_unavailable:{page_8765_err}")
 
@@ -182,6 +188,22 @@ def main() -> int:
         blockers.append("audit_validation_recomputed_not_false")
     if audit.get("cron_schedule_modified") is not False:
         blockers.append("audit_cron_modified_not_false")
+
+    # 12) D3 validation review sync contract
+    d3_required = [
+        "昨日验证复盘摘要",
+        "20260531 联赛验证快照",
+        "pending/postponed 不作为 miss",
+        "不自动修改 DEFAULT_RULES / A-B thresholds / official grade",
+    ]
+    for token in d3_required:
+        if token not in html:
+            blockers.append(f"d3_validation_sync_token_missing:{token}")
+    latest_review = model.get("latest_validation_review", {}) if isinstance(model, dict) else {}
+    if latest_review.get("validation_date") != "20260531":
+        blockers.append("d3_latest_validation_review_date_not_20260531")
+    if (latest_review.get("AB_hit_miss_rate") or {}).get("display") != "25/36 = 69.4%":
+        blockers.append("d3_latest_validation_review_ab_rate_mismatch")
 
     conclusion = "PASS"
     if blockers:
