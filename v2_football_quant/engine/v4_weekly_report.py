@@ -29,6 +29,7 @@ DAILY_DIR = BASE_DIR / "data" / "daily_reports"
 WEEKLY_DIR = BASE_DIR / "data" / "weekly_reports"
 ATTRIB_DIR = BASE_DIR / "data" / "v4_archive"
 VALIDATION_DIR = BASE_DIR / "data" / "runtime" / "validation"
+TREND_DIR = BASE_DIR / "data" / "runtime" / "league_watchlist_trends"
 
 
 def _date_key(s: str) -> str:
@@ -121,6 +122,34 @@ def _load_league_observation(start: str, end: str) -> dict[str, Any]:
         "do_not_conclude_count": 0,
         "pending_only_count": 0,
         "policy_note": "联赛长期观察层缺失，不阻断周报主流程。",
+    }
+
+
+def _load_league_watchlist_trend() -> dict[str, Any]:
+    trend = _load_json(TREND_DIR / "v4_league_watchlist_trend_latest.json", {})
+    if not trend:
+        return {
+            "status": "WARN_ONLY",
+            "baseline_only": True,
+            "baseline_only_reason": "趋势报告缺失，无法判断变化。",
+            "tag_worsened_count": 0,
+            "tag_improved_count": 0,
+            "new_low_trust_alert_count": 0,
+            "pending_to_validated_count": 0,
+            "sample_count_delta_top": [],
+            "policy_note": "趋势仅供观察，不自动影响 official grade。",
+        }
+    risk = trend.get("risk_summary") or {}
+    return {
+        "status": "OK",
+        "baseline_only": bool(trend.get("baseline_only")),
+        "baseline_only_reason": trend.get("baseline_only_reason") or "",
+        "tag_worsened_count": int(risk.get("tag_worsened_count") or 0),
+        "tag_improved_count": int(risk.get("tag_improved_count") or 0),
+        "new_low_trust_alert_count": int(risk.get("new_low_trust_alert_count") or 0),
+        "pending_to_validated_count": int(risk.get("pending_to_validated_count") or 0),
+        "sample_count_delta_top": trend.get("sample_count_delta_top") or [],
+        "policy_note": "趋势仅供观察，不自动影响 official grade。",
     }
 
 
@@ -272,6 +301,7 @@ def aggregate(start: str, end: str) -> dict[str, Any]:
         )
     script_rows.sort(key=lambda x: (-x["samples"], x["script_type"]))
     league_observation = _load_league_observation(start, end)
+    league_trend_observation = _load_league_watchlist_trend()
 
     return {
         "start": _date_key(start),
@@ -295,6 +325,7 @@ def aggregate(start: str, end: str) -> dict[str, Any]:
             "script_type_performance": script_rows,
         },
         "league_ledger_observation": league_observation,
+        "league_watchlist_trend_observation": league_trend_observation,
     }
 
 
@@ -380,6 +411,7 @@ def render(report: dict[str, Any]) -> str:
     for k in ["MODEL_FEATURE", "TIME_DISTRIBUTION", "MATCH_FLOW", "MARKET_SIGNAL", "EVENT_NOISE", "CONTEXT_NOISE", "WEATHER_NOISE", "LINEUP_CHANGE", "MOTIVATION_MISREAD", "DATA_QUALITY", "NORMAL_VARIANCE"]:
         lines.append(f"- {k}: {rcnt.get(k, 0)}")
     obs = report.get("league_ledger_observation") or {}
+    trend = report.get("league_watchlist_trend_observation") or {}
     lines += [
         "",
         "七、本周结论",
@@ -396,6 +428,26 @@ def render(report: dict[str, Any]) -> str:
         f"- DO_NOT_CONCLUDE：{obs.get('do_not_conclude_count', 0)}",
         f"- PENDING_ONLY：{obs.get('pending_only_count', 0)}",
         f"- 说明：{obs.get('policy_note', '联赛标签仅供观察，不自动影响 official grade。')}",
+        "",
+        "九、联赛 Watchlist 趋势变化",
+        f"- 状态：{trend.get('status', 'WARN_ONLY')}",
+    ]
+    if trend.get("baseline_only"):
+        lines.append(f"- {trend.get('baseline_only_reason', '当前仅有 baseline 快照，不能判断趋势。')}")
+    else:
+        lines.extend(
+            [
+                f"- 标签恶化：{trend.get('tag_worsened_count', 0)}",
+                f"- 标签改善：{trend.get('tag_improved_count', 0)}",
+                f"- 新增 LOW_TRUST_ALERT：{trend.get('new_low_trust_alert_count', 0)}",
+                f"- pending 转 validated：{trend.get('pending_to_validated_count', 0)}",
+            ]
+        )
+        top = trend.get("sample_count_delta_top") or []
+        if top:
+            lines.append(f"- 样本增长最多：{top[0].get('league')} (Δvalidated={top[0].get('delta_validated_count')})")
+    lines += [
+        f"- 说明：{trend.get('policy_note', '趋势仅供观察，不自动影响 official grade。')}",
         "",
     ]
     return "\n".join(lines)
