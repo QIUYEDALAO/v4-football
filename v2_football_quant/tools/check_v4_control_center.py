@@ -205,6 +205,20 @@ def main() -> int:
     if (latest_review.get("AB_hit_miss_rate") or {}).get("display") != "25/36 = 69.4%":
         blockers.append("d3_latest_validation_review_ab_rate_mismatch")
 
+    # 13) League ledger A1 fix display contract
+    league_a1_required = [
+        "延期/未完赛，仅记录，不进分母",
+        "样本不足，不下结论，仅观察",
+        "样本偏少，仅辅助参考",
+        "长期低命中预警，不自动排除",
+        "KEEP / WATCH / OBSERVE 仅为展示标签，不自动改评级",
+    ]
+    for token in league_a1_required:
+        if token not in html:
+            blockers.append(f"league_a1_display_token_missing:{token}")
+    if "official_grade = league" in html or "grade = league" in html:
+        blockers.append("league_tag_mixed_into_official_grade")
+
     conclusion = "PASS"
     if blockers:
         conclusion = "BLOCKER"

@@ -717,10 +717,10 @@ function leagueTrustMeta(row){
   if(!row) return {tag:'DATA_MISSING', text:'数据缺失', note:'暂无联赛长期样本，仅展示，不参与判级'};
   const tag=safe(row.trust_tag,'DATA_MISSING');
   const sample=safe(row.sample_tag,'DATA_MISSING');
-  if(sample==='PENDING_ONLY') return {tag:'PENDING_ONLY', text:'仅待赛', note:'PENDING_ONLY：不参与命中率分母'};
+  if(sample==='PENDING_ONLY'||tag==='PENDING_ONLY') return {tag:'PENDING_ONLY', text:'延期/未完赛，仅记录，不进分母', note:'PENDING_ONLY：延期/未完赛，仅记录，不进分母；仅观察，不自动影响评级'};
   if(tag==='LOW_TRUST_ALERT') return {tag, text:'长期低命中预警', note:'LOW_TRUST_ALERT：长期低命中预警，不自动排除；仅观察，不自动影响评级'};
-  if(tag==='DO_NOT_CONCLUDE') return {tag, text:'样本不足，不下结论', note:'DO_NOT_CONCLUDE：样本不足，不下结论；仅观察，不自动影响评级'};
-  if(tag==='LOW_SAMPLE_ONLY'||sample==='LOW_SAMPLE'||sample==='VERY_LOW_SAMPLE') return {tag, text:'样本不足，不下结论', note:'LOW_SAMPLE：样本不足，不下结论；仅观察，不自动影响评级'};
+  if(tag==='DO_NOT_CONCLUDE') return {tag, text:'样本不足，不下结论，仅观察', note:'DO_NOT_CONCLUDE：样本不足，不下结论，仅观察；不是负面判级，不自动影响评级'};
+  if(tag==='LOW_SAMPLE_ONLY'||sample==='LOW_SAMPLE'||sample==='VERY_LOW_SAMPLE') return {tag, text:'样本偏少，仅辅助参考', note:'LOW_SAMPLE_ONLY：样本偏少，仅辅助参考；仅观察，不自动影响评级'};
   if(tag==='DATA_GAP'||tag==='DATA_MISSING') return {tag, text:'数据缺失', note:'DATA_MISSING：仅展示，不参与判级'};
   return {tag, text:tag, note:`${tag}：长期观察标签，仅观察，不自动影响评级`};
 }
@@ -1681,7 +1681,7 @@ function buildReviewPanel(){
   const focusTable=focus.length?`<table class="league-table"><tr><th>20260531 联赛</th><th>命中</th><th>已验证</th><th>待赛</th><th>命中率</th><th>样本提示</th></tr>${focus.map(x=>`<tr><td>${safe(x.league,'未知')}</td><td>${Number(x.hit_count||0)}/${Number(x.validated_count||0)}</td><td>${Number(x.validated_count||0)}</td><td>${Number(x.pending_count||0)}</td><td>${Number(x.validated_count||0)>0?safe(x.hit_rate,'N/A'):'pending-only'}</td><td>${safe(x.sample_warning,'LOW_SAMPLE')}</td></tr>`).join('')}</table>`:'<div class="note">暂无 20260531 联赛验证快照。</div>';
   const rows=Object.values(MODEL.league_trust_tags||{}).sort((a,b)=>Number(b.validated_count||0)-Number(a.validated_count||0)).slice(0,16);
   const table=rows.length?`<table class="league-table"><tr><th>联赛</th><th>已验证</th><th>待赛</th><th>命中率</th><th>长期标签</th></tr>${rows.map(x=>{const m=leagueTrustMeta(x);return `<tr><td>${safe(x.league,'未知')}</td><td>${Number(x.validated_count||0)}</td><td>${Number(x.pending_count||0)}</td><td>${Number(x.validated_count||0)>0?pct(x.hit_rate):'不计分母'}</td><td title="${m.note}">${m.tag}</td></tr>`;}).join('')}</table>`:'<div class="note">暂无联赛长期样本。</div>';
-  return `<div class='note'>联赛长期表现库只做 dashboard 风险提示，仅观察，不自动影响评级，不自动排除联赛。LOW_TRUST_ALERT 显示为长期低命中预警，不自动排除；LOW_SAMPLE / DO_NOT_CONCLUDE 显示为样本不足，不下结论。</div>
+  return `<div class='note'>联赛长期表现库只做 dashboard 风险提示，仅观察，不自动影响评级，不自动排除联赛。PENDING_ONLY 显示为延期/未完赛，仅记录，不进分母；DO_NOT_CONCLUDE 显示为样本不足，不下结论，仅观察；LOW_SAMPLE_ONLY 显示为样本偏少，仅辅助参考；LOW_TRUST_ALERT 显示为长期低命中预警，不自动排除；KEEP / WATCH / OBSERVE 仅为展示标签，不自动改评级。</div>
   <div class='decision-title' style='margin-top:10px'>20260531 联赛验证快照</div>
   <div class='note'>单日联赛拆分仅归档观察，不自动修改 DEFAULT_RULES / A-B thresholds / official grade。</div>
   ${focusTable}

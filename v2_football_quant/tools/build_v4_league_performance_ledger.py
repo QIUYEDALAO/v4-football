@@ -15,7 +15,7 @@ from typing import Any
 
 ROOT = Path(__file__).resolve().parents[1]
 VALIDATION = ROOT / "data/runtime/validation"
-HISTORICAL_LEDGER = VALIDATION / "v4_ab_historical_ledger_20260526.json"
+HISTORICAL_LEDGER_LATEST = VALIDATION / "v4_ab_historical_ledger_latest.json"
 VALIDATION_20260531 = VALIDATION / "v4_official_ab_validation_review_20260531.json"
 OUTPUT_JSON = VALIDATION / "v4_league_performance_ledger_latest.json"
 OUTPUT_CSV = VALIDATION / "v4_league_performance_ledger_latest.csv"
@@ -72,9 +72,29 @@ def sample_tag(validated_count: int, pending_count: int) -> str:
     return "SINGLE_OR_TINY_SAMPLE"
 
 
-def trust_tag(validated_count: int, hit_rate: float, data_gap: bool = False) -> str:
+def find_historical_ledger() -> tuple[Path | None, str]:
+    if HISTORICAL_LEDGER_LATEST.exists():
+        return HISTORICAL_LEDGER_LATEST, "OK"
+    candidates = [
+        path for path in VALIDATION.glob("v4_ab_historical_ledger_*.json")
+        if not path.name.startswith("v4_league_performance_ledger_")
+    ]
+    if not candidates:
+        return None, "HISTORICAL_LEDGER_MISSING_WARN_ONLY"
+
+    def sort_key(path: Path) -> tuple[str, float]:
+        suffix = path.stem.rsplit("_", 1)[-1]
+        date_key = suffix if len(suffix) == 8 and suffix.isdigit() else ""
+        return date_key, path.stat().st_mtime
+
+    return sorted(candidates, key=sort_key)[-1], "OK"
+
+
+def trust_tag(validated_count: int, hit_rate: float, pending_count: int = 0, data_gap: bool = False) -> str:
     if data_gap:
         return "DATA_GAP"
+    if validated_count == 0 and pending_count > 0:
+        return "PENDING_ONLY"
     if validated_count < 5:
         return "DO_NOT_CONCLUDE"
     if validated_count < 10:
@@ -161,17 +181,47 @@ def record_key(record: dict[str, Any]) -> tuple[str, str, str]:
     )
 
 
-def recent_stats(records: list[dict[str, Any]], days: int) -> tuple[int, float]:
-    cutoff = (datetime.now(LOCAL_TZ) - timedelta(days=days)).strftime("%Y-%m-%d")
+def normalize_date(value: Any) -> str:
+    text = str(value or "").strip()
+    if len(text) >= 10 and text[4] == "-" and text[7] == "-":
+        return text[:10]
+    if len(text) == 8 and text.isdigit():
+        return f"{text[:4]}-{text[4:6]}-{text[6:8]}"
+    return ""
+
+
+def max_record_date(records: list[dict[str, Any]]) -> str:
+    dates = [normalize_date(row.get("date") or row.get("scan_date")) for row in records]
+    dates = [date for date in dates if date]
+    return max(dates) if dates else ""
+
+
+def recent_stats(records: list[dict[str, Any]], days: int, anchor_date: str) -> tuple[int, float]:
+    if not anchor_date:
+        return 0, 0.0
+    try:
+        anchor = datetime.strptime(anchor_date, "%Y-%m-%d")
+    except ValueError:
+        return 0, 0.0
+    cutoff = (anchor - timedelta(days=days)).strftime("%Y-%m-%d")
     rows = [row for row in records if str(row.get("date") or "") >= cutoff]
     return len(rows), safe_rate(sum(1 for row in rows if row.get("result_hit") is True), len(rows))
 
 
-def aggregate_leagues(records: list[dict[str, Any]]) -> tuple[list[dict[str, Any]], int]:
+def aggregate_leagues(records: list[dict[str, Any]]) -> tuple[list[dict[str, Any]], int, str]:
     by_league: dict[str, list[dict[str, Any]]] = defaultdict(list)
     for record in records:
+        normalized_date = normalize_date(record.get("date") or record.get("scan_date"))
+        if normalized_date:
+            record = dict(record)
+            record["date"] = normalized_date
         by_league[normalize_league(record.get("league"))].append(record)
 
+    trend_anchor_date = max_record_date([
+        record for records_for_league in by_league.values()
+        for record in records_for_league
+        if fixture_state(record) == "VALIDATED"
+    ])
     pending_denominator_excluded = 0
     league_rows: list[dict[str, Any]] = []
     for league, league_records in sorted(by_league.items()):
@@ -190,12 +240,12 @@ def aggregate_leagues(records: list[dict[str, Any]]) -> tuple[list[dict[str, Any
         ]
         non_rescue_rows = [record for record in validated if record not in rescue_rows]
         dates = sorted(str(record.get("date") or "") for record in league_records if record.get("date"))
-        last_7d_count, last_7d_rate = recent_stats(validated, 7)
-        last_30d_count, last_30d_rate = recent_stats(validated, 30)
+        last_7d_count, last_7d_rate = recent_stats(validated, 7, trend_anchor_date)
+        last_30d_count, last_30d_rate = recent_stats(validated, 30, trend_anchor_date)
         data_gap = league == "UNKNOWN"
-        tag = trust_tag(len(validated), hit_rate, data_gap)
+        tag = trust_tag(len(validated), hit_rate, len(pending), data_gap)
         warnings: list[str] = []
-        if tag in {"LOW_TRUST_ALERT", "LOW_SAMPLE_ONLY", "DO_NOT_CONCLUDE", "DATA_GAP"}:
+        if tag in {"LOW_TRUST_ALERT", "LOW_SAMPLE_ONLY", "DO_NOT_CONCLUDE", "DATA_GAP", "PENDING_ONLY"}:
             warnings.append(tag)
         if pending and len(pending) > len(validated):
             warnings.append("HIGH_PENDING_RATIO")
@@ -240,15 +290,16 @@ def aggregate_leagues(records: list[dict[str, Any]]) -> tuple[list[dict[str, Any
                 "trust_tag": tag,
                 "warning_flags": warnings,
                 "source_files": sources,
-                "data_quality_status": "DATA_GAP" if data_gap else "OK",
+                "data_quality_status": "DATA_GAP" if data_gap else ("PENDING_ONLY" if tag == "PENDING_ONLY" else "OK"),
             }
         )
     league_rows.sort(key=lambda row: (-row["validated_count"], row["normalized_league"]))
-    return league_rows, pending_denominator_excluded
+    return league_rows, pending_denominator_excluded, trend_anchor_date
 
 
 def build() -> dict[str, Any]:
-    historical = load_json(HISTORICAL_LEDGER)
+    historical_path, historical_status = find_historical_ledger()
+    historical = load_json(historical_path) if historical_path else {}
     review = load_json(VALIDATION_20260531)
     historical_rows = historical.get("records") or []
     review_candidates = review_rows(review)
@@ -289,14 +340,17 @@ def build() -> dict[str, Any]:
                     audit["official_outside57_review_included_count"] += 1
             audit[f"{source_name}_included_count"] += 1
 
-    league_rows, pending_excluded = aggregate_leagues(merged)
-    baseline_rows, _ = aggregate_leagues(review_merged)
+    league_rows, pending_excluded, trend_anchor_date = aggregate_leagues(merged)
+    baseline_rows, _, baseline_trend_anchor_date = aggregate_leagues(review_merged)
     audit["pending_denominator_excluded_count"] = pending_excluded
     return {
         "schema_version": "v4.league_performance_ledger.v1",
         "generated_at": datetime.now(LOCAL_TZ).isoformat(),
-        "source_ledger": HISTORICAL_LEDGER.name,
+        "source_ledger": historical_path.name if historical_path else "NOT_FOUND",
+        "source_ledger_resolved": str(historical_path) if historical_path else "NOT_FOUND",
+        "historical_ledger_status": historical_status,
         "source_validation_review": VALIDATION_20260531.name,
+        "trend_anchor_date": trend_anchor_date or "DATA_MISSING",
         "official_only": True,
         "C_SKIP_excluded": True,
         "shadow_dryrun_excluded": True,
@@ -310,7 +364,7 @@ def build() -> dict[str, Any]:
         "keep_count": sum(row["trust_tag"] == "KEEP" for row in league_rows),
         "watch_count": sum(row["trust_tag"] == "WATCH" for row in league_rows),
         "low_trust_count": sum(row["trust_tag"] == "LOW_TRUST_ALERT" for row in league_rows),
-        "low_sample_count": sum(row["trust_tag"] in {"LOW_SAMPLE_ONLY", "DO_NOT_CONCLUDE"} for row in league_rows),
+        "low_sample_count": sum(row["trust_tag"] in {"LOW_SAMPLE_ONLY", "DO_NOT_CONCLUDE", "PENDING_ONLY"} for row in league_rows),
         "do_not_conclude_count": sum(row["trust_tag"] == "DO_NOT_CONCLUDE" for row in league_rows),
         "pending_only_count": sum(row["sample_tag"] == "PENDING_ONLY" for row in league_rows),
         "data_gap_count": sum(row["trust_tag"] == "DATA_GAP" for row in league_rows),
@@ -320,6 +374,7 @@ def build() -> dict[str, Any]:
         "baseline_20260531": {
             "validated_count": sum(row["validated_count"] for row in baseline_rows),
             "pending_count": sum(row["pending_count"] for row in baseline_rows),
+            "trend_anchor_date": baseline_trend_anchor_date or "DATA_MISSING",
             "leagues": baseline_rows,
         },
     }

@@ -32,7 +32,7 @@ REQUIRED_FIELDS = {
 }
 ALLOWED_TAGS = {
     "DO_NOT_CONCLUDE", "LOW_SAMPLE_ONLY", "OBSERVE", "KEEP", "WATCH",
-    "LOW_TRUST_ALERT", "DATA_GAP",
+    "LOW_TRUST_ALERT", "DATA_GAP", "PENDING_ONLY",
 }
 
 
@@ -54,9 +54,11 @@ def expected_confidence(validated_count: int) -> str:
     return "OBSERVE_ONLY"
 
 
-def expected_tag(validated_count: int, hit_rate: float, data_gap: bool) -> str:
+def expected_tag(validated_count: int, pending_count: int, hit_rate: float, data_gap: bool) -> str:
     if data_gap:
         return "DATA_GAP"
+    if validated_count == 0 and pending_count > 0:
+        return "PENDING_ONLY"
     if validated_count < 5:
         return "DO_NOT_CONCLUDE"
     if validated_count < 10:
@@ -144,7 +146,7 @@ def main() -> int:
             row_errors.append(f"{row.get('league')}:sample_tag_bad")
         if row.get("trust_tag") not in ALLOWED_TAGS:
             row_errors.append(f"{row.get('league')}:trust_tag_missing")
-        if row.get("trust_tag") != expected_tag(validated, hit_rate, data_gap):
+        if row.get("trust_tag") != expected_tag(validated, pending, hit_rate, data_gap):
             row_errors.append(f"{row.get('league')}:trust_tag_bad")
     add(checks, "league_rows_contract", not row_errors, row_errors[:20])
 
@@ -180,11 +182,33 @@ def main() -> int:
     add(checks, "baseline_20260531_智利甲_1_3", baseline_is("智利甲", 1, 3), baseline_rows.get("智利甲"))
     add(checks, "baseline_20260531_巴西甲_3_5", baseline_is("巴西甲", 3, 5), baseline_rows.get("巴西甲"))
     add(checks, "baseline_20260531_阿根廷杯_pending_only", baseline_is("阿根廷杯", 0, 0, 1), baseline_rows.get("阿根廷杯"))
+    arg_cup = baseline_rows.get("阿根廷杯") or {}
+    add(
+        checks,
+        "baseline_20260531_阿根廷杯_pending_only_contract",
+        int(arg_cup.get("validated_count") or 0) == 0
+        and int(arg_cup.get("pending_count") or 0) == 1
+        and int(arg_cup.get("hit_count") or 0) == 0
+        and int(arg_cup.get("miss_count") or 0) == 0
+        and arg_cup.get("sample_tag") == "PENDING_ONLY"
+        and arg_cup.get("trust_tag") == "PENDING_ONLY",
+        arg_cup,
+    )
+    add(checks, "source_ledger_resolved_present", bool(payload.get("source_ledger_resolved")), payload.get("source_ledger_resolved"))
+    add(
+        checks,
+        "historical_ledger_status_ok_or_warn",
+        payload.get("historical_ledger_status") in {"OK", "HISTORICAL_LEDGER_MISSING_WARN_ONLY"},
+        payload.get("historical_ledger_status"),
+    )
+    add(checks, "trend_anchor_date_present", payload.get("trend_anchor_date") not in {"", None}, payload.get("trend_anchor_date"))
 
     builder_text = BUILDER.read_text(encoding="utf-8")
     model_text = MODEL_BUILDER.read_text(encoding="utf-8")
     dashboard_text = DASHBOARD.read_text(encoding="utf-8")
     add(checks, "no_api", "requests." not in builder_text and "urlopen(" not in builder_text)
+    add(checks, "historical_source_not_hardcoded_20260526", "load_json(HISTORICAL_LEDGER)" not in builder_text and "HISTORICAL_LEDGER = VALIDATION / \"v4_ab_historical_ledger_20260526.json\"" not in builder_text)
+    add(checks, "trend_window_not_datetime_now", "datetime.now(LOCAL_TZ) - timedelta(days=days)" not in builder_text)
     add(checks, "no_scan", "scan_and_brief" not in builder_text and "fullscan" not in builder_text)
     add(checks, "no_qq", "qq_push" not in builder_text.lower() and "send_qq" not in builder_text.lower())
     add(checks, "no_pending_write", "pending" not in " ".join(path.name for path in [OUTPUT_JSON, OUTPUT_CSV]))
@@ -199,6 +223,8 @@ def main() -> int:
         and "official_grade = league" not in model_text
         and "grade = league" not in model_text,
     )
+    add(checks, "dashboard_pending_only_copy", "延期/未完赛，仅记录，不进分母" in dashboard_text)
+    add(checks, "dashboard_low_sample_copy", "样本偏少，仅辅助参考" in dashboard_text)
 
     blockers = [check["name"] for check in checks if not check["ok"]]
     result = {

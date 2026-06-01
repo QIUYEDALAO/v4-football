@@ -1313,6 +1313,10 @@ def _extract_league_performance_summary(ledger: dict) -> dict:
         row for row in rows
         if isinstance(row, dict) and row.get("trust_tag") == "DO_NOT_CONCLUDE"
     ]
+    pending_only = [
+        row for row in rows
+        if isinstance(row, dict) and row.get("trust_tag") == "PENDING_ONLY"
+    ]
     return {
         "league_performance_summary": {
             "league_count": int(ledger.get("league_count") or 0),
@@ -1325,12 +1329,15 @@ def _extract_league_performance_summary(ledger: dict) -> dict:
             "do_not_conclude_count": int(ledger.get("do_not_conclude_count") or 0),
             "pending_only_count": int(ledger.get("pending_only_count") or 0),
             "data_gap_count": int(ledger.get("data_gap_count") or 0),
+            "trend_anchor_date": ledger.get("trend_anchor_date") or "DATA_MISSING",
+            "source_ledger_resolved": ledger.get("source_ledger_resolved") or "NOT_FOUND",
             "policy": "display_only_no_official_grade_change",
         },
         "league_trust_tags": tags,
         "low_trust_league_watchlist": low_trust,
         "low_sample_league_watchlist": low_sample,
         "do_not_conclude_league_list": do_not_conclude,
+        "pending_only_league_list": pending_only,
         "league_data_quality_status": "OK" if rows else "DATA_MISSING",
     }
 
