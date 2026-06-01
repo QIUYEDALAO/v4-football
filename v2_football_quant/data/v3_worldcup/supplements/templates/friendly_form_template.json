@@ -1,0 +1,17 @@
+{
+  "meta": {"category": "friendly_form", "template": true, "observation_only": true},
+  "records": [
+    {
+      "team": "TEMPLATE_TEAM",
+      "match_date": "",
+      "opponent": "",
+      "venue": "",
+      "score_for": 0,
+      "score_against": 0,
+      "rotation_level": "UNKNOWN",
+      "notes": "template only",
+      "source": "template",
+      "data_status": "TEMPLATE_ONLY"
+    }
+  ]
+}

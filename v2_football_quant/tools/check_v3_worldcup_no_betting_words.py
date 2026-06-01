@@ -56,6 +56,8 @@ def in_scope(path: Path) -> bool:
         return path.name.startswith("build_v3_worldcup") or path.name.startswith("check_v3_worldcup")
     if "data/v3_worldcup/" in s:
         return path.suffix in {".json", ".md", ".txt"}
+    if "data/runtime/v3_worldcup/" in s:
+        return path.suffix in {".json", ".txt"}
     return False
 
 

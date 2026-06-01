@@ -15,6 +15,7 @@ ROSTERS = V3 / "rosters/worldcup_rosters_20260526.json"
 PROFILES = V3 / "team_profiles/team_profiles_20260526.json"
 DELTAS = V3 / "team_profiles/roster_delta_20260526.json"
 WATCH = V3 / "market_baseline/v3_perception_gap_roster_watchlist_20260526.json"
+SUPPLEMENT_REPORT = ROOT / "data/runtime/v3_worldcup/supplement_reports/v3_worldcup_supplement_coverage_20260602.json"
 
 CST = timezone(timedelta(hours=8))
 
@@ -63,6 +64,7 @@ def main() -> int:
     profiles = _load(PROFILES)
     deltas = _load(DELTAS)
     watch = _load(WATCH)
+    supp = _load(SUPPLEMENT_REPORT)
 
     meta = rosters.get("meta") or {}
     teams_total = _safe_int(meta.get("total_teams") or 46)
@@ -105,6 +107,17 @@ def main() -> int:
         "WC_HISTORY_SUPPLEMENT_MISSING",
     ]
 
+    supp_cov = supp.get("coverage_by_category") if isinstance(supp.get("coverage_by_category"), dict) else {}
+    caps_cov = (supp_cov.get("caps_goals_minutes") or {}).get("coverage_status")
+    injury_cov = (supp_cov.get("injuries") or {}).get("coverage_status")
+    friendly_cov = (supp_cov.get("friendly_form") or {}).get("coverage_status")
+    market_cov = (supp_cov.get("market_baseline") or {}).get("coverage_status")
+    supp_status = supp.get("status") if supp else "DATA_MISSING"
+    if supp and isinstance(supp.get("warn_only_items"), list):
+        for x in supp["warn_only_items"]:
+            if x not in warn_only_items:
+                warn_only_items.append(x)
+
     now = datetime.now(CST)
     payload = {
         "generated_at": now.isoformat(),
@@ -118,11 +131,12 @@ def main() -> int:
         "players_total": players_total,
         "roster_source": str(ROSTERS),
         "roster_coverage_status": "READY_46_OF_46" if teams_total == 46 and teams_with_roster == 46 else "PARTIAL",
-        "supplement_coverage_status": "MISSING",
-        "caps_goals_minutes_coverage_status": "MISSING",
-        "injury_coverage_status": "MISSING",
-        "friendly_form_coverage_status": "MISSING",
-        "market_baseline_coverage_status": "PARTIAL_BASELINE_ONLY",
+        "supplement_coverage_status": supp_status,
+        "caps_goals_minutes_coverage_status": caps_cov or "MISSING",
+        "injury_coverage_status": injury_cov or "MISSING",
+        "friendly_form_coverage_status": friendly_cov or "MISSING",
+        "market_baseline_coverage_status": market_cov or "PARTIAL_BASELINE_ONLY",
+        "supplement_coverage_by_category": supp_cov or {},
         "perception_gap_watchlist": watch_list,
         "perception_gap_watchlist_count": len(watch_list),
         "undervalued_candidates": undervalued,

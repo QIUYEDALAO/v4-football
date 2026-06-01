@@ -52,6 +52,8 @@ def main() -> int:
     add(checks, "guard_observation_only", guard.get("observation_only") is True, guard)
     add(checks, "guard_no_betting", guard.get("no_betting_recommendations") is True, guard)
     add(checks, "guard_no_v4_changes", guard.get("no_v4_changes") is True, guard)
+    add(checks, "supplement_coverage_status_present", bool(payload.get("supplement_coverage_status")), payload.get("supplement_coverage_status"))
+    add(checks, "supplement_coverage_by_category_present", isinstance(payload.get("supplement_coverage_by_category"), dict), type(payload.get("supplement_coverage_by_category")).__name__)
     hints = [str(x.get("action_hint") or "") for x in wl if isinstance(x, dict)]
     add(checks, "action_hint_whitelist", all(h in ALLOW_HINTS for h in hints), hints[:12])
     add(checks, "action_hint_no_bad", all(h not in BAD_HINTS for h in hints), hints[:12])

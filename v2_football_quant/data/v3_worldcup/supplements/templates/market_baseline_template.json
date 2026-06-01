@@ -1,0 +1,17 @@
+{
+  "meta": {"category": "market_baseline", "template": true, "observation_only": true},
+  "records": [
+    {
+      "team": "TEMPLATE_TEAM",
+      "market_type": "template",
+      "baseline_value": 0,
+      "current_value": 0,
+      "movement": 0,
+      "public_hype_level": "UNKNOWN",
+      "underdog_discount_signal": "UNKNOWN",
+      "source": "template",
+      "source_date": "2026-06-02",
+      "data_status": "TEMPLATE_ONLY"
+    }
+  ]
+}

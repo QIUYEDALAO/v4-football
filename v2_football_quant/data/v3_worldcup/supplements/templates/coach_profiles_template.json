@@ -1,0 +1,14 @@
+{
+  "meta": {"category": "coach_profiles", "template": true, "observation_only": true},
+  "records": [
+    {
+      "team": "TEMPLATE_TEAM",
+      "coach": "TEMPLATE_COACH",
+      "tenure_days": 0,
+      "tactical_style": "UNKNOWN",
+      "tournament_experience": "UNKNOWN",
+      "volatility_risk": "UNKNOWN",
+      "data_status": "TEMPLATE_ONLY"
+    }
+  ]
+}

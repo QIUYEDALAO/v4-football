@@ -1,0 +1,22 @@
+{
+  "meta": {
+    "category": "caps_goals_minutes",
+    "template": true,
+    "observation_only": true
+  },
+  "records": [
+    {
+      "team": "TEMPLATE_TEAM",
+      "player_name": "TEMPLATE_PLAYER",
+      "position": "MID",
+      "caps": 0,
+      "goals": 0,
+      "national_team_minutes_last_12m": 0,
+      "club_minutes_2025_26": 0,
+      "source": "template",
+      "source_date": "2026-06-02",
+      "confidence": "UNKNOWN",
+      "data_status": "TEMPLATE_ONLY"
+    }
+  ]
+}

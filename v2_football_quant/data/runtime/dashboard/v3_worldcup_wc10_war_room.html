@@ -38,6 +38,8 @@ async function load(){
     const resp=await fetch('/data/v3_worldcup/war_room/v3_worldcup_wc10_war_room_20260602.json?ts='+Date.now());
     const m=await resp.json();
     const warn=a(m.warn_only_items);
+    const supp=m.supplement_coverage_by_category||{};
+    const suppRows=Object.keys(supp).map(k=>`<div class="mini"><span>${k}</span><b>${n((supp[k]||{}).coverage_status,'MISSING')}</b></div>`).join('');
     const under=a(m.undervalued_candidates), over=a(m.overhyped_risk_candidates);
     root.innerHTML = `
     <div class="card">
@@ -53,6 +55,8 @@ async function load(){
     <div class="card">
       <div class="note">数据覆盖：roster=${n(m.roster_coverage_status,'MISSING')} / caps-goals-minutes=${n(m.caps_goals_minutes_coverage_status,'MISSING')} / injury=${n(m.injury_coverage_status,'MISSING')} / friendly=${n(m.friendly_form_coverage_status,'MISSING')} / market=${n(m.market_baseline_coverage_status,'MISSING')}</div>
       <div class="note warn">WARN_ONLY: ${warn.join('、')}</div>
+      <div class="note">supplement layer: ${n(m.supplement_coverage_status,'DATA_MISSING')}（TEMPLATE_ONLY / MISSING 时不得下结论）</div>
+      <div class="grid">${suppRows||'<div class="note">supplement coverage data missing</div>'}</div>
     </div>
     <div class="card list">
       <div class="note">Perception Gap Watchlist（每类最多显示 5 条）</div>

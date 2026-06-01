@@ -1,0 +1,13 @@
+{
+  "meta": {"category": "wc_history", "template": true, "observation_only": true},
+  "records": [
+    {
+      "team": "TEMPLATE_TEAM",
+      "wc_appearances": 0,
+      "recent_wc_result": "UNKNOWN",
+      "tournament_consistency": "UNKNOWN",
+      "pressure_profile": "UNKNOWN",
+      "data_status": "TEMPLATE_ONLY"
+    }
+  ]
+}

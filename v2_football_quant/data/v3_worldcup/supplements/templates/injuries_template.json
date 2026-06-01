@@ -1,0 +1,16 @@
+{
+  "meta": {"category": "injuries", "template": true, "observation_only": true},
+  "records": [
+    {
+      "team": "TEMPLATE_TEAM",
+      "player_name": "TEMPLATE_PLAYER",
+      "injury_status": "UNKNOWN",
+      "expected_return": "",
+      "availability_risk": "UNKNOWN",
+      "source": "template",
+      "source_date": "2026-06-02",
+      "confidence": "UNKNOWN",
+      "data_status": "TEMPLATE_ONLY"
+    }
+  ]
+}

@@ -1,0 +1,14 @@
+{
+  "meta": {"category": "club_form", "template": true, "observation_only": true},
+  "records": [
+    {
+      "player_name": "TEMPLATE_PLAYER",
+      "team": "TEMPLATE_TEAM",
+      "club": "TEMPLATE_CLUB",
+      "club_minutes_recent": 0,
+      "club_form_signal": "UNKNOWN",
+      "fatigue_risk": "UNKNOWN",
+      "data_status": "TEMPLATE_ONLY"
+    }
+  ]
+}

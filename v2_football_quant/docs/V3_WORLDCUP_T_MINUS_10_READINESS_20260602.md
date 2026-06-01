@@ -39,7 +39,7 @@ It is not a betting recommendation system and does not modify V4 logic.
 
 ## Next Suggested Phase
 
-1. V3-WC9 supplement ingestion
+1. V3-WC9 supplement ingestion layer (template-only until source authorization)
 2. V3 group/opener dashboard enrichment
 3. V3 team readiness delta with supplements
 4. V3 friendly/injury watch layer
