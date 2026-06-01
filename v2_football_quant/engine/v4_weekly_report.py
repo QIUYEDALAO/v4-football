@@ -28,6 +28,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 DAILY_DIR = BASE_DIR / "data" / "daily_reports"
 WEEKLY_DIR = BASE_DIR / "data" / "weekly_reports"
 ATTRIB_DIR = BASE_DIR / "data" / "v4_archive"
+VALIDATION_DIR = BASE_DIR / "data" / "runtime" / "validation"
 
 
 def _date_key(s: str) -> str:
@@ -77,6 +78,50 @@ def _load_jsonl(path: Path) -> list[dict[str, Any]]:
 
 def _pct(n: int, d: int) -> float:
     return round(n / d * 100, 1) if d else 0.0
+
+
+def _load_league_observation(start: str, end: str) -> dict[str, Any]:
+    key = f"{_date_key(start)}_{_date_key(end)}"
+    watchlist = _load_json(WEEKLY_DIR / f"v4_league_watchlist_report_{key}.json", {})
+    ledger = _load_json(VALIDATION_DIR / "v4_league_performance_ledger_latest.json", {})
+    if watchlist:
+        return {
+            "status": "OK",
+            "source": str(WEEKLY_DIR / f"v4_league_watchlist_report_{key}.json"),
+            "trend_anchor_date": watchlist.get("trend_anchor_date") or "DATA_MISSING",
+            "keep_count": len(watchlist.get("keep_leagues") or []),
+            "watch_count": len(watchlist.get("watch_leagues") or []),
+            "low_trust_alert_count": len(watchlist.get("low_trust_alert_leagues") or []),
+            "low_sample_count": len(watchlist.get("low_sample_leagues") or []),
+            "do_not_conclude_count": len(watchlist.get("do_not_conclude_leagues") or []),
+            "pending_only_count": len(watchlist.get("pending_only_leagues") or []),
+            "policy_note": "联赛标签仅供观察，不自动影响 official grade。",
+        }
+    if ledger:
+        return {
+            "status": "OK",
+            "source": str(VALIDATION_DIR / "v4_league_performance_ledger_latest.json"),
+            "trend_anchor_date": ledger.get("trend_anchor_date") or "DATA_MISSING",
+            "keep_count": int(ledger.get("keep_count") or 0),
+            "watch_count": int(ledger.get("watch_count") or 0),
+            "low_trust_alert_count": int(ledger.get("low_trust_count") or 0),
+            "low_sample_count": int(ledger.get("low_sample_count") or 0),
+            "do_not_conclude_count": int(ledger.get("do_not_conclude_count") or 0),
+            "pending_only_count": int(ledger.get("pending_only_count") or 0),
+            "policy_note": "联赛标签仅供观察，不自动影响 official grade。",
+        }
+    return {
+        "status": "WARN_ONLY",
+        "source": "DATA_MISSING",
+        "trend_anchor_date": "DATA_MISSING",
+        "keep_count": 0,
+        "watch_count": 0,
+        "low_trust_alert_count": 0,
+        "low_sample_count": 0,
+        "do_not_conclude_count": 0,
+        "pending_only_count": 0,
+        "policy_note": "联赛长期观察层缺失，不阻断周报主流程。",
+    }
 
 
 def _grade_accumulator() -> dict[str, int]:
@@ -226,6 +271,7 @@ def aggregate(start: str, end: str) -> dict[str, Any]:
             }
         )
     script_rows.sort(key=lambda x: (-x["samples"], x["script_type"]))
+    league_observation = _load_league_observation(start, end)
 
     return {
         "start": _date_key(start),
@@ -248,6 +294,7 @@ def aggregate(start: str, end: str) -> dict[str, Any]:
             "time_bin_source_performance": time_source_rows,
             "script_type_performance": script_rows,
         },
+        "league_ledger_observation": league_observation,
     }
 
 
@@ -332,10 +379,23 @@ def render(report: dict[str, Any]) -> str:
     ]
     for k in ["MODEL_FEATURE", "TIME_DISTRIBUTION", "MATCH_FLOW", "MARKET_SIGNAL", "EVENT_NOISE", "CONTEXT_NOISE", "WEATHER_NOISE", "LINEUP_CHANGE", "MOTIVATION_MISREAD", "DATA_QUALITY", "NORMAL_VARIANCE"]:
         lines.append(f"- {k}: {rcnt.get(k, 0)}")
+    obs = report.get("league_ledger_observation") or {}
     lines += [
         "",
         "七、本周结论",
         "如果分级单调性 PASS 且 A+B 覆盖率在 5%-15%，当前规则继续运行；否则进入月度校准候选。",
+        "",
+        "八、联赛长期观察（League Ledger）",
+        f"- 状态：{obs.get('status', 'WARN_ONLY')}",
+        f"- 来源：{obs.get('source', 'DATA_MISSING')}",
+        f"- trend_anchor_date：{obs.get('trend_anchor_date', 'DATA_MISSING')}",
+        f"- KEEP：{obs.get('keep_count', 0)}",
+        f"- WATCH：{obs.get('watch_count', 0)}",
+        f"- LOW_TRUST_ALERT：{obs.get('low_trust_alert_count', 0)}",
+        f"- LOW_SAMPLE：{obs.get('low_sample_count', 0)}",
+        f"- DO_NOT_CONCLUDE：{obs.get('do_not_conclude_count', 0)}",
+        f"- PENDING_ONLY：{obs.get('pending_only_count', 0)}",
+        f"- 说明：{obs.get('policy_note', '联赛标签仅供观察，不自动影响 official grade。')}",
         "",
     ]
     return "\n".join(lines)
