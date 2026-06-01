@@ -1,0 +1,93 @@
+#!/usr/bin/env python3
+from __future__ import annotations
+
+import json
+import subprocess
+import sys
+from datetime import datetime
+from pathlib import Path
+from typing import Any
+
+ROOT = Path(__file__).resolve().parents[1]
+OUT = ROOT / "data/runtime/status/check_v3_worldcup_wc10_war_room_20260602.json"
+BUILDER = ROOT / "tools/build_v3_worldcup_wc10_war_room.py"
+WAR = ROOT / "data/v3_worldcup/war_room/v3_worldcup_wc10_war_room_20260602.json"
+HTML = ROOT / "data/runtime/dashboard/v3_worldcup_wc10_war_room.html"
+
+BAD_HINTS = {"BET", "STAKE", "BUY", "SELL", "AUTO_BET", "RECOMMENDATION", "LOCKED_PICK"}
+ALLOW_HINTS = {"OBSERVE_ONLY", "WATCHLIST_ONLY", "NEED_SUPPLEMENT", "DO_NOT_CONCLUDE", "DATA_GAP_REVIEW"}
+
+
+def _load(path: Path) -> dict[str, Any]:
+    try:
+        obj = json.loads(path.read_text(encoding="utf-8"))
+        return obj if isinstance(obj, dict) else {}
+    except Exception:
+        return {}
+
+
+def add(checks: list[dict[str, Any]], name: str, ok: bool, detail: Any = "") -> None:
+    checks.append({"name": name, "ok": bool(ok), "detail": detail})
+
+
+def main() -> int:
+    checks: list[dict[str, Any]] = []
+    run = subprocess.run([sys.executable, str(BUILDER)], cwd=str(ROOT), capture_output=True, text=True, check=False)
+    add(checks, "builder_runs", run.returncode == 0, run.stderr or run.stdout[-500:])
+    add(checks, "war_room_json_exists", WAR.exists(), str(WAR))
+    add(checks, "dashboard_html_exists", HTML.exists(), str(HTML))
+    payload = _load(WAR)
+    add(checks, "teams_with_roster_46", int(payload.get("teams_with_roster") or 0) == 46, payload.get("teams_with_roster"))
+    add(checks, "teams_total_46", int(payload.get("teams_total") or 0) == 46, payload.get("teams_total"))
+    add(checks, "players_total_1375", int(payload.get("players_total") or 0) == 1375, payload.get("players_total"))
+    add(checks, "status_ok", payload.get("status") == "WAR_ROOM_READY_WITH_WARN_ONLY", payload.get("status"))
+    add(checks, "status_level_ok", payload.get("status_level") == "CODE_READY", payload.get("status_level"))
+    add(checks, "blocker_none", payload.get("blocker") == "NONE", payload.get("blocker"))
+    warn = payload.get("warn_only_items") or []
+    for x in ["CAPS_GOALS_MINUTES_SUPPLEMENT_MISSING", "INJURY_SUPPLEMENT_MISSING", "FRIENDLY_FORM_SUPPLEMENT_MISSING", "MARKET_BASELINE_SUPPLEMENT_MISSING"]:
+        add(checks, f"warn_has_{x}", x in warn, warn)
+    wl = payload.get("perception_gap_watchlist") or []
+    add(checks, "watchlist_count_ge_1", int(payload.get("perception_gap_watchlist_count") or len(wl)) >= 1, payload.get("perception_gap_watchlist_count"))
+    guard = payload.get("safety_guard") or {}
+    add(checks, "guard_observation_only", guard.get("observation_only") is True, guard)
+    add(checks, "guard_no_betting", guard.get("no_betting_recommendations") is True, guard)
+    add(checks, "guard_no_v4_changes", guard.get("no_v4_changes") is True, guard)
+    hints = [str(x.get("action_hint") or "") for x in wl if isinstance(x, dict)]
+    add(checks, "action_hint_whitelist", all(h in ALLOW_HINTS for h in hints), hints[:12])
+    add(checks, "action_hint_no_bad", all(h not in BAD_HINTS for h in hints), hints[:12])
+    text = (json.dumps(payload, ensure_ascii=False) + "\n" + (HTML.read_text(encoding="utf-8", errors="ignore") if HTML.exists() else "")).lower()
+    sanitized = (
+        text.replace("no betting recommendation", "")
+        .replace("no betting recommendations", "")
+        .replace("not a betting recommendation", "")
+        .replace("不输出投注建议", "")
+        .replace("任何 watchlist 都不是推荐下注", "")
+        .replace("no_stake", "")
+    )
+    banned = ["bet ready", "recommendation_ready", "auto_trade_ready", "wager", "推荐下注", "投注建议", "auto bet", "locked pick"]
+    add(checks, "no_betting_terms", all(x not in sanitized for x in banned), banned)
+    src = BUILDER.read_text(encoding="utf-8", errors="ignore").lower()
+    add(checks, "no_api", "requests." not in src and "urlopen(" not in src)
+    add(checks, "no_v4_scan", "scan_and_brief" not in src and "fullscan" not in src)
+    add(
+        checks,
+        "no_qq_pending_validation_livebet_cron",
+        all(x not in src for x in ["send_qq(", "pending_route(", "recompute_validation(", "append_live_bet(", "crontab"]),
+    )
+    add(checks, "no_touch_outside57_scanner", "v4_outside57_scanner.py" not in src)
+    add(checks, "no_secrets", all(x not in src for x in ["api-key", "token=", "secret"]), "source_scan")
+
+    blockers = [c["name"] for c in checks if not c["ok"]]
+    out = {
+        "generated_at": datetime.now().isoformat(),
+        "conclusion": "PASS" if not blockers else "BLOCKER",
+        "blockers": blockers,
+        "checks": checks,
+    }
+    OUT.write_text(json.dumps(out, ensure_ascii=False, indent=2), encoding="utf-8")
+    print(json.dumps({"conclusion": out["conclusion"], "blockers": blockers, "output": str(OUT)}, ensure_ascii=False, indent=2))
+    return 0 if not blockers else 2
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())
