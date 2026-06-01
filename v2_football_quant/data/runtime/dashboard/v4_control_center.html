@@ -66,7 +66,7 @@ button{cursor:pointer}
 }
 .kpi{min-height:96px}
 .label{font-size:11px;color:var(--muted)}
-.kpi .value{font-size:23px;font-weight:950;margin:7px 0 3px;letter-spacing:-.45px}
+.kpi .value{font-size:22px;font-weight:950;margin:7px 0 3px;letter-spacing:0;line-height:1.12;overflow-wrap:anywhere}
 .hint{font-size:10.5px;color:var(--muted);line-height:1.35}
 .green{color:var(--green)}.blue{color:var(--blue)}.yellow{color:var(--yellow)}.red{color:var(--red)}.purple{color:var(--purple)}.orange{color:var(--orange)}
 .primary-layout{
@@ -82,6 +82,60 @@ button{cursor:pointer}
   min-height:0;
   overflow:auto;
 }
+.dense-workspace{
+  grid-template-columns:minmax(0,1fr) 390px;
+  min-height:690px;
+  align-items:stretch;
+}
+.dense-list-panel{height:690px}
+.dense-list-panel .candidate-list{
+  height:620px;
+  overflow-y:auto;
+  overflow-x:hidden;
+  border:1px solid rgba(143,165,196,.14);
+  border-radius:12px;
+  background:rgba(0,0,0,.10);
+}
+.decision-side{height:690px;overflow:auto}
+.selected-match{
+  border:1px solid rgba(143,165,196,.15);
+  background:linear-gradient(180deg,rgba(92,200,255,.08),rgba(255,255,255,.025));
+  border-radius:14px;padding:11px;margin-bottom:9px;
+}
+.selected-title{font-size:18px;font-weight:950;line-height:1.25;margin-top:5px}
+.decision-cards{display:grid;grid-template-columns:1fr;gap:8px;margin-bottom:9px}
+.selected-form{
+  border:1px solid rgba(143,165,196,.14);
+  background:rgba(0,0,0,.14);
+  border-radius:14px;padding:10px;margin-bottom:8px;
+}
+.selected-form-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.selected-form label{display:block;font-size:10px;color:var(--muted);margin:7px 0 4px}
+.selected-form input,.selected-form select,.selected-form textarea{
+  width:100%;border:1px solid rgba(143,165,196,.24);border-radius:10px;
+  background:rgba(0,0,0,.22);color:var(--text);padding:8px;font-size:12px;outline:none;
+}
+.selected-notes{height:46px;resize:vertical}
+.selected-actions{display:grid;grid-template-columns:1fr 1fr 1fr;gap:7px;margin-top:9px}
+.compact-todo{margin-top:10px}
+.density-bar{display:grid;grid-template-columns:repeat(4,1fr);gap:7px;margin:8px 0}
+.density-bucket{border:1px solid rgba(143,165,196,.13);background:rgba(255,255,255,.035);border-radius:10px;padding:8px}
+.density-bucket b{display:block;font-size:12px}
+.density-bucket span{display:block;font-size:10.5px;color:var(--muted);margin-top:3px}
+.group-row td{background:rgba(0,0,0,.22);color:#dce8fb;font-weight:900;padding:8px}
+.group-row .count{float:right;color:var(--muted);font-weight:600}
+.candidate-row.selected td{background:rgba(92,200,255,.10)}
+.candidate-row .next-col{color:var(--yellow);font-size:11px;white-space:nowrap}
+.candidate-detail-row td{padding:0 6px 8px;background:rgba(92,200,255,.055);border-bottom:1px solid rgba(92,200,255,.18)}
+.candidate-detail{
+  display:grid;grid-template-columns:1.05fr .95fr 1.2fr 1fr;gap:8px;
+  padding:9px;border:1px solid rgba(92,200,255,.16);border-radius:11px;
+  background:rgba(0,0,0,.14);font-size:12px;line-height:1.45;
+}
+.detail-cell{min-width:0}
+.detail-cell span{display:block;color:var(--muted);font-size:10px;margin-bottom:3px}
+.detail-cell b{display:block;color:#edf6ff;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.detail-cell em{display:block;color:#c9d7ea;font-style:normal;font-size:11px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .candidate-panel{
   display:flex;
   flex-direction:column;
@@ -94,20 +148,24 @@ button{cursor:pointer}
 .candidate-list::-webkit-scrollbar-thumb{background:rgba(143,165,196,.32);border-radius:999px}
 /* 列表布局 */
 .candidate-table{width:100%;border-collapse:collapse;font-size:13px;table-layout:fixed}
-.candidate-table th{text-align:left;padding:4px 6px;color:var(--muted);font-weight:600;font-size:11px;border-bottom:1px solid var(--line);position:sticky;top:0;background:var(--panel);z-index:1}
+.dense-list-panel .candidate-table{min-width:0}
+.candidate-table th{text-align:left;padding:4px 6px;color:var(--muted);font-weight:600;font-size:11px;border-bottom:1px solid var(--line);position:sticky;top:0;background:var(--card);z-index:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .candidate-row{cursor:pointer;transition:background .12s}
 .candidate-row:hover{background:rgba(88,183,255,.06)}
-.candidate-row td{padding:5px 6px;border-bottom:1px solid rgba(255,255,255,.05);vertical-align:middle}
+.candidate-row td{padding:5px 6px;border-bottom:1px solid rgba(255,255,255,.05);vertical-align:middle;overflow:hidden;text-overflow:ellipsis}
 .candidate-row .time-col{white-space:nowrap;font-variant-numeric:tabular-nums;font-size:12px}
 .candidate-row .grade-col{text-align:center;font-weight:700}
 .candidate-row .league-col{color:var(--muted);font-size:11px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .candidate-row .shadow-col{font-size:11px;color:#dbe8fb;white-space:nowrap}
+.candidate-row .peak-col,.candidate-row .roi-col,.candidate-row .line-col{
+  font-size:11px;color:#dbe8fb;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+}
 .candidate-row .teams-col{font-weight:700;font-size:13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.candidate-row .playbook-col{color:var(--amber);font-weight:600;font-size:11px;white-space:nowrap}
+.candidate-row .playbook-col{color:var(--yellow);font-weight:600;font-size:11px;white-space:nowrap}
 .candidate-row .dist-col{color:var(--muted);font-size:10.5px;white-space:normal;word-break:keep-all}
 .candidate-row .status-col{white-space:nowrap;font-size:11px}
 .candidate-row .action-col{text-align:right;white-space:nowrap}
-.expand-btn{background:rgba(255,255,255,.06);border:1px solid var(--line);color:var(--ink);padding:2px 9px;border-radius:5px;cursor:pointer;font-size:11px}
+.expand-btn{background:rgba(255,255,255,.06);border:1px solid var(--line);color:var(--text);padding:2px 9px;border-radius:5px;cursor:pointer;font-size:11px}
 .expand-btn:hover{background:rgba(88,183,255,.15)}
 .expand-btn.open{background:var(--blue);color:#08111f;border-color:var(--blue)}
 .bet-row-panel{display:none}
@@ -119,14 +177,38 @@ button{cursor:pointer}
 .shadow-disclaimer{margin-top:6px;color:#ffdca0}
 .bet-form-inline{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
 .bet-form-inline label{color:var(--muted);font-size:11px;min-width:40px}
-.bet-form-inline input,.bet-form-inline select,.bet-form-inline textarea{background:var(--panel2);border:1px solid var(--line);color:var(--ink);padding:4px 7px;border-radius:5px;font-size:12px}
+.bet-form-inline input,.bet-form-inline select,.bet-form-inline textarea{background:var(--card2);border:1px solid var(--line);color:var(--text);padding:4px 7px;border-radius:5px;font-size:12px}
 .bet-form-inline input{width:65px}
 .bet-form-inline select{width:70px}
 .bet-form-inline textarea{flex:1;min-width:120px;height:28px;resize:none}
 .bet-form-inline .btn-save{background:var(--green);color:#08111f;border:none;padding:4px 12px;border-radius:5px;cursor:pointer;font-weight:700;font-size:12px}
-.bet-form-inline .btn-no-market{background:rgba(255,180,70,.16);color:#ffb446;border:1px solid rgba(255,180,70,.24)}.btn-skip{background:rgba(255,107,114,.14);color:var(--red);border:1px solid rgba(255,107,114,.25);padding:4px 12px;border-radius:5px;cursor:pointer;font-size:12px}
+.btn-save{background:var(--green);color:#08111f;border:none;padding:8px 10px;border-radius:10px;cursor:pointer;font-weight:800;font-size:12px}
+.btn-no-market{background:rgba(255,180,70,.16);color:#ffb446;border:1px solid rgba(255,180,70,.24);padding:8px 10px;border-radius:10px;cursor:pointer;font-weight:800;font-size:12px}
+.btn-skip{background:rgba(255,107,114,.14);color:var(--red);border:1px solid rgba(255,107,114,.25);padding:8px 10px;border-radius:10px;cursor:pointer;font-weight:800;font-size:12px}
+.desk-toolbar{display:flex;gap:8px;align-items:center;justify-content:space-between;margin:4px 0 10px;flex-wrap:wrap}
+.seg{display:inline-flex;border:1px solid rgba(143,165,196,.18);background:rgba(0,0,0,.16);border-radius:12px;padding:3px;gap:3px}
+.seg button{border:0;background:transparent;color:var(--muted);border-radius:9px;padding:6px 9px;font-size:11px}
+.seg button.active{background:rgba(92,200,255,.15);color:#e4f8ff}
+.desk-search{min-width:210px;flex:1;max-width:320px;border:1px solid rgba(143,165,196,.22);background:rgba(0,0,0,.18);color:var(--text);border-radius:12px;padding:8px 10px;font-size:12px}
+.decision-grid{display:grid;grid-template-columns:1.05fr .95fr;gap:10px;margin-bottom:10px}
+.decision-card{border:1px solid rgba(143,165,196,.16);border-radius:12px;background:rgba(255,255,255,.035);padding:10px;min-width:0}
+.decision-title{font-size:12px;color:var(--muted);margin-bottom:6px}
+.decision-main{font-size:16px;font-weight:900;line-height:1.25}
+.decision-sub{font-size:12px;color:#cddaf0;line-height:1.45;margin-top:6px}
+.league-mini{display:grid;grid-template-columns:repeat(4,1fr);gap:7px;margin-top:8px}
+.league-mini .mini{border:1px solid rgba(143,165,196,.13);background:rgba(0,0,0,.15);border-radius:10px;padding:7px;min-width:0}
+.league-mini .mini span{display:block;color:var(--muted);font-size:10px}
+.league-mini .mini b{display:block;font-size:13px;margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.inline-validation{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin:8px 0}
+.inline-validation .mini{border:1px solid rgba(92,200,255,.18);background:rgba(92,200,255,.055);border-radius:10px;padding:7px}
+.inline-validation span{display:block;font-size:10px;color:var(--muted)}
+.inline-validation b{display:block;font-size:13px;margin-top:3px}
+.single-page-note{border:1px solid rgba(50,217,145,.22);background:rgba(50,217,145,.08);color:#baf7d8;border-radius:12px;padding:9px 10px;font-size:12px;line-height:1.45;margin-bottom:10px}
+.audit-fold{margin-top:10px}
+.audit-fold summary{color:#dce8fb}
+.league-table td,.league-table th{font-size:12px}
 @media(max-width:760px){.candidate-row .playbook-col{display:none}
-.candidate-row .dist-col{white-space:normal;word-break:keep-all}.candidate-row .league-col{font-size:10px;max-width:60px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.candidate-row .teams-col{font-size:12px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.candidate-table th:nth-child(3),.candidate-table th:nth-child(5),.candidate-table th:nth-child(6){display:none}}
+.candidate-row .time-col{font-size:11px}.candidate-row .grade-col{font-size:12px}.candidate-row .peak-col,.candidate-row .line-col{font-size:10px}.candidate-row .next-col{font-size:10px}.candidate-row .badge{padding:3px 5px;font-size:10px}.candidate-row .dist-col{white-space:normal;word-break:keep-all}.candidate-row .league-col{font-size:10px;max-width:60px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.candidate-row .teams-col{font-size:12px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.candidate-table th:nth-child(3),.candidate-table th:nth-child(5),.candidate-table th:nth-child(6){display:none}.dense-list-panel .candidate-table th{display:table-cell!important}.candidate-detail{grid-template-columns:1fr 1fr}.decision-grid,.inline-validation{grid-template-columns:1fr}.league-mini{grid-template-columns:repeat(2,1fr)}}
 .section-head{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:9px}
 h2{font-size:15px;margin:0}
 .btn{
@@ -268,6 +350,10 @@ th{color:var(--muted);font-weight:650}
   .quick-form button{grid-column:1/-1}
   .side-sticky{position:static;height:auto;min-height:unset;max-height:none;overflow:visible}
   .candidate-list{overflow:visible;grid-template-columns:1fr;max-height:none;flex:unset}
+  .dense-workspace{min-height:unset}
+  .dense-list-panel{height:620px}
+  .dense-list-panel .candidate-list{height:548px;overflow-y:auto;overflow-x:hidden;max-height:none;flex:1}
+  .decision-side{height:auto;overflow:visible}
 }
 @media(max-width:540px){
   .app{padding:10px 9px 84px}
@@ -277,7 +363,7 @@ th{color:var(--muted);font-weight:650}
   .kpi-grid{grid-template-columns:repeat(2,1fr);gap:8px}
   .card{border-radius:16px;padding:10px}
   .kpi{min-height:90px}
-  .kpi .value{font-size:21px}
+  .kpi .value{font-size:18px}
   .summary-grid{grid-template-columns:repeat(2,1fr)}
   .quick-form{grid-template-columns:1fr 1fr}
   .chart{height:140px}
@@ -321,11 +407,11 @@ th{color:var(--muted);font-weight:650}
     </div>
   </section>
 
-  <main class="grid primary-layout">
-    <section class="card candidate-panel">
+  <main class="grid primary-layout dense-workspace">
+    <section class="card candidate-panel dense-list-panel">
       <div class="section-head">
-        <h2>今日候选行动区</h2>
-        <button class="btn ghost" onclick="openPanel('intel')">情报详情</button>
+        <h2>比赛推荐列表</h2>
+        <span class="label">30-40场密集处理：左表滚动，右侧决策</span>
       </div>
 
       <div id="candidateList" class="candidate-list">
@@ -334,12 +420,65 @@ th{color:var(--muted);font-weight:650}
       <div class="skip-line" id="skipLine" style="display:none"></div>
     </section>
 
-    <aside class="card side-sticky">
+    <aside class="card side-sticky decision-side">
       <div class="section-head">
-        <h2>今日待办与实盘快照</h2>
-        <button class="btn ghost" onclick="openPanel('rules')">操作规则</button>
+        <h2>单场决策</h2>
+        <button class="btn ghost" onclick="openPanel('rules')">规则</button>
       </div>
-      <div class="todo-list">
+
+      <section class="selected-match">
+        <div class="label">当前选中</div>
+        <div class="selected-title" id="selectedMatchTitle">请选择一场比赛</div>
+        <div class="meta" id="selectedMatchMeta">点击左侧比赛行后，在这里完成投注/未投注/无盘口记录。</div>
+      </section>
+
+      <section class="decision-cards">
+        <div class="decision-card">
+          <div class="decision-title">下注决策</div>
+          <div class="decision-main" id="selectedDecisionMain">等待选择</div>
+          <div class="decision-sub" id="selectedDecisionBasis">选择比赛后显示建议依据。</div>
+          <div class="league-mini">
+            <div class="mini"><span>盘口</span><b id="selectedLine">-</b></div>
+            <div class="mini"><span>建议金额</span><b id="selectedStake">-</b></div>
+            <div class="mini"><span>水位</span><b id="selectedOdds">-</b></div>
+            <div class="mini"><span>高峰</span><b id="selectedPeak">-</b></div>
+          </div>
+        </div>
+        <div class="decision-card">
+          <div class="decision-title">联赛可信度</div>
+          <div class="decision-main" id="selectedLeagueMain">等待选择</div>
+          <div class="league-mini">
+            <div class="mini"><span>AB样本</span><b id="selectedLeagueSample">-</b></div>
+            <div class="mini"><span>AB命中</span><b id="selectedLeagueHit">-</b></div>
+            <div class="mini"><span>最佳ROI</span><b id="selectedLeagueRoi">-</b></div>
+            <div class="mini"><span>动作</span><b id="selectedLeagueAction">-</b></div>
+          </div>
+        </div>
+      </section>
+
+      <section class="selected-form">
+        <div class="selected-form-grid">
+          <div><label>盘口线</label><select id="selectedFormLine" onchange="syncSelectedStakeFromLine()"><option>O0.75</option><option>O1</option><option>O1.25</option><option>O1.5</option><option>O2</option></select></div>
+          <div><label>水位</label><input id="selectedFormOdds" value=""></div>
+          <div><label>金额</label><input id="selectedFormStake" value=""></div>
+          <div><label>入场分钟</label><input id="selectedFormMinute" value=""></div>
+          <div><label>入场比分</label><input id="selectedFormScore" value="0-0"></div>
+          <div><label>NO_BET原因</label><select id="selectedNoBetReason"><option value="EARLY_GOAL">早进球未投</option><option value="ODDS_MOVED">盘口/水位变化</option><option value="NOT_WATCHED">未看盘</option><option value="MANUAL_SKIP">手动跳过</option><option value="MARKET_CLOSED">封盘</option><option value="OTHER">其他</option></select></div>
+        </div>
+        <div class="selected-actions">
+          <button class="btn-save" onclick="addSelectedBet()">记录 BET</button>
+          <button class="btn-skip" onclick="markSelectedNoBet()">记录 NO_BET</button>
+          <button class="btn-no-market" onclick="markSelectedNoMarket()">无盘口排除</button>
+        </div>
+        <label>备注</label><textarea id="selectedNotes" class="selected-notes"></textarea>
+      </section>
+
+      <details class="audit-fold">
+        <summary>审计折叠区</summary>
+        <div id="selectedAudit" class="shadow-review">选择比赛后显示 RF 影子、盘口冲突、采集血缘。</div>
+      </details>
+
+      <div class="todo-list compact-todo">
         <div class="todo">
           <div><div class="todo-title">待结算订单：<span id="todoSettle">1</span>笔</div><div class="meta">可展开逐笔作废或结算，避免重复提交</div></div>
           <button class="btn warn" onclick="toggleOpenBetList()">查看</button>
@@ -402,7 +541,7 @@ th{color:var(--muted);font-weight:650}
     </div>
 
     <div class="card module">
-      <div class="section-head"><h2>复盘与联赛</h2><button class="btn ghost" onclick="window.open('/v4_ab_historical_ledger.html','_blank')">打开</button></div>
+      <div class="section-head"><h2>复盘与联赛</h2><button class="btn ghost" onclick="openPanel('review')">打开</button></div>
       <div class="rows">
         <div class="row"><span>AB账本</span><b id="modReviewLedger">可打开明细页</b></div>
         <div class="row"><span>联赛指数</span><b id="modReviewLeague">可打开分层页</b></div>
@@ -476,6 +615,10 @@ th{color:var(--muted);font-weight:650}
 <script>
 let MODEL={};
 let DISPLAY_CANDIDATES=[];
+let CAND_FILTER='ALL';
+let CAND_QUERY='';
+let SELECTED_FIXTURE_ID='';
+let SELECTED_CAND_INDEX=0;
 const $=id=>document.getElementById(id);
 const safe=(v,f="N/A")=>{
   if(v===void 0||v===null) return f;
@@ -490,6 +633,62 @@ const uniDisplay=x=>{const u=first(x.fixture_universe,"");if(u==="all_eligible")
 const num=(v,d=2)=>{const n=Number(v);return Number.isFinite(n)?n.toFixed(d):(0).toFixed(d)};
 const first=(...v)=>v.find(x=>x!==void 0&&x!==null&&x!=="");
 const arr=v=>Array.isArray(v)?v:[];
+function localDateYmd(){
+  const d=new Date();
+  const y=d.getFullYear();
+  const m=String(d.getMonth()+1).padStart(2,'0');
+  const day=String(d.getDate()).padStart(2,'0');
+  return `${y}${m}${day}`;
+}
+const pct=v=>{const n=Number(v);return Number.isFinite(n)?`${(n*100).toFixed(1)}%`:'N/A';};
+const roi=v=>{const n=Number(v);return Number.isFinite(n)?`${n>=0?'+':''}${(n*100).toFixed(1)}%`:'N/A';};
+function defaultStakeFor(grade,line){
+  const g=String(grade||'').toUpperCase();
+  const l=String(line||'');
+  const map={A:{'O0.75':300,'O1':250,'O1.25':150,'O1.5':0,'O2':0},B:{'O0.75':150,'O1':120,'O1.25':0,'O1.5':0,'O2':0}};
+  return (map[g]&&map[g][l]!==undefined)?map[g][l]:0;
+}
+function stakeHint(grade,line){
+  const stake=defaultStakeFor(grade,line);
+  if(stake<=0) return '建议跳过：该评级/盘口不建议下注';
+  if(grade==='A'&&line==='O1.25') return `建议 ${stake} 元，降仓观察`;
+  if(grade==='B'&&line==='O1') return `建议 ${stake} 元，可按实盘水位手改`;
+  return `建议 ${stake} 元`;
+}
+function leagueStatsFor(name){
+  const stats=(MODEL.league_hit_rate||{}).by_league||{};
+  const raw=String(name||'').trim();
+  if(!raw) return null;
+  return stats[raw] || stats[raw.replace(/\s+/g,' ')] || null;
+}
+function leagueTrustFor(name){
+  const tags=MODEL.league_trust_tags||{};
+  const raw=String(name||'').trim();
+  if(!raw) return null;
+  return tags[raw] || tags[raw.replace(/\s+/g,' ')] || null;
+}
+function leagueTrustMeta(row){
+  if(!row) return {tag:'DATA_MISSING', text:'数据缺失', note:'暂无联赛长期样本，仅展示，不参与判级'};
+  const tag=safe(row.trust_tag,'DATA_MISSING');
+  const sample=safe(row.sample_tag,'DATA_MISSING');
+  if(sample==='PENDING_ONLY') return {tag:'PENDING_ONLY', text:'仅待赛', note:'PENDING_ONLY：不参与命中率分母'};
+  if(tag==='LOW_TRUST_ALERT') return {tag, text:'观察风险', note:'LOW_TRUST_ALERT：观察风险，不自动排除'};
+  if(tag==='DO_NOT_CONCLUDE') return {tag, text:'不下结论', note:'DO_NOT_CONCLUDE：样本不足，不下结论'};
+  if(tag==='LOW_SAMPLE_ONLY'||sample==='LOW_SAMPLE'||sample==='VERY_LOW_SAMPLE') return {tag, text:'样本不足', note:'LOW_SAMPLE：样本不足，不下结论'};
+  if(tag==='DATA_GAP'||tag==='DATA_MISSING') return {tag, text:'数据缺失', note:'DATA_MISSING：仅展示，不参与判级'};
+  return {tag, text:tag, note:`${tag}：长期观察标签，仅展示，不参与判级`};
+}
+function leagueTrustBadge(name){
+  const meta=leagueTrustMeta(leagueTrustFor(name));
+  return `<span class="badge ${meta.tag==='LOW_TRUST_ALERT'?'red':meta.tag==='KEEP'?'a':'warn'}" title="${meta.note}">${meta.text}</span>`;
+}
+function leagueConfidenceText(row){
+  if(!row) return '无联赛样本';
+  const n=Number(row.sample_total_ab||0);
+  if(n>=20) return '样本>=20，可重点参考';
+  if(n>=10) return '样本10-19，弱参考';
+  return '小样本，仅观察';
+}
 const SHADOW_ENUM_CN={
   HOT_DRIVER_ACCEPTABLE:"强侧驱动，弱侧保底",
   HOT_DRIVER_SUPPORTIVE:"强侧极热，弱侧支持",
@@ -557,10 +756,42 @@ function getSkipItems(){ const c=getCandidatesNode(); const s=MODEL.skip||{}; if
 function getDemoCount(){
   const q = new URLSearchParams(window.location.search);
   const n = Number(q.get('demo_candidates')||'0');
-  return Number.isFinite(n) && n > 0 ? Math.min(20, Math.floor(n)) : 0;
+  return Number.isFinite(n) && n > 0 ? Math.min(60, Math.floor(n)) : 0;
 }
 function buildDemoCandidates(list,total){
-  if(!list.length || total<=list.length) return list;
+  if(!list.length){
+    const leagues=['丹超','俄超','乌拉甲','保甲','瑞典超','挪超','日职联','韩K联'];
+    const teams=['北城','海湾','山谷','绿洲','港口','铁道','星联','湖畔','东岸','西桥','南郡','中央'];
+    const out=[];
+    for(let j=0;j<total;j++){
+      const h=12+Math.floor(j/3);
+      const m=(j%3)*20;
+      out.push({
+        fixture_id:`demo-${j+1}`,
+        league:leagues[j%leagues.length],
+        home_cn:`${teams[j%teams.length]}FC`,
+        away_cn:`${teams[(j+5)%teams.length]}竞技`,
+        grade:j%3===0?'B':'A',
+        rating:j%3===0?'B':'A',
+        kickoff_time:`2026-06-01 ${String(h%24).padStart(2,'0')}:${String(m).padStart(2,'0')}:00`,
+        kickoff_local:`2026-06-01 ${String(h%24).padStart(2,'0')}:${String(m).padStart(2,'0')}`,
+        playbook_script:j%2?'中段发力':'开局冲击',
+        fh_goal_dist_available:true,
+        fh_goal_dist_0_15_pct:j%3===0?24:42,
+        fh_goal_dist_16_30_pct:j%3===1?46:31,
+        fh_goal_dist_31_45_pct:j%3===2?49:27,
+        fh_goal_dist_total_goals:12+j%5,
+        fh_goal_dist_source:'demo_goal_counts',
+        default_line:j%4===0?'O0.75':(j%4===1?'O1':'O1.25'),
+        default_odds:'0.86',
+        default_entry_minute:j%2?'13':'10',
+        already_bet:false,
+        settled:false
+      });
+    }
+    return out;
+  }
+  if(total<=list.length) return list;
   const out=[...list];
   let i=1;
   while(out.length<total){
@@ -625,8 +856,8 @@ function renderTop(){
   const a=Number(first(top.today_a_count,(top.today_candidates||{}).A,c.a_count,0));
   const b=Number(first(top.today_b_count,(top.today_candidates||{}).B,c.b_count,0));
   const sk=Number(first(top.today_skip_count,(top.today_candidates||{}).SKIP,c.skip_count,0));
-  $('kpiCandidates').textContent=`A${a}/B${b}/SKIP${sk}`;
-  $('kpiCandidatesHint').textContent='';
+  $('kpiCandidates').textContent=`A${a}/B${b}/跳${sk}`;
+  $('kpiCandidatesHint').textContent=`SKIP${sk} 跳过候选`;
 
   const yv=top.yesterday_validation||MODEL.yesterday_validation_detail||{};
   const yA=safe(first(top.yesterday_a_text,yv.A,top.yesterday_validation?.A),'暂无');
@@ -661,192 +892,371 @@ function matchName(x){
   return `${home} vs ${away}`;
 }
 
+function candidateGrade(x){return String(first(x.official_grade,x.rating,x.grade,'B')).toUpperCase();}
+function candidateFixtureId(x){return String(first(x.fixture_id,'')).trim();}
+function candidateLeague(x){return safe(first(x.league_cn,x.league),'联赛');}
+function candidateStatus(x){
+  if(x.no_market_excluded) return {text:'无盘口', cls:'stop', rank:5, next:'已排除'};
+  if(x.no_bet_recorded) return {text:'未投注', cls:'stop', rank:4, next:'已记录'};
+  if(x.settled) return {text:'已结算', cls:'bet', rank:6, next:'复盘'};
+  if(x.already_bet) return {text:'已投注', cls:'bet', rank:3, next:'待结算'};
+  return {text:'待投注', cls:'todo', rank:0, next:'右侧处理'};
+}
+function kickoffInfo(x){
+  const raw=first(x.kickoff_bj,x.kickoff_time_bj,x.kickoff_local,x.kickoff_time,x.kickoff,x.time,'');
+  const s=String(raw||'');
+  const m=s.match(/(\d{4})-(\d{2})-(\d{2})[T ](\d{2}):(\d{2})/);
+  const label=m?`${m[2]}-${m[3]} ${m[4]}:${m[5]}`:(s.slice(0,16).replace('T',' ')||'待定');
+  let minutes=99999;
+  try{
+    const dt=new Date(s);
+    if(!Number.isNaN(dt.getTime())) minutes=Math.round((dt.getTime()-Date.now())/60000);
+  }catch(_){}
+  return {raw:s,label,minutes};
+}
+function leagueLine(x){
+  const lg=leagueTrustFor(candidateLeague(x));
+  const meta=leagueTrustMeta(lg);
+  if(!lg) return meta.note;
+  return `${Number(lg.validated_count||0)}场 · ${pct(lg.hit_rate)} · ${meta.text}`;
+}
+function roiLine(x){
+  const lg=leagueStatsFor(candidateLeague(x));
+  if(!lg) return 'N/A';
+  return `${safe(lg.best_roi_line,'-')} ${roi(lg.best_roi_with_rebate)}`;
+}
+function leagueDetailFor(x){
+  const lg=leagueTrustFor(candidateLeague(x));
+  const meta=leagueTrustMeta(lg);
+  if(!lg) return {main:'无联赛长期样本', sub:meta.note};
+  return {
+    main:`${Number(lg.validated_count||0)}场 · ${pct(lg.hit_rate)} · ${meta.text}`,
+    sub:meta.note
+  };
+}
+function recommendedLine(x){
+  const plan=linePlanFor(x);
+  return `${plan.line} / ${plan.stake>0?plan.stake:'观'}`;
+}
+function normalizePctValue(v){
+  const n=Number(v);
+  if(!Number.isFinite(n)) return null;
+  return n<=1?Math.round(n*1000)/10:Math.round(n*10)/10;
+}
+function goalPeakInfo(x){
+  const bins=[
+    {label:'0-15', value:normalizePctValue(x.fh_goal_dist_0_15_pct)},
+    {label:'16-30', value:normalizePctValue(x.fh_goal_dist_16_30_pct)},
+    {label:'31-45', value:normalizePctValue(x.fh_goal_dist_31_45_pct)}
+  ].filter(b=>b.value!==null);
+  if(!bins.length) return {label:'高峰未知', pct:null, text:'高峰未知', source:'缺真实进球分布'};
+  bins.sort((a,b)=>b.value-a.value);
+  const top=bins[0];
+  return {
+    label:top.label,
+    pct:top.value,
+    text:`${top.label} · ${top.value.toFixed(1)}%`,
+    source:safe(x.fh_goal_dist_source,'events_goal_counts')
+  };
+}
+function goalDistributionText(x){
+  const bins=[
+    ['0-15',normalizePctValue(x.fh_goal_dist_0_15_pct)],
+    ['16-30',normalizePctValue(x.fh_goal_dist_16_30_pct)],
+    ['31-45',normalizePctValue(x.fh_goal_dist_31_45_pct)]
+  ].filter(v=>v[1]!==null);
+  if(!bins.length) return '暂无真实分布';
+  return bins.map(v=>`${v[0]} ${v[1].toFixed(1)}%`).join(' / ');
+}
+function linePlanFor(x){
+  const grade=candidateGrade(x);
+  const lg=leagueStatsFor(candidateLeague(x));
+  const sample=Number((lg||{}).sample_total_ab||0);
+  const bestRoi=Number((lg||{}).best_roi_with_rebate);
+  const leagueLine=safe((lg||{}).best_roi_line,'');
+  const defaultLine=safe(first(x.default_line,''),'');
+  let line='';
+  let source='';
+  const basis=[];
+  if(sample>=10 && leagueLine && Number.isFinite(bestRoi) && bestRoi>0){
+    line=leagueLine;
+    source='联赛ROI';
+    basis.push(`联赛样本${sample}，${line} ROI ${roi(bestRoi)}`);
+  }else if(defaultLine){
+    line=defaultLine;
+    source=safe(x.default_source,'候选默认');
+    basis.push(`候选/实盘默认盘口 ${defaultLine}`);
+    if(sample>0 && sample<10) basis.push(`联赛样本${sample}<10，仅观察`);
+  }else{
+    line=grade==='B'?'O0.75':'O1';
+    source='评级模板';
+    basis.push(`${grade}级盘口模板`);
+    if(sample>0 && sample<10) basis.push(`联赛样本${sample}<10，仅观察`);
+  }
+  if(!line) line='O1';
+  const rawStake=x.default_stake;
+  const hasRawStake=rawStake!==void 0&&rawStake!==null&&rawStake!=='';
+  const stake=hasRawStake?Number(rawStake):defaultStakeFor(grade,line);
+  const cleanStake=Number.isFinite(stake)?stake:0;
+  if(cleanStake<=0) basis.push('该盘口金额为0，建议观察/跳过');
+  else basis.push(`金额按${grade}级风控模板`);
+  return {line, stake:cleanStake, source, basis:basis.join('；')};
+}
+function applyCandidateFilter(list){
+  const q=String(CAND_QUERY||'').trim().toLowerCase();
+  return list.filter(x=>{
+    const grade=candidateGrade(x);
+    const status=candidateStatus(x);
+    const ko=kickoffInfo(x);
+    if(CAND_FILTER==='A'&&grade!=='A') return false;
+    if(CAND_FILTER==='B'&&grade!=='B') return false;
+    if(CAND_FILTER==='TODO'&&status.rank!==0) return false;
+    if(CAND_FILTER==='RECORDED'&&status.rank===0) return false;
+    if(CAND_FILTER==='SOON'&&!(ko.minutes>=-30&&ko.minutes<=30)) return false;
+    if(q){
+      const hay=[matchName(x),candidateLeague(x),first(x.playbook_script,''),grade,status.text].join(' ').toLowerCase();
+      if(!hay.includes(q)) return false;
+    }
+    return true;
+  });
+}
+function prioritySort(list){
+  return [...list].sort((a,b)=>{
+    const sa=candidateStatus(a), sb=candidateStatus(b);
+    const ga=candidateGrade(a), gb=candidateGrade(b);
+    const ka=kickoffInfo(a), kb=kickoffInfo(b);
+    const pa=(sa.rank*100000)+(ga==='A'?0:1000)+Math.max(0,ka.minutes);
+    const pb=(sb.rank*100000)+(gb==='A'?0:1000)+Math.max(0,kb.minutes);
+    return pa-pb;
+  });
+}
+function groupLabel(x){
+  const ko=kickoffInfo(x);
+  if(ko.minutes>=-30&&ko.minutes<=30) return '优先队列：30分钟内开赛';
+  const hh=(ko.label.match(/(\d{2}):(\d{2})/)||[])[1];
+  const h=Number(hh);
+  if(Number.isFinite(h)){
+    if(h<18) return '18:00 前';
+    if(h<22) return '18:00-22:00';
+    if(h>=22 || h<2) return '22:00-02:00';
+  }
+  return '凌晨以后 / 时间待定';
+}
+function groupCounts(list){
+  const out={};
+  for(const x of list){
+    const g=groupLabel(x);
+    out[g]=out[g]||{total:0,A:0,B:0,todo:0};
+    out[g].total++;
+    out[g][candidateGrade(x)]++;
+    if(candidateStatus(x).rank===0) out[g].todo++;
+  }
+  return out;
+}
 function renderCandidates(){
-  const base=getCandidates().filter(x=>['A','B'].includes(String(first(x.rating,x.grade,'')).toUpperCase()));
+  const base=getCandidates().filter(x=>['A','B'].includes(candidateGrade(x)));
   const demoCount=getDemoCount();
-  const list=sortCandidates(demoCount?buildDemoCandidates(base,demoCount):base);
-  const el=$('candidateList');
+  const all=prioritySort(demoCount?buildDemoCandidates(base,demoCount):base);
+  const list=applyCandidateFilter(all);
   DISPLAY_CANDIDATES=list;
-  if(!list.length){el.innerHTML='<div class="note">今日暂无 A/B 候选。</div><div class="note" style="margin-top:8px">RF影子观察仅用于复盘，不作为投注推荐。</div>';return;}
-  var h='<table class="candidate-table"><thead><tr><th style="width:9%">时间</th><th style="width:6%">官方</th><th style="width:8%">RF影子</th><th style="width:8%">盘口后</th><th style="width:26%">对阵</th><th style="width:10%">剧本</th><th style="width:23%">进球分布</th><th style="width:6%">状态</th><th style="width:4%"></th></tr></thead><tbody>';
-  list.forEach(function(x,i){h+=renderListRow(x,i);});
+  const el=$('candidateList');
+  if(!list.length){
+    el.innerHTML='<div class="note">当前筛选下暂无 A/B 候选。</div><div class="note" style="margin-top:8px">可切换“全部”查看完整候选。</div>';
+    renderSelectedCandidate(null);
+    return;
+  }
+  const selectedIndex=list.findIndex(x=>candidateFixtureId(x)===SELECTED_FIXTURE_ID);
+  if(!SELECTED_FIXTURE_ID || selectedIndex<0){
+    SELECTED_CAND_INDEX=0;
+    SELECTED_FIXTURE_ID=candidateFixtureId(list[0]);
+  }else{
+    SELECTED_CAND_INDEX=selectedIndex;
+  }
+  const counts=groupCounts(all);
+  const buckets=['优先队列：30分钟内开赛','18:00 前','18:00-22:00','22:00-02:00'];
+  let h='<div class="single-page-note">密集模式：比赛列表固定滚动；点击任一行，右侧单场决策面板完成 BET / NO_BET / 无盘口。系统异常中心保留在底部导航和抽屉。</div>';
+  h+=`<div class="desk-toolbar"><div class="seg"><button class="${CAND_FILTER==='ALL'?'active':''}" onclick="setCandFilter('ALL')">全部</button><button class="${CAND_FILTER==='TODO'?'active':''}" onclick="setCandFilter('TODO')">待处理</button><button class="${CAND_FILTER==='A'?'active':''}" onclick="setCandFilter('A')">A</button><button class="${CAND_FILTER==='B'?'active':''}" onclick="setCandFilter('B')">B</button><button class="${CAND_FILTER==='SOON'?'active':''}" onclick="setCandFilter('SOON')">30分钟内</button><button class="${CAND_FILTER==='RECORDED'?'active':''}" onclick="setCandFilter('RECORDED')">已记录</button></div><input class="desk-search" value="${safe(CAND_QUERY,'').replace(/"/g,'&quot;')}" placeholder="搜索球队 / 联赛 / 状态" oninput="setCandQuery(this.value)"></div>`;
+  h+='<div class="density-bar">'+buckets.map(b=>{const c=counts[b]||{total:0,A:0,B:0,todo:0};return `<div class="density-bucket"><b>${b.replace('优先队列：','')}</b><span>A${c.A||0}/B${c.B||0} · 待投${c.todo||0}</span></div>`;}).join('')+'</div>';
+  h+='<table class="candidate-table"><thead><tr><th style="width:12%">时间</th><th style="width:6%">级</th><th style="width:10%">联赛</th><th style="width:29%">对阵</th><th style="width:15%">进球高峰</th><th style="width:13%">盘口建议</th><th style="width:8%">状态</th><th style="width:7%">下一步</th></tr></thead><tbody>';
+  let lastGroup='';
+  list.forEach((x,i)=>{
+    const g=groupLabel(x);
+    if(g!==lastGroup){
+      const c=groupCounts(list)[g]||{total:0,A:0,B:0,todo:0};
+      h+=`<tr class="group-row"><td colspan="8">${g}<span class="count">${c.total}场 · A${c.A||0}/B${c.B||0}</span></td></tr>`;
+      lastGroup=g;
+    }
+    h+=renderDenseRow(x,i);
+  });
   h+='</tbody></table>';
   el.innerHTML=h;
-  const layout=document.querySelector('.primary-layout');
-  if(layout){
-    layout.classList.toggle('mode-4', list.length>2);
-    layout.classList.toggle('mode-2', list.length<=2);
-  }
   $('skipLine').style.display='none';
-  if(demoCount){ toast('临时演示已启用：'+demoCount+'场（A级优先→按开赛时间）'); }
+  renderSelectedCandidate(list[SELECTED_CAND_INDEX]||list[0]);
 }
-
-function renderListRow(x,i){
-  const r=String(first(x.rating,x.grade,'A')).toUpperCase();
-  const official=String(first(x.official_grade,x.grade,'无')).toUpperCase();
-  const rfShadow=safe(x.rf_shadow_grade,'数据缺失');
-  const marketShadow=safe(x.market_adjusted_shadow_grade,'数据缺失');
-  const league=safe(first(x.league_cn,x.league),'联赛');
-  const fmtKickoff=v=>{if(!v)return null;const s=String(v);const m=s.match(/(\d{4})-(\d{2})-(\d{2})[T ](\d{2}):(\d{2})/);if(m)return m[2]+'-'+m[3]+' '+m[4]+':'+m[5];return (s||'').slice(0,16).replace('T',' ');};
-  const rawTime=first(x.kickoff_bj,x.kickoff_time_bj,x.kickoff_local,x.kickoff_time,x.kickoff,x.time,null);
-  const time=rawTime?fmtKickoff(rawTime):'待定';
-  // Use model's real playbook and distribution fields
-  const playbook=x.playbook_script||'数据暂缺';
-  const d015=x.fh_goal_dist_0_15_pct;const d1630=x.fh_goal_dist_16_30_pct;const d3145=x.fh_goal_dist_31_45_pct;
-  var distText='进球分布暂缺';
-  if(d015!=null&&d1630!=null&&d3145!=null){distText='0-15 '+d015+'% · 16-30 '+d1630+'% · 31-45 '+d3145+'%';}
-  var stateTag;
-  if(x.no_market_excluded){stateTag='无盘口已排除';}
-  else if(x.no_bet_recorded){stateTag=x.no_bet_reason_code==='EARLY_GOAL'?'未投：早进球':'未投：已记录';}
-  else if(x.settled){stateTag='已结算';}
-  else if(x.already_bet){stateTag='已投注';}
-  else{stateTag='未投注';}
-  const shadowBadge=`RF:${safe(rfShadow,'数据缺失')} / 盘后:${safe(marketShadow,'数据缺失')}`;
-  const diffText=safe(x.official_vs_shadow_reason,'官方与影子差异待观察');
-  const shadowRoute=shadowCn(x.rf_shadow_route);
-  const balanceReason=safe(x.rf_balance_reason,'数据缺失');
-  const h2hReason=shadowCn(first(x.h2h_recent5_bonus_reason,x.h2h_recent5_support_status));
-  const openMarketReason=shadowCn(first(x.opening_market_reason,x.opening_market_support_status));
-  const marketBookmaker=safe(first(x.opening_market_bookmaker_used,''),'未命中');
-  const marketSource=shadowCn(first(x.opening_market_source,'')); 
-  const marketBetName=safe(first(x.opening_market_bet_name,x.opening_market_market_name,''),'未记录');
-  const noHtOuReason=shadowCn(first(x.no_ht_ou_reason,x.opening_market_data_status,''));
-  const marketConflict=shadowCn(first(x.opening_market_conflict_level,''));
-  const marketAction=shadowCn(first(x.opening_market_action,x.dryrun_action,''));
-  const marketVetoSeverity=safe(first(x.market_veto_severity,''),'NONE');
-  const marketVetoReason=safe(first(x.market_veto_reason,''),'未记录');
-  const marketPolicyVersion=safe(first(x.market_policy_version,''),'未记录');
-  const marketAdjustReason=safe(x.market_adjustment_reason,'数据缺失');
-  const modeRaw=String(first(x.collection_mode,'official_legacy')).toLowerCase();
-  const observeMode=collectionModeCn(modeRaw);
-  const collectionStage=safe(first(x.collection_stage,x.actual_collection_stage),'未记录');
-  const h2hState=(modeRaw==='official_legacy')
-    ? '已查（旧链路）'
-    : collectionStateCn(Boolean(x.h2h_required),Boolean(x.h2h_collected),x.h2h_skipped_reason);
-  const eventsState=(modeRaw==='official_legacy')
-    ? '按旧链路执行'
-    : collectionStateCn(Boolean(x.events_required),Boolean(x.events_collected),x.events_skipped_reason);
-  const cplState=(modeRaw==='official_legacy')
-    ? '占位未启用'
-    : collectionStateCn(Boolean(x.cpl_required),Boolean(x.cpl_collected),x.cpl_skipped_reason);
-  const h2hBudgetReason=safe(x.h2h_budget_exceeded_reason,'');
-  const h2hTimeoutSec=safe(first(x.h2h_timeout_seconds,''),'');
-  const h2hRequiredTotal=safe(first(x.h2h_required_total,''),'');
-  const h2hRatioCap=safe(first(x.h2h_required_ratio_cap,''),'');
-  const prefilterMs=safe(first(x.prefilter_elapsed_ms,0),'0');
-  const recentHomeMs=safe(first(x.recent_home_elapsed_ms,0),'0');
-  const recentAwayMs=safe(first(x.recent_away_elapsed_ms,0),'0');
-  const oddsMs=safe(first(x.odds_elapsed_ms,0),'0');
-  const coverageMs=safe(first(x.coverage_elapsed_ms,0),'0');
-  const h2hMs=safe(first(x.h2h_elapsed_ms,0),'0');
-  const eventsMs=safe(first(x.events_elapsed_ms,0),'0');
-  const slowestStage=safe(first(x.slowest_stage,''),'未记录');
-  const apiCallCount=safe(first(x.api_call_count,0),'0');
-  const cacheHitCount=safe(first(x.cache_hit_count,0),'0');
-  const cacheMissCount=safe(first(x.cache_miss_count,0),'0');
-  const savedCalls=safe(first(x.expensive_calls_saved,0),'0');
-  const collectionReason=safe(x.collection_reason,'未记录');
-  const seasonPhase=safe(first(x.season_phase,'UNKNOWN'),'UNKNOWN');
-  const leagueTier=safe(first(x.league_tier,'UNKNOWN_TIER'),'UNKNOWN_TIER');
-  const rfWindowPolicy=safe(first(x.rf_window_policy,''),'');
-  const rfSampleStatus=safe(first(x.rf_sample_status,'UNKNOWN'),'UNKNOWN');
-  const rfFreshnessStatus=safe(first(x.rf_freshness_status,x.recent_freshness_status,'UNKNOWN'),'UNKNOWN');
-  const recent60H=safe(first(x.recent60_match_count_home,0),'0');
-  const recent60A=safe(first(x.recent60_match_count_away,0),'0');
-  const recent90H=safe(first(x.recent90_match_count_home,0),'0');
-  const recent90A=safe(first(x.recent90_match_count_away,0),'0');
-  const recent10DaysH=safe(first(x.recent10_window_days_home,0),'0');
-  const recent10DaysA=safe(first(x.recent10_window_days_away,0),'0');
-  const recent5DaysH=safe(first(x.recent5_window_days_home,0),'0');
-  const recent5DaysA=safe(first(x.recent5_window_days_away,0),'0');
-  const seasonAwareReason=safe(first(x.rf_season_aware_reason,''),'');
-  const isOfficialCandidate=['A','B'].includes(official);
-  const dl=safe(first(x.default_line,'O1'),'O1');
-  const od=safe(x.default_odds,'');const st=safe(x.default_stake,'');const mi=safe(x.default_entry_minute,'');
-  const lines=['O0.75','O1','O1.25','O1.5','O2'];
-  const lineOpts=lines.map(function(l){return '<option'+(l===dl?' selected':'')+'>'+l+'</option>';}).join('');
-  var row='<tr class="candidate-row grade-'+r+'" onclick="toggleBetPanel('+i+')">';
-  row+='<td class="time-col">'+time+'</td>';
-  row+='<td class="grade-col"><span style="display:inline-block;width:7px;height:7px;border-radius:50%;background:'+(official==='A'?'var(--green)':'var(--blue)')+';margin-right:3px;vertical-align:middle"></span>'+safe(official,'无')+'</td>';
-  row+='<td class="shadow-col">'+safe(rfShadow,'数据缺失')+'</td>';
-  row+='<td class="shadow-col">'+safe(marketShadow,'数据缺失')+'</td>';
-  row+='<td class="teams-col" title="'+matchName(x)+'">'+matchName(x)+'</td>';
-  row+='<td class="playbook-col">'+playbook+'</td>';
-  row+='<td class="dist-col">'+distText+'</td>';
-  row+='<td class="status-col">'+stateTag+'</td>';
-  row+='<td class="action-col"><button class="expand-btn" id="ebtn'+i+'">展开</button></td>';
-  row+='</tr>';
-  // Bet form panel row
-  row+='<tr class="bet-row-panel" id="bpanel'+i+'"><td colspan="9">';
-  row+='<div class="shadow-review"><div class="t">【RF影子观察】</div>';
-  row+='<div><span class="k">联赛：</span>'+league+'</div>';
-  row+='<div><span class="k">官方等级：</span>'+safe(official,'无')+'　<span class="k">RF影子：</span>'+safe(rfShadow,'数据缺失')+'　<span class="k">盘口调整后：</span>'+safe(marketShadow,'数据缺失')+'</div>';
-  row+='<div><span class="k">影子路线：</span>'+shadowRoute+'　<span class="k">差异：</span>'+safe(diffText,'待观察')+'</div>';
-  row+='<div><span class="k">近期状态：</span>'+safe(x.rf_shadow_reason,'数据缺失')+'</div>';
-  row+='<div><span class="k">双方平衡：</span>'+balanceReason+'</div>';
-  row+='<div><span class="k">H2H近5：</span>'+h2hReason+'</div>';
-  row+='<div><span class="k">初盘判断：</span>'+openMarketReason+'</div>';
-  row+='<div><span class="k">盘口来源：</span>'+marketSource+'　<span class="k">bookmaker：</span>'+marketBookmaker+'</div>';
-  row+='<div><span class="k">盘口市场：</span>'+marketBetName+'</div>';
-  row+='<div><span class="k">缺失原因：</span>'+noHtOuReason+'</div>';
-  row+='<div><span class="k">冲突分层：</span>'+marketConflict+'　<span class="k">动作：</span>'+marketAction+'</div>';
-  row+='<div><span class="k">veto级别：</span>'+marketVetoSeverity+'　<span class="k">veto原因：</span>'+marketVetoReason+'</div>';
-  row+='<div><span class="k">策略版本：</span>'+marketPolicyVersion+'</div>';
-  row+='<div><span class="k">盘口调整说明：</span>'+marketAdjustReason+'</div>';
-  row+='<div><span class="k">采集模式：</span>'+observeMode+'</div>';
-  row+='<div><span class="k">采集阶段：</span>'+collectionStage+'</div>';
-  row+='<div><span class="k">H2H：</span>'+h2hState+'</div>';
-  row+='<div><span class="k">H2H预算：</span>'+(h2hBudgetReason?shadowCn(h2hBudgetReason):'未触发')+'</div>';
-  row+='<div><span class="k">H2H超时阈值：</span>'+(h2hTimeoutSec?`${h2hTimeoutSec}秒`:'未记录')+'　<span class="k">H2H需查总数：</span>'+(h2hRequiredTotal||'未记录')+'　<span class="k">比例上限：</span>'+(h2hRatioCap?`${h2hRatioCap}`:'未记录')+'</div>';
-  row+='<div><span class="k">Events：</span>'+eventsState+'</div>';
-  row+='<div><span class="k">CPL：</span>'+cplState+'</div>';
-  row+='<div><span class="k">耗时(ms)：</span>prefilter '+prefilterMs+' | recent(H/A) '+recentHomeMs+'/'+recentAwayMs+' | odds '+oddsMs+' | coverage '+coverageMs+' | h2h '+h2hMs+' | events '+eventsMs+'</div>';
-  row+='<div><span class="k">慢因：</span>'+safe(slowestStage,'未记录')+'　<span class="k">API调用：</span>'+apiCallCount+'　<span class="k">cache hit/miss：</span>'+cacheHitCount+'/'+cacheMissCount+'</div>';
-  row+='<div><span class="k">节省请求（估算）：</span>'+savedCalls+'</div>';
-  row+='<div><span class="k">采集说明：</span>'+collectionReason+'</div>';
-  row+='<div><span class="k">赛季阶段：</span>'+shadowCn(seasonPhase)+'　<span class="k">联赛层级：</span>'+shadowCn(leagueTier)+'</div>';
-  row+='<div><span class="k">窗口策略：</span>'+shadowCn(rfWindowPolicy)+'　<span class="k">样本状态：</span>'+shadowCn(rfSampleStatus)+'　<span class="k">新鲜度：</span>'+shadowCn(rfFreshnessStatus)+'</div>';
-  row+='<div><span class="k">近60场计数(H/A)：</span>'+recent60H+'/'+recent60A+'　<span class="k">近90场计数(H/A)：</span>'+recent90H+'/'+recent90A+'</div>';
-  row+='<div><span class="k">recent10窗口天数(H/A)：</span>'+recent10DaysH+'/'+recent10DaysA+'　<span class="k">recent5窗口天数(H/A)：</span>'+recent5DaysH+'/'+recent5DaysA+'</div>';
-  row+='<div><span class="k">Season-aware说明：</span>'+safe(seasonAwareReason,'未记录')+'</div>';
-  row+='<div class="shadow-disclaimer">影子观察，不作为投注推荐。</div></div>';
-  if(isOfficialCandidate){
-    row+='<div class="bet-form-inline">';
-    row+='<label>盘口线</label><select id="line-'+i+'">'+lineOpts+'</select>';
-    row+='<label>水位</label><input id="odds-'+i+'" value="'+od+'">';
-    row+='<label>金额</label><input id="stake-'+i+'" value="'+st+'">';
-    row+='<label>入场</label><input id="minute-'+i+'" value="'+mi+'">';
-    row+='<button class="btn-save" onclick="event.stopPropagation();addBet('+i+')">保存投注</button>';
-    row+='<button class="btn-skip" onclick="event.stopPropagation();markNoBetEarlyGoal('+i+')">早进球未投</button>';
-    row+='<button class="btn-no-market" onclick="event.stopPropagation();markNoMarket('+i+')">无盘口排除</button>';
-    row+='<label>备注</label><textarea id="notes-'+i+'"></textarea>';
-    row+='</div>';
-  }else{
-    row+='<div class="note">该行仅影子观察，投注操作已禁用。</div>';
-  }
-  row+='</td></tr>';
+function renderDenseRow(x,i){
+  const status=candidateStatus(x);
+  const selected=i===SELECTED_CAND_INDEX;
+  const grade=candidateGrade(x);
+  const ko=kickoffInfo(x);
+  const peak=goalPeakInfo(x);
+  const plan=linePlanFor(x);
+  let row=`<tr class="candidate-row grade-${grade} ${selected?'selected':''}" data-index="${i}" onclick="selectCandidate(${i})">
+    <td class="time-col">${ko.label}</td>
+    <td class="grade-col"><span style="display:inline-block;width:7px;height:7px;border-radius:50%;background:${grade==='A'?'var(--green)':'var(--blue)'};margin-right:3px;vertical-align:middle"></span>${grade}</td>
+    <td class="league-col" title="${candidateLeague(x)}">${candidateLeague(x)}<br>${leagueTrustBadge(candidateLeague(x))}</td>
+    <td class="teams-col" title="${matchName(x)}">${matchName(x)}</td>
+    <td class="peak-col" title="${peak.source}">${peak.text}</td>
+    <td class="line-col" title="${plan.basis}">${recommendedLine(x)}</td>
+    <td class="status-col"><span class="badge ${status.cls==='todo'?'warn':status.cls==='stop'?'red':'a'}">${status.text}</span></td>
+    <td class="next-col">${status.next}</td>
+  </tr>`;
+  if(selected) row+=renderCandidateDetailRow(x);
   return row;
 }
-var openBetPanel=-1;
-function toggleBetPanel(i){
-  var allPanels=document.querySelectorAll('.bet-row-panel');
-  var allBtns=document.querySelectorAll('.expand-btn');
-  if(openBetPanel===i){
-    allPanels[i].classList.remove('open');
-    allBtns[i].classList.remove('open');
-    allBtns[i].textContent='展开';
-    openBetPanel=-1;
-  }else{
-    if(openBetPanel>=0){
-      allPanels[openBetPanel].classList.remove('open');
-      allBtns[openBetPanel].classList.remove('open');
-      allBtns[openBetPanel].textContent='展开';
-    }
-    allPanels[i].classList.add('open');
-    allBtns[i].classList.add('open');
-    allBtns[i].textContent='收起';
-    openBetPanel=i;
+function renderCandidateDetailRow(x){
+  const peak=goalPeakInfo(x);
+  const plan=linePlanFor(x);
+  const league=leagueDetailFor(x);
+  const dist=goalDistributionText(x);
+  return `<tr class="candidate-detail-row"><td colspan="8">
+    <div class="candidate-detail">
+      <div class="detail-cell"><span>联赛命中/ROI</span><b>${league.main}</b><em>${league.sub}</em></div>
+      <div class="detail-cell"><span>进球分布</span><b>${peak.text}</b><em>${dist}</em></div>
+      <div class="detail-cell"><span>盘口建议依据</span><b>${recommendedLine(x)}</b><em>${plan.basis}</em></div>
+      <div class="detail-cell"><span>技术审计</span><b>RF ${safe(x.rf_shadow_grade,'缺失')} / 盘后 ${safe(x.market_adjusted_shadow_grade,'缺失')}</b><em>${shadowCn(first(x.opening_market_action,x.dryrun_action,''))}</em></div>
+    </div>
+  </td></tr>`;
+}
+function setCandFilter(v){CAND_FILTER=v;renderCandidates();}
+function setCandQuery(v){CAND_QUERY=v;renderCandidates();}
+function selectCandidate(i){
+  const x=DISPLAY_CANDIDATES[i];
+  if(!x) return;
+  SELECTED_CAND_INDEX=i;
+  SELECTED_FIXTURE_ID=candidateFixtureId(x);
+  renderCandidates();
+}
+function renderSelectedCandidate(x){
+  if(!x){
+    $('selectedMatchTitle').textContent='请选择一场比赛';
+    $('selectedMatchMeta').textContent='点击左侧比赛行后，在这里完成投注/未投注/无盘口记录。';
+    $('selectedDecisionMain').textContent='等待选择';
+    $('selectedLine').textContent='-';
+    $('selectedStake').textContent='-';
+    $('selectedOdds').textContent='-';
+    $('selectedPeak').textContent='-';
+    $('selectedDecisionBasis').textContent='选择比赛后显示建议依据。';
+    $('selectedLeagueMain').textContent='等待选择';
+    $('selectedLeagueSample').textContent='-';
+    $('selectedLeagueHit').textContent='-';
+    $('selectedLeagueRoi').textContent='-';
+    $('selectedLeagueAction').textContent='-';
+    $('selectedAudit').innerHTML='选择比赛后显示 RF 影子、盘口冲突、采集血缘。';
+    return;
   }
+  const grade=candidateGrade(x);
+  const ko=kickoffInfo(x);
+  const league=candidateLeague(x);
+  const plan=linePlanFor(x);
+  const peak=goalPeakInfo(x);
+  const line=plan.line;
+  const odds=safe(first(x.default_odds,''),'');
+  const stake=plan.stake;
+  const minute=safe(first(x.default_entry_minute,''),'');
+  const lg=leagueTrustFor(league);
+  const leagueMeta=leagueTrustMeta(lg);
+  $('selectedMatchTitle').textContent=matchName(x);
+  $('selectedMatchMeta').textContent=`${ko.label} · ${league} · official ${grade} · ${safe(first(x.playbook_script,''),'剧本待补')} · 高峰${peak.text}`;
+  $('selectedDecisionMain').textContent=stakeHint(grade,line);
+  $('selectedDecisionBasis').textContent=`依据：${plan.basis}。高峰来自上半场进球分布 ${peak.text}。`;
+  $('selectedLine').textContent=line;
+  $('selectedStake').textContent=`${stake||0}元`;
+  $('selectedOdds').textContent=odds||'待填';
+  $('selectedPeak').textContent=peak.text;
+  $('selectedLeagueMain').textContent=`${league}：${leagueMeta.note}`;
+  $('selectedLeagueSample').textContent=lg?`${Number(lg.validated_count||0)}`:'0';
+  $('selectedLeagueHit').textContent=lg?pct(lg.hit_rate):'N/A';
+  $('selectedLeagueRoi').textContent='仅观察';
+  $('selectedLeagueAction').textContent=leagueMeta.tag;
+  $('selectedFormLine').value=line;
+  $('selectedFormOdds').value=odds;
+  $('selectedFormStake').value=stake||'';
+  $('selectedFormMinute').value=minute;
+  $('selectedNotes').value='';
+  $('selectedAudit').innerHTML=buildAuditText(x);
+}
+function buildAuditText(x){
+  const peak=goalPeakInfo(x);
+  const plan=linePlanFor(x);
+  return `<div><span class="k">RF影子：</span>${safe(x.rf_shadow_grade,'数据缺失')}　<span class="k">盘口后：</span>${safe(x.market_adjusted_shadow_grade,'数据缺失')}</div>
+  <div><span class="k">上半场高峰：</span>${peak.text}　<span class="k">进球分布来源：</span>${peak.source}</div>
+  <div><span class="k">盘口建议依据：</span>${plan.basis}</div>
+  <div><span class="k">影子路线：</span>${shadowCn(x.rf_shadow_route)}　<span class="k">盘口动作：</span>${shadowCn(first(x.opening_market_action,x.dryrun_action,''))}</div>
+  <div><span class="k">盘口来源：</span>${shadowCn(first(x.opening_market_source,''))}　<span class="k">bookmaker：</span>${safe(first(x.opening_market_bookmaker_used,''),'未命中')}</div>
+  <div><span class="k">采集：</span>${collectionModeCn(first(x.collection_mode,'official_legacy'))} / ${safe(first(x.collection_stage,x.actual_collection_stage),'未记录')}</div>
+  <div class="shadow-disclaimer">影子观察和技术血缘仅供复盘，不作为投注推荐。</div>`;
+}
+function selectedCandidate(){
+  if(!DISPLAY_CANDIDATES.length) return null;
+  if(SELECTED_CAND_INDEX>=0 && SELECTED_CAND_INDEX<DISPLAY_CANDIDATES.length){
+    return DISPLAY_CANDIDATES[SELECTED_CAND_INDEX];
+  }
+  if(SELECTED_FIXTURE_ID){
+    const exact=DISPLAY_CANDIDATES.find(x=>candidateFixtureId(x)===SELECTED_FIXTURE_ID);
+    if(exact) return exact;
+  }
+  return DISPLAY_CANDIDATES[0];
+}
+function readFloatValue(id, fallback){
+  const el=$(id);
+  const n=Number.parseFloat(el?el.value:'');
+  return Number.isFinite(n)?n:fallback;
+}
+function selectedReasonText(code){
+  const map={
+    EARLY_GOAL:'入场前已进球，未按计划投注',
+    ODDS_MOVED:'盘口或水位变化，不符合计划',
+    NOT_WATCHED:'未及时看盘，放弃投注',
+    MANUAL_SKIP:'人工判断跳过',
+    MARKET_CLOSED:'盘口关闭，无法入场',
+    OTHER:'其他原因未投注'
+  };
+  return map[String(code||'').toUpperCase()]||map.OTHER;
+}
+function syncSelectedStakeFromLine(){
+  const x=selectedCandidate();
+  if(!x) return;
+  const grade=candidateGrade(x);
+  const line=$('selectedFormLine')?.value||'O1';
+  const stake=defaultStakeFor(grade,line);
+  const peak=goalPeakInfo(x);
+  if($('selectedFormStake')) $('selectedFormStake').value=stake?String(stake):'';
+  $('selectedDecisionMain').textContent=stakeHint(grade,line);
+  $('selectedDecisionBasis').textContent=`依据：手动选择 ${line}，金额按${grade}级风控模板。高峰来自上半场进球分布 ${peak.text}。`;
+  $('selectedLine').textContent=line;
+  $('selectedStake').textContent=`${stake||0}元`;
+}
+function buildSelectedBasePayload(x){
+  const line=$('selectedFormLine')?.value||'O1';
+  const odds=readFloatValue('selectedFormOdds',0.86);
+  const stake=readFloatValue('selectedFormStake',null);
+  return {
+    date:MODEL.today_date||localDateYmd(),
+    fixture_id:first(x.fixture_id,''),
+    league:first(x.league,x.league_cn,''),
+    home:first(x.home_cn,x.home,'主队'),
+    away:first(x.away_cn,x.away,'客队'),
+    home_cn:first(x.home_cn,x.home,'主队'),
+    away_cn:first(x.away_cn,x.away,'客队'),
+    grade:candidateGrade(x),
+    market_line:line,
+    odds_water:odds,
+    stake:stake,
+    entry_minute:$('selectedFormMinute')?.value||'',
+    score_at_entry:$('selectedFormScore')?.value||'',
+    rebate_rate:0.025,
+    notes:$('selectedNotes')?.value||''
+  };
 }
 
 function renderSide(){
@@ -969,8 +1379,10 @@ function renderModules(){
   $('modBetSettle').textContent='按半场比分结算';
   $('modBetAudit').textContent='全流程审计留痕';
 
-  $('modReviewLedger').textContent='点击打开AB历史复盘页';
-  $('modReviewLeague').textContent='点击打开联赛诊断页';
+  const leagueTop=arr((MODEL.league_hit_rate||{}).top_leagues);
+  const bestLeague=leagueTop[0]||{};
+  $('modReviewLedger').textContent='当前页抽屉查看AB/联赛摘要';
+  $('modReviewLeague').textContent=bestLeague.league?`${bestLeague.league} ${pct(bestLeague.hit_rate_ab)}`:'暂无联赛样本';
   $('modReviewUnknown').textContent='未知联赛不进主归因';
   $('modReviewPolicy').textContent='只观察，不自动改策略';
 
@@ -980,66 +1392,88 @@ function renderModules(){
   if(ss.cron_status_text){ $('systemToolbarStatus').textContent=ss.cron_status_text; }
 }
 
-async function addBet(i){
-  const list=DISPLAY_CANDIDATES.length?DISPLAY_CANDIDATES:getCandidates().filter(x=>['A','B'].includes(String(first(x.rating,x.grade,'')).toUpperCase()));
-  const x=list[i]; if(!x){toast('候选数据缺失');return;}
-  const payload={date:MODEL.today_date||new Date().toISOString().slice(0,10).replace(/-/g,''),league:first(x.league,x.league_cn,''),home_cn:first(x.home_cn,x.home,'主队'),away_cn:first(x.away_cn,x.away,'客队'),fixture_id:first(x.fixture_id,''),grade:first(x.rating,x.grade,'A'),market_line:document.getElementById(`line-${i}`).value,odds_water:parseFloat(document.getElementById(`odds-${i}`).value)||0.86,stake:parseFloat(document.getElementById(`stake-${i}`).value)||null,entry_minute:document.getElementById(`minute-${i}`).value||'',rebate_rate:0.025,notes:document.getElementById(`notes-${i}`).value||'',bet_status:'BET',settlement_result:'PENDING'};
+async function addSelectedBet(){
+  const x=selectedCandidate();
+  if(!x){ toast('请先选择一场比赛'); return; }
+  const payload=buildSelectedBasePayload(x);
+  payload.bet_status='BET';
+  payload.settlement_result='PENDING';
+  if(!payload.fixture_id){ toast('缺少 fixture_id，无法记录投注'); return; }
+  if(payload.stake===null || payload.stake<=0){ toast('请填写投注金额'); return; }
   try{
     const r=await fetch('/api/live_bets/add',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
     const d=await r.json();
-    if(d.ok){toast('已添加记录'); loadModel(true);} else {toast('添加失败: '+(d.error||'未知错误'));}
+    if(d.ok){toast('已添加投注记录'); await loadModel(true);} else {toast('添加失败: '+(d.error||'未知错误'));}
   }catch(e){toast('网络错误: '+e.message);}
 }
 
-async function markNoBetEarlyGoal(i){
-  const list=DISPLAY_CANDIDATES.length?DISPLAY_CANDIDATES:getCandidates().filter(x=>['A','B'].includes(String(first(x.rating,x.grade,'')).toUpperCase()));
-  const x=list[i]; if(!x){toast('候选数据缺失');return;}
+async function markSelectedNoBet(){
+  const x=selectedCandidate();
+  if(!x){ toast('请先选择一场比赛'); return; }
+  const base=buildSelectedBasePayload(x);
+  const reasonCode=$('selectedNoBetReason')?.value||'EARLY_GOAL';
   const payload={
-    date:MODEL.today_date||new Date().toISOString().slice(0,10).replace(/-/g,''),
-    fixture_id:first(x.fixture_id,''),
-    league:first(x.league,x.league_cn,''),
-    home:first(x.home_cn,x.home,'主队'),
-    away:first(x.away_cn,x.away,'客队'),
-    grade:first(x.rating,x.grade,'A'),
-    reason_code:'EARLY_GOAL',
-    reason_text:'入场前已进球，未按计划投注',
-    planned_line:document.getElementById(`line-${i}`)?.value||'O1',
-    planned_odds:parseFloat(document.getElementById(`odds-${i}`)?.value||'0.86'),
-    planned_stake:parseFloat(document.getElementById(`stake-${i}`)?.value||'428'),
-    planned_entry_minute:document.getElementById(`minute-${i}`)?.value||'13',
-    note:document.getElementById(`notes-${i}`)?.value||''
+    date:base.date,
+    fixture_id:base.fixture_id,
+    league:base.league,
+    home:base.home,
+    away:base.away,
+    grade:base.grade,
+    reason_code:reasonCode,
+    reason_text:selectedReasonText(reasonCode),
+    planned_line:base.market_line,
+    planned_odds:base.odds_water,
+    planned_stake:base.stake,
+    planned_entry_minute:base.entry_minute,
+    note:base.notes
   };
   if(!payload.fixture_id){ toast('缺少 fixture_id，无法记录未投注原因'); return; }
   try{
     const r=await fetch('/api/v4_live_bet/no_bet',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
     const d=await r.json();
-    if(d.ok){ toast('已记录：早进球未投'); await loadModel(true); }
+    if(d.ok){ toast('已记录：'+selectedReasonText(reasonCode)); await loadModel(true); }
     else { toast('记录失败: '+(d.error||'未知错误')); }
   }catch(e){ toast('网络错误: '+e.message); }
 }
 
-async function markNoMarket(i){
-  const list=DISPLAY_CANDIDATES.length?DISPLAY_CANDIDATES:getCandidates().filter(x=>['A','B'].includes(String(first(x.rating,x.grade,'')).toUpperCase()));
-  const x=list[i]; if(!x){toast('候选数据缺失');return;}
+async function markSelectedNoMarket(){
+  const x=selectedCandidate();
+  if(!x){ toast('请先选择一场比赛'); return; }
   if(!confirm('确认将该候选标记为无盘口排除？\n排除后不再计入待投注和验证统计。'))return;
+  const base=buildSelectedBasePayload(x);
   const payload={
-    date:MODEL.today_date||new Date().toISOString().slice(0,10).replace(/-/g,''),
-    fixture_id:first(x.fixture_id,''),
-    league:first(x.league,x.league_cn,''),
-    home:first(x.home_cn,x.home,''),
-    away:first(x.away_cn,x.away,''),
-    grade:first(x.rating,x.grade,'A'),
+    date:base.date,
+    fixture_id:base.fixture_id,
+    league:base.league,
+    home:base.home,
+    away:base.away,
+    grade:base.grade,
     reason:'no_market',
     reason_text:'无盘口/未开盘，手动排除',
-    source:'dashboard_manual'
+    source:'dashboard_manual',
+    note:base.notes
   };
   if(!payload.fixture_id){ toast('缺少 fixture_id'); return; }
   try{
     const r=await fetch('/api/v4_live_bet/no_market',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
     const d=await r.json();
-    if(d.ok){ toast('已标记无盘口排除'); await loadModel(true); }
+    if(d.ok){ toast(d.status==='already_excluded'?'此前已标记无盘口':'已标记无盘口排除'); await loadModel(true); }
     else { toast('标记失败: '+(d.error||'未知错误')); }
   }catch(e){ toast('网络错误: '+e.message); }
+}
+
+async function addBet(i){
+  if(Number.isFinite(Number(i))) selectCandidate(Number(i));
+  return addSelectedBet();
+}
+async function markNoBetEarlyGoal(i){
+  if(Number.isFinite(Number(i))) selectCandidate(Number(i));
+  if($('selectedNoBetReason')) $('selectedNoBetReason').value='EARLY_GOAL';
+  return markSelectedNoBet();
+}
+async function markNoMarket(i){
+  if(Number.isFinite(Number(i))) selectCandidate(Number(i));
+  return markSelectedNoMarket();
 }
 
 function buildValidationPanel(){
@@ -1071,10 +1505,19 @@ function buildBetApiPanel(){
   </table><div class='note'>仅本地记录，不自动下注，不连接任何账号。</div>`;
 }
 function buildReviewPanel(){
-  return `<div class='note'>复盘与联赛入口：</div>
+  const summary=MODEL.league_performance_summary||{};
+  const rows=Object.values(MODEL.league_trust_tags||{}).sort((a,b)=>Number(b.validated_count||0)-Number(a.validated_count||0)).slice(0,16);
+  const table=rows.length?`<table class="league-table"><tr><th>联赛</th><th>已验证</th><th>待赛</th><th>命中率</th><th>长期标签</th></tr>${rows.map(x=>{const m=leagueTrustMeta(x);return `<tr><td>${safe(x.league,'未知')}</td><td>${Number(x.validated_count||0)}</td><td>${Number(x.pending_count||0)}</td><td>${Number(x.validated_count||0)>0?pct(x.hit_rate):'不计分母'}</td><td title="${m.note}">${m.tag}</td></tr>`;}).join('')}</table>`:'<div class="note">暂无联赛长期样本。</div>';
+  return `<div class='note'>联赛长期表现库只做 dashboard 风险提示，不自动改判级，不自动排除联赛。LOW_TRUST_ALERT 表示观察风险；LOW_SAMPLE / DO_NOT_CONCLUDE 表示样本不足，不下结论。</div>
+  <div class='inline-validation'>
+    <div class='mini'><span>联赛数</span><b>${safe(summary.league_count,0)}</b></div>
+    <div class='mini'><span>AB已验证</span><b>${safe(summary.total_validated,0)}</b></div>
+    <div class='mini'><span>待赛不计分母</span><b>${safe(summary.total_pending,0)}</b></div>
+  </div>
+  ${table}
   <div class='actions'>
-    <a class='btn ghost' href='/v4_ab_historical_ledger.html' target='_blank'>打开AB历史复盘</a>
-    <a class='btn ghost' href='/v4_league_hit_rate.html' target='_blank'>打开联赛命中率/ROI</a>
+    <a class='btn ghost' href='/v4_ab_historical_ledger.html' target='_blank'>审计AB历史复盘</a>
+    <a class='btn ghost' href='/v4_league_hit_rate.html' target='_blank'>审计联赛命中率/ROI</a>
   </div>`;
 }
 function buildSystemPanel(){
@@ -1140,7 +1583,7 @@ function goNav(tab){
   if(tab==='overview'){ window.scrollTo({top:0,behavior:'smooth'}); return; }
   if(tab==='bet'){ document.querySelector('.candidate-list')?.scrollIntoView({behavior:'smooth',block:'start'}); return; }
   if(tab==='validation'){ openPanel('validation'); return; }
-  if(tab==='review'){ window.open('/v4_ab_historical_ledger.html','_blank'); return; }
+  if(tab==='review'){ openPanel('review'); return; }
   if(tab==='system'){ openPanel('system'); return; }
 }
 const panels={

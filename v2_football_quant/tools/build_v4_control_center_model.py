@@ -31,6 +31,7 @@ from typing import Any, Dict, List, Optional
 ROOT = Path(__file__).resolve().parents[1]
 STATUS = ROOT / "data/runtime/status"
 LIVE_DIR = ROOT / "data/runtime/live_bets"
+VALIDATION = ROOT / "data/runtime/validation"
 
 
 def _load_json(path: Path) -> dict:
@@ -167,6 +168,19 @@ def _find_latest_cron_checker() -> tuple[Optional[Path], dict]:
         return None, {}
     p = candidates[-1]
     return p, _load_json(p)
+
+
+def _find_latest_league_hit_rate_stats() -> tuple[Optional[Path], dict]:
+    candidates = sorted(STATUS.glob("v4_league_hit_rate_stats_*.json"))
+    if not candidates:
+        return None, {}
+    p = candidates[-1]
+    return p, _load_json(p)
+
+
+def _find_league_performance_ledger() -> tuple[Optional[Path], dict]:
+    p = VALIDATION / "v4_league_performance_ledger_latest.json"
+    return (p, _load_json(p)) if p.exists() else (None, {})
 
 
 def _read_live_bet_summary(date_str: str) -> dict:
@@ -1214,6 +1228,99 @@ def _extract_live_bet_status(today_date: str) -> dict:
     }
 
 
+def _extract_league_hit_rate_summary(stats: dict) -> dict:
+    leagues = stats.get("leagues") if isinstance(stats, dict) else []
+    if not isinstance(leagues, list):
+        leagues = []
+
+    def _best_roi_line(row: dict) -> dict:
+        options = [
+            ("O0.75", _safe_float(row.get("o075_roi_with_rebate"), 0.0)),
+            ("O1", _safe_float(row.get("o1_roi_with_rebate"), 0.0)),
+            ("O1.25", _safe_float(row.get("o125_roi_with_rebate"), 0.0)),
+            ("O1.5", _safe_float(row.get("o15_roi_with_rebate"), 0.0)),
+        ]
+        line, roi = max(options, key=lambda x: x[1])
+        return {"line": line, "roi": round(roi, 6)}
+
+    normalized: list[dict[str, Any]] = []
+    by_league: dict[str, dict[str, Any]] = {}
+    for raw in leagues:
+        if not isinstance(raw, dict):
+            continue
+        item = dict(raw)
+        best = _best_roi_line(item)
+        item["best_roi_line"] = best["line"]
+        item["best_roi_with_rebate"] = best["roi"]
+        normalized.append(item)
+        name = str(item.get("league") or "").strip()
+        if name:
+            by_league[name] = item
+
+    normalized.sort(
+        key=lambda x: (
+            int(x.get("sample_total_ab") or 0),
+            _safe_float(x.get("hit_rate_ab"), 0.0),
+            _safe_float(x.get("best_roi_with_rebate"), 0.0),
+        ),
+        reverse=True,
+    )
+    return {
+        "source": "v4_league_hit_rate_stats",
+        "sample_scope": stats.get("sample_scope", "official_57_ab_settled_only") if isinstance(stats, dict) else "official_57_ab_settled_only",
+        "generated_at": stats.get("generated_at", "") if isinstance(stats, dict) else "",
+        "A_settled": stats.get("A_settled", 0) if isinstance(stats, dict) else 0,
+        "B_settled": stats.get("B_settled", 0) if isinstance(stats, dict) else 0,
+        "AB_settled": stats.get("AB_settled", 0) if isinstance(stats, dict) else 0,
+        "outside_57_mixed": bool(stats.get("outside_57_mixed", False)) if isinstance(stats, dict) else False,
+        "top_leagues": normalized[:12],
+        "by_league": by_league,
+        "policy": stats.get("policy", {}) if isinstance(stats, dict) else {},
+    }
+
+
+def _extract_league_performance_summary(ledger: dict) -> dict:
+    rows = ledger.get("leagues") if isinstance(ledger, dict) else []
+    if not isinstance(rows, list):
+        rows = []
+    tags: dict[str, dict[str, Any]] = {}
+    for raw in rows:
+        if not isinstance(raw, dict):
+            continue
+        league = str(raw.get("normalized_league") or raw.get("league") or "").strip()
+        if league:
+            tags[league] = dict(raw)
+    low_trust = [row for row in rows if isinstance(row, dict) and row.get("trust_tag") == "LOW_TRUST_ALERT"]
+    low_sample = [
+        row for row in rows
+        if isinstance(row, dict) and row.get("trust_tag") in {"LOW_SAMPLE_ONLY", "OBSERVE"}
+    ]
+    do_not_conclude = [
+        row for row in rows
+        if isinstance(row, dict) and row.get("trust_tag") == "DO_NOT_CONCLUDE"
+    ]
+    return {
+        "league_performance_summary": {
+            "league_count": int(ledger.get("league_count") or 0),
+            "total_validated": int(ledger.get("total_validated") or 0),
+            "total_pending": int(ledger.get("total_pending") or 0),
+            "keep_count": int(ledger.get("keep_count") or 0),
+            "watch_count": int(ledger.get("watch_count") or 0),
+            "low_trust_count": int(ledger.get("low_trust_count") or 0),
+            "low_sample_count": int(ledger.get("low_sample_count") or 0),
+            "do_not_conclude_count": int(ledger.get("do_not_conclude_count") or 0),
+            "pending_only_count": int(ledger.get("pending_only_count") or 0),
+            "data_gap_count": int(ledger.get("data_gap_count") or 0),
+            "policy": "display_only_no_official_grade_change",
+        },
+        "league_trust_tags": tags,
+        "low_trust_league_watchlist": low_trust,
+        "low_sample_league_watchlist": low_sample,
+        "do_not_conclude_league_list": do_not_conclude,
+        "league_data_quality_status": "OK" if rows else "DATA_MISSING",
+    }
+
+
 def _extract_system_status(cron: dict) -> dict:
     """提取系统状态"""
     cron_check = cron.get("cron_check") or {}
@@ -1322,6 +1429,12 @@ def build_model() -> dict:
     # 3. 验证累计 — 只读取 official A/B-only truth file
     tc_path, tc = _find_latest_true_cumulative()
     cumulative_validation = _extract_cumulative_validation(tc, vsot=vsot, today_str=validation_anchor_date)
+
+    # 3b. 联赛命中率 — 只读诊断统计，展示用，不自动改策略
+    league_stats_path, league_stats_raw = _find_latest_league_hit_rate_stats()
+    league_hit_rate = _extract_league_hit_rate_summary(league_stats_raw)
+    league_ledger_path, league_ledger_raw = _find_league_performance_ledger()
+    league_performance = _extract_league_performance_summary(league_ledger_raw)
 
     # 4. 实盘 — 只从 live_bets 数据源 (已在上面提取)
     # live_bet 和 live_daily 已在 build_model 开头提取
@@ -1459,6 +1572,26 @@ def build_model() -> dict:
         })
     system_alerts = 0 if system.get("cron_all_ok", False) else 1
     candidates["items"] = (candidates.get("a_candidates") or []) + (candidates.get("b_candidates") or [])
+    league_trust_tags = league_performance["league_trust_tags"]
+    today_candidate_league_tags: dict[str, dict[str, Any]] = {}
+    for item in candidates["items"]:
+        league = str(item.get("league") or "").strip()
+        tag = league_trust_tags.get(league, {
+            "league": league,
+            "normalized_league": league,
+            "trust_tag": "DATA_MISSING",
+            "sample_tag": "DATA_MISSING",
+            "validated_count": 0,
+            "pending_count": 0,
+            "hit_rate": 0.0,
+            "data_quality_status": "DATA_MISSING",
+        })
+        item["league_trust_tag"] = tag.get("trust_tag", "DATA_MISSING")
+        item["league_sample_tag"] = tag.get("sample_tag", "DATA_MISSING")
+        item["league_validated_count"] = int(tag.get("validated_count") or 0)
+        item["league_pending_count"] = int(tag.get("pending_count") or 0)
+        item["league_hit_rate"] = float(tag.get("hit_rate") or 0.0)
+        today_candidate_league_tags[league] = tag
     skip_node = {
         "items": [
             {
@@ -1486,6 +1619,8 @@ def build_model() -> dict:
             "live_bet_today": str(LIVE_DIR / f"daily_summary_{today_str}.json"),
             "live_bet_cumulative": str(LIVE_DIR / "cumulative_summary.json"),
             "cron_checker": str(cron_path) if cron_path else "NOT_FOUND",
+            "league_hit_rate": str(league_stats_path) if league_stats_path else "NOT_FOUND",
+            "league_performance_ledger": str(league_ledger_path) if league_ledger_path else "NOT_FOUND",
         },
         "top_status": {
             "today_candidates": {
@@ -1595,6 +1730,9 @@ def build_model() -> dict:
         "skip": skip_node,
         "yesterday_validation_detail": yesterday_validation,
         "cumulative_validation_detail": cumulative_validation,
+        "league_hit_rate": league_hit_rate,
+        **league_performance,
+        "today_candidate_league_tags": today_candidate_league_tags,
         "live_bet_summary": {
             "current_bankroll": live_bet["cumulative"]["current_bankroll"],
             "today_stake": live_bet["today"]["stake_amount"],
