@@ -43,6 +43,7 @@ ALLOW_PHRASES = [
     "任何 watchlist 都不是推荐下注",
     "不构成投注建议",
     "无投注建议",
+    "dry-run 不等于 official final squad",
 ]
 
 

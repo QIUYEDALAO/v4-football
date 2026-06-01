@@ -39,8 +39,8 @@ It is not a betting recommendation system and does not modify V4 logic.
 
 ## Next Suggested Phase
 
-1. V3-WC7 real final squad source authorization gate
-2. V3-WC8 final squad canonicalization layer (48-team readiness and final 23-26 checks)
-3. V3-WC9 supplement ingestion layer (template-only until source authorization)
-4. V3 group/opener dashboard enrichment
-5. V3 team readiness delta with supplements
+1. V3-WC6 authorized offline final squad ingestion dry-run layer
+2. V3-WC7 real final squad source authorization gate
+3. V3-WC8 final squad canonicalization layer (48-team readiness and final 23-26 checks)
+4. V3-WC9 supplement ingestion layer (template-only until source authorization)
+5. V3 group/opener dashboard enrichment

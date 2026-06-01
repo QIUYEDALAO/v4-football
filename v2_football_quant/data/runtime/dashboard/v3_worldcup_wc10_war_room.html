@@ -83,6 +83,15 @@ async function load(){
       </div>
       <div class="note warn">未授权文件不得 ingest。当前没有 approved real final squad source。WC6 ingestion not started。</div>
     </div>
+    <div class="card">
+      <div class="note">WC6 authorized ingestion dry-run: ${n(m.wc6_ingestion_dryrun_status,'DATA_MISSING')}</div>
+      <div class="grid">
+        <div class="mini"><span>dryrun files parsed</span><b>${n(m.wc6_ingestion_dryrun_files_parsed,0)}</b></div>
+        <div class="mini"><span>official final squad written</span><b>${String(n(m.wc6_ingestion_dryrun_official_written,false))}</b></div>
+        <div class="mini"><span>dryrun only</span><b>${String(n(m.wc6_ingestion_dryrun_only,true))}</b></div>
+      </div>
+      <div class="note warn">当前未开始真实 final squad ingestion。无授权文件时自动 NOOP。dry-run 不等于 official final squad。</div>
+    </div>
     <div class="card list">
       <div class="note">Perception Gap Watchlist（每类最多显示 5 条）</div>
       <div class="note">undervalued candidates</div>

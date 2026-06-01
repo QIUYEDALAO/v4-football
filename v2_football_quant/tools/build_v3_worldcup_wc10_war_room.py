@@ -18,6 +18,7 @@ WATCH = V3 / "market_baseline/v3_perception_gap_roster_watchlist_20260526.json"
 SUPPLEMENT_REPORT = ROOT / "data/runtime/v3_worldcup/supplement_reports/v3_worldcup_supplement_coverage_20260602.json"
 FINAL_SQUAD_REPORT = ROOT / "data/runtime/v3_worldcup/final_squads/v3_worldcup_final_squad_canonicalization_20260602.json"
 SOURCE_GATE_REPORT = ROOT / "data/runtime/v3_worldcup/source_authorization/v3_worldcup_source_authorization_gate_20260602.json"
+DRYRUN_REPORT = ROOT / "data/runtime/v3_worldcup/final_squads/v3_worldcup_authorized_final_squad_ingestion_dryrun_20260602.json"
 
 CST = timezone(timedelta(hours=8))
 
@@ -69,6 +70,7 @@ def main() -> int:
     supp = _load(SUPPLEMENT_REPORT)
     final_squad = _load(FINAL_SQUAD_REPORT)
     source_gate = _load(SOURCE_GATE_REPORT)
+    dryrun = _load(DRYRUN_REPORT)
 
     meta = rosters.get("meta") or {}
     teams_total = _safe_int(meta.get("total_teams") or 46)
@@ -136,6 +138,10 @@ def main() -> int:
         for x in source_gate["warn_only_items"]:
             if x not in warn_only_items:
                 warn_only_items.append(x)
+    if dryrun and isinstance(dryrun.get("warn_only_items"), list):
+        for x in dryrun["warn_only_items"]:
+            if x not in warn_only_items:
+                warn_only_items.append(x)
 
     now = datetime.now(CST)
     payload = {
@@ -172,6 +178,10 @@ def main() -> int:
         "source_authorization_unauthorized_files_found": int(source_gate.get("unauthorized_files_found") or 0) if source_gate else 0,
         "source_authorization_authorized_files_found": int(source_gate.get("authorized_files_found") or 0) if source_gate else 0,
         "source_authorization_ready_for_ingestion": int(source_gate.get("final_squad_files_ready_for_ingestion") or 0) if source_gate else 0,
+        "wc6_ingestion_dryrun_status": dryrun.get("status") if dryrun else "DATA_MISSING",
+        "wc6_ingestion_dryrun_files_parsed": int(dryrun.get("dryrun_files_parsed") or 0) if dryrun else 0,
+        "wc6_ingestion_dryrun_official_written": bool(dryrun.get("official_final_squad_written")) if dryrun else False,
+        "wc6_ingestion_dryrun_only": bool((dryrun.get("safety_guard") or {}).get("dryrun_only")) if dryrun else True,
         "perception_gap_watchlist": watch_list,
         "perception_gap_watchlist_count": len(watch_list),
         "undervalued_candidates": undervalued,

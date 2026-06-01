@@ -62,6 +62,8 @@ def main() -> int:
     add(checks, "source_gate_status_present", bool(payload.get("source_authorization_gate_status")), payload.get("source_authorization_gate_status"))
     add(checks, "source_gate_approved_count_present", int(payload.get("source_authorization_approved_sources_count") or 0) >= 0, payload.get("source_authorization_approved_sources_count"))
     add(checks, "source_gate_intake_count_present", int(payload.get("source_authorization_intake_files_found") or 0) >= 0, payload.get("source_authorization_intake_files_found"))
+    add(checks, "wc6_dryrun_status_present", bool(payload.get("wc6_ingestion_dryrun_status")), payload.get("wc6_ingestion_dryrun_status"))
+    add(checks, "wc6_official_not_written", payload.get("wc6_ingestion_dryrun_official_written") is False, payload.get("wc6_ingestion_dryrun_official_written"))
     hints = [str(x.get("action_hint") or "") for x in wl if isinstance(x, dict)]
     add(checks, "action_hint_whitelist", all(h in ALLOW_HINTS for h in hints), hints[:12])
     add(checks, "action_hint_no_bad", all(h not in BAD_HINTS for h in hints), hints[:12])

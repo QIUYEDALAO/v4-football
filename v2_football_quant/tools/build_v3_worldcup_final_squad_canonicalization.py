@@ -13,6 +13,7 @@ FS_ROOT = V3 / "final_squads"
 TPL = FS_ROOT / "templates"
 OUT_DIR = ROOT / "data/runtime/v3_worldcup/final_squads"
 SOURCE_GATE_REPORT = ROOT / "data/runtime/v3_worldcup/source_authorization/v3_worldcup_source_authorization_gate_20260602.json"
+DRYRUN_REPORT = ROOT / "data/runtime/v3_worldcup/final_squads/v3_worldcup_authorized_final_squad_ingestion_dryrun_20260602.json"
 
 
 def _load(path: Path) -> dict[str, Any]:
@@ -33,6 +34,7 @@ def _safe_int(v: Any, d: int = 0) -> int:
 def main() -> int:
     roster = _load(ROSTERS)
     source_gate = _load(SOURCE_GATE_REPORT)
+    dryrun = _load(DRYRUN_REPORT)
     meta = roster.get("meta") if isinstance(roster.get("meta"), dict) else {}
     teams_expected = 48
     teams_detected = _safe_int(meta.get("total_teams"), 46)
@@ -139,6 +141,14 @@ def main() -> int:
             "authorized_files_found": int(source_gate.get("authorized_files_found") or 0) if source_gate else 0,
             "final_squad_files_ready_for_ingestion": int(source_gate.get("final_squad_files_ready_for_ingestion") or 0) if source_gate else 0,
             "ingestion_status": "NOT_STARTED",
+        },
+        "ingestion_dryrun_status": dryrun.get("status") if dryrun else "DATA_MISSING",
+        "ingestion_dryrun": {
+            "approved_sources_count": int(dryrun.get("approved_sources_count") or 0) if dryrun else 0,
+            "authorized_files_found": int(dryrun.get("authorized_files_found") or 0) if dryrun else 0,
+            "dryrun_files_parsed": int(dryrun.get("dryrun_files_parsed") or 0) if dryrun else 0,
+            "official_final_squad_written": bool(dryrun.get("official_final_squad_written")) if dryrun else False,
+            "dryrun_only": bool((dryrun.get("safety_guard") or {}).get("dryrun_only")) if dryrun else True,
         },
         "policy_note": "Final squad canonicalization is observation-only and not a betting recommendation output.",
         "safety_guard": {

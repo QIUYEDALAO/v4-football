@@ -48,6 +48,7 @@ def main() -> int:
     add(checks, "status_legal", payload.get("status") in {"FINAL_SQUAD_LAYER_READY_TEMPLATE_ONLY", "FINAL_SQUAD_LAYER_READY_WITH_COVERAGE_WARN_ONLY"}, payload.get("status"))
     add(checks, "blocker_none", payload.get("blocker") == "NONE", payload.get("blocker"))
     add(checks, "not_complete", payload.get("status") != "FINAL_SQUAD_COMPLETE", payload.get("status"))
+    add(checks, "dryrun_status_present", bool(payload.get("ingestion_dryrun_status")), payload.get("ingestion_dryrun_status"))
 
     guard = payload.get("safety_guard") if isinstance(payload.get("safety_guard"), dict) else {}
     add(checks, "baseline_not_final26", guard.get("baseline_pool_not_treated_as_final_26") is True, guard)

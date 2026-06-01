@@ -16,7 +16,7 @@ WC7 builds the authorization gate for real final squad sources.
 
 1. Every intake file must be registered in source manifest first.
 2. Unauthorized intake files must not be ingested.
-3. WC6 is the first phase allowed to ingest real final squad files after authorization.
+3. WC6 only runs authorized dry-run parsing and still does not write official final squad artifacts.
 
 ## Boundary
 
