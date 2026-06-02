@@ -114,6 +114,7 @@ def main() -> int:
         .replace("no betting recommendations", "")
         .replace("not a betting recommendation", "")
         .replace("不是投注建议", "")
+        .replace("不作为投注建议", "")
         .replace("不输出投注建议", "")
         .replace("任何 watchlist 都不是推荐下注", "")
         .replace("no_stake", "")

@@ -60,6 +60,9 @@ async function load(){
     const pgTags=a(m.perception_gap_output_tags);
     const pgInputs=a(m.perception_gap_next_required_inputs);
     const pgGuard=m.perception_gap_safety_guard||{};
+    const venueFocus=a(m.venue_stress_focus_venues);
+    const venueRows=a(m.venue_stress_venues);
+    const venueTags=a(m.venue_stress_tags_allowed);
     const under=a(m.undervalued_candidates), over=a(m.overhyped_risk_candidates);
     root.innerHTML = `
     <div class="card">
@@ -71,6 +74,23 @@ async function load(){
         <div class="mini"><span>players_total</span><b>${n(m.players_total,0)}</b></div>
         <div class="mini"><span>warn_only</span><b>${warn.length}</b></div>
       </div>
+    </div>
+    <div class="card">
+      <div class="note">场馆压力 / Venue Stress Observation</div>
+      <div class="grid">
+        <div class="mini"><span>status</span><b>${n(m.venue_stress_status,'DATA_MISSING')}</b></div>
+        <div class="mini"><span>venues</span><b>${n(m.venue_stress_count,0)} / 16</b></div>
+        <div class="mini"><span>focus venues</span><b>${n(m.venue_stress_focus_count,0)} / 5</b></div>
+        <div class="mini"><span>observation_only</span><b>${String(n((m.venue_stress_safety_guard||{}).observation_only,true))}</b></div>
+        <div class="mini"><span>betting_recommendation</span><b>${String(n((m.venue_stress_safety_guard||{}).betting_recommendation,false))}</b></div>
+        <div class="mini"><span>video claim scoring</span><b>${String(!n((m.venue_stress_safety_guard||{}).video_claim_not_scoring_input,true))}</b></div>
+      </div>
+      <div class="note">观察标签：${venueTags.join('、')||'HEAT_STRESS、HUMIDITY_STRESS、ALTITUDE_STRESS、MIDDAY_KICKOFF_RISK、VENUE_UPSET_WATCH、WATCH_ONLY'}</div>
+      <div class="note warn">仅显示场馆压力、风险原因、数据来源等级；不作为胜负判断，不作为投注建议。</div>
+      <div class="grid">
+        ${(venueFocus.map(x=>`<div class="mini"><span>${n(x.venue,'UNKNOWN')} · ${n(x.city,'')}</span><b>${a(x.stress_tags).join(' / ')}</b><span>风险原因：${n(x.stress_reason,'')} · 数据来源等级：${n(x.source_quality,'UNKNOWN')} · video_claim_allowed=${String(n(x.video_claim_allowed,false))}</span></div>`).join('')||'<div class="note">暂无重点场馆</div>')}
+      </div>
+      <details><summary class="note">16 场馆完整列表 (${venueRows.length})</summary>${venueRows.map(x=>`<div class="mini"><span>${n(x.venue,'UNKNOWN')} · ${n(x.country,'')}</span><b>${a(x.stress_tags).join(' / ')}</b><span>altitude=${n(x.altitude,'N/A')}m · heat=${n(x.temperature_risk,'N/A')} · humidity=${n(x.humidity_risk,'N/A')} · midday=${n(x.midday_risk,'N/A')}</span></div>`).join('')}</details>
     </div>
     <div class="card">
       <div class="note">世界杯历史市场基准 / Historical Market Baseline</div>

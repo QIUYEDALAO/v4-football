@@ -40,6 +40,7 @@ ALLOW_PHRASES = [
     "禁止投注推荐",
     "不输出投注建议",
     "不是投注建议",
+    "不作为投注建议",
     "这是观察层，不是投注建议",
     "不自动下注",
     "observation-only, not trading signal",

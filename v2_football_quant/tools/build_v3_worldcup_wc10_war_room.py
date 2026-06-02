@@ -22,6 +22,7 @@ DRYRUN_REPORT = ROOT / "data/runtime/v3_worldcup/final_squads/v3_worldcup_author
 WC5D_REVIEW_ARTIFACT = ROOT / "data/runtime/v3_worldcup/final_squads/v3_wc5d_candidate_review_artifact_20260602.json"
 HISTORICAL_MARKET_SUMMARY = ROOT / "data/runtime/v3_worldcup/historical_market_baseline/20260602/v3_wc4a_historical_market_summary_v1.json"
 PERCEPTION_GAP_BLUEPRINT = ROOT / "data/v3_worldcup/perception_gap_blueprint/v3_worldcup_perception_gap_blueprint_20260602.json"
+VENUE_STRESS = ROOT / "data/v3_worldcup/venue_stress/v3_worldcup_venue_stress_20260603.json"
 
 CST = timezone(timedelta(hours=8))
 
@@ -194,6 +195,41 @@ def _perception_gap_blueprint_view(blueprint: dict[str, Any]) -> dict[str, Any]:
     }
 
 
+def _venue_stress_view(payload: dict[str, Any]) -> dict[str, Any]:
+    guard = payload.get("safety_guard") if isinstance(payload.get("safety_guard"), dict) else {}
+    rows = payload.get("venues") if isinstance(payload.get("venues"), list) else []
+    focus = payload.get("focus_venue_rows") if isinstance(payload.get("focus_venue_rows"), list) else []
+    if not payload:
+        return {
+            "venue_stress_status": "VENUE_STRESS_MISSING_WARN_ONLY",
+            "venue_stress_count": 0,
+            "venue_stress_focus_count": 0,
+            "venue_stress_tags_allowed": [],
+            "venue_stress_venues": [],
+            "venue_stress_focus_venues": [],
+            "venue_stress_safety_guard": {
+                "observation_only": True,
+                "betting_recommendation": False,
+                "video_claim_not_scoring_input": True,
+            },
+        }
+    return {
+        "venue_stress_status": "VENUE_STRESS_READY",
+        "venue_stress_count": int(payload.get("venue_count") or len(rows)),
+        "venue_stress_focus_count": int(payload.get("focus_venue_count") or len(focus)),
+        "venue_stress_tags_allowed": payload.get("stress_tags_allowed") if isinstance(payload.get("stress_tags_allowed"), list) else [],
+        "venue_stress_venues": rows,
+        "venue_stress_focus_venues": focus,
+        "venue_stress_safety_guard": {
+            "observation_only": guard.get("observation_only") is True,
+            "betting_recommendation": False,
+            "no_stake": guard.get("no_stake", True),
+            "no_v4_changes": guard.get("no_v4_changes", True),
+            "video_claim_not_scoring_input": guard.get("video_claim_not_scoring_input", True),
+        },
+    }
+
+
 def main() -> int:
     rosters = _load(ROSTERS)
     profiles = _load(PROFILES)
@@ -206,6 +242,7 @@ def main() -> int:
     wc5d = _load(WC5D_REVIEW_ARTIFACT)
     historical_market = _load(HISTORICAL_MARKET_SUMMARY)
     perception_gap_blueprint = _load(PERCEPTION_GAP_BLUEPRINT)
+    venue_stress = _load(VENUE_STRESS)
 
     meta = rosters.get("meta") or {}
     teams_total = _safe_int(meta.get("total_teams") or 46)
@@ -294,6 +331,9 @@ def main() -> int:
     perception_gap_blueprint_view = _perception_gap_blueprint_view(perception_gap_blueprint)
     if not perception_gap_blueprint and "PERCEPTION_GAP_BLUEPRINT_MISSING_WARN_ONLY" not in warn_only_items:
         warn_only_items.append("PERCEPTION_GAP_BLUEPRINT_MISSING_WARN_ONLY")
+    venue_stress_view = _venue_stress_view(venue_stress)
+    if not venue_stress and "VENUE_STRESS_MISSING_WARN_ONLY" not in warn_only_items:
+        warn_only_items.append("VENUE_STRESS_MISSING_WARN_ONLY")
 
     now = datetime.now(CST)
     payload = {
@@ -337,6 +377,7 @@ def main() -> int:
         **candidate_review,
         **historical_market_view,
         **perception_gap_blueprint_view,
+        **venue_stress_view,
         "perception_gap_watchlist": watch_list,
         "perception_gap_watchlist_count": len(watch_list),
         "undervalued_candidates": undervalued,
@@ -364,6 +405,7 @@ def main() -> int:
             "no_qq_push": True,
             "no_pending_write": True,
             "no_v4_changes": True,
+            "venue_stress_observation_only": True,
             "no_default_rules_change": True,
             "no_ab_thresholds_change": True,
             "no_live_bet_change": True,
