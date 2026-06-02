@@ -53,6 +53,13 @@ async function load(){
     const hmr=m.historical_market_baseline_key_rates||{};
     const hmq=m.historical_market_baseline_data_quality||{};
     const hmy=a(m.historical_market_baseline_years);
+    const pgl=m.perception_gap_input_layers||{};
+    const pgHist=pgl.historical_market_baseline||{};
+    const pgMarket=pgl.current_match_market_layer||{};
+    const pgLineup=pgl.lineup_formation_value_delta_layer||{};
+    const pgTags=a(m.perception_gap_output_tags);
+    const pgInputs=a(m.perception_gap_next_required_inputs);
+    const pgGuard=m.perception_gap_safety_guard||{};
     const under=a(m.undervalued_candidates), over=a(m.overhyped_risk_candidates);
     root.innerHTML = `
     <div class="card">
@@ -84,6 +91,32 @@ async function load(){
       <div class="note">TheStatsAPI coverage: match=${n(hmq.thestatsapi_match_coverage,'128/192')} / odds 2018=${n((hmq.thestatsapi_odds_coverage||{})['2018'],'34/64')} / odds 2022=${n((hmq.thestatsapi_odds_coverage||{})['2022'],'33/64')} / lineups 2018=${n((hmq.thestatsapi_lineup_coverage||{})['2018'],'26/64')} / lineups 2022=${n((hmq.thestatsapi_lineup_coverage||{})['2022'],'22/64')}</div>
       <details><summary class="note">年度摘要</summary>${hmy.map(x=>`<div class="mini"><span>${x.year}</span><b>${x.matches} matches</b></div>`).join('')}</details>
       <div class="note warn">历史赔率只用于 Perception Gap 观察，不是投注建议。不是 V4 official grade，不影响 V4 A/B/C/SKIP。</div>
+    </div>
+    <div class="card">
+      <div class="note">Perception Gap 评分蓝图</div>
+      <div class="grid">
+        <div class="mini"><span>blueprint status</span><b>${n(m.perception_gap_blueprint_status,'DATA_MISSING')}</b></div>
+        <div class="mini"><span>observation_only</span><b>${String(n(pgGuard.observation_only,true))}</b></div>
+        <div class="mini"><span>affects V4 grade</span><b>${String(n(pgGuard.affects_v4_grade,false))}</b></div>
+      </div>
+      <div class="note">历史市场基准层</div>
+      <div class="grid">
+        <div class="mini"><span>favorite_band</span><b>${n(pgHist.favorite_band,'schema')}</b></div>
+        <div class="mini"><span>favorite failed</span><b>${pct(pgHist.historical_favorite_failed_rate)}</b></div>
+        <div class="mini"><span>HT draw</span><b>${pct(pgHist.historical_ht_draw_rate)}</b></div>
+        <div class="mini"><span>upset</span><b>${pct(pgHist.historical_upset_rate)}</b></div>
+      </div>
+      <div class="note">当前市场 / API prediction 层</div>
+      <div class="grid">
+        ${Object.keys(pgMarket).slice(0,11).map(k=>`<div class="mini"><span>${k}</span><b>${n(pgMarket[k],'schema')}</b></div>`).join('')}
+      </div>
+      <div class="note">首发 / 阵型 / 身价差值层</div>
+      <div class="grid">
+        ${Object.keys(pgLineup).slice(0,13).map(k=>`<div class="mini"><span>${k}</span><b>${n(pgLineup[k],'schema')}</b></div>`).join('')}
+      </div>
+      <div class="note">观察标签：${pgTags.join('、')||'UNDERVALUED_WATCH、OVERHYPED_RISK、MARKET_FAIR、LINEUP_WEAKENED、LINEUP_STRONGER_THAN_EXPECTED、DATA_INSUFFICIENT、WATCH_ONLY'}</div>
+      <div class="note">下一步需要：${pgInputs.join('、')||'当前赔率、API prediction、赛前首发、阵型、首发身价'}</div>
+      <div class="note warn">这是观察层，不是投注建议。不影响 V4 A/B/C/SKIP。不自动下注。首发层等赛前 30 分钟输入后才启用。</div>
     </div>
     <div class="card">
       <div class="note">世界杯名单候选审查 / Candidate Review</div>

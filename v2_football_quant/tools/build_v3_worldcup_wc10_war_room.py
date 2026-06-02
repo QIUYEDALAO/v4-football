@@ -21,6 +21,7 @@ SOURCE_GATE_REPORT = ROOT / "data/runtime/v3_worldcup/source_authorization/v3_wo
 DRYRUN_REPORT = ROOT / "data/runtime/v3_worldcup/final_squads/v3_worldcup_authorized_final_squad_ingestion_dryrun_20260602.json"
 WC5D_REVIEW_ARTIFACT = ROOT / "data/runtime/v3_worldcup/final_squads/v3_wc5d_candidate_review_artifact_20260602.json"
 HISTORICAL_MARKET_SUMMARY = ROOT / "data/runtime/v3_worldcup/historical_market_baseline/20260602/v3_wc4a_historical_market_summary_v1.json"
+PERCEPTION_GAP_BLUEPRINT = ROOT / "data/v3_worldcup/perception_gap_blueprint/v3_worldcup_perception_gap_blueprint_20260602.json"
 
 CST = timezone(timedelta(hours=8))
 
@@ -163,6 +164,36 @@ def _historical_market_view(summary: dict[str, Any]) -> dict[str, Any]:
     }
 
 
+def _perception_gap_blueprint_view(blueprint: dict[str, Any]) -> dict[str, Any]:
+    if not blueprint:
+        return {
+            "perception_gap_blueprint_status": "PERCEPTION_GAP_BLUEPRINT_MISSING_WARN_ONLY",
+            "perception_gap_input_layers": {},
+            "perception_gap_output_tags": [],
+            "perception_gap_safety_guard": {
+                "observation_only": True,
+                "betting_recommendation": False,
+                "affects_v4_grade": False,
+                "auto_bet_allowed": False,
+                "official_final_squad_required": False,
+            },
+            "perception_gap_next_required_inputs": [],
+        }
+    return {
+        "perception_gap_blueprint_status": blueprint.get("status") or "PERCEPTION_GAP_SCORING_BLUEPRINT_READY",
+        "perception_gap_input_layers": blueprint.get("input_layers") if isinstance(blueprint.get("input_layers"), dict) else {},
+        "perception_gap_output_tags": blueprint.get("output_tags") if isinstance(blueprint.get("output_tags"), list) else [],
+        "perception_gap_safety_guard": blueprint.get("safety_guard") if isinstance(blueprint.get("safety_guard"), dict) else {
+            "observation_only": True,
+            "betting_recommendation": False,
+            "affects_v4_grade": False,
+            "auto_bet_allowed": False,
+            "official_final_squad_required": False,
+        },
+        "perception_gap_next_required_inputs": blueprint.get("next_required_inputs") if isinstance(blueprint.get("next_required_inputs"), list) else [],
+    }
+
+
 def main() -> int:
     rosters = _load(ROSTERS)
     profiles = _load(PROFILES)
@@ -174,6 +205,7 @@ def main() -> int:
     dryrun = _load(DRYRUN_REPORT)
     wc5d = _load(WC5D_REVIEW_ARTIFACT)
     historical_market = _load(HISTORICAL_MARKET_SUMMARY)
+    perception_gap_blueprint = _load(PERCEPTION_GAP_BLUEPRINT)
 
     meta = rosters.get("meta") or {}
     teams_total = _safe_int(meta.get("total_teams") or 46)
@@ -259,6 +291,9 @@ def main() -> int:
     historical_market_view = _historical_market_view(historical_market)
     if not historical_market and "HISTORICAL_MARKET_BASELINE_MISSING_WARN_ONLY" not in warn_only_items:
         warn_only_items.append("HISTORICAL_MARKET_BASELINE_MISSING_WARN_ONLY")
+    perception_gap_blueprint_view = _perception_gap_blueprint_view(perception_gap_blueprint)
+    if not perception_gap_blueprint and "PERCEPTION_GAP_BLUEPRINT_MISSING_WARN_ONLY" not in warn_only_items:
+        warn_only_items.append("PERCEPTION_GAP_BLUEPRINT_MISSING_WARN_ONLY")
 
     now = datetime.now(CST)
     payload = {
@@ -301,6 +336,7 @@ def main() -> int:
         "wc6_ingestion_dryrun_only": bool((dryrun.get("safety_guard") or {}).get("dryrun_only")) if dryrun else True,
         **candidate_review,
         **historical_market_view,
+        **perception_gap_blueprint_view,
         "perception_gap_watchlist": watch_list,
         "perception_gap_watchlist_count": len(watch_list),
         "undervalued_candidates": undervalued,

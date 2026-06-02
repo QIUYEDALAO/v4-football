@@ -96,6 +96,15 @@ def main() -> int:
         round(float(hm_rates.get("strong_favorite_win_rate") or 0), 3) in {0.0, 0.605},
         round(float(hm_rates.get("favorite_failed_rate") or 0), 3) in {0.0, 0.422},
     ]), hm_rates)
+    pg_layers = payload.get("perception_gap_input_layers") if isinstance(payload.get("perception_gap_input_layers"), dict) else {}
+    pg_tags = payload.get("perception_gap_output_tags") if isinstance(payload.get("perception_gap_output_tags"), list) else []
+    pg_guard = payload.get("perception_gap_safety_guard") if isinstance(payload.get("perception_gap_safety_guard"), dict) else {}
+    add(checks, "perception_gap_blueprint_status_present", bool(payload.get("perception_gap_blueprint_status")), payload.get("perception_gap_blueprint_status"))
+    add(checks, "perception_gap_layers_present", all(k in pg_layers for k in ["historical_market_baseline", "current_match_market_layer", "lineup_formation_value_delta_layer"]), list(pg_layers.keys()))
+    add(checks, "perception_gap_tags_complete", set(pg_tags) == {"UNDERVALUED_WATCH", "OVERHYPED_RISK", "MARKET_FAIR", "LINEUP_WEAKENED", "LINEUP_STRONGER_THAN_EXPECTED", "DATA_INSUFFICIENT", "WATCH_ONLY"}, pg_tags)
+    add(checks, "perception_gap_observation_only", pg_guard.get("observation_only") is True, pg_guard)
+    add(checks, "perception_gap_no_betting", pg_guard.get("betting_recommendation") is False and pg_guard.get("auto_bet_allowed") is False, pg_guard)
+    add(checks, "perception_gap_no_v4_grade_impact", pg_guard.get("affects_v4_grade") is False, pg_guard)
     hints = [str(x.get("action_hint") or "") for x in wl if isinstance(x, dict)]
     add(checks, "action_hint_whitelist", all(h in ALLOW_HINTS for h in hints), hints[:12])
     add(checks, "action_hint_no_bad", all(h not in BAD_HINTS for h in hints), hints[:12])
