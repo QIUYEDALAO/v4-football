@@ -123,7 +123,7 @@ def _resolve_official_artifact(date: str, official_artifact: str | None) -> dict
     candidates: list[Path] = []
     if official_artifact:
         candidates.append(Path(official_artifact))
-    candidates.append(STATUS_DIR / f"v3v4_dashboard_candidate_view_{date}.json")
+    candidates.append(STATUS_DIR / f"v4_official_candidate_view_{date}.json")
 
     for p in candidates:
         if p.exists():

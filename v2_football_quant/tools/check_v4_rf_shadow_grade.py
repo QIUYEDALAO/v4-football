@@ -110,7 +110,7 @@ def main() -> int:
     task_status = _load_json(task_status_path) if task_status_path.exists() else {}
     out_files = task_status.get("output_files") or {}
     scout_path = Path(out_files["scout"]) if out_files.get("scout") else _latest("scout_v4_*.json", REPORT)
-    cv_path = Path(out_files["candidate_view"]) if out_files.get("candidate_view") else _latest("v3v4_dashboard_candidate_view_*.json", STATUS)
+    cv_path = Path(out_files["candidate_view"]) if out_files.get("candidate_view") else _latest("v4_official_candidate_view_*.json", STATUS)
     model_path = _latest("v4_control_center_model_*.json", STATUS)
 
     # Light-mode checker: runtime artifacts are optional in this phase.

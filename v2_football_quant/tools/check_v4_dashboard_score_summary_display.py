@@ -83,7 +83,7 @@ def main():
         warnings.append(f"candidate_count:N/A")
     
     # 11: A/B grade unchanged
-    candidate_view = load(STATUS / f"v3v4_dashboard_candidate_view_{today}.json")
+    candidate_view = load(STATUS / f"v4_official_candidate_view_{today}.json")
     if candidate_view:
         cv_a = candidate_view.get("A_count") or candidate_view.get("A", 0)
         cv_b = candidate_view.get("B_count") or candidate_view.get("B", 0)

@@ -214,7 +214,7 @@ def main() -> int:
         errors.append("NO_MARKET present in dryrun A/B")
 
     print("\n[9] Official grade unchanged (dynamic row count)")
-    candidate_path = os.path.join(CANDIDATE_DIR, f"v3v4_dashboard_candidate_view_{scan_date}.json")
+    candidate_path = os.path.join(CANDIDATE_DIR, f"v4_official_candidate_view_{scan_date}.json")
     cv = load_json(candidate_path, "Candidate view")
     if cv is None:
         errors.append("candidate view missing")

@@ -35,7 +35,7 @@ STATUS_DIR = ROOT / "data" / "runtime" / "status"
 LOCAL_TZ = timezone(timedelta(hours=8))
 
 SCOUT_RE = re.compile(r"^scout_v4_(\d{8})\.json$")
-CANDIDATE_RE = re.compile(r"^v3v4_dashboard_candidate_view_(\d{8})\.json$")
+CANDIDATE_RE = re.compile(r"^v4_official_candidate_view_(\d{8})\.json$")
 
 VALID_SOURCE_GROUPS = {"WHITELIST_57", "OUTSIDE_57"}
 
@@ -67,7 +67,7 @@ def find_date_pairs() -> list[tuple[str, Path, Path | None]]:
             if date_str in seen:
                 continue
             seen.add(date_str)
-            candidate_path = STATUS_DIR / f"v3v4_dashboard_candidate_view_{date_str}.json"
+            candidate_path = STATUS_DIR / f"v4_official_candidate_view_{date_str}.json"
             if not candidate_path.exists():
                 candidate_path = None
             pairs.append((date_str, p, candidate_path))

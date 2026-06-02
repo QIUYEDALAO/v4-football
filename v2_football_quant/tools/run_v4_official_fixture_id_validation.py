@@ -51,7 +51,7 @@ def is_settled_status(short: str, long_status: str) -> bool:
 
 def choose_official_source(target_date: str) -> tuple[list[dict[str, Any]], str]:
     # Official source: candidate_view of target_date only (A/B from formal brief), no scout full pool.
-    cv = STATUS / f'v3v4_dashboard_candidate_view_{target_date}.json'
+    cv = STATUS / f'v4_official_candidate_view_{target_date}.json'
     data = load(cv, {}) if cv.exists() else {}
     rows: list[dict[str, Any]] = []
     for k in ('A_candidates', 'B_candidates'):

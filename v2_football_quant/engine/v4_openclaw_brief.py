@@ -346,7 +346,7 @@ def _brief_line(item: dict[str, Any]) -> str:
 
 def _build_brief_season_aware(date_str: str, candidate_view_path: Path | None = None) -> str:
     key = _date_key(date_str)
-    cv_path = candidate_view_path or (STATUS_DIR / f"v3v4_dashboard_candidate_view_{key}.json")
+    cv_path = candidate_view_path or (STATUS_DIR / f"v4_official_candidate_view_{key}.json")
     cv = _load_json(cv_path, {})
     if not isinstance(cv, dict):
         cv = {}

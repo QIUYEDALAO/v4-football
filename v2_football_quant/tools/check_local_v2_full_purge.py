@@ -67,7 +67,7 @@ for root_dir in ['engine', 'tools', 'data/runtime', 'data/daily_reports', 'docs'
 check("V2_CODE remaining = 0", v2_count == 0, f"remaining={v2_count}")
 
 # 8. Dashboard V2 visible
-dash = BASE / "data/runtime/dashboard/intel_ops_console.html"
+dash = BASE / "data/runtime/dashboard/v4_control_center.html"
 if dash.exists():
     content = dash.read_text()
     v2_terms = ['BET_LOCKED','V2锁仓','V2生产状态','V2 QQ','V2_ONLY']

@@ -8,7 +8,7 @@ Applies v4_script_classifier with BOSS-directed formal 9-type taxonomy.
 Reads:  data/daily_reports/scout_v4_{date}.json
         data/runtime/status/intel_desk_v4_candidate_view_{date}.json (for grade/window metadata)
 Writes: data/runtime/status/intel_desk_v4_candidate_view_{date}.json (enriched)
-Calls:  tools/generate_intel_desk_html.py (to regenerate HTML)
+Calls:  tools/build_v4_control_center_model.py (to refresh the canonical model)
 """
 import hashlib
 import json
@@ -154,10 +154,10 @@ def build_candidate_view(date_str=None):
 
 
 def regenerate_html():
-    """Call generate_intel_desk_html.py to regenerate dashboard HTML from updated candidate view."""
-    gen_script = MODULE / "tools" / "generate_intel_desk_html.py"
+    """Refresh the canonical Control Center model after enrichment."""
+    gen_script = MODULE / "tools" / "build_v4_control_center_model.py"
     if not gen_script.is_file():
-        print("WARNING: generate_intel_desk_html.py not found, skipping HTML regeneration")
+        print("WARNING: build_v4_control_center_model.py not found, skipping model refresh")
         return False
     print("\n=== Regenerating HTML ===")
     r = subprocess.run(

@@ -110,7 +110,7 @@ ck("2. Total Python files scanned (post-quarantine)",
    f"engine={len(engine_py)}, tools={len(tools_py)}, engine/ds={len(engine_ds_py)}, pipeline={len(pipeline_py)}")
 
 # ===== 2. Active Singletons (post-quarantine) =====
-# gen_intel_ops_console.py was self-generated temp — now archived; generate_intel_desk_html.py is the active canonical generator
+# Legacy Intel Ops generators are archived; Control Center model builder is canonical.
 ACTIVE_SINGLETONS = {
     "engine/daily_runner.py": "V2 daily auto-run HT 1X2",
     "engine/v4_runner.py": "V4 daily scout scanner",
@@ -125,7 +125,7 @@ ACTIVE_SINGLETONS = {
 }
 
 TOOL_SINGLETONS = {
-    "tools/generate_intel_desk_html.py": "Intel desk dashboard HTML generator (CANONICAL)",
+    "tools/build_v4_control_center_model.py": "V4 Control Center model builder (CANONICAL)",
     "tools/intel_ops_refresh.py": "Intel ops one-command refresh",
     "tools/v4_build_candidate_view.py": "V4 candidate view builder",
     "tools/v4_today_source_resolver.py": "V4 today source resolver",
@@ -405,7 +405,7 @@ reference_audit = {
         "gen_intel_ops_console": "ARCHIVED (self-generated temp, not a permanent singleton)",
         "regenerate_intel_ops_console": "ARCHIVED (superseded)",
         "surgically_update_ops_console": "ARCHIVED (one-off surgical update)",
-        "canonical_intel_desk_generator": "tools/generate_intel_desk_html.py",
+        "canonical_control_center_builder": "tools/build_v4_control_center_model.py",
     },
     "v3_isolation_post_quarantine": {
         "v3_in_active_engine": v3_in_engine,

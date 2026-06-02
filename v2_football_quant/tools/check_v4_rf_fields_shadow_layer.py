@@ -87,7 +87,7 @@ def main() -> int:
     task_state = str(task_status.get("status") or "")
     task_out = task_status.get("output_files") or {}
     scout_path = Path(task_out["scout"]) if task_out.get("scout") else _latest("scout_v4_*.json", REPORT)
-    cv_path = Path(task_out["candidate_view"]) if task_out.get("candidate_view") else _latest("v3v4_dashboard_candidate_view_*.json", STATUS)
+    cv_path = Path(task_out["candidate_view"]) if task_out.get("candidate_view") else _latest("v4_official_candidate_view_*.json", STATUS)
     model_path = _latest("v4_control_center_model_*.json", STATUS)
 
     _ok(checks, "task_status_exists", task_status_path.exists(), str(task_status_path))

@@ -81,30 +81,10 @@
       "exception_when": "qq_push_path_present = true",
       "note": "Cron dry-run is informational unless QQ push path is active"
     },
-    "check_intel_ops_console": {
+    "check_v4_control_center": {
       "route": "status_only",
       "exception_when": "check_status = BLOCKER",
-      "note": "Console checker is informational; only BLOCKER triggers QQ"
-    },
-    "check_intel_ops_console_post_night_state": {
-      "route": "status_only",
-      "note": "Post-night state check is informational"
-    },
-    "check_intel_ops_console_candidate_folding_ux": {
-      "route": "status_only",
-      "note": "UX folding check is informational"
-    },
-    "check_intel_ops_console_readability_ux": {
-      "route": "status_only",
-      "note": "Readability UX check is informational"
-    },
-    "check_intel_ops_console_no_notify_clean_ui": {
-      "route": "status_only",
-      "note": "Clean UI check is informational"
-    },
-    "check_intel_ops_console_chinese_ux": {
-      "route": "status_only",
-      "note": "Chinese UX check is informational"
+      "note": "Canonical Control Center checker is informational; only BLOCKER triggers QQ"
     },
     "check_validation_ab133_forensic_recount": {
       "route": "status_only",

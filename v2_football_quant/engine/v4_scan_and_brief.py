@@ -475,7 +475,7 @@ def _build_candidate_view_from_scout(
     scout_path: Path,
     production_grade_mode: str = "official_legacy",
 ) -> Path:
-    candidate_path = BASE_DIR / "data" / "runtime" / "status" / f"v3v4_dashboard_candidate_view_{today_key}.json"
+    candidate_path = BASE_DIR / "data" / "runtime" / "status" / f"v4_official_candidate_view_{today_key}.json"
     try:
         wl = json.loads((BASE_DIR / "config" / "leagues_whitelist.json").read_text())
         wl_ids = set(str(k) for k in wl.get("leagueId", {}).keys())
@@ -576,7 +576,7 @@ def _build_candidate_view_from_scout(
     outside_a = [e for e in a_list if e.get("source_group") == "OUTSIDE_57"]
     outside_b = [e for e in b_list if e.get("source_group") == "OUTSIDE_57"]
     candidate_view = {
-        "schema_version": "v3v4_dashboard_candidate_view.v2",
+        "schema_version": "v4_official_candidate_view.v2",
         "generated_at": datetime.now(LOCAL_TZ).isoformat(),
         "scan_date": today_key,
         "source_window": "daily_1200",
@@ -682,7 +682,7 @@ def _run_parallel_scan(args, scan_date: str, today_key: str, wd, log_path: Path)
 
     # ── Adapter: transform scanner results to official formats ──
 
-    candidate_path = BASE_DIR / "data" / "runtime" / "status" / f"v3v4_dashboard_candidate_view_{today_key}.json"
+    candidate_path = BASE_DIR / "data" / "runtime" / "status" / f"v4_official_candidate_view_{today_key}.json"
     scout_path = REPORT_DIR / f"scout_v4_{today_key}.json"
 
     # Load whitelist
@@ -840,7 +840,7 @@ def _run_parallel_scan(args, scan_date: str, today_key: str, wd, log_path: Path)
 
     # Build candidate_view (no C grade)
     candidate_view = {
-        "schema_version": "v3v4_dashboard_candidate_view.v2",
+        "schema_version": "v4_official_candidate_view.v2",
         "generated_at": datetime.now(LOCAL_TZ).isoformat(),
         "scan_date": today_key,
         "source_window": "daily_1200",

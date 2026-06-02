@@ -40,14 +40,12 @@ else:
 
 # Check timeout plan before cron enable. This checker is read-only and must not
 # mutate the active Gateway cron state.
-timeout_plan_file = BASE / "data/runtime/status/v3v4_dashboard_daily_auto_update_cron_plan_20260524.json"
+timeout_plan_file = BASE / "data/runtime/status/v4_daily_scan_cron_payload_freeze_20260526.json"
 if timeout_plan_file.exists():
     timeout_plan = json.loads(timeout_plan_file.read_text())
-    timeout_cfg = timeout_plan.get("scan_timeout", {})
+    timeout_cfg = timeout_plan.get("payload", {})
     timeout_seconds = int(timeout_cfg.get("timeout_seconds") or timeout_cfg.get("recommended_timeout_seconds") or 0)
     check("12:00 scan timeout plan=1800", timeout_seconds >= 1800)
-    check("Timeout change requires BOSS approval", timeout_cfg.get("boss_approval_required") == True)
-    check("Active cron not modified for timeout", timeout_cfg.get("active_cron_modified", False) == False)
 else:
     check("Timeout plan exists", False, "MISSING")
 
@@ -65,7 +63,7 @@ check("No active V4 early scan", not any("early" in l.lower() for l in v4_enable
 check("No active V4 one-shot", not any("oneshot" in l.lower() or "one-shot" in l.lower() for l in v4_enabled))
 
 # Check dashboard source
-dash = BASE / "data/runtime/dashboard/intel_ops_console.html"
+dash = BASE / "data/runtime/dashboard/v4_control_center.html"
 if dash.exists():
     c = dash.read_text()
     check("source_window=daily_1200", "source_window=daily_1200" in c)

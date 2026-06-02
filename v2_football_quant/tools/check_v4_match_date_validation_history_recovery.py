@@ -10,7 +10,7 @@ from typing import Any
 
 ROOT = Path(__file__).resolve().parents[1]
 STATUS = ROOT / "data/runtime/status"
-HTML_PATH = ROOT / "data/runtime/dashboard/intel_ops_console.html"
+HTML_PATH = ROOT / "data/runtime/dashboard/v4_control_center.html"
 DATE = "20260523"
 
 
@@ -70,8 +70,8 @@ def main() -> int:
     apply = load(STATUS / "v4_match_date_validation_history_recovery_apply_20260523.json")
     stale = load(STATUS / "v4_validation_pre_repair_marked_stale_20260523.json")
     local_html = HTML_PATH.read_text(encoding="utf-8") if HTML_PATH.exists() else ""
-    code127, html127 = fetch("http://127.0.0.1:8765/intel_ops_console.html")
-    code192, html192 = fetch("http://192.168.1.2:8765/intel_ops_console.html")
+    code127, html127 = fetch("http://127.0.0.1:8766/v4_control_center.html")
+    code192, html192 = fetch("http://127.0.0.1:8766/v4_control_center.html")
     bodies = {
         "file": check_body(local_html, summary),
         "127": check_body(html127, summary) if code127 == 200 else {"validation_card_visible": False, "error": html127},

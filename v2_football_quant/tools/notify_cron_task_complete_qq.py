@@ -63,12 +63,12 @@ TASK_CONFIG = {
             "scan": "V4_DAILY_SCAN_READONLY",
         },
     },
-    "V3V4_DASHBOARD_AFTER_SCAN_REFRESH": {
+    "V4_CONTROL_CENTER_REFRESH_AFTER_SCAN": {
         "scheduled_time": "13:00",
         "scan_result": False,
         "dashboard_for": "SCAN",
         "task_names": {
-            "dashboard": "V3V4_DASHBOARD_AFTER_SCAN_REFRESH",
+            "dashboard": "V4_CONTROL_CENTER_REFRESH_AFTER_SCAN",
         },
     },
     "V4_VALIDATION_DRY_RUN": {
@@ -79,12 +79,12 @@ TASK_CONFIG = {
             "validation": "V4_VALIDATION_DRY_RUN",
         },
     },
-    "V3V4_DASHBOARD_AFTER_VALIDATION_REFRESH": {
+    "V4_CONTROL_CENTER_REFRESH_AFTER_VALIDATION": {
         "scheduled_time": "13:30",
         "scan_result": False,
         "dashboard_for": "VALIDATION",
         "task_names": {
-            "dashboard": "V3V4_DASHBOARD_AFTER_VALIDATION_REFRESH",
+            "dashboard": "V4_CONTROL_CENTER_REFRESH_AFTER_VALIDATION",
         },
     },
     "V4_VALIDATION_DRY_RUN_FINAL_AND_DASHBOARD_REFRESH": {
@@ -100,20 +100,20 @@ TASK_CONFIG = {
 
 STATUS_MARKER_MAP = {
     "V4_DAILY_SCAN_READONLY": {
-        "pattern": "v3v4_dashboard_brief_resolution_{date}.json",
+        "pattern": "v4_official_candidate_view_resolution_{date}.json",
         "key": "scan_resolution",
     },
-    "V3V4_DASHBOARD_AFTER_SCAN_REFRESH": {
-        "pattern": "v3v4_dashboard_daily_update_after_scan_apply_{date}.json",
-        "key": "check_status",
+    "V4_CONTROL_CENTER_REFRESH_AFTER_SCAN": {
+        "pattern": "v4_control_center_refresh_after_scan_apply_{date}.json",
+        "key": "conclusion",
     },
     "V4_VALIDATION_DRY_RUN": {
         "pattern": "v3v4_validation_summary_{date}.json",
         "key": None,  # 复合解析
     },
-    "V3V4_DASHBOARD_AFTER_VALIDATION_REFRESH": {
-        "pattern": "v3v4_dashboard_daily_update_after_validation_apply_{date}.json",
-        "key": "check_status",
+    "V4_CONTROL_CENTER_REFRESH_AFTER_VALIDATION": {
+        "pattern": "v4_control_center_refresh_after_validation_apply_{date}.json",
+        "key": "conclusion",
     },
     "V4_VALIDATION_DRY_RUN_FINAL_AND_DASHBOARD_REFRESH": {
         "pattern": "v3v4_validation_final_and_dashboard_refresh_{date}.json",

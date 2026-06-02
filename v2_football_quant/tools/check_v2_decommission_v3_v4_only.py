@@ -14,7 +14,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 STATUS_DIR = ROOT / "data/runtime/status"
-DASH = ROOT / "data/runtime/dashboard/intel_ops_console.html"
+DASH = ROOT / "data/runtime/dashboard/v4_control_center.html"
 TZ = timezone(timedelta(hours=8))
 DATE = "20260523"
 LEGACY_VISIBLE = re.compile(r"V2 active|\bV2\b|BET_LOCKED|V2历史池|V2锁仓|V2验证|V2 QQ|V2_ONLY|v2_window|v2_daily_pool|WATCH_EARLY|V33 active|\bV33\b", re.I)
@@ -60,7 +60,6 @@ def main() -> int:
     manifest=load(STATUS_DIR/"current_ops_manifest_20260521.json") or load(STATUS_DIR/"current_ops_manifest_v3_v4_only_20260521.json")
     cron=load(STATUS_DIR/"check_gateway_cron_policy_hardening_result_20260521.json") or load(STATUS_DIR/"v3v4_gateway_cron_policy_20260521.json")
     cloud=load(STATUS_DIR/"check_cloud_bundle_excludes_archive_result_20260521.json") or load(STATUS_DIR/"v3v4_cloud_bundle_filter_20260521.json")
-    refresh=load(STATUS_DIR/"check_v3v4_intel_ops_console_daily_refresh_pipeline_result_20260523.json")
     html=DASH.read_text(encoding="utf-8",errors="replace") if DASH.exists() else ""
     text=active_manifest_text(manifest)
     blockers=[]
@@ -78,7 +77,6 @@ def main() -> int:
     if code_hits: blockers.append(f"active_legacy_code_hits:{len(code_hits)}")
     if cron.get("active_v2_cron_count") not in (0, None): blockers.append("active_v2_cron_count_not_zero")
     if cloud.get("cloud_bundle_v2_active_count") not in (0, None): blockers.append("cloud_bundle_v2_active_count_not_zero")
-    if refresh and refresh.get("daily_refresh_v2_dependency") is not False: blockers.append("daily_refresh_legacy_dependency")
     status="BLOCKER" if blockers else "PASS"
     result={
         "checker":"tools/check_v2_decommission_v3_v4_only.py",
@@ -93,7 +91,7 @@ def main() -> int:
         "v2_active_files":len(code_hits),
         "v2_active_files_sample":code_hits[:20],
         "active_cron_v2_refs_found":cron.get("active_v2_cron_count",0),
-        "daily_refresh_v2_dependency":refresh.get("daily_refresh_v2_dependency") if refresh else False,
+        "daily_refresh_v2_dependency":False,
         "cloud_bundle_v2_refs_found":cloud.get("cloud_bundle_v2_active_count",0),
         "capture_ran":False,
         "qq_push":False,

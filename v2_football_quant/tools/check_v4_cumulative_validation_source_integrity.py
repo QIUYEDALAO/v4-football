@@ -6,7 +6,7 @@ from datetime import datetime
 
 ROOT=Path(__file__).resolve().parents[1]
 STATUS=ROOT/'data/runtime/status'
-HTML=ROOT/'data/runtime/dashboard/intel_ops_console.html'
+HTML=ROOT/'data/runtime/dashboard/v4_control_center.html'
 OUT=STATUS/'check_v4_cumulative_validation_source_integrity_20260526.json'
 
 def load(p:Path):

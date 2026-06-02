@@ -110,7 +110,7 @@ def check_remote_http(cfg, path):
 
 def check_remote_no_notify(cfg):
     remote_current = cfg.get("remote_current_symlink", "/srv/intel-desk/current")
-    console_path = f"{remote_current}/dashboard/intel_ops_console.html"
+    console_path = f"{remote_current}/dashboard/v4_control_center.html"
     cmd = f"grep -c 'V4_QQ_ENABLED' {console_path} 2>/dev/null || echo 0"
     ret, stdout, stderr = run_ssh(cfg, cmd)
     v4qq_count = int(stdout.strip()) if stdout.strip().isdigit() else 0
@@ -155,9 +155,9 @@ def check_no_production_runner(cfg):
 
 
 def check_active_blockers(cfg):
-    """Check if intel_ops_console shows active blockers."""
+    """Check if the V4 Control Center shows active blockers."""
     remote_current = cfg.get("remote_current_symlink", "/srv/intel-desk/current")
-    cmd = f"grep -c '阻断' {remote_current}/dashboard/intel_ops_console.html 2>/dev/null || echo 0"
+    cmd = f"grep -c '阻断' {remote_current}/dashboard/v4_control_center.html 2>/dev/null || echo 0"
     ret, stdout, stderr = run_ssh(cfg, cmd)
     blocker_count = int(stdout.strip()) if stdout.strip().isdigit() else 0
     status = "PASS" if blocker_count == 0 else "WARN_ONLY"
@@ -204,7 +204,7 @@ def main():
     check("Remote accessible via SSH", s3, d3)
     if s3 == "FAIL":
         # Skip remaining remote checks
-        for label in ["Remote manifest", "Hash match", "index.html", "intel_ops_console.html",
+        for label in ["Remote manifest", "Hash match", "v4_control_center.html",
                        "No-notify compliance", "Symlink correct", "No production runner", "Blocker status"]:
             check(label, "SKIP", "remote unreachable")
 
@@ -213,10 +213,10 @@ def main():
         check("Remote manifest accessible", s4, d4)
         s5, d5 = check_hash_match(cfg, manifest)
         check("SHA256 local==remote", s5, d5)
-        s6, d6 = check_remote_http(cfg, "dashboard/index.html")
-        check("index.html 200/OK", s6, d6)
-        s7, d7 = check_remote_http(cfg, "dashboard/intel_ops_console.html")
-        check("intel_ops_console.html 200/OK", s7, d7)
+        s6, d6 = check_remote_http(cfg, "dashboard/v4_control_center.html")
+        check("v4_control_center.html 200/OK", s6, d6)
+        s7, d7 = check_remote_http(cfg, "dashboard/v4_control_center.html")
+        check("v4_control_center.html canonical 200/OK", s7, d7)
         s8, d8 = check_remote_no_notify(cfg)
         check("No-notify rules pass on remote", s8, d8)
         s9, d9 = check_remote_symlink(cfg)

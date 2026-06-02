@@ -15,7 +15,7 @@ Verifies:
 
 Reads: data/runtime/status/intel_desk_v4_candidate_view_20260520.json
        data/runtime/status/v4_script_taxonomy_20260520.json
-       data/runtime/dashboard/intel_ops_console.html
+       data/runtime/dashboard/v4_control_center.html
        data/daily_reports/scout_v4_20260520.json
 """
 import json, sys
@@ -24,7 +24,7 @@ from pathlib import Path
 MODULE = Path(__file__).resolve().parents[1]
 CV = MODULE / "data/runtime/status/intel_desk_v4_candidate_view_20260520.json"
 TAXONOMY = MODULE / "data/runtime/status/v4_script_taxonomy_20260520.json"
-CONSOLE = MODULE / "data/runtime/dashboard/intel_ops_console.html"
+CONSOLE = MODULE / "data/runtime/dashboard/v4_control_center.html"
 SCOUT = MODULE / "data/daily_reports/scout_v4_20260520.json"
 
 FORBIDDEN_SCRIPT_TOKENS = ["FULLTIME_OVER", "SECOND_HALF_OVER", "SH_OU", "FT_OU"]

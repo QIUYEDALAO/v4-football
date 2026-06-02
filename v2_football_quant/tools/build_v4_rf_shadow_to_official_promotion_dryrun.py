@@ -46,7 +46,7 @@ def load_scout(scan_date: str) -> list:
 
 
 def load_candidate_view(scan_date: str) -> dict:
-    path = os.path.join(CANDIDATE_VIEW_DIR, f"v3v4_dashboard_candidate_view_{scan_date}.json")
+    path = os.path.join(CANDIDATE_VIEW_DIR, f"v4_official_candidate_view_{scan_date}.json")
     if not os.path.exists(path):
         raise FileNotFoundError(f"Candidate view not found: {path}")
     with open(path) as f:

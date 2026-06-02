@@ -20,7 +20,7 @@ def main():
     print(f"Pyramid map covers {len(mapped_ids)} league IDs")
     
     # Check latest candidate_view for pyramid_unknown trace
-    cv_files = sorted(STATUS.glob("v3v4_dashboard_candidate_view_*.json"))
+    cv_files = sorted(STATUS.glob("v4_official_candidate_view_*.json"))
     if not cv_files:
         print("No candidate_view found")
         return

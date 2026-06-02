@@ -50,20 +50,13 @@ SECRET_CONTENT_REGEX_PATTERNS = [
 # ---- Public allowlist for status files ----
 STATUS_PUBLIC_ALLOWLIST = [
     # Checker results (public)
-    "check_intel_ops_console_no_notify_clean_ui_result",
-    "check_intel_ops_console_readability_ux_result",
-    "check_intel_ops_console_candidate_folding_ux_result",
-    "check_intel_ops_console_decision_ux_result",
-    "check_intel_ops_console_chinese_ux_checker_result",
-    "check_intel_ops_console_checker_result",
+    "v4_control_center_codex_checker",
     "check_validation_ab133_forensic_recount_result",
     "v4_goal_distribution_source_trace_checker_result",
     "v4_script_goal_distribution_checker_result",
     "cloud_publish_bundle_implementation",
     "cloud_publish_manifest",
     # Public documentation markers
-    "intel_ops_console_no_notify_clean_ui_v3",
-    "intel_ops_console_readability_row_layout_v2",
     "intel_desk_v4_candidate_view",
     "team_name_zh_aliases",
     "metric_zh_labels",

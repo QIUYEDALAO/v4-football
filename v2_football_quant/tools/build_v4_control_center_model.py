@@ -10,6 +10,7 @@ from __future__ import annotations
 
 import json
 import math
+import re
 from datetime import datetime, timedelta
 from pathlib import Path
 
@@ -214,12 +215,109 @@ def _candidate_display_fields(item: dict) -> dict:
         "unsupported_reason": " / ".join(reasons),
     }
 
-def _find_latest_candidate_view() -> tuple[Optional[Path], dict]:
-    candidates = sorted(STATUS.glob("v3v4_dashboard_candidate_view_*.json"))
-    if not candidates:
-        return None, {}
-    p = candidates[-1]
-    return p, _load_json(p)
+GRADE_HEADER_RE = re.compile(
+    r"^[^\n]*?(?P<grade>[AB])级(?:上半场)?(?:强推荐|达标推荐)(?:[：:](?:无|\(无\)))?\s*$",
+    re.MULTILINE,
+)
+
+
+def _latest_formal_input_date() -> str:
+    dates = []
+    for p in (ROOT / "data/daily_reports").glob("scan_perf_v4_*.json"):
+        suffix = p.stem.split("_")[-1]
+        if len(suffix) == 8 and suffix.isdigit():
+            dates.append(suffix)
+    return max(dates) if dates else datetime.now().strftime("%Y%m%d")
+
+
+def _split_grade_blocks(text: str, grade: str) -> list[str]:
+    blocks: list[str] = []
+    matches = list(GRADE_HEADER_RE.finditer(text))
+    for idx, match in enumerate(matches):
+        if match.group("grade") != grade:
+            continue
+        start = match.end()
+        next_header = matches[idx + 1].start() if idx + 1 < len(matches) else len(text)
+        next_rule = text.find("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━", start)
+        end = min(x for x in (next_header, next_rule if next_rule != -1 else None) if x is not None)
+        section = text[start:end].strip()
+        if section and section not in {"(无)", "无", "：(无)"}:
+            blocks.append(section)
+    return blocks
+
+
+def _parse_brief_candidate(block: str, grade: str, scout_by_fixture: dict[int, dict]) -> dict:
+    lines = [ln.strip() for ln in block.splitlines() if ln.strip()]
+    title = lines[0].lstrip("- ").strip() if lines else "UNKNOWN"
+    compact = [part.strip() for part in title.split("｜")]
+    match_title = compact[0] if compact else title
+    home, away = [part.strip() for part in match_title.split(" vs ", 1)] if " vs " in match_title else (match_title, "UNKNOWN")
+    fixture = next(
+        (
+            row for row in scout_by_fixture.values()
+            if str(row.get("home") or row.get("home_team") or "").strip().casefold() == home.casefold()
+            and str(row.get("away") or row.get("away_team") or "").strip().casefold() == away.casefold()
+        ),
+        {},
+    )
+    reason_line = next((ln for ln in lines if ln.startswith("原因：")), "")
+    fixture_id = fixture.get("fixture_id")
+    return {
+        "fixture_id": fixture_id,
+        "home": home,
+        "away": away,
+        "home_en": home,
+        "away_en": away,
+        "league": compact[1] if len(compact) > 1 else str(fixture.get("league") or "UNKNOWN"),
+        "kickoff_display": compact[2] if len(compact) > 2 else str(fixture.get("kickoff") or "TBD"),
+        "grade": grade,
+        "official_grade": grade,
+        "grade_source": "brief_formal_display",
+        "recommendation_status": "brief_formal_display_only",
+        "distribution_text": reason_line.replace("原因：", "", 1).strip(),
+        "risk": reason_line.replace("原因：", "", 1).strip(),
+        "scout_fixture_found": bool(fixture),
+        "fallback_recompute": False,
+        "official_grade_preserved": True,
+    }
+
+
+def _parse_formal_candidate_inputs(date_key: str) -> tuple[dict, dict[str, Path]]:
+    daily = ROOT / "data/daily_reports"
+    scan_perf_path = daily / f"scan_perf_v4_{date_key}.json"
+    scout_path = daily / f"scout_v4_{date_key}.json"
+    brief_path = daily / f"v4_openclaw_brief_{date_key}.txt"
+    scan_perf = _load_json(scan_perf_path)
+    scout_raw = _load_json(scout_path)
+    scout = scout_raw if isinstance(scout_raw, list) else (scout_raw.get("rows") or scout_raw.get("results") or [])
+    text = brief_path.read_text(encoding="utf-8") if brief_path.exists() else ""
+    scout_by_fixture = {
+        int(row["fixture_id"]): row for row in scout
+        if isinstance(row, dict) and row.get("fixture_id")
+    }
+    a_candidates = [_parse_brief_candidate(block, "A", scout_by_fixture) for block in _split_grade_blocks(text, "A")]
+    b_candidates = [_parse_brief_candidate(block, "B", scout_by_fixture) for block in _split_grade_blocks(text, "B")]
+    c_match = re.search(r"C级观察[：:](?P<n>\d+)场", text)
+    c_count = int(c_match.group("n")) if c_match else 0
+    scan_total = int(scan_perf.get("total_fixtures") or 0)
+    skip_count = max(0, scan_total - len(a_candidates) - len(b_candidates) - c_count)
+    view = {
+        "schema_version": "v4_control_center_formal_inputs.v1",
+        "scan_date": date_key,
+        "source_window": "daily_1200",
+        "A_count": len(a_candidates),
+        "B_count": len(b_candidates),
+        "C_count": c_count,
+        "SKIP_count": skip_count,
+        "scan_total": scan_total,
+        "A_candidates": a_candidates,
+        "B_candidates": b_candidates,
+        "C_candidates": [],
+        "formal_recommendation_count": len(a_candidates) + len(b_candidates),
+        "parsed_from_formal_inputs": True,
+        "fallback_used": False,
+    }
+    return view, {"scan_perf": scan_perf_path, "scout": scout_path, "brief": brief_path}
 
 
 def _find_latest_validation_source_of_truth() -> tuple[Optional[Path], dict]:
@@ -1119,7 +1217,7 @@ def _extract_yesterday_validation(vsot: dict, *, today_str: str, vsot_path: Opti
             "B": yesterday.get("B", {}).get("display_rate") or "N/A",
             "AB": yesterday.get("A_plus_B", {}).get("display_rate") or "N/A",
         },
-        "detail_entry_url": "/intel_ops_console.html#validation",
+        "detail_entry_url": "/v4_control_center.html#validation",
     }
     # Force canonical-day semantics:
     # if canonical yesterday has no settled fixture-id validation file,
@@ -1765,14 +1863,9 @@ def build_model() -> dict:
     live_daily = _read_live_bet_summary(today_str)
 
     # 1. 今日候选
-    cv_path, cv = _find_latest_candidate_view()
-    candidate_anchor_date = ""
-    if cv_path:
-        s = cv_path.stem.split("_")[-1]
-        if len(s) == 8 and s.isdigit():
-            candidate_anchor_date = s
-    # Load scout for scoring display fields
-    scout_path = ROOT / "data" / "daily_reports" / f"scout_v4_{today_str}.json"
+    candidate_anchor_date = _latest_formal_input_date()
+    cv, formal_inputs = _parse_formal_candidate_inputs(candidate_anchor_date)
+    scout_path = formal_inputs["scout"]
     try:
         scout_data: list = json.loads(scout_path.read_text(encoding="utf-8")) if scout_path.exists() else []
     except Exception:
@@ -1988,7 +2081,12 @@ def build_model() -> dict:
         "today_date": today_str,
         "validation_anchor_date": validation_anchor_date,
         "data_sources": {
-            "candidates": str(cv_path) if cv_path else "NOT_FOUND",
+            "candidates": {
+                "canonical": "scan_perf + scout + brief",
+                "scan_perf": str(formal_inputs["scan_perf"]),
+                "scout": str(formal_inputs["scout"]),
+                "brief": str(formal_inputs["brief"]),
+            },
             "yesterday_validation": str(vsot_path) if vsot_path else "NOT_FOUND",
             "cumulative_validation": str(tc_path) if tc_path else "NOT_FOUND",
             "live_bet_today": str(LIVE_DIR / f"daily_summary_{today_str}.json"),

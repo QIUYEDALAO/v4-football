@@ -5,7 +5,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 STATUS = ROOT / 'data/runtime/status'
-DASH = ROOT / 'data/runtime/dashboard/intel_ops_console.html'
+DASH = ROOT / 'data/runtime/dashboard/v4_control_center.html'
 
 REQUIRED = [
     STATUS / 'v4_ab_130_sample_inventory_20260525.json',

@@ -64,7 +64,7 @@ def main() -> int:
     args = p.parse_args()
 
     key = _date_key(args.date)
-    cv_path = STATUS_DIR / f"v3v4_dashboard_candidate_view_{key}.json"
+    cv_path = STATUS_DIR / f"v4_official_candidate_view_{key}.json"
     cv = _load_json(cv_path, {})
 
     brief_text = build_brief(

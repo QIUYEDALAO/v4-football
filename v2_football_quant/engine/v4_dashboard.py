@@ -693,7 +693,7 @@ def render_dashboard(date_str: str, window_mode: str = "natural") -> Path:
     live_entries = _load_json(BASE_DIR / "data" / "paper_trading" / f"v4_live_entries_{key}.json", [])
     review = _load_json(REPORT_DIR / f"v4_review_{key}.json", {})
     validation = _load_json(REPORT_DIR / f"v4_ht_recommend_validation_{key}.json", {})
-    candidate_view = _load_json(BASE_DIR / "data" / "runtime" / "status" / f"v3v4_dashboard_candidate_view_{key}.json", {})
+    candidate_view = _load_json(BASE_DIR / "data" / "runtime" / "status" / f"v4_official_candidate_view_{key}.json", {})
     if not scout:
         raise FileNotFoundError(f"没有可渲染的 V4 情报数据: {scout_path}")
     rows = _enrich_records(

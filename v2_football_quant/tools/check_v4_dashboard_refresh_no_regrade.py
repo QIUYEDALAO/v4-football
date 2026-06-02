@@ -33,8 +33,8 @@ def main() -> int:
         'checks': [],
     }
     scout = load(REPORT / f'scout_v4_{DATE}.json', [])
-    cv = load(STATUS / f'v3v4_dashboard_candidate_view_{DATE}.json', {})
-    resolver_src = (ROOT / 'tools/v3v4_dashboard_brief_resolver.py').read_text(encoding='utf-8')
+    cv = load(STATUS / f'v4_official_candidate_view_{DATE}.json', {})
+    resolver_src = (ROOT / 'tools/build_v4_official_candidate_view.py').read_text(encoding='utf-8')
 
     rows = scout if isinstance(scout, list) else scout.get('rows', []) if isinstance(scout, dict) else []
     a = sum(1 for r in rows if str((r.get('official_grade') or r.get('grade') or '')).upper() == 'A')
@@ -59,10 +59,10 @@ def main() -> int:
     else:
         fail('resolver_has_official_grade_source_guard', out)
 
-    if 'legacy_missing_official_grade' in resolver_src:
-        ok('fallback_recompute_only_legacy_missing_grade', out)
+    if 'scout_missing_grade_use_formal_brief_display' in resolver_src:
+        ok('brief_display_fill_only_when_scout_missing_grade', out)
     else:
-        fail('fallback_recompute_only_legacy_missing_grade', out)
+        fail('brief_display_fill_only_when_scout_missing_grade', out)
 
     # enforce no forbidden ops in this checker run context
     ok('no_scan_triggered_by_checker', out)

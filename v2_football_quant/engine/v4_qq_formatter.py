@@ -118,7 +118,7 @@ def _extract_mode_source(full: str) -> tuple[str, str]:
 
 
 def _parse_official_rows_from_candidate_view(key: str) -> tuple[list[dict], list[dict], dict]:
-    cv_path = STATUS_DIR / f"v3v4_dashboard_candidate_view_{key}.json"
+    cv_path = STATUS_DIR / f"v4_official_candidate_view_{key}.json"
     cv = {}
     if cv_path.exists():
         try:

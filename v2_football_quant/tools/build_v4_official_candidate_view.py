@@ -357,17 +357,17 @@ def build_candidate_view(date: str, text: str, brief_path: Path, scout_path: Pat
         else:
             merged_b.append(base)
 
-    # Legacy fallback only when scout has no A/B grade at all.
+    # The formal brief supplies display grades only when scout lacks A/B grades.
     scout_has_official_ab = len(merged_a) + len(merged_b) > 0
     if not scout_has_official_ab:
         for x in a_items:
             x["fallback_recompute"] = True
             x["official_grade_preserved"] = False
-            x["grade_source"] = "legacy_brief_fallback"
+            x["grade_source"] = "formal_brief_display"
         for x in b_items:
             x["fallback_recompute"] = True
             x["official_grade_preserved"] = False
-            x["grade_source"] = "legacy_brief_fallback"
+            x["grade_source"] = "formal_brief_display"
         merged_a = a_items
         merged_b = b_items
 
@@ -385,7 +385,7 @@ def build_candidate_view(date: str, text: str, brief_path: Path, scout_path: Pat
     final_total = int(scan_perf_total or overview.get("scan_total", final_a + final_b + final_c) or 0)
     final_skip = max(0, final_total - final_a - final_b - final_c)
     return {
-        "schema_version": "v3v4_dashboard_brief_candidate_view.v1",
+        "schema_version": "v4_official_candidate_view.v1",
         "generated_at": datetime.now(TZ).isoformat(),
         "scan_date": date,
         "source_window": "daily_1200",
@@ -415,8 +415,8 @@ def build_candidate_view(date: str, text: str, brief_path: Path, scout_path: Pat
         "V4_QQ_ENABLED": False,
         "parsed_from_brief": True,
         "fallback_used": not scout_has_official_ab,
-        "fallback_reason": None if scout_has_official_ab else "legacy_missing_official_grade",
-        "builder_script": "tools/v3v4_dashboard_brief_resolver.py",
+        "fallback_reason": None if scout_has_official_ab else "scout_missing_grade_use_formal_brief_display",
+        "builder_script": "tools/build_v4_official_candidate_view.py",
         "official_grade_source": "scout_official" if scout_has_official_ab else "brief_fallback",
     }
 
@@ -451,8 +451,8 @@ def resolve(date: str, *, write: bool = True) -> dict[str, Any]:
         view = build_candidate_view(date, text, brief_path, scout_path if scout_path.exists() else None)
         counts = {k: view[f"{k}_count"] for k in ["A", "B", "C", "SKIP"]}
         result = {
-            "schema_version": "v3v4_dashboard_brief_resolution.v1",
-            "phase": "V3V4-DASHBOARD-DYNAMIC-DATE-MARKER-AND-MATCHDATE-TZ-HOTFIX",
+            "schema_version": "v4_official_candidate_view_resolution.v1",
+            "phase": "V4-OFFICIAL-CANDIDATE-VIEW",
             "generated_at": datetime.now(TZ).isoformat(),
             "date": date,
             "brief_path": str(brief_path.relative_to(ROOT)),
@@ -478,7 +478,7 @@ def resolve(date: str, *, write: bool = True) -> dict[str, Any]:
             "cloud_publish": False,
         }
         if write:
-            out_view = STATUS / f"v3v4_dashboard_candidate_view_{date}.json"
+            out_view = STATUS / f"v4_official_candidate_view_{date}.json"
             out_view.write_text(json.dumps(view, ensure_ascii=False, indent=2), encoding="utf-8")
             missing_rows: list[dict[str, Any]] = []
             for bucket in ("A_candidates", "B_candidates", "C_candidates"):
@@ -502,7 +502,7 @@ def resolve(date: str, *, write: bool = True) -> dict[str, Any]:
             missing_payload = {"date": date, "missing_count": len(missing_rows), "missing_rows": missing_rows}
             missing_path.write_text(json.dumps(missing_payload, ensure_ascii=False, indent=2), encoding="utf-8")
     if write:
-        out = STATUS / f"v3v4_dashboard_brief_resolution_{date}.json"
+        out = STATUS / f"v4_official_candidate_view_resolution_{date}.json"
         out.write_text(json.dumps(result, ensure_ascii=False, indent=2), encoding="utf-8")
     return result
 

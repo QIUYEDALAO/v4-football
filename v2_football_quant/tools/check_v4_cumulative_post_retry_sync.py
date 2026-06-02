@@ -13,7 +13,7 @@ def check(name, fn):
         CHECKS.append({"name": name, "pass": False, "msg": str(e)})
         print(f"  FAIL {name}: {e}")
 
-html_path = "data/runtime/dashboard/intel_ops_console.html"
+html_path = "data/runtime/dashboard/v4_control_center.html"
 with open(html_path) as f:
     h = f.read()
 

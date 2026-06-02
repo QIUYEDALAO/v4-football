@@ -62,17 +62,14 @@ check("1.1 v4_control_center.html 存在且可读",
 retired_files = ["index.html", "intel_ops_console.html", "intel_desk.html"]
 for fname in retired_files:
     fp = DASH / fname
-    if fp.exists():
-        content = fp.read_text(encoding="utf-8", errors="ignore")
-        is_retired = "已退役" in content or "retired" in content.lower()
-        check(f"1.2 {fname} 已退役/跳转",
-              is_retired,
-              "退役页面内容正确" if is_retired else "仍显示旧内容！")
+    check(f"1.2 {fname} 已删除",
+          not fp.exists(),
+          "旧页面不存在" if not fp.exists() else "旧页面仍存在！")
 
 intel_desk_disabled = DASH / "intel_desk.html.disabled"
-check("1.3 intel_desk.html.disabled 存在（已禁用副本）",
-      intel_desk_disabled.exists(),
-      "禁用副本已保留")
+check("1.3 intel_desk.html.disabled 已删除",
+      not intel_desk_disabled.exists(),
+      "不保留 deprecated 副本")
 
 # ── 2. 内容守卫检查 ──
 print("\n[2/4] 内容守卫")

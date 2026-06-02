@@ -10,7 +10,7 @@ from pathlib import Path
 
 CHECKER_NAME = "check_validation_ab133_forensic_recount"
 STATUS_DIR = Path("data/runtime/status")
-DASHBOARD = Path("data/runtime/dashboard/intel_ops_console.html")
+DASHBOARD = Path("data/runtime/dashboard/v4_control_center.html")
 
 results = []
 PASS = 0

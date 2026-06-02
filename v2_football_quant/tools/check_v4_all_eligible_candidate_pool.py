@@ -52,7 +52,7 @@ def load_candidate_view(candidate_path: Path | None = None) -> dict | None:
         return json.loads(candidate_path.read_text(encoding="utf-8"))
 
     status_dir = BASE_DIR / "data" / "runtime" / "status"
-    pattern = "v3v4_dashboard_candidate_view_*.json"
+    pattern = "v4_official_candidate_view_*.json"
     candidates = sorted(status_dir.glob(pattern), reverse=True)
     if candidates:
         return json.loads(candidates[0].read_text(encoding="utf-8"))

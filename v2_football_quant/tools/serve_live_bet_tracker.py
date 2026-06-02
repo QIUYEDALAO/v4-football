@@ -50,10 +50,10 @@ def _ensure_control_center_model() -> Path | None:
 
 
 def _resolve_candidate_view(date: str) -> tuple[dict, str, bool]:
-    exact = STATUS / f"v3v4_dashboard_candidate_view_{date}.json"
+    exact = STATUS / f"v4_official_candidate_view_{date}.json"
     if exact.exists():
         return _load_json(exact), date, False
-    candidates = sorted(STATUS.glob("v3v4_dashboard_candidate_view_*.json"))
+    candidates = sorted(STATUS.glob("v4_official_candidate_view_*.json"))
     dated = []
     for p in candidates:
         d = p.stem.split("_")[-1]

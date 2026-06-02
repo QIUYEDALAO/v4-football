@@ -16,7 +16,7 @@ LEDGER=VAL/'v4_ab_historical_ledger_20260526.json'
 SIM=STATUS/'v4_ab_historical_crown_ou_settlement_simulation_20260526.json'
 SEG=STATUS/'v4_ab_historical_segment_attribution_20260526.json'
 HTML=DASH/'v4_ab_historical_ledger.html'
-INTEL=DASH/'intel_ops_console.html'
+INTEL=DASH/'v4_control_center.html'
 OUT=STATUS/'v4_ab_historical_ledger_checker_20260526.json'
 
 def jload(p):

@@ -20,7 +20,7 @@ def main():
    if PAT.search(p.name): hits.append(rel)
  if hits: blockers.append(f'active_legacy_named_files:{len(hits)}')
  v3=[ROOT/'engine/wc_model.py',ROOT/'engine/v3_config/v3_thresholds.json']
- v4=[ROOT/'engine/v4_runner.py',ROOT/'engine/v4_review_renderer.py',ROOT/'tools/generate_intel_desk_html.py']
+ v4=[ROOT/'engine/v4_runner.py',ROOT/'engine/v4_review_renderer.py',ROOT/'tools/build_v4_control_center_model.py']
  missing_v3=[str(p.relative_to(ROOT)) for p in v3 if not p.exists()]
  missing_v4=[str(p.relative_to(ROOT)) for p in v4 if not p.exists()]
  if missing_v3: blockers.append(f'missing_v3:{missing_v3}')

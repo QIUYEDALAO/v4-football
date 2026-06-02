@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
-"""Check V4 script & goal-time distribution in intel_ops_console.html.
+"""Check V4 script & goal-time distribution in v4_control_center.html.
 
-Reads:  data/runtime/dashboard/intel_ops_console.html
+Reads:  data/runtime/dashboard/v4_control_center.html
         data/runtime/status/intel_desk_v4_candidate_view_20260520.json
 """
 import json
@@ -9,7 +9,7 @@ import sys
 from pathlib import Path
 
 MODULE = Path(__file__).resolve().parents[1]
-CONSOLE_HTML = MODULE / "data" / "runtime" / "dashboard" / "intel_ops_console.html"
+CONSOLE_HTML = MODULE / "data" / "runtime" / "dashboard" / "v4_control_center.html"
 CANDIDATE_JSON = MODULE / "data" / "runtime" / "status" / "intel_desk_v4_candidate_view_20260520.json"
 
 TAXONOMY_JSON = MODULE / "data" / "runtime" / "status" / "v4_script_taxonomy_20260520.json"
@@ -225,7 +225,7 @@ def check_v2_lock_not_new(console):
 
 def main():
     if not CONSOLE_HTML.is_file():
-        print("BLOCKER: intel_ops_console.html does not exist")
+        print("BLOCKER: v4_control_center.html does not exist")
         sys.exit(1)
 
     console, model = load_data()

@@ -125,7 +125,7 @@ def main() -> int:
     runner = (ROOT / "engine/v4_runner.py").read_text(encoding="utf-8", errors="replace")
     validator = (ROOT / "engine/v4_ht_result_validator.py").read_text(encoding="utf-8", errors="replace")
     attribution = (ROOT / "engine/v4_result_attribution.py").read_text(encoding="utf-8", errors="replace")
-    dashboard_resolver = (ROOT / "tools/v3v4_dashboard_validation_resolver.py").read_text(encoding="utf-8", errors="replace")
+    dashboard_resolver = (ROOT / "tools/run_v4_official_fixture_id_validation.py").read_text(encoding="utf-8", errors="replace")
     today_resolver = (ROOT / "tools/v4_today_source_resolver.py").read_text(encoding="utf-8", errors="replace")
     scanner_date_uses_kickoff = "_scout_date_fields(fx[\"kickoff\"]" in runner and "match_date" in runner
     validator_uses_match_date = "date_filter_field" in validator and "match_date" in validator and "target_match_date" in validator

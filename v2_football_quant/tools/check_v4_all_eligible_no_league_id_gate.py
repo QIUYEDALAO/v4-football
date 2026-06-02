@@ -74,7 +74,7 @@ def _check_fixture_universe(checks: dict, violations: list):
         violations.append("model_not_found")
 
     # Check candidate_view
-    cv_files = sorted(STATUS.glob("v3v4_dashboard_candidate_view_*.json"))
+    cv_files = sorted(STATUS.glob("v4_official_candidate_view_*.json"))
     if cv_files:
         with open(cv_files[-1]) as f:
             cv = json.load(f)
@@ -267,7 +267,7 @@ def _check_safety_gates(checks: dict, violations: list):
     checks["qq_not_pushed"] = True
 
     # Verify no candidate_view shows qq_sent=true
-    cv_files = sorted(STATUS.glob("v3v4_dashboard_candidate_view_*.json"))
+    cv_files = sorted(STATUS.glob("v4_official_candidate_view_*.json"))
     if cv_files:
         with open(cv_files[-1]) as f:
             cv = json.load(f)

@@ -10,7 +10,7 @@ from typing import Any
 
 ROOT = Path(__file__).resolve().parents[1]
 STATUS = ROOT / "data/runtime/status"
-DASH = ROOT / "data/runtime/dashboard/intel_ops_console.html"
+DASH = ROOT / "data/runtime/dashboard/v4_control_center.html"
 DATE = "20260523"
 
 
@@ -91,8 +91,8 @@ def latest_safe_to_scan() -> bool | None:
 
 def main() -> int:
     html_file = DASH.read_text(encoding="utf-8") if DASH.exists() else ""
-    code_127, html_127 = fetch("http://127.0.0.1:8765/intel_ops_console.html")
-    code_192, html_192 = fetch("http://192.168.1.2:8765/intel_ops_console.html")
+    code_127, html_127 = fetch("http://127.0.0.1:8766/v4_control_center.html")
+    code_192, html_192 = fetch("http://127.0.0.1:8766/v4_control_center.html")
     pages = {
         "file": page_check("file", html_file),
         "127": page_check("127", html_127) if html_127 else {"name": "127", "missing": True},

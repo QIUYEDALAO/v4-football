@@ -10,7 +10,7 @@ from typing import Any
 
 ROOT = Path(__file__).resolve().parents[1]
 STATUS = ROOT / "data/runtime/status"
-DASH = ROOT / "data/runtime/dashboard/intel_ops_console.html"
+DASH = ROOT / "data/runtime/dashboard/v4_control_center.html"
 DATE = "20260523"
 
 
@@ -74,8 +74,8 @@ def main() -> int:
     html_file = text(DASH)
     code_resolver = text(ROOT / "tools/rebuild_v4_script_validation_from_match_date.py")
     page_file = page_checks("file", html_file)
-    code_127, html_127 = fetch("http://127.0.0.1:8765/intel_ops_console.html")
-    code_192, html_192 = fetch("http://192.168.1.2:8765/intel_ops_console.html")
+    code_127, html_127 = fetch("http://127.0.0.1:8766/v4_control_center.html")
+    code_192, html_192 = fetch("http://127.0.0.1:8766/v4_control_center.html")
     page_127 = page_checks("127", html_127) if html_127 else {"name": "127", "http_code": code_127}
     page_192 = page_checks("192", html_192) if html_192 else {"name": "192", "http_code": code_192}
 

@@ -26,7 +26,7 @@ def _load(path: Path, default):
 
 
 def _latest_candidate_date() -> str:
-    files = sorted(STATUS.glob("v3v4_dashboard_candidate_view_*.json"))
+    files = sorted(STATUS.glob("v4_official_candidate_view_*.json"))
     if not files:
         return datetime.now(LOCAL_TZ).strftime("%Y%m%d")
     return files[-1].stem.split("_")[-1]
@@ -92,7 +92,7 @@ def main() -> int:
     _ok(checks, "route_sent_marker_not_written", (route.get("markers") or {}).get("sent_marker_written") is False)
     _ok(checks, "duplicate_guard_present", "duplicate_sent_exists" in (route.get("route_guard") or {}))
 
-    cv_path = STATUS / f"v3v4_dashboard_candidate_view_{date}.json"
+    cv_path = STATUS / f"v4_official_candidate_view_{date}.json"
     cv = _load(cv_path, {})
     _ok(checks, "candidate_view_input_supported", cv_path.exists(), str(cv_path))
     _ok(checks, "official_ab_rendered", int(cv.get("A_count", 0) or 0) + int(cv.get("B_count", 0) or 0) == int(route.get("main_recommendation_count", 0) or 0))

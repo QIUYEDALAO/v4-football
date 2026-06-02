@@ -20,7 +20,7 @@ def main() -> int:
     net = read("engine/net_utils.py")
     runner = read("engine/v4_runner.py")
     supervisor = read("engine/v4_scan_and_brief.py")
-    dashboard = read("tools/generate_intel_desk_html.py")
+    dashboard = read("tools/build_v4_control_center_model.py")
     forbidden_fail_fast = "API_FORBIDDEN_FAIL_FAST" in net and "no_retry no_curl" in net
     curl_fallback_on_403 = bool(re.search(r"API_FORBIDDEN_NOT_SUBSCRIBED[\s\S]{0,500}_curl_raw_get", net))
     preflight_required = "api_preflight(today_key" in runner and "api_preflight(today_key" in supervisor

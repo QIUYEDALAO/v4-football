@@ -22,8 +22,8 @@ ROOT = Path(__file__).resolve().parents[1]
 STATUS = ROOT / "data/runtime/status"
 TZ = timezone(timedelta(hours=8))
 FIXTURE_ID_VALIDATOR = ROOT / "tools/run_v4_official_fixture_id_validation.py"
-DASHBOARD_RUNNER = ROOT / "tools/run_v3v4_dashboard_daily_update.py"
-LAST_GOOD = STATUS / "v3v4_intel_ops_console_daily_refresh_last_good.json"
+DASHBOARD_RUNNER = ROOT / "tools/run_v4_control_center_refresh.py"
+LAST_GOOD = STATUS / "v4_control_center_refresh_last_good.json"
 
 
 def now() -> str:
@@ -53,8 +53,8 @@ def validation_hash(date: str) -> str | None:
 
 def previous_validation_hash(date: str) -> tuple[str | None, str | None]:
     preferred = [
-        STATUS / f"v3v4_dashboard_daily_update_after_validation_apply_{date}.json",
-        STATUS / f"v3v4_dashboard_daily_update_after_validation_dry_run_{date}.json",
+        STATUS / f"v4_control_center_refresh_after_validation_apply_{date}.json",
+        STATUS / f"v4_control_center_refresh_after_validation_dry_run_{date}.json",
     ]
     candidates = [p for p in preferred if p.exists()]
     seen: set[Path] = set()
@@ -189,8 +189,8 @@ def main() -> int:
             "validation_summary": f"data/runtime/status/v3v4_validation_summary_{args.date}.json",
             "script_validation_summary": f"data/runtime/status/v4_script_validation_summary_{args.date}.json",
             "previous_after_validation_candidates": [
-                f"data/runtime/status/v3v4_dashboard_daily_update_after_validation_apply_{args.date}.json",
-                f"data/runtime/status/v3v4_dashboard_daily_update_after_validation_dry_run_{args.date}.json",
+                f"data/runtime/status/v4_control_center_refresh_after_validation_apply_{args.date}.json",
+                f"data/runtime/status/v4_control_center_refresh_after_validation_dry_run_{args.date}.json",
             ],
         },
         "validation_source_hash": current_hash,

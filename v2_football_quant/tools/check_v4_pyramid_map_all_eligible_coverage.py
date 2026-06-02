@@ -23,7 +23,7 @@ def main():
     mapped_ids = set(pyr.keys())
     
     # 1: all_eligible active
-    cv = load(STATUS / f"v3v4_dashboard_candidate_view_{today}.json")
+    cv = load(STATUS / f"v4_official_candidate_view_{today}.json")
     if cv:
         if cv.get('fixture_universe') == 'all_eligible':
             warnings.append("all_eligible_active")

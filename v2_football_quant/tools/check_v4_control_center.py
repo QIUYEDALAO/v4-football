@@ -51,7 +51,6 @@ def main() -> int:
     html = html_path.read_text(encoding="utf-8", errors="ignore")
     ok_api, api_obj, api_err = _fetch_json("http://127.0.0.1:8766/api/v4_control_center_model")
     ok_127, page_127, page_127_err = _fetch_text("http://127.0.0.1:8766/v4_control_center.html")
-    ok_8765, page_8765, page_8765_err = _fetch_text("http://127.0.0.1:8765/intel_ops_console.html")
 
     if not ok_api:
         model_files = sorted(STATUS.glob("v4_control_center_model_*.json"))
@@ -63,12 +62,23 @@ def main() -> int:
     if not ok_127:
         page_127 = html
         warnings.append(f"page_8766_unavailable_using_local_html:{page_127_err}")
-    if not ok_8765:
-        warnings.append(f"page_8765_unavailable:{page_8765_err}")
 
     model = api_obj.get("model", api_obj) if isinstance(api_obj, dict) else {}
     if not isinstance(model, dict) or not model:
         blockers.append("model_empty_or_invalid")
+
+    # The Control Center is the only formal dashboard entry. Legacy dashboard
+    # names must not flow back into its builder, HTML, or canonical model.
+    builder_text = (ROOT / "tools/build_v4_control_center_model.py").read_text(encoding="utf-8", errors="ignore")
+    canonical_text = json.dumps(model, ensure_ascii=False)
+    forbidden_formal_tokens = ["v3v4_dashboard_candidate_view", "intel_ops_console", "after_scan_refresh"]
+    for token in forbidden_formal_tokens:
+        if token in builder_text:
+            blockers.append(f"legacy_token_in_control_center_builder:{token}")
+        if token in html:
+            blockers.append(f"legacy_token_in_control_center_html:{token}")
+        if token in canonical_text:
+            blockers.append(f"legacy_token_in_control_center_model:{token}")
 
     # 1) must have JS binding path
     required_js = [
@@ -248,6 +258,15 @@ def main() -> int:
     elif items:
         blockers.append("readability_rops_model_item_missing")
 
+    today = model.get("top_status", {}).get("today_candidates", {})
+    if {
+        "A": today.get("A"),
+        "B": today.get("B"),
+        "SKIP": today.get("SKIP"),
+        "scan_total": today.get("scan_total"),
+    } != {"A": 0, "B": 1, "SKIP": 9, "scan_total": 10}:
+        blockers.append(f"canonical_20260602_counts_mismatch:{today}")
+
     # 14) D4 league intelligence panel contract
     d4_required = [
         "联赛情报",
@@ -281,7 +300,6 @@ def main() -> int:
         "checks": {
             "api_json_ok": ok_api,
             "page_8766_ok": ok_127,
-            "page_8765_ok": ok_8765,
             "model_non_empty": bool(model),
             "anchor_count_required": len(required_ids),
             "anchor_missing_count": len(miss_ids),

@@ -19,8 +19,8 @@ DASH = ROOT / "data/runtime/dashboard"
 BASELINE = STATUS / "v4_true_cumulative_result_validation_20260525.json"
 INV130 = STATUS / "v4_ab_130_sample_inventory_20260525.json"
 YR = STATUS / "v4_yesterday_result_validation_bounded_rerun_20260526.json"
-CV = STATUS / "v3v4_dashboard_candidate_view_20260525.json"
-CV_20260524 = STATUS / "v3v4_dashboard_candidate_view_20260524.json"
+CV = STATUS / "v4_official_candidate_view_20260525.json"
+CV_20260524 = STATUS / "v4_official_candidate_view_20260524.json"
 
 STEP2 = STATUS / "v4_ab_historical_official_recommendation_inventory_20260526.json"
 STEP3 = STATUS / "v4_ab_historical_postmatch_matchup_20260526.json"
@@ -33,7 +33,7 @@ STEP8 = STATUS / "v4_ab_historical_ledger_html_20260526.json"
 STEP9 = STATUS / "v4_ab_historical_ledger_dashboard_entry_20260526.json"
 
 HTML_OUT = DASH / "v4_ab_historical_ledger.html"
-INTEL_HTML = DASH / "intel_ops_console.html"
+INTEL_HTML = DASH / "v4_control_center.html"
 
 
 def jload(p: Path, default: Any = None) -> Any:
