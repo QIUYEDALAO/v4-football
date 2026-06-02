@@ -20,6 +20,7 @@ FINAL_SQUAD_REPORT = ROOT / "data/runtime/v3_worldcup/final_squads/v3_worldcup_f
 SOURCE_GATE_REPORT = ROOT / "data/runtime/v3_worldcup/source_authorization/v3_worldcup_source_authorization_gate_20260602.json"
 DRYRUN_REPORT = ROOT / "data/runtime/v3_worldcup/final_squads/v3_worldcup_authorized_final_squad_ingestion_dryrun_20260602.json"
 WC5D_REVIEW_ARTIFACT = ROOT / "data/runtime/v3_worldcup/final_squads/v3_wc5d_candidate_review_artifact_20260602.json"
+HISTORICAL_MARKET_SUMMARY = ROOT / "data/runtime/v3_worldcup/historical_market_baseline/20260602/v3_wc4a_historical_market_summary_v1.json"
 
 CST = timezone(timedelta(hours=8))
 
@@ -109,6 +110,59 @@ def _candidate_review_view(payload: dict[str, Any]) -> dict[str, Any]:
     }
 
 
+def _historical_market_view(summary: dict[str, Any]) -> dict[str, Any]:
+    if not summary:
+        return {
+            "historical_market_baseline_status": "HISTORICAL_MARKET_BASELINE_MISSING_WARN_ONLY",
+            "historical_market_baseline_summary": {},
+            "historical_market_baseline_years": [],
+            "historical_market_baseline_counts": {},
+            "historical_market_baseline_key_rates": {},
+            "historical_market_baseline_data_quality": {"qualifiers_in_baseline": False, "source": "DATA_MISSING"},
+            "historical_market_baseline_safety_guard": {"observation_only": True, "no_betting_recommendations": True, "no_v4_changes": True},
+        }
+    years = summary.get("matches_by_year") if isinstance(summary.get("matches_by_year"), dict) else {}
+    return {
+        "historical_market_baseline_status": "READY",
+        "historical_market_baseline_summary": {
+            "source_status": "HISTORICAL_MARKET_BASELINE_READY",
+            "data_source": "WorldCup2026.xlsx + TheStatsAPI cache",
+            "total_world_cup_finals_matches": int(summary.get("total_world_cup_finals_matches") or 0),
+            "qualifiers_in_baseline": False,
+        },
+        "historical_market_baseline_years": [{"year": int(k), "matches": int(v)} for k, v in sorted(years.items())],
+        "historical_market_baseline_counts": {
+            "heavy_favorite_count": int(summary.get("heavy_favorite_count") or 0),
+            "strong_favorite_count": int(summary.get("strong_favorite_count") or 0),
+            "favorite_failed_count": int(summary.get("favorite_failed_count") or 0),
+            "underdog_upset_count": int(summary.get("underdog_upset_count") or 0),
+            "draw_result_count": int(summary.get("draw_result_count") or 0),
+            "ht_draw_count": int(summary.get("ht_draw_count") or 0),
+            "over_2_5_count": int(summary.get("over_2_5_count") or 0),
+            "btts_count": int(summary.get("btts_count") or 0),
+        },
+        "historical_market_baseline_key_rates": {
+            "heavy_favorite_win_rate": float(summary.get("heavy_favorite_win_rate") or 0),
+            "strong_favorite_win_rate": float(summary.get("strong_favorite_win_rate") or 0),
+            "favorite_failed_rate": float(summary.get("favorite_failed_rate") or 0),
+        },
+        "historical_market_baseline_data_quality": {
+            "qualifiers_in_baseline": False,
+            "qualifiers_rows": 889,
+            "thestatsapi_match_coverage": summary.get("thestatsapi_match_id_coverage") or "128/192",
+            "thestatsapi_odds_coverage": {"2018": summary.get("thestatsapi_odds_2018"), "2022": summary.get("thestatsapi_odds_2022")},
+            "thestatsapi_lineup_coverage": {"2018": summary.get("thestatsapi_lineups_2018"), "2022": summary.get("thestatsapi_lineups_2022")},
+            "xg_statistics_events_status": "UNAVAILABLE_SUPPLEMENT_ONLY",
+        },
+        "historical_market_baseline_safety_guard": {
+            "observation_only": True,
+            "no_betting_recommendations": True,
+            "not_v4_official_grade": True,
+            "no_v4_changes": True,
+        },
+    }
+
+
 def main() -> int:
     rosters = _load(ROSTERS)
     profiles = _load(PROFILES)
@@ -119,6 +173,7 @@ def main() -> int:
     source_gate = _load(SOURCE_GATE_REPORT)
     dryrun = _load(DRYRUN_REPORT)
     wc5d = _load(WC5D_REVIEW_ARTIFACT)
+    historical_market = _load(HISTORICAL_MARKET_SUMMARY)
 
     meta = rosters.get("meta") or {}
     teams_total = _safe_int(meta.get("total_teams") or 46)
@@ -201,6 +256,9 @@ def main() -> int:
     }
     if not wc5d and "WC5D_MISSING_WARN_ONLY" not in warn_only_items:
         warn_only_items.append("WC5D_MISSING_WARN_ONLY")
+    historical_market_view = _historical_market_view(historical_market)
+    if not historical_market and "HISTORICAL_MARKET_BASELINE_MISSING_WARN_ONLY" not in warn_only_items:
+        warn_only_items.append("HISTORICAL_MARKET_BASELINE_MISSING_WARN_ONLY")
 
     now = datetime.now(CST)
     payload = {
@@ -242,6 +300,7 @@ def main() -> int:
         "wc6_ingestion_dryrun_official_written": bool(dryrun.get("official_final_squad_written")) if dryrun else False,
         "wc6_ingestion_dryrun_only": bool((dryrun.get("safety_guard") or {}).get("dryrun_only")) if dryrun else True,
         **candidate_review,
+        **historical_market_view,
         "perception_gap_watchlist": watch_list,
         "perception_gap_watchlist_count": len(watch_list),
         "undervalued_candidates": undervalued,

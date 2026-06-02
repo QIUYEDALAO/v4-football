@@ -33,6 +33,7 @@ function n(v,d){return v===undefined||v===null||v===''?d:v}
 function a(v){return Array.isArray(v)?v:[]}
 function item(x){return `<div class="mini"><span>${n(x.team,'UNKNOWN')} · ${n(x.signal_type,'WATCHLIST_ONLY')}</span><b>${n(x.confidence,'LOW')} · ${n(x.action_hint,'WATCHLIST_ONLY')}</b><span>${n(x.reason,'')}</span></div>`}
 function teamItem(x){return `<div class="mini"><span>${n(x.team_name,'UNKNOWN')} · ${n(x.candidate_status,'UNKNOWN')}</span><b>${n(x.recommended_candidate_source,'N/A')} · ${x.safe_for_candidate_review?'safe':'hold'}</b><span>${n(x.hold_reason,'')}</span></div>`}
+function pct(v){return ((Number(v||0))*100).toFixed(1)+'%'}
 async function load(){
   const root=document.getElementById('root');
   try{
@@ -47,6 +48,11 @@ async function load(){
     const crFocus=a(m.candidate_review_focus_teams);
     const crSafe=a(m.candidate_review_safe_teams);
     const crHold=a(m.candidate_review_hold_teams);
+    const hms=m.historical_market_baseline_summary||{};
+    const hmc=m.historical_market_baseline_counts||{};
+    const hmr=m.historical_market_baseline_key_rates||{};
+    const hmq=m.historical_market_baseline_data_quality||{};
+    const hmy=a(m.historical_market_baseline_years);
     const under=a(m.undervalued_candidates), over=a(m.overhyped_risk_candidates);
     root.innerHTML = `
     <div class="card">
@@ -58,6 +64,26 @@ async function load(){
         <div class="mini"><span>players_total</span><b>${n(m.players_total,0)}</b></div>
         <div class="mini"><span>warn_only</span><b>${warn.length}</b></div>
       </div>
+    </div>
+    <div class="card">
+      <div class="note">世界杯历史市场基准 / Historical Market Baseline</div>
+      <div class="grid">
+        <div class="mini"><span>baseline status</span><b>${n(m.historical_market_baseline_status,'DATA_MISSING')}</b></div>
+        <div class="mini"><span>years</span><b>${hmy.map(x=>x.year).join(' / ')||'2014 / 2018 / 2022'}</b></div>
+        <div class="mini"><span>matches</span><b>${n(hms.total_world_cup_finals_matches,192)}</b></div>
+        <div class="mini"><span>heavy favorite win</span><b>${pct(hmr.heavy_favorite_win_rate)}</b></div>
+        <div class="mini"><span>strong favorite win</span><b>${pct(hmr.strong_favorite_win_rate)}</b></div>
+        <div class="mini"><span>favorite failed</span><b>${pct(hmr.favorite_failed_rate)}</b></div>
+        <div class="mini"><span>underdog upset</span><b>${n(hmc.underdog_upset_count,43)}</b></div>
+        <div class="mini"><span>draw result</span><b>${n(hmc.draw_result_count,38)}</b></div>
+        <div class="mini"><span>HT draw</span><b>${n(hmc.ht_draw_count,95)}</b></div>
+        <div class="mini"><span>Over 2.5</span><b>${n(hmc.over_2_5_count,99)}</b></div>
+        <div class="mini"><span>BTTS</span><b>${n(hmc.btts_count,96)}</b></div>
+        <div class="mini"><span>data source</span><b>Excel + cache</b></div>
+      </div>
+      <div class="note">TheStatsAPI coverage: match=${n(hmq.thestatsapi_match_coverage,'128/192')} / odds 2018=${n((hmq.thestatsapi_odds_coverage||{})['2018'],'34/64')} / odds 2022=${n((hmq.thestatsapi_odds_coverage||{})['2022'],'33/64')} / lineups 2018=${n((hmq.thestatsapi_lineup_coverage||{})['2018'],'26/64')} / lineups 2022=${n((hmq.thestatsapi_lineup_coverage||{})['2022'],'22/64')}</div>
+      <details><summary class="note">年度摘要</summary>${hmy.map(x=>`<div class="mini"><span>${x.year}</span><b>${x.matches} matches</b></div>`).join('')}</details>
+      <div class="note warn">历史赔率只用于 Perception Gap 观察，不是投注建议。不是 V4 official grade，不影响 V4 A/B/C/SKIP。</div>
     </div>
     <div class="card">
       <div class="note">世界杯名单候选审查 / Candidate Review</div>

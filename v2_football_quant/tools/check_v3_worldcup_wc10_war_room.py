@@ -79,6 +79,23 @@ def main() -> int:
         int(cc.get("API_INCOMPLETE_NEED_REVIEW") or 0) in {0, 3},
         int(cc.get("PROVISIONAL_OVERFULL_NEED_REVIEW") or 0) in {0, 1},
     ]), cc)
+    add(checks, "historical_market_status_present", bool(payload.get("historical_market_baseline_status")), payload.get("historical_market_baseline_status"))
+    hm_summary = payload.get("historical_market_baseline_summary") if isinstance(payload.get("historical_market_baseline_summary"), dict) else {}
+    hm_counts = payload.get("historical_market_baseline_counts") if isinstance(payload.get("historical_market_baseline_counts"), dict) else {}
+    hm_rates = payload.get("historical_market_baseline_key_rates") if isinstance(payload.get("historical_market_baseline_key_rates"), dict) else {}
+    add(checks, "historical_market_matches_192", int(hm_summary.get("total_world_cup_finals_matches") or 0) in {0, 192}, hm_summary)
+    add(checks, "historical_market_key_counts", all([
+        int(hm_counts.get("underdog_upset_count") or 0) in {0, 43},
+        int(hm_counts.get("draw_result_count") or 0) in {0, 38},
+        int(hm_counts.get("ht_draw_count") or 0) in {0, 95},
+        int(hm_counts.get("over_2_5_count") or 0) in {0, 99},
+        int(hm_counts.get("btts_count") or 0) in {0, 96},
+    ]), hm_counts)
+    add(checks, "historical_market_key_rates", all([
+        round(float(hm_rates.get("heavy_favorite_win_rate") or 0), 3) in {0.0, 0.719},
+        round(float(hm_rates.get("strong_favorite_win_rate") or 0), 3) in {0.0, 0.605},
+        round(float(hm_rates.get("favorite_failed_rate") or 0), 3) in {0.0, 0.422},
+    ]), hm_rates)
     hints = [str(x.get("action_hint") or "") for x in wl if isinstance(x, dict)]
     add(checks, "action_hint_whitelist", all(h in ALLOW_HINTS for h in hints), hints[:12])
     add(checks, "action_hint_no_bad", all(h not in BAD_HINTS for h in hints), hints[:12])
@@ -87,6 +104,7 @@ def main() -> int:
         text.replace("no betting recommendation", "")
         .replace("no betting recommendations", "")
         .replace("not a betting recommendation", "")
+        .replace("不是投注建议", "")
         .replace("不输出投注建议", "")
         .replace("任何 watchlist 都不是推荐下注", "")
         .replace("no_stake", "")

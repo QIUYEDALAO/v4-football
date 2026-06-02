@@ -39,8 +39,8 @@ It is not a betting recommendation system and does not modify V4 logic.
 
 ## Next Suggested Phase
 
-1. V3-WC5E candidate review dashboard integration
-2. V3-WC6 authorized offline final squad ingestion dry-run layer
-3. V3-WC7 real final squad source authorization gate
-4. V3-WC8 final squad canonicalization layer (48-team readiness and final 23-26 checks)
-5. V3-WC9 supplement ingestion layer (template-only until source authorization)
+1. V3-WC4B historical market baseline builder/checker/dashboard
+2. V3-WC5E candidate review dashboard integration
+3. V3-WC6 authorized offline final squad ingestion dry-run layer
+4. V3-WC7 real final squad source authorization gate
+5. V3-WC8 final squad canonicalization layer (48-team readiness and final 23-26 checks)
