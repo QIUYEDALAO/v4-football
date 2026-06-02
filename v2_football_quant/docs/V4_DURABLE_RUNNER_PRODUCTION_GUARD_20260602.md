@@ -8,11 +8,20 @@ cron, run a real scan, or change V4 grading rules.
 
 ## Current State
 
-- runner installed/template only
-- launchd loaded = false
-- isolated session dependency = true
-- OpenClaw 12:00 job unchanged
-- next action = `DEPLOY_APPROVAL_REQUIRED`
+The checker supports both lifecycle states:
+
+- `--mode template`: deployment has not happened yet; launchd must not be
+  loaded, and OpenClaw may still point at the old direct scan payload.
+- `--mode deployed`: deployment has happened; launchd must be loaded, and
+  OpenClaw 12:00 must be a read-only status check.
+- `--mode auto`: infer the mode from local launchd/OpenClaw state.
+
+Current deployed expectation:
+
+- launchd loaded = true
+- isolated session dependency = false
+- OpenClaw 12:00 mode = read-only status check
+- next action = `WAIT_NEXT_SCHEDULED_SCAN`
 
 ## Durable Runner Contract
 

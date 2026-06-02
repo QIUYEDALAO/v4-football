@@ -86,7 +86,7 @@ def main() -> int:
         durable = {}
     for field in [
         "runner_installed", "launchd_loaded", "isolated_session_dependency",
-        "next_action", "last_scheduled_scan", "last_completed_scan",
+        "openclaw_1200_mode", "next_action", "last_scheduled_scan", "last_completed_scan",
         "last_exit_code", "active_lock", "heartbeat_age_seconds",
         "catch_up_required",
     ]:
@@ -95,7 +95,7 @@ def main() -> int:
     for token in [
         "runner installed/template only", "last scheduled scan", "last completed scan",
         "last exit code", "active lock", "heartbeat age", "catch-up required",
-        "isolated session dependency", "launchd loaded", "next action",
+        "isolated session dependency", "OpenClaw 12:00 mode", "launchd loaded", "next action",
     ]:
         if token not in html:
             blockers.append(f"durable_runner_html_missing:{token}")

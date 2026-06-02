@@ -1861,6 +1861,33 @@ def _load_durable_runner_status() -> dict:
     data = _load_json(path)
     if data:
         return data
+    guard = _load_json(STATUS / "check_v4_durable_runner_result.json")
+    if guard:
+        mode = guard.get("mode") or guard.get("detected_mode") or "template"
+        deployed = mode == "deployed"
+        return {
+            "schema_version": "v4_durable_daily_scan_status.v1",
+            "updated_at": datetime.now().isoformat(),
+            "runner_mode": "deployed" if deployed else "template_only",
+            "runner_installed": deployed,
+            "launchd_template_present": True,
+            "launchd_loaded": bool(guard.get("launchd_loaded")),
+            "isolated_session_dependency": bool(guard.get("isolated_session_dependency", not deployed)),
+            "openclaw_status_only_target": deployed,
+            "openclaw_1200_mode": guard.get("openclaw_1200_mode") or ("read-only status check" if deployed else "direct_scan_until_deploy"),
+            "next_action": guard.get("next_action") or ("WAIT_NEXT_SCHEDULED_SCAN" if deployed else "DEPLOY_APPROVAL_REQUIRED"),
+            "scheduled_time": "12:00 Asia/Shanghai",
+            "state": "DEPLOYED_WAITING_NEXT_SCAN" if deployed else "TEMPLATE_ONLY",
+            "last_scheduled_scan": None,
+            "last_completed_scan": None,
+            "last_exit_code": None,
+            "active_lock": False,
+            "heartbeat_at": None,
+            "heartbeat_age_seconds": None,
+            "catch_up_required": False,
+            "catch_up_status": "NOT_REQUIRED",
+            "auto_rerun": False,
+        }
     return {
         "schema_version": "v4_durable_daily_scan_status.v1",
         "updated_at": datetime.now().isoformat(),
@@ -1870,6 +1897,7 @@ def _load_durable_runner_status() -> dict:
         "launchd_loaded": False,
         "isolated_session_dependency": True,
         "openclaw_status_only_target": True,
+        "openclaw_1200_mode": "direct_scan_until_deploy",
         "next_action": "DEPLOY_APPROVAL_REQUIRED",
         "scheduled_time": "12:00 Asia/Shanghai",
         "state": "TEMPLATE_ONLY",

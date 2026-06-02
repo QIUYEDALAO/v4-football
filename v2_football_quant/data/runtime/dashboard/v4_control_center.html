@@ -1840,6 +1840,7 @@ function buildSystemPanel(){
     <tr><td>heartbeat age</td><td>${safe(first(dr.heartbeat_age_seconds,'N/A'),'N/A')}</td></tr>
     <tr><td>catch-up required</td><td>${safe(first(dr.catch_up_required,false),false)}</td></tr>
     <tr><td>isolated session dependency</td><td>${safe(first(dr.isolated_session_dependency,true),true)}</td></tr>
+    <tr><td>OpenClaw 12:00 mode</td><td>${safe(first(dr.openclaw_1200_mode,'direct_scan_until_deploy'),'direct_scan_until_deploy')}</td></tr>
     <tr><td>launchd loaded</td><td>${safe(first(dr.launchd_loaded,false),false)}</td></tr>
     <tr><td>next action</td><td>${safe(first(dr.next_action,'DEPLOY_APPROVAL_REQUIRED'),'DEPLOY_APPROVAL_REQUIRED')}</td></tr>
   </table><div class='lock'>全量扫描 / 策略修改 / 上云发布 / 定时修改均锁定。</div>${errLine}`;
