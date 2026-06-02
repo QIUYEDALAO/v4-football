@@ -172,11 +172,53 @@ def _load_team_map() -> dict[str, str]:
 
 TEAM_MAP = _load_team_map()
 
+LEAGUE_DISPLAY_ALIASES = {
+    "芬甲": "芬甲 / Finland Ykkonen",
+    "Finland Ykkonen": "芬甲 / Finland Ykkonen",
+    "Ykkonen": "芬甲 / Finland Ykkonen",
+}
+
 
 def _cn_name(name: Any) -> tuple[str, str | None]:
     original = str(name or "UNKNOWN")
     mapped = TEAM_MAP.get(original) or TEAM_MAP.get(original.strip())
     return (mapped or original, original if mapped and mapped != original else None)
+
+
+def _team_display(item: dict[str, Any]) -> dict[str, str]:
+    home_en = str(item.get("home_team_en") or item.get("home_en") or item.get("home") or item.get("home_team") or "UNKNOWN")
+    away_en = str(item.get("away_team_en") or item.get("away_en") or item.get("away") or item.get("away_team") or "UNKNOWN")
+    home_cn = str(item.get("home_team_cn") or item.get("home_cn") or "").strip()
+    away_cn = str(item.get("away_team_cn") or item.get("away_cn") or "").strip()
+    missing = bool(item.get("team_cn_missing"))
+    if home_cn.startswith("中文名缺失："):
+        home_cn = ""
+        missing = True
+    if away_cn.startswith("中文名缺失："):
+        away_cn = ""
+        missing = True
+    if not home_cn or home_cn == home_en:
+        home_cn = home_en
+        missing = True
+    if not away_cn or away_cn == away_en:
+        away_cn = away_en
+        missing = True
+    title = f"{home_cn} vs {away_cn}"
+    if missing:
+        title = f"{home_en} vs {away_en}（原始队名）"
+    return {
+        "title": title,
+        "home_cn": home_cn,
+        "away_cn": away_cn,
+        "home_en": home_en,
+        "away_en": away_en,
+        "cn_status": "暂无中文映射，显示原始队名" if missing else "中文/音译名",
+    }
+
+
+def _league_display(item: dict[str, Any]) -> str:
+    league = str(item.get("league") or item.get("league_name") or "UNKNOWN").strip()
+    return LEAGUE_DISPLAY_ALIASES.get(league, league)
 
 
 def _script(item: dict[str, Any]) -> str:
@@ -193,6 +235,57 @@ def _time_bins(item: dict[str, Any]) -> str:
             for key, label in [("m0_15", "0-15m"), ("m16_30", "16-30m"), ("m31_45", "31-45m")]
         )
     return "time_bins 待补齐"
+
+
+def _goal_distribution_note(item: dict[str, Any]) -> dict[str, Any]:
+    dist = item.get("goal_distribution") or item.get("goal_time_distribution") or {}
+    peak = item.get("peak_goal_window")
+    has_real_dist = isinstance(dist, dict) and (dist.get("available") is True or any(k in dist for k in ("m0_15", "m16_30", "m31_45")))
+    if has_real_dist or peak:
+        return {
+            "missing": False,
+            "summary": _time_bins(item),
+            "reasons": [],
+            "unsupported_reason": "真实进球分布已返回",
+        }
+    reasons: list[str] = []
+    h2h_count = item.get("h2h_used_count") or item.get("h2h_valid_count") or item.get("h2h_official_count") or item.get("sample_size")
+    if item.get("h2h_low_sample") is True or not h2h_count:
+        reasons.append("H2H样本不足")
+    dist_text = str(item.get("distribution_text") or "")
+    if "TIER_3_WEAK_COVERAGE" in dist_text or "WEAK_COVERAGE" in dist_text or not item.get("league_sample"):
+        reasons.append("联赛长期样本不足")
+    reasons.append("数据源未返回进球时间分布")
+    deduped = list(dict.fromkeys(reasons))
+    return {
+        "missing": True,
+        "summary": "暂无真实进球分布",
+        "reasons": deduped,
+        "unsupported_reason": " / ".join(deduped),
+    }
+
+
+def _candidate_decision_focus(items: list[dict[str, Any]]) -> str:
+    item = items[0] if items else {}
+    if not item:
+        return """
+<section class="panel decision-focus-panel">
+  <h2>单场决策</h2>
+  <p class="hint">暂无 B 候选，等待下一次 V4 情报刷新。</p>
+</section>"""
+    teams = _team_display(item)
+    dist_note = _goal_distribution_note(item)
+    league = _league_display(item)
+    gap = "进球分布不可用" if dist_note["missing"] else "无"
+    reason = dist_note["unsupported_reason"]
+    return f"""
+<section class="panel decision-focus-panel">
+  <h2>单场决策</h2>
+  <div class="decision-title">{_h(teams['title'])}</div>
+  <div class="decision-sub">联赛：{_h(league)}</div>
+  <div class="decision-row"><span>数据缺口：</span><b>{_h(gap)}</b></div>
+  <div class="decision-row"><span>不支持原因：</span><b>{_h(reason)}</b></div>
+</section>"""
 
 
 def resolve_source_date(data: dict[str, Any], candidate_path: Path | None, *, write: bool = True) -> dict[str, Any]:
@@ -453,27 +546,10 @@ def _ht_display(item: dict[str, Any]) -> str | None:
 
 
 def _card(item: dict[str, Any], grade: str) -> str:
-    home_cn_raw = item.get("home_team_cn") or item.get("home_cn")
-    away_cn_raw = item.get("away_team_cn") or item.get("away_cn")
-    home_en = item.get("home_team_en") or item.get("home_en") or item.get("home") or item.get("home_team")
-    away_en = item.get("away_team_en") or item.get("away_en") or item.get("away") or item.get("away_team")
-    if home_cn_raw:
-        home_cn = str(home_cn_raw)
-    else:
-        home_cn = str(home_en or "UNKNOWN")
-    if away_cn_raw:
-        away_cn = str(away_cn_raw)
-    else:
-        away_cn = str(away_en or "UNKNOWN")
-    # Never render the explicit missing-prefix in active A/B titles.
-    if home_cn.startswith("中文名缺失："):
-        home_cn = home_cn.replace("中文名缺失：", "", 1).strip() or str(home_en or "UNKNOWN")
-    if away_cn.startswith("中文名缺失："):
-        away_cn = away_cn.replace("中文名缺失：", "", 1).strip() or str(away_en or "UNKNOWN")
-    english = ""
-    if home_en or away_en:
-        english = f"<div class='english-line'>EN: {_h(home_en or home_cn)} vs {_h(away_en or away_cn)}</div>"
-    league = _h(item.get("league") or "UNKNOWN")
+    teams = _team_display(item)
+    english = f"<div class='english-line'>原始英文：{_h(teams['home_en'])} vs {_h(teams['away_en'])}</div>"
+    cn_status = f"<div class='cn-display-line'>显示名：{_h(teams['home_cn'])} vs {_h(teams['away_cn'])} · {_h(teams['cn_status'])}</div>"
+    league = _h(_league_display(item))
     kickoff = _h(item.get("kickoff_display") or item.get("kickoff_time") or "TBD")
     missing_fields: list[str] = []
     segments: list[str] = []
@@ -498,8 +574,20 @@ def _card(item: dict[str, Any], grade: str) -> str:
     else:
         missing_fields.append("script_type")
     r3 = " · ".join(segments) if segments else "主信息字段待正式源补齐"
-    bins = _h(_time_bins(item))
-    missing = f"<div class='missing-fields'>missing_fields: {_h(','.join(missing_fields))}</div>" if missing_fields else ""
+    dist_note = _goal_distribution_note(item)
+    if dist_note["missing"]:
+        bins = (
+            "<div class='goal-dist-missing'><b>暂无真实进球分布</b>"
+            f"<span>原因：{_h(dist_note['unsupported_reason'])}</span></div>"
+        )
+    else:
+        bins = _h(str(dist_note["summary"]))
+    gap_text = "进球分布不可用" if dist_note["missing"] else ("、".join(missing_fields) if missing_fields else "无")
+    missing = f"<div class='missing-fields'>数据缺口：{_h(gap_text)}</div>"
+    unsupported = (
+        f"<div class='unsupported-reason'>不支持原因：{_h(dist_note['unsupported_reason'])}</div>"
+        if dist_note["missing"] else ""
+    )
     shadow_pairs = [
         ("official_grade", _clean_value(item.get("grade")) or grade),
         ("rf_shadow_grade", _clean_value(item.get("rf_shadow_grade")) or "DATA_MISSING"),
@@ -518,13 +606,20 @@ def _card(item: dict[str, Any], grade: str) -> str:
         f"<div class='row'><span>{_h(k)}</span><b>{_h(v)}</b></div>" for k, v in shadow_pairs
     )
     shadow_detail = f"<details class='shadow-fold'><summary>Shadow解释</summary>{shadow_lines}</details>"
+    decision_detail = (
+        "<details class='decision-gap-fold' open><summary>单场决策数据说明</summary>"
+        f"<div class='row'><span>数据缺口</span><b>{_h(gap_text)}</b></div>"
+        f"<div class='row'><span>进球分布</span><b>{_h(dist_note['summary'])}</b></div>"
+        f"<div class='row'><span>不支持原因</span><b>{_h(dist_note['unsupported_reason'])}</b></div>"
+        "</details>"
+    )
     return f"""
 <article class="candidate-card grade-{grade}" data-grade="{grade}">
   <div class="card-r1"><span>{kickoff}</span><span>{league}</span><b class="grade-badge grade-badge-{grade}">{grade}</b></div>
-  <div class="match-line">{_h(home_cn)} <span>vs</span> {_h(away_cn)}</div>
+  <div class="match-line">{_h(teams['title'])}</div>
   <div class="card-r3">{r3}</div>
   <div class="time-bins">{bins}</div>
-  {english}{missing}{shadow_detail}
+  {cn_status}{english}{missing}{unsupported}{decision_detail}{shadow_detail}
 </article>"""
 
 
@@ -608,7 +703,7 @@ def render_html(data: dict[str, Any], candidate_path: Path | None, v3: dict[str,
 <style>
 :root{{--bg:#07101d;--panel:#101b2c;--panel2:#15243a;--ink:#eef5ff;--muted:#91a2b8;--line:#26384f;--blue:#58b7ff;--green:#47d18c;--amber:#e7b84e;--red:#ff6b72;--violet:#a9a1ff}}
 *{{box-sizing:border-box}}body{{margin:0;background:radial-gradient(circle at 15% 0%,#173558 0,#07101d 34%,#050912 100%);color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;padding:16px;max-width:1060px;margin-inline:auto;line-height:1.42}}
-header{{padding:10px 2px 16px}}h1{{margin:0;font-size:26px;letter-spacing:.02em}}.sub{{color:var(--muted);font-size:13px;margin-top:5px}}.notice{{background:rgba(231,184,78,.13);border:1px solid rgba(231,184,78,.42);border-radius:14px;padding:10px 12px;margin:4px 0 14px;color:#ffe3a2;font-weight:700}}.kpi-grid{{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin:8px 0 14px}}.kpi{{background:linear-gradient(155deg,var(--panel),#0c1727);border:1px solid var(--line);border-radius:16px;padding:12px;min-height:94px;box-shadow:0 12px 30px rgba(0,0,0,.22)}}.kpi .label{{color:var(--muted);font-size:12px}}.kpi .value{{font-size:22px;font-weight:800;margin-top:8px}}.kpi .foot{{font-size:12px;color:var(--muted);margin-top:4px}}.layout{{display:grid;grid-template-columns:1.25fr .75fr;gap:12px}}.panel,.candidate-group{{background:rgba(16,27,44,.92);border:1px solid var(--line);border-radius:16px;padding:14px;margin-bottom:12px;box-shadow:0 10px 28px rgba(0,0,0,.18)}}h2{{font-size:16px;margin:0 0 10px;color:var(--blue)}}h3{{font-size:14px;margin:10px 0 8px;color:#cfe8ff}}.row{{display:flex;justify-content:space-between;gap:16px;border-top:1px solid rgba(255,255,255,.07);padding:8px 0}}.row:first-of-type{{border-top:0}}.row span{{color:var(--muted)}}.ok{{color:var(--green)}}.warn{{color:var(--amber)}}.danger{{color:var(--red)}}summary{{cursor:pointer;display:flex;justify-content:space-between;align-items:center;gap:12px;font-weight:800}}details>summary::-webkit-details-marker{{display:none}}.group-note,.hint{{color:var(--muted);font-size:13px;margin:8px 0}}.candidate-list{{display:grid;gap:9px;margin-top:10px}}.candidate-card{{background:linear-gradient(155deg,var(--panel2),#0b1422);border:1px solid rgba(255,255,255,.08);border-left:4px solid var(--line);border-radius:14px;padding:12px}}.candidate-card.grade-A{{border-left-color:var(--green)}}.candidate-card.grade-B{{border-left-color:var(--blue)}}.candidate-card.grade-C{{border-left-color:var(--amber)}}.card-r1{{display:flex;align-items:center;gap:8px;color:var(--muted);font-size:12px}}.card-r1 span:nth-child(2){{flex:1}}.grade-badge{{border-radius:999px;padding:3px 9px;font-size:12px;color:#08111f}}.grade-badge-A{{background:var(--green)}}.grade-badge-B{{background:var(--blue)}}.grade-badge-C{{background:var(--amber)}}.match-line{{font-size:17px;font-weight:800;margin-top:7px}}.match-line span{{font-weight:500;color:var(--muted);font-size:13px}}.card-r3,.time-bins,.english-line,.missing-fields{{font-size:13px;color:var(--muted);margin-top:6px}}.shadow-fold{{margin-top:8px;border-top:1px dashed rgba(255,255,255,.12);padding-top:6px}}.shadow-fold .row{{padding:4px 0;font-size:12px;gap:12px}}.shadow-fold .row span{{max-width:45%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}}.shadow-fold .row b{{flex:1;font-size:12px;text-align:right;word-break:break-word}}.script-label{{color:var(--muted)}}.script-value{{color:var(--amber);font-weight:800}}.missing-fields{{display:none}}.english-line{{display:none}}.lineage{{margin-top:10px;border-top:1px dashed rgba(255,255,255,.12);padding-top:8px;color:var(--muted);font-size:12px}}.validation-grid{{display:grid;grid-template-columns:1fr 1fr;gap:10px}}.validation-col{{border-top:1px solid rgba(255,255,255,.08);padding-top:6px}}.validation-metric{{display:grid;grid-template-columns:38px 1fr;gap:5px;padding:4px 0;font-size:13px;align-items:center}}.validation-metric span{{color:var(--muted);font-style:normal}}.validation-metric b{{font-size:13px;white-space:nowrap}}.script-validation-lite{{margin-top:10px;padding:8px 10px;border:1px solid rgba(255,255,255,.10);border-radius:12px;background:rgba(255,255,255,.035);display:grid;grid-template-columns:auto 1fr;gap:4px 8px;align-items:center;font-size:12px}}.script-validation-lite .script-lite-title{{color:var(--muted);font-weight:800}}.script-validation-lite>b{{color:#f2d27a;font-weight:800}}.script-validation-lite>em{{grid-column:1/-1;color:var(--muted);font-style:normal}}.script-validation-chip{{display:inline-flex;gap:4px;align-items:center;border:1px solid rgba(255,255,255,.09);border-radius:999px;padding:3px 7px;background:rgba(255,255,255,.04)}}.script-validation-chip i{{font-style:normal;color:var(--muted)}}.script-validation-chip b{{color:var(--amber);font-weight:800}}.compact-validation{{padding-bottom:10px}}.validation-audit{{margin-top:8px;border-top:1px dashed rgba(255,255,255,.12);padding-top:8px}}.next-list{{margin:0;padding-left:18px;color:var(--muted)}}.audit-code{{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12px;color:var(--muted);word-break:break-all}}@media(max-width:760px){{body{{padding:12px}}.kpi-grid{{grid-template-columns:repeat(2,minmax(0,1fr))}}.layout{{grid-template-columns:1fr}}h1{{font-size:23px}}.kpi .value{{font-size:20px}}.validation-metric{{grid-template-columns:38px 1fr}}.shadow-fold .row{{display:block}}.shadow-fold .row span{{display:block;max-width:100%;white-space:normal}}.shadow-fold .row b{{display:block;text-align:left;margin-top:2px}}}}
+header{{padding:8px 2px 10px}}h1{{margin:0;font-size:24px;letter-spacing:.02em}}.sub{{color:var(--muted);font-size:12px;margin-top:4px}}.notice{{background:rgba(231,184,78,.13);border:1px solid rgba(231,184,78,.42);border-radius:14px;padding:10px 12px;margin:4px 0 14px;color:#ffe3a2;font-weight:700}}.kpi-grid{{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin:6px 0 10px}}.kpi{{background:linear-gradient(155deg,var(--panel),#0c1727);border:1px solid var(--line);border-radius:12px;padding:10px;min-height:76px;box-shadow:0 12px 30px rgba(0,0,0,.22)}}.kpi .label{{color:var(--muted);font-size:12px}}.kpi .value{{font-size:20px;font-weight:800;margin-top:6px}}.kpi .foot{{font-size:12px;color:var(--muted);margin-top:3px}}.layout{{display:grid;grid-template-columns:1.15fr .85fr;gap:12px;align-items:start}}.panel,.candidate-group{{background:rgba(16,27,44,.92);border:1px solid var(--line);border-radius:12px;padding:12px;margin-bottom:10px;box-shadow:0 10px 28px rgba(0,0,0,.18)}}h2{{font-size:16px;margin:0 0 8px;color:var(--blue)}}h3{{font-size:14px;margin:8px 0 6px;color:#cfe8ff}}.row{{display:flex;justify-content:space-between;gap:16px;border-top:1px solid rgba(255,255,255,.07);padding:8px 0}}.row:first-of-type{{border-top:0}}.row span{{color:var(--muted)}}.ok{{color:var(--green)}}.warn{{color:var(--amber)}}.danger{{color:var(--red)}}summary{{cursor:pointer;display:flex;justify-content:space-between;align-items:center;gap:12px;font-weight:800}}details>summary::-webkit-details-marker{{display:none}}.group-note,.hint{{color:var(--muted);font-size:13px;margin:6px 0}}.candidate-list{{display:grid;gap:8px;margin-top:8px}}.candidate-card{{background:linear-gradient(155deg,var(--panel2),#0b1422);border:1px solid rgba(255,255,255,.08);border-left:4px solid var(--line);border-radius:12px;padding:10px}}.candidate-card.grade-A{{border-left-color:var(--green)}}.candidate-card.grade-B{{border-left-color:var(--blue)}}.candidate-card.grade-C{{border-left-color:var(--amber)}}.card-r1{{display:flex;align-items:center;gap:8px;color:var(--muted);font-size:12px}}.card-r1 span:nth-child(2){{flex:1;white-space:normal}}.grade-badge{{border-radius:999px;padding:3px 9px;font-size:12px;color:#08111f}}.grade-badge-A{{background:var(--green)}}.grade-badge-B{{background:var(--blue)}}.grade-badge-C{{background:var(--amber)}}.match-line{{font-size:18px;font-weight:800;margin-top:6px}}.match-line span{{font-weight:500;color:var(--muted);font-size:13px}}.card-r3,.time-bins,.english-line,.cn-display-line,.missing-fields,.unsupported-reason{{font-size:13px;color:var(--muted);margin-top:5px}}.goal-dist-missing{{display:grid;gap:2px;color:var(--muted)}}.goal-dist-missing b{{color:#f2d27a}}.goal-dist-missing span{{font-size:13px;white-space:normal}}.decision-focus-panel{{border-color:rgba(88,183,255,.55)}}.decision-title{{font-size:18px;font-weight:800;margin-bottom:6px}}.decision-sub{{color:var(--muted);font-size:13px;margin-bottom:8px}}.decision-row{{display:block;border-top:1px solid rgba(255,255,255,.08);padding:8px 0;font-size:14px}}.decision-row span{{display:block;color:var(--muted);font-size:12px;margin-bottom:3px}}.decision-row b{{display:block;color:var(--ink);white-space:normal;line-height:1.35}}.decision-gap-fold,.shadow-fold{{margin-top:8px;border-top:1px dashed rgba(255,255,255,.12);padding-top:6px}}.decision-gap-fold .row,.shadow-fold .row{{padding:4px 0;font-size:12px;gap:12px}}.decision-gap-fold .row span,.shadow-fold .row span{{max-width:45%;white-space:normal}}.decision-gap-fold .row b,.shadow-fold .row b{{flex:1;font-size:12px;text-align:right;white-space:normal;word-break:break-word}}.script-label{{color:var(--muted)}}.script-value{{color:var(--amber);font-weight:800}}.lineage{{margin-top:10px;border-top:1px dashed rgba(255,255,255,.12);padding-top:8px;color:var(--muted);font-size:12px}}.validation-grid{{display:grid;grid-template-columns:1fr 1fr;gap:10px}}.validation-col{{border-top:1px solid rgba(255,255,255,.08);padding-top:6px}}.validation-metric{{display:grid;grid-template-columns:38px 1fr;gap:5px;padding:4px 0;font-size:13px;align-items:center}}.validation-metric span{{color:var(--muted);font-style:normal}}.validation-metric b{{font-size:13px;white-space:nowrap}}.script-validation-lite{{margin-top:10px;padding:8px 10px;border:1px solid rgba(255,255,255,.10);border-radius:12px;background:rgba(255,255,255,.035);display:grid;grid-template-columns:auto 1fr;gap:4px 8px;align-items:center;font-size:12px}}.script-validation-lite .script-lite-title{{color:var(--muted);font-weight:800}}.script-validation-lite>b{{color:#f2d27a;font-weight:800}}.script-validation-lite>em{{grid-column:1/-1;color:var(--muted);font-style:normal}}.script-validation-chip{{display:inline-flex;gap:4px;align-items:center;border:1px solid rgba(255,255,255,.09);border-radius:999px;padding:3px 7px;background:rgba(255,255,255,.04)}}.script-validation-chip i{{font-style:normal;color:var(--muted)}}.script-validation-chip b{{color:var(--amber);font-weight:800}}.compact-validation{{padding-bottom:10px}}.validation-audit{{margin-top:8px;border-top:1px dashed rgba(255,255,255,.12);padding-top:8px}}.next-list{{margin:0;padding-left:18px;color:var(--muted)}}.audit-code{{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12px;color:var(--muted);word-break:break-all}}@media(max-width:760px){{body{{padding:12px}}.kpi-grid{{grid-template-columns:repeat(2,minmax(0,1fr))}}.layout{{grid-template-columns:1fr}}h1{{font-size:23px}}.kpi .value{{font-size:20px}}.validation-metric{{grid-template-columns:38px 1fr}}.decision-gap-fold .row,.shadow-fold .row{{display:block}}.decision-gap-fold .row span,.shadow-fold .row span{{display:block;max-width:100%;white-space:normal}}.decision-gap-fold .row b,.shadow-fold .row b{{display:block;text-align:left;margin-top:2px}}}}
 </style>
 </head>
 <body>
@@ -625,7 +720,12 @@ header{{padding:10px 2px 16px}}h1{{margin:0;font-size:26px;letter-spacing:.02em}
 </section>
 <div class="layout">
 <main>
-{_validation_section(validation)}
+<section class="panel candidate-panel">
+  <h2>候选列表</h2>
+  <p class="hint">{display_label}。候选列表只展示 A/B 正式候选；SKIP 仅作为系统状态。</p>
+  {_group('B级候选', 'B', b_items, True)}
+  {_group('A级候选', 'A', a_items, False)}
+</section>
 <section class="panel">
   <h2>V4 情报状态</h2>
   <div class="row"><span>正式候选</span><b>{counts['A'] + counts['B']} 场</b></div>
@@ -634,14 +734,10 @@ header{{padding:10px 2px 16px}}h1{{margin:0;font-size:26px;letter-spacing:.02em}
   <div class="row"><span>全量扫描场次</span><b>{scan_total}</b></div>
   <div class="row"><span>采集日期 / 窗口</span><b>{scan_date} / {source_window}</b></div>
 </section>
-<section class="panel candidate-panel">
-  <h2>候选列表</h2>
-  <p class="hint">{display_label}。候选列表只展示 A/B 正式候选；SKIP 仅作为系统状态。</p>
-  {_group('A级候选', 'A', a_items, True)}
-  {_group('B级候选', 'B', b_items, True)}
-</section>
+{_validation_section(validation)}
 </main>
 <aside>
+{_candidate_decision_focus(b_items or a_items)}
 {_v3_panel(v3, v3_path)}
 <section class="panel safety-panel">
   <h2>系统安全</h2>

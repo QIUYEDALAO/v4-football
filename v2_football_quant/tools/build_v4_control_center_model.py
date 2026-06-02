@@ -141,6 +141,67 @@ def _resolve_cn_name(name_en: str, name_cn_hint: str = "") -> str:
     cn, _, _, _ = resolver.resolve_one(name_en, name_cn_hint if name_cn_hint else None)
     return cn
 
+
+LEAGUE_DISPLAY_ALIASES = {
+    "芬甲": "芬甲 / Finland Ykkonen",
+    "Finland Ykkonen": "芬甲 / Finland Ykkonen",
+    "Ykkonen": "芬甲 / Finland Ykkonen",
+}
+
+
+def _league_display_name(league: str) -> str:
+    league = str(league or "").strip()
+    return LEAGUE_DISPLAY_ALIASES.get(league, league)
+
+
+def _candidate_display_fields(item: dict) -> dict:
+    home_en = str(item.get("home_en") or item.get("home") or "")
+    away_en = str(item.get("away_en") or item.get("away") or "")
+    home_cn = str(item.get("home_cn") or "").strip()
+    away_cn = str(item.get("away_cn") or "").strip()
+    cn_missing = not home_cn or not away_cn or home_cn == home_en or away_cn == away_en
+    if cn_missing:
+        match_display = f"{home_en} vs {away_en}（原始队名）"
+        cn_status = "暂无中文映射，显示原始队名"
+    else:
+        match_display = f"{home_cn} vs {away_cn}"
+        cn_status = "中文/音译名"
+
+    data_gap: list[str] = []
+    if item.get("ht_score") in (None, "", "-"):
+        data_gap.append("ht_score")
+    if item.get("script_type") in (None, "", "-", "待识别"):
+        data_gap.append("script_type")
+    if not item.get("fh_goal_dist_available"):
+        data_gap.append("goal_distribution")
+
+    reasons: list[str] = []
+    h2h_count = item.get("h2h_used_count") or item.get("h2h_valid_count") or item.get("h2h_official_count")
+    if item.get("h2h_low_sample") is True or not h2h_count:
+        reasons.append("H2H样本不足")
+    dist_text = str(item.get("distribution_text") or "")
+    if "TIER_3_WEAK_COVERAGE" in dist_text or "WEAK_COVERAGE" in dist_text:
+        reasons.append("联赛长期样本不足")
+    if not item.get("fh_goal_dist_available"):
+        reasons.append("数据源未返回进球时间分布")
+    reasons = list(dict.fromkeys(reasons))
+    if not reasons:
+        reasons = ["真实进球分布已返回"]
+
+    return {
+        "match_display": match_display,
+        "home_display": home_cn or home_en,
+        "away_display": away_cn or away_en,
+        "team_display_status": cn_status,
+        "original_match": f"{home_en} vs {away_en}",
+        "league_display": _league_display_name(str(item.get("league") or "")),
+        "data_gap": data_gap,
+        "data_gap_display": "进球分布不可用" if "goal_distribution" in data_gap else ("、".join(data_gap) if data_gap else "无"),
+        "goal_distribution_status": "暂无真实进球分布" if not item.get("fh_goal_dist_available") else "真实进球分布已返回",
+        "goal_distribution_missing_reason": " / ".join(reasons),
+        "unsupported_reason": " / ".join(reasons),
+    }
+
 def _find_latest_candidate_view() -> tuple[Optional[Path], dict]:
     candidates = sorted(STATUS.glob("v3v4_dashboard_candidate_view_*.json"))
     if not candidates:
@@ -934,6 +995,7 @@ def _extract_candidates(view: dict, live_daily: dict, scout_data: list | None = 
             item["playbook_script"] = _derive_playbook_script(pct_015, pct_1630, pct_3145, total_goals)
         else:
             item["playbook_script"] = "数据暂缺"
+        item.update(_candidate_display_fields(item))
 
     return {
         "scan_date": view.get("scan_date") or "",
