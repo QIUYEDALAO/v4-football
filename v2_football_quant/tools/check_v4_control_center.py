@@ -80,6 +80,26 @@ def main() -> int:
         if token in canonical_text:
             blockers.append(f"legacy_token_in_control_center_model:{token}")
 
+    durable = model.get("durable_runner", {})
+    if not isinstance(durable, dict):
+        blockers.append("durable_runner_status_not_dict")
+        durable = {}
+    for field in [
+        "runner_installed", "launchd_loaded", "isolated_session_dependency",
+        "next_action", "last_scheduled_scan", "last_completed_scan",
+        "last_exit_code", "active_lock", "heartbeat_age_seconds",
+        "catch_up_required",
+    ]:
+        if field not in durable:
+            blockers.append(f"durable_runner_field_missing:{field}")
+    for token in [
+        "runner installed/template only", "last scheduled scan", "last completed scan",
+        "last exit code", "active lock", "heartbeat age", "catch-up required",
+        "isolated session dependency", "launchd loaded", "next action",
+    ]:
+        if token not in html:
+            blockers.append(f"durable_runner_html_missing:{token}")
+
     # 1) must have JS binding path
     required_js = [
         "function loadModel",

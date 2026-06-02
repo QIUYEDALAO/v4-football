@@ -1822,6 +1822,7 @@ function buildReviewPanel(){
 function buildSystemPanel(){
   const ss=MODEL.system_status||{};
   const se=MODEL.system_errors||{};
+  const dr=MODEL.durable_runner||{};
   const errCount=Number(first(se.active_error_count,0));
   const blockerCount=Number(first(se.active_blocker_count,0));
   const errLine=errCount>0?`<div class='lock' style='margin-top:10px'>异常状态已并入系统页：active ${errCount}，blocker ${blockerCount}。红点只提示，不触发 kill/retry。</div>${buildErrorsPanel()}`:"<div class='note' style='margin-top:10px'>异常状态：当前无 active 异常；底部不再单独占用 Tab。</div>";
@@ -1830,6 +1831,17 @@ function buildSystemPanel(){
     <tr><td>QQ notify</td><td>${safe(ss.qq_notify_status,'N/A')}</td></tr>
     <tr><td>checker</td><td>${safe(ss.checker_status,'N/A')}</td></tr>
     <tr><td>last_updated_at</td><td>${safe(ss.last_updated_at,'N/A')}</td></tr>
+    <tr><td>durable runner</td><td>${safe(first(dr.runner_mode,'template_only'),'template_only')}</td></tr>
+    <tr><td>runner installed/template only</td><td>${safe(first(dr.runner_installed,false),false)?'installed':'template only'}</td></tr>
+    <tr><td>last scheduled scan</td><td>${safe(first(dr.last_scheduled_scan,'N/A'),'N/A')}</td></tr>
+    <tr><td>last completed scan</td><td>${safe(first(dr.last_completed_scan,'N/A'),'N/A')}</td></tr>
+    <tr><td>last exit code</td><td>${safe(first(dr.last_exit_code,'N/A'),'N/A')}</td></tr>
+    <tr><td>active lock</td><td>${safe(first(dr.active_lock,false),false)}</td></tr>
+    <tr><td>heartbeat age</td><td>${safe(first(dr.heartbeat_age_seconds,'N/A'),'N/A')}</td></tr>
+    <tr><td>catch-up required</td><td>${safe(first(dr.catch_up_required,false),false)}</td></tr>
+    <tr><td>isolated session dependency</td><td>${safe(first(dr.isolated_session_dependency,true),true)}</td></tr>
+    <tr><td>launchd loaded</td><td>${safe(first(dr.launchd_loaded,false),false)}</td></tr>
+    <tr><td>next action</td><td>${safe(first(dr.next_action,'DEPLOY_APPROVAL_REQUIRED'),'DEPLOY_APPROVAL_REQUIRED')}</td></tr>
   </table><div class='lock'>全量扫描 / 策略修改 / 上云发布 / 定时修改均锁定。</div>${errLine}`;
 }
 function buildErrorsPanel(){

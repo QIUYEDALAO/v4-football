@@ -1855,6 +1855,36 @@ def _load_system_error_summary() -> dict:
     }
 
 
+def _load_durable_runner_status() -> dict:
+    """Load local durable-runner state without starting or deploying it."""
+    path = STATUS / "v4_durable_daily_scan_status.json"
+    data = _load_json(path)
+    if data:
+        return data
+    return {
+        "schema_version": "v4_durable_daily_scan_status.v1",
+        "updated_at": datetime.now().isoformat(),
+        "runner_mode": "template_only",
+        "runner_installed": False,
+        "launchd_template_present": True,
+        "launchd_loaded": False,
+        "isolated_session_dependency": True,
+        "openclaw_status_only_target": True,
+        "next_action": "DEPLOY_APPROVAL_REQUIRED",
+        "scheduled_time": "12:00 Asia/Shanghai",
+        "state": "TEMPLATE_ONLY",
+        "last_scheduled_scan": None,
+        "last_completed_scan": None,
+        "last_exit_code": None,
+        "active_lock": False,
+        "heartbeat_at": None,
+        "heartbeat_age_seconds": None,
+        "catch_up_required": False,
+        "catch_up_status": "NOT_REQUIRED",
+        "auto_rerun": False,
+    }
+
+
 def build_model() -> dict:
     today_str = datetime.now().strftime("%Y%m%d")
 
@@ -1910,6 +1940,7 @@ def build_model() -> dict:
     # 5. 系统状态
     cron_path, cron = _find_latest_cron_checker()
     system = _extract_system_status(cron)
+    durable_runner = _load_durable_runner_status()
 
     # Fill candidate live states from today's raw records (no rewrite)
     raw_records = []
@@ -2249,6 +2280,7 @@ def build_model() -> dict:
         },
         "live_bet": live_bet,
         "system": system,
+        "durable_runner": durable_runner,
         "system_status": {
             "cron_ok": system.get("cron_all_ok", False),
             "cron_status_text": "定时任务正常" if system.get("cron_all_ok") else "定时任务异常",
@@ -2262,6 +2294,11 @@ def build_model() -> dict:
             "server_8766_status": "PASS",
             "server_8765_status": "PASS",
             "last_updated_at": system.get("generated_at", "") or datetime.now().isoformat(),
+            "durable_runner_state": durable_runner.get("state", "TEMPLATE_ONLY"),
+            "durable_runner_installed": durable_runner.get("runner_installed", False),
+            "launchd_loaded": durable_runner.get("launchd_loaded", False),
+            "isolated_session_dependency": durable_runner.get("isolated_session_dependency", True),
+            "durable_runner_next_action": durable_runner.get("next_action", "DEPLOY_APPROVAL_REQUIRED"),
         },
         "audit": {
             "validation_cumulative_not_from_live_bets": True,
