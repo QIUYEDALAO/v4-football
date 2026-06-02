@@ -121,7 +121,8 @@ def main() -> int:
         if missing_in_items:
             blockers.append(f"candidate_default_fields_missing:{','.join(sorted(set(missing_in_items)))}")
         if null_in_items:
-            warnings.append(f"candidate_default_fields_null_for_unbet:{','.join(sorted(set(null_in_items)))}")
+            if any(not str(it.get("market_advice_display") or "").strip() for it in items if isinstance(it, dict)):
+                warnings.append(f"candidate_default_fields_null_without_display_fallback:{','.join(sorted(set(null_in_items)))}")
     else:
         warnings.append("candidate_items_empty")
 
@@ -159,7 +160,14 @@ def main() -> int:
     # 11) D2 UX refinement contract
     d2_required = [
         "单场结论",
-        "official grade",
+        "正式等级",
+        "盘口证据",
+        "近况 / 交锋",
+        "赛季阶段",
+        "对阵：",
+        "原始队名：",
+        "暂无真实进球分布。",
+        "不支持原因：",
         "联赛长期表现",
         "仅观察，不自动影响评级",
         "长期低命中预警，不自动排除",
@@ -194,7 +202,7 @@ def main() -> int:
         "昨日验证复盘摘要",
         "20260531 联赛验证快照",
         "pending/postponed 不作为 miss",
-        "不自动修改 DEFAULT_RULES / A-B thresholds / official grade",
+        "不自动修改默认规则、A/B阈值、正式等级",
     ]
     for token in d3_required:
         if token not in html:
@@ -218,6 +226,27 @@ def main() -> int:
             blockers.append(f"league_a1_display_token_missing:{token}")
     if "official_grade = league" in html or "grade = league" in html:
         blockers.append("league_tag_mixed_into_official_grade")
+
+    # 15) 20260602 readability contract for the real 8766 entrypoint.
+    rops = next((x for x in items if isinstance(x, dict) and str(x.get("home_en") or x.get("home")) == "Rops" and str(x.get("away_en") or x.get("away")) == "OLS"), {})
+    if rops:
+        expected_model = {
+            "match_display": "罗瓦涅米RoPS vs 奥卢OLS",
+            "original_match": "Rops vs OLS",
+            "league_display": "芬甲 / Finland Ykkonen",
+            "grade_display": "B级候选",
+            "candidate_status_display": "待关注",
+            "market_advice_display": "0.75 / 150",
+            "technical_audit_display": "RF C，盘后 C",
+            "data_gap_display": "进球分布不可用",
+        }
+        for key, expected in expected_model.items():
+            if str(rops.get(key) or "") != expected:
+                blockers.append(f"readability_model_{key}_mismatch:{rops.get(key)}")
+        if "数据源未返回进球时间分布" not in str(rops.get("unsupported_reason") or rops.get("goal_distribution_missing_reason") or ""):
+            blockers.append("readability_model_goal_distribution_reason_missing")
+    elif items:
+        blockers.append("readability_rops_model_item_missing")
 
     # 14) D4 league intelligence panel contract
     d4_required = [

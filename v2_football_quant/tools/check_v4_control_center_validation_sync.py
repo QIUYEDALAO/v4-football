@@ -119,7 +119,7 @@ def main() -> int:
         "rule change recommended",
         "system anomalies",
         "pending/postponed 不作为 miss",
-        "不自动修改 DEFAULT_RULES / A-B thresholds / official grade",
+        "不自动修改默认规则、A/B阈值、正式等级",
     ]
     for token in html_tokens:
         if token not in html:

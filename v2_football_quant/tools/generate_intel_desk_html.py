@@ -10,6 +10,7 @@ from __future__ import annotations
 import hashlib
 import html
 import json
+import re
 from datetime import datetime, timezone, timedelta
 from pathlib import Path
 from typing import Any
@@ -178,6 +179,12 @@ LEAGUE_DISPLAY_ALIASES = {
     "Ykkonen": "芬甲 / Finland Ykkonen",
 }
 
+TEAM_DISPLAY_ALIASES = {
+    "Rops": "罗瓦涅米RoPS",
+    "RoPS": "罗瓦涅米RoPS",
+    "OLS": "奥卢OLS",
+}
+
 
 def _cn_name(name: Any) -> tuple[str, str | None]:
     original = str(name or "UNKNOWN")
@@ -197,6 +204,14 @@ def _team_display(item: dict[str, Any]) -> dict[str, str]:
     if away_cn.startswith("中文名缺失："):
         away_cn = ""
         missing = True
+    home_alias = TEAM_DISPLAY_ALIASES.get(home_en)
+    away_alias = TEAM_DISPLAY_ALIASES.get(away_en)
+    if home_alias:
+        home_cn = home_alias
+        missing = False
+    if away_alias:
+        away_cn = away_alias
+        missing = False
     if not home_cn or home_cn == home_en:
         home_cn = home_en
         missing = True
@@ -204,8 +219,6 @@ def _team_display(item: dict[str, Any]) -> dict[str, str]:
         away_cn = away_en
         missing = True
     title = f"{home_cn} vs {away_cn}"
-    if missing:
-        title = f"{home_en} vs {away_en}（原始队名）"
     return {
         "title": title,
         "home_cn": home_cn,
@@ -214,6 +227,46 @@ def _team_display(item: dict[str, Any]) -> dict[str, str]:
         "away_en": away_en,
         "cn_status": "暂无中文映射，显示原始队名" if missing else "中文/音译名",
     }
+
+
+def _market_advice_display(item: dict[str, Any]) -> str:
+    line = _clean_value(item.get("default_line") or item.get("line") or item.get("displayLine")) or "0.75"
+    stake = _clean_value(item.get("default_stake") or item.get("stake")) or "150"
+    return f"{line} / {stake}"
+
+
+def _grade_display(grade: str) -> str:
+    return f"{grade}级候选"
+
+
+def _audit_summary(item: dict[str, Any]) -> str:
+    text = str(item.get("distribution_text") or "")
+    rf_grade = _clean_value(item.get("rf_shadow_grade"))
+    market_grade = _clean_value(item.get("market_adjusted_shadow_grade"))
+    if not rf_grade:
+        m = re.search(r"shadow=([A-Z]+)", text)
+        rf_grade = m.group(1) if m else "C"
+    if not market_grade:
+        m = re.search(r"market_adjusted_shadow_grade\(([A-Z]+)\)", text)
+        market_grade = m.group(1) if m else "C"
+    return f"RF {rf_grade}，盘后 {market_grade}"
+
+
+def _audit_rows(item: dict[str, Any], grade: str, dist_note: dict[str, Any]) -> list[tuple[str, str]]:
+    text = str(item.get("distribution_text") or "")
+    market_evidence = "盘口强确认，但资料不足" if "STRONG_CONFIRMED" in text or "MARKET_STRONG_CONFIRM" in text else "资料不足"
+    season = "赛季进行中" if "ACTIVE_SEASON" in text else "赛季阶段未明"
+    tier = "三级联赛，覆盖较弱" if "TIER_3_WEAK_COVERAGE" in text else "覆盖状态未明"
+    return [
+        ("正式等级", _grade_display(grade)),
+        ("盘口证据", market_evidence),
+        ("近况 / 交锋", "H2H样本不足"),
+        ("赛季阶段", season),
+        ("联赛覆盖", tier),
+        ("技术审计", _audit_summary(item)),
+        ("进球分布", str(dist_note["summary"])),
+        ("缺失原因", str(dist_note["unsupported_reason"])),
+    ]
 
 
 def _league_display(item: dict[str, Any]) -> str:
@@ -259,7 +312,7 @@ def _goal_distribution_note(item: dict[str, Any]) -> dict[str, Any]:
     deduped = list(dict.fromkeys(reasons))
     return {
         "missing": True,
-        "summary": "暂无真实进球分布",
+        "summary": "暂无真实进球分布。",
         "reasons": deduped,
         "unsupported_reason": " / ".join(deduped),
     }
@@ -277,14 +330,22 @@ def _candidate_decision_focus(items: list[dict[str, Any]]) -> str:
     dist_note = _goal_distribution_note(item)
     league = _league_display(item)
     gap = "进球分布不可用" if dist_note["missing"] else "无"
-    reason = dist_note["unsupported_reason"]
+    reason = f"{dist_note['unsupported_reason']}。"
+    grade = str(item.get("grade") or "B").upper()
+    conclusion_grade = f"{grade}级"
     return f"""
 <section class="panel decision-focus-panel">
   <h2>单场决策</h2>
-  <div class="decision-title">{_h(teams['title'])}</div>
+  <div class="decision-title">对阵：{_h(teams['title'])}</div>
+  <div class="decision-original">原始队名：{_h(teams['home_en'])} vs {_h(teams['away_en'])}</div>
   <div class="decision-sub">联赛：{_h(league)}</div>
-  <div class="decision-row"><span>数据缺口：</span><b>{_h(gap)}</b></div>
-  <div class="decision-row"><span>不支持原因：</span><b>{_h(reason)}</b></div>
+  <div class="decision-row"><span>等级：</span><b>{_h(_grade_display(grade))}</b></div>
+  <div class="decision-row"><span>状态：</span><b>待关注</b></div>
+  <div class="decision-row"><span>盘口建议：</span><b>{_h(_market_advice_display(item))}</b></div>
+  <div class="decision-row"><span>技术审计：</span><b>{_h(_audit_summary(item))}</b></div>
+  <div class="decision-row decision-sentence">数据缺口：{_h(gap)}。</div>
+  <div class="decision-row decision-sentence">不支持原因：{_h(reason)}</div>
+  <div class="decision-row decision-sentence">当前结论：{_h(conclusion_grade)}待关注，不是已推送推荐。</div>
 </section>"""
 
 
@@ -547,8 +608,7 @@ def _ht_display(item: dict[str, Any]) -> str | None:
 
 def _card(item: dict[str, Any], grade: str) -> str:
     teams = _team_display(item)
-    english = f"<div class='english-line'>原始英文：{_h(teams['home_en'])} vs {_h(teams['away_en'])}</div>"
-    cn_status = f"<div class='cn-display-line'>显示名：{_h(teams['home_cn'])} vs {_h(teams['away_cn'])} · {_h(teams['cn_status'])}</div>"
+    english = f"<div class='english-line'>原始队名：{_h(teams['home_en'])} vs {_h(teams['away_en'])}</div>"
     league = _h(_league_display(item))
     kickoff = _h(item.get("kickoff_display") or item.get("kickoff_time") or "TBD")
     missing_fields: list[str] = []
@@ -573,53 +633,45 @@ def _card(item: dict[str, Any], grade: str) -> str:
         segments.append(f"<span class='script-label'>剧本：</span><span class='script-value'>{_h(script)}</span>")
     else:
         missing_fields.append("script_type")
-    r3 = " · ".join(segments) if segments else "主信息字段待正式源补齐"
     dist_note = _goal_distribution_note(item)
+    r3 = (
+        f"<span>等级：{_h(_grade_display(grade))}</span>"
+        f"<span>状态：待关注</span>"
+        f"<span>盘口建议：{_h(_market_advice_display(item))}</span>"
+        f"<span>技术审计：{_h(_audit_summary(item))}</span>"
+    )
     if dist_note["missing"]:
         bins = (
-            "<div class='goal-dist-missing'><b>暂无真实进球分布</b>"
-            f"<span>原因：{_h(dist_note['unsupported_reason'])}</span></div>"
+            "<div class='goal-dist-missing'><b>暂无真实进球分布。</b>"
+            f"<span>原因：{_h(dist_note['unsupported_reason'])}。</span></div>"
         )
     else:
         bins = _h(str(dist_note["summary"]))
     gap_text = "进球分布不可用" if dist_note["missing"] else ("、".join(missing_fields) if missing_fields else "无")
-    missing = f"<div class='missing-fields'>数据缺口：{_h(gap_text)}</div>"
+    missing = f"<div class='missing-fields'>数据缺口：{_h(gap_text)}。</div>"
     unsupported = (
-        f"<div class='unsupported-reason'>不支持原因：{_h(dist_note['unsupported_reason'])}</div>"
+        f"<div class='unsupported-reason'>不支持原因：{_h(dist_note['unsupported_reason'])}。</div>"
         if dist_note["missing"] else ""
     )
-    shadow_pairs = [
-        ("official_grade", _clean_value(item.get("grade")) or grade),
-        ("rf_shadow_grade", _clean_value(item.get("rf_shadow_grade")) or "DATA_MISSING"),
-        ("market_adjusted_shadow_grade", _clean_value(item.get("market_adjusted_shadow_grade")) or "DATA_MISSING"),
-        ("rf_shadow_route", _clean_value(item.get("rf_shadow_route")) or "N/A"),
-        ("rf_shadow_reason", _clean_value(item.get("rf_shadow_reason")) or "N/A"),
-        ("rf_balance_status", _clean_value(item.get("rf_balance_status")) or "N/A"),
-        ("rf_balance_reason", _clean_value(item.get("rf_balance_reason")) or "N/A"),
-        ("h2h_recent5_support_status", _clean_value(item.get("h2h_recent5_support_status")) or "N/A"),
-        ("h2h_recent5_bonus_reason", _clean_value(item.get("h2h_recent5_bonus_reason")) or "N/A"),
-        ("opening_market_support_status", _clean_value(item.get("opening_market_support_status")) or "N/A"),
-        ("opening_market_reason", _clean_value(item.get("opening_market_reason")) or "N/A"),
-        ("market_adjustment_reason", _clean_value(item.get("market_adjustment_reason")) or "N/A"),
-    ]
+    shadow_pairs = _audit_rows(item, grade, dist_note)
     shadow_lines = "".join(
         f"<div class='row'><span>{_h(k)}</span><b>{_h(v)}</b></div>" for k, v in shadow_pairs
     )
-    shadow_detail = f"<details class='shadow-fold'><summary>Shadow解释</summary>{shadow_lines}</details>"
+    shadow_detail = f"<details class='shadow-fold' open><summary>技术审计</summary>{shadow_lines}</details>"
     decision_detail = (
         "<details class='decision-gap-fold' open><summary>单场决策数据说明</summary>"
-        f"<div class='row'><span>数据缺口</span><b>{_h(gap_text)}</b></div>"
+        f"<div class='row'><span>数据缺口</span><b>{_h(gap_text)}。</b></div>"
         f"<div class='row'><span>进球分布</span><b>{_h(dist_note['summary'])}</b></div>"
-        f"<div class='row'><span>不支持原因</span><b>{_h(dist_note['unsupported_reason'])}</b></div>"
+        f"<div class='row'><span>不支持原因</span><b>{_h(dist_note['unsupported_reason'])}。</b></div>"
         "</details>"
     )
     return f"""
 <article class="candidate-card grade-{grade}" data-grade="{grade}">
-  <div class="card-r1"><span>{kickoff}</span><span>{league}</span><b class="grade-badge grade-badge-{grade}">{grade}</b></div>
-  <div class="match-line">{_h(teams['title'])}</div>
-  <div class="card-r3">{r3}</div>
+  <div class="card-r1"><span>{kickoff}</span><span>联赛：{league}</span><b class="grade-badge grade-badge-{grade}">{_h(_grade_display(grade))}</b></div>
+  <div class="match-line">对阵：{_h(teams['title'])}</div>
+  <div class="card-r3 summary-grid">{r3}</div>
   <div class="time-bins">{bins}</div>
-  {cn_status}{english}{missing}{unsupported}{decision_detail}{shadow_detail}
+  {english}{missing}{unsupported}{decision_detail}{shadow_detail}
 </article>"""
 
 
@@ -675,7 +727,7 @@ def render_html(data: dict[str, Any], candidate_path: Path | None, v3: dict[str,
     api_status_marker = _latest_api_status(DATE_KEY)
     api_safe = api_status_marker.get("safe_to_scan")
     api_status = str(api_status_marker.get("api_status") or "API_UNKNOWN")
-    api_last_good = "last_good preserved"
+    api_last_good = "稳定版本已保留"
     if api_safe is False:
         if api_status == "API_FORBIDDEN_NOT_SUBSCRIBED":
             data_status = "API credential blocked"
@@ -703,20 +755,20 @@ def render_html(data: dict[str, Any], candidate_path: Path | None, v3: dict[str,
 <style>
 :root{{--bg:#07101d;--panel:#101b2c;--panel2:#15243a;--ink:#eef5ff;--muted:#91a2b8;--line:#26384f;--blue:#58b7ff;--green:#47d18c;--amber:#e7b84e;--red:#ff6b72;--violet:#a9a1ff}}
 *{{box-sizing:border-box}}body{{margin:0;background:radial-gradient(circle at 15% 0%,#173558 0,#07101d 34%,#050912 100%);color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;padding:16px;max-width:1060px;margin-inline:auto;line-height:1.42}}
-header{{padding:8px 2px 10px}}h1{{margin:0;font-size:24px;letter-spacing:.02em}}.sub{{color:var(--muted);font-size:12px;margin-top:4px}}.notice{{background:rgba(231,184,78,.13);border:1px solid rgba(231,184,78,.42);border-radius:14px;padding:10px 12px;margin:4px 0 14px;color:#ffe3a2;font-weight:700}}.kpi-grid{{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin:6px 0 10px}}.kpi{{background:linear-gradient(155deg,var(--panel),#0c1727);border:1px solid var(--line);border-radius:12px;padding:10px;min-height:76px;box-shadow:0 12px 30px rgba(0,0,0,.22)}}.kpi .label{{color:var(--muted);font-size:12px}}.kpi .value{{font-size:20px;font-weight:800;margin-top:6px}}.kpi .foot{{font-size:12px;color:var(--muted);margin-top:3px}}.layout{{display:grid;grid-template-columns:1.15fr .85fr;gap:12px;align-items:start}}.panel,.candidate-group{{background:rgba(16,27,44,.92);border:1px solid var(--line);border-radius:12px;padding:12px;margin-bottom:10px;box-shadow:0 10px 28px rgba(0,0,0,.18)}}h2{{font-size:16px;margin:0 0 8px;color:var(--blue)}}h3{{font-size:14px;margin:8px 0 6px;color:#cfe8ff}}.row{{display:flex;justify-content:space-between;gap:16px;border-top:1px solid rgba(255,255,255,.07);padding:8px 0}}.row:first-of-type{{border-top:0}}.row span{{color:var(--muted)}}.ok{{color:var(--green)}}.warn{{color:var(--amber)}}.danger{{color:var(--red)}}summary{{cursor:pointer;display:flex;justify-content:space-between;align-items:center;gap:12px;font-weight:800}}details>summary::-webkit-details-marker{{display:none}}.group-note,.hint{{color:var(--muted);font-size:13px;margin:6px 0}}.candidate-list{{display:grid;gap:8px;margin-top:8px}}.candidate-card{{background:linear-gradient(155deg,var(--panel2),#0b1422);border:1px solid rgba(255,255,255,.08);border-left:4px solid var(--line);border-radius:12px;padding:10px}}.candidate-card.grade-A{{border-left-color:var(--green)}}.candidate-card.grade-B{{border-left-color:var(--blue)}}.candidate-card.grade-C{{border-left-color:var(--amber)}}.card-r1{{display:flex;align-items:center;gap:8px;color:var(--muted);font-size:12px}}.card-r1 span:nth-child(2){{flex:1;white-space:normal}}.grade-badge{{border-radius:999px;padding:3px 9px;font-size:12px;color:#08111f}}.grade-badge-A{{background:var(--green)}}.grade-badge-B{{background:var(--blue)}}.grade-badge-C{{background:var(--amber)}}.match-line{{font-size:18px;font-weight:800;margin-top:6px}}.match-line span{{font-weight:500;color:var(--muted);font-size:13px}}.card-r3,.time-bins,.english-line,.cn-display-line,.missing-fields,.unsupported-reason{{font-size:13px;color:var(--muted);margin-top:5px}}.goal-dist-missing{{display:grid;gap:2px;color:var(--muted)}}.goal-dist-missing b{{color:#f2d27a}}.goal-dist-missing span{{font-size:13px;white-space:normal}}.decision-focus-panel{{border-color:rgba(88,183,255,.55)}}.decision-title{{font-size:18px;font-weight:800;margin-bottom:6px}}.decision-sub{{color:var(--muted);font-size:13px;margin-bottom:8px}}.decision-row{{display:block;border-top:1px solid rgba(255,255,255,.08);padding:8px 0;font-size:14px}}.decision-row span{{display:block;color:var(--muted);font-size:12px;margin-bottom:3px}}.decision-row b{{display:block;color:var(--ink);white-space:normal;line-height:1.35}}.decision-gap-fold,.shadow-fold{{margin-top:8px;border-top:1px dashed rgba(255,255,255,.12);padding-top:6px}}.decision-gap-fold .row,.shadow-fold .row{{padding:4px 0;font-size:12px;gap:12px}}.decision-gap-fold .row span,.shadow-fold .row span{{max-width:45%;white-space:normal}}.decision-gap-fold .row b,.shadow-fold .row b{{flex:1;font-size:12px;text-align:right;white-space:normal;word-break:break-word}}.script-label{{color:var(--muted)}}.script-value{{color:var(--amber);font-weight:800}}.lineage{{margin-top:10px;border-top:1px dashed rgba(255,255,255,.12);padding-top:8px;color:var(--muted);font-size:12px}}.validation-grid{{display:grid;grid-template-columns:1fr 1fr;gap:10px}}.validation-col{{border-top:1px solid rgba(255,255,255,.08);padding-top:6px}}.validation-metric{{display:grid;grid-template-columns:38px 1fr;gap:5px;padding:4px 0;font-size:13px;align-items:center}}.validation-metric span{{color:var(--muted);font-style:normal}}.validation-metric b{{font-size:13px;white-space:nowrap}}.script-validation-lite{{margin-top:10px;padding:8px 10px;border:1px solid rgba(255,255,255,.10);border-radius:12px;background:rgba(255,255,255,.035);display:grid;grid-template-columns:auto 1fr;gap:4px 8px;align-items:center;font-size:12px}}.script-validation-lite .script-lite-title{{color:var(--muted);font-weight:800}}.script-validation-lite>b{{color:#f2d27a;font-weight:800}}.script-validation-lite>em{{grid-column:1/-1;color:var(--muted);font-style:normal}}.script-validation-chip{{display:inline-flex;gap:4px;align-items:center;border:1px solid rgba(255,255,255,.09);border-radius:999px;padding:3px 7px;background:rgba(255,255,255,.04)}}.script-validation-chip i{{font-style:normal;color:var(--muted)}}.script-validation-chip b{{color:var(--amber);font-weight:800}}.compact-validation{{padding-bottom:10px}}.validation-audit{{margin-top:8px;border-top:1px dashed rgba(255,255,255,.12);padding-top:8px}}.next-list{{margin:0;padding-left:18px;color:var(--muted)}}.audit-code{{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12px;color:var(--muted);word-break:break-all}}@media(max-width:760px){{body{{padding:12px}}.kpi-grid{{grid-template-columns:repeat(2,minmax(0,1fr))}}.layout{{grid-template-columns:1fr}}h1{{font-size:23px}}.kpi .value{{font-size:20px}}.validation-metric{{grid-template-columns:38px 1fr}}.decision-gap-fold .row,.shadow-fold .row{{display:block}}.decision-gap-fold .row span,.shadow-fold .row span{{display:block;max-width:100%;white-space:normal}}.decision-gap-fold .row b,.shadow-fold .row b{{display:block;text-align:left;margin-top:2px}}}}
+header{{padding:8px 2px 10px}}h1{{margin:0;font-size:24px;letter-spacing:.02em}}.sub{{color:var(--muted);font-size:12px;margin-top:4px}}.notice{{background:rgba(231,184,78,.13);border:1px solid rgba(231,184,78,.42);border-radius:14px;padding:10px 12px;margin:4px 0 14px;color:#ffe3a2;font-weight:700}}.kpi-grid{{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin:6px 0 10px}}.kpi{{background:linear-gradient(155deg,var(--panel),#0c1727);border:1px solid var(--line);border-radius:12px;padding:10px;min-height:76px;box-shadow:0 12px 30px rgba(0,0,0,.22)}}.kpi .label{{color:var(--muted);font-size:12px}}.kpi .value{{font-size:20px;font-weight:800;margin-top:6px}}.kpi .foot{{font-size:12px;color:var(--muted);margin-top:3px}}.layout{{display:grid;grid-template-columns:1.15fr .85fr;gap:12px;align-items:start}}.panel,.candidate-group{{background:rgba(16,27,44,.92);border:1px solid var(--line);border-radius:12px;padding:12px;margin-bottom:10px;box-shadow:0 10px 28px rgba(0,0,0,.18)}}h2{{font-size:16px;margin:0 0 8px;color:var(--blue)}}h3{{font-size:14px;margin:8px 0 6px;color:#cfe8ff}}.row{{display:flex;justify-content:space-between;gap:16px;border-top:1px solid rgba(255,255,255,.07);padding:8px 0}}.row:first-of-type{{border-top:0}}.row span{{color:var(--muted)}}.ok{{color:var(--green)}}.warn{{color:var(--amber)}}.danger{{color:var(--red)}}summary{{cursor:pointer;display:flex;justify-content:space-between;align-items:center;gap:12px;font-weight:800}}details>summary::-webkit-details-marker{{display:none}}.group-note,.hint{{color:var(--muted);font-size:13px;margin:6px 0}}.candidate-list{{display:grid;gap:8px;margin-top:8px}}.candidate-card{{background:linear-gradient(155deg,var(--panel2),#0b1422);border:1px solid rgba(255,255,255,.08);border-left:4px solid var(--line);border-radius:12px;padding:10px}}.candidate-card.grade-A{{border-left-color:var(--green)}}.candidate-card.grade-B{{border-left-color:var(--blue)}}.candidate-card.grade-C{{border-left-color:var(--amber)}}.card-r1{{display:flex;align-items:center;gap:8px;color:var(--muted);font-size:12px}}.card-r1 span:nth-child(2){{flex:1;white-space:normal}}.grade-badge{{border-radius:999px;padding:3px 9px;font-size:12px;color:#08111f}}.grade-badge-A{{background:var(--green)}}.grade-badge-B{{background:var(--blue)}}.grade-badge-C{{background:var(--amber)}}.match-line{{font-size:18px;font-weight:800;margin-top:6px}}.match-line span{{font-weight:500;color:var(--muted);font-size:13px}}.summary-grid{{display:grid;grid-template-columns:1fr 1fr;gap:4px 10px;color:var(--ink)}}.card-r3,.time-bins,.english-line,.cn-display-line,.missing-fields,.unsupported-reason{{font-size:13px;color:var(--muted);margin-top:5px}}.goal-dist-missing{{display:grid;gap:2px;color:var(--muted)}}.goal-dist-missing b{{color:#f2d27a}}.goal-dist-missing span{{font-size:13px;white-space:normal}}.decision-focus-panel{{border-color:rgba(88,183,255,.55)}}.decision-title{{font-size:18px;font-weight:800;margin-bottom:4px}}.decision-original,.decision-sub{{color:var(--muted);font-size:13px;margin-bottom:6px}}.decision-row{{display:block;border-top:1px solid rgba(255,255,255,.08);padding:8px 0;font-size:14px}}.decision-row span{{display:block;color:var(--muted);font-size:12px;margin-bottom:3px}}.decision-row b{{display:block;color:var(--ink);white-space:normal;line-height:1.35}}.decision-sentence{{color:var(--ink);font-weight:800;line-height:1.35;white-space:normal}}.decision-gap-fold,.shadow-fold{{margin-top:8px;border-top:1px dashed rgba(255,255,255,.12);padding-top:6px}}.decision-gap-fold .row,.shadow-fold .row{{padding:4px 0;font-size:12px;gap:12px}}.decision-gap-fold .row span,.shadow-fold .row span{{max-width:45%;white-space:normal}}.decision-gap-fold .row b,.shadow-fold .row b{{flex:1;font-size:12px;text-align:right;white-space:normal;word-break:break-word}}.script-label{{color:var(--muted)}}.script-value{{color:var(--amber);font-weight:800}}.lineage{{margin-top:10px;border-top:1px dashed rgba(255,255,255,.12);padding-top:8px;color:var(--muted);font-size:12px}}.validation-grid{{display:grid;grid-template-columns:1fr 1fr;gap:10px}}.validation-col{{border-top:1px solid rgba(255,255,255,.08);padding-top:6px}}.validation-metric{{display:grid;grid-template-columns:38px 1fr;gap:5px;padding:4px 0;font-size:13px;align-items:center}}.validation-metric span{{color:var(--muted);font-style:normal}}.validation-metric b{{font-size:13px;white-space:nowrap}}.script-validation-lite{{margin-top:10px;padding:8px 10px;border:1px solid rgba(255,255,255,.10);border-radius:12px;background:rgba(255,255,255,.035);display:grid;grid-template-columns:auto 1fr;gap:4px 8px;align-items:center;font-size:12px}}.script-validation-lite .script-lite-title{{color:var(--muted);font-weight:800}}.script-validation-lite>b{{color:#f2d27a;font-weight:800}}.script-validation-lite>em{{grid-column:1/-1;color:var(--muted);font-style:normal}}.script-validation-chip{{display:inline-flex;gap:4px;align-items:center;border:1px solid rgba(255,255,255,.09);border-radius:999px;padding:3px 7px;background:rgba(255,255,255,.04)}}.script-validation-chip i{{font-style:normal;color:var(--muted)}}.script-validation-chip b{{color:var(--amber);font-weight:800}}.compact-validation{{padding-bottom:10px}}.validation-audit{{margin-top:8px;border-top:1px dashed rgba(255,255,255,.12);padding-top:8px}}.next-list{{margin:0;padding-left:18px;color:var(--muted)}}.audit-code{{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12px;color:var(--muted);word-break:break-all}}@media(max-width:760px){{body{{padding:12px}}.kpi-grid{{grid-template-columns:repeat(2,minmax(0,1fr))}}.layout{{grid-template-columns:1fr}}h1{{font-size:23px}}.kpi .value{{font-size:20px}}.summary-grid{{grid-template-columns:1fr}}.validation-metric{{grid-template-columns:38px 1fr}}.decision-gap-fold .row,.shadow-fold .row{{display:block}}.decision-gap-fold .row span,.shadow-fold .row span{{display:block;max-width:100%;white-space:normal}}.decision-gap-fold .row b,.shadow-fold .row b{{display:block;text-align:left;margin-top:2px}}}}
 </style>
 </head>
 <body>
 <header>
   <h1>情报决策总台 — V3/V4</h1>
-  <div class="sub">generated={generated_at} · source_window={source_window} · no capture · no push · no cloud publish</div>
+  <div class="sub">生成时间={generated_at} · 扫描窗口={source_window} · 未采集 · 未推送 · 未发布</div>
 </header>
 {data_notice}
 <section class="kpi-grid" aria-label="top status cards">
   <div class="kpi"><div class="label">数据状态</div><div class="value {data_status_class}">{data_status}</div><div class="foot">{display_label} · {api_last_good}</div></div>
   <div class="kpi"><div class="label">候选结构</div><div class="value">A{counts['A']} / B{counts['B']}</div><div class="foot">SKIP {counts['SKIP']}</div></div>
-  <div class="kpi"><div class="label">复盘状态</div><div class="value warn">REPORT_ONLY</div><div class="foot">等待赛果 / 可复盘</div></div>
-  <div class="kpi"><div class="label">阻断</div><div class="value {('ok' if blockers == 0 else 'danger')}">{blockers}</div><div class="foot">active blocker count</div></div>
+  <div class="kpi"><div class="label">复盘状态</div><div class="value warn">待复盘</div><div class="foot">等待赛果 / 可复盘</div></div>
+  <div class="kpi"><div class="label">阻断</div><div class="value {('ok' if blockers == 0 else 'danger')}">{blockers}</div><div class="foot">当前阻断数</div></div>
 </section>
 <div class="layout">
 <main>
@@ -730,7 +782,7 @@ header{{padding:8px 2px 10px}}h1{{margin:0;font-size:24px;letter-spacing:.02em}}
   <h2>V4 情报状态</h2>
   <div class="row"><span>正式候选</span><b>{counts['A'] + counts['B']} 场</b></div>
   <div class="row"><span>A/B/SKIP</span><b>A{counts['A']} / B{counts['B']} / SKIP{counts['SKIP']}</b></div>
-  <div class="row"><span>review_mode</span><b>REPORT_ONLY</b></div>
+  <div class="row"><span>复盘模式</span><b>待复盘</b></div>
   <div class="row"><span>全量扫描场次</span><b>{scan_total}</b></div>
   <div class="row"><span>采集日期 / 窗口</span><b>{scan_date} / {source_window}</b></div>
 </section>
@@ -742,7 +794,7 @@ header{{padding:8px 2px 10px}}h1{{margin:0;font-size:24px;letter-spacing:.02em}}
 <section class="panel safety-panel">
   <h2>系统安全</h2>
   <div class="row"><span>V3 active</span><b>战备中 / 预留</b></div>
-  <div class="row"><span>V4 review</span><b>REPORT_ONLY</b></div>
+  <div class="row"><span>V4复盘模式</span><b>只展示，未推送</b></div>
   <div class="row"><span>legacy modules</span><b>禁用</b></div>
   <div class="row"><span>QQ推送</span><b>关闭</b></div>
   <div class="row"><span>capture/cloud</span><b>关闭</b></div>
@@ -783,7 +835,7 @@ def build_dashboard(write: bool = True, date_key: str = DATE_KEY) -> dict[str, A
         "source_date": source_resolution.get("scan_date"),
         "is_today_source": source_resolution.get("is_today_source"),
         "source_date_mismatch": source_resolution.get("source_date_mismatch"),
-        "review_mode": "REPORT_ONLY",
+        "review_mode": "只展示，未推送",
         "v3_status": v3.get("status", "RESERVED_WAITING_FOR_SCHEDULE_OR_INTEL_SOURCE") if v3 else "RESERVED_WAITING_FOR_SCHEDULE_OR_INTEL_SOURCE",
         "dashboard_sha256": digest,
         "validation_summary_sha256": hashlib.sha256(json.dumps(validation, ensure_ascii=False, sort_keys=True).encode()).hexdigest(),

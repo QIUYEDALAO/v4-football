@@ -73,7 +73,7 @@ def main() -> int:
     html = HTML.read_text(encoding="utf-8", errors="ignore") if HTML.exists() else ""
     _add(checks, "baseline_only_wording_exists", "当前仅有 baseline 快照，不能判断趋势。" in html, "baseline_only_wording")
     _add(checks, "html_has_league_intel", "联赛情报" in html, "联赛情报")
-    _add(checks, "html_has_official_grade_observe_only", "不自动影响 official grade" in html, "official_grade_note")
+    _add(checks, "html_has_official_grade_observe_only", "不自动影响正式等级" in html, "official_grade_note")
     _add(checks, "html_has_not_auto_exclude", "不自动排除" in html, "not_auto_exclude")
     _add(checks, "html_has_pending_not_denominator", "不进分母" in html, "pending_not_denominator")
     banned = ["AUTO_EXCLUDE", "BLACKLIST", "RULE_CHANGE_NOW", "THRESHOLD_CHANGE_NOW"]

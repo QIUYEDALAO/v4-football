@@ -148,6 +148,12 @@ LEAGUE_DISPLAY_ALIASES = {
     "Ykkonen": "芬甲 / Finland Ykkonen",
 }
 
+TEAM_DISPLAY_ALIASES = {
+    "Rops": "罗瓦涅米RoPS",
+    "RoPS": "罗瓦涅米RoPS",
+    "OLS": "奥卢OLS",
+}
+
 
 def _league_display_name(league: str) -> str:
     league = str(league or "").strip()
@@ -159,6 +165,8 @@ def _candidate_display_fields(item: dict) -> dict:
     away_en = str(item.get("away_en") or item.get("away") or "")
     home_cn = str(item.get("home_cn") or "").strip()
     away_cn = str(item.get("away_cn") or "").strip()
+    home_cn = TEAM_DISPLAY_ALIASES.get(home_en, home_cn)
+    away_cn = TEAM_DISPLAY_ALIASES.get(away_en, away_cn)
     cn_missing = not home_cn or not away_cn or home_cn == home_en or away_cn == away_en
     if cn_missing:
         match_display = f"{home_en} vs {away_en}（原始队名）"
@@ -195,6 +203,10 @@ def _candidate_display_fields(item: dict) -> dict:
         "team_display_status": cn_status,
         "original_match": f"{home_en} vs {away_en}",
         "league_display": _league_display_name(str(item.get("league") or "")),
+        "grade_display": f"{str(item.get('grade') or 'B').upper()}级候选",
+        "candidate_status_display": "待关注",
+        "market_advice_display": f"{item.get('default_line') or item.get('line') or '0.75'} / {item.get('default_stake') or item.get('stake') or '150'}",
+        "technical_audit_display": "RF C，盘后 C",
         "data_gap": data_gap,
         "data_gap_display": "进球分布不可用" if "goal_distribution" in data_gap else ("、".join(data_gap) if data_gap else "无"),
         "goal_distribution_status": "暂无真实进球分布" if not item.get("fh_goal_dist_available") else "真实进球分布已返回",
