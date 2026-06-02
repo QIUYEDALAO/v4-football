@@ -400,8 +400,27 @@ def main() -> int:
         marker["dashboard_refreshed"] = True
         marker["dashboard_sha256"] = dashboard_marker.get("dashboard_sha256")
         marker["script_validation_visible"] = True
+        try:
+            proc = subprocess.run(
+                [sys.executable, str(ROOT / "tools" / "build_v4_control_center_model.py")],
+                cwd=str(ROOT),
+                text=True,
+                capture_output=True,
+                timeout=120,
+            )
+            marker["control_center_model_refreshed"] = proc.returncode == 0
+            marker["control_center_model_returncode"] = proc.returncode
+            marker["control_center_model_stdout_tail"] = proc.stdout[-800:]
+            marker["control_center_model_stderr_tail"] = proc.stderr[-800:]
+            if proc.returncode != 0:
+                marker["blockers"].append(f"CONTROL_CENTER_MODEL_REFRESH_RC_{proc.returncode}")
+        except Exception as exc:
+            marker["control_center_model_refreshed"] = False
+            marker["control_center_model_error"] = str(exc)
+            marker["blockers"].append("CONTROL_CENTER_MODEL_REFRESH_FAILED")
     else:
         marker["dashboard_refreshed"] = False
+        marker["control_center_model_refreshed"] = False
     if args.final_pass and args.phase == "after-validation":
         out = STATUS / f"v3v4_dashboard_after_validation_final_refresh_{args.date}.json"
     elif args.final_pass:

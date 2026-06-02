@@ -48,15 +48,15 @@ def _latest(pattern: str) -> Path | None:
     return files[-1] if files else None
 
 
-def _active_source_allowlist() -> dict[str, Any]:
-    path = STATUS_DIR / "v3v4_dashboard_active_source_allowlist_20260525.json"
+def _active_source_allowlist(date_key: str = DATE_KEY) -> dict[str, Any]:
+    path = STATUS_DIR / f"v3v4_dashboard_active_source_allowlist_{date_key}.json"
     if not path.exists():
         return {}
     return _load_json(path)
 
 
-def _is_allowed(rel_path: str, key: str) -> bool:
-    allow = _active_source_allowlist().get("active_allowlist", {})
+def _is_allowed(rel_path: str, key: str, date_key: str = DATE_KEY) -> bool:
+    allow = _active_source_allowlist(date_key).get("active_allowlist", {})
     if not isinstance(allow, dict):
         return True
     allowed = allow.get(key)
@@ -72,7 +72,7 @@ def _latest_candidate_view(date_key: str = DATE_KEY) -> tuple[dict[str, Any], Pa
         resolve_brief(date_key, write=True)
     if candidate_path.exists():
         rel = str(candidate_path.relative_to(MODULE))
-        if _is_allowed(rel, "candidate_view"):
+        if _is_allowed(rel, "candidate_view", date_key):
             return _load_json(candidate_path), candidate_path
     # Fail closed: do not fallback to legacy intel_desk_v4_candidate_view_*.json
     # to avoid stale source pollution (e.g., 20260522 rollback artifacts).
@@ -573,7 +573,7 @@ def render_html(data: dict[str, Any], candidate_path: Path | None, v3: dict[str,
     source_resolution = source_resolution or resolve_source_date(data, candidate_path, write=False)
     counts = _counts(data)
     formal_count = int(data.get("formal_recommendation_count", counts["A"] + counts["B"]) or 0)
-    scan_total = counts["A"] + counts["B"] + counts["C"] + counts["SKIP"]
+    scan_total = int(data.get("scan_total", counts["A"] + counts["B"] + counts["C"] + counts["SKIP"]) or 0)
     source_window = _h(data.get("source_window", "unknown"))
     scan_date = _h(source_resolution.get("scan_date", "unknown"))
     display_label = _h(source_resolution.get("display_label", "最近候选"))
@@ -672,7 +672,7 @@ def build_dashboard(write: bool = True, date_key: str = DATE_KEY) -> dict[str, A
     digest = hashlib.sha256(html_text.encode()).hexdigest()
     counts = _counts(data)
     formal_count = int(data.get("formal_recommendation_count", counts["A"] + counts["B"]) or 0)
-    scan_total = counts["A"] + counts["B"] + counts["C"] + counts["SKIP"]
+    scan_total = int(data.get("scan_total", counts["A"] + counts["B"] + counts["C"] + counts["SKIP"]) or 0)
     marker = {
         "schema_version": "v3v4_dashboard_validation_two_column_script_highlight_build.v1",
         "phase": "V3V4-DASHBOARD-VALIDATION-TWO-COLUMN-SCRIPT-HIGHLIGHT-20260523",

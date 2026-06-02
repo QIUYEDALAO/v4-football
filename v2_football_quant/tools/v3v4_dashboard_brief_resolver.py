@@ -53,10 +53,10 @@ SUPPLEMENTAL_CN = {
     "New England Revolution": "新英格兰革命",
 }
 
-GRADE_HEADERS = {
-    "A": "🔥 A级上半场强推荐",
-    "B": "🟢 B级上半场达标推荐",
-}
+GRADE_HEADER_RE = re.compile(
+    r"^[^\n]*?(?P<grade>[AB])级(?:上半场)?(?:强推荐|达标推荐)(?:[：:](?:无|\(无\)))?\s*$",
+    re.MULTILINE,
+)
 C_HEADER = "👁️ C级观察池"
 SKIP_HEADER = "⚪ 跳过统计"
 
@@ -96,8 +96,8 @@ def sha(path: Path | None) -> str | None:
 
 def parse_overview(text: str) -> dict[str, int]:
     patterns = {
-        "A": r"A级强推荐：(?P<n>\d+)场",
-        "B": r"B级达标推荐：(?P<n>\d+)场",
+        "A": r"A级(?:上半场)?强推荐[：:](?P<n>\d+)场",
+        "B": r"B级(?:上半场)?达标推荐[：:](?P<n>\d+)场",
         "C": r"C级观察：(?P<n>\d+)场",
         "SKIP": r"HT_SKIP跳过：(?P<n>\d+)场|跳过：(?P<n2>\d+)场",
         "scan_total": r"全量扫描：(?P<n>\d+)场",
@@ -111,24 +111,51 @@ def parse_overview(text: str) -> dict[str, int]:
     return out
 
 
-def split_blocks(text: str, header: str) -> list[str]:
-    pieces = text.split(header)
-    blocks = []
-    for piece in pieces[1:]:
-        block = piece.split("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━", 1)[0]
-        if block.strip():
-            blocks.append(block.strip())
+def split_grade_blocks(text: str, grade: str) -> list[str]:
+    blocks: list[str] = []
+    matches = list(GRADE_HEADER_RE.finditer(text))
+    for idx, match in enumerate(matches):
+        if match.group("grade") != grade:
+            continue
+        start = match.end()
+        next_header = matches[idx + 1].start() if idx + 1 < len(matches) else len(text)
+        next_rule = text.find("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━", start)
+        end = min([x for x in [next_header, next_rule if next_rule != -1 else None] if x is not None])
+        section = text[start:end].strip()
+        if section and section not in {"(无)", "无", "：(无)"}:
+            blocks.append(section)
     return blocks
+
+
+def _norm_team(name: str) -> str:
+    return re.sub(r"\s+", " ", str(name or "").strip()).casefold()
+
+
+def _find_scout_match(home: str, away: str, scout_by_fixture: dict[int, dict[str, Any]]) -> dict[str, Any]:
+    home_key = _norm_team(home)
+    away_key = _norm_team(away)
+    for row in scout_by_fixture.values():
+        row_home = _norm_team(row.get("home") or row.get("home_team"))
+        row_away = _norm_team(row.get("away") or row.get("away_team"))
+        if row_home == home_key and row_away == away_key:
+            return row
+    return {}
 
 
 def parse_ab_block(block: str, grade: str, idx: int, scout_by_fixture: dict[int, dict[str, Any]], brief_path: Path) -> dict[str, Any]:
     lines = [ln.strip() for ln in block.splitlines() if ln.strip()]
-    title = lines[0]
-    home, away = [part.strip() for part in title.split(" vs ", 1)] if " vs " in title else (title, "UNKNOWN")
+    title = lines[0].lstrip("- ").strip() if lines else "UNKNOWN"
+    compact_parts = [p.strip() for p in title.split("｜")]
+    match_title = compact_parts[0] if compact_parts else title
+    home, away = [part.strip() for part in match_title.split(" vs ", 1)] if " vs " in match_title else (match_title, "UNKNOWN")
     meta = lines[1] if len(lines) > 1 else ""
-    parts = [p.strip() for p in meta.split("·")]
-    league = parts[0] if parts else "UNKNOWN"
-    kickoff_display = parts[1] if len(parts) > 1 else "TBD"
+    if len(compact_parts) >= 3:
+        league = compact_parts[1] or "UNKNOWN"
+        kickoff_display = compact_parts[2] or "TBD"
+    else:
+        parts = [p.strip() for p in meta.split("·")]
+        league = parts[0] if parts else "UNKNOWN"
+        kickoff_display = parts[1] if len(parts) > 1 else "TBD"
     fixture_match = re.search(r"#(\d+)", meta)
     fixture_id = int(fixture_match.group(1)) if fixture_match else None
     score_line = next((ln for ln in lines if ln.startswith("HT评分")), "")
@@ -136,7 +163,11 @@ def parse_ab_block(block: str, grade: str, idx: int, scout_by_fixture: dict[int,
     script_line = next((ln for ln in lines if ln.startswith("剧本：")), "")
     dist_line = next((ln for ln in lines if ln.startswith("分布：")), "")
     risk_line = next((ln for ln in lines if ln.startswith("风险：")), "")
+    reason_line = next((ln for ln in lines if ln.startswith("原因：")), "")
     source = scout_by_fixture.get(fixture_id or -1, {})
+    if not source:
+        source = _find_scout_match(home, away, scout_by_fixture)
+        fixture_id = int(source.get("fixture_id")) if source.get("fixture_id") else fixture_id
     resolved = CN_RESOLVER.resolve_match(home, away, source=str(brief_path.relative_to(ROOT)))
     home_cn, away_cn = resolved["home_team_cn"], resolved["away_team_cn"]
     home_en, away_en = resolved["home_team_en"], resolved["away_team_en"]
@@ -162,8 +193,8 @@ def parse_ab_block(block: str, grade: str, idx: int, scout_by_fixture: dict[int,
         "expected_goals": f"{score_match.group(3)}球" if score_match else "-",
         "sample_size": int(score_match.group(4)) if score_match else None,
         "script_type": script_line.replace("剧本：", "") if script_line else "待识别",
-        "distribution_text": dist_line.replace("分布：", "") if dist_line else "time_bins 待补齐",
-        "risk": risk_line.replace("风险：", "") if risk_line else "-",
+        "distribution_text": dist_line.replace("分布：", "") if dist_line else (reason_line.replace("原因：", "") if reason_line else "season_aware_rf brief"),
+        "risk": risk_line.replace("风险：", "") if risk_line else (reason_line.replace("原因：", "") if reason_line else "-"),
         "grade": grade,
         "recommendation_status": "brief_formal_display_only",
         "source": str(brief_path.relative_to(ROOT)),
@@ -243,6 +274,8 @@ def parse_c_items(text: str, scout_by_fixture: dict[int, dict[str, Any]], brief_
 
 
 def build_candidate_view(date: str, text: str, brief_path: Path, scout_path: Path | None) -> dict[str, Any]:
+    scan_perf_path = DAILY / f"scan_perf_v4_{date}.json"
+    scan_perf = load_json(scan_perf_path) or {}
     scout_obj = load_json(scout_path) if scout_path else []
     if isinstance(scout_obj, list):
         scout = scout_obj
@@ -252,8 +285,8 @@ def build_candidate_view(date: str, text: str, brief_path: Path, scout_path: Pat
         scout = []
     scout_by_fixture = {int(item.get("fixture_id")): item for item in scout if isinstance(item, dict) and item.get("fixture_id")}
     overview = parse_overview(text)
-    a_items_raw = [parse_ab_block(block, "A", i, scout_by_fixture, brief_path) for i, block in enumerate(split_blocks(text, GRADE_HEADERS["A"]), 1)]
-    b_items_raw = [parse_ab_block(block, "B", i, scout_by_fixture, brief_path) for i, block in enumerate(split_blocks(text, GRADE_HEADERS["B"]), 1)]
+    a_items_raw = [parse_ab_block(block, "A", i, scout_by_fixture, brief_path) for i, block in enumerate(split_grade_blocks(text, "A"), 1)]
+    b_items_raw = [parse_ab_block(block, "B", i, scout_by_fixture, brief_path) for i, block in enumerate(split_grade_blocks(text, "B"), 1)]
     a_items = [x for x in a_items_raw if not _is_placeholder_candidate(x)]
     b_items = [x for x in b_items_raw if not _is_placeholder_candidate(x)]
     parsed_by_fixture = {}
@@ -345,11 +378,12 @@ def build_candidate_view(date: str, text: str, brief_path: Path, scout_path: Pat
             g = str((row.get("official_grade") or row.get("grade") or "")).upper().strip()
             if g in scout_grade_counts:
                 scout_grade_counts[g] += 1
-    final_a = scout_grade_counts["A"] if scout_has_official_ab else len(merged_a)
-    final_b = scout_grade_counts["B"] if scout_has_official_ab else len(merged_b)
-    final_c = scout_grade_counts["C"] if scout else overview.get("C", len(c_items))
-    final_skip = scout_grade_counts["SKIP"] if scout else overview.get("SKIP", 0)
-    final_total = len(scout) if scout else overview.get("scan_total", final_a + final_b + final_c + final_skip)
+    final_a = len(merged_a)
+    final_b = len(merged_b)
+    final_c = int(overview.get("C", len(c_items)) or 0)
+    scan_perf_total = scan_perf.get("total_fixtures") if isinstance(scan_perf, dict) else None
+    final_total = int(scan_perf_total or overview.get("scan_total", final_a + final_b + final_c) or 0)
+    final_skip = max(0, final_total - final_a - final_b - final_c)
     return {
         "schema_version": "v3v4_dashboard_brief_candidate_view.v1",
         "generated_at": datetime.now(TZ).isoformat(),
@@ -361,6 +395,10 @@ def build_candidate_view(date: str, text: str, brief_path: Path, scout_path: Pat
         "brief_sha256": sha(brief_path),
         "scout_path": str(scout_path.relative_to(ROOT)) if scout_path else None,
         "scout_sha256": sha(scout_path),
+        "scan_perf_path": str(scan_perf_path.relative_to(ROOT)) if scan_perf_path.exists() else None,
+        "scan_perf_sha256": sha(scan_perf_path) if scan_perf_path.exists() else None,
+        "scan_perf_total_fixtures": scan_perf_total,
+        "scouted_count": scan_perf.get("scouted_count") if isinstance(scan_perf, dict) else None,
         "A_count": final_a,
         "B_count": final_b,
         "C_count": final_c,
@@ -431,8 +469,8 @@ def resolve(date: str, *, write: bool = True) -> dict[str, Any]:
             "formal_count": view["formal_recommendation_count"],
             "window": "daily_1200",
             "parsed_from_brief": True,
-            "fallback_used": False,
-            "fallback_reason": None,
+            "fallback_used": bool(view.get("fallback_used")),
+            "fallback_reason": view.get("fallback_reason"),
             "candidate_view": view,
             "brief_used_for_hit_rate": False,
             "capture_ran": False,
