@@ -29,6 +29,13 @@ VENUE_SIGNAL_TAGS = {
     "VENUE_UPSET_WATCH",
 }
 
+MARKET_DATA_STATUS_PATH = [
+    "CURRENT_MARKET_DATA_MISSING",
+    "MARKET_DATA_PARTIAL",
+    "MARKET_DATA_AVAILABLE",
+]
+UPSET_WATCH_DEFINITION = "historical_data_insufficient_for_probability"
+
 SAMPLES = [
     {
         "sample_id": "WC4D-HUMID-001",
@@ -99,8 +106,13 @@ def _squad_quality(home: str, away: str, team_by_name: dict[str, dict[str, Any]]
     elif "CANDIDATE_REVIEW_HOLD" in qualities:
         combined = "SQUAD_REVIEW_HOLD"
     else:
-        combined = "SQUAD_CANDIDATE_REVIEW_OK"
+        combined = "SQUAD_CANDIDATE_KNOWN"
     return combined, f"{home_note} | {away_note}"
+
+
+def _team_candidate_status(team_name: str, team_by_name: dict[str, dict[str, Any]]) -> str:
+    info = team_by_name.get(team_name)
+    return str((info or {}).get("candidate_status") or "TEAM_CACHE_MISSING")
 
 
 def _venue_stress_tag(venue: dict[str, Any]) -> str:
@@ -115,7 +127,7 @@ def _data_insufficient_reason(match: dict[str, Any], squad_quality: str) -> str:
         reasons.append("current_market_or_api_odds_cache_missing")
     if match.get("xg_available") is not True:
         reasons.append("api_prediction_or_xg_cache_missing")
-    if squad_quality != "SQUAD_CANDIDATE_REVIEW_OK":
+    if squad_quality != "SQUAD_CANDIDATE_KNOWN":
         reasons.append("candidate_squad_requires_review_or_team_cache_missing")
     reasons.extend(["official_final_squad_not_confirmed", "starting_xi_not_available"])
     return ";".join(dict.fromkeys(reasons))
@@ -147,6 +159,8 @@ def build_rows() -> tuple[list[dict[str, str]], dict[str, Any]]:
         home = str((match.get("home_team") or {}).get("name") or "")
         away = str((match.get("away_team") or {}).get("name") or "")
         squad_quality, squad_note = _squad_quality(home, away, team_by_name)
+        venue_tag = _venue_stress_tag(venue)
+        upset_watch_definition = UPSET_WATCH_DEFINITION if "VENUE_UPSET_WATCH" in venue_tag else ""
         rows.append(
             {
                 "run_date": RUN_DATE,
@@ -165,8 +179,13 @@ def build_rows() -> tuple[list[dict[str, str]], dict[str, Any]]:
                 "popular_strong_team": sample["popular_strong_team"],
                 "odds_available": str(match.get("odds_available") is True).lower(),
                 "xg_available": str(match.get("xg_available") is True).lower(),
+                "market_data_status": "CURRENT_MARKET_DATA_MISSING",
                 "market_gap_tag": "CURRENT_MARKET_DATA_MISSING",
-                "venue_stress_tag": _venue_stress_tag(venue),
+                "venue_stress_tag": venue_tag,
+                "upset_watch_definition": upset_watch_definition,
+                "venue_upset_watch_scoring": "false",
+                "home_candidate_status": _team_candidate_status(home, team_by_name),
+                "away_candidate_status": _team_candidate_status(away, team_by_name),
                 "squad_data_quality": squad_quality,
                 "perception_gap_tag": "DATA_INSUFFICIENT;WATCH_ONLY",
                 "data_insufficient_reason": _data_insufficient_reason(match, squad_quality),
@@ -232,6 +251,9 @@ def write_outputs(rows: list[dict[str, str]], context: dict[str, Any]) -> dict[s
         f"- candidate_review_artifact: {WC5D_REVIEW_ARTIFACT.relative_to(ROOT)}",
         f"- venue_stress_layer: {VENUE_STRESS.relative_to(ROOT)}",
         "- api_prediction_or_odds_cache: local 2026 match cache present; selected samples have odds_available=false and xg_available=false",
+        f"- market_data_status_path: {' -> '.join(MARKET_DATA_STATUS_PATH)}",
+        f"- upset_watch_definition: {UPSET_WATCH_DEFINITION}",
+        "- VENUE_UPSET_WATCH is not an upset prediction and is not a scoring input.",
         (
             "- local_cache_coverage: "
             f"world_cup_2026_matches={coverage.get('world_cup_2026_matches')}; "
@@ -253,7 +275,11 @@ def write_outputs(rows: list[dict[str, str]], context: dict[str, Any]) -> dict[s
                 f"- sample_priority: {row['sample_priority']}",
                 f"- market_gap_tag: {row['market_gap_tag']}",
                 f"- venue_stress_tag: {row['venue_stress_tag']}",
+                f"- upset_watch_definition: {row['upset_watch_definition'] or 'N/A'}",
+                f"- venue_upset_watch_scoring: {row['venue_upset_watch_scoring']}",
                 f"- squad_data_quality: {row['squad_data_quality']}",
+                f"- home_candidate_status: {row['home_candidate_status']}",
+                f"- away_candidate_status: {row['away_candidate_status']}",
                 f"- perception_gap_tag: {row['perception_gap_tag']}",
                 f"- data_insufficient_reason: {row['data_insufficient_reason']}",
                 f"- venue_reason: {row['venue_reason']}",
@@ -292,6 +318,10 @@ def write_outputs(rows: list[dict[str, str]], context: dict[str, Any]) -> dict[s
         "affects_v4_grade": False,
         "scoring_changed": False,
         "local_2026_odds_or_prediction_available_for_samples": False,
+        "market_data_status_path": MARKET_DATA_STATUS_PATH,
+        "current_market_data_status": "CURRENT_MARKET_DATA_MISSING",
+        "upset_watch_definition": UPSET_WATCH_DEFINITION,
+        "venue_upset_watch_scoring": False,
         "source_files": [str(path.relative_to(ROOT)) for path in context["source_files"]],
     }
     STATUS_OUT.write_text(json.dumps(status, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")

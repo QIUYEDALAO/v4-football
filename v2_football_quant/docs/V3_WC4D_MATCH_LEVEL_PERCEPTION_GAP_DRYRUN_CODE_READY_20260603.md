@@ -26,6 +26,11 @@ It is observation-only. It does not change V4, grading rules, validation, QQ, li
   - `betting_recommendation=false`
   - `affects_v4_grade=false`
   - `scoring_changed=false`
+  - `SQUAD_CANDIDATE_REVIEW_OK` does not appear
+  - `SQUAD_CANDIDATE_KNOWN` appears without implying confirmed final squad
+  - team-level statuses keep `OFFICIAL_CONFIRMED` distinct from API candidate statuses
+  - `VENUE_UPSET_WATCH` carries `upset_watch_definition=historical_data_insufficient_for_probability`
+  - market data status path is frozen as `CURRENT_MARKET_DATA_MISSING -> MARKET_DATA_PARTIAL -> MARKET_DATA_AVAILABLE`
 
 ## War Room
 
@@ -41,3 +46,10 @@ It is observation-only. It does not change V4, grading rules, validation, QQ, li
 ## Safety
 
 WC4D is a dry-run observation layer. It only surfaces market gap tags, venue stress tags, squad data quality, perception gap tags, and data insufficiency reasons for selected samples.
+
+WC4E freezes the WC4D labels before any future scoring work:
+
+- `SQUAD_CANDIDATE_KNOWN` means the local candidate-review artifact has known candidate status for both teams. It does not mean confirmed final squad.
+- `OFFICIAL_CONFIRMED` remains visible in `home_candidate_status` or `away_candidate_status` and is distinct from `API_CLEAN_CANDIDATE`.
+- `VENUE_UPSET_WATCH` is retained as a venue-stress observation tag only. Its definition is `historical_data_insufficient_for_probability`; it is not an upset prediction and it is not a scoring input.
+- Current WC4D samples remain `CURRENT_MARKET_DATA_MISSING`. The only allowed future status path is `CURRENT_MARKET_DATA_MISSING -> MARKET_DATA_PARTIAL -> MARKET_DATA_AVAILABLE`.

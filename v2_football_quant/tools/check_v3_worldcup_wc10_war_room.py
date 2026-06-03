@@ -113,6 +113,9 @@ def main() -> int:
     add(checks, "match_level_pg_dryrun_no_betting", mlpg_guard.get("betting_recommendation") is False, mlpg_guard)
     add(checks, "match_level_pg_dryrun_no_v4_grade_impact", mlpg_guard.get("affects_v4_grade") is False, mlpg_guard)
     add(checks, "match_level_pg_dryrun_scoring_unchanged", mlpg_guard.get("scoring_changed") is False, mlpg_guard)
+    add(checks, "match_level_pg_dryrun_upset_watch_not_scoring", mlpg_guard.get("venue_upset_watch_scoring") is False, mlpg_guard)
+    add(checks, "match_level_pg_dryrun_upset_watch_definition", payload.get("match_level_perception_gap_dryrun_upset_watch_definition") == "historical_data_insufficient_for_probability", payload.get("match_level_perception_gap_dryrun_upset_watch_definition"))
+    add(checks, "match_level_pg_dryrun_market_path", payload.get("match_level_perception_gap_dryrun_market_data_status_path") == ["CURRENT_MARKET_DATA_MISSING", "MARKET_DATA_PARTIAL", "MARKET_DATA_AVAILABLE"], payload.get("match_level_perception_gap_dryrun_market_data_status_path"))
     hints = [str(x.get("action_hint") or "") for x in wl if isinstance(x, dict)]
     add(checks, "action_hint_whitelist", all(h in ALLOW_HINTS for h in hints), hints[:12])
     add(checks, "action_hint_no_bad", all(h not in BAD_HINTS for h in hints), hints[:12])

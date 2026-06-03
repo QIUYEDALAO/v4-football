@@ -152,8 +152,10 @@ async function load(){
       </div>
       <div class="note warn">只展示 match-level observation，不进入推荐，不影响 V4。</div>
       <div class="grid">
-        ${(matchPgSamples.map(x=>`<div class="mini"><span>${n(x.sample_id,'WC4D')} · ${n(x.match,'UNKNOWN')}</span><b>${n(x.perception_gap_tag,'DATA_INSUFFICIENT;WATCH_ONLY')}</b><span>venue=${n(x.venue,'N/A')} · market=${n(x.market_gap_tag,'DATA_INSUFFICIENT')} · venue_stress=${n(x.venue_stress_tag,'WATCH_ONLY')} · squad=${n(x.squad_data_quality,'SQUAD_DATA_INSUFFICIENT')}</span><span>data_gap=${n(x.data_insufficient_reason,'')}</span></div>`).join('')||'<div class="note">暂无 WC4D dry-run 样例</div>')}
+        ${(matchPgSamples.map(x=>`<div class="mini"><span>${n(x.sample_id,'WC4D')} · ${n(x.match,'UNKNOWN')}</span><b>${n(x.perception_gap_tag,'DATA_INSUFFICIENT;WATCH_ONLY')}</b><span>venue=${n(x.venue,'N/A')} · market=${n(x.market_data_status,n(x.market_gap_tag,'DATA_INSUFFICIENT'))} · venue_stress=${n(x.venue_stress_tag,'WATCH_ONLY')} · squad=${n(x.squad_data_quality,'SQUAD_DATA_INSUFFICIENT')}</span><span>team_status=${n(x.home_candidate_status,'N/A')} / ${n(x.away_candidate_status,'N/A')}</span><span>data_gap=${n(x.data_insufficient_reason,'')}</span></div>`).join('')||'<div class="note">暂无 WC4D dry-run 样例</div>')}
       </div>
+      <div class="note">market data path: ${a(m.match_level_perception_gap_dryrun_market_data_status_path).join(' -> ')||'CURRENT_MARKET_DATA_MISSING -> MARKET_DATA_PARTIAL -> MARKET_DATA_AVAILABLE'}</div>
+      <div class="note">VENUE_UPSET_WATCH definition: ${n(m.match_level_perception_gap_dryrun_upset_watch_definition,'historical_data_insufficient_for_probability')}，不是冷门预测，不进入评分。</div>
     </div>
     <div class="card">
       <div class="note">世界杯名单候选审查 / Candidate Review</div>

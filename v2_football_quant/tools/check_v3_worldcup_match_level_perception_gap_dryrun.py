@@ -21,8 +21,13 @@ STATUS_CHECK_OUT = ROOT / "data/runtime/status/check_v3_worldcup_match_level_per
 REQUIRED_FIELDS = {
     "match",
     "venue",
+    "market_data_status",
     "market_gap_tag",
     "venue_stress_tag",
+    "upset_watch_definition",
+    "venue_upset_watch_scoring",
+    "home_candidate_status",
+    "away_candidate_status",
     "squad_data_quality",
     "perception_gap_tag",
     "data_insufficient_reason",
@@ -83,6 +88,34 @@ def main() -> int:
     _add(checks, "betting_recommendation_false", all(r.get("betting_recommendation") == "false" for r in rows), [r.get("betting_recommendation") for r in rows])
     _add(checks, "affects_v4_grade_false", all(r.get("affects_v4_grade") == "false" for r in rows), [r.get("affects_v4_grade") for r in rows])
     _add(checks, "scoring_changed_false", all(r.get("scoring_changed") == "false" for r in rows) and status.get("scoring_changed") is False, status)
+    _add(checks, "old_squad_label_absent", all(r.get("squad_data_quality") != "SQUAD_CANDIDATE_REVIEW_OK" for r in rows), [r.get("squad_data_quality") for r in rows])
+    _add(checks, "new_squad_label_present", any(r.get("squad_data_quality") == "SQUAD_CANDIDATE_KNOWN" for r in rows), [r.get("squad_data_quality") for r in rows])
+    _add(
+        checks,
+        "official_confirmed_distinct_from_candidate_known",
+        any(
+            r.get("match") == "England vs Croatia"
+            and r.get("squad_data_quality") == "SQUAD_CANDIDATE_KNOWN"
+            and r.get("home_candidate_status") == "OFFICIAL_CONFIRMED"
+            and r.get("away_candidate_status") == "API_CLEAN_CANDIDATE"
+            for r in rows
+        ),
+        [f"{r.get('match')}:{r.get('home_candidate_status')}|{r.get('away_candidate_status')}->{r.get('squad_data_quality')}" for r in rows],
+    )
+    market_path = ["CURRENT_MARKET_DATA_MISSING", "MARKET_DATA_PARTIAL", "MARKET_DATA_AVAILABLE"]
+    _add(checks, "market_data_path_frozen", status.get("market_data_status_path") == market_path, status.get("market_data_status_path"))
+    _add(checks, "current_market_data_missing", all(r.get("market_data_status") == "CURRENT_MARKET_DATA_MISSING" and r.get("market_gap_tag") == "CURRENT_MARKET_DATA_MISSING" for r in rows), [r.get("market_data_status") for r in rows])
+    _add(
+        checks,
+        "venue_upset_watch_defined_or_absent",
+        all(
+            "VENUE_UPSET_WATCH" not in r.get("venue_stress_tag", "")
+            or r.get("upset_watch_definition") == "historical_data_insufficient_for_probability"
+            for r in rows
+        ),
+        [r.get("upset_watch_definition") for r in rows],
+    )
+    _add(checks, "venue_upset_watch_not_scoring", all(r.get("venue_upset_watch_scoring") == "false" for r in rows), [r.get("venue_upset_watch_scoring") for r in rows])
 
     md = MD_OUT.read_text(encoding="utf-8", errors="ignore") if MD_OUT.exists() else ""
     for phrase in ["mode: DRY_RUN", "observation_only: true", "betting_recommendation: false", "scoring_changed: false", "recommendation_output: false"]:
@@ -99,6 +132,9 @@ def main() -> int:
     _add(checks, "war_room_no_betting", guard.get("betting_recommendation") is False, guard)
     _add(checks, "war_room_no_v4", guard.get("affects_v4_grade") is False, guard)
     _add(checks, "war_room_scoring_unchanged", guard.get("scoring_changed") is False, guard)
+    _add(checks, "war_room_upset_watch_not_scoring", guard.get("venue_upset_watch_scoring") is False, guard)
+    _add(checks, "war_room_upset_watch_definition", war.get("match_level_perception_gap_dryrun_upset_watch_definition") == "historical_data_insufficient_for_probability", war.get("match_level_perception_gap_dryrun_upset_watch_definition"))
+    _add(checks, "war_room_market_data_path", war.get("match_level_perception_gap_dryrun_market_data_status_path") == ["CURRENT_MARKET_DATA_MISSING", "MARKET_DATA_PARTIAL", "MARKET_DATA_AVAILABLE"], war.get("match_level_perception_gap_dryrun_market_data_status_path"))
 
     blockers = [c["name"] for c in checks if not c["ok"]]
     out = {
