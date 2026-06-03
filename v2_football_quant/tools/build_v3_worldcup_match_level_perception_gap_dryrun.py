@@ -43,6 +43,10 @@ SAMPLES = [
         "venue": "Hard Rock Stadium",
         "sample_priority": "高温高湿场馆 + 热门强队",
         "popular_strong_team": "Brazil",
+        "market_upgrade_case": "NO_ODDS_NO_XG_NO_API_PREDICTION",
+        "dryrun_has_odds": False,
+        "dryrun_has_xg": False,
+        "dryrun_has_api_prediction": False,
     },
     {
         "sample_id": "WC4D-ALTITUDE-001",
@@ -50,6 +54,10 @@ SAMPLES = [
         "venue": "Estadio Azteca",
         "sample_priority": "高原场馆 + 东道主场景",
         "popular_strong_team": "Mexico",
+        "market_upgrade_case": "ODDS_ONLY",
+        "dryrun_has_odds": True,
+        "dryrun_has_xg": False,
+        "dryrun_has_api_prediction": False,
     },
     {
         "sample_id": "WC4D-ORDINARY-001",
@@ -57,6 +65,10 @@ SAMPLES = [
         "venue": "AT&T Stadium",
         "sample_priority": "普通/低压力场馆 + 候选资料较完整",
         "popular_strong_team": "Belgium",
+        "market_upgrade_case": "ODDS_PLUS_API_PREDICTION",
+        "dryrun_has_odds": True,
+        "dryrun_has_xg": False,
+        "dryrun_has_api_prediction": True,
     },
     {
         "sample_id": "WC4D-POPULAR-001",
@@ -64,6 +76,10 @@ SAMPLES = [
         "venue": "Arrowhead Stadium",
         "sample_priority": "热门强队场次 + 午间压力观察",
         "popular_strong_team": "England",
+        "market_upgrade_case": "ODDS_PLUS_XG_PLUS_API_PREDICTION",
+        "dryrun_has_odds": True,
+        "dryrun_has_xg": True,
+        "dryrun_has_api_prediction": True,
     },
     {
         "sample_id": "WC4D-MIXED-001",
@@ -71,6 +87,10 @@ SAMPLES = [
         "venue": "Estadio Akron",
         "sample_priority": "高原/湿度混合压力 + 强队对话",
         "popular_strong_team": "Spain",
+        "market_upgrade_case": "XG_ONLY_DRYRUN_CONTROL",
+        "dryrun_has_odds": False,
+        "dryrun_has_xg": True,
+        "dryrun_has_api_prediction": False,
     },
 ]
 
@@ -121,6 +141,14 @@ def _venue_stress_tag(venue: dict[str, Any]) -> str:
     return ";".join(active or ["WATCH_ONLY"])
 
 
+def _market_data_status(has_odds: bool, has_xg: bool, has_api_prediction: bool) -> str:
+    if has_odds and has_xg and has_api_prediction:
+        return "MARKET_DATA_AVAILABLE"
+    if has_odds or has_xg or has_api_prediction:
+        return "MARKET_DATA_PARTIAL"
+    return "CURRENT_MARKET_DATA_MISSING"
+
+
 def _data_insufficient_reason(match: dict[str, Any], squad_quality: str) -> str:
     reasons: list[str] = []
     if match.get("odds_available") is not True:
@@ -161,6 +189,10 @@ def build_rows() -> tuple[list[dict[str, str]], dict[str, Any]]:
         squad_quality, squad_note = _squad_quality(home, away, team_by_name)
         venue_tag = _venue_stress_tag(venue)
         upset_watch_definition = UPSET_WATCH_DEFINITION if "VENUE_UPSET_WATCH" in venue_tag else ""
+        dryrun_has_odds = bool(sample["dryrun_has_odds"])
+        dryrun_has_xg = bool(sample["dryrun_has_xg"])
+        dryrun_has_api_prediction = bool(sample["dryrun_has_api_prediction"])
+        market_status = _market_data_status(dryrun_has_odds, dryrun_has_xg, dryrun_has_api_prediction)
         rows.append(
             {
                 "run_date": RUN_DATE,
@@ -179,8 +211,16 @@ def build_rows() -> tuple[list[dict[str, str]], dict[str, Any]]:
                 "popular_strong_team": sample["popular_strong_team"],
                 "odds_available": str(match.get("odds_available") is True).lower(),
                 "xg_available": str(match.get("xg_available") is True).lower(),
-                "market_data_status": "CURRENT_MARKET_DATA_MISSING",
-                "market_gap_tag": "CURRENT_MARKET_DATA_MISSING",
+                "api_prediction_available": "false",
+                "real_market_cache_used": "false",
+                "dryrun_market_data_sample": "true",
+                "market_upgrade_case": sample["market_upgrade_case"],
+                "dryrun_has_odds": str(dryrun_has_odds).lower(),
+                "dryrun_has_xg": str(dryrun_has_xg).lower(),
+                "dryrun_has_api_prediction": str(dryrun_has_api_prediction).lower(),
+                "market_data_status": market_status,
+                "market_gap_tag": market_status,
+                "market_data_status_source": "DRYRUN_SIMULATED_INPUT_NOT_REAL_CACHE",
                 "venue_stress_tag": venue_tag,
                 "upset_watch_definition": upset_watch_definition,
                 "venue_upset_watch_scoring": "false",
@@ -252,6 +292,7 @@ def write_outputs(rows: list[dict[str, str]], context: dict[str, Any]) -> dict[s
         f"- venue_stress_layer: {VENUE_STRESS.relative_to(ROOT)}",
         "- api_prediction_or_odds_cache: local 2026 match cache present; selected samples have odds_available=false and xg_available=false",
         f"- market_data_status_path: {' -> '.join(MARKET_DATA_STATUS_PATH)}",
+        "- market_data_upgrade_dryrun: simulated availability flags only; no real odds, xG, or API prediction values are written.",
         f"- upset_watch_definition: {UPSET_WATCH_DEFINITION}",
         "- VENUE_UPSET_WATCH is not an upset prediction and is not a scoring input.",
         (
@@ -273,6 +314,13 @@ def write_outputs(rows: list[dict[str, str]], context: dict[str, Any]) -> dict[s
                 f"- utc_date: {row['utc_date']}",
                 f"- dryrun_venue: {row['dryrun_venue']} ({row['dryrun_venue_city']}, {row['dryrun_venue_country']})",
                 f"- sample_priority: {row['sample_priority']}",
+                f"- market_upgrade_case: {row['market_upgrade_case']}",
+                f"- dryrun_market_data_sample: {row['dryrun_market_data_sample']}",
+                f"- real_market_cache_used: {row['real_market_cache_used']}",
+                f"- dryrun_has_odds: {row['dryrun_has_odds']}",
+                f"- dryrun_has_xg: {row['dryrun_has_xg']}",
+                f"- dryrun_has_api_prediction: {row['dryrun_has_api_prediction']}",
+                f"- market_data_status: {row['market_data_status']}",
                 f"- market_gap_tag: {row['market_gap_tag']}",
                 f"- venue_stress_tag: {row['venue_stress_tag']}",
                 f"- upset_watch_definition: {row['upset_watch_definition'] or 'N/A'}",
@@ -319,7 +367,13 @@ def write_outputs(rows: list[dict[str, str]], context: dict[str, Any]) -> dict[s
         "scoring_changed": False,
         "local_2026_odds_or_prediction_available_for_samples": False,
         "market_data_status_path": MARKET_DATA_STATUS_PATH,
-        "current_market_data_status": "CURRENT_MARKET_DATA_MISSING",
+        "market_data_upgrade_dryrun": True,
+        "real_market_cache_used": False,
+        "market_data_status_cases": {
+            status_name: sum(1 for row in rows if row["market_data_status"] == status_name)
+            for status_name in MARKET_DATA_STATUS_PATH
+        },
+        "market_upgrade_cases": [row["market_upgrade_case"] for row in rows],
         "upset_watch_definition": UPSET_WATCH_DEFINITION,
         "venue_upset_watch_scoring": False,
         "source_files": [str(path.relative_to(ROOT)) for path in context["source_files"]],

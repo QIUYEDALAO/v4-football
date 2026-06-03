@@ -116,6 +116,9 @@ def main() -> int:
     add(checks, "match_level_pg_dryrun_upset_watch_not_scoring", mlpg_guard.get("venue_upset_watch_scoring") is False, mlpg_guard)
     add(checks, "match_level_pg_dryrun_upset_watch_definition", payload.get("match_level_perception_gap_dryrun_upset_watch_definition") == "historical_data_insufficient_for_probability", payload.get("match_level_perception_gap_dryrun_upset_watch_definition"))
     add(checks, "match_level_pg_dryrun_market_path", payload.get("match_level_perception_gap_dryrun_market_data_status_path") == ["CURRENT_MARKET_DATA_MISSING", "MARKET_DATA_PARTIAL", "MARKET_DATA_AVAILABLE"], payload.get("match_level_perception_gap_dryrun_market_data_status_path"))
+    add(checks, "match_level_pg_dryrun_market_cases", payload.get("match_level_perception_gap_dryrun_market_data_status_cases") == {"CURRENT_MARKET_DATA_MISSING": 1, "MARKET_DATA_PARTIAL": 3, "MARKET_DATA_AVAILABLE": 1}, payload.get("match_level_perception_gap_dryrun_market_data_status_cases"))
+    add(checks, "match_level_pg_dryrun_real_market_not_used", payload.get("match_level_perception_gap_dryrun_real_market_cache_used") is False, payload.get("match_level_perception_gap_dryrun_real_market_cache_used"))
+    add(checks, "match_level_pg_dryrun_samples_marked", all(x.get("dryrun_market_data_sample") is True and x.get("real_market_cache_used") is False for x in mlpg_samples), mlpg_samples[:2])
     hints = [str(x.get("action_hint") or "") for x in wl if isinstance(x, dict)]
     add(checks, "action_hint_whitelist", all(h in ALLOW_HINTS for h in hints), hints[:12])
     add(checks, "action_hint_no_bad", all(h not in BAD_HINTS for h in hints), hints[:12])

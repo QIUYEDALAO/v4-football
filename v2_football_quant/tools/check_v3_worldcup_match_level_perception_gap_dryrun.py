@@ -22,6 +22,13 @@ REQUIRED_FIELDS = {
     "match",
     "venue",
     "market_data_status",
+    "market_data_status_source",
+    "dryrun_market_data_sample",
+    "real_market_cache_used",
+    "market_upgrade_case",
+    "dryrun_has_odds",
+    "dryrun_has_xg",
+    "dryrun_has_api_prediction",
     "market_gap_tag",
     "venue_stress_tag",
     "upset_watch_definition",
@@ -104,7 +111,26 @@ def main() -> int:
     )
     market_path = ["CURRENT_MARKET_DATA_MISSING", "MARKET_DATA_PARTIAL", "MARKET_DATA_AVAILABLE"]
     _add(checks, "market_data_path_frozen", status.get("market_data_status_path") == market_path, status.get("market_data_status_path"))
-    _add(checks, "current_market_data_missing", all(r.get("market_data_status") == "CURRENT_MARKET_DATA_MISSING" and r.get("market_gap_tag") == "CURRENT_MARKET_DATA_MISSING" for r in rows), [r.get("market_data_status") for r in rows])
+    _add(checks, "market_data_status_values_valid", set(r.get("market_data_status") for r in rows) <= set(market_path), [r.get("market_data_status") for r in rows])
+    _add(checks, "market_data_three_tiers_present", set(r.get("market_data_status") for r in rows) == set(market_path), [r.get("market_data_status") for r in rows])
+    _add(checks, "market_data_cases_counted", status.get("market_data_status_cases") == {"CURRENT_MARKET_DATA_MISSING": 1, "MARKET_DATA_PARTIAL": 3, "MARKET_DATA_AVAILABLE": 1}, status.get("market_data_status_cases"))
+    _add(
+        checks,
+        "market_upgrade_cases_present",
+        {
+            "NO_ODDS_NO_XG_NO_API_PREDICTION",
+            "ODDS_ONLY",
+            "ODDS_PLUS_API_PREDICTION",
+            "ODDS_PLUS_XG_PLUS_API_PREDICTION",
+        }.issubset(set(r.get("market_upgrade_case") for r in rows)),
+        [r.get("market_upgrade_case") for r in rows],
+    )
+    _add(checks, "market_missing_case_status", any(r.get("market_upgrade_case") == "NO_ODDS_NO_XG_NO_API_PREDICTION" and r.get("market_data_status") == "CURRENT_MARKET_DATA_MISSING" for r in rows))
+    _add(checks, "odds_only_case_partial", any(r.get("market_upgrade_case") == "ODDS_ONLY" and r.get("dryrun_has_odds") == "true" and r.get("dryrun_has_xg") == "false" and r.get("dryrun_has_api_prediction") == "false" and r.get("market_data_status") == "MARKET_DATA_PARTIAL" for r in rows))
+    _add(checks, "odds_prediction_case_partial", any(r.get("market_upgrade_case") == "ODDS_PLUS_API_PREDICTION" and r.get("dryrun_has_odds") == "true" and r.get("dryrun_has_xg") == "false" and r.get("dryrun_has_api_prediction") == "true" and r.get("market_data_status") == "MARKET_DATA_PARTIAL" for r in rows))
+    _add(checks, "odds_xg_prediction_case_available", any(r.get("market_upgrade_case") == "ODDS_PLUS_XG_PLUS_API_PREDICTION" and r.get("dryrun_has_odds") == "true" and r.get("dryrun_has_xg") == "true" and r.get("dryrun_has_api_prediction") == "true" and r.get("market_data_status") == "MARKET_DATA_AVAILABLE" for r in rows))
+    _add(checks, "real_market_not_faked", all(r.get("odds_available") == "false" and r.get("xg_available") == "false" and r.get("api_prediction_available") == "false" and r.get("real_market_cache_used") == "false" for r in rows), [(r.get("odds_available"), r.get("xg_available"), r.get("api_prediction_available"), r.get("real_market_cache_used")) for r in rows])
+    _add(checks, "clearly_marked_dryrun_samples", all(r.get("dryrun_market_data_sample") == "true" and r.get("market_data_status_source") == "DRYRUN_SIMULATED_INPUT_NOT_REAL_CACHE" for r in rows), [r.get("market_data_status_source") for r in rows])
     _add(
         checks,
         "venue_upset_watch_defined_or_absent",
@@ -135,6 +161,8 @@ def main() -> int:
     _add(checks, "war_room_upset_watch_not_scoring", guard.get("venue_upset_watch_scoring") is False, guard)
     _add(checks, "war_room_upset_watch_definition", war.get("match_level_perception_gap_dryrun_upset_watch_definition") == "historical_data_insufficient_for_probability", war.get("match_level_perception_gap_dryrun_upset_watch_definition"))
     _add(checks, "war_room_market_data_path", war.get("match_level_perception_gap_dryrun_market_data_status_path") == ["CURRENT_MARKET_DATA_MISSING", "MARKET_DATA_PARTIAL", "MARKET_DATA_AVAILABLE"], war.get("match_level_perception_gap_dryrun_market_data_status_path"))
+    _add(checks, "war_room_market_data_cases", war.get("match_level_perception_gap_dryrun_market_data_status_cases") == {"CURRENT_MARKET_DATA_MISSING": 1, "MARKET_DATA_PARTIAL": 3, "MARKET_DATA_AVAILABLE": 1}, war.get("match_level_perception_gap_dryrun_market_data_status_cases"))
+    _add(checks, "war_room_real_market_not_used", war.get("match_level_perception_gap_dryrun_real_market_cache_used") is False, war.get("match_level_perception_gap_dryrun_real_market_cache_used"))
 
     blockers = [c["name"] for c in checks if not c["ok"]]
     out = {

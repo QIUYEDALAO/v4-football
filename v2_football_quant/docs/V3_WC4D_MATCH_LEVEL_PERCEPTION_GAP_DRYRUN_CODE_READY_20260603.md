@@ -53,3 +53,11 @@ WC4E freezes the WC4D labels before any future scoring work:
 - `OFFICIAL_CONFIRMED` remains visible in `home_candidate_status` or `away_candidate_status` and is distinct from `API_CLEAN_CANDIDATE`.
 - `VENUE_UPSET_WATCH` is retained as a venue-stress observation tag only. Its definition is `historical_data_insufficient_for_probability`; it is not an upset prediction and it is not a scoring input.
 - Current WC4D samples remain `CURRENT_MARKET_DATA_MISSING`. The only allowed future status path is `CURRENT_MARKET_DATA_MISSING -> MARKET_DATA_PARTIAL -> MARKET_DATA_AVAILABLE`.
+
+WC4F adds a market data upgrade dry-run path:
+
+- `CURRENT_MARKET_DATA_MISSING`: no odds, no xG, and no API prediction in the dry-run availability flags.
+- `MARKET_DATA_PARTIAL`: partial dry-run availability, such as odds only or odds plus API prediction.
+- `MARKET_DATA_AVAILABLE`: odds, xG, and API prediction are all present in the dry-run availability flags.
+
+The WC4F cases are explicitly marked with `dryrun_market_data_sample=true`, `real_market_cache_used=false`, and `market_data_status_source=DRYRUN_SIMULATED_INPUT_NOT_REAL_CACHE`. They do not write real odds values, xG values, or API prediction values.
