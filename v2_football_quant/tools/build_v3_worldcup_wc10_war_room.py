@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import json
+import csv
 from datetime import datetime, timezone, timedelta
 from pathlib import Path
 from typing import Any
@@ -23,6 +24,8 @@ WC5D_REVIEW_ARTIFACT = ROOT / "data/runtime/v3_worldcup/final_squads/v3_wc5d_can
 HISTORICAL_MARKET_SUMMARY = ROOT / "data/runtime/v3_worldcup/historical_market_baseline/20260602/v3_wc4a_historical_market_summary_v1.json"
 PERCEPTION_GAP_BLUEPRINT = ROOT / "data/v3_worldcup/perception_gap_blueprint/v3_worldcup_perception_gap_blueprint_20260602.json"
 VENUE_STRESS = ROOT / "data/v3_worldcup/venue_stress/v3_worldcup_venue_stress_20260603.json"
+MATCH_LEVEL_PG_DRYRUN_CSV = ROOT / "data/runtime/v3_worldcup/perception_gap_dryrun/v3_wc4d_match_level_perception_gap_dryrun_20260603.csv"
+MATCH_LEVEL_PG_DRYRUN_STATUS = ROOT / "data/runtime/v3_worldcup/perception_gap_dryrun/v3_wc4d_match_level_perception_gap_dryrun_status_20260603.json"
 
 CST = timezone(timedelta(hours=8))
 
@@ -230,6 +233,76 @@ def _venue_stress_view(payload: dict[str, Any]) -> dict[str, Any]:
     }
 
 
+def _match_level_perception_gap_dryrun_view(csv_path: Path, status_path: Path) -> dict[str, Any]:
+    status = _load(status_path)
+    rows: list[dict[str, Any]] = []
+    if csv_path.exists():
+        try:
+            with csv_path.open(encoding="utf-8", newline="") as f:
+                rows = [dict(row) for row in csv.DictReader(f)]
+        except Exception:
+            rows = []
+    if not rows:
+        return {
+            "match_level_perception_gap_dryrun_status": "DRY_RUN_MISSING_WARN_ONLY",
+            "match_level_perception_gap_dryrun_sample_count": 0,
+            "match_level_perception_gap_dryrun_samples": [],
+            "match_level_perception_gap_dryrun_safety_guard": {
+                "observation_only": True,
+                "betting_recommendation": False,
+                "affects_v4_grade": False,
+                "scoring_changed": False,
+            },
+        }
+    samples = []
+    for row in rows:
+        samples.append(
+            {
+                "sample_id": row.get("sample_id") or "",
+                "match_id": row.get("match_id") or "",
+                "match": row.get("match") or f"{row.get('home_team', '')} vs {row.get('away_team', '')}".strip(),
+                "home_team": row.get("home_team") or "",
+                "away_team": row.get("away_team") or "",
+                "utc_date": row.get("utc_date") or "",
+                "venue": row.get("venue") or row.get("dryrun_venue") or "",
+                "venue_city": row.get("dryrun_venue_city") or "",
+                "venue_country": row.get("dryrun_venue_country") or "",
+                "sample_priority": row.get("sample_priority") or "",
+                "market_gap_tag": row.get("market_gap_tag") or "DATA_INSUFFICIENT",
+                "venue_stress_tag": row.get("venue_stress_tag") or "WATCH_ONLY",
+                "squad_data_quality": row.get("squad_data_quality") or "SQUAD_DATA_INSUFFICIENT",
+                "perception_gap_tag": row.get("perception_gap_tag") or "DATA_INSUFFICIENT;WATCH_ONLY",
+                "data_insufficient_reason": row.get("data_insufficient_reason") or "",
+                "odds_available": row.get("odds_available") == "true",
+                "xg_available": row.get("xg_available") == "true",
+                "observation_only": row.get("observation_only") == "true",
+                "betting_recommendation": row.get("betting_recommendation") == "true",
+                "affects_v4_grade": row.get("affects_v4_grade") == "true",
+                "scoring_changed": row.get("scoring_changed") == "true",
+            }
+        )
+    return {
+        "match_level_perception_gap_dryrun_status": "DRY_RUN_READY",
+        "match_level_perception_gap_dryrun_sample_count": int(status.get("sample_count") or len(samples)),
+        "match_level_perception_gap_dryrun_samples": samples,
+        "match_level_perception_gap_dryrun_coverage": {
+            "has_high_heat_or_humidity_sample": status.get("has_high_heat_or_humidity_sample") is True,
+            "has_altitude_sample": status.get("has_altitude_sample") is True,
+            "has_ordinary_sample": status.get("has_ordinary_sample") is True,
+            "has_popular_strong_team_sample": status.get("has_popular_strong_team_sample") is True,
+            "has_mixed_pressure_sample": status.get("has_mixed_pressure_sample") is True,
+            "local_2026_odds_or_prediction_available_for_samples": status.get("local_2026_odds_or_prediction_available_for_samples") is True,
+        },
+        "match_level_perception_gap_dryrun_safety_guard": {
+            "observation_only": True,
+            "betting_recommendation": False,
+            "affects_v4_grade": False,
+            "scoring_changed": False,
+            "recommendation_output": False,
+        },
+    }
+
+
 def main() -> int:
     rosters = _load(ROSTERS)
     profiles = _load(PROFILES)
@@ -334,6 +407,14 @@ def main() -> int:
     venue_stress_view = _venue_stress_view(venue_stress)
     if not venue_stress and "VENUE_STRESS_MISSING_WARN_ONLY" not in warn_only_items:
         warn_only_items.append("VENUE_STRESS_MISSING_WARN_ONLY")
+    match_level_pg_dryrun_view = _match_level_perception_gap_dryrun_view(
+        MATCH_LEVEL_PG_DRYRUN_CSV,
+        MATCH_LEVEL_PG_DRYRUN_STATUS,
+    )
+    if match_level_pg_dryrun_view["match_level_perception_gap_dryrun_status"] != "DRY_RUN_READY":
+        warn = "WC4D_MATCH_LEVEL_PERCEPTION_GAP_DRYRUN_MISSING_WARN_ONLY"
+        if warn not in warn_only_items:
+            warn_only_items.append(warn)
 
     now = datetime.now(CST)
     payload = {
@@ -378,6 +459,7 @@ def main() -> int:
         **historical_market_view,
         **perception_gap_blueprint_view,
         **venue_stress_view,
+        **match_level_pg_dryrun_view,
         "perception_gap_watchlist": watch_list,
         "perception_gap_watchlist_count": len(watch_list),
         "undervalued_candidates": undervalued,

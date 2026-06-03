@@ -105,6 +105,14 @@ def main() -> int:
     add(checks, "perception_gap_observation_only", pg_guard.get("observation_only") is True, pg_guard)
     add(checks, "perception_gap_no_betting", pg_guard.get("betting_recommendation") is False and pg_guard.get("auto_bet_allowed") is False, pg_guard)
     add(checks, "perception_gap_no_v4_grade_impact", pg_guard.get("affects_v4_grade") is False, pg_guard)
+    mlpg_samples = payload.get("match_level_perception_gap_dryrun_samples") if isinstance(payload.get("match_level_perception_gap_dryrun_samples"), list) else []
+    mlpg_guard = payload.get("match_level_perception_gap_dryrun_safety_guard") if isinstance(payload.get("match_level_perception_gap_dryrun_safety_guard"), dict) else {}
+    add(checks, "match_level_pg_dryrun_ready", payload.get("match_level_perception_gap_dryrun_status") == "DRY_RUN_READY", payload.get("match_level_perception_gap_dryrun_status"))
+    add(checks, "match_level_pg_dryrun_samples_5", len(mlpg_samples) == 5 and int(payload.get("match_level_perception_gap_dryrun_sample_count") or 0) == 5, payload.get("match_level_perception_gap_dryrun_sample_count"))
+    add(checks, "match_level_pg_dryrun_observation_only", mlpg_guard.get("observation_only") is True, mlpg_guard)
+    add(checks, "match_level_pg_dryrun_no_betting", mlpg_guard.get("betting_recommendation") is False, mlpg_guard)
+    add(checks, "match_level_pg_dryrun_no_v4_grade_impact", mlpg_guard.get("affects_v4_grade") is False, mlpg_guard)
+    add(checks, "match_level_pg_dryrun_scoring_unchanged", mlpg_guard.get("scoring_changed") is False, mlpg_guard)
     hints = [str(x.get("action_hint") or "") for x in wl if isinstance(x, dict)]
     add(checks, "action_hint_whitelist", all(h in ALLOW_HINTS for h in hints), hints[:12])
     add(checks, "action_hint_no_bad", all(h not in BAD_HINTS for h in hints), hints[:12])
