@@ -154,7 +154,9 @@ def main() -> int:
             if any(not str(it.get("market_advice_display") or "").strip() for it in items if isinstance(it, dict)):
                 warnings.append(f"candidate_default_fields_null_without_display_fallback:{','.join(sorted(set(null_in_items)))}")
     else:
-        warnings.append("candidate_items_empty")
+        today_counts = model.get("top_status", {}).get("today_candidates", {}) if isinstance(model.get("top_status"), dict) else {}
+        if int(today_counts.get("A") or 0) + int(today_counts.get("B") or 0) > 0:
+            warnings.append("candidate_items_empty")
 
     # 6) skip must be summary line and not candidate card
     if "skip-line" not in html:
@@ -278,14 +280,37 @@ def main() -> int:
     elif items:
         blockers.append("readability_rops_model_item_missing")
 
+    canonical_20260602 = _load_json(STATUS / "v4_official_candidate_view_20260602.json")
+    canonical_counts = {
+        "A": canonical_20260602.get("A_count"),
+        "B": canonical_20260602.get("B_count"),
+        "C": canonical_20260602.get("C_count"),
+        "SKIP": canonical_20260602.get("SKIP_count"),
+        "scan_total": canonical_20260602.get("scan_total"),
+    }
+    if canonical_counts != {"A": 0, "B": 1, "C": 0, "SKIP": 9, "scan_total": 10}:
+        blockers.append(f"canonical_20260602_counts_mismatch:{canonical_counts}")
+    canonical_b = canonical_20260602.get("B_candidates") or []
+    if not any(
+        isinstance(x, dict)
+        and str(x.get("home_en") or x.get("home")) == "Rops"
+        and str(x.get("away_en") or x.get("away")) == "OLS"
+        for x in canonical_b
+    ):
+        blockers.append("canonical_20260602_rops_ols_missing")
+
     today = model.get("top_status", {}).get("today_candidates", {})
-    if {
-        "A": today.get("A"),
-        "B": today.get("B"),
-        "SKIP": today.get("SKIP"),
-        "scan_total": today.get("scan_total"),
-    } != {"A": 0, "B": 1, "SKIP": 9, "scan_total": 10}:
-        blockers.append(f"canonical_20260602_counts_mismatch:{today}")
+    today_key = str(model.get("today_date") or "")
+    if today_key == "20260603":
+        expected_latest = {"A": 0, "B": 0, "SKIP": 15, "scan_total": 15}
+        latest_counts = {
+            "A": today.get("A"),
+            "B": today.get("B"),
+            "SKIP": today.get("SKIP"),
+            "scan_total": today.get("scan_total"),
+        }
+        if latest_counts != expected_latest:
+            blockers.append(f"latest_20260603_counts_mismatch:{latest_counts}")
 
     # 14) D4 league intelligence panel contract
     d4_required = [

@@ -1953,9 +1953,27 @@ def _load_durable_runner_status() -> dict:
     """Load local durable-runner state without starting or deploying it."""
     path = STATUS / "v4_durable_daily_scan_status.json"
     data = _load_json(path)
-    if data:
-        return data
     guard = _load_json(STATUS / "check_v4_durable_runner_result.json")
+    if data:
+        guard_mode = guard.get("mode") or guard.get("detected_mode") or ""
+        guard_deployed = guard_mode == "deployed" or bool(guard.get("launchd_loaded"))
+        data = dict(data)
+        data.setdefault("schema_version", "v4_durable_daily_scan_status.v1")
+        data.setdefault("runner_installed", bool(data.get("runner_installed") or guard_deployed))
+        data["launchd_loaded"] = bool(data.get("launchd_loaded") or guard.get("launchd_loaded"))
+        data["isolated_session_dependency"] = bool(guard.get("isolated_session_dependency", data.get("isolated_session_dependency", not guard_deployed)))
+        data.setdefault("openclaw_status_only_target", guard_deployed)
+        data["openclaw_1200_mode"] = data.get("openclaw_1200_mode") or guard.get("openclaw_1200_mode") or ("read-only status check" if guard_deployed else "direct_scan_until_deploy")
+        data.setdefault("next_action", guard.get("next_action") or ("WAIT_NEXT_SCHEDULED_SCAN" if guard_deployed else "DEPLOY_APPROVAL_REQUIRED"))
+        data.setdefault("last_scheduled_scan", None)
+        data.setdefault("last_completed_scan", None)
+        data.setdefault("last_exit_code", None)
+        data.setdefault("active_lock", False)
+        data.setdefault("heartbeat_age_seconds", None)
+        data.setdefault("catch_up_required", False)
+        data.setdefault("catch_up_status", "NOT_REQUIRED")
+        data.setdefault("auto_rerun", False)
+        return data
     if guard:
         mode = guard.get("mode") or guard.get("detected_mode") or "template"
         deployed = mode == "deployed"
