@@ -42,7 +42,9 @@ REPORT_DIR = BASE_DIR / "data" / "daily_reports"
 LOG_DIR = BASE_DIR / "data" / "runtime" / "logs"
 LOCK_DIR = BASE_DIR / "data" / "runtime" / "locks"
 GLOBAL_LOCK = LOCK_DIR / "v4_scan_global.lock"
+UNIVERSE_DIR = BASE_DIR / "data" / "universe"
 LOCAL_TZ = timezone(timedelta(hours=8))
+H2H_DATA_GAP_NOTE = "资料缺口：H2H样本不足，不参与评分。"
 
 FORBIDDEN_KEYWORDS = [
     "SECOND_HALF_OVER", "FULLTIME_OVER", "market_scores",
@@ -227,6 +229,89 @@ def _to_int(v: Any, default: int = 0) -> int:
         return int(v)
     except Exception:
         return default
+
+
+def _load_json(path: Path, default: Any) -> Any:
+    if not path.exists():
+        return default
+    try:
+        return json.loads(path.read_text(encoding="utf-8"))
+    except Exception:
+        return default
+
+
+def _load_jsonl(path: Path) -> list[dict[str, Any]]:
+    if not path.exists():
+        return []
+    rows: list[dict[str, Any]] = []
+    for line in path.read_text(encoding="utf-8").splitlines():
+        line = line.strip()
+        if not line:
+            continue
+        try:
+            obj = json.loads(line)
+        except Exception:
+            continue
+        if isinstance(obj, dict):
+            rows.append(obj)
+    return rows
+
+
+def _h2h_sample_gap_from_reason(reason: str) -> bool:
+    text = str(reason or "")
+    return "样本量" in text or any(token in text for token in ("H2H=0/0", "H2H=0/1", "H2H=0/2", "H2H=0/3"))
+
+
+def _display_prescout_skip_reason(reason: str) -> str:
+    text = str(reason or "").strip() or "INVALID"
+    if text.startswith("H2H_"):
+        text = text[4:]
+    if text == "H2H_TIMEOUT_SKIP":
+        return "综合前筛超时"
+    if "样本量" in text:
+        return "综合前筛资料不足"
+    if text.startswith("未达标"):
+        return f"综合前筛未达标 {text.removeprefix('未达标').strip()}"
+    return f"综合前筛未达标：{text}"
+
+
+def _scan_total_from_perf(today_key: str, scout_count: int) -> int:
+    perf = _load_json(REPORT_DIR / f"scan_perf_v4_{today_key}.json", {})
+    if isinstance(perf, dict):
+        return _to_int(perf.get("total_fixtures"), scout_count)
+    return scout_count
+
+
+def _universe_skip_items(today_key: str, known_fixture_ids: set[int]) -> list[dict[str, Any]]:
+    rows = _load_jsonl(UNIVERSE_DIR / f"fixtures_universe_{today_key}.jsonl")
+    items: list[dict[str, Any]] = []
+    for row in rows:
+        fid = _to_int(row.get("fixture_id"), 0)
+        if not fid or fid in known_fixture_ids:
+            continue
+        if str(row.get("filter_result") or "").upper() != "SKIP":
+            continue
+        raw_reason = str(row.get("raw_h2h_reason") or row.get("filter_reason") or "")
+        reason = _display_prescout_skip_reason(raw_reason)
+        h2h_gap = bool(row.get("h2h_data_gap")) or _h2h_sample_gap_from_reason(raw_reason)
+        items.append({
+            "fixture_id": fid,
+            "home": row.get("home_team") or "?",
+            "away": row.get("away_team") or "?",
+            "league": row.get("league_name") or "?",
+            "kickoff": row.get("kickoff_time") or "?",
+            "grade": "SKIP",
+            "official_grade": "SKIP",
+            "skip": True,
+            "filter_reason": reason,
+            "reason": reason,
+            "raw_h2h_reason": raw_reason,
+            "h2h_data_gap": h2h_gap,
+            "h2h_data_gap_note": H2H_DATA_GAP_NOTE if h2h_gap else "",
+            "h2h_role": "资料缺口说明，不作为SKIP主因",
+            "actual_collection_reason": row.get("actual_collection_reason") or "",
+        })
+    return items
 
 
 def _resolve_official_grade_from_shadow(
@@ -571,6 +656,13 @@ def _build_candidate_view_from_scout(
 
     timeout_count = 0
     score_incomplete_count = 0
+    known_skip_fixture_ids = {
+        int(e["fixture_id"]) for e in skip_list
+        if isinstance(e, dict) and e.get("fixture_id")
+    }
+    universe_skip_list = _universe_skip_items(today_key, known_skip_fixture_ids)
+    skip_total = len(skip_list) + len(universe_skip_list)
+    scan_total = _scan_total_from_perf(today_key, len(scout_rows))
     whitelist_a = [e for e in a_list if e.get("source_group") == "WHITELIST_57"]
     whitelist_b = [e for e in b_list if e.get("source_group") == "WHITELIST_57"]
     outside_a = [e for e in a_list if e.get("source_group") == "OUTSIDE_57"]
@@ -594,10 +686,11 @@ def _build_candidate_view_from_scout(
         "A_count": len(a_list),
         "B_count": len(b_list),
         "C_count": 0,
-        "SKIP_count": len(skip_list),
+        "SKIP_count": max(skip_total, max(0, scan_total - len(a_list) - len(b_list))),
         "DATA_TIMEOUT_count": timeout_count,
         "SCORE_INCOMPLETE_count": score_incomplete_count,
-        "scan_total": len(scout_rows),
+        "scan_total": scan_total,
+        "scan_perf_total_fixtures": scan_total,
         "formal_recommendation_count": len(a_list) + len(b_list),
         "A_WHITELIST_57_count": len(whitelist_a),
         "A_OUTSIDE_57_count": len(outside_a),
@@ -606,6 +699,7 @@ def _build_candidate_view_from_scout(
         "A_candidates": a_list,
         "B_candidates": b_list,
         "C_candidates": [],
+        "SKIP_candidates": skip_list + universe_skip_list,
         "C_observation_only": True,
         "actual_send": False,
         "qq_sent": False,
@@ -617,7 +711,7 @@ def _build_candidate_view_from_scout(
     }
     candidate_path.parent.mkdir(parents=True, exist_ok=True)
     candidate_path.write_text(json.dumps(candidate_view, ensure_ascii=False, indent=2), encoding="utf-8")
-    print(f"[adapter] wrote candidate_view(serial): A={len(a_list)} B={len(b_list)} SKIP={len(skip_list)} total={len(scout_rows)}", flush=True)
+    print(f"[adapter] wrote candidate_view(serial): A={len(a_list)} B={len(b_list)} SKIP={candidate_view['SKIP_count']} total={scan_total}", flush=True)
     return candidate_path
 
 
@@ -833,6 +927,7 @@ def _run_parallel_scan(args, scan_date: str, today_key: str, wd, log_path: Path)
     # ── Compute split statistics ──
     timeout_count = sum(1 for r in official_results if r.get("status") in ("API_TIMEOUT", "DATA_TIMEOUT"))
     score_incomplete_count = sum(1 for r in official_results if r.get("status") in ("SCORE_ERROR", "SCORE_INCOMPLETE", "FAILED_WITH_REASON"))
+    scan_total = _scan_total_from_perf(today_key, len(results))
     whitelist_a = [e for e in a_list if e.get("source_group") == "WHITELIST_57"]
     whitelist_b = [e for e in b_list if e.get("source_group") == "WHITELIST_57"]
     outside_a = [e for e in a_list if e.get("source_group") == "OUTSIDE_57"]
@@ -858,10 +953,11 @@ def _run_parallel_scan(args, scan_date: str, today_key: str, wd, log_path: Path)
         "A_count": len(a_list),
         "B_count": len(b_list),
         "C_count": 0,
-        "SKIP_count": len(skip_list),
+        "SKIP_count": max(len(skip_list), max(0, scan_total - len(a_list) - len(b_list))),
         "DATA_TIMEOUT_count": timeout_count,
         "SCORE_INCOMPLETE_count": score_incomplete_count,
-        "scan_total": len(results),
+        "scan_total": scan_total,
+        "scan_perf_total_fixtures": scan_total,
         "formal_recommendation_count": len(a_list) + len(b_list),
         "A_WHITELIST_57_count": len(whitelist_a),
         "A_OUTSIDE_57_count": len(outside_a),
@@ -870,6 +966,7 @@ def _run_parallel_scan(args, scan_date: str, today_key: str, wd, log_path: Path)
         "A_candidates": a_list,
         "B_candidates": b_list,
         "C_candidates": [],
+        "SKIP_candidates": skip_list,
         "C_observation_only": True,
         "actual_send": False,
         "qq_sent": False,
@@ -881,7 +978,7 @@ def _run_parallel_scan(args, scan_date: str, today_key: str, wd, log_path: Path)
     }
     candidate_path.parent.mkdir(parents=True, exist_ok=True)
     candidate_path.write_text(json.dumps(candidate_view, ensure_ascii=False, indent=2), encoding="utf-8")
-    print(f"[adapter] wrote candidate_view: A={len(a_list)} B={len(b_list)} SKIP={len(skip_list)} total={len(results)}", flush=True)
+    print(f"[adapter] wrote candidate_view: A={len(a_list)} B={len(b_list)} SKIP={candidate_view['SKIP_count']} total={scan_total}", flush=True)
 
     # Write scout
     scout_path.parent.mkdir(parents=True, exist_ok=True)

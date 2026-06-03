@@ -18,8 +18,10 @@ from team_cn_resolver import TeamCnResolver
 ROOT = Path(__file__).resolve().parents[1]
 DAILY = ROOT / "data/daily_reports"
 STATUS = ROOT / "data/runtime/status"
+UNIVERSE = ROOT / "data/universe"
 TEAM_CN_MAP = ROOT / "engine/team_cn_map.json"
 TZ = timezone(timedelta(hours=8))
+H2H_DATA_GAP_NOTE = "资料缺口：H2H样本不足，不参与评分。"
 
 # Display-only supplemental names for current brief entries missing from the map.
 SUPPLEMENTAL_CN = {
@@ -68,6 +70,23 @@ def load_json(path: Path) -> Any:
         return json.loads(path.read_text(encoding="utf-8"))
     except Exception:
         return None
+
+
+def load_jsonl(path: Path) -> list[dict[str, Any]]:
+    if not path.exists():
+        return []
+    rows: list[dict[str, Any]] = []
+    for line in path.read_text(encoding="utf-8").splitlines():
+        line = line.strip()
+        if not line:
+            continue
+        try:
+            obj = json.loads(line)
+        except Exception:
+            continue
+        if isinstance(obj, dict):
+            rows.append(obj)
+    return rows
 
 
 def load_team_map() -> dict[str, str]:
@@ -129,6 +148,75 @@ def split_grade_blocks(text: str, grade: str) -> list[str]:
 
 def _norm_team(name: str) -> str:
     return re.sub(r"\s+", " ", str(name or "").strip()).casefold()
+
+
+def _h2h_sample_gap_from_reason(reason: str) -> bool:
+    text = str(reason or "")
+    return "样本量" in text or any(token in text for token in ("H2H=0/0", "H2H=0/1", "H2H=0/2", "H2H=0/3"))
+
+
+def _display_prescout_skip_reason(reason: str) -> str:
+    text = str(reason or "").strip() or "INVALID"
+    if text.startswith("H2H_"):
+        text = text[4:]
+    if text == "H2H_TIMEOUT_SKIP":
+        return "综合前筛超时"
+    if "样本量" in text:
+        return "综合前筛资料不足"
+    if text.startswith("未达标"):
+        return f"综合前筛未达标 {text.removeprefix('未达标').strip()}"
+    if text.startswith("NO_CANDIDATE|"):
+        return "综合评分未进入A/B/C"
+    return f"综合前筛未达标：{text}"
+
+
+def _universe_skip_candidates(date: str, known_fixture_ids: set[int]) -> list[dict[str, Any]]:
+    items: list[dict[str, Any]] = []
+    for idx, row in enumerate(load_jsonl(UNIVERSE / f"fixtures_universe_{date}.jsonl"), 1):
+        fid = row.get("fixture_id")
+        try:
+            fid_int = int(fid)
+        except Exception:
+            continue
+        if fid_int in known_fixture_ids:
+            continue
+        if str(row.get("filter_result") or "").upper() != "SKIP":
+            continue
+        home = str(row.get("home_team") or "UNKNOWN")
+        away = str(row.get("away_team") or "UNKNOWN")
+        resolved = CN_RESOLVER.resolve_match(home, away, source=f"data/universe/fixtures_universe_{date}.jsonl")
+        raw_reason = str(row.get("raw_h2h_reason") or row.get("filter_reason") or "")
+        reason = _display_prescout_skip_reason(raw_reason)
+        h2h_gap = bool(row.get("h2h_data_gap")) or _h2h_sample_gap_from_reason(raw_reason)
+        items.append({
+            "index": idx,
+            "fixture_id": fid_int,
+            "home": home,
+            "away": away,
+            "home_cn": resolved["home_team_cn"],
+            "away_cn": resolved["away_team_cn"],
+            "home_team_cn": resolved["home_team_cn"],
+            "away_team_cn": resolved["away_team_cn"],
+            "home_en": resolved["home_team_en"],
+            "away_en": resolved["away_team_en"],
+            "home_team_en": resolved["home_team_en"],
+            "away_team_en": resolved["away_team_en"],
+            "league": str(row.get("league_name") or "UNKNOWN"),
+            "kickoff_display": str(row.get("kickoff_time") or "TBD"),
+            "grade": "SKIP",
+            "official_grade": "SKIP",
+            "reason": reason,
+            "skip_reason": reason,
+            "filter_reason": reason,
+            "raw_h2h_reason": raw_reason,
+            "h2h_data_gap": h2h_gap,
+            "h2h_data_gap_note": H2H_DATA_GAP_NOTE if h2h_gap else "",
+            "h2h_role": "资料缺口说明，不作为SKIP主因",
+            "recommendation_status": "skip_attribution_display_only",
+            "source": f"data/universe/fixtures_universe_{date}.jsonl",
+            "actual_collection_reason": row.get("actual_collection_reason") or "",
+        })
+    return items
 
 
 def _find_scout_match(home: str, away: str, scout_by_fixture: dict[int, dict[str, Any]]) -> dict[str, Any]:
@@ -372,6 +460,11 @@ def build_candidate_view(date: str, text: str, brief_path: Path, scout_path: Pat
         merged_b = b_items
 
     c_items = parse_c_items(text, scout_by_fixture, brief_path)
+    known_fixture_ids = {
+        int(row["fixture_id"]) for row in scout
+        if isinstance(row, dict) and row.get("fixture_id")
+    }
+    skip_items = _universe_skip_candidates(date, known_fixture_ids)
     scout_grade_counts = {"A": 0, "B": 0, "C": 0, "SKIP": 0}
     for row in scout:
         if isinstance(row, dict):
@@ -409,6 +502,7 @@ def build_candidate_view(date: str, text: str, brief_path: Path, scout_path: Pat
         "A_candidate": merged_a[0] if merged_a else None,
         "B_candidates": merged_b,
         "C_candidates": c_items,
+        "SKIP_candidates": skip_items,
         "C_observation_only": True,
         "actual_send": False,
         "qq_sent": False,

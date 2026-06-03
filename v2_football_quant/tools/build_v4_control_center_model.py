@@ -32,12 +32,14 @@ from typing import Any, Dict, List, Optional
 ROOT = Path(__file__).resolve().parents[1]
 STATUS = ROOT / "data/runtime/status"
 LIVE_DIR = ROOT / "data/runtime/live_bets"
+UNIVERSE = ROOT / "data/universe"
 VALIDATION = ROOT / "data/runtime/validation"
 WEEKLY = ROOT / "data/weekly_reports"
 MONTHLY = ROOT / "data/monthly_reports"
 RUNTIME_TREND = ROOT / "data/runtime/league_watchlist_trends"
 VALIDATION_REVIEW_20260531 = VALIDATION / "v4_official_ab_validation_review_20260531.json"
 VALIDATION_REVIEW_MD_20260531 = ROOT / "data/daily_reports/V4_20260531_OFFICIAL_AB_VALIDATION_REVIEW.md"
+H2H_DATA_GAP_NOTE = "资料缺口：H2H样本不足，不参与评分。"
 
 
 def _load_json(path: Path) -> dict:
@@ -45,6 +47,79 @@ def _load_json(path: Path) -> dict:
         return json.loads(path.read_text(encoding="utf-8"))
     except Exception:
         return {}
+
+
+def _load_jsonl(path: Path) -> list[dict[str, Any]]:
+    if not path.exists():
+        return []
+    rows: list[dict[str, Any]] = []
+    for line in path.read_text(encoding="utf-8").splitlines():
+        line = line.strip()
+        if not line:
+            continue
+        try:
+            obj = json.loads(line)
+        except Exception:
+            continue
+        if isinstance(obj, dict):
+            rows.append(obj)
+    return rows
+
+
+def _h2h_sample_gap_from_reason(reason: str) -> bool:
+    text = str(reason or "")
+    return "样本量" in text or any(token in text for token in ("H2H=0/0", "H2H=0/1", "H2H=0/2", "H2H=0/3"))
+
+
+def _display_prescout_skip_reason(reason: str) -> str:
+    text = str(reason or "").strip() or "INVALID"
+    if text.startswith("H2H_"):
+        text = text[4:]
+    if text == "H2H_TIMEOUT_SKIP":
+        return "综合前筛超时"
+    if "样本量" in text:
+        return "综合前筛资料不足"
+    if text.startswith("未达标"):
+        return f"综合前筛未达标 {text.removeprefix('未达标').strip()}"
+    if text.startswith("NO_CANDIDATE|"):
+        return "综合评分未进入A/B/C"
+    return f"综合前筛未达标：{text}"
+
+
+def _universe_skip_candidates(date_key: str, known_fixture_ids: set[int]) -> list[dict[str, Any]]:
+    out: list[dict[str, Any]] = []
+    resolver = _get_team_resolver()
+    for row in _load_jsonl(UNIVERSE / f"fixtures_universe_{date_key}.jsonl"):
+        try:
+            fid = int(row.get("fixture_id"))
+        except Exception:
+            continue
+        if fid in known_fixture_ids:
+            continue
+        if str(row.get("filter_result") or "").upper() != "SKIP":
+            continue
+        home = str(row.get("home_team") or "UNKNOWN")
+        away = str(row.get("away_team") or "UNKNOWN")
+        resolved = resolver.resolve_match(home, away, source=f"data/universe/fixtures_universe_{date_key}.jsonl")
+        raw_reason = str(row.get("raw_h2h_reason") or row.get("filter_reason") or "")
+        reason = _display_prescout_skip_reason(raw_reason)
+        h2h_gap = bool(row.get("h2h_data_gap")) or _h2h_sample_gap_from_reason(raw_reason)
+        out.append({
+            "fixture_id": fid,
+            "home_cn": resolved["home_team_cn"],
+            "away_cn": resolved["away_team_cn"],
+            "home_en": resolved["home_team_en"],
+            "away_en": resolved["away_team_en"],
+            "league": str(row.get("league_name") or "UNKNOWN"),
+            "grade": "SKIP",
+            "reason": reason,
+            "skip_reason": reason,
+            "raw_h2h_reason": raw_reason,
+            "h2h_data_gap": h2h_gap,
+            "h2h_data_gap_note": H2H_DATA_GAP_NOTE if h2h_gap else "",
+            "h2h_role": "资料缺口说明，不作为SKIP主因",
+        })
+    return out
 
 
 # —— playbook script & time distribution helpers ——
@@ -297,6 +372,8 @@ def _parse_formal_candidate_inputs(date_key: str) -> tuple[dict, dict[str, Path]
     }
     a_candidates = [_parse_brief_candidate(block, "A", scout_by_fixture) for block in _split_grade_blocks(text, "A")]
     b_candidates = [_parse_brief_candidate(block, "B", scout_by_fixture) for block in _split_grade_blocks(text, "B")]
+    known_fixture_ids = set(scout_by_fixture)
+    skip_candidates = _universe_skip_candidates(date_key, known_fixture_ids)
     c_match = re.search(r"C级观察[：:](?P<n>\d+)场", text)
     c_count = int(c_match.group("n")) if c_match else 0
     scan_total = int(scan_perf.get("total_fixtures") or 0)
@@ -313,6 +390,7 @@ def _parse_formal_candidate_inputs(date_key: str) -> tuple[dict, dict[str, Path]
         "A_candidates": a_candidates,
         "B_candidates": b_candidates,
         "C_candidates": [],
+        "SKIP_candidates": skip_candidates,
         "formal_recommendation_count": len(a_candidates) + len(b_candidates),
         "parsed_from_formal_inputs": True,
         "fallback_used": False,
@@ -1074,6 +1152,22 @@ def _extract_candidates(view: dict, live_daily: dict, scout_data: list | None = 
             "away_cn": _resolve_cn_name(r.get("away") or r.get("away_en") or "", r.get("away_cn") or r.get("away_team_cn") or ""),
             "grade": "SKIP",
             "reason": r.get("reason") or r.get("skip_reason") or "",
+        })
+
+    for r in (view.get("SKIP_candidates") or []):
+        if not isinstance(r, dict):
+            continue
+        skip_candidates.append({
+            "fixture_id": r.get("fixture_id"),
+            "league": r.get("league") or "",
+            "home_cn": _resolve_cn_name(r.get("home_en") or r.get("home") or "", r.get("home_cn") or r.get("home_team_cn") or ""),
+            "away_cn": _resolve_cn_name(r.get("away_en") or r.get("away") or "", r.get("away_cn") or r.get("away_team_cn") or ""),
+            "grade": "SKIP",
+            "reason": r.get("reason") or r.get("skip_reason") or r.get("filter_reason") or "",
+            "raw_h2h_reason": r.get("raw_h2h_reason") or "",
+            "h2h_data_gap": bool(r.get("h2h_data_gap")),
+            "h2h_data_gap_note": r.get("h2h_data_gap_note") or "",
+            "h2h_role": r.get("h2h_role") or "资料缺口说明，不作为SKIP主因",
         })
 
     # ── Compute split statistics ──
@@ -2127,6 +2221,9 @@ def build_model() -> dict:
                 "away_cn": x.get("away_cn") or "暂无",
                 "league": x.get("league") or "N/A",
                 "reason": x.get("reason") or "策略跳过",
+                "h2h_data_gap": bool(x.get("h2h_data_gap")),
+                "h2h_data_gap_note": x.get("h2h_data_gap_note") or "",
+                "h2h_role": x.get("h2h_role") or "资料缺口说明，不作为SKIP主因",
             }
             for x in (candidates.get("skip_candidates") or [])
         ]

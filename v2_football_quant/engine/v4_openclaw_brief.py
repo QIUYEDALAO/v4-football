@@ -26,6 +26,7 @@ except Exception:
 
 REPORT_DIR = BASE_DIR / "data" / "daily_reports"
 STATUS_DIR = BASE_DIR / "data" / "runtime" / "status"
+H2H_DATA_GAP_NOTE = "资料缺口：H2H样本不足，不参与评分。"
 
 
 def _date_key(date_str: str) -> str:
@@ -369,9 +370,18 @@ def _build_brief_season_aware(date_str: str, candidate_view_path: Path | None = 
     ]
     c_count = int(cv.get("C_count", 0) or 0)
     skip_count = int(cv.get("SKIP_count", 0) or 0)
+    skip_rows = [r for r in (cv.get("SKIP_candidates") or []) if isinstance(r, dict)]
     total = int(cv.get("scan_total", len(a_rows) + len(b_rows) + c_count + skip_count) or 0)
     ab_total = len(a_rows) + len(b_rows)
     ab_ratio = _pct_value(ab_total, total)
+    skip_counter: Counter[str] = Counter()
+    h2h_gap_count = 0
+    for row in skip_rows:
+        reason = str(row.get("reason") or row.get("skip_reason") or row.get("filter_reason") or "").strip()
+        if reason:
+            skip_counter[reason] += 1
+        if row.get("h2h_data_gap") or row.get("h2h_data_gap_note"):
+            h2h_gap_count += 1
 
     lines: list[str] = []
     lines.append("【V4 情报系统】")
@@ -410,6 +420,14 @@ def _build_brief_season_aware(date_str: str, candidate_view_path: Path | None = 
         lines.append("今日无A/B上半场主推荐。")
     else:
         lines.append(f"V4最终结论：今日 A/B 主推荐 {ab_total} 场（A={len(a_rows)}, B={len(b_rows)}）。")
+    if skip_count:
+        lines.append("")
+        lines.append(f"⚪ 跳过归因：{skip_count}场")
+        if skip_counter:
+            for reason, n in skip_counter.most_common(6):
+                lines.append(f"- {reason}：{n}场")
+        if h2h_gap_count:
+            lines.append(f"- {H2H_DATA_GAP_NOTE}：{h2h_gap_count}场")
     lines.append("风险提示：仅 official A/B 可作为主推荐；C观察、影子条目、演练条目不进入主推荐。")
     lines.append("⚠️ V4最终结论以 official A/B 为准。")
 

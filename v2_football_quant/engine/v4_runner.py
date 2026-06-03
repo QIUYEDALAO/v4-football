@@ -77,6 +77,7 @@ SCAN_PROFILE_STABLE_FULL_24H = "stable_full_24h"
 LOCAL_TZ = timezone(timedelta(hours=8))
 H2H_MAX_REQUIRED_RATIO = 0.35
 H2H_PER_FIXTURE_TIMEOUT_SECONDS = 20
+H2H_DATA_GAP_NOTE = "资料缺口：H2H样本不足，不参与评分。"
 
 # Match-date validation must use the match-local calendar date, not the
 # operator/CST scan date. Country mapping is intentionally conservative; if a
@@ -130,6 +131,23 @@ def _resolve_match_timezone(country: str | None = None, league_name: str | None 
         except Exception:
             pass
     return LOCAL_TZ, "operator_timezone_fallback", True
+
+
+def _h2h_sample_gap_from_reason(reason: str) -> bool:
+    text = str(reason or "")
+    return "样本量" in text or any(token in text for token in ("H2H=0/0", "H2H=0/1", "H2H=0/2", "H2H=0/3"))
+
+
+def _display_prescout_skip_reason(reason: str) -> str:
+    """Keep legacy pre-scout SKIP reasons from being read as an H2H hard gate."""
+    text = str(reason or "").strip() or "INVALID"
+    if text == "H2H_TIMEOUT_SKIP":
+        return "综合前筛超时"
+    if "样本量" in text:
+        return "综合前筛资料不足"
+    if text.startswith("未达标"):
+        return f"综合前筛未达标 {text.removeprefix('未达标').strip()}"
+    return f"综合前筛未达标：{text}"
 
 
 def _parse_kickoff_local(kickoff: str, *, country: str | None = None, league_name: str | None = None, fixture_timezone: str | None = None) -> tuple[datetime, bool, str]:
@@ -1486,7 +1504,7 @@ def run_v4_scan(
                 stats["below_threshold"] += 1
             continue
 
-        logger.info(f"  ⏳ H2H: {fx.get('league_name','?')} | {fx['home']} vs {fx['away']}")
+        logger.info(f"  ⏳ 综合前筛: {fx.get('league_name','?')} | {fx['home']} vs {fx['away']}")
         result = evaluate_h2h_edge(
             fx["homeId"],
             fx["awayId"],
@@ -1497,9 +1515,11 @@ def run_v4_scan(
             current_country=fx.get("country"),
         )
         if not result.get("valid"):
-            logger.info(f"  ⏭️ SKIP: {result.get('reason','?')}")
+            logger.info(f"  ⏭️ SKIP: {_display_prescout_skip_reason(result.get('reason','?'))}")
         h2h_valid = bool(result.get("valid"))
         h2h_reason = result.get("reason", "")
+        display_skip_reason = _display_prescout_skip_reason(h2h_reason)
+        h2h_data_gap = _h2h_sample_gap_from_reason(h2h_reason)
 
         actual_flags = {
             "actual_h2h_collected": True,
@@ -1527,7 +1547,11 @@ def run_v4_scan(
                 "is_candidate": False,
                 "candidate_score": None,
                 "filter_result": "SKIP",
-                "filter_reason": f"H2H_{h2h_reason or 'INVALID'}",
+                "filter_reason": display_skip_reason,
+                "raw_h2h_reason": h2h_reason,
+                "h2h_data_gap": h2h_data_gap,
+                "h2h_data_gap_note": H2H_DATA_GAP_NOTE if h2h_data_gap else "",
+                "h2h_role": "资料缺口说明，不作为SKIP主因",
                 "run_tag": run_tag,
                 "logged_at": datetime.now().isoformat(),
                 "collection_plan_mode": "OBSERVE_ONLY",
@@ -1543,7 +1567,7 @@ def run_v4_scan(
                 "planned_collection_reason": "PLAN_PENDING",
                 **actual_flags,
                 "actual_collection_stage": "H2H_DONE_INVALID",
-                "actual_collection_reason": f"H2H_INVALID:{h2h_reason or 'INVALID'}",
+                "actual_collection_reason": f"PRE_SCOUT_COMPOSITE_GATE_INVALID:{h2h_reason or 'INVALID'}",
             })
             if "API_ERROR" in result.get("reason", ""):
                 stats["api_error"] += 1
@@ -1790,7 +1814,7 @@ def run_v4_scan(
         json.dump(scout_reports, f, ensure_ascii=False, indent=2)
 
     logger.info(f"\n🔭 V4 球探扫描完成:")
-    logger.info(f"  总数: {stats['total']} → H2H不足: {stats['no_h2h']} → 未达标: {stats['below_threshold']} → API错误: {stats['api_error']} → 无盘口: {stats.get('no_odds',0)} → 🔭球探报告: {stats['scouted']}")
+    logger.info(f"  总数: {stats['total']} → H2H资料缺口: {stats['no_h2h']} → 综合未达标: {stats['below_threshold']} → API错误: {stats['api_error']} → 无盘口: {stats.get('no_odds',0)} → 🔭球探报告: {stats['scouted']}")
     logger.info(f"  保存: {out_path} ({len(scout_reports)} 条)")
     logger.info(f"  🎯 滚球雷达: {len(live_watchlist)} 场")
     logger.info(f"  🧾 Universe日志: {universe_out}")
