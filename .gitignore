@@ -1,8 +1,10 @@
 # 敏感数据
 .env
+*.env
 *.key
 *secret*
 *credentials*
+*token*
 
 # API 密钥（搜索替换后再提交）
 **/API_KEY*
@@ -28,11 +30,26 @@ node_modules/
 
 # 日志
 logs/
+log/
 *.log
 
 # 临时文件
+runtime/
+cache/
+tmp/
 *.bak
 *.tmp
+*.lock
+*.pid
+
+# Local workspace metadata
+.config/
+.learnings/
+.wiki/.openclaw-wiki/cache/
+.wiki/.openclaw-wiki/log.jsonl
+v4-football/.learnings/
+v4-football/.wiki/.openclaw-wiki/cache/
+v4-football/.wiki/.openclaw-wiki/log.jsonl
 
 # 数据文件（不上传）
 v2_football_quant/data/
