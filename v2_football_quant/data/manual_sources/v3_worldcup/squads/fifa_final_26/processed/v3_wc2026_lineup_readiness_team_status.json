@@ -1,0 +1,1620 @@
+{
+  "module": "v3_wc2026_lineup_readiness_team_status",
+  "tournament": "FIFA World Cup 2026",
+  "generated_from": {
+    "players_json": "data/manual_sources/v3_worldcup/squads/fifa_final_26/processed/v3_wc2026_final_26_players.json",
+    "teams_json": "data/manual_sources/v3_worldcup/squads/fifa_final_26/processed/v3_wc2026_final_26_teams.json",
+    "summary_json": "data/manual_sources/v3_worldcup/squads/fifa_final_26/processed/v3_wc2026_final_26_summary.json",
+    "squad_profile_observation": "data/manual_sources/v3_worldcup/squads/fifa_final_26/processed/v3_wc2026_final_26_squad_profile_observation.json",
+    "tactical_profile": "data/v3_worldcup/tactical_profile/v3_worldcup_tactical_profile_layer_20260604.json"
+  },
+  "team_count": 48,
+  "total_players": 1248,
+  "teams_with_26_players": 48,
+  "position_distribution": {
+    "GK": 145,
+    "DF": 421,
+    "MF": 371,
+    "FW": 311
+  },
+  "starting_xi_status": "NOT_AVAILABLE",
+  "matchday_lineup_status": "WAIT_OFFICIAL_LINEUP",
+  "formation_status": "HISTORICAL_OBSERVATION_ONLY",
+  "teams": [
+    {
+      "team": "Algeria",
+      "team_slug": "algeria",
+      "final_26_player_count": 26,
+      "fifa_position_distribution": {
+        "GK": 3,
+        "DF": 9,
+        "MF": 7,
+        "FW": 7
+      },
+      "starting_xi_status": "NOT_AVAILABLE",
+      "starting_xi_source": "NONE",
+      "starting_xi_players": [],
+      "predicted_xi_generated": false,
+      "matchday_lineup_status": "WAIT_OFFICIAL_LINEUP",
+      "formation_status": "HISTORICAL_OBSERVATION_ONLY",
+      "historical_formations_observed": [
+        "NO_DATA"
+      ],
+      "tactical_profile_ref": "data/v3_worldcup/tactical_profile/v3_worldcup_tactical_profile_layer_20260604.json",
+      "official_lineup_future_source": "official_matchday_lineup_feed_not_ingested",
+      "data_insufficient_reason": [
+        "official_matchday_lineup_not_available",
+        "no_confirmed_lineup_feed_ingested",
+        "formation_is_historical_observation_only"
+      ],
+      "observation_only": true,
+      "no_starting_xi_generated": true,
+      "no_prediction": true,
+      "no_injury_judgment": true,
+      "betting_recommendation": false,
+      "affects_v4": false
+    },
+    {
+      "team": "Argentina",
+      "team_slug": "argentina",
+      "final_26_player_count": 26,
+      "fifa_position_distribution": {
+        "GK": 3,
+        "DF": 8,
+        "MF": 8,
+        "FW": 7
+      },
+      "starting_xi_status": "NOT_AVAILABLE",
+      "starting_xi_source": "NONE",
+      "starting_xi_players": [],
+      "predicted_xi_generated": false,
+      "matchday_lineup_status": "WAIT_OFFICIAL_LINEUP",
+      "formation_status": "HISTORICAL_OBSERVATION_ONLY",
+      "historical_formations_observed": [
+        "4-4-2",
+        "4-3-3",
+        "4-2-3-1"
+      ],
+      "tactical_profile_ref": "data/v3_worldcup/tactical_profile/v3_worldcup_tactical_profile_layer_20260604.json",
+      "official_lineup_future_source": "official_matchday_lineup_feed_not_ingested",
+      "data_insufficient_reason": [
+        "official_matchday_lineup_not_available",
+        "no_confirmed_lineup_feed_ingested",
+        "formation_is_historical_observation_only"
+      ],
+      "observation_only": true,
+      "no_starting_xi_generated": true,
+      "no_prediction": true,
+      "no_injury_judgment": true,
+      "betting_recommendation": false,
+      "affects_v4": false
+    },
+    {
+      "team": "Australia",
+      "team_slug": "australia",
+      "final_26_player_count": 26,
+      "fifa_position_distribution": {
+        "GK": 3,
+        "DF": 10,
+        "MF": 5,
+        "FW": 8
+      },
+      "starting_xi_status": "NOT_AVAILABLE",
+      "starting_xi_source": "NONE",
+      "starting_xi_players": [],
+      "predicted_xi_generated": false,
+      "matchday_lineup_status": "WAIT_OFFICIAL_LINEUP",
+      "formation_status": "HISTORICAL_OBSERVATION_ONLY",
+      "historical_formations_observed": [
+        "4-4-2",
+        "4-4-1-1"
+      ],
+      "tactical_profile_ref": "data/v3_worldcup/tactical_profile/v3_worldcup_tactical_profile_layer_20260604.json",
+      "official_lineup_future_source": "official_matchday_lineup_feed_not_ingested",
+      "data_insufficient_reason": [
+        "official_matchday_lineup_not_available",
+        "no_confirmed_lineup_feed_ingested",
+        "formation_is_historical_observation_only"
+      ],
+      "observation_only": true,
+      "no_starting_xi_generated": true,
+      "no_prediction": true,
+      "no_injury_judgment": true,
+      "betting_recommendation": false,
+      "affects_v4": false
+    },
+    {
+      "team": "Austria",
+      "team_slug": "austria",
+      "final_26_player_count": 26,
+      "fifa_position_distribution": {
+        "GK": 3,
+        "DF": 8,
+        "MF": 11,
+        "FW": 4
+      },
+      "starting_xi_status": "NOT_AVAILABLE",
+      "starting_xi_source": "NONE",
+      "starting_xi_players": [],
+      "predicted_xi_generated": false,
+      "matchday_lineup_status": "WAIT_OFFICIAL_LINEUP",
+      "formation_status": "HISTORICAL_OBSERVATION_ONLY",
+      "historical_formations_observed": [
+        "NO_DATA"
+      ],
+      "tactical_profile_ref": "data/v3_worldcup/tactical_profile/v3_worldcup_tactical_profile_layer_20260604.json",
+      "official_lineup_future_source": "official_matchday_lineup_feed_not_ingested",
+      "data_insufficient_reason": [
+        "official_matchday_lineup_not_available",
+        "no_confirmed_lineup_feed_ingested",
+        "formation_is_historical_observation_only"
+      ],
+      "observation_only": true,
+      "no_starting_xi_generated": true,
+      "no_prediction": true,
+      "no_injury_judgment": true,
+      "betting_recommendation": false,
+      "affects_v4": false
+    },
+    {
+      "team": "Belgium",
+      "team_slug": "belgium",
+      "final_26_player_count": 26,
+      "fifa_position_distribution": {
+        "GK": 3,
+        "DF": 9,
+        "MF": 8,
+        "FW": 6
+      },
+      "starting_xi_status": "NOT_AVAILABLE",
+      "starting_xi_source": "NONE",
+      "starting_xi_players": [],
+      "predicted_xi_generated": false,
+      "matchday_lineup_status": "WAIT_OFFICIAL_LINEUP",
+      "formation_status": "HISTORICAL_OBSERVATION_ONLY",
+      "historical_formations_observed": [
+        "3-4-2-1",
+        "4-2-3-1",
+        "4-3-3"
+      ],
+      "tactical_profile_ref": "data/v3_worldcup/tactical_profile/v3_worldcup_tactical_profile_layer_20260604.json",
+      "official_lineup_future_source": "official_matchday_lineup_feed_not_ingested",
+      "data_insufficient_reason": [
+        "official_matchday_lineup_not_available",
+        "no_confirmed_lineup_feed_ingested",
+        "formation_is_historical_observation_only"
+      ],
+      "observation_only": true,
+      "no_starting_xi_generated": true,
+      "no_prediction": true,
+      "no_injury_judgment": true,
+      "betting_recommendation": false,
+      "affects_v4": false
+    },
+    {
+      "team": "Bosnia And Herzegovina",
+      "team_slug": "bosnia_and_herzegovina",
+      "final_26_player_count": 26,
+      "fifa_position_distribution": {
+        "GK": 3,
+        "DF": 8,
+        "MF": 8,
+        "FW": 7
+      },
+      "starting_xi_status": "NOT_AVAILABLE",
+      "starting_xi_source": "NONE",
+      "starting_xi_players": [],
+      "predicted_xi_generated": false,
+      "matchday_lineup_status": "WAIT_OFFICIAL_LINEUP",
+      "formation_status": "HISTORICAL_OBSERVATION_ONLY",
+      "historical_formations_observed": [],
+      "tactical_profile_ref": "",
+      "official_lineup_future_source": "official_matchday_lineup_feed_not_ingested",
+      "data_insufficient_reason": [
+        "official_matchday_lineup_not_available",
+        "no_confirmed_lineup_feed_ingested",
+        "formation_is_historical_observation_only"
+      ],
+      "observation_only": true,
+      "no_starting_xi_generated": true,
+      "no_prediction": true,
+      "no_injury_judgment": true,
+      "betting_recommendation": false,
+      "affects_v4": false
+    },
+    {
+      "team": "Brazil",
+      "team_slug": "brazil",
+      "final_26_player_count": 26,
+      "fifa_position_distribution": {
+        "GK": 3,
+        "DF": 9,
+        "MF": 5,
+        "FW": 9
+      },
+      "starting_xi_status": "NOT_AVAILABLE",
+      "starting_xi_source": "NONE",
+      "starting_xi_players": [],
+      "predicted_xi_generated": false,
+      "matchday_lineup_status": "WAIT_OFFICIAL_LINEUP",
+      "formation_status": "HISTORICAL_OBSERVATION_ONLY",
+      "historical_formations_observed": [
+        "4-3-3",
+        "4-2-3-1"
+      ],
+      "tactical_profile_ref": "data/v3_worldcup/tactical_profile/v3_worldcup_tactical_profile_layer_20260604.json",
+      "official_lineup_future_source": "official_matchday_lineup_feed_not_ingested",
+      "data_insufficient_reason": [
+        "official_matchday_lineup_not_available",
+        "no_confirmed_lineup_feed_ingested",
+        "formation_is_historical_observation_only"
+      ],
+      "observation_only": true,
+      "no_starting_xi_generated": true,
+      "no_prediction": true,
+      "no_injury_judgment": true,
+      "betting_recommendation": false,
+      "affects_v4": false
+    },
+    {
+      "team": "Cabo Verde",
+      "team_slug": "cabo_verde",
+      "final_26_player_count": 26,
+      "fifa_position_distribution": {
+        "GK": 3,
+        "DF": 8,
+        "MF": 12,
+        "FW": 3
+      },
+      "starting_xi_status": "NOT_AVAILABLE",
+      "starting_xi_source": "NONE",
+      "starting_xi_players": [],
+      "predicted_xi_generated": false,
+      "matchday_lineup_status": "WAIT_OFFICIAL_LINEUP",
+      "formation_status": "HISTORICAL_OBSERVATION_ONLY",
+      "historical_formations_observed": [],
+      "tactical_profile_ref": "",
+      "official_lineup_future_source": "official_matchday_lineup_feed_not_ingested",
+      "data_insufficient_reason": [
+        "official_matchday_lineup_not_available",
+        "no_confirmed_lineup_feed_ingested",
+        "formation_is_historical_observation_only"
+      ],
+      "observation_only": true,
+      "no_starting_xi_generated": true,
+      "no_prediction": true,
+      "no_injury_judgment": true,
+      "betting_recommendation": false,
+      "affects_v4": false
+    },
+    {
+      "team": "Canada",
+      "team_slug": "canada",
+      "final_26_player_count": 26,
+      "fifa_position_distribution": {
+        "GK": 3,
+        "DF": 9,
+        "MF": 8,
+        "FW": 6
+      },
+      "starting_xi_status": "NOT_AVAILABLE",
+      "starting_xi_source": "NONE",
+      "starting_xi_players": [],
+      "predicted_xi_generated": false,
+      "matchday_lineup_status": "WAIT_OFFICIAL_LINEUP",
+      "formation_status": "HISTORICAL_OBSERVATION_ONLY",
+      "historical_formations_observed": [
+        "3-4-3",
+        "4-4-1-1"
+      ],
+      "tactical_profile_ref": "data/v3_worldcup/tactical_profile/v3_worldcup_tactical_profile_layer_20260604.json",
+      "official_lineup_future_source": "official_matchday_lineup_feed_not_ingested",
+      "data_insufficient_reason": [
+        "official_matchday_lineup_not_available",
+        "no_confirmed_lineup_feed_ingested",
+        "formation_is_historical_observation_only"
+      ],
+      "observation_only": true,
+      "no_starting_xi_generated": true,
+      "no_prediction": true,
+      "no_injury_judgment": true,
+      "betting_recommendation": false,
+      "affects_v4": false
+    },
+    {
+      "team": "Colombia",
+      "team_slug": "colombia",
+      "final_26_player_count": 26,
+      "fifa_position_distribution": {
+        "GK": 3,
+        "DF": 9,
+        "MF": 8,
+        "FW": 6
+      },
+      "starting_xi_status": "NOT_AVAILABLE",
+      "starting_xi_source": "NONE",
+      "starting_xi_players": [],
+      "predicted_xi_generated": false,
+      "matchday_lineup_status": "WAIT_OFFICIAL_LINEUP",
+      "formation_status": "HISTORICAL_OBSERVATION_ONLY",
+      "historical_formations_observed": [
+        "4-2-3-1",
+        "4-3-1-2"
+      ],
+      "tactical_profile_ref": "data/v3_worldcup/tactical_profile/v3_worldcup_tactical_profile_layer_20260604.json",
+      "official_lineup_future_source": "official_matchday_lineup_feed_not_ingested",
+      "data_insufficient_reason": [
+        "official_matchday_lineup_not_available",
+        "no_confirmed_lineup_feed_ingested",
+        "formation_is_historical_observation_only"
+      ],
+      "observation_only": true,
+      "no_starting_xi_generated": true,
+      "no_prediction": true,
+      "no_injury_judgment": true,
+      "betting_recommendation": false,
+      "affects_v4": false
+    },
+    {
+      "team": "Congo DR",
+      "team_slug": "congo_dr",
+      "final_26_player_count": 26,
+      "fifa_position_distribution": {
+        "GK": 3,
+        "DF": 8,
+        "MF": 8,
+        "FW": 7
+      },
+      "starting_xi_status": "NOT_AVAILABLE",
+      "starting_xi_source": "NONE",
+      "starting_xi_players": [],
+      "predicted_xi_generated": false,
+      "matchday_lineup_status": "WAIT_OFFICIAL_LINEUP",
+      "formation_status": "HISTORICAL_OBSERVATION_ONLY",
+      "historical_formations_observed": [
+        "NO_DATA"
+      ],
+      "tactical_profile_ref": "data/v3_worldcup/tactical_profile/v3_worldcup_tactical_profile_layer_20260604.json",
+      "official_lineup_future_source": "official_matchday_lineup_feed_not_ingested",
+      "data_insufficient_reason": [
+        "official_matchday_lineup_not_available",
+        "no_confirmed_lineup_feed_ingested",
+        "formation_is_historical_observation_only"
+      ],
+      "observation_only": true,
+      "no_starting_xi_generated": true,
+      "no_prediction": true,
+      "no_injury_judgment": true,
+      "betting_recommendation": false,
+      "affects_v4": false
+    },
+    {
+      "team": "Croatia",
+      "team_slug": "croatia",
+      "final_26_player_count": 26,
+      "fifa_position_distribution": {
+        "GK": 3,
+        "DF": 8,
+        "MF": 9,
+        "FW": 6
+      },
+      "starting_xi_status": "NOT_AVAILABLE",
+      "starting_xi_source": "NONE",
+      "starting_xi_players": [],
+      "predicted_xi_generated": false,
+      "matchday_lineup_status": "WAIT_OFFICIAL_LINEUP",
+      "formation_status": "HISTORICAL_OBSERVATION_ONLY",
+      "historical_formations_observed": [
+        "4-3-3",
+        "4-1-4-1",
+        "4-2-3-1"
+      ],
+      "tactical_profile_ref": "data/v3_worldcup/tactical_profile/v3_worldcup_tactical_profile_layer_20260604.json",
+      "official_lineup_future_source": "official_matchday_lineup_feed_not_ingested",
+      "data_insufficient_reason": [
+        "official_matchday_lineup_not_available",
+        "no_confirmed_lineup_feed_ingested",
+        "formation_is_historical_observation_only"
+      ],
+      "observation_only": true,
+      "no_starting_xi_generated": true,
+      "no_prediction": true,
+      "no_injury_judgment": true,
+      "betting_recommendation": false,
+      "affects_v4": false
+    },
+    {
+      "team": "Curaçao",
+      "team_slug": "curacao",
+      "final_26_player_count": 26,
+      "fifa_position_distribution": {
+        "GK": 3,
+        "DF": 8,
+        "MF": 7,
+        "FW": 8
+      },
+      "starting_xi_status": "NOT_AVAILABLE",
+      "starting_xi_source": "NONE",
+      "starting_xi_players": [],
+      "predicted_xi_generated": false,
+      "matchday_lineup_status": "WAIT_OFFICIAL_LINEUP",
+      "formation_status": "HISTORICAL_OBSERVATION_ONLY",
+      "historical_formations_observed": [],
+      "tactical_profile_ref": "",
+      "official_lineup_future_source": "official_matchday_lineup_feed_not_ingested",
+      "data_insufficient_reason": [
+        "official_matchday_lineup_not_available",
+        "no_confirmed_lineup_feed_ingested",
+        "formation_is_historical_observation_only"
+      ],
+      "observation_only": true,
+      "no_starting_xi_generated": true,
+      "no_prediction": true,
+      "no_injury_judgment": true,
+      "betting_recommendation": false,
+      "affects_v4": false
+    },
+    {
+      "team": "Czechia",
+      "team_slug": "czechia",
+      "final_26_player_count": 26,
+      "fifa_position_distribution": {
+        "GK": 3,
+        "DF": 9,
+        "MF": 7,
+        "FW": 7
+      },
+      "starting_xi_status": "NOT_AVAILABLE",
+      "starting_xi_source": "NONE",
+      "starting_xi_players": [],
+      "predicted_xi_generated": false,
+      "matchday_lineup_status": "WAIT_OFFICIAL_LINEUP",
+      "formation_status": "HISTORICAL_OBSERVATION_ONLY",
+      "historical_formations_observed": [],
+      "tactical_profile_ref": "",
+      "official_lineup_future_source": "official_matchday_lineup_feed_not_ingested",
+      "data_insufficient_reason": [
+        "official_matchday_lineup_not_available",
+        "no_confirmed_lineup_feed_ingested",
+        "formation_is_historical_observation_only"
+      ],
+      "observation_only": true,
+      "no_starting_xi_generated": true,
+      "no_prediction": true,
+      "no_injury_judgment": true,
+      "betting_recommendation": false,
+      "affects_v4": false
+    },
+    {
+      "team": "Côte D'Ivoire",
+      "team_slug": "cote_d_ivoire",
+      "final_26_player_count": 26,
+      "fifa_position_distribution": {
+        "GK": 3,
+        "DF": 8,
+        "MF": 6,
+        "FW": 9
+      },
+      "starting_xi_status": "NOT_AVAILABLE",
+      "starting_xi_source": "NONE",
+      "starting_xi_players": [],
+      "predicted_xi_generated": false,
+      "matchday_lineup_status": "WAIT_OFFICIAL_LINEUP",
+      "formation_status": "HISTORICAL_OBSERVATION_ONLY",
+      "historical_formations_observed": [],
+      "tactical_profile_ref": "",
+      "official_lineup_future_source": "official_matchday_lineup_feed_not_ingested",
+      "data_insufficient_reason": [
+        "official_matchday_lineup_not_available",
+        "no_confirmed_lineup_feed_ingested",
+        "formation_is_historical_observation_only"
+      ],
+      "observation_only": true,
+      "no_starting_xi_generated": true,
+      "no_prediction": true,
+      "no_injury_judgment": true,
+      "betting_recommendation": false,
+      "affects_v4": false
+    },
+    {
+      "team": "Ecuador",
+      "team_slug": "ecuador",
+      "final_26_player_count": 26,
+      "fifa_position_distribution": {
+        "GK": 3,
+        "DF": 8,
+        "MF": 8,
+        "FW": 7
+      },
+      "starting_xi_status": "NOT_AVAILABLE",
+      "starting_xi_source": "NONE",
+      "starting_xi_players": [],
+      "predicted_xi_generated": false,
+      "matchday_lineup_status": "WAIT_OFFICIAL_LINEUP",
+      "formation_status": "HISTORICAL_OBSERVATION_ONLY",
+      "historical_formations_observed": [
+        "4-3-3",
+        "4-4-2"
+      ],
+      "tactical_profile_ref": "data/v3_worldcup/tactical_profile/v3_worldcup_tactical_profile_layer_20260604.json",
+      "official_lineup_future_source": "official_matchday_lineup_feed_not_ingested",
+      "data_insufficient_reason": [
+        "official_matchday_lineup_not_available",
+        "no_confirmed_lineup_feed_ingested",
+        "formation_is_historical_observation_only"
+      ],
+      "observation_only": true,
+      "no_starting_xi_generated": true,
+      "no_prediction": true,
+      "no_injury_judgment": true,
+      "betting_recommendation": false,
+      "affects_v4": false
+    },
+    {
+      "team": "Egypt",
+      "team_slug": "egypt",
+      "final_26_player_count": 26,
+      "fifa_position_distribution": {
+        "GK": 4,
+        "DF": 8,
+        "MF": 7,
+        "FW": 7
+      },
+      "starting_xi_status": "NOT_AVAILABLE",
+      "starting_xi_source": "NONE",
+      "starting_xi_players": [],
+      "predicted_xi_generated": false,
+      "matchday_lineup_status": "WAIT_OFFICIAL_LINEUP",
+      "formation_status": "HISTORICAL_OBSERVATION_ONLY",
+      "historical_formations_observed": [
+        "4-2-3-1"
+      ],
+      "tactical_profile_ref": "data/v3_worldcup/tactical_profile/v3_worldcup_tactical_profile_layer_20260604.json",
+      "official_lineup_future_source": "official_matchday_lineup_feed_not_ingested",
+      "data_insufficient_reason": [
+        "official_matchday_lineup_not_available",
+        "no_confirmed_lineup_feed_ingested",
+        "formation_is_historical_observation_only"
+      ],
+      "observation_only": true,
+      "no_starting_xi_generated": true,
+      "no_prediction": true,
+      "no_injury_judgment": true,
+      "betting_recommendation": false,
+      "affects_v4": false
+    },
+    {
+      "team": "England",
+      "team_slug": "england",
+      "final_26_player_count": 26,
+      "fifa_position_distribution": {
+        "GK": 3,
+        "DF": 9,
+        "MF": 7,
+        "FW": 7
+      },
+      "starting_xi_status": "NOT_AVAILABLE",
+      "starting_xi_source": "NONE",
+      "starting_xi_players": [],
+      "predicted_xi_generated": false,
+      "matchday_lineup_status": "WAIT_OFFICIAL_LINEUP",
+      "formation_status": "HISTORICAL_OBSERVATION_ONLY",
+      "historical_formations_observed": [
+        "3-1-4-2",
+        "4-3-3"
+      ],
+      "tactical_profile_ref": "data/v3_worldcup/tactical_profile/v3_worldcup_tactical_profile_layer_20260604.json",
+      "official_lineup_future_source": "official_matchday_lineup_feed_not_ingested",
+      "data_insufficient_reason": [
+        "official_matchday_lineup_not_available",
+        "no_confirmed_lineup_feed_ingested",
+        "formation_is_historical_observation_only"
+      ],
+      "observation_only": true,
+      "no_starting_xi_generated": true,
+      "no_prediction": true,
+      "no_injury_judgment": true,
+      "betting_recommendation": false,
+      "affects_v4": false
+    },
+    {
+      "team": "France",
+      "team_slug": "france",
+      "final_26_player_count": 26,
+      "fifa_position_distribution": {
+        "GK": 3,
+        "DF": 9,
+        "MF": 7,
+        "FW": 7
+      },
+      "starting_xi_status": "NOT_AVAILABLE",
+      "starting_xi_source": "NONE",
+      "starting_xi_players": [],
+      "predicted_xi_generated": false,
+      "matchday_lineup_status": "WAIT_OFFICIAL_LINEUP",
+      "formation_status": "HISTORICAL_OBSERVATION_ONLY",
+      "historical_formations_observed": [
+        "4-2-3-1",
+        "4-4-2"
+      ],
+      "tactical_profile_ref": "data/v3_worldcup/tactical_profile/v3_worldcup_tactical_profile_layer_20260604.json",
+      "official_lineup_future_source": "official_matchday_lineup_feed_not_ingested",
+      "data_insufficient_reason": [
+        "official_matchday_lineup_not_available",
+        "no_confirmed_lineup_feed_ingested",
+        "formation_is_historical_observation_only"
+      ],
+      "observation_only": true,
+      "no_starting_xi_generated": true,
+      "no_prediction": true,
+      "no_injury_judgment": true,
+      "betting_recommendation": false,
+      "affects_v4": false
+    },
+    {
+      "team": "Germany",
+      "team_slug": "germany",
+      "final_26_player_count": 26,
+      "fifa_position_distribution": {
+        "GK": 3,
+        "DF": 8,
+        "MF": 11,
+        "FW": 4
+      },
+      "starting_xi_status": "NOT_AVAILABLE",
+      "starting_xi_source": "NONE",
+      "starting_xi_players": [],
+      "predicted_xi_generated": false,
+      "matchday_lineup_status": "WAIT_OFFICIAL_LINEUP",
+      "formation_status": "HISTORICAL_OBSERVATION_ONLY",
+      "historical_formations_observed": [
+        "NO_DATA"
+      ],
+      "tactical_profile_ref": "data/v3_worldcup/tactical_profile/v3_worldcup_tactical_profile_layer_20260604.json",
+      "official_lineup_future_source": "official_matchday_lineup_feed_not_ingested",
+      "data_insufficient_reason": [
+        "official_matchday_lineup_not_available",
+        "no_confirmed_lineup_feed_ingested",
+        "formation_is_historical_observation_only"
+      ],
+      "observation_only": true,
+      "no_starting_xi_generated": true,
+      "no_prediction": true,
+      "no_injury_judgment": true,
+      "betting_recommendation": false,
+      "affects_v4": false
+    },
+    {
+      "team": "Ghana",
+      "team_slug": "ghana",
+      "final_26_player_count": 26,
+      "fifa_position_distribution": {
+        "GK": 3,
+        "DF": 9,
+        "MF": 6,
+        "FW": 8
+      },
+      "starting_xi_status": "NOT_AVAILABLE",
+      "starting_xi_source": "NONE",
+      "starting_xi_players": [],
+      "predicted_xi_generated": false,
+      "matchday_lineup_status": "WAIT_OFFICIAL_LINEUP",
+      "formation_status": "HISTORICAL_OBSERVATION_ONLY",
+      "historical_formations_observed": [
+        "NO_DATA"
+      ],
+      "tactical_profile_ref": "data/v3_worldcup/tactical_profile/v3_worldcup_tactical_profile_layer_20260604.json",
+      "official_lineup_future_source": "official_matchday_lineup_feed_not_ingested",
+      "data_insufficient_reason": [
+        "official_matchday_lineup_not_available",
+        "no_confirmed_lineup_feed_ingested",
+        "formation_is_historical_observation_only"
+      ],
+      "observation_only": true,
+      "no_starting_xi_generated": true,
+      "no_prediction": true,
+      "no_injury_judgment": true,
+      "betting_recommendation": false,
+      "affects_v4": false
+    },
+    {
+      "team": "Haiti",
+      "team_slug": "haiti",
+      "final_26_player_count": 26,
+      "fifa_position_distribution": {
+        "GK": 3,
+        "DF": 8,
+        "MF": 6,
+        "FW": 9
+      },
+      "starting_xi_status": "NOT_AVAILABLE",
+      "starting_xi_source": "NONE",
+      "starting_xi_players": [],
+      "predicted_xi_generated": false,
+      "matchday_lineup_status": "WAIT_OFFICIAL_LINEUP",
+      "formation_status": "HISTORICAL_OBSERVATION_ONLY",
+      "historical_formations_observed": [
+        "NO_DATA"
+      ],
+      "tactical_profile_ref": "data/v3_worldcup/tactical_profile/v3_worldcup_tactical_profile_layer_20260604.json",
+      "official_lineup_future_source": "official_matchday_lineup_feed_not_ingested",
+      "data_insufficient_reason": [
+        "official_matchday_lineup_not_available",
+        "no_confirmed_lineup_feed_ingested",
+        "formation_is_historical_observation_only"
+      ],
+      "observation_only": true,
+      "no_starting_xi_generated": true,
+      "no_prediction": true,
+      "no_injury_judgment": true,
+      "betting_recommendation": false,
+      "affects_v4": false
+    },
+    {
+      "team": "IR Iran",
+      "team_slug": "ir_iran",
+      "final_26_player_count": 26,
+      "fifa_position_distribution": {
+        "GK": 3,
+        "DF": 9,
+        "MF": 8,
+        "FW": 6
+      },
+      "starting_xi_status": "NOT_AVAILABLE",
+      "starting_xi_source": "NONE",
+      "starting_xi_players": [],
+      "predicted_xi_generated": false,
+      "matchday_lineup_status": "WAIT_OFFICIAL_LINEUP",
+      "formation_status": "HISTORICAL_OBSERVATION_ONLY",
+      "historical_formations_observed": [],
+      "tactical_profile_ref": "",
+      "official_lineup_future_source": "official_matchday_lineup_feed_not_ingested",
+      "data_insufficient_reason": [
+        "official_matchday_lineup_not_available",
+        "no_confirmed_lineup_feed_ingested",
+        "formation_is_historical_observation_only"
+      ],
+      "observation_only": true,
+      "no_starting_xi_generated": true,
+      "no_prediction": true,
+      "no_injury_judgment": true,
+      "betting_recommendation": false,
+      "affects_v4": false
+    },
+    {
+      "team": "Iraq",
+      "team_slug": "iraq",
+      "final_26_player_count": 26,
+      "fifa_position_distribution": {
+        "GK": 3,
+        "DF": 9,
+        "MF": 7,
+        "FW": 7
+      },
+      "starting_xi_status": "NOT_AVAILABLE",
+      "starting_xi_source": "NONE",
+      "starting_xi_players": [],
+      "predicted_xi_generated": false,
+      "matchday_lineup_status": "WAIT_OFFICIAL_LINEUP",
+      "formation_status": "HISTORICAL_OBSERVATION_ONLY",
+      "historical_formations_observed": [
+        "NO_DATA"
+      ],
+      "tactical_profile_ref": "data/v3_worldcup/tactical_profile/v3_worldcup_tactical_profile_layer_20260604.json",
+      "official_lineup_future_source": "official_matchday_lineup_feed_not_ingested",
+      "data_insufficient_reason": [
+        "official_matchday_lineup_not_available",
+        "no_confirmed_lineup_feed_ingested",
+        "formation_is_historical_observation_only"
+      ],
+      "observation_only": true,
+      "no_starting_xi_generated": true,
+      "no_prediction": true,
+      "no_injury_judgment": true,
+      "betting_recommendation": false,
+      "affects_v4": false
+    },
+    {
+      "team": "Japan",
+      "team_slug": "japan",
+      "final_26_player_count": 26,
+      "fifa_position_distribution": {
+        "GK": 3,
+        "DF": 9,
+        "MF": 10,
+        "FW": 4
+      },
+      "starting_xi_status": "NOT_AVAILABLE",
+      "starting_xi_source": "NONE",
+      "starting_xi_players": [],
+      "predicted_xi_generated": false,
+      "matchday_lineup_status": "WAIT_OFFICIAL_LINEUP",
+      "formation_status": "HISTORICAL_OBSERVATION_ONLY",
+      "historical_formations_observed": [
+        "4-2-3-1",
+        "3-4-3"
+      ],
+      "tactical_profile_ref": "data/v3_worldcup/tactical_profile/v3_worldcup_tactical_profile_layer_20260604.json",
+      "official_lineup_future_source": "official_matchday_lineup_feed_not_ingested",
+      "data_insufficient_reason": [
+        "official_matchday_lineup_not_available",
+        "no_confirmed_lineup_feed_ingested",
+        "formation_is_historical_observation_only"
+      ],
+      "observation_only": true,
+      "no_starting_xi_generated": true,
+      "no_prediction": true,
+      "no_injury_judgment": true,
+      "betting_recommendation": false,
+      "affects_v4": false
+    },
+    {
+      "team": "Jordan",
+      "team_slug": "jordan",
+      "final_26_player_count": 26,
+      "fifa_position_distribution": {
+        "GK": 3,
+        "DF": 9,
+        "MF": 7,
+        "FW": 7
+      },
+      "starting_xi_status": "NOT_AVAILABLE",
+      "starting_xi_source": "NONE",
+      "starting_xi_players": [],
+      "predicted_xi_generated": false,
+      "matchday_lineup_status": "WAIT_OFFICIAL_LINEUP",
+      "formation_status": "HISTORICAL_OBSERVATION_ONLY",
+      "historical_formations_observed": [
+        "NO_DATA"
+      ],
+      "tactical_profile_ref": "data/v3_worldcup/tactical_profile/v3_worldcup_tactical_profile_layer_20260604.json",
+      "official_lineup_future_source": "official_matchday_lineup_feed_not_ingested",
+      "data_insufficient_reason": [
+        "official_matchday_lineup_not_available",
+        "no_confirmed_lineup_feed_ingested",
+        "formation_is_historical_observation_only"
+      ],
+      "observation_only": true,
+      "no_starting_xi_generated": true,
+      "no_prediction": true,
+      "no_injury_judgment": true,
+      "betting_recommendation": false,
+      "affects_v4": false
+    },
+    {
+      "team": "Korea Republic",
+      "team_slug": "korea_republic",
+      "final_26_player_count": 26,
+      "fifa_position_distribution": {
+        "GK": 3,
+        "DF": 9,
+        "MF": 11,
+        "FW": 3
+      },
+      "starting_xi_status": "NOT_AVAILABLE",
+      "starting_xi_source": "NONE",
+      "starting_xi_players": [],
+      "predicted_xi_generated": false,
+      "matchday_lineup_status": "WAIT_OFFICIAL_LINEUP",
+      "formation_status": "HISTORICAL_OBSERVATION_ONLY",
+      "historical_formations_observed": [],
+      "tactical_profile_ref": "",
+      "official_lineup_future_source": "official_matchday_lineup_feed_not_ingested",
+      "data_insufficient_reason": [
+        "official_matchday_lineup_not_available",
+        "no_confirmed_lineup_feed_ingested",
+        "formation_is_historical_observation_only"
+      ],
+      "observation_only": true,
+      "no_starting_xi_generated": true,
+      "no_prediction": true,
+      "no_injury_judgment": true,
+      "betting_recommendation": false,
+      "affects_v4": false
+    },
+    {
+      "team": "Mexico",
+      "team_slug": "mexico",
+      "final_26_player_count": 26,
+      "fifa_position_distribution": {
+        "GK": 3,
+        "DF": 7,
+        "MF": 8,
+        "FW": 8
+      },
+      "starting_xi_status": "NOT_AVAILABLE",
+      "starting_xi_source": "NONE",
+      "starting_xi_players": [],
+      "predicted_xi_generated": false,
+      "matchday_lineup_status": "WAIT_OFFICIAL_LINEUP",
+      "formation_status": "HISTORICAL_OBSERVATION_ONLY",
+      "historical_formations_observed": [
+        "NO_DATA"
+      ],
+      "tactical_profile_ref": "data/v3_worldcup/tactical_profile/v3_worldcup_tactical_profile_layer_20260604.json",
+      "official_lineup_future_source": "official_matchday_lineup_feed_not_ingested",
+      "data_insufficient_reason": [
+        "official_matchday_lineup_not_available",
+        "no_confirmed_lineup_feed_ingested",
+        "formation_is_historical_observation_only"
+      ],
+      "observation_only": true,
+      "no_starting_xi_generated": true,
+      "no_prediction": true,
+      "no_injury_judgment": true,
+      "betting_recommendation": false,
+      "affects_v4": false
+    },
+    {
+      "team": "Morocco",
+      "team_slug": "morocco",
+      "final_26_player_count": 26,
+      "fifa_position_distribution": {
+        "GK": 3,
+        "DF": 9,
+        "MF": 9,
+        "FW": 5
+      },
+      "starting_xi_status": "NOT_AVAILABLE",
+      "starting_xi_source": "NONE",
+      "starting_xi_players": [],
+      "predicted_xi_generated": false,
+      "matchday_lineup_status": "WAIT_OFFICIAL_LINEUP",
+      "formation_status": "HISTORICAL_OBSERVATION_ONLY",
+      "historical_formations_observed": [
+        "4-3-3",
+        "5-4-1"
+      ],
+      "tactical_profile_ref": "data/v3_worldcup/tactical_profile/v3_worldcup_tactical_profile_layer_20260604.json",
+      "official_lineup_future_source": "official_matchday_lineup_feed_not_ingested",
+      "data_insufficient_reason": [
+        "official_matchday_lineup_not_available",
+        "no_confirmed_lineup_feed_ingested",
+        "formation_is_historical_observation_only"
+      ],
+      "observation_only": true,
+      "no_starting_xi_generated": true,
+      "no_prediction": true,
+      "no_injury_judgment": true,
+      "betting_recommendation": false,
+      "affects_v4": false
+    },
+    {
+      "team": "Netherlands",
+      "team_slug": "netherlands",
+      "final_26_player_count": 26,
+      "fifa_position_distribution": {
+        "GK": 3,
+        "DF": 8,
+        "MF": 8,
+        "FW": 7
+      },
+      "starting_xi_status": "NOT_AVAILABLE",
+      "starting_xi_source": "NONE",
+      "starting_xi_players": [],
+      "predicted_xi_generated": false,
+      "matchday_lineup_status": "WAIT_OFFICIAL_LINEUP",
+      "formation_status": "HISTORICAL_OBSERVATION_ONLY",
+      "historical_formations_observed": [
+        "3-4-1-2"
+      ],
+      "tactical_profile_ref": "data/v3_worldcup/tactical_profile/v3_worldcup_tactical_profile_layer_20260604.json",
+      "official_lineup_future_source": "official_matchday_lineup_feed_not_ingested",
+      "data_insufficient_reason": [
+        "official_matchday_lineup_not_available",
+        "no_confirmed_lineup_feed_ingested",
+        "formation_is_historical_observation_only"
+      ],
+      "observation_only": true,
+      "no_starting_xi_generated": true,
+      "no_prediction": true,
+      "no_injury_judgment": true,
+      "betting_recommendation": false,
+      "affects_v4": false
+    },
+    {
+      "team": "New Zealand",
+      "team_slug": "new_zealand",
+      "final_26_player_count": 26,
+      "fifa_position_distribution": {
+        "GK": 3,
+        "DF": 9,
+        "MF": 10,
+        "FW": 4
+      },
+      "starting_xi_status": "NOT_AVAILABLE",
+      "starting_xi_source": "NONE",
+      "starting_xi_players": [],
+      "predicted_xi_generated": false,
+      "matchday_lineup_status": "WAIT_OFFICIAL_LINEUP",
+      "formation_status": "HISTORICAL_OBSERVATION_ONLY",
+      "historical_formations_observed": [
+        "NO_DATA"
+      ],
+      "tactical_profile_ref": "data/v3_worldcup/tactical_profile/v3_worldcup_tactical_profile_layer_20260604.json",
+      "official_lineup_future_source": "official_matchday_lineup_feed_not_ingested",
+      "data_insufficient_reason": [
+        "official_matchday_lineup_not_available",
+        "no_confirmed_lineup_feed_ingested",
+        "formation_is_historical_observation_only"
+      ],
+      "observation_only": true,
+      "no_starting_xi_generated": true,
+      "no_prediction": true,
+      "no_injury_judgment": true,
+      "betting_recommendation": false,
+      "affects_v4": false
+    },
+    {
+      "team": "Norway",
+      "team_slug": "norway",
+      "final_26_player_count": 26,
+      "fifa_position_distribution": {
+        "GK": 3,
+        "DF": 8,
+        "MF": 10,
+        "FW": 5
+      },
+      "starting_xi_status": "NOT_AVAILABLE",
+      "starting_xi_source": "NONE",
+      "starting_xi_players": [],
+      "predicted_xi_generated": false,
+      "matchday_lineup_status": "WAIT_OFFICIAL_LINEUP",
+      "formation_status": "HISTORICAL_OBSERVATION_ONLY",
+      "historical_formations_observed": [
+        "NO_DATA"
+      ],
+      "tactical_profile_ref": "data/v3_worldcup/tactical_profile/v3_worldcup_tactical_profile_layer_20260604.json",
+      "official_lineup_future_source": "official_matchday_lineup_feed_not_ingested",
+      "data_insufficient_reason": [
+        "official_matchday_lineup_not_available",
+        "no_confirmed_lineup_feed_ingested",
+        "formation_is_historical_observation_only"
+      ],
+      "observation_only": true,
+      "no_starting_xi_generated": true,
+      "no_prediction": true,
+      "no_injury_judgment": true,
+      "betting_recommendation": false,
+      "affects_v4": false
+    },
+    {
+      "team": "Panama",
+      "team_slug": "panama",
+      "final_26_player_count": 26,
+      "fifa_position_distribution": {
+        "GK": 3,
+        "DF": 11,
+        "MF": 8,
+        "FW": 4
+      },
+      "starting_xi_status": "NOT_AVAILABLE",
+      "starting_xi_source": "NONE",
+      "starting_xi_players": [],
+      "predicted_xi_generated": false,
+      "matchday_lineup_status": "WAIT_OFFICIAL_LINEUP",
+      "formation_status": "HISTORICAL_OBSERVATION_ONLY",
+      "historical_formations_observed": [
+        "4-1-4-1"
+      ],
+      "tactical_profile_ref": "data/v3_worldcup/tactical_profile/v3_worldcup_tactical_profile_layer_20260604.json",
+      "official_lineup_future_source": "official_matchday_lineup_feed_not_ingested",
+      "data_insufficient_reason": [
+        "official_matchday_lineup_not_available",
+        "no_confirmed_lineup_feed_ingested",
+        "formation_is_historical_observation_only"
+      ],
+      "observation_only": true,
+      "no_starting_xi_generated": true,
+      "no_prediction": true,
+      "no_injury_judgment": true,
+      "betting_recommendation": false,
+      "affects_v4": false
+    },
+    {
+      "team": "Paraguay",
+      "team_slug": "paraguay",
+      "final_26_player_count": 26,
+      "fifa_position_distribution": {
+        "GK": 3,
+        "DF": 8,
+        "MF": 9,
+        "FW": 6
+      },
+      "starting_xi_status": "NOT_AVAILABLE",
+      "starting_xi_source": "NONE",
+      "starting_xi_players": [],
+      "predicted_xi_generated": false,
+      "matchday_lineup_status": "WAIT_OFFICIAL_LINEUP",
+      "formation_status": "HISTORICAL_OBSERVATION_ONLY",
+      "historical_formations_observed": [
+        "NO_DATA"
+      ],
+      "tactical_profile_ref": "data/v3_worldcup/tactical_profile/v3_worldcup_tactical_profile_layer_20260604.json",
+      "official_lineup_future_source": "official_matchday_lineup_feed_not_ingested",
+      "data_insufficient_reason": [
+        "official_matchday_lineup_not_available",
+        "no_confirmed_lineup_feed_ingested",
+        "formation_is_historical_observation_only"
+      ],
+      "observation_only": true,
+      "no_starting_xi_generated": true,
+      "no_prediction": true,
+      "no_injury_judgment": true,
+      "betting_recommendation": false,
+      "affects_v4": false
+    },
+    {
+      "team": "Portugal",
+      "team_slug": "portugal",
+      "final_26_player_count": 26,
+      "fifa_position_distribution": {
+        "GK": 3,
+        "DF": 9,
+        "MF": 6,
+        "FW": 8
+      },
+      "starting_xi_status": "NOT_AVAILABLE",
+      "starting_xi_source": "NONE",
+      "starting_xi_players": [],
+      "predicted_xi_generated": false,
+      "matchday_lineup_status": "WAIT_OFFICIAL_LINEUP",
+      "formation_status": "HISTORICAL_OBSERVATION_ONLY",
+      "historical_formations_observed": [
+        "4-4-2",
+        "4-3-3"
+      ],
+      "tactical_profile_ref": "data/v3_worldcup/tactical_profile/v3_worldcup_tactical_profile_layer_20260604.json",
+      "official_lineup_future_source": "official_matchday_lineup_feed_not_ingested",
+      "data_insufficient_reason": [
+        "official_matchday_lineup_not_available",
+        "no_confirmed_lineup_feed_ingested",
+        "formation_is_historical_observation_only"
+      ],
+      "observation_only": true,
+      "no_starting_xi_generated": true,
+      "no_prediction": true,
+      "no_injury_judgment": true,
+      "betting_recommendation": false,
+      "affects_v4": false
+    },
+    {
+      "team": "Qatar",
+      "team_slug": "qatar",
+      "final_26_player_count": 26,
+      "fifa_position_distribution": {
+        "GK": 3,
+        "DF": 9,
+        "MF": 5,
+        "FW": 9
+      },
+      "starting_xi_status": "NOT_AVAILABLE",
+      "starting_xi_source": "NONE",
+      "starting_xi_players": [],
+      "predicted_xi_generated": false,
+      "matchday_lineup_status": "WAIT_OFFICIAL_LINEUP",
+      "formation_status": "HISTORICAL_OBSERVATION_ONLY",
+      "historical_formations_observed": [
+        "5-3-2"
+      ],
+      "tactical_profile_ref": "data/v3_worldcup/tactical_profile/v3_worldcup_tactical_profile_layer_20260604.json",
+      "official_lineup_future_source": "official_matchday_lineup_feed_not_ingested",
+      "data_insufficient_reason": [
+        "official_matchday_lineup_not_available",
+        "no_confirmed_lineup_feed_ingested",
+        "formation_is_historical_observation_only"
+      ],
+      "observation_only": true,
+      "no_starting_xi_generated": true,
+      "no_prediction": true,
+      "no_injury_judgment": true,
+      "betting_recommendation": false,
+      "affects_v4": false
+    },
+    {
+      "team": "Saudi Arabia",
+      "team_slug": "saudi_arabia",
+      "final_26_player_count": 26,
+      "fifa_position_distribution": {
+        "GK": 3,
+        "DF": 10,
+        "MF": 6,
+        "FW": 7
+      },
+      "starting_xi_status": "NOT_AVAILABLE",
+      "starting_xi_source": "NONE",
+      "starting_xi_players": [],
+      "predicted_xi_generated": false,
+      "matchday_lineup_status": "WAIT_OFFICIAL_LINEUP",
+      "formation_status": "HISTORICAL_OBSERVATION_ONLY",
+      "historical_formations_observed": [
+        "4-1-4-1"
+      ],
+      "tactical_profile_ref": "data/v3_worldcup/tactical_profile/v3_worldcup_tactical_profile_layer_20260604.json",
+      "official_lineup_future_source": "official_matchday_lineup_feed_not_ingested",
+      "data_insufficient_reason": [
+        "official_matchday_lineup_not_available",
+        "no_confirmed_lineup_feed_ingested",
+        "formation_is_historical_observation_only"
+      ],
+      "observation_only": true,
+      "no_starting_xi_generated": true,
+      "no_prediction": true,
+      "no_injury_judgment": true,
+      "betting_recommendation": false,
+      "affects_v4": false
+    },
+    {
+      "team": "Scotland",
+      "team_slug": "scotland",
+      "final_26_player_count": 26,
+      "fifa_position_distribution": {
+        "GK": 3,
+        "DF": 10,
+        "MF": 6,
+        "FW": 7
+      },
+      "starting_xi_status": "NOT_AVAILABLE",
+      "starting_xi_source": "NONE",
+      "starting_xi_players": [],
+      "predicted_xi_generated": false,
+      "matchday_lineup_status": "WAIT_OFFICIAL_LINEUP",
+      "formation_status": "HISTORICAL_OBSERVATION_ONLY",
+      "historical_formations_observed": [
+        "NO_DATA"
+      ],
+      "tactical_profile_ref": "data/v3_worldcup/tactical_profile/v3_worldcup_tactical_profile_layer_20260604.json",
+      "official_lineup_future_source": "official_matchday_lineup_feed_not_ingested",
+      "data_insufficient_reason": [
+        "official_matchday_lineup_not_available",
+        "no_confirmed_lineup_feed_ingested",
+        "formation_is_historical_observation_only"
+      ],
+      "observation_only": true,
+      "no_starting_xi_generated": true,
+      "no_prediction": true,
+      "no_injury_judgment": true,
+      "betting_recommendation": false,
+      "affects_v4": false
+    },
+    {
+      "team": "Senegal",
+      "team_slug": "senegal",
+      "final_26_player_count": 26,
+      "fifa_position_distribution": {
+        "GK": 3,
+        "DF": 8,
+        "MF": 7,
+        "FW": 8
+      },
+      "starting_xi_status": "NOT_AVAILABLE",
+      "starting_xi_source": "NONE",
+      "starting_xi_players": [],
+      "predicted_xi_generated": false,
+      "matchday_lineup_status": "WAIT_OFFICIAL_LINEUP",
+      "formation_status": "HISTORICAL_OBSERVATION_ONLY",
+      "historical_formations_observed": [
+        "4-4-2",
+        "4-1-4-1",
+        "4-2-3-1"
+      ],
+      "tactical_profile_ref": "data/v3_worldcup/tactical_profile/v3_worldcup_tactical_profile_layer_20260604.json",
+      "official_lineup_future_source": "official_matchday_lineup_feed_not_ingested",
+      "data_insufficient_reason": [
+        "official_matchday_lineup_not_available",
+        "no_confirmed_lineup_feed_ingested",
+        "formation_is_historical_observation_only"
+      ],
+      "observation_only": true,
+      "no_starting_xi_generated": true,
+      "no_prediction": true,
+      "no_injury_judgment": true,
+      "betting_recommendation": false,
+      "affects_v4": false
+    },
+    {
+      "team": "South Africa",
+      "team_slug": "south_africa",
+      "final_26_player_count": 26,
+      "fifa_position_distribution": {
+        "GK": 3,
+        "DF": 10,
+        "MF": 5,
+        "FW": 8
+      },
+      "starting_xi_status": "NOT_AVAILABLE",
+      "starting_xi_source": "NONE",
+      "starting_xi_players": [],
+      "predicted_xi_generated": false,
+      "matchday_lineup_status": "WAIT_OFFICIAL_LINEUP",
+      "formation_status": "HISTORICAL_OBSERVATION_ONLY",
+      "historical_formations_observed": [
+        "NO_DATA"
+      ],
+      "tactical_profile_ref": "data/v3_worldcup/tactical_profile/v3_worldcup_tactical_profile_layer_20260604.json",
+      "official_lineup_future_source": "official_matchday_lineup_feed_not_ingested",
+      "data_insufficient_reason": [
+        "official_matchday_lineup_not_available",
+        "no_confirmed_lineup_feed_ingested",
+        "formation_is_historical_observation_only"
+      ],
+      "observation_only": true,
+      "no_starting_xi_generated": true,
+      "no_prediction": true,
+      "no_injury_judgment": true,
+      "betting_recommendation": false,
+      "affects_v4": false
+    },
+    {
+      "team": "Spain",
+      "team_slug": "spain",
+      "final_26_player_count": 26,
+      "fifa_position_distribution": {
+        "GK": 3,
+        "DF": 8,
+        "MF": 7,
+        "FW": 8
+      },
+      "starting_xi_status": "NOT_AVAILABLE",
+      "starting_xi_source": "NONE",
+      "starting_xi_players": [],
+      "predicted_xi_generated": false,
+      "matchday_lineup_status": "WAIT_OFFICIAL_LINEUP",
+      "formation_status": "HISTORICAL_OBSERVATION_ONLY",
+      "historical_formations_observed": [
+        "4-3-3"
+      ],
+      "tactical_profile_ref": "data/v3_worldcup/tactical_profile/v3_worldcup_tactical_profile_layer_20260604.json",
+      "official_lineup_future_source": "official_matchday_lineup_feed_not_ingested",
+      "data_insufficient_reason": [
+        "official_matchday_lineup_not_available",
+        "no_confirmed_lineup_feed_ingested",
+        "formation_is_historical_observation_only"
+      ],
+      "observation_only": true,
+      "no_starting_xi_generated": true,
+      "no_prediction": true,
+      "no_injury_judgment": true,
+      "betting_recommendation": false,
+      "affects_v4": false
+    },
+    {
+      "team": "Sweden",
+      "team_slug": "sweden",
+      "final_26_player_count": 26,
+      "fifa_position_distribution": {
+        "GK": 3,
+        "DF": 11,
+        "MF": 7,
+        "FW": 5
+      },
+      "starting_xi_status": "NOT_AVAILABLE",
+      "starting_xi_source": "NONE",
+      "starting_xi_players": [],
+      "predicted_xi_generated": false,
+      "matchday_lineup_status": "WAIT_OFFICIAL_LINEUP",
+      "formation_status": "HISTORICAL_OBSERVATION_ONLY",
+      "historical_formations_observed": [
+        "4-4-2"
+      ],
+      "tactical_profile_ref": "data/v3_worldcup/tactical_profile/v3_worldcup_tactical_profile_layer_20260604.json",
+      "official_lineup_future_source": "official_matchday_lineup_feed_not_ingested",
+      "data_insufficient_reason": [
+        "official_matchday_lineup_not_available",
+        "no_confirmed_lineup_feed_ingested",
+        "formation_is_historical_observation_only"
+      ],
+      "observation_only": true,
+      "no_starting_xi_generated": true,
+      "no_prediction": true,
+      "no_injury_judgment": true,
+      "betting_recommendation": false,
+      "affects_v4": false
+    },
+    {
+      "team": "Switzerland",
+      "team_slug": "switzerland",
+      "final_26_player_count": 26,
+      "fifa_position_distribution": {
+        "GK": 3,
+        "DF": 8,
+        "MF": 8,
+        "FW": 7
+      },
+      "starting_xi_status": "NOT_AVAILABLE",
+      "starting_xi_source": "NONE",
+      "starting_xi_players": [],
+      "predicted_xi_generated": false,
+      "matchday_lineup_status": "WAIT_OFFICIAL_LINEUP",
+      "formation_status": "HISTORICAL_OBSERVATION_ONLY",
+      "historical_formations_observed": [
+        "4-2-3-1",
+        "3-1-4-2"
+      ],
+      "tactical_profile_ref": "data/v3_worldcup/tactical_profile/v3_worldcup_tactical_profile_layer_20260604.json",
+      "official_lineup_future_source": "official_matchday_lineup_feed_not_ingested",
+      "data_insufficient_reason": [
+        "official_matchday_lineup_not_available",
+        "no_confirmed_lineup_feed_ingested",
+        "formation_is_historical_observation_only"
+      ],
+      "observation_only": true,
+      "no_starting_xi_generated": true,
+      "no_prediction": true,
+      "no_injury_judgment": true,
+      "betting_recommendation": false,
+      "affects_v4": false
+    },
+    {
+      "team": "Tunisia",
+      "team_slug": "tunisia",
+      "final_26_player_count": 26,
+      "fifa_position_distribution": {
+        "GK": 3,
+        "DF": 10,
+        "MF": 8,
+        "FW": 5
+      },
+      "starting_xi_status": "NOT_AVAILABLE",
+      "starting_xi_source": "NONE",
+      "starting_xi_players": [],
+      "predicted_xi_generated": false,
+      "matchday_lineup_status": "WAIT_OFFICIAL_LINEUP",
+      "formation_status": "HISTORICAL_OBSERVATION_ONLY",
+      "historical_formations_observed": [
+        "NO_DATA"
+      ],
+      "tactical_profile_ref": "data/v3_worldcup/tactical_profile/v3_worldcup_tactical_profile_layer_20260604.json",
+      "official_lineup_future_source": "official_matchday_lineup_feed_not_ingested",
+      "data_insufficient_reason": [
+        "official_matchday_lineup_not_available",
+        "no_confirmed_lineup_feed_ingested",
+        "formation_is_historical_observation_only"
+      ],
+      "observation_only": true,
+      "no_starting_xi_generated": true,
+      "no_prediction": true,
+      "no_injury_judgment": true,
+      "betting_recommendation": false,
+      "affects_v4": false
+    },
+    {
+      "team": "Türkiye",
+      "team_slug": "turkiye",
+      "final_26_player_count": 26,
+      "fifa_position_distribution": {
+        "GK": 3,
+        "DF": 9,
+        "MF": 5,
+        "FW": 9
+      },
+      "starting_xi_status": "NOT_AVAILABLE",
+      "starting_xi_source": "NONE",
+      "starting_xi_players": [],
+      "predicted_xi_generated": false,
+      "matchday_lineup_status": "WAIT_OFFICIAL_LINEUP",
+      "formation_status": "HISTORICAL_OBSERVATION_ONLY",
+      "historical_formations_observed": [],
+      "tactical_profile_ref": "",
+      "official_lineup_future_source": "official_matchday_lineup_feed_not_ingested",
+      "data_insufficient_reason": [
+        "official_matchday_lineup_not_available",
+        "no_confirmed_lineup_feed_ingested",
+        "formation_is_historical_observation_only"
+      ],
+      "observation_only": true,
+      "no_starting_xi_generated": true,
+      "no_prediction": true,
+      "no_injury_judgment": true,
+      "betting_recommendation": false,
+      "affects_v4": false
+    },
+    {
+      "team": "USA",
+      "team_slug": "usa",
+      "final_26_player_count": 26,
+      "fifa_position_distribution": {
+        "GK": 3,
+        "DF": 10,
+        "MF": 6,
+        "FW": 7
+      },
+      "starting_xi_status": "NOT_AVAILABLE",
+      "starting_xi_source": "NONE",
+      "starting_xi_players": [],
+      "predicted_xi_generated": false,
+      "matchday_lineup_status": "WAIT_OFFICIAL_LINEUP",
+      "formation_status": "HISTORICAL_OBSERVATION_ONLY",
+      "historical_formations_observed": [
+        "NO_DATA"
+      ],
+      "tactical_profile_ref": "data/v3_worldcup/tactical_profile/v3_worldcup_tactical_profile_layer_20260604.json",
+      "official_lineup_future_source": "official_matchday_lineup_feed_not_ingested",
+      "data_insufficient_reason": [
+        "official_matchday_lineup_not_available",
+        "no_confirmed_lineup_feed_ingested",
+        "formation_is_historical_observation_only"
+      ],
+      "observation_only": true,
+      "no_starting_xi_generated": true,
+      "no_prediction": true,
+      "no_injury_judgment": true,
+      "betting_recommendation": false,
+      "affects_v4": false
+    },
+    {
+      "team": "Uruguay",
+      "team_slug": "uruguay",
+      "final_26_player_count": 26,
+      "fifa_position_distribution": {
+        "GK": 3,
+        "DF": 7,
+        "MF": 11,
+        "FW": 5
+      },
+      "starting_xi_status": "NOT_AVAILABLE",
+      "starting_xi_source": "NONE",
+      "starting_xi_players": [],
+      "predicted_xi_generated": false,
+      "matchday_lineup_status": "WAIT_OFFICIAL_LINEUP",
+      "formation_status": "HISTORICAL_OBSERVATION_ONLY",
+      "historical_formations_observed": [
+        "4-3-1-2"
+      ],
+      "tactical_profile_ref": "data/v3_worldcup/tactical_profile/v3_worldcup_tactical_profile_layer_20260604.json",
+      "official_lineup_future_source": "official_matchday_lineup_feed_not_ingested",
+      "data_insufficient_reason": [
+        "official_matchday_lineup_not_available",
+        "no_confirmed_lineup_feed_ingested",
+        "formation_is_historical_observation_only"
+      ],
+      "observation_only": true,
+      "no_starting_xi_generated": true,
+      "no_prediction": true,
+      "no_injury_judgment": true,
+      "betting_recommendation": false,
+      "affects_v4": false
+    },
+    {
+      "team": "Uzbekistan",
+      "team_slug": "uzbekistan",
+      "final_26_player_count": 26,
+      "fifa_position_distribution": {
+        "GK": 3,
+        "DF": 10,
+        "MF": 10,
+        "FW": 3
+      },
+      "starting_xi_status": "NOT_AVAILABLE",
+      "starting_xi_source": "NONE",
+      "starting_xi_players": [],
+      "predicted_xi_generated": false,
+      "matchday_lineup_status": "WAIT_OFFICIAL_LINEUP",
+      "formation_status": "HISTORICAL_OBSERVATION_ONLY",
+      "historical_formations_observed": [
+        "NO_DATA"
+      ],
+      "tactical_profile_ref": "data/v3_worldcup/tactical_profile/v3_worldcup_tactical_profile_layer_20260604.json",
+      "official_lineup_future_source": "official_matchday_lineup_feed_not_ingested",
+      "data_insufficient_reason": [
+        "official_matchday_lineup_not_available",
+        "no_confirmed_lineup_feed_ingested",
+        "formation_is_historical_observation_only"
+      ],
+      "observation_only": true,
+      "no_starting_xi_generated": true,
+      "no_prediction": true,
+      "no_injury_judgment": true,
+      "betting_recommendation": false,
+      "affects_v4": false
+    }
+  ],
+  "safety": {
+    "observation_only": true,
+    "no_starting_xi_generated": true,
+    "no_prediction": true,
+    "no_injury_judgment": true,
+    "betting_recommendation": false,
+    "affects_v4": false
+  }
+}

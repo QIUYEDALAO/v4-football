@@ -1,0 +1,42 @@
+{
+  "schema_name": "v3_wc2026_lineup_readiness_schema",
+  "tournament": "FIFA World Cup 2026",
+  "schema_status": "SCHEMA_READY_WAIT_OFFICIAL_LINEUP",
+  "source_strategy": {
+    "final_26_canonical_source": "data/manual_sources/v3_worldcup/squads/fifa_final_26/processed/v3_wc2026_final_26_players.json",
+    "tactical_profile_source": "data/v3_worldcup/tactical_profile/v3_worldcup_tactical_profile_layer_20260604.json",
+    "historical_formation_source": "data/v3_worldcup/tactical_profile/v3_worldcup_tactical_profile_layer_20260604.json",
+    "official_lineup_future_source": "official_matchday_lineup_feed_not_ingested",
+    "source_trust_level": "OFFICIAL_FINAL_26_PLUS_HISTORICAL_OBSERVATION",
+    "source_status": "FINAL_26_READY_MATCHDAY_LINEUP_NOT_AVAILABLE"
+  },
+  "team_status_schema": {
+    "team": "string",
+    "team_slug": "string",
+    "final_26_player_count": 26,
+    "starting_xi_status": "NOT_AVAILABLE",
+    "starting_xi_source": "NONE",
+    "starting_xi_players": [],
+    "predicted_xi_generated": false,
+    "matchday_lineup_status": "WAIT_OFFICIAL_LINEUP",
+    "formation_status": "HISTORICAL_OBSERVATION_ONLY",
+    "historical_formations_observed": "array[string]",
+    "tactical_profile_ref": "string",
+    "official_lineup_future_source": "official_matchday_lineup_feed_not_ingested",
+    "data_insufficient_reason": "official_matchday_lineup_not_available",
+    "observation_only": true,
+    "no_starting_xi_generated": true,
+    "no_prediction": true,
+    "no_injury_judgment": true,
+    "betting_recommendation": false,
+    "affects_v4": false
+  },
+  "safety": {
+    "observation_only": true,
+    "no_starting_xi_generated": true,
+    "no_prediction": true,
+    "no_injury_judgment": true,
+    "betting_recommendation": false,
+    "affects_v4": false
+  }
+}
