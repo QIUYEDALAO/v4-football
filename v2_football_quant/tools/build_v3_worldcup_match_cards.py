@@ -16,6 +16,7 @@ FIXTURES = ROOT / "data/runtime/v3_worldcup/thestatsapi_cache/20260602/world_cup
 MASTER_INDEX = OUT_DIR / "v3_wc_war_room_master_index.json"
 GAP_RADAR = OUT_DIR / "v3_wc_war_room_gap_radar.json"
 FIXTURE_MAPPING_BRIDGE = OUT_DIR / "v3_wc2026_fixture_mapping_bridge.json"
+VENUE_MAPPING_BRIDGE = OUT_DIR / "v3_wc2026_venue_mapping_bridge.json"
 FINAL26_MANIFEST = ROOT / "data/manual_sources/v3_worldcup/squads/fifa_final_26/processed/v3_wc2026_final_26_pack_manifest.json"
 PROFILE_CARDS = ROOT / "data/manual_sources/v3_worldcup/squads/fifa_final_26/processed/v3_wc2026_final_26_squad_profile_team_cards.json"
 LINEUP_STATUS = ROOT / "data/manual_sources/v3_worldcup/squads/fifa_final_26/processed/v3_wc2026_lineup_readiness_team_status.json"
@@ -156,8 +157,44 @@ def data_gaps(base_gaps: dict[str, Any], venue_mapped: bool, odds_available: boo
     return sorted(set(gaps))
 
 
-def venue_binding(venue: dict[str, Any], bridge_row: dict[str, Any] | None = None, venue_name: str | None = None) -> dict[str, Any]:
+def venue_binding(
+    venue: dict[str, Any],
+    bridge_row: dict[str, Any] | None = None,
+    venue_bridge_row: dict[str, Any] | None = None,
+    venue_name: str | None = None,
+) -> dict[str, Any]:
     bridge_row = bridge_row or {}
+    venue_bridge_row = venue_bridge_row or {}
+    if venue_bridge_row:
+        if venue_bridge_row.get("venue_mapping_status") == "MAPPED":
+            return {
+                "venue_name": venue_bridge_row.get("venue_name"),
+                "venue_slug": venue_bridge_row.get("venue_slug"),
+                "venue_stress_status": "VENUE_STRESS_BOUND",
+                "venue_stress_tags": ["WATCH_ONLY"],
+                "venue_stress_ref": venue_bridge_row.get("venue_stress_ref") or rel(VENUE_STRESS),
+                "venue_mapping_status": "MAPPED",
+                "venue_gap_reason": "",
+                "venue_source_type": venue_bridge_row.get("venue_source_type"),
+                "venue_mapping_confidence": venue_bridge_row.get("venue_mapping_confidence"),
+                "manual_mapping_required": False,
+                "venue_mapping_bridge_ref": f"{rel(VENUE_MAPPING_BRIDGE)}#{venue_bridge_row.get('match_card_id')}",
+                "fixture_mapping_bridge_ref": f"{rel(FIXTURE_MAPPING_BRIDGE)}#{bridge_row.get('match_card_id')}" if bridge_row else None,
+            }
+        return {
+            "venue_name": venue_bridge_row.get("venue_name") or "VENUE_NOT_MAPPED",
+            "venue_slug": venue_bridge_row.get("venue_slug") or "venue_not_mapped",
+            "venue_stress_status": "VENUE_SOURCE_REQUIRED",
+            "venue_stress_tags": ["WATCH_ONLY"],
+            "venue_stress_ref": venue_bridge_row.get("venue_stress_ref") or rel(VENUE_STRESS),
+            "venue_mapping_status": "UNMAPPED",
+            "venue_gap_reason": venue_bridge_row.get("venue_gap_reason") or "VENUE_SOURCE_REQUIRED",
+            "venue_source_type": venue_bridge_row.get("venue_source_type") or "VENUE_SOURCE_REQUIRED",
+            "venue_mapping_confidence": venue_bridge_row.get("venue_mapping_confidence") or "NONE",
+            "manual_mapping_required": True,
+            "venue_mapping_bridge_ref": f"{rel(VENUE_MAPPING_BRIDGE)}#{venue_bridge_row.get('match_card_id')}",
+            "fixture_mapping_bridge_ref": f"{rel(FIXTURE_MAPPING_BRIDGE)}#{bridge_row.get('match_card_id')}" if bridge_row else None,
+        }
     if bridge_row.get("venue_mapping_status") == "UNMAPPED":
         return {
             "venue_name": bridge_row.get("venue_name") or "VENUE_NOT_MAPPED",
@@ -167,6 +204,10 @@ def venue_binding(venue: dict[str, Any], bridge_row: dict[str, Any] | None = Non
             "venue_stress_ref": rel(VENUE_STRESS),
             "venue_mapping_status": "UNMAPPED",
             "venue_gap_reason": ";".join(bridge_row.get("mapping_gap_reason") or ["fixture_sources_do_not_provide_match_venue"]),
+            "venue_source_type": "VENUE_SOURCE_REQUIRED",
+            "venue_mapping_confidence": "NONE",
+            "manual_mapping_required": True,
+            "venue_mapping_bridge_ref": None,
             "fixture_mapping_bridge_ref": f"{rel(FIXTURE_MAPPING_BRIDGE)}#{bridge_row.get('match_card_id')}",
         }
     venues = venue.get("venues") if isinstance(venue.get("venues"), list) else []
@@ -186,6 +227,10 @@ def venue_binding(venue: dict[str, Any], bridge_row: dict[str, Any] | None = Non
             "venue_stress_ref": f"{rel(VENUE_STRESS)}#{slugify(venue_real_name)}",
             "venue_mapping_status": "BOUND",
             "venue_gap_reason": "",
+            "venue_source_type": "LOCAL_FIXTURE_SOURCE",
+            "venue_mapping_confidence": "HIGH_EXACT_VENUE_NAME",
+            "manual_mapping_required": False,
+            "venue_mapping_bridge_ref": None,
             "fixture_mapping_bridge_ref": f"{rel(FIXTURE_MAPPING_BRIDGE)}#{bridge_row.get('match_card_id')}" if bridge_row else None,
         }
     return {
@@ -196,6 +241,10 @@ def venue_binding(venue: dict[str, Any], bridge_row: dict[str, Any] | None = Non
         "venue_stress_ref": rel(VENUE_STRESS),
         "venue_mapping_status": "NOT_MAPPED",
         "venue_gap_reason": "fixture_source_missing_venue_name",
+        "venue_source_type": "VENUE_SOURCE_REQUIRED",
+        "venue_mapping_confidence": "NONE",
+        "manual_mapping_required": True,
+        "venue_mapping_bridge_ref": None,
         "fixture_mapping_bridge_ref": f"{rel(FIXTURE_MAPPING_BRIDGE)}#{bridge_row.get('match_card_id')}" if bridge_row else None,
     }
 
@@ -237,6 +286,7 @@ def build() -> tuple[list[dict[str, Any]], dict[str, Any]]:
     lineups = index_by_team(load_json(LINEUP_STATUS))
     tactical = tactical_index(load_json(TACTICAL_PROFILE))
     bridge = bridge_index(load_json(FIXTURE_MAPPING_BRIDGE))
+    venue_bridge = bridge_index(load_json(VENUE_MAPPING_BRIDGE))
     venue = load_json(VENUE_STRESS)
     wc10 = load_json(WC10_WAR_ROOM)
     odds_live = load_json(ODDS_LIVE_STATUS)
@@ -290,7 +340,8 @@ def build() -> tuple[list[dict[str, Any]], dict[str, Any]]:
         match_id = str(row.get("id") or f"wc2026_match_{idx:03d}")
         group = str(row.get("group_label") or "UNKNOWN")
         bridge_row = bridge.get(match_id, {})
-        venue_bound = venue_binding(venue if isinstance(venue, dict) else {}, bridge_row, row.get("venue"))
+        venue_bridge_row = venue_bridge.get(match_id, {})
+        venue_bound = venue_binding(venue if isinstance(venue, dict) else {}, bridge_row, venue_bridge_row, row.get("venue"))
         odds_bound = odds_binding(
             odds_live if isinstance(odds_live, dict) else {},
             odds_availability if isinstance(odds_availability, dict) else {},
@@ -384,6 +435,7 @@ def build() -> tuple[list[dict[str, Any]], dict[str, Any]]:
         "source_gap_radar": rel(GAP_RADAR),
         "source_wc10_war_room": rel(WC10_WAR_ROOM),
         "source_fixture_mapping_bridge": rel(FIXTURE_MAPPING_BRIDGE),
+        "source_venue_mapping_bridge": rel(VENUE_MAPPING_BRIDGE),
         "match_count": len(cards),
         "teams_covered": len(teams_covered),
         "team_names_covered": sorted(teams_covered),
@@ -401,7 +453,7 @@ def build() -> tuple[list[dict[str, Any]], dict[str, Any]]:
         "global_data_gaps": data_gaps(gap if isinstance(gap, dict) else {}, False, False, False),
         "global_gap_summary": {
             "fixture_mapping": "mapped_by_fixture_mapping_bridge" if bridge else "fixture_mapping_bridge_missing",
-            "venue_binding": "fixture_sources_do_not_provide_match_venue",
+            "venue_binding": "VENUE_SOURCE_REQUIRED" if venue_bridge else "venue_mapping_bridge_missing",
             "odds_binding": "mapped_by_fixture_mapping_bridge",
             "official_lineup": "WAIT_OFFICIAL_LINEUP",
             "native_opening_closing": "not_available_from_current_snapshot",

@@ -109,6 +109,8 @@ def main() -> int:
         add(failures, bool(card.get("home_final_26_profile_ref")) and bool(card.get("away_final_26_profile_ref")), "final_26_profile_ref_missing", match_id)
         add(failures, isinstance(card.get("venue_binding"), dict), "venue_binding_missing", match_id)
         add(failures, isinstance(card.get("odds_binding"), dict), "odds_binding_missing", match_id)
+        add(failures, bool(card.get("venue_binding", {}).get("venue_gap_reason")), "venue_gap_reason_missing", match_id)
+        add(failures, bool(card.get("venue_binding", {}).get("venue_mapping_bridge_ref")), "venue_mapping_bridge_ref_missing", match_id)
         add(failures, card.get("odds_binding", {}).get("no_money_flow_judgment") is True, "no_money_flow_judgment_missing", match_id)
         add(failures, bool(card.get("odds_binding", {}).get("odds_fixture_id")), "odds_fixture_id_missing", match_id)
         add(failures, card.get("home_lineup_status") in {"WAIT_OFFICIAL_LINEUP", "NOT_AVAILABLE"}, "home_lineup_status_unexpected", match_id)

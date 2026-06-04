@@ -93,6 +93,8 @@ def main() -> int:
         if isinstance(venue_binding, dict):
             for key in ["venue_name", "venue_slug", "venue_stress_status", "venue_stress_tags", "venue_stress_ref", "venue_mapping_status", "venue_gap_reason"]:
                 add(failures, key in venue_binding, f"venue_binding_{key}_missing", match_id)
+            add(failures, venue_binding.get("manual_mapping_required") is True, "manual_mapping_required_unexpected", match_id)
+            add(failures, bool(venue_binding.get("venue_mapping_bridge_ref")), "venue_mapping_bridge_ref_missing", match_id)
         if isinstance(odds_binding, dict):
             for key in [
                 "odds_fixture_id",

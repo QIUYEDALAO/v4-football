@@ -1,0 +1,31 @@
+{
+  "pack_name": "V3_WC_MATCH_CARD_PACK_PHASE_4_VENUE_MAPPING_BRIDGE",
+  "generated_at": "2026-06-04T17:05:59.869401+00:00",
+  "current_head": "0ae3546",
+  "match_count": 72,
+  "venue_mapped_count": 0,
+  "venue_unmapped_count": 72,
+  "manual_mapping_required_count": 72,
+  "venue_source_found": false,
+  "venue_sources_checked": [
+    "data/v3_wc2026/group_schedule.json",
+    "data/runtime/v3_worldcup/thestatsapi_cache/20260602/world_cup_2026/matches_2026_all.json",
+    "data/manual_sources/v3_worldcup/war_room/v3_wc2026_fixture_mapping_bridge.json",
+    "data/v3_worldcup/venue_stress/v3_worldcup_venue_stress_20260603.json",
+    "data/runtime/v3_worldcup/venue_stress/v3_worldcup_venue_stress_20260603.json",
+    "/Users/liudehua/.openclaw/workspace/v4-football/reports/v3_wc_venue_stress_pack.csv"
+  ],
+  "venue_stress_venue_count": 16,
+  "conflict_count": 0,
+  "duplicate_mapping_count": 0,
+  "unmapped_reason_distribution": {
+    "VENUE_SOURCE_REQUIRED: no local per-match venue source found": 72
+  },
+  "manual_template": "data/manual_sources/v3_worldcup/war_room/v3_wc2026_venue_mapping_manual_template.csv",
+  "safety": {
+    "observation_only": true,
+    "no_prediction": true,
+    "betting_recommendation": false,
+    "affects_v4": false
+  }
+}

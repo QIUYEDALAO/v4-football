@@ -14,23 +14,27 @@
     "venue_binding": {
       "venue_name": "VENUE_NOT_MAPPED",
       "venue_slug": "venue_not_mapped",
-      "venue_stress_status": "VENUE_LAYER_READY_FIXTURE_VENUE_NOT_MAPPED",
+      "venue_stress_status": "VENUE_SOURCE_REQUIRED",
       "venue_stress_tags": [
         "WATCH_ONLY"
       ],
       "venue_stress_ref": "data/v3_worldcup/venue_stress/v3_worldcup_venue_stress_20260603.json",
       "venue_mapping_status": "UNMAPPED",
-      "venue_gap_reason": "fixture_sources_do_not_provide_match_venue",
+      "venue_gap_reason": "VENUE_SOURCE_REQUIRED: no local per-match venue source found",
+      "venue_source_type": "VENUE_SOURCE_REQUIRED",
+      "venue_mapping_confidence": "NONE",
+      "manual_mapping_required": true,
+      "venue_mapping_bridge_ref": "data/manual_sources/v3_worldcup/war_room/v3_wc2026_venue_mapping_bridge.json#mt_370102627",
       "fixture_mapping_bridge_ref": "data/manual_sources/v3_worldcup/war_room/v3_wc2026_fixture_mapping_bridge.json#mt_370102627"
     },
     "venue_stress_summary": {
-      "status": "VENUE_LAYER_READY_FIXTURE_VENUE_NOT_MAPPED",
+      "status": "VENUE_SOURCE_REQUIRED",
       "source": "data/v3_worldcup/venue_stress/v3_worldcup_venue_stress_20260603.json",
       "venue_count": 16,
       "stress_tags": [
         "WATCH_ONLY"
       ],
-      "observation_note": "fixture_sources_do_not_provide_match_venue"
+      "observation_note": "VENUE_SOURCE_REQUIRED: no local per-match venue source found"
     },
     "home_final_26_profile_ref": "data/manual_sources/v3_worldcup/squads/fifa_final_26/processed/v3_wc2026_final_26_squad_profile_team_cards.json#algeria",
     "away_final_26_profile_ref": "data/manual_sources/v3_worldcup/squads/fifa_final_26/processed/v3_wc2026_final_26_squad_profile_team_cards.json#austria",
@@ -110,23 +114,27 @@
     "venue_binding": {
       "venue_name": "VENUE_NOT_MAPPED",
       "venue_slug": "venue_not_mapped",
-      "venue_stress_status": "VENUE_LAYER_READY_FIXTURE_VENUE_NOT_MAPPED",
+      "venue_stress_status": "VENUE_SOURCE_REQUIRED",
       "venue_stress_tags": [
         "WATCH_ONLY"
       ],
       "venue_stress_ref": "data/v3_worldcup/venue_stress/v3_worldcup_venue_stress_20260603.json",
       "venue_mapping_status": "UNMAPPED",
-      "venue_gap_reason": "fixture_sources_do_not_provide_match_venue",
+      "venue_gap_reason": "VENUE_SOURCE_REQUIRED: no local per-match venue source found",
+      "venue_source_type": "VENUE_SOURCE_REQUIRED",
+      "venue_mapping_confidence": "NONE",
+      "manual_mapping_required": true,
+      "venue_mapping_bridge_ref": "data/manual_sources/v3_worldcup/war_room/v3_wc2026_venue_mapping_bridge.json#mt_028389140",
       "fixture_mapping_bridge_ref": "data/manual_sources/v3_worldcup/war_room/v3_wc2026_fixture_mapping_bridge.json#mt_028389140"
     },
     "venue_stress_summary": {
-      "status": "VENUE_LAYER_READY_FIXTURE_VENUE_NOT_MAPPED",
+      "status": "VENUE_SOURCE_REQUIRED",
       "source": "data/v3_worldcup/venue_stress/v3_worldcup_venue_stress_20260603.json",
       "venue_count": 16,
       "stress_tags": [
         "WATCH_ONLY"
       ],
-      "observation_note": "fixture_sources_do_not_provide_match_venue"
+      "observation_note": "VENUE_SOURCE_REQUIRED: no local per-match venue source found"
     },
     "home_final_26_profile_ref": "data/manual_sources/v3_worldcup/squads/fifa_final_26/processed/v3_wc2026_final_26_squad_profile_team_cards.json#jordan",
     "away_final_26_profile_ref": "data/manual_sources/v3_worldcup/squads/fifa_final_26/processed/v3_wc2026_final_26_squad_profile_team_cards.json#argentina",
@@ -209,23 +217,27 @@
     "venue_binding": {
       "venue_name": "VENUE_NOT_MAPPED",
       "venue_slug": "venue_not_mapped",
-      "venue_stress_status": "VENUE_LAYER_READY_FIXTURE_VENUE_NOT_MAPPED",
+      "venue_stress_status": "VENUE_SOURCE_REQUIRED",
       "venue_stress_tags": [
         "WATCH_ONLY"
       ],
       "venue_stress_ref": "data/v3_worldcup/venue_stress/v3_worldcup_venue_stress_20260603.json",
       "venue_mapping_status": "UNMAPPED",
-      "venue_gap_reason": "fixture_sources_do_not_provide_match_venue",
+      "venue_gap_reason": "VENUE_SOURCE_REQUIRED: no local per-match venue source found",
+      "venue_source_type": "VENUE_SOURCE_REQUIRED",
+      "venue_mapping_confidence": "NONE",
+      "manual_mapping_required": true,
+      "venue_mapping_bridge_ref": "data/manual_sources/v3_worldcup/war_room/v3_wc2026_venue_mapping_bridge.json#mt_370102675",
       "fixture_mapping_bridge_ref": "data/manual_sources/v3_worldcup/war_room/v3_wc2026_fixture_mapping_bridge.json#mt_370102675"
     },
     "venue_stress_summary": {
-      "status": "VENUE_LAYER_READY_FIXTURE_VENUE_NOT_MAPPED",
+      "status": "VENUE_SOURCE_REQUIRED",
       "source": "data/v3_worldcup/venue_stress/v3_worldcup_venue_stress_20260603.json",
       "venue_count": 16,
       "stress_tags": [
         "WATCH_ONLY"
       ],
-      "observation_note": "fixture_sources_do_not_provide_match_venue"
+      "observation_note": "VENUE_SOURCE_REQUIRED: no local per-match venue source found"
     },
     "home_final_26_profile_ref": "data/manual_sources/v3_worldcup/squads/fifa_final_26/processed/v3_wc2026_final_26_squad_profile_team_cards.json#congo_dr",
     "away_final_26_profile_ref": "data/manual_sources/v3_worldcup/squads/fifa_final_26/processed/v3_wc2026_final_26_squad_profile_team_cards.json#uzbekistan",
@@ -305,23 +317,27 @@
     "venue_binding": {
       "venue_name": "VENUE_NOT_MAPPED",
       "venue_slug": "venue_not_mapped",
-      "venue_stress_status": "VENUE_LAYER_READY_FIXTURE_VENUE_NOT_MAPPED",
+      "venue_stress_status": "VENUE_SOURCE_REQUIRED",
       "venue_stress_tags": [
         "WATCH_ONLY"
       ],
       "venue_stress_ref": "data/v3_worldcup/venue_stress/v3_worldcup_venue_stress_20260603.json",
       "venue_mapping_status": "UNMAPPED",
-      "venue_gap_reason": "fixture_sources_do_not_provide_match_venue",
+      "venue_gap_reason": "VENUE_SOURCE_REQUIRED: no local per-match venue source found",
+      "venue_source_type": "VENUE_SOURCE_REQUIRED",
+      "venue_mapping_confidence": "NONE",
+      "manual_mapping_required": true,
+      "venue_mapping_bridge_ref": "data/manual_sources/v3_worldcup/war_room/v3_wc2026_venue_mapping_bridge.json#mt_641915285",
       "fixture_mapping_bridge_ref": "data/manual_sources/v3_worldcup/war_room/v3_wc2026_fixture_mapping_bridge.json#mt_641915285"
     },
     "venue_stress_summary": {
-      "status": "VENUE_LAYER_READY_FIXTURE_VENUE_NOT_MAPPED",
+      "status": "VENUE_SOURCE_REQUIRED",
       "source": "data/v3_worldcup/venue_stress/v3_worldcup_venue_stress_20260603.json",
       "venue_count": 16,
       "stress_tags": [
         "WATCH_ONLY"
       ],
-      "observation_note": "fixture_sources_do_not_provide_match_venue"
+      "observation_note": "VENUE_SOURCE_REQUIRED: no local per-match venue source found"
     },
     "home_final_26_profile_ref": "data/manual_sources/v3_worldcup/squads/fifa_final_26/processed/v3_wc2026_final_26_squad_profile_team_cards.json#colombia",
     "away_final_26_profile_ref": "data/manual_sources/v3_worldcup/squads/fifa_final_26/processed/v3_wc2026_final_26_squad_profile_team_cards.json#portugal",
@@ -405,23 +421,27 @@
     "venue_binding": {
       "venue_name": "VENUE_NOT_MAPPED",
       "venue_slug": "venue_not_mapped",
-      "venue_stress_status": "VENUE_LAYER_READY_FIXTURE_VENUE_NOT_MAPPED",
+      "venue_stress_status": "VENUE_SOURCE_REQUIRED",
       "venue_stress_tags": [
         "WATCH_ONLY"
       ],
       "venue_stress_ref": "data/v3_worldcup/venue_stress/v3_worldcup_venue_stress_20260603.json",
       "venue_mapping_status": "UNMAPPED",
-      "venue_gap_reason": "fixture_sources_do_not_provide_match_venue",
+      "venue_gap_reason": "VENUE_SOURCE_REQUIRED: no local per-match venue source found",
+      "venue_source_type": "VENUE_SOURCE_REQUIRED",
+      "venue_mapping_confidence": "NONE",
+      "manual_mapping_required": true,
+      "venue_mapping_bridge_ref": "data/manual_sources/v3_worldcup/war_room/v3_wc2026_venue_mapping_bridge.json#mt_641915103",
       "fixture_mapping_bridge_ref": "data/manual_sources/v3_worldcup/war_room/v3_wc2026_fixture_mapping_bridge.json#mt_641915103"
     },
     "venue_stress_summary": {
-      "status": "VENUE_LAYER_READY_FIXTURE_VENUE_NOT_MAPPED",
+      "status": "VENUE_SOURCE_REQUIRED",
       "source": "data/v3_worldcup/venue_stress/v3_worldcup_venue_stress_20260603.json",
       "venue_count": 16,
       "stress_tags": [
         "WATCH_ONLY"
       ],
-      "observation_note": "fixture_sources_do_not_provide_match_venue"
+      "observation_note": "VENUE_SOURCE_REQUIRED: no local per-match venue source found"
     },
     "home_final_26_profile_ref": "data/manual_sources/v3_worldcup/squads/fifa_final_26/processed/v3_wc2026_final_26_squad_profile_team_cards.json#panama",
     "away_final_26_profile_ref": "data/manual_sources/v3_worldcup/squads/fifa_final_26/processed/v3_wc2026_final_26_squad_profile_team_cards.json#england",
@@ -503,23 +523,27 @@
     "venue_binding": {
       "venue_name": "VENUE_NOT_MAPPED",
       "venue_slug": "venue_not_mapped",
-      "venue_stress_status": "VENUE_LAYER_READY_FIXTURE_VENUE_NOT_MAPPED",
+      "venue_stress_status": "VENUE_SOURCE_REQUIRED",
       "venue_stress_tags": [
         "WATCH_ONLY"
       ],
       "venue_stress_ref": "data/v3_worldcup/venue_stress/v3_worldcup_venue_stress_20260603.json",
       "venue_mapping_status": "UNMAPPED",
-      "venue_gap_reason": "fixture_sources_do_not_provide_match_venue",
+      "venue_gap_reason": "VENUE_SOURCE_REQUIRED: no local per-match venue source found",
+      "venue_source_type": "VENUE_SOURCE_REQUIRED",
+      "venue_mapping_confidence": "NONE",
+      "manual_mapping_required": true,
+      "venue_mapping_bridge_ref": "data/manual_sources/v3_worldcup/war_room/v3_wc2026_venue_mapping_bridge.json#mt_028389889",
       "fixture_mapping_bridge_ref": "data/manual_sources/v3_worldcup/war_room/v3_wc2026_fixture_mapping_bridge.json#mt_028389889"
     },
     "venue_stress_summary": {
-      "status": "VENUE_LAYER_READY_FIXTURE_VENUE_NOT_MAPPED",
+      "status": "VENUE_SOURCE_REQUIRED",
       "source": "data/v3_worldcup/venue_stress/v3_worldcup_venue_stress_20260603.json",
       "venue_count": 16,
       "stress_tags": [
         "WATCH_ONLY"
       ],
-      "observation_note": "fixture_sources_do_not_provide_match_venue"
+      "observation_note": "VENUE_SOURCE_REQUIRED: no local per-match venue source found"
     },
     "home_final_26_profile_ref": "data/manual_sources/v3_worldcup/squads/fifa_final_26/processed/v3_wc2026_final_26_squad_profile_team_cards.json#croatia",
     "away_final_26_profile_ref": "data/manual_sources/v3_worldcup/squads/fifa_final_26/processed/v3_wc2026_final_26_squad_profile_team_cards.json#ghana",
@@ -602,23 +626,27 @@
     "venue_binding": {
       "venue_name": "VENUE_NOT_MAPPED",
       "venue_slug": "venue_not_mapped",
-      "venue_stress_status": "VENUE_LAYER_READY_FIXTURE_VENUE_NOT_MAPPED",
+      "venue_stress_status": "VENUE_SOURCE_REQUIRED",
       "venue_stress_tags": [
         "WATCH_ONLY"
       ],
       "venue_stress_ref": "data/v3_worldcup/venue_stress/v3_worldcup_venue_stress_20260603.json",
       "venue_mapping_status": "UNMAPPED",
-      "venue_gap_reason": "fixture_sources_do_not_provide_match_venue",
+      "venue_gap_reason": "VENUE_SOURCE_REQUIRED: no local per-match venue source found",
+      "venue_source_type": "VENUE_SOURCE_REQUIRED",
+      "venue_mapping_confidence": "NONE",
+      "manual_mapping_required": true,
+      "venue_mapping_bridge_ref": "data/manual_sources/v3_worldcup/war_room/v3_wc2026_venue_mapping_bridge.json#mt_894046969",
       "fixture_mapping_bridge_ref": "data/manual_sources/v3_worldcup/war_room/v3_wc2026_fixture_mapping_bridge.json#mt_894046969"
     },
     "venue_stress_summary": {
-      "status": "VENUE_LAYER_READY_FIXTURE_VENUE_NOT_MAPPED",
+      "status": "VENUE_SOURCE_REQUIRED",
       "source": "data/v3_worldcup/venue_stress/v3_worldcup_venue_stress_20260603.json",
       "venue_count": 16,
       "stress_tags": [
         "WATCH_ONLY"
       ],
-      "observation_note": "fixture_sources_do_not_provide_match_venue"
+      "observation_note": "VENUE_SOURCE_REQUIRED: no local per-match venue source found"
     },
     "home_final_26_profile_ref": "data/manual_sources/v3_worldcup/squads/fifa_final_26/processed/v3_wc2026_final_26_squad_profile_team_cards.json#egypt",
     "away_final_26_profile_ref": "data/manual_sources/v3_worldcup/squads/fifa_final_26/processed/v3_wc2026_final_26_squad_profile_team_cards.json#ir_iran",
@@ -698,23 +726,27 @@
     "venue_binding": {
       "venue_name": "VENUE_NOT_MAPPED",
       "venue_slug": "venue_not_mapped",
-      "venue_stress_status": "VENUE_LAYER_READY_FIXTURE_VENUE_NOT_MAPPED",
+      "venue_stress_status": "VENUE_SOURCE_REQUIRED",
       "venue_stress_tags": [
         "WATCH_ONLY"
       ],
       "venue_stress_ref": "data/v3_worldcup/venue_stress/v3_worldcup_venue_stress_20260603.json",
       "venue_mapping_status": "UNMAPPED",
-      "venue_gap_reason": "fixture_sources_do_not_provide_match_venue",
+      "venue_gap_reason": "VENUE_SOURCE_REQUIRED: no local per-match venue source found",
+      "venue_source_type": "VENUE_SOURCE_REQUIRED",
+      "venue_mapping_confidence": "NONE",
+      "manual_mapping_required": true,
+      "venue_mapping_bridge_ref": "data/manual_sources/v3_worldcup/war_room/v3_wc2026_venue_mapping_bridge.json#mt_986264824",
       "fixture_mapping_bridge_ref": "data/manual_sources/v3_worldcup/war_room/v3_wc2026_fixture_mapping_bridge.json#mt_986264824"
     },
     "venue_stress_summary": {
-      "status": "VENUE_LAYER_READY_FIXTURE_VENUE_NOT_MAPPED",
+      "status": "VENUE_SOURCE_REQUIRED",
       "source": "data/v3_worldcup/venue_stress/v3_worldcup_venue_stress_20260603.json",
       "venue_count": 16,
       "stress_tags": [
         "WATCH_ONLY"
       ],
-      "observation_note": "fixture_sources_do_not_provide_match_venue"
+      "observation_note": "VENUE_SOURCE_REQUIRED: no local per-match venue source found"
     },
     "home_final_26_profile_ref": "data/manual_sources/v3_worldcup/squads/fifa_final_26/processed/v3_wc2026_final_26_squad_profile_team_cards.json#new_zealand",
     "away_final_26_profile_ref": "data/manual_sources/v3_worldcup/squads/fifa_final_26/processed/v3_wc2026_final_26_squad_profile_team_cards.json#belgium",
@@ -797,23 +829,27 @@
     "venue_binding": {
       "venue_name": "VENUE_NOT_MAPPED",
       "venue_slug": "venue_not_mapped",
-      "venue_stress_status": "VENUE_LAYER_READY_FIXTURE_VENUE_NOT_MAPPED",
+      "venue_stress_status": "VENUE_SOURCE_REQUIRED",
       "venue_stress_tags": [
         "WATCH_ONLY"
       ],
       "venue_stress_ref": "data/v3_worldcup/venue_stress/v3_worldcup_venue_stress_20260603.json",
       "venue_mapping_status": "UNMAPPED",
-      "venue_gap_reason": "fixture_sources_do_not_provide_match_venue",
+      "venue_gap_reason": "VENUE_SOURCE_REQUIRED: no local per-match venue source found",
+      "venue_source_type": "VENUE_SOURCE_REQUIRED",
+      "venue_mapping_confidence": "NONE",
+      "manual_mapping_required": true,
+      "venue_mapping_bridge_ref": "data/manual_sources/v3_worldcup/war_room/v3_wc2026_venue_mapping_bridge.json#mt_209798011",
       "fixture_mapping_bridge_ref": "data/manual_sources/v3_worldcup/war_room/v3_wc2026_fixture_mapping_bridge.json#mt_209798011"
     },
     "venue_stress_summary": {
-      "status": "VENUE_LAYER_READY_FIXTURE_VENUE_NOT_MAPPED",
+      "status": "VENUE_SOURCE_REQUIRED",
       "source": "data/v3_worldcup/venue_stress/v3_worldcup_venue_stress_20260603.json",
       "venue_count": 16,
       "stress_tags": [
         "WATCH_ONLY"
       ],
-      "observation_note": "fixture_sources_do_not_provide_match_venue"
+      "observation_note": "VENUE_SOURCE_REQUIRED: no local per-match venue source found"
     },
     "home_final_26_profile_ref": "data/manual_sources/v3_worldcup/squads/fifa_final_26/processed/v3_wc2026_final_26_squad_profile_team_cards.json#uruguay",
     "away_final_26_profile_ref": "data/manual_sources/v3_worldcup/squads/fifa_final_26/processed/v3_wc2026_final_26_squad_profile_team_cards.json#spain",
@@ -893,23 +929,27 @@
     "venue_binding": {
       "venue_name": "VENUE_NOT_MAPPED",
       "venue_slug": "venue_not_mapped",
-      "venue_stress_status": "VENUE_LAYER_READY_FIXTURE_VENUE_NOT_MAPPED",
+      "venue_stress_status": "VENUE_SOURCE_REQUIRED",
       "venue_stress_tags": [
         "WATCH_ONLY"
       ],
       "venue_stress_ref": "data/v3_worldcup/venue_stress/v3_worldcup_venue_stress_20260603.json",
       "venue_mapping_status": "UNMAPPED",
-      "venue_gap_reason": "fixture_sources_do_not_provide_match_venue",
+      "venue_gap_reason": "VENUE_SOURCE_REQUIRED: no local per-match venue source found",
+      "venue_source_type": "VENUE_SOURCE_REQUIRED",
+      "venue_mapping_confidence": "NONE",
+      "manual_mapping_required": true,
+      "venue_mapping_bridge_ref": "data/manual_sources/v3_worldcup/war_room/v3_wc2026_venue_mapping_bridge.json#mt_517473114",
       "fixture_mapping_bridge_ref": "data/manual_sources/v3_worldcup/war_room/v3_wc2026_fixture_mapping_bridge.json#mt_517473114"
     },
     "venue_stress_summary": {
-      "status": "VENUE_LAYER_READY_FIXTURE_VENUE_NOT_MAPPED",
+      "status": "VENUE_SOURCE_REQUIRED",
       "source": "data/v3_worldcup/venue_stress/v3_worldcup_venue_stress_20260603.json",
       "venue_count": 16,
       "stress_tags": [
         "WATCH_ONLY"
       ],
-      "observation_note": "fixture_sources_do_not_provide_match_venue"
+      "observation_note": "VENUE_SOURCE_REQUIRED: no local per-match venue source found"
     },
     "home_final_26_profile_ref": "data/manual_sources/v3_worldcup/squads/fifa_final_26/processed/v3_wc2026_final_26_squad_profile_team_cards.json#cabo_verde",
     "away_final_26_profile_ref": "data/manual_sources/v3_worldcup/squads/fifa_final_26/processed/v3_wc2026_final_26_squad_profile_team_cards.json#saudi_arabia",
@@ -989,23 +1029,27 @@
     "venue_binding": {
       "venue_name": "VENUE_NOT_MAPPED",
       "venue_slug": "venue_not_mapped",
-      "venue_stress_status": "VENUE_LAYER_READY_FIXTURE_VENUE_NOT_MAPPED",
+      "venue_stress_status": "VENUE_SOURCE_REQUIRED",
       "venue_stress_tags": [
         "WATCH_ONLY"
       ],
       "venue_stress_ref": "data/v3_worldcup/venue_stress/v3_worldcup_venue_stress_20260603.json",
       "venue_mapping_status": "UNMAPPED",
-      "venue_gap_reason": "fixture_sources_do_not_provide_match_venue",
+      "venue_gap_reason": "VENUE_SOURCE_REQUIRED: no local per-match venue source found",
+      "venue_source_type": "VENUE_SOURCE_REQUIRED",
+      "venue_mapping_confidence": "NONE",
+      "manual_mapping_required": true,
+      "venue_mapping_bridge_ref": "data/manual_sources/v3_worldcup/war_room/v3_wc2026_venue_mapping_bridge.json#mt_209798033",
       "fixture_mapping_bridge_ref": "data/manual_sources/v3_worldcup/war_room/v3_wc2026_fixture_mapping_bridge.json#mt_209798033"
     },
     "venue_stress_summary": {
-      "status": "VENUE_LAYER_READY_FIXTURE_VENUE_NOT_MAPPED",
+      "status": "VENUE_SOURCE_REQUIRED",
       "source": "data/v3_worldcup/venue_stress/v3_worldcup_venue_stress_20260603.json",
       "venue_count": 16,
       "stress_tags": [
         "WATCH_ONLY"
       ],
-      "observation_note": "fixture_sources_do_not_provide_match_venue"
+      "observation_note": "VENUE_SOURCE_REQUIRED: no local per-match venue source found"
     },
     "home_final_26_profile_ref": "data/manual_sources/v3_worldcup/squads/fifa_final_26/processed/v3_wc2026_final_26_squad_profile_team_cards.json#senegal",
     "away_final_26_profile_ref": "data/manual_sources/v3_worldcup/squads/fifa_final_26/processed/v3_wc2026_final_26_squad_profile_team_cards.json#iraq",
@@ -1088,23 +1132,27 @@
     "venue_binding": {
       "venue_name": "VENUE_NOT_MAPPED",
       "venue_slug": "venue_not_mapped",
-      "venue_stress_status": "VENUE_LAYER_READY_FIXTURE_VENUE_NOT_MAPPED",
+      "venue_stress_status": "VENUE_SOURCE_REQUIRED",
       "venue_stress_tags": [
         "WATCH_ONLY"
       ],
       "venue_stress_ref": "data/v3_worldcup/venue_stress/v3_worldcup_venue_stress_20260603.json",
       "venue_mapping_status": "UNMAPPED",
-      "venue_gap_reason": "fixture_sources_do_not_provide_match_venue",
+      "venue_gap_reason": "VENUE_SOURCE_REQUIRED: no local per-match venue source found",
+      "venue_source_type": "VENUE_SOURCE_REQUIRED",
+      "venue_mapping_confidence": "NONE",
+      "manual_mapping_required": true,
+      "venue_mapping_bridge_ref": "data/manual_sources/v3_worldcup/war_room/v3_wc2026_venue_mapping_bridge.json#mt_370102505",
       "fixture_mapping_bridge_ref": "data/manual_sources/v3_worldcup/war_room/v3_wc2026_fixture_mapping_bridge.json#mt_370102505"
     },
     "venue_stress_summary": {
-      "status": "VENUE_LAYER_READY_FIXTURE_VENUE_NOT_MAPPED",
+      "status": "VENUE_SOURCE_REQUIRED",
       "source": "data/v3_worldcup/venue_stress/v3_worldcup_venue_stress_20260603.json",
       "venue_count": 16,
       "stress_tags": [
         "WATCH_ONLY"
       ],
-      "observation_note": "fixture_sources_do_not_provide_match_venue"
+      "observation_note": "VENUE_SOURCE_REQUIRED: no local per-match venue source found"
     },
     "home_final_26_profile_ref": "data/manual_sources/v3_worldcup/squads/fifa_final_26/processed/v3_wc2026_final_26_squad_profile_team_cards.json#norway",
     "away_final_26_profile_ref": "data/manual_sources/v3_worldcup/squads/fifa_final_26/processed/v3_wc2026_final_26_squad_profile_team_cards.json#france",
@@ -1186,23 +1234,27 @@
     "venue_binding": {
       "venue_name": "VENUE_NOT_MAPPED",
       "venue_slug": "venue_not_mapped",
-      "venue_stress_status": "VENUE_LAYER_READY_FIXTURE_VENUE_NOT_MAPPED",
+      "venue_stress_status": "VENUE_SOURCE_REQUIRED",
       "venue_stress_tags": [
         "WATCH_ONLY"
       ],
       "venue_stress_ref": "data/v3_worldcup/venue_stress/v3_worldcup_venue_stress_20260603.json",
       "venue_mapping_status": "UNMAPPED",
-      "venue_gap_reason": "fixture_sources_do_not_provide_match_venue",
+      "venue_gap_reason": "VENUE_SOURCE_REQUIRED: no local per-match venue source found",
+      "venue_source_type": "VENUE_SOURCE_REQUIRED",
+      "venue_mapping_confidence": "NONE",
+      "manual_mapping_required": true,
+      "venue_mapping_bridge_ref": "data/manual_sources/v3_worldcup/war_room/v3_wc2026_venue_mapping_bridge.json#mt_209798660",
       "fixture_mapping_bridge_ref": "data/manual_sources/v3_worldcup/war_room/v3_wc2026_fixture_mapping_bridge.json#mt_209798660"
     },
     "venue_stress_summary": {
-      "status": "VENUE_LAYER_READY_FIXTURE_VENUE_NOT_MAPPED",
+      "status": "VENUE_SOURCE_REQUIRED",
       "source": "data/v3_worldcup/venue_stress/v3_worldcup_venue_stress_20260603.json",
       "venue_count": 16,
       "stress_tags": [
         "WATCH_ONLY"
       ],
-      "observation_note": "fixture_sources_do_not_provide_match_venue"
+      "observation_note": "VENUE_SOURCE_REQUIRED: no local per-match venue source found"
     },
     "home_final_26_profile_ref": "data/manual_sources/v3_worldcup/squads/fifa_final_26/processed/v3_wc2026_final_26_squad_profile_team_cards.json#paraguay",
     "away_final_26_profile_ref": "data/manual_sources/v3_worldcup/squads/fifa_final_26/processed/v3_wc2026_final_26_squad_profile_team_cards.json#australia",
@@ -1284,23 +1336,27 @@
     "venue_binding": {
       "venue_name": "VENUE_NOT_MAPPED",
       "venue_slug": "venue_not_mapped",
-      "venue_stress_status": "VENUE_LAYER_READY_FIXTURE_VENUE_NOT_MAPPED",
+      "venue_stress_status": "VENUE_SOURCE_REQUIRED",
       "venue_stress_tags": [
         "WATCH_ONLY"
       ],
       "venue_stress_ref": "data/v3_worldcup/venue_stress/v3_worldcup_venue_stress_20260603.json",
       "venue_mapping_status": "UNMAPPED",
-      "venue_gap_reason": "fixture_sources_do_not_provide_match_venue",
+      "venue_gap_reason": "VENUE_SOURCE_REQUIRED: no local per-match venue source found",
+      "venue_source_type": "VENUE_SOURCE_REQUIRED",
+      "venue_mapping_confidence": "NONE",
+      "manual_mapping_required": true,
+      "venue_mapping_bridge_ref": "data/manual_sources/v3_worldcup/war_room/v3_wc2026_venue_mapping_bridge.json#mt_370102873",
       "fixture_mapping_bridge_ref": "data/manual_sources/v3_worldcup/war_room/v3_wc2026_fixture_mapping_bridge.json#mt_370102873"
     },
     "venue_stress_summary": {
-      "status": "VENUE_LAYER_READY_FIXTURE_VENUE_NOT_MAPPED",
+      "status": "VENUE_SOURCE_REQUIRED",
       "source": "data/v3_worldcup/venue_stress/v3_worldcup_venue_stress_20260603.json",
       "venue_count": 16,
       "stress_tags": [
         "WATCH_ONLY"
       ],
-      "observation_note": "fixture_sources_do_not_provide_match_venue"
+      "observation_note": "VENUE_SOURCE_REQUIRED: no local per-match venue source found"
     },
     "home_final_26_profile_ref": "data/manual_sources/v3_worldcup/squads/fifa_final_26/processed/v3_wc2026_final_26_squad_profile_team_cards.json#turkiye",
     "away_final_26_profile_ref": "data/manual_sources/v3_worldcup/squads/fifa_final_26/processed/v3_wc2026_final_26_squad_profile_team_cards.json#usa",
@@ -1380,23 +1436,27 @@
     "venue_binding": {
       "venue_name": "VENUE_NOT_MAPPED",
       "venue_slug": "venue_not_mapped",
-      "venue_stress_status": "VENUE_LAYER_READY_FIXTURE_VENUE_NOT_MAPPED",
+      "venue_stress_status": "VENUE_SOURCE_REQUIRED",
       "venue_stress_tags": [
         "WATCH_ONLY"
       ],
       "venue_stress_ref": "data/v3_worldcup/venue_stress/v3_worldcup_venue_stress_20260603.json",
       "venue_mapping_status": "UNMAPPED",
-      "venue_gap_reason": "fixture_sources_do_not_provide_match_venue",
+      "venue_gap_reason": "VENUE_SOURCE_REQUIRED: no local per-match venue source found",
+      "venue_source_type": "VENUE_SOURCE_REQUIRED",
+      "venue_mapping_confidence": "NONE",
+      "manual_mapping_required": true,
+      "venue_mapping_bridge_ref": "data/manual_sources/v3_worldcup/war_room/v3_wc2026_venue_mapping_bridge.json#mt_517473422",
       "fixture_mapping_bridge_ref": "data/manual_sources/v3_worldcup/war_room/v3_wc2026_fixture_mapping_bridge.json#mt_517473422"
     },
     "venue_stress_summary": {
-      "status": "VENUE_LAYER_READY_FIXTURE_VENUE_NOT_MAPPED",
+      "status": "VENUE_SOURCE_REQUIRED",
       "source": "data/v3_worldcup/venue_stress/v3_worldcup_venue_stress_20260603.json",
       "venue_count": 16,
       "stress_tags": [
         "WATCH_ONLY"
       ],
-      "observation_note": "fixture_sources_do_not_provide_match_venue"
+      "observation_note": "VENUE_SOURCE_REQUIRED: no local per-match venue source found"
     },
     "home_final_26_profile_ref": "data/manual_sources/v3_worldcup/squads/fifa_final_26/processed/v3_wc2026_final_26_squad_profile_team_cards.json#tunisia",
     "away_final_26_profile_ref": "data/manual_sources/v3_worldcup/squads/fifa_final_26/processed/v3_wc2026_final_26_squad_profile_team_cards.json#netherlands",
@@ -1476,23 +1536,27 @@
     "venue_binding": {
       "venue_name": "VENUE_NOT_MAPPED",
       "venue_slug": "venue_not_mapped",
-      "venue_stress_status": "VENUE_LAYER_READY_FIXTURE_VENUE_NOT_MAPPED",
+      "venue_stress_status": "VENUE_SOURCE_REQUIRED",
       "venue_stress_tags": [
         "WATCH_ONLY"
       ],
       "venue_stress_ref": "data/v3_worldcup/venue_stress/v3_worldcup_venue_stress_20260603.json",
       "venue_mapping_status": "UNMAPPED",
-      "venue_gap_reason": "fixture_sources_do_not_provide_match_venue",
+      "venue_gap_reason": "VENUE_SOURCE_REQUIRED: no local per-match venue source found",
+      "venue_source_type": "VENUE_SOURCE_REQUIRED",
+      "venue_mapping_confidence": "NONE",
+      "manual_mapping_required": true,
+      "venue_mapping_bridge_ref": "data/manual_sources/v3_worldcup/war_room/v3_wc2026_venue_mapping_bridge.json#mt_986264218",
       "fixture_mapping_bridge_ref": "data/manual_sources/v3_worldcup/war_room/v3_wc2026_fixture_mapping_bridge.json#mt_986264218"
     },
     "venue_stress_summary": {
-      "status": "VENUE_LAYER_READY_FIXTURE_VENUE_NOT_MAPPED",
+      "status": "VENUE_SOURCE_REQUIRED",
       "source": "data/v3_worldcup/venue_stress/v3_worldcup_venue_stress_20260603.json",
       "venue_count": 16,
       "stress_tags": [
         "WATCH_ONLY"
       ],
-      "observation_note": "fixture_sources_do_not_provide_match_venue"
+      "observation_note": "VENUE_SOURCE_REQUIRED: no local per-match venue source found"
     },
     "home_final_26_profile_ref": "data/manual_sources/v3_worldcup/squads/fifa_final_26/processed/v3_wc2026_final_26_squad_profile_team_cards.json#japan",
     "away_final_26_profile_ref": "data/manual_sources/v3_worldcup/squads/fifa_final_26/processed/v3_wc2026_final_26_squad_profile_team_cards.json#sweden",
@@ -1574,23 +1638,27 @@
     "venue_binding": {
       "venue_name": "VENUE_NOT_MAPPED",
       "venue_slug": "venue_not_mapped",
-      "venue_stress_status": "VENUE_LAYER_READY_FIXTURE_VENUE_NOT_MAPPED",
+      "venue_stress_status": "VENUE_SOURCE_REQUIRED",
       "venue_stress_tags": [
         "WATCH_ONLY"
       ],
       "venue_stress_ref": "data/v3_worldcup/venue_stress/v3_worldcup_venue_stress_20260603.json",
       "venue_mapping_status": "UNMAPPED",
-      "venue_gap_reason": "fixture_sources_do_not_provide_match_venue",
+      "venue_gap_reason": "VENUE_SOURCE_REQUIRED: no local per-match venue source found",
+      "venue_source_type": "VENUE_SOURCE_REQUIRED",
+      "venue_mapping_confidence": "NONE",
+      "manual_mapping_required": true,
+      "venue_mapping_bridge_ref": "data/manual_sources/v3_worldcup/war_room/v3_wc2026_venue_mapping_bridge.json#mt_894046563",
       "fixture_mapping_bridge_ref": "data/manual_sources/v3_worldcup/war_room/v3_wc2026_fixture_mapping_bridge.json#mt_894046563"
     },
     "venue_stress_summary": {
-      "status": "VENUE_LAYER_READY_FIXTURE_VENUE_NOT_MAPPED",
+      "status": "VENUE_SOURCE_REQUIRED",
       "source": "data/v3_worldcup/venue_stress/v3_worldcup_venue_stress_20260603.json",
       "venue_count": 16,
       "stress_tags": [
         "WATCH_ONLY"
       ],
-      "observation_note": "fixture_sources_do_not_provide_match_venue"
+      "observation_note": "VENUE_SOURCE_REQUIRED: no local per-match venue source found"
     },
     "home_final_26_profile_ref": "data/manual_sources/v3_worldcup/squads/fifa_final_26/processed/v3_wc2026_final_26_squad_profile_team_cards.json#curacao",
     "away_final_26_profile_ref": "data/manual_sources/v3_worldcup/squads/fifa_final_26/processed/v3_wc2026_final_26_squad_profile_team_cards.json#cote_divoire",
@@ -1670,23 +1738,27 @@
     "venue_binding": {
       "venue_name": "VENUE_NOT_MAPPED",
       "venue_slug": "venue_not_mapped",
-      "venue_stress_status": "VENUE_LAYER_READY_FIXTURE_VENUE_NOT_MAPPED",
+      "venue_stress_status": "VENUE_SOURCE_REQUIRED",
       "venue_stress_tags": [
         "WATCH_ONLY"
       ],
       "venue_stress_ref": "data/v3_worldcup/venue_stress/v3_worldcup_venue_stress_20260603.json",
       "venue_mapping_status": "UNMAPPED",
-      "venue_gap_reason": "fixture_sources_do_not_provide_match_venue",
+      "venue_gap_reason": "VENUE_SOURCE_REQUIRED: no local per-match venue source found",
+      "venue_source_type": "VENUE_SOURCE_REQUIRED",
+      "venue_mapping_confidence": "NONE",
+      "manual_mapping_required": true,
+      "venue_mapping_bridge_ref": "data/manual_sources/v3_worldcup/war_room/v3_wc2026_venue_mapping_bridge.json#mt_370102820",
       "fixture_mapping_bridge_ref": "data/manual_sources/v3_worldcup/war_room/v3_wc2026_fixture_mapping_bridge.json#mt_370102820"
     },
     "venue_stress_summary": {
-      "status": "VENUE_LAYER_READY_FIXTURE_VENUE_NOT_MAPPED",
+      "status": "VENUE_SOURCE_REQUIRED",
       "source": "data/v3_worldcup/venue_stress/v3_worldcup_venue_stress_20260603.json",
       "venue_count": 16,
       "stress_tags": [
         "WATCH_ONLY"
       ],
-      "observation_note": "fixture_sources_do_not_provide_match_venue"
+      "observation_note": "VENUE_SOURCE_REQUIRED: no local per-match venue source found"
     },
     "home_final_26_profile_ref": "data/manual_sources/v3_worldcup/squads/fifa_final_26/processed/v3_wc2026_final_26_squad_profile_team_cards.json#ecuador",
     "away_final_26_profile_ref": "data/manual_sources/v3_worldcup/squads/fifa_final_26/processed/v3_wc2026_final_26_squad_profile_team_cards.json#germany",
@@ -1768,23 +1840,27 @@
     "venue_binding": {
       "venue_name": "VENUE_NOT_MAPPED",
       "venue_slug": "venue_not_mapped",
-      "venue_stress_status": "VENUE_LAYER_READY_FIXTURE_VENUE_NOT_MAPPED",
+      "venue_stress_status": "VENUE_SOURCE_REQUIRED",
       "venue_stress_tags": [
         "WATCH_ONLY"
       ],
       "venue_stress_ref": "data/v3_worldcup/venue_stress/v3_worldcup_venue_stress_20260603.json",
       "venue_mapping_status": "UNMAPPED",
-      "venue_gap_reason": "fixture_sources_do_not_provide_match_venue",
+      "venue_gap_reason": "VENUE_SOURCE_REQUIRED: no local per-match venue source found",
+      "venue_source_type": "VENUE_SOURCE_REQUIRED",
+      "venue_mapping_confidence": "NONE",
+      "manual_mapping_required": true,
+      "venue_mapping_bridge_ref": "data/manual_sources/v3_worldcup/war_room/v3_wc2026_venue_mapping_bridge.json#mt_028389197",
       "fixture_mapping_bridge_ref": "data/manual_sources/v3_worldcup/war_room/v3_wc2026_fixture_mapping_bridge.json#mt_028389197"
     },
     "venue_stress_summary": {
-      "status": "VENUE_LAYER_READY_FIXTURE_VENUE_NOT_MAPPED",
+      "status": "VENUE_SOURCE_REQUIRED",
       "source": "data/v3_worldcup/venue_stress/v3_worldcup_venue_stress_20260603.json",
       "venue_count": 16,
       "stress_tags": [
         "WATCH_ONLY"
       ],
-      "observation_note": "fixture_sources_do_not_provide_match_venue"
+      "observation_note": "VENUE_SOURCE_REQUIRED: no local per-match venue source found"
     },
     "home_final_26_profile_ref": "data/manual_sources/v3_worldcup/squads/fifa_final_26/processed/v3_wc2026_final_26_squad_profile_team_cards.json#south_africa",
     "away_final_26_profile_ref": "data/manual_sources/v3_worldcup/squads/fifa_final_26/processed/v3_wc2026_final_26_squad_profile_team_cards.json#korea_republic",
@@ -1864,23 +1940,27 @@
     "venue_binding": {
       "venue_name": "VENUE_NOT_MAPPED",
       "venue_slug": "venue_not_mapped",
-      "venue_stress_status": "VENUE_LAYER_READY_FIXTURE_VENUE_NOT_MAPPED",
+      "venue_stress_status": "VENUE_SOURCE_REQUIRED",
       "venue_stress_tags": [
         "WATCH_ONLY"
       ],
       "venue_stress_ref": "data/v3_worldcup/venue_stress/v3_worldcup_venue_stress_20260603.json",
       "venue_mapping_status": "UNMAPPED",
-      "venue_gap_reason": "fixture_sources_do_not_provide_match_venue",
+      "venue_gap_reason": "VENUE_SOURCE_REQUIRED: no local per-match venue source found",
+      "venue_source_type": "VENUE_SOURCE_REQUIRED",
+      "venue_mapping_confidence": "NONE",
+      "manual_mapping_required": true,
+      "venue_mapping_bridge_ref": "data/manual_sources/v3_worldcup/war_room/v3_wc2026_venue_mapping_bridge.json#mt_986264714",
       "fixture_mapping_bridge_ref": "data/manual_sources/v3_worldcup/war_room/v3_wc2026_fixture_mapping_bridge.json#mt_986264714"
     },
     "venue_stress_summary": {
-      "status": "VENUE_LAYER_READY_FIXTURE_VENUE_NOT_MAPPED",
+      "status": "VENUE_SOURCE_REQUIRED",
       "source": "data/v3_worldcup/venue_stress/v3_worldcup_venue_stress_20260603.json",
       "venue_count": 16,
       "stress_tags": [
         "WATCH_ONLY"
       ],
-      "observation_note": "fixture_sources_do_not_provide_match_venue"
+      "observation_note": "VENUE_SOURCE_REQUIRED: no local per-match venue source found"
     },
     "home_final_26_profile_ref": "data/manual_sources/v3_worldcup/squads/fifa_final_26/processed/v3_wc2026_final_26_squad_profile_team_cards.json#czechia",
     "away_final_26_profile_ref": "data/manual_sources/v3_worldcup/squads/fifa_final_26/processed/v3_wc2026_final_26_squad_profile_team_cards.json#mexico",
@@ -1960,23 +2040,27 @@
     "venue_binding": {
       "venue_name": "VENUE_NOT_MAPPED",
       "venue_slug": "venue_not_mapped",
-      "venue_stress_status": "VENUE_LAYER_READY_FIXTURE_VENUE_NOT_MAPPED",
+      "venue_stress_status": "VENUE_SOURCE_REQUIRED",
       "venue_stress_tags": [
         "WATCH_ONLY"
       ],
       "venue_stress_ref": "data/v3_worldcup/venue_stress/v3_worldcup_venue_stress_20260603.json",
       "venue_mapping_status": "UNMAPPED",
-      "venue_gap_reason": "fixture_sources_do_not_provide_match_venue",
+      "venue_gap_reason": "VENUE_SOURCE_REQUIRED: no local per-match venue source found",
+      "venue_source_type": "VENUE_SOURCE_REQUIRED",
+      "venue_mapping_confidence": "NONE",
+      "manual_mapping_required": true,
+      "venue_mapping_bridge_ref": "data/manual_sources/v3_worldcup/war_room/v3_wc2026_venue_mapping_bridge.json#mt_028389482",
       "fixture_mapping_bridge_ref": "data/manual_sources/v3_worldcup/war_room/v3_wc2026_fixture_mapping_bridge.json#mt_028389482"
     },
     "venue_stress_summary": {
-      "status": "VENUE_LAYER_READY_FIXTURE_VENUE_NOT_MAPPED",
+      "status": "VENUE_SOURCE_REQUIRED",
       "source": "data/v3_worldcup/venue_stress/v3_worldcup_venue_stress_20260603.json",
       "venue_count": 16,
       "stress_tags": [
         "WATCH_ONLY"
       ],
-      "observation_note": "fixture_sources_do_not_provide_match_venue"
+      "observation_note": "VENUE_SOURCE_REQUIRED: no local per-match venue source found"
     },
     "home_final_26_profile_ref": "data/manual_sources/v3_worldcup/squads/fifa_final_26/processed/v3_wc2026_final_26_squad_profile_team_cards.json#morocco",
     "away_final_26_profile_ref": "data/manual_sources/v3_worldcup/squads/fifa_final_26/processed/v3_wc2026_final_26_squad_profile_team_cards.json#haiti",
@@ -2058,23 +2142,27 @@
     "venue_binding": {
       "venue_name": "VENUE_NOT_MAPPED",
       "venue_slug": "venue_not_mapped",
-      "venue_stress_status": "VENUE_LAYER_READY_FIXTURE_VENUE_NOT_MAPPED",
+      "venue_stress_status": "VENUE_SOURCE_REQUIRED",
       "venue_stress_tags": [
         "WATCH_ONLY"
       ],
       "venue_stress_ref": "data/v3_worldcup/venue_stress/v3_worldcup_venue_stress_20260603.json",
       "venue_mapping_status": "UNMAPPED",
-      "venue_gap_reason": "fixture_sources_do_not_provide_match_venue",
+      "venue_gap_reason": "VENUE_SOURCE_REQUIRED: no local per-match venue source found",
+      "venue_source_type": "VENUE_SOURCE_REQUIRED",
+      "venue_mapping_confidence": "NONE",
+      "manual_mapping_required": true,
+      "venue_mapping_bridge_ref": "data/manual_sources/v3_worldcup/war_room/v3_wc2026_venue_mapping_bridge.json#mt_209798693",
       "fixture_mapping_bridge_ref": "data/manual_sources/v3_worldcup/war_room/v3_wc2026_fixture_mapping_bridge.json#mt_209798693"
     },
     "venue_stress_summary": {
-      "status": "VENUE_LAYER_READY_FIXTURE_VENUE_NOT_MAPPED",
+      "status": "VENUE_SOURCE_REQUIRED",
       "source": "data/v3_worldcup/venue_stress/v3_worldcup_venue_stress_20260603.json",
       "venue_count": 16,
       "stress_tags": [
         "WATCH_ONLY"
       ],
-      "observation_note": "fixture_sources_do_not_provide_match_venue"
+      "observation_note": "VENUE_SOURCE_REQUIRED: no local per-match venue source found"
     },
     "home_final_26_profile_ref": "data/manual_sources/v3_worldcup/squads/fifa_final_26/processed/v3_wc2026_final_26_squad_profile_team_cards.json#scotland",
     "away_final_26_profile_ref": "data/manual_sources/v3_worldcup/squads/fifa_final_26/processed/v3_wc2026_final_26_squad_profile_team_cards.json#brazil",
@@ -2156,23 +2244,27 @@
     "venue_binding": {
       "venue_name": "VENUE_NOT_MAPPED",
       "venue_slug": "venue_not_mapped",
-      "venue_stress_status": "VENUE_LAYER_READY_FIXTURE_VENUE_NOT_MAPPED",
+      "venue_stress_status": "VENUE_SOURCE_REQUIRED",
       "venue_stress_tags": [
         "WATCH_ONLY"
       ],
       "venue_stress_ref": "data/v3_worldcup/venue_stress/v3_worldcup_venue_stress_20260603.json",
       "venue_mapping_status": "UNMAPPED",
-      "venue_gap_reason": "fixture_sources_do_not_provide_match_venue",
+      "venue_gap_reason": "VENUE_SOURCE_REQUIRED: no local per-match venue source found",
+      "venue_source_type": "VENUE_SOURCE_REQUIRED",
+      "venue_mapping_confidence": "NONE",
+      "manual_mapping_required": true,
+      "venue_mapping_bridge_ref": "data/manual_sources/v3_worldcup/war_room/v3_wc2026_venue_mapping_bridge.json#mt_732520309",
       "fixture_mapping_bridge_ref": "data/manual_sources/v3_worldcup/war_room/v3_wc2026_fixture_mapping_bridge.json#mt_732520309"
     },
     "venue_stress_summary": {
-      "status": "VENUE_LAYER_READY_FIXTURE_VENUE_NOT_MAPPED",
+      "status": "VENUE_SOURCE_REQUIRED",
       "source": "data/v3_worldcup/venue_stress/v3_worldcup_venue_stress_20260603.json",
       "venue_count": 16,
       "stress_tags": [
         "WATCH_ONLY"
       ],
-      "observation_note": "fixture_sources_do_not_provide_match_venue"
+      "observation_note": "VENUE_SOURCE_REQUIRED: no local per-match venue source found"
     },
     "home_final_26_profile_ref": "data/manual_sources/v3_worldcup/squads/fifa_final_26/processed/v3_wc2026_final_26_squad_profile_team_cards.json#bosnia_and_herzegovina",
     "away_final_26_profile_ref": "data/manual_sources/v3_worldcup/squads/fifa_final_26/processed/v3_wc2026_final_26_squad_profile_team_cards.json#qatar",
@@ -2252,23 +2344,27 @@
     "venue_binding": {
       "venue_name": "VENUE_NOT_MAPPED",
       "venue_slug": "venue_not_mapped",
-      "venue_stress_status": "VENUE_LAYER_READY_FIXTURE_VENUE_NOT_MAPPED",
+      "venue_stress_status": "VENUE_SOURCE_REQUIRED",
       "venue_stress_tags": [
         "WATCH_ONLY"
       ],
       "venue_stress_ref": "data/v3_worldcup/venue_stress/v3_worldcup_venue_stress_20260603.json",
       "venue_mapping_status": "UNMAPPED",
-      "venue_gap_reason": "fixture_sources_do_not_provide_match_venue",
+      "venue_gap_reason": "VENUE_SOURCE_REQUIRED: no local per-match venue source found",
+      "venue_source_type": "VENUE_SOURCE_REQUIRED",
+      "venue_mapping_confidence": "NONE",
+      "manual_mapping_required": true,
+      "venue_mapping_bridge_ref": "data/manual_sources/v3_worldcup/war_room/v3_wc2026_venue_mapping_bridge.json#mt_209798077",
       "fixture_mapping_bridge_ref": "data/manual_sources/v3_worldcup/war_room/v3_wc2026_fixture_mapping_bridge.json#mt_209798077"
     },
     "venue_stress_summary": {
-      "status": "VENUE_LAYER_READY_FIXTURE_VENUE_NOT_MAPPED",
+      "status": "VENUE_SOURCE_REQUIRED",
       "source": "data/v3_worldcup/venue_stress/v3_worldcup_venue_stress_20260603.json",
       "venue_count": 16,
       "stress_tags": [
         "WATCH_ONLY"
       ],
-      "observation_note": "fixture_sources_do_not_provide_match_venue"
+      "observation_note": "VENUE_SOURCE_REQUIRED: no local per-match venue source found"
     },
     "home_final_26_profile_ref": "data/manual_sources/v3_worldcup/squads/fifa_final_26/processed/v3_wc2026_final_26_squad_profile_team_cards.json#switzerland",
     "away_final_26_profile_ref": "data/manual_sources/v3_worldcup/squads/fifa_final_26/processed/v3_wc2026_final_26_squad_profile_team_cards.json#canada",
@@ -2352,23 +2448,27 @@
     "venue_binding": {
       "venue_name": "VENUE_NOT_MAPPED",
       "venue_slug": "venue_not_mapped",
-      "venue_stress_status": "VENUE_LAYER_READY_FIXTURE_VENUE_NOT_MAPPED",
+      "venue_stress_status": "VENUE_SOURCE_REQUIRED",
       "venue_stress_tags": [
         "WATCH_ONLY"
       ],
       "venue_stress_ref": "data/v3_worldcup/venue_stress/v3_worldcup_venue_stress_20260603.json",
       "venue_mapping_status": "UNMAPPED",
-      "venue_gap_reason": "fixture_sources_do_not_provide_match_venue",
+      "venue_gap_reason": "VENUE_SOURCE_REQUIRED: no local per-match venue source found",
+      "venue_source_type": "VENUE_SOURCE_REQUIRED",
+      "venue_mapping_confidence": "NONE",
+      "manual_mapping_required": true,
+      "venue_mapping_bridge_ref": "data/manual_sources/v3_worldcup/war_room/v3_wc2026_venue_mapping_bridge.json#mt_517473884",
       "fixture_mapping_bridge_ref": "data/manual_sources/v3_worldcup/war_room/v3_wc2026_fixture_mapping_bridge.json#mt_517473884"
     },
     "venue_stress_summary": {
-      "status": "VENUE_LAYER_READY_FIXTURE_VENUE_NOT_MAPPED",
+      "status": "VENUE_SOURCE_REQUIRED",
       "source": "data/v3_worldcup/venue_stress/v3_worldcup_venue_stress_20260603.json",
       "venue_count": 16,
       "stress_tags": [
         "WATCH_ONLY"
       ],
-      "observation_note": "fixture_sources_do_not_provide_match_venue"
+      "observation_note": "VENUE_SOURCE_REQUIRED: no local per-match venue source found"
     },
     "home_final_26_profile_ref": "data/manual_sources/v3_worldcup/squads/fifa_final_26/processed/v3_wc2026_final_26_squad_profile_team_cards.json#colombia",
     "away_final_26_profile_ref": "data/manual_sources/v3_worldcup/squads/fifa_final_26/processed/v3_wc2026_final_26_squad_profile_team_cards.json#congo_dr",
@@ -2450,23 +2550,27 @@
     "venue_binding": {
       "venue_name": "VENUE_NOT_MAPPED",
       "venue_slug": "venue_not_mapped",
-      "venue_stress_status": "VENUE_LAYER_READY_FIXTURE_VENUE_NOT_MAPPED",
+      "venue_stress_status": "VENUE_SOURCE_REQUIRED",
       "venue_stress_tags": [
         "WATCH_ONLY"
       ],
       "venue_stress_ref": "data/v3_worldcup/venue_stress/v3_worldcup_venue_stress_20260603.json",
       "venue_mapping_status": "UNMAPPED",
-      "venue_gap_reason": "fixture_sources_do_not_provide_match_venue",
+      "venue_gap_reason": "VENUE_SOURCE_REQUIRED: no local per-match venue source found",
+      "venue_source_type": "VENUE_SOURCE_REQUIRED",
+      "venue_mapping_confidence": "NONE",
+      "manual_mapping_required": true,
+      "venue_mapping_bridge_ref": "data/manual_sources/v3_worldcup/war_room/v3_wc2026_venue_mapping_bridge.json#mt_153636113",
       "fixture_mapping_bridge_ref": "data/manual_sources/v3_worldcup/war_room/v3_wc2026_fixture_mapping_bridge.json#mt_153636113"
     },
     "venue_stress_summary": {
-      "status": "VENUE_LAYER_READY_FIXTURE_VENUE_NOT_MAPPED",
+      "status": "VENUE_SOURCE_REQUIRED",
       "source": "data/v3_worldcup/venue_stress/v3_worldcup_venue_stress_20260603.json",
       "venue_count": 16,
       "stress_tags": [
         "WATCH_ONLY"
       ],
-      "observation_note": "fixture_sources_do_not_provide_match_venue"
+      "observation_note": "VENUE_SOURCE_REQUIRED: no local per-match venue source found"
     },
     "home_final_26_profile_ref": "data/manual_sources/v3_worldcup/squads/fifa_final_26/processed/v3_wc2026_final_26_squad_profile_team_cards.json#panama",
     "away_final_26_profile_ref": "data/manual_sources/v3_worldcup/squads/fifa_final_26/processed/v3_wc2026_final_26_squad_profile_team_cards.json#croatia",
@@ -2549,23 +2653,27 @@
     "venue_binding": {
       "venue_name": "VENUE_NOT_MAPPED",
       "venue_slug": "venue_not_mapped",
-      "venue_stress_status": "VENUE_LAYER_READY_FIXTURE_VENUE_NOT_MAPPED",
+      "venue_stress_status": "VENUE_SOURCE_REQUIRED",
       "venue_stress_tags": [
         "WATCH_ONLY"
       ],
       "venue_stress_ref": "data/v3_worldcup/venue_stress/v3_worldcup_venue_stress_20260603.json",
       "venue_mapping_status": "UNMAPPED",
-      "venue_gap_reason": "fixture_sources_do_not_provide_match_venue",
+      "venue_gap_reason": "VENUE_SOURCE_REQUIRED: no local per-match venue source found",
+      "venue_source_type": "VENUE_SOURCE_REQUIRED",
+      "venue_mapping_confidence": "NONE",
+      "manual_mapping_required": true,
+      "venue_mapping_bridge_ref": "data/manual_sources/v3_worldcup/war_room/v3_wc2026_venue_mapping_bridge.json#mt_986264630",
       "fixture_mapping_bridge_ref": "data/manual_sources/v3_worldcup/war_room/v3_wc2026_fixture_mapping_bridge.json#mt_986264630"
     },
     "venue_stress_summary": {
-      "status": "VENUE_LAYER_READY_FIXTURE_VENUE_NOT_MAPPED",
+      "status": "VENUE_SOURCE_REQUIRED",
       "source": "data/v3_worldcup/venue_stress/v3_worldcup_venue_stress_20260603.json",
       "venue_count": 16,
       "stress_tags": [
         "WATCH_ONLY"
       ],
-      "observation_note": "fixture_sources_do_not_provide_match_venue"
+      "observation_note": "VENUE_SOURCE_REQUIRED: no local per-match venue source found"
     },
     "home_final_26_profile_ref": "data/manual_sources/v3_worldcup/squads/fifa_final_26/processed/v3_wc2026_final_26_squad_profile_team_cards.json#england",
     "away_final_26_profile_ref": "data/manual_sources/v3_worldcup/squads/fifa_final_26/processed/v3_wc2026_final_26_squad_profile_team_cards.json#ghana",
@@ -2647,23 +2755,27 @@
     "venue_binding": {
       "venue_name": "VENUE_NOT_MAPPED",
       "venue_slug": "venue_not_mapped",
-      "venue_stress_status": "VENUE_LAYER_READY_FIXTURE_VENUE_NOT_MAPPED",
+      "venue_stress_status": "VENUE_SOURCE_REQUIRED",
       "venue_stress_tags": [
         "WATCH_ONLY"
       ],
       "venue_stress_ref": "data/v3_worldcup/venue_stress/v3_worldcup_venue_stress_20260603.json",
       "venue_mapping_status": "UNMAPPED",
-      "venue_gap_reason": "fixture_sources_do_not_provide_match_venue",
+      "venue_gap_reason": "VENUE_SOURCE_REQUIRED: no local per-match venue source found",
+      "venue_source_type": "VENUE_SOURCE_REQUIRED",
+      "venue_mapping_confidence": "NONE",
+      "manual_mapping_required": true,
+      "venue_mapping_bridge_ref": "data/manual_sources/v3_worldcup/war_room/v3_wc2026_venue_mapping_bridge.json#mt_894046526",
       "fixture_mapping_bridge_ref": "data/manual_sources/v3_worldcup/war_room/v3_wc2026_fixture_mapping_bridge.json#mt_894046526"
     },
     "venue_stress_summary": {
-      "status": "VENUE_LAYER_READY_FIXTURE_VENUE_NOT_MAPPED",
+      "status": "VENUE_SOURCE_REQUIRED",
       "source": "data/v3_worldcup/venue_stress/v3_worldcup_venue_stress_20260603.json",
       "venue_count": 16,
       "stress_tags": [
         "WATCH_ONLY"
       ],
-      "observation_note": "fixture_sources_do_not_provide_match_venue"
+      "observation_note": "VENUE_SOURCE_REQUIRED: no local per-match venue source found"
     },
     "home_final_26_profile_ref": "data/manual_sources/v3_worldcup/squads/fifa_final_26/processed/v3_wc2026_final_26_squad_profile_team_cards.json#portugal",
     "away_final_26_profile_ref": "data/manual_sources/v3_worldcup/squads/fifa_final_26/processed/v3_wc2026_final_26_squad_profile_team_cards.json#uzbekistan",
@@ -2745,23 +2857,27 @@
     "venue_binding": {
       "venue_name": "VENUE_NOT_MAPPED",
       "venue_slug": "venue_not_mapped",
-      "venue_stress_status": "VENUE_LAYER_READY_FIXTURE_VENUE_NOT_MAPPED",
+      "venue_stress_status": "VENUE_SOURCE_REQUIRED",
       "venue_stress_tags": [
         "WATCH_ONLY"
       ],
       "venue_stress_ref": "data/v3_worldcup/venue_stress/v3_worldcup_venue_stress_20260603.json",
       "venue_mapping_status": "UNMAPPED",
-      "venue_gap_reason": "fixture_sources_do_not_provide_match_venue",
+      "venue_gap_reason": "VENUE_SOURCE_REQUIRED: no local per-match venue source found",
+      "venue_source_type": "VENUE_SOURCE_REQUIRED",
+      "venue_mapping_confidence": "NONE",
+      "manual_mapping_required": true,
+      "venue_mapping_bridge_ref": "data/manual_sources/v3_worldcup/war_room/v3_wc2026_venue_mapping_bridge.json#mt_153637966",
       "fixture_mapping_bridge_ref": "data/manual_sources/v3_worldcup/war_room/v3_wc2026_fixture_mapping_bridge.json#mt_153637966"
     },
     "venue_stress_summary": {
-      "status": "VENUE_LAYER_READY_FIXTURE_VENUE_NOT_MAPPED",
+      "status": "VENUE_SOURCE_REQUIRED",
       "source": "data/v3_worldcup/venue_stress/v3_worldcup_venue_stress_20260603.json",
       "venue_count": 16,
       "stress_tags": [
         "WATCH_ONLY"
       ],
-      "observation_note": "fixture_sources_do_not_provide_match_venue"
+      "observation_note": "VENUE_SOURCE_REQUIRED: no local per-match venue source found"
     },
     "home_final_26_profile_ref": "data/manual_sources/v3_worldcup/squads/fifa_final_26/processed/v3_wc2026_final_26_squad_profile_team_cards.json#jordan",
     "away_final_26_profile_ref": "data/manual_sources/v3_worldcup/squads/fifa_final_26/processed/v3_wc2026_final_26_squad_profile_team_cards.json#algeria",
@@ -2841,23 +2957,27 @@
     "venue_binding": {
       "venue_name": "VENUE_NOT_MAPPED",
       "venue_slug": "venue_not_mapped",
-      "venue_stress_status": "VENUE_LAYER_READY_FIXTURE_VENUE_NOT_MAPPED",
+      "venue_stress_status": "VENUE_SOURCE_REQUIRED",
       "venue_stress_tags": [
         "WATCH_ONLY"
       ],
       "venue_stress_ref": "data/v3_worldcup/venue_stress/v3_worldcup_venue_stress_20260603.json",
       "venue_mapping_status": "UNMAPPED",
-      "venue_gap_reason": "fixture_sources_do_not_provide_match_venue",
+      "venue_gap_reason": "VENUE_SOURCE_REQUIRED: no local per-match venue source found",
+      "venue_source_type": "VENUE_SOURCE_REQUIRED",
+      "venue_mapping_confidence": "NONE",
+      "manual_mapping_required": true,
+      "venue_mapping_bridge_ref": "data/manual_sources/v3_worldcup/war_room/v3_wc2026_venue_mapping_bridge.json#mt_153637911",
       "fixture_mapping_bridge_ref": "data/manual_sources/v3_worldcup/war_room/v3_wc2026_fixture_mapping_bridge.json#mt_153637911"
     },
     "venue_stress_summary": {
-      "status": "VENUE_LAYER_READY_FIXTURE_VENUE_NOT_MAPPED",
+      "status": "VENUE_SOURCE_REQUIRED",
       "source": "data/v3_worldcup/venue_stress/v3_worldcup_venue_stress_20260603.json",
       "venue_count": 16,
       "stress_tags": [
         "WATCH_ONLY"
       ],
-      "observation_note": "fixture_sources_do_not_provide_match_venue"
+      "observation_note": "VENUE_SOURCE_REQUIRED: no local per-match venue source found"
     },
     "home_final_26_profile_ref": "data/manual_sources/v3_worldcup/squads/fifa_final_26/processed/v3_wc2026_final_26_squad_profile_team_cards.json#norway",
     "away_final_26_profile_ref": "data/manual_sources/v3_worldcup/squads/fifa_final_26/processed/v3_wc2026_final_26_squad_profile_team_cards.json#senegal",
@@ -2940,23 +3060,27 @@
     "venue_binding": {
       "venue_name": "VENUE_NOT_MAPPED",
       "venue_slug": "venue_not_mapped",
-      "venue_stress_status": "VENUE_LAYER_READY_FIXTURE_VENUE_NOT_MAPPED",
+      "venue_stress_status": "VENUE_SOURCE_REQUIRED",
       "venue_stress_tags": [
         "WATCH_ONLY"
       ],
       "venue_stress_ref": "data/v3_worldcup/venue_stress/v3_worldcup_venue_stress_20260603.json",
       "venue_mapping_status": "UNMAPPED",
-      "venue_gap_reason": "fixture_sources_do_not_provide_match_venue",
+      "venue_gap_reason": "VENUE_SOURCE_REQUIRED: no local per-match venue source found",
+      "venue_source_type": "VENUE_SOURCE_REQUIRED",
+      "venue_mapping_confidence": "NONE",
+      "manual_mapping_required": true,
+      "venue_mapping_bridge_ref": "data/manual_sources/v3_worldcup/war_room/v3_wc2026_venue_mapping_bridge.json#mt_732520476",
       "fixture_mapping_bridge_ref": "data/manual_sources/v3_worldcup/war_room/v3_wc2026_fixture_mapping_bridge.json#mt_732520476"
     },
     "venue_stress_summary": {
-      "status": "VENUE_LAYER_READY_FIXTURE_VENUE_NOT_MAPPED",
+      "status": "VENUE_SOURCE_REQUIRED",
       "source": "data/v3_worldcup/venue_stress/v3_worldcup_venue_stress_20260603.json",
       "venue_count": 16,
       "stress_tags": [
         "WATCH_ONLY"
       ],
-      "observation_note": "fixture_sources_do_not_provide_match_venue"
+      "observation_note": "VENUE_SOURCE_REQUIRED: no local per-match venue source found"
     },
     "home_final_26_profile_ref": "data/manual_sources/v3_worldcup/squads/fifa_final_26/processed/v3_wc2026_final_26_squad_profile_team_cards.json#france",
     "away_final_26_profile_ref": "data/manual_sources/v3_worldcup/squads/fifa_final_26/processed/v3_wc2026_final_26_squad_profile_team_cards.json#iraq",
@@ -3038,23 +3162,27 @@
     "venue_binding": {
       "venue_name": "VENUE_NOT_MAPPED",
       "venue_slug": "venue_not_mapped",
-      "venue_stress_status": "VENUE_LAYER_READY_FIXTURE_VENUE_NOT_MAPPED",
+      "venue_stress_status": "VENUE_SOURCE_REQUIRED",
       "venue_stress_tags": [
         "WATCH_ONLY"
       ],
       "venue_stress_ref": "data/v3_worldcup/venue_stress/v3_worldcup_venue_stress_20260603.json",
       "venue_mapping_status": "UNMAPPED",
-      "venue_gap_reason": "fixture_sources_do_not_provide_match_venue",
+      "venue_gap_reason": "VENUE_SOURCE_REQUIRED: no local per-match venue source found",
+      "venue_source_type": "VENUE_SOURCE_REQUIRED",
+      "venue_mapping_confidence": "NONE",
+      "manual_mapping_required": true,
+      "venue_mapping_bridge_ref": "data/manual_sources/v3_worldcup/war_room/v3_wc2026_venue_mapping_bridge.json#mt_986262946",
       "fixture_mapping_bridge_ref": "data/manual_sources/v3_worldcup/war_room/v3_wc2026_fixture_mapping_bridge.json#mt_986262946"
     },
     "venue_stress_summary": {
-      "status": "VENUE_LAYER_READY_FIXTURE_VENUE_NOT_MAPPED",
+      "status": "VENUE_SOURCE_REQUIRED",
       "source": "data/v3_worldcup/venue_stress/v3_worldcup_venue_stress_20260603.json",
       "venue_count": 16,
       "stress_tags": [
         "WATCH_ONLY"
       ],
-      "observation_note": "fixture_sources_do_not_provide_match_venue"
+      "observation_note": "VENUE_SOURCE_REQUIRED: no local per-match venue source found"
     },
     "home_final_26_profile_ref": "data/manual_sources/v3_worldcup/squads/fifa_final_26/processed/v3_wc2026_final_26_squad_profile_team_cards.json#argentina",
     "away_final_26_profile_ref": "data/manual_sources/v3_worldcup/squads/fifa_final_26/processed/v3_wc2026_final_26_squad_profile_team_cards.json#austria",
@@ -3137,23 +3265,27 @@
     "venue_binding": {
       "venue_name": "VENUE_NOT_MAPPED",
       "venue_slug": "venue_not_mapped",
-      "venue_stress_status": "VENUE_LAYER_READY_FIXTURE_VENUE_NOT_MAPPED",
+      "venue_stress_status": "VENUE_SOURCE_REQUIRED",
       "venue_stress_tags": [
         "WATCH_ONLY"
       ],
       "venue_stress_ref": "data/v3_worldcup/venue_stress/v3_worldcup_venue_stress_20260603.json",
       "venue_mapping_status": "UNMAPPED",
-      "venue_gap_reason": "fixture_sources_do_not_provide_match_venue",
+      "venue_gap_reason": "VENUE_SOURCE_REQUIRED: no local per-match venue source found",
+      "venue_source_type": "VENUE_SOURCE_REQUIRED",
+      "venue_mapping_confidence": "NONE",
+      "manual_mapping_required": true,
+      "venue_mapping_bridge_ref": "data/manual_sources/v3_worldcup/war_room/v3_wc2026_venue_mapping_bridge.json#mt_370102726",
       "fixture_mapping_bridge_ref": "data/manual_sources/v3_worldcup/war_room/v3_wc2026_fixture_mapping_bridge.json#mt_370102726"
     },
     "venue_stress_summary": {
-      "status": "VENUE_LAYER_READY_FIXTURE_VENUE_NOT_MAPPED",
+      "status": "VENUE_SOURCE_REQUIRED",
       "source": "data/v3_worldcup/venue_stress/v3_worldcup_venue_stress_20260603.json",
       "venue_count": 16,
       "stress_tags": [
         "WATCH_ONLY"
       ],
-      "observation_note": "fixture_sources_do_not_provide_match_venue"
+      "observation_note": "VENUE_SOURCE_REQUIRED: no local per-match venue source found"
     },
     "home_final_26_profile_ref": "data/manual_sources/v3_worldcup/squads/fifa_final_26/processed/v3_wc2026_final_26_squad_profile_team_cards.json#new_zealand",
     "away_final_26_profile_ref": "data/manual_sources/v3_worldcup/squads/fifa_final_26/processed/v3_wc2026_final_26_squad_profile_team_cards.json#egypt",
@@ -3233,23 +3365,27 @@
     "venue_binding": {
       "venue_name": "VENUE_NOT_MAPPED",
       "venue_slug": "venue_not_mapped",
-      "venue_stress_status": "VENUE_LAYER_READY_FIXTURE_VENUE_NOT_MAPPED",
+      "venue_stress_status": "VENUE_SOURCE_REQUIRED",
       "venue_stress_tags": [
         "WATCH_ONLY"
       ],
       "venue_stress_ref": "data/v3_worldcup/venue_stress/v3_worldcup_venue_stress_20260603.json",
       "venue_mapping_status": "UNMAPPED",
-      "venue_gap_reason": "fixture_sources_do_not_provide_match_venue",
+      "venue_gap_reason": "VENUE_SOURCE_REQUIRED: no local per-match venue source found",
+      "venue_source_type": "VENUE_SOURCE_REQUIRED",
+      "venue_mapping_confidence": "NONE",
+      "manual_mapping_required": true,
+      "venue_mapping_bridge_ref": "data/manual_sources/v3_worldcup/war_room/v3_wc2026_venue_mapping_bridge.json#mt_153637559",
       "fixture_mapping_bridge_ref": "data/manual_sources/v3_worldcup/war_room/v3_wc2026_fixture_mapping_bridge.json#mt_153637559"
     },
     "venue_stress_summary": {
-      "status": "VENUE_LAYER_READY_FIXTURE_VENUE_NOT_MAPPED",
+      "status": "VENUE_SOURCE_REQUIRED",
       "source": "data/v3_worldcup/venue_stress/v3_worldcup_venue_stress_20260603.json",
       "venue_count": 16,
       "stress_tags": [
         "WATCH_ONLY"
       ],
-      "observation_note": "fixture_sources_do_not_provide_match_venue"
+      "observation_note": "VENUE_SOURCE_REQUIRED: no local per-match venue source found"
     },
     "home_final_26_profile_ref": "data/manual_sources/v3_worldcup/squads/fifa_final_26/processed/v3_wc2026_final_26_squad_profile_team_cards.json#uruguay",
     "away_final_26_profile_ref": "data/manual_sources/v3_worldcup/squads/fifa_final_26/processed/v3_wc2026_final_26_squad_profile_team_cards.json#cabo_verde",
@@ -3329,23 +3465,27 @@
     "venue_binding": {
       "venue_name": "VENUE_NOT_MAPPED",
       "venue_slug": "venue_not_mapped",
-      "venue_stress_status": "VENUE_LAYER_READY_FIXTURE_VENUE_NOT_MAPPED",
+      "venue_stress_status": "VENUE_SOURCE_REQUIRED",
       "venue_stress_tags": [
         "WATCH_ONLY"
       ],
       "venue_stress_ref": "data/v3_worldcup/venue_stress/v3_worldcup_venue_stress_20260603.json",
       "venue_mapping_status": "UNMAPPED",
-      "venue_gap_reason": "fixture_sources_do_not_provide_match_venue",
+      "venue_gap_reason": "VENUE_SOURCE_REQUIRED: no local per-match venue source found",
+      "venue_source_type": "VENUE_SOURCE_REQUIRED",
+      "venue_mapping_confidence": "NONE",
+      "manual_mapping_required": true,
+      "venue_mapping_bridge_ref": "data/manual_sources/v3_worldcup/war_room/v3_wc2026_venue_mapping_bridge.json#mt_732525756",
       "fixture_mapping_bridge_ref": "data/manual_sources/v3_worldcup/war_room/v3_wc2026_fixture_mapping_bridge.json#mt_732525756"
     },
     "venue_stress_summary": {
-      "status": "VENUE_LAYER_READY_FIXTURE_VENUE_NOT_MAPPED",
+      "status": "VENUE_SOURCE_REQUIRED",
       "source": "data/v3_worldcup/venue_stress/v3_worldcup_venue_stress_20260603.json",
       "venue_count": 16,
       "stress_tags": [
         "WATCH_ONLY"
       ],
-      "observation_note": "fixture_sources_do_not_provide_match_venue"
+      "observation_note": "VENUE_SOURCE_REQUIRED: no local per-match venue source found"
     },
     "home_final_26_profile_ref": "data/manual_sources/v3_worldcup/squads/fifa_final_26/processed/v3_wc2026_final_26_squad_profile_team_cards.json#belgium",
     "away_final_26_profile_ref": "data/manual_sources/v3_worldcup/squads/fifa_final_26/processed/v3_wc2026_final_26_squad_profile_team_cards.json#ir_iran",
@@ -3428,23 +3568,27 @@
     "venue_binding": {
       "venue_name": "VENUE_NOT_MAPPED",
       "venue_slug": "venue_not_mapped",
-      "venue_stress_status": "VENUE_LAYER_READY_FIXTURE_VENUE_NOT_MAPPED",
+      "venue_stress_status": "VENUE_SOURCE_REQUIRED",
       "venue_stress_tags": [
         "WATCH_ONLY"
       ],
       "venue_stress_ref": "data/v3_worldcup/venue_stress/v3_worldcup_venue_stress_20260603.json",
       "venue_mapping_status": "UNMAPPED",
-      "venue_gap_reason": "fixture_sources_do_not_provide_match_venue",
+      "venue_gap_reason": "VENUE_SOURCE_REQUIRED: no local per-match venue source found",
+      "venue_source_type": "VENUE_SOURCE_REQUIRED",
+      "venue_mapping_confidence": "NONE",
+      "manual_mapping_required": true,
+      "venue_mapping_bridge_ref": "data/manual_sources/v3_worldcup/war_room/v3_wc2026_venue_mapping_bridge.json#mt_153637587",
       "fixture_mapping_bridge_ref": "data/manual_sources/v3_worldcup/war_room/v3_wc2026_fixture_mapping_bridge.json#mt_153637587"
     },
     "venue_stress_summary": {
-      "status": "VENUE_LAYER_READY_FIXTURE_VENUE_NOT_MAPPED",
+      "status": "VENUE_SOURCE_REQUIRED",
       "source": "data/v3_worldcup/venue_stress/v3_worldcup_venue_stress_20260603.json",
       "venue_count": 16,
       "stress_tags": [
         "WATCH_ONLY"
       ],
-      "observation_note": "fixture_sources_do_not_provide_match_venue"
+      "observation_note": "VENUE_SOURCE_REQUIRED: no local per-match venue source found"
     },
     "home_final_26_profile_ref": "data/manual_sources/v3_worldcup/squads/fifa_final_26/processed/v3_wc2026_final_26_squad_profile_team_cards.json#spain",
     "away_final_26_profile_ref": "data/manual_sources/v3_worldcup/squads/fifa_final_26/processed/v3_wc2026_final_26_squad_profile_team_cards.json#saudi_arabia",
@@ -3524,23 +3668,27 @@
     "venue_binding": {
       "venue_name": "VENUE_NOT_MAPPED",
       "venue_slug": "venue_not_mapped",
-      "venue_stress_status": "VENUE_LAYER_READY_FIXTURE_VENUE_NOT_MAPPED",
+      "venue_stress_status": "VENUE_SOURCE_REQUIRED",
       "venue_stress_tags": [
         "WATCH_ONLY"
       ],
       "venue_stress_ref": "data/v3_worldcup/venue_stress/v3_worldcup_venue_stress_20260603.json",
       "venue_mapping_status": "UNMAPPED",
-      "venue_gap_reason": "fixture_sources_do_not_provide_match_venue",
+      "venue_gap_reason": "VENUE_SOURCE_REQUIRED: no local per-match venue source found",
+      "venue_source_type": "VENUE_SOURCE_REQUIRED",
+      "venue_mapping_confidence": "NONE",
+      "manual_mapping_required": true,
+      "venue_mapping_bridge_ref": "data/manual_sources/v3_worldcup/war_room/v3_wc2026_venue_mapping_bridge.json#mt_517473411",
       "fixture_mapping_bridge_ref": "data/manual_sources/v3_worldcup/war_room/v3_wc2026_fixture_mapping_bridge.json#mt_517473411"
     },
     "venue_stress_summary": {
-      "status": "VENUE_LAYER_READY_FIXTURE_VENUE_NOT_MAPPED",
+      "status": "VENUE_SOURCE_REQUIRED",
       "source": "data/v3_worldcup/venue_stress/v3_worldcup_venue_stress_20260603.json",
       "venue_count": 16,
       "stress_tags": [
         "WATCH_ONLY"
       ],
-      "observation_note": "fixture_sources_do_not_provide_match_venue"
+      "observation_note": "VENUE_SOURCE_REQUIRED: no local per-match venue source found"
     },
     "home_final_26_profile_ref": "data/manual_sources/v3_worldcup/squads/fifa_final_26/processed/v3_wc2026_final_26_squad_profile_team_cards.json#tunisia",
     "away_final_26_profile_ref": "data/manual_sources/v3_worldcup/squads/fifa_final_26/processed/v3_wc2026_final_26_squad_profile_team_cards.json#japan",
@@ -3622,23 +3770,27 @@
     "venue_binding": {
       "venue_name": "VENUE_NOT_MAPPED",
       "venue_slug": "venue_not_mapped",
-      "venue_stress_status": "VENUE_LAYER_READY_FIXTURE_VENUE_NOT_MAPPED",
+      "venue_stress_status": "VENUE_SOURCE_REQUIRED",
       "venue_stress_tags": [
         "WATCH_ONLY"
       ],
       "venue_stress_ref": "data/v3_worldcup/venue_stress/v3_worldcup_venue_stress_20260603.json",
       "venue_mapping_status": "UNMAPPED",
-      "venue_gap_reason": "fixture_sources_do_not_provide_match_venue",
+      "venue_gap_reason": "VENUE_SOURCE_REQUIRED: no local per-match venue source found",
+      "venue_source_type": "VENUE_SOURCE_REQUIRED",
+      "venue_mapping_confidence": "NONE",
+      "manual_mapping_required": true,
+      "venue_mapping_bridge_ref": "data/manual_sources/v3_worldcup/war_room/v3_wc2026_venue_mapping_bridge.json#mt_641915358",
       "fixture_mapping_bridge_ref": "data/manual_sources/v3_worldcup/war_room/v3_wc2026_fixture_mapping_bridge.json#mt_641915358"
     },
     "venue_stress_summary": {
-      "status": "VENUE_LAYER_READY_FIXTURE_VENUE_NOT_MAPPED",
+      "status": "VENUE_SOURCE_REQUIRED",
       "source": "data/v3_worldcup/venue_stress/v3_worldcup_venue_stress_20260603.json",
       "venue_count": 16,
       "stress_tags": [
         "WATCH_ONLY"
       ],
-      "observation_note": "fixture_sources_do_not_provide_match_venue"
+      "observation_note": "VENUE_SOURCE_REQUIRED: no local per-match venue source found"
     },
     "home_final_26_profile_ref": "data/manual_sources/v3_worldcup/squads/fifa_final_26/processed/v3_wc2026_final_26_squad_profile_team_cards.json#ecuador",
     "away_final_26_profile_ref": "data/manual_sources/v3_worldcup/squads/fifa_final_26/processed/v3_wc2026_final_26_squad_profile_team_cards.json#curacao",
@@ -3720,23 +3872,27 @@
     "venue_binding": {
       "venue_name": "VENUE_NOT_MAPPED",
       "venue_slug": "venue_not_mapped",
-      "venue_stress_status": "VENUE_LAYER_READY_FIXTURE_VENUE_NOT_MAPPED",
+      "venue_stress_status": "VENUE_SOURCE_REQUIRED",
       "venue_stress_tags": [
         "WATCH_ONLY"
       ],
       "venue_stress_ref": "data/v3_worldcup/venue_stress/v3_worldcup_venue_stress_20260603.json",
       "venue_mapping_status": "UNMAPPED",
-      "venue_gap_reason": "fixture_sources_do_not_provide_match_venue",
+      "venue_gap_reason": "VENUE_SOURCE_REQUIRED: no local per-match venue source found",
+      "venue_source_type": "VENUE_SOURCE_REQUIRED",
+      "venue_mapping_confidence": "NONE",
+      "manual_mapping_required": true,
+      "venue_mapping_bridge_ref": "data/manual_sources/v3_worldcup/war_room/v3_wc2026_venue_mapping_bridge.json#mt_465851784",
       "fixture_mapping_bridge_ref": "data/manual_sources/v3_worldcup/war_room/v3_wc2026_fixture_mapping_bridge.json#mt_465851784"
     },
     "venue_stress_summary": {
-      "status": "VENUE_LAYER_READY_FIXTURE_VENUE_NOT_MAPPED",
+      "status": "VENUE_SOURCE_REQUIRED",
       "source": "data/v3_worldcup/venue_stress/v3_worldcup_venue_stress_20260603.json",
       "venue_count": 16,
       "stress_tags": [
         "WATCH_ONLY"
       ],
-      "observation_note": "fixture_sources_do_not_provide_match_venue"
+      "observation_note": "VENUE_SOURCE_REQUIRED: no local per-match venue source found"
     },
     "home_final_26_profile_ref": "data/manual_sources/v3_worldcup/squads/fifa_final_26/processed/v3_wc2026_final_26_squad_profile_team_cards.json#germany",
     "away_final_26_profile_ref": "data/manual_sources/v3_worldcup/squads/fifa_final_26/processed/v3_wc2026_final_26_squad_profile_team_cards.json#cote_divoire",
@@ -3816,23 +3972,27 @@
     "venue_binding": {
       "venue_name": "VENUE_NOT_MAPPED",
       "venue_slug": "venue_not_mapped",
-      "venue_stress_status": "VENUE_LAYER_READY_FIXTURE_VENUE_NOT_MAPPED",
+      "venue_stress_status": "VENUE_SOURCE_REQUIRED",
       "venue_stress_tags": [
         "WATCH_ONLY"
       ],
       "venue_stress_ref": "data/v3_worldcup/venue_stress/v3_worldcup_venue_stress_20260603.json",
       "venue_mapping_status": "UNMAPPED",
-      "venue_gap_reason": "fixture_sources_do_not_provide_match_venue",
+      "venue_gap_reason": "VENUE_SOURCE_REQUIRED: no local per-match venue source found",
+      "venue_source_type": "VENUE_SOURCE_REQUIRED",
+      "venue_mapping_confidence": "NONE",
+      "manual_mapping_required": true,
+      "venue_mapping_bridge_ref": "data/manual_sources/v3_worldcup/war_room/v3_wc2026_venue_mapping_bridge.json#mt_370102162",
       "fixture_mapping_bridge_ref": "data/manual_sources/v3_worldcup/war_room/v3_wc2026_fixture_mapping_bridge.json#mt_370102162"
     },
     "venue_stress_summary": {
-      "status": "VENUE_LAYER_READY_FIXTURE_VENUE_NOT_MAPPED",
+      "status": "VENUE_SOURCE_REQUIRED",
       "source": "data/v3_worldcup/venue_stress/v3_worldcup_venue_stress_20260603.json",
       "venue_count": 16,
       "stress_tags": [
         "WATCH_ONLY"
       ],
-      "observation_note": "fixture_sources_do_not_provide_match_venue"
+      "observation_note": "VENUE_SOURCE_REQUIRED: no local per-match venue source found"
     },
     "home_final_26_profile_ref": "data/manual_sources/v3_worldcup/squads/fifa_final_26/processed/v3_wc2026_final_26_squad_profile_team_cards.json#netherlands",
     "away_final_26_profile_ref": "data/manual_sources/v3_worldcup/squads/fifa_final_26/processed/v3_wc2026_final_26_squad_profile_team_cards.json#sweden",
@@ -3912,23 +4072,27 @@
     "venue_binding": {
       "venue_name": "VENUE_NOT_MAPPED",
       "venue_slug": "venue_not_mapped",
-      "venue_stress_status": "VENUE_LAYER_READY_FIXTURE_VENUE_NOT_MAPPED",
+      "venue_stress_status": "VENUE_SOURCE_REQUIRED",
       "venue_stress_tags": [
         "WATCH_ONLY"
       ],
       "venue_stress_ref": "data/v3_worldcup/venue_stress/v3_worldcup_venue_stress_20260603.json",
       "venue_mapping_status": "UNMAPPED",
-      "venue_gap_reason": "fixture_sources_do_not_provide_match_venue",
+      "venue_gap_reason": "VENUE_SOURCE_REQUIRED: no local per-match venue source found",
+      "venue_source_type": "VENUE_SOURCE_REQUIRED",
+      "venue_mapping_confidence": "NONE",
+      "manual_mapping_required": true,
+      "venue_mapping_bridge_ref": "data/manual_sources/v3_worldcup/war_room/v3_wc2026_venue_mapping_bridge.json#mt_732520931",
       "fixture_mapping_bridge_ref": "data/manual_sources/v3_worldcup/war_room/v3_wc2026_fixture_mapping_bridge.json#mt_732520931"
     },
     "venue_stress_summary": {
-      "status": "VENUE_LAYER_READY_FIXTURE_VENUE_NOT_MAPPED",
+      "status": "VENUE_SOURCE_REQUIRED",
       "source": "data/v3_worldcup/venue_stress/v3_worldcup_venue_stress_20260603.json",
       "venue_count": 16,
       "stress_tags": [
         "WATCH_ONLY"
       ],
-      "observation_note": "fixture_sources_do_not_provide_match_venue"
+      "observation_note": "VENUE_SOURCE_REQUIRED: no local per-match venue source found"
     },
     "home_final_26_profile_ref": "data/manual_sources/v3_worldcup/squads/fifa_final_26/processed/v3_wc2026_final_26_squad_profile_team_cards.json#turkiye",
     "away_final_26_profile_ref": "data/manual_sources/v3_worldcup/squads/fifa_final_26/processed/v3_wc2026_final_26_squad_profile_team_cards.json#paraguay",
@@ -4008,23 +4172,27 @@
     "venue_binding": {
       "venue_name": "VENUE_NOT_MAPPED",
       "venue_slug": "venue_not_mapped",
-      "venue_stress_status": "VENUE_LAYER_READY_FIXTURE_VENUE_NOT_MAPPED",
+      "venue_stress_status": "VENUE_SOURCE_REQUIRED",
       "venue_stress_tags": [
         "WATCH_ONLY"
       ],
       "venue_stress_ref": "data/v3_worldcup/venue_stress/v3_worldcup_venue_stress_20260603.json",
       "venue_mapping_status": "UNMAPPED",
-      "venue_gap_reason": "fixture_sources_do_not_provide_match_venue",
+      "venue_gap_reason": "VENUE_SOURCE_REQUIRED: no local per-match venue source found",
+      "venue_source_type": "VENUE_SOURCE_REQUIRED",
+      "venue_mapping_confidence": "NONE",
+      "manual_mapping_required": true,
+      "venue_mapping_bridge_ref": "data/manual_sources/v3_worldcup/war_room/v3_wc2026_venue_mapping_bridge.json#mt_641915383",
       "fixture_mapping_bridge_ref": "data/manual_sources/v3_worldcup/war_room/v3_wc2026_fixture_mapping_bridge.json#mt_641915383"
     },
     "venue_stress_summary": {
-      "status": "VENUE_LAYER_READY_FIXTURE_VENUE_NOT_MAPPED",
+      "status": "VENUE_SOURCE_REQUIRED",
       "source": "data/v3_worldcup/venue_stress/v3_worldcup_venue_stress_20260603.json",
       "venue_count": 16,
       "stress_tags": [
         "WATCH_ONLY"
       ],
-      "observation_note": "fixture_sources_do_not_provide_match_venue"
+      "observation_note": "VENUE_SOURCE_REQUIRED: no local per-match venue source found"
     },
     "home_final_26_profile_ref": "data/manual_sources/v3_worldcup/squads/fifa_final_26/processed/v3_wc2026_final_26_squad_profile_team_cards.json#brazil",
     "away_final_26_profile_ref": "data/manual_sources/v3_worldcup/squads/fifa_final_26/processed/v3_wc2026_final_26_squad_profile_team_cards.json#haiti",
@@ -4106,23 +4274,27 @@
     "venue_binding": {
       "venue_name": "VENUE_NOT_MAPPED",
       "venue_slug": "venue_not_mapped",
-      "venue_stress_status": "VENUE_LAYER_READY_FIXTURE_VENUE_NOT_MAPPED",
+      "venue_stress_status": "VENUE_SOURCE_REQUIRED",
       "venue_stress_tags": [
         "WATCH_ONLY"
       ],
       "venue_stress_ref": "data/v3_worldcup/venue_stress/v3_worldcup_venue_stress_20260603.json",
       "venue_mapping_status": "UNMAPPED",
-      "venue_gap_reason": "fixture_sources_do_not_provide_match_venue",
+      "venue_gap_reason": "VENUE_SOURCE_REQUIRED: no local per-match venue source found",
+      "venue_source_type": "VENUE_SOURCE_REQUIRED",
+      "venue_mapping_confidence": "NONE",
+      "manual_mapping_required": true,
+      "venue_mapping_bridge_ref": "data/manual_sources/v3_worldcup/war_room/v3_wc2026_venue_mapping_bridge.json#mt_732520916",
       "fixture_mapping_bridge_ref": "data/manual_sources/v3_worldcup/war_room/v3_wc2026_fixture_mapping_bridge.json#mt_732520916"
     },
     "venue_stress_summary": {
-      "status": "VENUE_LAYER_READY_FIXTURE_VENUE_NOT_MAPPED",
+      "status": "VENUE_SOURCE_REQUIRED",
       "source": "data/v3_worldcup/venue_stress/v3_worldcup_venue_stress_20260603.json",
       "venue_count": 16,
       "stress_tags": [
         "WATCH_ONLY"
       ],
-      "observation_note": "fixture_sources_do_not_provide_match_venue"
+      "observation_note": "VENUE_SOURCE_REQUIRED: no local per-match venue source found"
     },
     "home_final_26_profile_ref": "data/manual_sources/v3_worldcup/squads/fifa_final_26/processed/v3_wc2026_final_26_squad_profile_team_cards.json#scotland",
     "away_final_26_profile_ref": "data/manual_sources/v3_worldcup/squads/fifa_final_26/processed/v3_wc2026_final_26_squad_profile_team_cards.json#morocco",
@@ -4204,23 +4376,27 @@
     "venue_binding": {
       "venue_name": "VENUE_NOT_MAPPED",
       "venue_slug": "venue_not_mapped",
-      "venue_stress_status": "VENUE_LAYER_READY_FIXTURE_VENUE_NOT_MAPPED",
+      "venue_stress_status": "VENUE_SOURCE_REQUIRED",
       "venue_stress_tags": [
         "WATCH_ONLY"
       ],
       "venue_stress_ref": "data/v3_worldcup/venue_stress/v3_worldcup_venue_stress_20260603.json",
       "venue_mapping_status": "UNMAPPED",
-      "venue_gap_reason": "fixture_sources_do_not_provide_match_venue",
+      "venue_gap_reason": "VENUE_SOURCE_REQUIRED: no local per-match venue source found",
+      "venue_source_type": "VENUE_SOURCE_REQUIRED",
+      "venue_mapping_confidence": "NONE",
+      "manual_mapping_required": true,
+      "venue_mapping_bridge_ref": "data/manual_sources/v3_worldcup/war_room/v3_wc2026_venue_mapping_bridge.json#mt_894046538",
       "fixture_mapping_bridge_ref": "data/manual_sources/v3_worldcup/war_room/v3_wc2026_fixture_mapping_bridge.json#mt_894046538"
     },
     "venue_stress_summary": {
-      "status": "VENUE_LAYER_READY_FIXTURE_VENUE_NOT_MAPPED",
+      "status": "VENUE_SOURCE_REQUIRED",
       "source": "data/v3_worldcup/venue_stress/v3_worldcup_venue_stress_20260603.json",
       "venue_count": 16,
       "stress_tags": [
         "WATCH_ONLY"
       ],
-      "observation_note": "fixture_sources_do_not_provide_match_venue"
+      "observation_note": "VENUE_SOURCE_REQUIRED: no local per-match venue source found"
     },
     "home_final_26_profile_ref": "data/manual_sources/v3_worldcup/squads/fifa_final_26/processed/v3_wc2026_final_26_squad_profile_team_cards.json#usa",
     "away_final_26_profile_ref": "data/manual_sources/v3_worldcup/squads/fifa_final_26/processed/v3_wc2026_final_26_squad_profile_team_cards.json#australia",
@@ -4302,23 +4478,27 @@
     "venue_binding": {
       "venue_name": "VENUE_NOT_MAPPED",
       "venue_slug": "venue_not_mapped",
-      "venue_stress_status": "VENUE_LAYER_READY_FIXTURE_VENUE_NOT_MAPPED",
+      "venue_stress_status": "VENUE_SOURCE_REQUIRED",
       "venue_stress_tags": [
         "WATCH_ONLY"
       ],
       "venue_stress_ref": "data/v3_worldcup/venue_stress/v3_worldcup_venue_stress_20260603.json",
       "venue_mapping_status": "UNMAPPED",
-      "venue_gap_reason": "fixture_sources_do_not_provide_match_venue",
+      "venue_gap_reason": "VENUE_SOURCE_REQUIRED: no local per-match venue source found",
+      "venue_source_type": "VENUE_SOURCE_REQUIRED",
+      "venue_mapping_confidence": "NONE",
+      "manual_mapping_required": true,
+      "venue_mapping_bridge_ref": "data/manual_sources/v3_worldcup/war_room/v3_wc2026_venue_mapping_bridge.json#mt_153636108",
       "fixture_mapping_bridge_ref": "data/manual_sources/v3_worldcup/war_room/v3_wc2026_fixture_mapping_bridge.json#mt_153636108"
     },
     "venue_stress_summary": {
-      "status": "VENUE_LAYER_READY_FIXTURE_VENUE_NOT_MAPPED",
+      "status": "VENUE_SOURCE_REQUIRED",
       "source": "data/v3_worldcup/venue_stress/v3_worldcup_venue_stress_20260603.json",
       "venue_count": 16,
       "stress_tags": [
         "WATCH_ONLY"
       ],
-      "observation_note": "fixture_sources_do_not_provide_match_venue"
+      "observation_note": "VENUE_SOURCE_REQUIRED: no local per-match venue source found"
     },
     "home_final_26_profile_ref": "data/manual_sources/v3_worldcup/squads/fifa_final_26/processed/v3_wc2026_final_26_squad_profile_team_cards.json#mexico",
     "away_final_26_profile_ref": "data/manual_sources/v3_worldcup/squads/fifa_final_26/processed/v3_wc2026_final_26_squad_profile_team_cards.json#korea_republic",
@@ -4398,23 +4578,27 @@
     "venue_binding": {
       "venue_name": "VENUE_NOT_MAPPED",
       "venue_slug": "venue_not_mapped",
-      "venue_stress_status": "VENUE_LAYER_READY_FIXTURE_VENUE_NOT_MAPPED",
+      "venue_stress_status": "VENUE_SOURCE_REQUIRED",
       "venue_stress_tags": [
         "WATCH_ONLY"
       ],
       "venue_stress_ref": "data/v3_worldcup/venue_stress/v3_worldcup_venue_stress_20260603.json",
       "venue_mapping_status": "UNMAPPED",
-      "venue_gap_reason": "fixture_sources_do_not_provide_match_venue",
+      "venue_gap_reason": "VENUE_SOURCE_REQUIRED: no local per-match venue source found",
+      "venue_source_type": "VENUE_SOURCE_REQUIRED",
+      "venue_mapping_confidence": "NONE",
+      "manual_mapping_required": true,
+      "venue_mapping_bridge_ref": "data/manual_sources/v3_worldcup/war_room/v3_wc2026_venue_mapping_bridge.json#mt_894046992",
       "fixture_mapping_bridge_ref": "data/manual_sources/v3_worldcup/war_room/v3_wc2026_fixture_mapping_bridge.json#mt_894046992"
     },
     "venue_stress_summary": {
-      "status": "VENUE_LAYER_READY_FIXTURE_VENUE_NOT_MAPPED",
+      "status": "VENUE_SOURCE_REQUIRED",
       "source": "data/v3_worldcup/venue_stress/v3_worldcup_venue_stress_20260603.json",
       "venue_count": 16,
       "stress_tags": [
         "WATCH_ONLY"
       ],
-      "observation_note": "fixture_sources_do_not_provide_match_venue"
+      "observation_note": "VENUE_SOURCE_REQUIRED: no local per-match venue source found"
     },
     "home_final_26_profile_ref": "data/manual_sources/v3_worldcup/squads/fifa_final_26/processed/v3_wc2026_final_26_squad_profile_team_cards.json#canada",
     "away_final_26_profile_ref": "data/manual_sources/v3_worldcup/squads/fifa_final_26/processed/v3_wc2026_final_26_squad_profile_team_cards.json#qatar",
@@ -4496,23 +4680,27 @@
     "venue_binding": {
       "venue_name": "VENUE_NOT_MAPPED",
       "venue_slug": "venue_not_mapped",
-      "venue_stress_status": "VENUE_LAYER_READY_FIXTURE_VENUE_NOT_MAPPED",
+      "venue_stress_status": "VENUE_SOURCE_REQUIRED",
       "venue_stress_tags": [
         "WATCH_ONLY"
       ],
       "venue_stress_ref": "data/v3_worldcup/venue_stress/v3_worldcup_venue_stress_20260603.json",
       "venue_mapping_status": "UNMAPPED",
-      "venue_gap_reason": "fixture_sources_do_not_provide_match_venue",
+      "venue_gap_reason": "VENUE_SOURCE_REQUIRED: no local per-match venue source found",
+      "venue_source_type": "VENUE_SOURCE_REQUIRED",
+      "venue_mapping_confidence": "NONE",
+      "manual_mapping_required": true,
+      "venue_mapping_bridge_ref": "data/manual_sources/v3_worldcup/war_room/v3_wc2026_venue_mapping_bridge.json#mt_641915446",
       "fixture_mapping_bridge_ref": "data/manual_sources/v3_worldcup/war_room/v3_wc2026_fixture_mapping_bridge.json#mt_641915446"
     },
     "venue_stress_summary": {
-      "status": "VENUE_LAYER_READY_FIXTURE_VENUE_NOT_MAPPED",
+      "status": "VENUE_SOURCE_REQUIRED",
       "source": "data/v3_worldcup/venue_stress/v3_worldcup_venue_stress_20260603.json",
       "venue_count": 16,
       "stress_tags": [
         "WATCH_ONLY"
       ],
-      "observation_note": "fixture_sources_do_not_provide_match_venue"
+      "observation_note": "VENUE_SOURCE_REQUIRED: no local per-match venue source found"
     },
     "home_final_26_profile_ref": "data/manual_sources/v3_worldcup/squads/fifa_final_26/processed/v3_wc2026_final_26_squad_profile_team_cards.json#switzerland",
     "away_final_26_profile_ref": "data/manual_sources/v3_worldcup/squads/fifa_final_26/processed/v3_wc2026_final_26_squad_profile_team_cards.json#bosnia_and_herzegovina",
@@ -4594,23 +4782,27 @@
     "venue_binding": {
       "venue_name": "VENUE_NOT_MAPPED",
       "venue_slug": "venue_not_mapped",
-      "venue_stress_status": "VENUE_LAYER_READY_FIXTURE_VENUE_NOT_MAPPED",
+      "venue_stress_status": "VENUE_SOURCE_REQUIRED",
       "venue_stress_tags": [
         "WATCH_ONLY"
       ],
       "venue_stress_ref": "data/v3_worldcup/venue_stress/v3_worldcup_venue_stress_20260603.json",
       "venue_mapping_status": "UNMAPPED",
-      "venue_gap_reason": "fixture_sources_do_not_provide_match_venue",
+      "venue_gap_reason": "VENUE_SOURCE_REQUIRED: no local per-match venue source found",
+      "venue_source_type": "VENUE_SOURCE_REQUIRED",
+      "venue_mapping_confidence": "NONE",
+      "manual_mapping_required": true,
+      "venue_mapping_bridge_ref": "data/manual_sources/v3_worldcup/war_room/v3_wc2026_venue_mapping_bridge.json#mt_209798567",
       "fixture_mapping_bridge_ref": "data/manual_sources/v3_worldcup/war_room/v3_wc2026_fixture_mapping_bridge.json#mt_209798567"
     },
     "venue_stress_summary": {
-      "status": "VENUE_LAYER_READY_FIXTURE_VENUE_NOT_MAPPED",
+      "status": "VENUE_SOURCE_REQUIRED",
       "source": "data/v3_worldcup/venue_stress/v3_worldcup_venue_stress_20260603.json",
       "venue_count": 16,
       "stress_tags": [
         "WATCH_ONLY"
       ],
-      "observation_note": "fixture_sources_do_not_provide_match_venue"
+      "observation_note": "VENUE_SOURCE_REQUIRED: no local per-match venue source found"
     },
     "home_final_26_profile_ref": "data/manual_sources/v3_worldcup/squads/fifa_final_26/processed/v3_wc2026_final_26_squad_profile_team_cards.json#czechia",
     "away_final_26_profile_ref": "data/manual_sources/v3_worldcup/squads/fifa_final_26/processed/v3_wc2026_final_26_squad_profile_team_cards.json#south_africa",
@@ -4690,23 +4882,27 @@
     "venue_binding": {
       "venue_name": "VENUE_NOT_MAPPED",
       "venue_slug": "venue_not_mapped",
-      "venue_stress_status": "VENUE_LAYER_READY_FIXTURE_VENUE_NOT_MAPPED",
+      "venue_stress_status": "VENUE_SOURCE_REQUIRED",
       "venue_stress_tags": [
         "WATCH_ONLY"
       ],
       "venue_stress_ref": "data/v3_worldcup/venue_stress/v3_worldcup_venue_stress_20260603.json",
       "venue_mapping_status": "UNMAPPED",
-      "venue_gap_reason": "fixture_sources_do_not_provide_match_venue",
+      "venue_gap_reason": "VENUE_SOURCE_REQUIRED: no local per-match venue source found",
+      "venue_source_type": "VENUE_SOURCE_REQUIRED",
+      "venue_mapping_confidence": "NONE",
+      "manual_mapping_required": true,
+      "venue_mapping_bridge_ref": "data/manual_sources/v3_worldcup/war_room/v3_wc2026_venue_mapping_bridge.json#mt_986264782",
       "fixture_mapping_bridge_ref": "data/manual_sources/v3_worldcup/war_room/v3_wc2026_fixture_mapping_bridge.json#mt_986264782"
     },
     "venue_stress_summary": {
-      "status": "VENUE_LAYER_READY_FIXTURE_VENUE_NOT_MAPPED",
+      "status": "VENUE_SOURCE_REQUIRED",
       "source": "data/v3_worldcup/venue_stress/v3_worldcup_venue_stress_20260603.json",
       "venue_count": 16,
       "stress_tags": [
         "WATCH_ONLY"
       ],
-      "observation_note": "fixture_sources_do_not_provide_match_venue"
+      "observation_note": "VENUE_SOURCE_REQUIRED: no local per-match venue source found"
     },
     "home_final_26_profile_ref": "data/manual_sources/v3_worldcup/squads/fifa_final_26/processed/v3_wc2026_final_26_squad_profile_team_cards.json#uzbekistan",
     "away_final_26_profile_ref": "data/manual_sources/v3_worldcup/squads/fifa_final_26/processed/v3_wc2026_final_26_squad_profile_team_cards.json#colombia",
@@ -4788,23 +4984,27 @@
     "venue_binding": {
       "venue_name": "VENUE_NOT_MAPPED",
       "venue_slug": "venue_not_mapped",
-      "venue_stress_status": "VENUE_LAYER_READY_FIXTURE_VENUE_NOT_MAPPED",
+      "venue_stress_status": "VENUE_SOURCE_REQUIRED",
       "venue_stress_tags": [
         "WATCH_ONLY"
       ],
       "venue_stress_ref": "data/v3_worldcup/venue_stress/v3_worldcup_venue_stress_20260603.json",
       "venue_mapping_status": "UNMAPPED",
-      "venue_gap_reason": "fixture_sources_do_not_provide_match_venue",
+      "venue_gap_reason": "VENUE_SOURCE_REQUIRED: no local per-match venue source found",
+      "venue_source_type": "VENUE_SOURCE_REQUIRED",
+      "venue_mapping_confidence": "NONE",
+      "manual_mapping_required": true,
+      "venue_mapping_bridge_ref": "data/manual_sources/v3_worldcup/war_room/v3_wc2026_venue_mapping_bridge.json#mt_370102032",
       "fixture_mapping_bridge_ref": "data/manual_sources/v3_worldcup/war_room/v3_wc2026_fixture_mapping_bridge.json#mt_370102032"
     },
     "venue_stress_summary": {
-      "status": "VENUE_LAYER_READY_FIXTURE_VENUE_NOT_MAPPED",
+      "status": "VENUE_SOURCE_REQUIRED",
       "source": "data/v3_worldcup/venue_stress/v3_worldcup_venue_stress_20260603.json",
       "venue_count": 16,
       "stress_tags": [
         "WATCH_ONLY"
       ],
-      "observation_note": "fixture_sources_do_not_provide_match_venue"
+      "observation_note": "VENUE_SOURCE_REQUIRED: no local per-match venue source found"
     },
     "home_final_26_profile_ref": "data/manual_sources/v3_worldcup/squads/fifa_final_26/processed/v3_wc2026_final_26_squad_profile_team_cards.json#ghana",
     "away_final_26_profile_ref": "data/manual_sources/v3_worldcup/squads/fifa_final_26/processed/v3_wc2026_final_26_squad_profile_team_cards.json#panama",
@@ -4884,23 +5084,27 @@
     "venue_binding": {
       "venue_name": "VENUE_NOT_MAPPED",
       "venue_slug": "venue_not_mapped",
-      "venue_stress_status": "VENUE_LAYER_READY_FIXTURE_VENUE_NOT_MAPPED",
+      "venue_stress_status": "VENUE_SOURCE_REQUIRED",
       "venue_stress_tags": [
         "WATCH_ONLY"
       ],
       "venue_stress_ref": "data/v3_worldcup/venue_stress/v3_worldcup_venue_stress_20260603.json",
       "venue_mapping_status": "UNMAPPED",
-      "venue_gap_reason": "fixture_sources_do_not_provide_match_venue",
+      "venue_gap_reason": "VENUE_SOURCE_REQUIRED: no local per-match venue source found",
+      "venue_source_type": "VENUE_SOURCE_REQUIRED",
+      "venue_mapping_confidence": "NONE",
+      "manual_mapping_required": true,
+      "venue_mapping_bridge_ref": "data/manual_sources/v3_worldcup/war_room/v3_wc2026_venue_mapping_bridge.json#mt_028383092",
       "fixture_mapping_bridge_ref": "data/manual_sources/v3_worldcup/war_room/v3_wc2026_fixture_mapping_bridge.json#mt_028383092"
     },
     "venue_stress_summary": {
-      "status": "VENUE_LAYER_READY_FIXTURE_VENUE_NOT_MAPPED",
+      "status": "VENUE_SOURCE_REQUIRED",
       "source": "data/v3_worldcup/venue_stress/v3_worldcup_venue_stress_20260603.json",
       "venue_count": 16,
       "stress_tags": [
         "WATCH_ONLY"
       ],
-      "observation_note": "fixture_sources_do_not_provide_match_venue"
+      "observation_note": "VENUE_SOURCE_REQUIRED: no local per-match venue source found"
     },
     "home_final_26_profile_ref": "data/manual_sources/v3_worldcup/squads/fifa_final_26/processed/v3_wc2026_final_26_squad_profile_team_cards.json#england",
     "away_final_26_profile_ref": "data/manual_sources/v3_worldcup/squads/fifa_final_26/processed/v3_wc2026_final_26_squad_profile_team_cards.json#croatia",
@@ -4985,23 +5189,27 @@
     "venue_binding": {
       "venue_name": "VENUE_NOT_MAPPED",
       "venue_slug": "venue_not_mapped",
-      "venue_stress_status": "VENUE_LAYER_READY_FIXTURE_VENUE_NOT_MAPPED",
+      "venue_stress_status": "VENUE_SOURCE_REQUIRED",
       "venue_stress_tags": [
         "WATCH_ONLY"
       ],
       "venue_stress_ref": "data/v3_worldcup/venue_stress/v3_worldcup_venue_stress_20260603.json",
       "venue_mapping_status": "UNMAPPED",
-      "venue_gap_reason": "fixture_sources_do_not_provide_match_venue",
+      "venue_gap_reason": "VENUE_SOURCE_REQUIRED: no local per-match venue source found",
+      "venue_source_type": "VENUE_SOURCE_REQUIRED",
+      "venue_mapping_confidence": "NONE",
+      "manual_mapping_required": true,
+      "venue_mapping_bridge_ref": "data/manual_sources/v3_worldcup/war_room/v3_wc2026_venue_mapping_bridge.json#mt_732520442",
       "fixture_mapping_bridge_ref": "data/manual_sources/v3_worldcup/war_room/v3_wc2026_fixture_mapping_bridge.json#mt_732520442"
     },
     "venue_stress_summary": {
-      "status": "VENUE_LAYER_READY_FIXTURE_VENUE_NOT_MAPPED",
+      "status": "VENUE_SOURCE_REQUIRED",
       "source": "data/v3_worldcup/venue_stress/v3_worldcup_venue_stress_20260603.json",
       "venue_count": 16,
       "stress_tags": [
         "WATCH_ONLY"
       ],
-      "observation_note": "fixture_sources_do_not_provide_match_venue"
+      "observation_note": "VENUE_SOURCE_REQUIRED: no local per-match venue source found"
     },
     "home_final_26_profile_ref": "data/manual_sources/v3_worldcup/squads/fifa_final_26/processed/v3_wc2026_final_26_squad_profile_team_cards.json#portugal",
     "away_final_26_profile_ref": "data/manual_sources/v3_worldcup/squads/fifa_final_26/processed/v3_wc2026_final_26_squad_profile_team_cards.json#congo_dr",
@@ -5083,23 +5291,27 @@
     "venue_binding": {
       "venue_name": "VENUE_NOT_MAPPED",
       "venue_slug": "venue_not_mapped",
-      "venue_stress_status": "VENUE_LAYER_READY_FIXTURE_VENUE_NOT_MAPPED",
+      "venue_stress_status": "VENUE_SOURCE_REQUIRED",
       "venue_stress_tags": [
         "WATCH_ONLY"
       ],
       "venue_stress_ref": "data/v3_worldcup/venue_stress/v3_worldcup_venue_stress_20260603.json",
       "venue_mapping_status": "UNMAPPED",
-      "venue_gap_reason": "fixture_sources_do_not_provide_match_venue",
+      "venue_gap_reason": "VENUE_SOURCE_REQUIRED: no local per-match venue source found",
+      "venue_source_type": "VENUE_SOURCE_REQUIRED",
+      "venue_mapping_confidence": "NONE",
+      "manual_mapping_required": true,
+      "venue_mapping_bridge_ref": "data/manual_sources/v3_worldcup/war_room/v3_wc2026_venue_mapping_bridge.json#mt_209798581",
       "fixture_mapping_bridge_ref": "data/manual_sources/v3_worldcup/war_room/v3_wc2026_fixture_mapping_bridge.json#mt_209798581"
     },
     "venue_stress_summary": {
-      "status": "VENUE_LAYER_READY_FIXTURE_VENUE_NOT_MAPPED",
+      "status": "VENUE_SOURCE_REQUIRED",
       "source": "data/v3_worldcup/venue_stress/v3_worldcup_venue_stress_20260603.json",
       "venue_count": 16,
       "stress_tags": [
         "WATCH_ONLY"
       ],
-      "observation_note": "fixture_sources_do_not_provide_match_venue"
+      "observation_note": "VENUE_SOURCE_REQUIRED: no local per-match venue source found"
     },
     "home_final_26_profile_ref": "data/manual_sources/v3_worldcup/squads/fifa_final_26/processed/v3_wc2026_final_26_squad_profile_team_cards.json#austria",
     "away_final_26_profile_ref": "data/manual_sources/v3_worldcup/squads/fifa_final_26/processed/v3_wc2026_final_26_squad_profile_team_cards.json#jordan",
@@ -5179,23 +5391,27 @@
     "venue_binding": {
       "venue_name": "VENUE_NOT_MAPPED",
       "venue_slug": "venue_not_mapped",
-      "venue_stress_status": "VENUE_LAYER_READY_FIXTURE_VENUE_NOT_MAPPED",
+      "venue_stress_status": "VENUE_SOURCE_REQUIRED",
       "venue_stress_tags": [
         "WATCH_ONLY"
       ],
       "venue_stress_ref": "data/v3_worldcup/venue_stress/v3_worldcup_venue_stress_20260603.json",
       "venue_mapping_status": "UNMAPPED",
-      "venue_gap_reason": "fixture_sources_do_not_provide_match_venue",
+      "venue_gap_reason": "VENUE_SOURCE_REQUIRED: no local per-match venue source found",
+      "venue_source_type": "VENUE_SOURCE_REQUIRED",
+      "venue_mapping_confidence": "NONE",
+      "manual_mapping_required": true,
+      "venue_mapping_bridge_ref": "data/manual_sources/v3_worldcup/war_room/v3_wc2026_venue_mapping_bridge.json#mt_028389471",
       "fixture_mapping_bridge_ref": "data/manual_sources/v3_worldcup/war_room/v3_wc2026_fixture_mapping_bridge.json#mt_028389471"
     },
     "venue_stress_summary": {
-      "status": "VENUE_LAYER_READY_FIXTURE_VENUE_NOT_MAPPED",
+      "status": "VENUE_SOURCE_REQUIRED",
       "source": "data/v3_worldcup/venue_stress/v3_worldcup_venue_stress_20260603.json",
       "venue_count": 16,
       "stress_tags": [
         "WATCH_ONLY"
       ],
-      "observation_note": "fixture_sources_do_not_provide_match_venue"
+      "observation_note": "VENUE_SOURCE_REQUIRED: no local per-match venue source found"
     },
     "home_final_26_profile_ref": "data/manual_sources/v3_worldcup/squads/fifa_final_26/processed/v3_wc2026_final_26_squad_profile_team_cards.json#argentina",
     "away_final_26_profile_ref": "data/manual_sources/v3_worldcup/squads/fifa_final_26/processed/v3_wc2026_final_26_squad_profile_team_cards.json#algeria",
@@ -5278,23 +5494,27 @@
     "venue_binding": {
       "venue_name": "VENUE_NOT_MAPPED",
       "venue_slug": "venue_not_mapped",
-      "venue_stress_status": "VENUE_LAYER_READY_FIXTURE_VENUE_NOT_MAPPED",
+      "venue_stress_status": "VENUE_SOURCE_REQUIRED",
       "venue_stress_tags": [
         "WATCH_ONLY"
       ],
       "venue_stress_ref": "data/v3_worldcup/venue_stress/v3_worldcup_venue_stress_20260603.json",
       "venue_mapping_status": "UNMAPPED",
-      "venue_gap_reason": "fixture_sources_do_not_provide_match_venue",
+      "venue_gap_reason": "VENUE_SOURCE_REQUIRED: no local per-match venue source found",
+      "venue_source_type": "VENUE_SOURCE_REQUIRED",
+      "venue_mapping_confidence": "NONE",
+      "manual_mapping_required": true,
+      "venue_mapping_bridge_ref": "data/manual_sources/v3_worldcup/war_room/v3_wc2026_venue_mapping_bridge.json#mt_517473168",
       "fixture_mapping_bridge_ref": "data/manual_sources/v3_worldcup/war_room/v3_wc2026_fixture_mapping_bridge.json#mt_517473168"
     },
     "venue_stress_summary": {
-      "status": "VENUE_LAYER_READY_FIXTURE_VENUE_NOT_MAPPED",
+      "status": "VENUE_SOURCE_REQUIRED",
       "source": "data/v3_worldcup/venue_stress/v3_worldcup_venue_stress_20260603.json",
       "venue_count": 16,
       "stress_tags": [
         "WATCH_ONLY"
       ],
-      "observation_note": "fixture_sources_do_not_provide_match_venue"
+      "observation_note": "VENUE_SOURCE_REQUIRED: no local per-match venue source found"
     },
     "home_final_26_profile_ref": "data/manual_sources/v3_worldcup/squads/fifa_final_26/processed/v3_wc2026_final_26_squad_profile_team_cards.json#iraq",
     "away_final_26_profile_ref": "data/manual_sources/v3_worldcup/squads/fifa_final_26/processed/v3_wc2026_final_26_squad_profile_team_cards.json#norway",
@@ -5374,23 +5594,27 @@
     "venue_binding": {
       "venue_name": "VENUE_NOT_MAPPED",
       "venue_slug": "venue_not_mapped",
-      "venue_stress_status": "VENUE_LAYER_READY_FIXTURE_VENUE_NOT_MAPPED",
+      "venue_stress_status": "VENUE_SOURCE_REQUIRED",
       "venue_stress_tags": [
         "WATCH_ONLY"
       ],
       "venue_stress_ref": "data/v3_worldcup/venue_stress/v3_worldcup_venue_stress_20260603.json",
       "venue_mapping_status": "UNMAPPED",
-      "venue_gap_reason": "fixture_sources_do_not_provide_match_venue",
+      "venue_gap_reason": "VENUE_SOURCE_REQUIRED: no local per-match venue source found",
+      "venue_source_type": "VENUE_SOURCE_REQUIRED",
+      "venue_mapping_confidence": "NONE",
+      "manual_mapping_required": true,
+      "venue_mapping_bridge_ref": "data/manual_sources/v3_worldcup/war_room/v3_wc2026_venue_mapping_bridge.json#mt_209797283",
       "fixture_mapping_bridge_ref": "data/manual_sources/v3_worldcup/war_room/v3_wc2026_fixture_mapping_bridge.json#mt_209797283"
     },
     "venue_stress_summary": {
-      "status": "VENUE_LAYER_READY_FIXTURE_VENUE_NOT_MAPPED",
+      "status": "VENUE_SOURCE_REQUIRED",
       "source": "data/v3_worldcup/venue_stress/v3_worldcup_venue_stress_20260603.json",
       "venue_count": 16,
       "stress_tags": [
         "WATCH_ONLY"
       ],
-      "observation_note": "fixture_sources_do_not_provide_match_venue"
+      "observation_note": "VENUE_SOURCE_REQUIRED: no local per-match venue source found"
     },
     "home_final_26_profile_ref": "data/manual_sources/v3_worldcup/squads/fifa_final_26/processed/v3_wc2026_final_26_squad_profile_team_cards.json#france",
     "away_final_26_profile_ref": "data/manual_sources/v3_worldcup/squads/fifa_final_26/processed/v3_wc2026_final_26_squad_profile_team_cards.json#senegal",
@@ -5475,23 +5699,27 @@
     "venue_binding": {
       "venue_name": "VENUE_NOT_MAPPED",
       "venue_slug": "venue_not_mapped",
-      "venue_stress_status": "VENUE_LAYER_READY_FIXTURE_VENUE_NOT_MAPPED",
+      "venue_stress_status": "VENUE_SOURCE_REQUIRED",
       "venue_stress_tags": [
         "WATCH_ONLY"
       ],
       "venue_stress_ref": "data/v3_worldcup/venue_stress/v3_worldcup_venue_stress_20260603.json",
       "venue_mapping_status": "UNMAPPED",
-      "venue_gap_reason": "fixture_sources_do_not_provide_match_venue",
+      "venue_gap_reason": "VENUE_SOURCE_REQUIRED: no local per-match venue source found",
+      "venue_source_type": "VENUE_SOURCE_REQUIRED",
+      "venue_mapping_confidence": "NONE",
+      "manual_mapping_required": true,
+      "venue_mapping_bridge_ref": "data/manual_sources/v3_worldcup/war_room/v3_wc2026_venue_mapping_bridge.json#mt_986264843",
       "fixture_mapping_bridge_ref": "data/manual_sources/v3_worldcup/war_room/v3_wc2026_fixture_mapping_bridge.json#mt_986264843"
     },
     "venue_stress_summary": {
-      "status": "VENUE_LAYER_READY_FIXTURE_VENUE_NOT_MAPPED",
+      "status": "VENUE_SOURCE_REQUIRED",
       "source": "data/v3_worldcup/venue_stress/v3_worldcup_venue_stress_20260603.json",
       "venue_count": 16,
       "stress_tags": [
         "WATCH_ONLY"
       ],
-      "observation_note": "fixture_sources_do_not_provide_match_venue"
+      "observation_note": "VENUE_SOURCE_REQUIRED: no local per-match venue source found"
     },
     "home_final_26_profile_ref": "data/manual_sources/v3_worldcup/squads/fifa_final_26/processed/v3_wc2026_final_26_squad_profile_team_cards.json#ir_iran",
     "away_final_26_profile_ref": "data/manual_sources/v3_worldcup/squads/fifa_final_26/processed/v3_wc2026_final_26_squad_profile_team_cards.json#new_zealand",
@@ -5571,23 +5799,27 @@
     "venue_binding": {
       "venue_name": "VENUE_NOT_MAPPED",
       "venue_slug": "venue_not_mapped",
-      "venue_stress_status": "VENUE_LAYER_READY_FIXTURE_VENUE_NOT_MAPPED",
+      "venue_stress_status": "VENUE_SOURCE_REQUIRED",
       "venue_stress_tags": [
         "WATCH_ONLY"
       ],
       "venue_stress_ref": "data/v3_worldcup/venue_stress/v3_worldcup_venue_stress_20260603.json",
       "venue_mapping_status": "UNMAPPED",
-      "venue_gap_reason": "fixture_sources_do_not_provide_match_venue",
+      "venue_gap_reason": "VENUE_SOURCE_REQUIRED: no local per-match venue source found",
+      "venue_source_type": "VENUE_SOURCE_REQUIRED",
+      "venue_mapping_confidence": "NONE",
+      "manual_mapping_required": true,
+      "venue_mapping_bridge_ref": "data/manual_sources/v3_worldcup/war_room/v3_wc2026_venue_mapping_bridge.json#mt_209798066",
       "fixture_mapping_bridge_ref": "data/manual_sources/v3_worldcup/war_room/v3_wc2026_fixture_mapping_bridge.json#mt_209798066"
     },
     "venue_stress_summary": {
-      "status": "VENUE_LAYER_READY_FIXTURE_VENUE_NOT_MAPPED",
+      "status": "VENUE_SOURCE_REQUIRED",
       "source": "data/v3_worldcup/venue_stress/v3_worldcup_venue_stress_20260603.json",
       "venue_count": 16,
       "stress_tags": [
         "WATCH_ONLY"
       ],
-      "observation_note": "fixture_sources_do_not_provide_match_venue"
+      "observation_note": "VENUE_SOURCE_REQUIRED: no local per-match venue source found"
     },
     "home_final_26_profile_ref": "data/manual_sources/v3_worldcup/squads/fifa_final_26/processed/v3_wc2026_final_26_squad_profile_team_cards.json#saudi_arabia",
     "away_final_26_profile_ref": "data/manual_sources/v3_worldcup/squads/fifa_final_26/processed/v3_wc2026_final_26_squad_profile_team_cards.json#uruguay",
@@ -5667,23 +5899,27 @@
     "venue_binding": {
       "venue_name": "VENUE_NOT_MAPPED",
       "venue_slug": "venue_not_mapped",
-      "venue_stress_status": "VENUE_LAYER_READY_FIXTURE_VENUE_NOT_MAPPED",
+      "venue_stress_status": "VENUE_SOURCE_REQUIRED",
       "venue_stress_tags": [
         "WATCH_ONLY"
       ],
       "venue_stress_ref": "data/v3_worldcup/venue_stress/v3_worldcup_venue_stress_20260603.json",
       "venue_mapping_status": "UNMAPPED",
-      "venue_gap_reason": "fixture_sources_do_not_provide_match_venue",
+      "venue_gap_reason": "VENUE_SOURCE_REQUIRED: no local per-match venue source found",
+      "venue_source_type": "VENUE_SOURCE_REQUIRED",
+      "venue_mapping_confidence": "NONE",
+      "manual_mapping_required": true,
+      "venue_mapping_bridge_ref": "data/manual_sources/v3_worldcup/war_room/v3_wc2026_venue_mapping_bridge.json#mt_370102747",
       "fixture_mapping_bridge_ref": "data/manual_sources/v3_worldcup/war_room/v3_wc2026_fixture_mapping_bridge.json#mt_370102747"
     },
     "venue_stress_summary": {
-      "status": "VENUE_LAYER_READY_FIXTURE_VENUE_NOT_MAPPED",
+      "status": "VENUE_SOURCE_REQUIRED",
       "source": "data/v3_worldcup/venue_stress/v3_worldcup_venue_stress_20260603.json",
       "venue_count": 16,
       "stress_tags": [
         "WATCH_ONLY"
       ],
-      "observation_note": "fixture_sources_do_not_provide_match_venue"
+      "observation_note": "VENUE_SOURCE_REQUIRED: no local per-match venue source found"
     },
     "home_final_26_profile_ref": "data/manual_sources/v3_worldcup/squads/fifa_final_26/processed/v3_wc2026_final_26_squad_profile_team_cards.json#belgium",
     "away_final_26_profile_ref": "data/manual_sources/v3_worldcup/squads/fifa_final_26/processed/v3_wc2026_final_26_squad_profile_team_cards.json#egypt",
@@ -5766,23 +6002,27 @@
     "venue_binding": {
       "venue_name": "VENUE_NOT_MAPPED",
       "venue_slug": "venue_not_mapped",
-      "venue_stress_status": "VENUE_LAYER_READY_FIXTURE_VENUE_NOT_MAPPED",
+      "venue_stress_status": "VENUE_SOURCE_REQUIRED",
       "venue_stress_tags": [
         "WATCH_ONLY"
       ],
       "venue_stress_ref": "data/v3_worldcup/venue_stress/v3_worldcup_venue_stress_20260603.json",
       "venue_mapping_status": "UNMAPPED",
-      "venue_gap_reason": "fixture_sources_do_not_provide_match_venue",
+      "venue_gap_reason": "VENUE_SOURCE_REQUIRED: no local per-match venue source found",
+      "venue_source_type": "VENUE_SOURCE_REQUIRED",
+      "venue_mapping_confidence": "NONE",
+      "manual_mapping_required": true,
+      "venue_mapping_bridge_ref": "data/manual_sources/v3_worldcup/war_room/v3_wc2026_venue_mapping_bridge.json#mt_517473171",
       "fixture_mapping_bridge_ref": "data/manual_sources/v3_worldcup/war_room/v3_wc2026_fixture_mapping_bridge.json#mt_517473171"
     },
     "venue_stress_summary": {
-      "status": "VENUE_LAYER_READY_FIXTURE_VENUE_NOT_MAPPED",
+      "status": "VENUE_SOURCE_REQUIRED",
       "source": "data/v3_worldcup/venue_stress/v3_worldcup_venue_stress_20260603.json",
       "venue_count": 16,
       "stress_tags": [
         "WATCH_ONLY"
       ],
-      "observation_note": "fixture_sources_do_not_provide_match_venue"
+      "observation_note": "VENUE_SOURCE_REQUIRED: no local per-match venue source found"
     },
     "home_final_26_profile_ref": "data/manual_sources/v3_worldcup/squads/fifa_final_26/processed/v3_wc2026_final_26_squad_profile_team_cards.json#spain",
     "away_final_26_profile_ref": "data/manual_sources/v3_worldcup/squads/fifa_final_26/processed/v3_wc2026_final_26_squad_profile_team_cards.json#cabo_verde",
@@ -5862,23 +6102,27 @@
     "venue_binding": {
       "venue_name": "VENUE_NOT_MAPPED",
       "venue_slug": "venue_not_mapped",
-      "venue_stress_status": "VENUE_LAYER_READY_FIXTURE_VENUE_NOT_MAPPED",
+      "venue_stress_status": "VENUE_SOURCE_REQUIRED",
       "venue_stress_tags": [
         "WATCH_ONLY"
       ],
       "venue_stress_ref": "data/v3_worldcup/venue_stress/v3_worldcup_venue_stress_20260603.json",
       "venue_mapping_status": "UNMAPPED",
-      "venue_gap_reason": "fixture_sources_do_not_provide_match_venue",
+      "venue_gap_reason": "VENUE_SOURCE_REQUIRED: no local per-match venue source found",
+      "venue_source_type": "VENUE_SOURCE_REQUIRED",
+      "venue_mapping_confidence": "NONE",
+      "manual_mapping_required": true,
+      "venue_mapping_bridge_ref": "data/manual_sources/v3_worldcup/war_room/v3_wc2026_venue_mapping_bridge.json#mt_209798753",
       "fixture_mapping_bridge_ref": "data/manual_sources/v3_worldcup/war_room/v3_wc2026_fixture_mapping_bridge.json#mt_209798753"
     },
     "venue_stress_summary": {
-      "status": "VENUE_LAYER_READY_FIXTURE_VENUE_NOT_MAPPED",
+      "status": "VENUE_SOURCE_REQUIRED",
       "source": "data/v3_worldcup/venue_stress/v3_worldcup_venue_stress_20260603.json",
       "venue_count": 16,
       "stress_tags": [
         "WATCH_ONLY"
       ],
-      "observation_note": "fixture_sources_do_not_provide_match_venue"
+      "observation_note": "VENUE_SOURCE_REQUIRED: no local per-match venue source found"
     },
     "home_final_26_profile_ref": "data/manual_sources/v3_worldcup/squads/fifa_final_26/processed/v3_wc2026_final_26_squad_profile_team_cards.json#sweden",
     "away_final_26_profile_ref": "data/manual_sources/v3_worldcup/squads/fifa_final_26/processed/v3_wc2026_final_26_squad_profile_team_cards.json#tunisia",
@@ -5958,23 +6202,27 @@
     "venue_binding": {
       "venue_name": "VENUE_NOT_MAPPED",
       "venue_slug": "venue_not_mapped",
-      "venue_stress_status": "VENUE_LAYER_READY_FIXTURE_VENUE_NOT_MAPPED",
+      "venue_stress_status": "VENUE_SOURCE_REQUIRED",
       "venue_stress_tags": [
         "WATCH_ONLY"
       ],
       "venue_stress_ref": "data/v3_worldcup/venue_stress/v3_worldcup_venue_stress_20260603.json",
       "venue_mapping_status": "UNMAPPED",
-      "venue_gap_reason": "fixture_sources_do_not_provide_match_venue",
+      "venue_gap_reason": "VENUE_SOURCE_REQUIRED: no local per-match venue source found",
+      "venue_source_type": "VENUE_SOURCE_REQUIRED",
+      "venue_mapping_confidence": "NONE",
+      "manual_mapping_required": true,
+      "venue_mapping_bridge_ref": "data/manual_sources/v3_worldcup/war_room/v3_wc2026_venue_mapping_bridge.json#mt_028389435",
       "fixture_mapping_bridge_ref": "data/manual_sources/v3_worldcup/war_room/v3_wc2026_fixture_mapping_bridge.json#mt_028389435"
     },
     "venue_stress_summary": {
-      "status": "VENUE_LAYER_READY_FIXTURE_VENUE_NOT_MAPPED",
+      "status": "VENUE_SOURCE_REQUIRED",
       "source": "data/v3_worldcup/venue_stress/v3_worldcup_venue_stress_20260603.json",
       "venue_count": 16,
       "stress_tags": [
         "WATCH_ONLY"
       ],
-      "observation_note": "fixture_sources_do_not_provide_match_venue"
+      "observation_note": "VENUE_SOURCE_REQUIRED: no local per-match venue source found"
     },
     "home_final_26_profile_ref": "data/manual_sources/v3_worldcup/squads/fifa_final_26/processed/v3_wc2026_final_26_squad_profile_team_cards.json#cote_divoire",
     "away_final_26_profile_ref": "data/manual_sources/v3_worldcup/squads/fifa_final_26/processed/v3_wc2026_final_26_squad_profile_team_cards.json#ecuador",
@@ -6056,23 +6304,27 @@
     "venue_binding": {
       "venue_name": "VENUE_NOT_MAPPED",
       "venue_slug": "venue_not_mapped",
-      "venue_stress_status": "VENUE_LAYER_READY_FIXTURE_VENUE_NOT_MAPPED",
+      "venue_stress_status": "VENUE_SOURCE_REQUIRED",
       "venue_stress_tags": [
         "WATCH_ONLY"
       ],
       "venue_stress_ref": "data/v3_worldcup/venue_stress/v3_worldcup_venue_stress_20260603.json",
       "venue_mapping_status": "UNMAPPED",
-      "venue_gap_reason": "fixture_sources_do_not_provide_match_venue",
+      "venue_gap_reason": "VENUE_SOURCE_REQUIRED: no local per-match venue source found",
+      "venue_source_type": "VENUE_SOURCE_REQUIRED",
+      "venue_mapping_confidence": "NONE",
+      "manual_mapping_required": true,
+      "venue_mapping_bridge_ref": "data/manual_sources/v3_worldcup/war_room/v3_wc2026_venue_mapping_bridge.json#mt_465851856",
       "fixture_mapping_bridge_ref": "data/manual_sources/v3_worldcup/war_room/v3_wc2026_fixture_mapping_bridge.json#mt_465851856"
     },
     "venue_stress_summary": {
-      "status": "VENUE_LAYER_READY_FIXTURE_VENUE_NOT_MAPPED",
+      "status": "VENUE_SOURCE_REQUIRED",
       "source": "data/v3_worldcup/venue_stress/v3_worldcup_venue_stress_20260603.json",
       "venue_count": 16,
       "stress_tags": [
         "WATCH_ONLY"
       ],
-      "observation_note": "fixture_sources_do_not_provide_match_venue"
+      "observation_note": "VENUE_SOURCE_REQUIRED: no local per-match venue source found"
     },
     "home_final_26_profile_ref": "data/manual_sources/v3_worldcup/squads/fifa_final_26/processed/v3_wc2026_final_26_squad_profile_team_cards.json#netherlands",
     "away_final_26_profile_ref": "data/manual_sources/v3_worldcup/squads/fifa_final_26/processed/v3_wc2026_final_26_squad_profile_team_cards.json#japan",
@@ -6154,23 +6406,27 @@
     "venue_binding": {
       "venue_name": "VENUE_NOT_MAPPED",
       "venue_slug": "venue_not_mapped",
-      "venue_stress_status": "VENUE_LAYER_READY_FIXTURE_VENUE_NOT_MAPPED",
+      "venue_stress_status": "VENUE_SOURCE_REQUIRED",
       "venue_stress_tags": [
         "WATCH_ONLY"
       ],
       "venue_stress_ref": "data/v3_worldcup/venue_stress/v3_worldcup_venue_stress_20260603.json",
       "venue_mapping_status": "UNMAPPED",
-      "venue_gap_reason": "fixture_sources_do_not_provide_match_venue",
+      "venue_gap_reason": "VENUE_SOURCE_REQUIRED: no local per-match venue source found",
+      "venue_source_type": "VENUE_SOURCE_REQUIRED",
+      "venue_mapping_confidence": "NONE",
+      "manual_mapping_required": true,
+      "venue_mapping_bridge_ref": "data/manual_sources/v3_worldcup/war_room/v3_wc2026_venue_mapping_bridge.json#mt_732520954",
       "fixture_mapping_bridge_ref": "data/manual_sources/v3_worldcup/war_room/v3_wc2026_fixture_mapping_bridge.json#mt_732520954"
     },
     "venue_stress_summary": {
-      "status": "VENUE_LAYER_READY_FIXTURE_VENUE_NOT_MAPPED",
+      "status": "VENUE_SOURCE_REQUIRED",
       "source": "data/v3_worldcup/venue_stress/v3_worldcup_venue_stress_20260603.json",
       "venue_count": 16,
       "stress_tags": [
         "WATCH_ONLY"
       ],
-      "observation_note": "fixture_sources_do_not_provide_match_venue"
+      "observation_note": "VENUE_SOURCE_REQUIRED: no local per-match venue source found"
     },
     "home_final_26_profile_ref": "data/manual_sources/v3_worldcup/squads/fifa_final_26/processed/v3_wc2026_final_26_squad_profile_team_cards.json#germany",
     "away_final_26_profile_ref": "data/manual_sources/v3_worldcup/squads/fifa_final_26/processed/v3_wc2026_final_26_squad_profile_team_cards.json#curacao",
@@ -6250,23 +6506,27 @@
     "venue_binding": {
       "venue_name": "VENUE_NOT_MAPPED",
       "venue_slug": "venue_not_mapped",
-      "venue_stress_status": "VENUE_LAYER_READY_FIXTURE_VENUE_NOT_MAPPED",
+      "venue_stress_status": "VENUE_SOURCE_REQUIRED",
       "venue_stress_tags": [
         "WATCH_ONLY"
       ],
       "venue_stress_ref": "data/v3_worldcup/venue_stress/v3_worldcup_venue_stress_20260603.json",
       "venue_mapping_status": "UNMAPPED",
-      "venue_gap_reason": "fixture_sources_do_not_provide_match_venue",
+      "venue_gap_reason": "VENUE_SOURCE_REQUIRED: no local per-match venue source found",
+      "venue_source_type": "VENUE_SOURCE_REQUIRED",
+      "venue_mapping_confidence": "NONE",
+      "manual_mapping_required": true,
+      "venue_mapping_bridge_ref": "data/manual_sources/v3_worldcup/war_room/v3_wc2026_venue_mapping_bridge.json#mt_028389414",
       "fixture_mapping_bridge_ref": "data/manual_sources/v3_worldcup/war_room/v3_wc2026_fixture_mapping_bridge.json#mt_028389414"
     },
     "venue_stress_summary": {
-      "status": "VENUE_LAYER_READY_FIXTURE_VENUE_NOT_MAPPED",
+      "status": "VENUE_SOURCE_REQUIRED",
       "source": "data/v3_worldcup/venue_stress/v3_worldcup_venue_stress_20260603.json",
       "venue_count": 16,
       "stress_tags": [
         "WATCH_ONLY"
       ],
-      "observation_note": "fixture_sources_do_not_provide_match_venue"
+      "observation_note": "VENUE_SOURCE_REQUIRED: no local per-match venue source found"
     },
     "home_final_26_profile_ref": "data/manual_sources/v3_worldcup/squads/fifa_final_26/processed/v3_wc2026_final_26_squad_profile_team_cards.json#australia",
     "away_final_26_profile_ref": "data/manual_sources/v3_worldcup/squads/fifa_final_26/processed/v3_wc2026_final_26_squad_profile_team_cards.json#turkiye",
@@ -6348,23 +6608,27 @@
     "venue_binding": {
       "venue_name": "VENUE_NOT_MAPPED",
       "venue_slug": "venue_not_mapped",
-      "venue_stress_status": "VENUE_LAYER_READY_FIXTURE_VENUE_NOT_MAPPED",
+      "venue_stress_status": "VENUE_SOURCE_REQUIRED",
       "venue_stress_tags": [
         "WATCH_ONLY"
       ],
       "venue_stress_ref": "data/v3_worldcup/venue_stress/v3_worldcup_venue_stress_20260603.json",
       "venue_mapping_status": "UNMAPPED",
-      "venue_gap_reason": "fixture_sources_do_not_provide_match_venue",
+      "venue_gap_reason": "VENUE_SOURCE_REQUIRED: no local per-match venue source found",
+      "venue_source_type": "VENUE_SOURCE_REQUIRED",
+      "venue_mapping_confidence": "NONE",
+      "manual_mapping_required": true,
+      "venue_mapping_bridge_ref": "data/manual_sources/v3_worldcup/war_room/v3_wc2026_venue_mapping_bridge.json#mt_517473267",
       "fixture_mapping_bridge_ref": "data/manual_sources/v3_worldcup/war_room/v3_wc2026_fixture_mapping_bridge.json#mt_517473267"
     },
     "venue_stress_summary": {
-      "status": "VENUE_LAYER_READY_FIXTURE_VENUE_NOT_MAPPED",
+      "status": "VENUE_SOURCE_REQUIRED",
       "source": "data/v3_worldcup/venue_stress/v3_worldcup_venue_stress_20260603.json",
       "venue_count": 16,
       "stress_tags": [
         "WATCH_ONLY"
       ],
-      "observation_note": "fixture_sources_do_not_provide_match_venue"
+      "observation_note": "VENUE_SOURCE_REQUIRED: no local per-match venue source found"
     },
     "home_final_26_profile_ref": "data/manual_sources/v3_worldcup/squads/fifa_final_26/processed/v3_wc2026_final_26_squad_profile_team_cards.json#haiti",
     "away_final_26_profile_ref": "data/manual_sources/v3_worldcup/squads/fifa_final_26/processed/v3_wc2026_final_26_squad_profile_team_cards.json#scotland",
@@ -6444,23 +6708,27 @@
     "venue_binding": {
       "venue_name": "VENUE_NOT_MAPPED",
       "venue_slug": "venue_not_mapped",
-      "venue_stress_status": "VENUE_LAYER_READY_FIXTURE_VENUE_NOT_MAPPED",
+      "venue_stress_status": "VENUE_SOURCE_REQUIRED",
       "venue_stress_tags": [
         "WATCH_ONLY"
       ],
       "venue_stress_ref": "data/v3_worldcup/venue_stress/v3_worldcup_venue_stress_20260603.json",
       "venue_mapping_status": "UNMAPPED",
-      "venue_gap_reason": "fixture_sources_do_not_provide_match_venue",
+      "venue_gap_reason": "VENUE_SOURCE_REQUIRED: no local per-match venue source found",
+      "venue_source_type": "VENUE_SOURCE_REQUIRED",
+      "venue_mapping_confidence": "NONE",
+      "manual_mapping_required": true,
+      "venue_mapping_bridge_ref": "data/manual_sources/v3_worldcup/war_room/v3_wc2026_venue_mapping_bridge.json#mt_153637518",
       "fixture_mapping_bridge_ref": "data/manual_sources/v3_worldcup/war_room/v3_wc2026_fixture_mapping_bridge.json#mt_153637518"
     },
     "venue_stress_summary": {
-      "status": "VENUE_LAYER_READY_FIXTURE_VENUE_NOT_MAPPED",
+      "status": "VENUE_SOURCE_REQUIRED",
       "source": "data/v3_worldcup/venue_stress/v3_worldcup_venue_stress_20260603.json",
       "venue_count": 16,
       "stress_tags": [
         "WATCH_ONLY"
       ],
-      "observation_note": "fixture_sources_do_not_provide_match_venue"
+      "observation_note": "VENUE_SOURCE_REQUIRED: no local per-match venue source found"
     },
     "home_final_26_profile_ref": "data/manual_sources/v3_worldcup/squads/fifa_final_26/processed/v3_wc2026_final_26_squad_profile_team_cards.json#brazil",
     "away_final_26_profile_ref": "data/manual_sources/v3_worldcup/squads/fifa_final_26/processed/v3_wc2026_final_26_squad_profile_team_cards.json#morocco",
@@ -6544,23 +6812,27 @@
     "venue_binding": {
       "venue_name": "VENUE_NOT_MAPPED",
       "venue_slug": "venue_not_mapped",
-      "venue_stress_status": "VENUE_LAYER_READY_FIXTURE_VENUE_NOT_MAPPED",
+      "venue_stress_status": "VENUE_SOURCE_REQUIRED",
       "venue_stress_tags": [
         "WATCH_ONLY"
       ],
       "venue_stress_ref": "data/v3_worldcup/venue_stress/v3_worldcup_venue_stress_20260603.json",
       "venue_mapping_status": "UNMAPPED",
-      "venue_gap_reason": "fixture_sources_do_not_provide_match_venue",
+      "venue_gap_reason": "VENUE_SOURCE_REQUIRED: no local per-match venue source found",
+      "venue_source_type": "VENUE_SOURCE_REQUIRED",
+      "venue_mapping_confidence": "NONE",
+      "manual_mapping_required": true,
+      "venue_mapping_bridge_ref": "data/manual_sources/v3_worldcup/war_room/v3_wc2026_venue_mapping_bridge.json#mt_641919660",
       "fixture_mapping_bridge_ref": "data/manual_sources/v3_worldcup/war_room/v3_wc2026_fixture_mapping_bridge.json#mt_641919660"
     },
     "venue_stress_summary": {
-      "status": "VENUE_LAYER_READY_FIXTURE_VENUE_NOT_MAPPED",
+      "status": "VENUE_SOURCE_REQUIRED",
       "source": "data/v3_worldcup/venue_stress/v3_worldcup_venue_stress_20260603.json",
       "venue_count": 16,
       "stress_tags": [
         "WATCH_ONLY"
       ],
-      "observation_note": "fixture_sources_do_not_provide_match_venue"
+      "observation_note": "VENUE_SOURCE_REQUIRED: no local per-match venue source found"
     },
     "home_final_26_profile_ref": "data/manual_sources/v3_worldcup/squads/fifa_final_26/processed/v3_wc2026_final_26_squad_profile_team_cards.json#qatar",
     "away_final_26_profile_ref": "data/manual_sources/v3_worldcup/squads/fifa_final_26/processed/v3_wc2026_final_26_squad_profile_team_cards.json#switzerland",
@@ -6642,23 +6914,27 @@
     "venue_binding": {
       "venue_name": "VENUE_NOT_MAPPED",
       "venue_slug": "venue_not_mapped",
-      "venue_stress_status": "VENUE_LAYER_READY_FIXTURE_VENUE_NOT_MAPPED",
+      "venue_stress_status": "VENUE_SOURCE_REQUIRED",
       "venue_stress_tags": [
         "WATCH_ONLY"
       ],
       "venue_stress_ref": "data/v3_worldcup/venue_stress/v3_worldcup_venue_stress_20260603.json",
       "venue_mapping_status": "UNMAPPED",
-      "venue_gap_reason": "fixture_sources_do_not_provide_match_venue",
+      "venue_gap_reason": "VENUE_SOURCE_REQUIRED: no local per-match venue source found",
+      "venue_source_type": "VENUE_SOURCE_REQUIRED",
+      "venue_mapping_confidence": "NONE",
+      "manual_mapping_required": true,
+      "venue_mapping_bridge_ref": "data/manual_sources/v3_worldcup/war_room/v3_wc2026_venue_mapping_bridge.json#mt_517473281",
       "fixture_mapping_bridge_ref": "data/manual_sources/v3_worldcup/war_room/v3_wc2026_fixture_mapping_bridge.json#mt_517473281"
     },
     "venue_stress_summary": {
-      "status": "VENUE_LAYER_READY_FIXTURE_VENUE_NOT_MAPPED",
+      "status": "VENUE_SOURCE_REQUIRED",
       "source": "data/v3_worldcup/venue_stress/v3_worldcup_venue_stress_20260603.json",
       "venue_count": 16,
       "stress_tags": [
         "WATCH_ONLY"
       ],
-      "observation_note": "fixture_sources_do_not_provide_match_venue"
+      "observation_note": "VENUE_SOURCE_REQUIRED: no local per-match venue source found"
     },
     "home_final_26_profile_ref": "data/manual_sources/v3_worldcup/squads/fifa_final_26/processed/v3_wc2026_final_26_squad_profile_team_cards.json#usa",
     "away_final_26_profile_ref": "data/manual_sources/v3_worldcup/squads/fifa_final_26/processed/v3_wc2026_final_26_squad_profile_team_cards.json#paraguay",
@@ -6738,23 +7014,27 @@
     "venue_binding": {
       "venue_name": "VENUE_NOT_MAPPED",
       "venue_slug": "venue_not_mapped",
-      "venue_stress_status": "VENUE_LAYER_READY_FIXTURE_VENUE_NOT_MAPPED",
+      "venue_stress_status": "VENUE_SOURCE_REQUIRED",
       "venue_stress_tags": [
         "WATCH_ONLY"
       ],
       "venue_stress_ref": "data/v3_worldcup/venue_stress/v3_worldcup_venue_stress_20260603.json",
       "venue_mapping_status": "UNMAPPED",
-      "venue_gap_reason": "fixture_sources_do_not_provide_match_venue",
+      "venue_gap_reason": "VENUE_SOURCE_REQUIRED: no local per-match venue source found",
+      "venue_source_type": "VENUE_SOURCE_REQUIRED",
+      "venue_mapping_confidence": "NONE",
+      "manual_mapping_required": true,
+      "venue_mapping_bridge_ref": "data/manual_sources/v3_worldcup/war_room/v3_wc2026_venue_mapping_bridge.json#mt_641915402",
       "fixture_mapping_bridge_ref": "data/manual_sources/v3_worldcup/war_room/v3_wc2026_fixture_mapping_bridge.json#mt_641915402"
     },
     "venue_stress_summary": {
-      "status": "VENUE_LAYER_READY_FIXTURE_VENUE_NOT_MAPPED",
+      "status": "VENUE_SOURCE_REQUIRED",
       "source": "data/v3_worldcup/venue_stress/v3_worldcup_venue_stress_20260603.json",
       "venue_count": 16,
       "stress_tags": [
         "WATCH_ONLY"
       ],
-      "observation_note": "fixture_sources_do_not_provide_match_venue"
+      "observation_note": "VENUE_SOURCE_REQUIRED: no local per-match venue source found"
     },
     "home_final_26_profile_ref": "data/manual_sources/v3_worldcup/squads/fifa_final_26/processed/v3_wc2026_final_26_squad_profile_team_cards.json#canada",
     "away_final_26_profile_ref": "data/manual_sources/v3_worldcup/squads/fifa_final_26/processed/v3_wc2026_final_26_squad_profile_team_cards.json#bosnia_and_herzegovina",
@@ -6836,23 +7116,27 @@
     "venue_binding": {
       "venue_name": "VENUE_NOT_MAPPED",
       "venue_slug": "venue_not_mapped",
-      "venue_stress_status": "VENUE_LAYER_READY_FIXTURE_VENUE_NOT_MAPPED",
+      "venue_stress_status": "VENUE_SOURCE_REQUIRED",
       "venue_stress_tags": [
         "WATCH_ONLY"
       ],
       "venue_stress_ref": "data/v3_worldcup/venue_stress/v3_worldcup_venue_stress_20260603.json",
       "venue_mapping_status": "UNMAPPED",
-      "venue_gap_reason": "fixture_sources_do_not_provide_match_venue",
+      "venue_gap_reason": "VENUE_SOURCE_REQUIRED: no local per-match venue source found",
+      "venue_source_type": "VENUE_SOURCE_REQUIRED",
+      "venue_mapping_confidence": "NONE",
+      "manual_mapping_required": true,
+      "venue_mapping_bridge_ref": "data/manual_sources/v3_worldcup/war_room/v3_wc2026_venue_mapping_bridge.json#mt_153637955",
       "fixture_mapping_bridge_ref": "data/manual_sources/v3_worldcup/war_room/v3_wc2026_fixture_mapping_bridge.json#mt_153637955"
     },
     "venue_stress_summary": {
-      "status": "VENUE_LAYER_READY_FIXTURE_VENUE_NOT_MAPPED",
+      "status": "VENUE_SOURCE_REQUIRED",
       "source": "data/v3_worldcup/venue_stress/v3_worldcup_venue_stress_20260603.json",
       "venue_count": 16,
       "stress_tags": [
         "WATCH_ONLY"
       ],
-      "observation_note": "fixture_sources_do_not_provide_match_venue"
+      "observation_note": "VENUE_SOURCE_REQUIRED: no local per-match venue source found"
     },
     "home_final_26_profile_ref": "data/manual_sources/v3_worldcup/squads/fifa_final_26/processed/v3_wc2026_final_26_squad_profile_team_cards.json#korea_republic",
     "away_final_26_profile_ref": "data/manual_sources/v3_worldcup/squads/fifa_final_26/processed/v3_wc2026_final_26_squad_profile_team_cards.json#czechia",
@@ -6932,23 +7216,27 @@
     "venue_binding": {
       "venue_name": "VENUE_NOT_MAPPED",
       "venue_slug": "venue_not_mapped",
-      "venue_stress_status": "VENUE_LAYER_READY_FIXTURE_VENUE_NOT_MAPPED",
+      "venue_stress_status": "VENUE_SOURCE_REQUIRED",
       "venue_stress_tags": [
         "WATCH_ONLY"
       ],
       "venue_stress_ref": "data/v3_worldcup/venue_stress/v3_worldcup_venue_stress_20260603.json",
       "venue_mapping_status": "UNMAPPED",
-      "venue_gap_reason": "fixture_sources_do_not_provide_match_venue",
+      "venue_gap_reason": "VENUE_SOURCE_REQUIRED: no local per-match venue source found",
+      "venue_source_type": "VENUE_SOURCE_REQUIRED",
+      "venue_mapping_confidence": "NONE",
+      "manual_mapping_required": true,
+      "venue_mapping_bridge_ref": "data/manual_sources/v3_worldcup/war_room/v3_wc2026_venue_mapping_bridge.json#mt_153637999",
       "fixture_mapping_bridge_ref": "data/manual_sources/v3_worldcup/war_room/v3_wc2026_fixture_mapping_bridge.json#mt_153637999"
     },
     "venue_stress_summary": {
-      "status": "VENUE_LAYER_READY_FIXTURE_VENUE_NOT_MAPPED",
+      "status": "VENUE_SOURCE_REQUIRED",
       "source": "data/v3_worldcup/venue_stress/v3_worldcup_venue_stress_20260603.json",
       "venue_count": 16,
       "stress_tags": [
         "WATCH_ONLY"
       ],
-      "observation_note": "fixture_sources_do_not_provide_match_venue"
+      "observation_note": "VENUE_SOURCE_REQUIRED: no local per-match venue source found"
     },
     "home_final_26_profile_ref": "data/manual_sources/v3_worldcup/squads/fifa_final_26/processed/v3_wc2026_final_26_squad_profile_team_cards.json#mexico",
     "away_final_26_profile_ref": "data/manual_sources/v3_worldcup/squads/fifa_final_26/processed/v3_wc2026_final_26_squad_profile_team_cards.json#south_africa",

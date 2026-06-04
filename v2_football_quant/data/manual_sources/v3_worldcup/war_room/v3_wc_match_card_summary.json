@@ -1,12 +1,13 @@
 {
   "pack_name": "V3_WC_MATCH_CARD_PACK",
-  "generated_at": "2026-06-04T16:44:53.952954+00:00",
-  "current_head": "d1de518",
+  "generated_at": "2026-06-04T17:06:00.033325+00:00",
+  "current_head": "0ae3546",
   "source_fixtures": "data/runtime/v3_worldcup/thestatsapi_cache/20260602/world_cup_2026/matches_2026_all.json",
   "source_master_index": "data/manual_sources/v3_worldcup/war_room/v3_wc_war_room_master_index.json",
   "source_gap_radar": "data/manual_sources/v3_worldcup/war_room/v3_wc_war_room_gap_radar.json",
   "source_wc10_war_room": "data/v3_worldcup/war_room/v3_worldcup_wc10_war_room_20260602.json",
   "source_fixture_mapping_bridge": "data/manual_sources/v3_worldcup/war_room/v3_wc2026_fixture_mapping_bridge.json",
+  "source_venue_mapping_bridge": "data/manual_sources/v3_worldcup/war_room/v3_wc2026_venue_mapping_bridge.json",
   "match_count": 72,
   "teams_covered": 48,
   "team_names_covered": [
@@ -83,7 +84,7 @@
   ],
   "global_gap_summary": {
     "fixture_mapping": "mapped_by_fixture_mapping_bridge",
-    "venue_binding": "fixture_sources_do_not_provide_match_venue",
+    "venue_binding": "VENUE_SOURCE_REQUIRED",
     "odds_binding": "mapped_by_fixture_mapping_bridge",
     "official_lineup": "WAIT_OFFICIAL_LINEUP",
     "native_opening_closing": "not_available_from_current_snapshot",
