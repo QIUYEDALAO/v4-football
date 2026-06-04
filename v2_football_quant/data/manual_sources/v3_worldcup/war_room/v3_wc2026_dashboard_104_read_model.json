@@ -1,7 +1,7 @@
 {
   "pack_name": "V3_WC_2026_DASHBOARD_104_READ_MODEL_PACK",
-  "generated_at": "2026-06-04T19:18:41.844390+00:00",
-  "current_head": "53d35b1",
+  "generated_at": "2026-06-04T19:23:12.908869+00:00",
+  "current_head": "5c1becc",
   "dashboard_read_model": "V3_WC_2026_DASHBOARD_104_READ_MODEL",
   "canonical_source": "data/manual_sources/v3_worldcup/war_room/v3_wc2026_104_cards_index_bridge.json",
   "canonical_schedule_index": "data/manual_sources/v3_worldcup/war_room/v3_wc2026_schedule_index_104.json",
@@ -59,8 +59,8 @@
       "fixture_id_mapped_count": 72,
       "odds_fixture_id_mapped_count": 72,
       "venue_mapped_count": 0,
-      "final26_ready_group_card_count": 69,
-      "lineup_wait_official_count": 69,
+      "final26_ready_group_card_count": 72,
+      "lineup_wait_official_count": 72,
       "war_room_registered_count": 104,
       "dashboard_registered_count": 104
     },
@@ -71,10 +71,10 @@
       "venue_source_required_count": 72,
       "fixture_id_mapped_count": 72,
       "odds_fixture_id_mapped_count": 72,
-      "final26_ready_card_count": 69,
-      "final26_gap_card_count": 3,
-      "lineup_wait_official_count": 69,
-      "lineup_gap_card_count": 3,
+      "final26_ready_card_count": 72,
+      "final26_gap_card_count": 0,
+      "lineup_wait_official_count": 72,
+      "lineup_gap_card_count": 0,
       "war_room_registered_count": 72,
       "dashboard_registered_count": 72
     },
@@ -92,14 +92,12 @@
     },
     "gaps": {
       "reason_distribution": {
-        "FINAL26_TEAM_GAP": 3,
         "KNOCKOUT_STRUCTURAL_PLACEHOLDER_WAIT_OFFICIAL_FIXTURE": 32,
         "KNOCKOUT_STRUCTURAL_PLACEHOLDER_WAIT_OFFICIAL_TEAMS": 32,
-        "LINEUP_STATUS_GAP": 3,
         "VENUE_SOURCE_REQUIRED: no local per-match venue source found": 72
       },
       "venue_source_required": 72,
-      "official_lineup_required": 69,
+      "official_lineup_required": 72,
       "knockout_structural_placeholder": 32,
       "native_opening_closing_missing": true,
       "odds_movement_conclusion_missing": true

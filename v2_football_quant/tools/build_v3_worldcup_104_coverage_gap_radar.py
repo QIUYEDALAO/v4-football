@@ -29,6 +29,10 @@ SAFETY = {
     "affects_v4": False,
 }
 
+TEAM_SLUG_ALIASES = {
+    "cote_divoire": "cote_d_ivoire",
+}
+
 
 def load_json(path: Path) -> Any:
     try:
@@ -63,8 +67,13 @@ def _both_present(row: dict[str, Any], left: str, right: str) -> bool:
     return bool(row.get(left)) and bool(row.get(right))
 
 
+def canonical_team_slug(slug: Any) -> str:
+    raw = str(slug or "").strip()
+    return TEAM_SLUG_ALIASES.get(raw, raw)
+
+
 def _lineup_status(row: dict[str, Any], lineup_by_slug: dict[str, dict[str, Any]]) -> str:
-    slugs = [str(row.get("home_team_slug") or ""), str(row.get("away_team_slug") or "")]
+    slugs = [canonical_team_slug(row.get("home_team_slug")), canonical_team_slug(row.get("away_team_slug"))]
     if not all(slugs):
         return "STRUCTURAL_PLACEHOLDER"
     statuses = {lineup_by_slug.get(slug, {}).get("matchday_lineup_status") for slug in slugs}
@@ -91,10 +100,12 @@ def build() -> tuple[list[dict[str, Any]], dict[str, Any]]:
         is_knockout = kind == "KNOCKOUT_SLOT"
         home_slug = str(row.get("home_team_slug") or "")
         away_slug = str(row.get("away_team_slug") or "")
+        home_canonical_slug = canonical_team_slug(home_slug)
+        away_canonical_slug = canonical_team_slug(away_slug)
         fixture_present = bool(row.get("api_football_fixture_id"))
         odds_fixture_present = bool(row.get("odds_fixture_id"))
         teams_known = _both_present(row, "home_team", "away_team") and bool(home_slug) and bool(away_slug)
-        final26_ready = bool(home_slug in final26_slugs and away_slug in final26_slugs)
+        final26_ready = bool(home_canonical_slug in final26_slugs and away_canonical_slug in final26_slugs)
 
         if is_group:
             team_status = "KNOWN_FROM_GROUP_STAGE_SOURCE" if teams_known else "TEAM_GAP"
@@ -139,6 +150,9 @@ def build() -> tuple[list[dict[str, Any]], dict[str, Any]]:
             "away_team": row.get("away_team") if is_group else None,
             "home_team_slug": home_slug if is_group else None,
             "away_team_slug": away_slug if is_group else None,
+            "home_canonical_team_slug": home_canonical_slug if is_group else None,
+            "away_canonical_team_slug": away_canonical_slug if is_group else None,
+            "team_slug_alias_applied": bool(is_group and (home_slug != home_canonical_slug or away_slug != away_canonical_slug)),
             "team_coverage_status": team_status,
             "venue_coverage_status": venue_status,
             "fixture_id_coverage_status": fixture_status,

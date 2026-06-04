@@ -1,6 +1,6 @@
 {
   "pack_name": "V3_WC_WAR_ROOM_MASTER_INDEX_PACK",
-  "generated_at": "2026-06-04T19:18:41.931314+00:00",
+  "generated_at": "2026-06-04T19:23:12.993267+00:00",
   "source_master_index": "data/manual_sources/v3_worldcup/war_room/v3_wc_war_room_master_index.json",
   "missing_starting_xi": true,
   "missing_official_matchday_lineup": true,
@@ -16,8 +16,8 @@
     "fixture_id_mapped_count": 72,
     "odds_fixture_id_mapped_count": 72,
     "venue_mapped_count": 0,
-    "final26_ready_group_card_count": 69,
-    "lineup_wait_official_count": 69,
+    "final26_ready_group_card_count": 72,
+    "lineup_wait_official_count": 72,
     "war_room_registered_count": 104,
     "dashboard_registered_count": 104
   },
@@ -28,10 +28,10 @@
     "venue_source_required_count": 72,
     "fixture_id_mapped_count": 72,
     "odds_fixture_id_mapped_count": 72,
-    "final26_ready_card_count": 69,
-    "final26_gap_card_count": 3,
-    "lineup_wait_official_count": 69,
-    "lineup_gap_card_count": 3,
+    "final26_ready_card_count": 72,
+    "final26_gap_card_count": 0,
+    "lineup_wait_official_count": 72,
+    "lineup_gap_card_count": 0,
     "war_room_registered_count": 72,
     "dashboard_registered_count": 72
   },
@@ -49,14 +49,12 @@
   },
   "coverage_gap_summary": {
     "reason_distribution": {
-      "FINAL26_TEAM_GAP": 3,
       "KNOCKOUT_STRUCTURAL_PLACEHOLDER_WAIT_OFFICIAL_FIXTURE": 32,
       "KNOCKOUT_STRUCTURAL_PLACEHOLDER_WAIT_OFFICIAL_TEAMS": 32,
-      "LINEUP_STATUS_GAP": 3,
       "VENUE_SOURCE_REQUIRED: no local per-match venue source found": 72
     },
     "venue_source_required": 72,
-    "official_lineup_required": 69,
+    "official_lineup_required": 72,
     "knockout_structural_placeholder": 32,
     "native_opening_closing_missing": true,
     "odds_movement_conclusion_missing": true

@@ -110,10 +110,10 @@ def main() -> int:
     add(failures, summary.get("group_72", {}).get("team_known_count") == 72, "group_team_known_unexpected", summary.get("group_72"))
     add(failures, summary.get("group_72", {}).get("fixture_id_mapped_count") == 72, "group_fixture_id_mapped_unexpected", summary.get("group_72"))
     add(failures, summary.get("group_72", {}).get("odds_fixture_id_mapped_count") == 72, "group_odds_fixture_id_mapped_unexpected", summary.get("group_72"))
-    add(failures, summary.get("group_72", {}).get("final26_ready_card_count") == 69, "group_final26_ready_unexpected", summary.get("group_72"))
-    add(failures, summary.get("group_72", {}).get("final26_gap_card_count") == 3, "group_final26_gap_unexpected", summary.get("group_72"))
-    add(failures, summary.get("group_72", {}).get("lineup_wait_official_count") == 69, "group_lineup_wait_unexpected", summary.get("group_72"))
-    add(failures, summary.get("group_72", {}).get("lineup_gap_card_count") == 3, "group_lineup_gap_unexpected", summary.get("group_72"))
+    add(failures, summary.get("group_72", {}).get("final26_ready_card_count") == 72, "group_final26_ready_unexpected", summary.get("group_72"))
+    add(failures, summary.get("group_72", {}).get("final26_gap_card_count") == 0, "group_final26_gap_unexpected", summary.get("group_72"))
+    add(failures, summary.get("group_72", {}).get("lineup_wait_official_count") == 72, "group_lineup_wait_unexpected", summary.get("group_72"))
+    add(failures, summary.get("group_72", {}).get("lineup_gap_card_count") == 0, "group_lineup_gap_unexpected", summary.get("group_72"))
     add(failures, summary.get("group_72", {}).get("venue_source_required_count") == 72, "group_venue_gap_unexpected", summary.get("group_72"))
     add(failures, summary.get("group_72", {}).get("war_room_registered_count") == 72, "group_war_room_count_unexpected", summary.get("group_72"))
     add(failures, summary.get("group_72", {}).get("dashboard_registered_count") == 72, "group_dashboard_count_unexpected", summary.get("group_72"))
@@ -124,18 +124,20 @@ def main() -> int:
     add(failures, summary.get("knockout_32", {}).get("war_room_registered_count") == 32, "knockout_war_room_count_unexpected", summary.get("knockout_32"))
     add(failures, summary.get("knockout_32", {}).get("dashboard_registered_count") == 32, "knockout_dashboard_count_unexpected", summary.get("knockout_32"))
 
+    alias_rows = [row for row in group if row.get("team_slug_alias_applied") is True]
+    add(failures, len(alias_rows) == 3, "team_slug_alias_applied_count_unexpected", len(alias_rows))
+    add(failures, all(row.get("away_canonical_team_slug") == "cote_d_ivoire" or row.get("home_canonical_team_slug") == "cote_d_ivoire" for row in alias_rows), "team_slug_alias_target_unexpected", alias_rows)
+
     for row in group:
         cid = row.get("canonical_card_id")
         add(failures, row.get("team_coverage_status") == "KNOWN_FROM_GROUP_STAGE_SOURCE", "group_team_status_unexpected", cid)
         add(failures, row.get("venue_coverage_status") in {"UNMAPPED", "VENUE_SOURCE_REQUIRED"}, "group_venue_status_unexpected", cid)
         add(failures, row.get("fixture_id_coverage_status") == "MAPPED", "group_fixture_status_unexpected", cid)
         add(failures, row.get("odds_fixture_id_coverage_status") == "MAPPED", "group_odds_status_unexpected", cid)
-        add(failures, row.get("final26_coverage_status") in {"READY", "FINAL26_TEAM_GAP"}, "group_final26_status_unexpected", cid)
-        add(failures, row.get("lineup_coverage_status") in {"WAIT_OFFICIAL_LINEUP", "LINEUP_STATUS_GAP"}, "group_lineup_status_unexpected", cid)
-        if row.get("final26_coverage_status") == "FINAL26_TEAM_GAP":
-            add(failures, "FINAL26_TEAM_GAP" in row.get("gap_reasons", []), "group_final26_gap_reason_missing", cid)
-        if row.get("lineup_coverage_status") == "LINEUP_STATUS_GAP":
-            add(failures, "LINEUP_STATUS_GAP" in row.get("gap_reasons", []), "group_lineup_gap_reason_missing", cid)
+        add(failures, row.get("final26_coverage_status") == "READY", "group_final26_status_unexpected", cid)
+        add(failures, row.get("lineup_coverage_status") == "WAIT_OFFICIAL_LINEUP", "group_lineup_status_unexpected", cid)
+        add(failures, "FINAL26_TEAM_GAP" not in row.get("gap_reasons", []), "group_final26_gap_reason_present", cid)
+        add(failures, "LINEUP_STATUS_GAP" not in row.get("gap_reasons", []), "group_lineup_gap_reason_present", cid)
         add(failures, row.get("structural_placeholder") is False, "group_structural_placeholder_true", cid)
     for row in knockout:
         cid = row.get("canonical_card_id")
