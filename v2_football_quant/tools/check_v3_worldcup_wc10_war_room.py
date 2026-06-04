@@ -14,6 +14,7 @@ BUILDER = ROOT / "tools/build_v3_worldcup_wc10_war_room.py"
 TACTICAL_BUILDER = ROOT / "tools/build_v3_worldcup_tactical_profile_layer.py"
 CLOSING_1X2_BUILDER = ROOT / "tools/build_v3_worldcup_closing_1x2_market_structure.py"
 FINAL26_UI_BUILDER = ROOT / "tools/build_v3_worldcup_final_26_war_room_ui_payload.py"
+FINAL26_PROFILE_BUILDER = ROOT / "tools/build_v3_worldcup_final_26_squad_profile_observation.py"
 WAR = ROOT / "data/v3_worldcup/war_room/v3_worldcup_wc10_war_room_20260602.json"
 HTML = ROOT / "data/runtime/dashboard/v3_worldcup_wc10_war_room.html"
 
@@ -41,6 +42,8 @@ def main() -> int:
     add(checks, "closing_1x2_builder_runs", closing_run.returncode == 0, closing_run.stderr or closing_run.stdout[-500:])
     final26_ui_run = subprocess.run([sys.executable, str(FINAL26_UI_BUILDER)], cwd=str(ROOT), capture_output=True, text=True, check=False)
     add(checks, "final26_ui_builder_runs", final26_ui_run.returncode == 0, final26_ui_run.stderr or final26_ui_run.stdout[-500:])
+    final26_profile_run = subprocess.run([sys.executable, str(FINAL26_PROFILE_BUILDER)], cwd=str(ROOT), capture_output=True, text=True, check=False)
+    add(checks, "final26_profile_builder_runs", final26_profile_run.returncode == 0, final26_profile_run.stderr or final26_profile_run.stdout[-500:])
     run = subprocess.run([sys.executable, str(BUILDER)], cwd=str(ROOT), capture_output=True, text=True, check=False)
     add(checks, "builder_runs", run.returncode == 0, run.stderr or run.stdout[-500:])
     add(checks, "war_room_json_exists", WAR.exists(), str(WAR))
@@ -151,6 +154,20 @@ def main() -> int:
     add(checks, "final26_module", final26_node.get("module") == "final_26_squad_observation", final26_node.get("module"))
     add(checks, "final26_counts", int(final26_node.get("team_count") or 0) == 48 and int(final26_node.get("total_players") or 0) == 1248 and int(final26_node.get("coach_count") or 0) == 48, final26_node)
     add(checks, "final26_safety", final26_safety.get("observation_only") is True and final26_safety.get("no_starting_xi") is True and final26_safety.get("no_injury_judgment") is True and final26_safety.get("betting_recommendation") is False and final26_safety.get("affects_v4") is False, final26_safety)
+    profile_node = payload.get("final_26_squad_profile_observation") if isinstance(payload.get("final_26_squad_profile_observation"), dict) else {}
+    profile_safety = profile_node.get("safety") if isinstance(profile_node.get("safety"), dict) else {}
+    profile_rankings = profile_node.get("observation_rankings") if isinstance(profile_node.get("observation_rankings"), dict) else {}
+    profile_text = json.dumps(profile_node, ensure_ascii=False).lower()
+    add(checks, "final26_profile_node_present", bool(profile_node), profile_node)
+    add(checks, "final26_profile_ready", profile_node.get("status") == "FINAL_26_SQUAD_PROFILE_READY", profile_node.get("status"))
+    add(checks, "final26_profile_module", profile_node.get("module") == "final_26_squad_profile_observation", profile_node.get("module"))
+    add(checks, "final26_profile_counts", int(profile_node.get("team_count") or 0) == 48 and int(profile_node.get("total_players") or 0) == 1248, profile_node)
+    add(checks, "final26_profile_position_distribution", profile_node.get("position_distribution") == {"GK": 145, "DF": 421, "MF": 371, "FW": 311}, profile_node.get("position_distribution"))
+    add(checks, "final26_profile_core_profiles", all(isinstance(profile_node.get(k), dict) and bool(profile_node.get(k)) for k in ["age_profile", "height_profile", "club_profile", "position_group_profiles"]), list(profile_node.keys()))
+    add(checks, "final26_profile_rankings", profile_rankings.get("ranking_type") == "roster_observation_ranking" and all(isinstance(profile_rankings.get(k), list) and bool(profile_rankings.get(k)) for k in ["oldest_avg_age_teams", "youngest_avg_age_teams", "tallest_avg_height_teams", "shortest_avg_height_teams"]), profile_rankings)
+    add(checks, "final26_profile_team_refs", isinstance(profile_node.get("team_profile_refs"), list) and len(profile_node.get("team_profile_refs")) == 48, len(profile_node.get("team_profile_refs") or []))
+    add(checks, "final26_profile_safety", profile_safety.get("observation_only") is True and profile_safety.get("no_starting_xi") is True and profile_safety.get("no_injury_judgment") is True and profile_safety.get("no_prediction") is True and profile_safety.get("betting_recommendation") is False and profile_safety.get("affects_v4") is False, profile_safety)
+    add(checks, "final26_profile_no_prediction_betting_terms", all(token not in profile_text for token in ["strength ranking", "strength_ranking", "prediction ranking", "prediction_ranking", "betting signal", "betting_signal", "recommendation_ranking", "recommended_pick", "starting_lineup", "starting_players", "injury_status", "suspension_status"]), "profile_node_text_scan")
     hints = [str(x.get("action_hint") or "") for x in wl if isinstance(x, dict)]
     add(checks, "action_hint_whitelist", all(h in ALLOW_HINTS for h in hints), hints[:12])
     add(checks, "action_hint_no_bad", all(h not in BAD_HINTS for h in hints), hints[:12])

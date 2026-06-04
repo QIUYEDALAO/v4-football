@@ -29,6 +29,8 @@ MATCH_LEVEL_PG_DRYRUN_STATUS = ROOT / "data/runtime/v3_worldcup/perception_gap_d
 TACTICAL_PROFILE_LAYER = ROOT / "data/v3_worldcup/tactical_profile/v3_worldcup_tactical_profile_layer_20260604.json"
 CLOSING_1X2_LAYER = ROOT / "data/v3_worldcup/closing_1x2_market_structure/v3_worldcup_closing_1x2_market_structure_20260604.json"
 FINAL26_UI_PAYLOAD = ROOT / "data/manual_sources/v3_worldcup/squads/fifa_final_26/processed/v3_wc2026_final_26_war_room_ui_payload.json"
+FINAL26_PROFILE_OBSERVATION = ROOT / "data/manual_sources/v3_worldcup/squads/fifa_final_26/processed/v3_wc2026_final_26_squad_profile_observation.json"
+FINAL26_PROFILE_TEAM_CARDS = ROOT / "data/manual_sources/v3_worldcup/squads/fifa_final_26/processed/v3_wc2026_final_26_squad_profile_team_cards.json"
 
 CST = timezone(timedelta(hours=8))
 
@@ -39,6 +41,14 @@ def _load(path: Path) -> dict[str, Any]:
         return obj if isinstance(obj, dict) else {}
     except Exception:
         return {}
+
+
+def _load_list(path: Path) -> list[dict[str, Any]]:
+    try:
+        obj = json.loads(path.read_text(encoding="utf-8"))
+        return [item for item in obj if isinstance(item, dict)] if isinstance(obj, list) else []
+    except Exception:
+        return []
 
 
 def _safe_int(v: Any) -> int:
@@ -463,6 +473,69 @@ def _final26_squad_observation_view(payload: dict[str, Any]) -> dict[str, Any]:
     }
 
 
+def _final26_squad_profile_observation_view(profile: dict[str, Any], team_cards: list[dict[str, Any]]) -> dict[str, Any]:
+    if not profile:
+        return {
+            "final_26_squad_profile_observation": {
+                "module": "final_26_squad_profile_observation",
+                "status": "FINAL_26_SQUAD_PROFILE_MISSING_WARN_ONLY",
+                "source_profile_observation": str(FINAL26_PROFILE_OBSERVATION),
+                "source_profile_team_cards": str(FINAL26_PROFILE_TEAM_CARDS),
+                "team_count": 0,
+                "total_players": 0,
+                "position_distribution": {},
+                "age_profile": {},
+                "height_profile": {},
+                "club_profile": {},
+                "position_group_profiles": {},
+                "observation_rankings": {"ranking_type": "roster_observation_ranking"},
+                "team_profile_refs": [],
+                "safety": {
+                    "observation_only": True,
+                    "no_starting_xi": True,
+                    "no_injury_judgment": True,
+                    "no_prediction": True,
+                    "betting_recommendation": False,
+                    "affects_v4": False,
+                },
+            }
+        }
+    refs = [
+        {
+            "team": card.get("team"),
+            "team_slug": card.get("team_slug"),
+            "player_count": card.get("player_count"),
+            "source_profile_team_cards": str(FINAL26_PROFILE_TEAM_CARDS),
+        }
+        for card in team_cards
+    ]
+    return {
+        "final_26_squad_profile_observation": {
+            "module": profile.get("module") or "final_26_squad_profile_observation",
+            "status": "FINAL_26_SQUAD_PROFILE_READY",
+            "source_profile_observation": str(FINAL26_PROFILE_OBSERVATION),
+            "source_profile_team_cards": str(FINAL26_PROFILE_TEAM_CARDS),
+            "team_count": int(profile.get("team_count") or 0),
+            "total_players": int(profile.get("total_players") or 0),
+            "position_distribution": profile.get("position_distribution") if isinstance(profile.get("position_distribution"), dict) else {},
+            "age_profile": profile.get("age_profile") if isinstance(profile.get("age_profile"), dict) else {},
+            "height_profile": profile.get("height_profile") if isinstance(profile.get("height_profile"), dict) else {},
+            "club_profile": profile.get("club_profile") if isinstance(profile.get("club_profile"), dict) else {},
+            "position_group_profiles": profile.get("position_group_profiles") if isinstance(profile.get("position_group_profiles"), dict) else {},
+            "observation_rankings": profile.get("observation_rankings") if isinstance(profile.get("observation_rankings"), dict) else {"ranking_type": "roster_observation_ranking"},
+            "team_profile_refs": refs,
+            "safety": {
+                "observation_only": profile.get("observation_only") is True,
+                "no_starting_xi": profile.get("no_starting_xi") is True,
+                "no_injury_judgment": profile.get("no_injury_judgment") is True,
+                "no_prediction": profile.get("no_prediction") is True,
+                "betting_recommendation": False,
+                "affects_v4": False,
+            },
+        }
+    }
+
+
 def main() -> int:
     rosters = _load(ROSTERS)
     profiles = _load(PROFILES)
@@ -479,6 +552,8 @@ def main() -> int:
     tactical_profile = _load(TACTICAL_PROFILE_LAYER)
     closing_1x2 = _load(CLOSING_1X2_LAYER)
     final26_ui_payload = _load(FINAL26_UI_PAYLOAD)
+    final26_profile_observation = _load(FINAL26_PROFILE_OBSERVATION)
+    final26_profile_team_cards = _load_list(FINAL26_PROFILE_TEAM_CARDS)
 
     meta = rosters.get("meta") or {}
     teams_total = _safe_int(meta.get("total_teams") or 46)
@@ -593,6 +668,14 @@ def main() -> int:
         warn = "FINAL_26_OBSERVATION_PAYLOAD_MISSING_WARN_ONLY"
         if warn not in warn_only_items:
             warn_only_items.append(warn)
+    final26_squad_profile_observation_view = _final26_squad_profile_observation_view(
+        final26_profile_observation,
+        final26_profile_team_cards,
+    )
+    if not final26_profile_observation:
+        warn = "FINAL_26_SQUAD_PROFILE_MISSING_WARN_ONLY"
+        if warn not in warn_only_items:
+            warn_only_items.append(warn)
 
     now = datetime.now(CST)
     payload = {
@@ -641,6 +724,7 @@ def main() -> int:
         **tactical_profile_view,
         **closing_1x2_view,
         **final26_squad_observation_view,
+        **final26_squad_profile_observation_view,
         "perception_gap_watchlist": watch_list,
         "perception_gap_watchlist_count": len(watch_list),
         "undervalued_candidates": undervalued,
