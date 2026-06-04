@@ -17,6 +17,7 @@ APPROVED_DASHBOARD_UI_STAGE = "v2_football_quant/data/runtime/dashboard/v3_world
 CANONICAL_SOURCE = "data/manual_sources/v3_worldcup/war_room/v3_wc2026_104_cards_index_bridge.json"
 SCHEDULE_INDEX = "data/manual_sources/v3_worldcup/war_room/v3_wc2026_schedule_index_104.json"
 GROUP_VIEW = "data/manual_sources/v3_worldcup/war_room/v3_wc_match_cards.json"
+COVERAGE_SUMMARY = "data/manual_sources/v3_worldcup/war_room/v3_wc2026_104_coverage_gap_radar_summary.json"
 
 SECRET_PATTERNS = [
     re.compile(r"(?i)(api[_-]?key|token|secret)\s*[:=]\s*['\"][A-Za-z0-9_\-]{16,}"),
@@ -127,6 +128,14 @@ def main() -> int:
     add(failures, read_policy.get("group_stage_view_reader") == GROUP_VIEW, "group_stage_view_reader_unexpected", read_policy)
     add(failures, read_policy.get("do_not_merge_canonical_and_group_view") is True, "double_read_guard_missing", read_policy)
     add(failures, read_policy.get("duplicate_read_guard") == "READ_CANONICAL_104_OR_GROUP_VIEW_72_NOT_BOTH_AS_COMPLETE", "duplicate_read_guard_unexpected", read_policy)
+
+    coverage = payload.get("coverage_gap_summary") if isinstance(payload.get("coverage_gap_summary"), dict) else {}
+    add(failures, coverage.get("source") == COVERAGE_SUMMARY, "coverage_summary_source_unexpected", coverage.get("source"))
+    add(failures, (coverage.get("coverage_104") or {}).get("card_count") == 104, "coverage_104_count_unexpected", coverage.get("coverage_104"))
+    add(failures, (coverage.get("group_72") or {}).get("card_count") == 72, "coverage_group_72_count_unexpected", coverage.get("group_72"))
+    add(failures, (coverage.get("knockout_32") or {}).get("card_count") == 32, "coverage_knockout_32_count_unexpected", coverage.get("knockout_32"))
+    add(failures, (coverage.get("knockout_32") or {}).get("structural_placeholder_count") == 32, "coverage_knockout_placeholder_unexpected", coverage.get("knockout_32"))
+    add(failures, isinstance(coverage.get("gaps"), dict) and bool(coverage.get("gaps")), "coverage_gaps_missing", coverage.get("gaps"))
 
     safety = payload.get("safety") if isinstance(payload.get("safety"), dict) else {}
     for key, expected in {

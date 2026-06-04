@@ -17,6 +17,8 @@ GROUP_VIEW_72 = OUT_DIR / "v3_wc_match_cards.json"
 GROUP_VIEW_72_SUMMARY = OUT_DIR / "v3_wc_match_card_summary.json"
 MASTER_INDEX = OUT_DIR / "v3_wc_war_room_master_index.json"
 DASHBOARD_READ_MODEL = OUT_DIR / "v3_wc2026_dashboard_104_read_model.json"
+COVERAGE_GAP_RADAR = OUT_DIR / "v3_wc2026_104_coverage_gap_radar.json"
+COVERAGE_GAP_RADAR_SUMMARY = OUT_DIR / "v3_wc2026_104_coverage_gap_radar_summary.json"
 
 SAFETY = {
     "observation_only": True,
@@ -51,6 +53,7 @@ def build() -> dict[str, Any]:
     group_rows = load_json(GROUP_VIEW_72)
     group_summary = load_json(GROUP_VIEW_72_SUMMARY)
     master_index = load_json(MASTER_INDEX)
+    coverage_summary = load_json(COVERAGE_GAP_RADAR_SUMMARY)
 
     rows = canonical_rows if isinstance(canonical_rows, list) else []
     group_cards = group_rows if isinstance(group_rows, list) else []
@@ -105,6 +108,15 @@ def build() -> dict[str, Any]:
             "group_summary_match_count": group_summary.get("match_count") if isinstance(group_summary, dict) else None,
             "war_room_master_index": rel(MASTER_INDEX),
             "war_room_module_count": master_index.get("module_count") if isinstance(master_index, dict) else None,
+            "coverage_gap_radar": rel(COVERAGE_GAP_RADAR),
+            "coverage_gap_summary": rel(COVERAGE_GAP_RADAR_SUMMARY),
+        },
+        "coverage_gap_summary": {
+            "source": rel(COVERAGE_GAP_RADAR_SUMMARY),
+            "coverage_104": coverage_summary.get("coverage_104") if isinstance(coverage_summary, dict) else {},
+            "group_72": coverage_summary.get("group_72") if isinstance(coverage_summary, dict) else {},
+            "knockout_32": coverage_summary.get("knockout_32") if isinstance(coverage_summary, dict) else {},
+            "gaps": coverage_summary.get("gaps") if isinstance(coverage_summary, dict) else {},
         },
         "safety": SAFETY,
     }

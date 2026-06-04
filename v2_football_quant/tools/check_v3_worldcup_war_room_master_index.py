@@ -25,6 +25,7 @@ REQUIRED_MODULES = {
     "final_26_squad_profile",
     "wc10_war_room",
     "lineup_readiness_pending",
+    "coverage_gap_radar_104",
     "match_card_104_canonical_index",
     "dashboard_104_read_model",
 }
@@ -138,6 +139,13 @@ def main() -> int:
     final_module = next((item for item in modules if isinstance(item, dict) and item.get("module_name") == "final_26_squad_pack"), {})
     add(failures, final_module.get("status") == "LOCKED", "final_26_squad_pack_not_locked", final_module.get("status"))
     add(failures, final_module.get("total_players") == 1248, "final_26_total_players_unexpected", final_module.get("total_players"))
+    coverage_module = next((item for item in modules if isinstance(item, dict) and item.get("module_name") == "coverage_gap_radar_104"), {})
+    add(failures, coverage_module.get("coverage_radar") == "data/manual_sources/v3_worldcup/war_room/v3_wc2026_104_coverage_gap_radar.json", "coverage_radar_source_unexpected", coverage_module.get("coverage_radar"))
+    add(failures, coverage_module.get("coverage_summary") == "data/manual_sources/v3_worldcup/war_room/v3_wc2026_104_coverage_gap_radar_summary.json", "coverage_summary_source_unexpected", coverage_module.get("coverage_summary"))
+    add(failures, (coverage_module.get("coverage_104") or {}).get("card_count") == 104, "coverage_104_count_unexpected", coverage_module.get("coverage_104"))
+    add(failures, (coverage_module.get("group_72") or {}).get("card_count") == 72, "coverage_group_72_count_unexpected", coverage_module.get("group_72"))
+    add(failures, (coverage_module.get("knockout_32") or {}).get("card_count") == 32, "coverage_knockout_32_count_unexpected", coverage_module.get("knockout_32"))
+    add(failures, (coverage_module.get("knockout_32") or {}).get("structural_placeholder_count") == 32, "coverage_knockout_placeholder_unexpected", coverage_module.get("knockout_32"))
     match_card_module = next((item for item in modules if isinstance(item, dict) and item.get("module_name") == "match_card_104_canonical_index"), {})
     add(failures, match_card_module.get("canonical_source") == "data/manual_sources/v3_worldcup/war_room/v3_wc2026_104_cards_index_bridge.json", "match_card_104_canonical_source_unexpected", match_card_module.get("canonical_source"))
     add(failures, match_card_module.get("group_stage_view") == "data/manual_sources/v3_worldcup/war_room/v3_wc_match_cards.json", "match_card_group_view_unexpected", match_card_module.get("group_stage_view"))
@@ -168,6 +176,10 @@ def main() -> int:
         add(failures, item.get("affects_v4") is False, "module_affects_v4_true", item.get("module_name"))
 
     add(failures, gap.get("missing_starting_xi") is True, "gap_missing_starting_xi_unexpected", gap.get("missing_starting_xi"))
+    add(failures, (gap.get("coverage_104") or {}).get("card_count") == 104, "gap_coverage_104_count_unexpected", gap.get("coverage_104"))
+    add(failures, (gap.get("group_72") or {}).get("card_count") == 72, "gap_group_72_count_unexpected", gap.get("group_72"))
+    add(failures, (gap.get("knockout_32") or {}).get("card_count") == 32, "gap_knockout_32_count_unexpected", gap.get("knockout_32"))
+    add(failures, isinstance(gap.get("coverage_gap_summary"), dict) and bool(gap.get("coverage_gap_summary")), "gap_coverage_gap_summary_missing", gap.get("coverage_gap_summary"))
     for flag in [
         "missing_official_matchday_lineup",
         "missing_native_opening_odds",

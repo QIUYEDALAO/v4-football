@@ -1,6 +1,6 @@
 {
   "pack_name": "V3_WC_WAR_ROOM_MASTER_INDEX_PACK",
-  "generated_at": "2026-06-04T15:19:49.350690+00:00",
+  "generated_at": "2026-06-04T19:18:41.931314+00:00",
   "source_master_index": "data/manual_sources/v3_worldcup/war_room/v3_wc_war_room_master_index.json",
   "missing_starting_xi": true,
   "missing_official_matchday_lineup": true,
@@ -9,6 +9,58 @@
   "missing_odds_movement_conclusion": true,
   "missing_injury_suspension_official_feed": true,
   "odds_available_fixture_count": 1,
+  "coverage_104": {
+    "card_count": 104,
+    "team_known_count": 72,
+    "team_structural_placeholder_count": 32,
+    "fixture_id_mapped_count": 72,
+    "odds_fixture_id_mapped_count": 72,
+    "venue_mapped_count": 0,
+    "final26_ready_group_card_count": 69,
+    "lineup_wait_official_count": 69,
+    "war_room_registered_count": 104,
+    "dashboard_registered_count": 104
+  },
+  "group_72": {
+    "card_count": 72,
+    "team_known_count": 72,
+    "venue_mapped_count": 0,
+    "venue_source_required_count": 72,
+    "fixture_id_mapped_count": 72,
+    "odds_fixture_id_mapped_count": 72,
+    "final26_ready_card_count": 69,
+    "final26_gap_card_count": 3,
+    "lineup_wait_official_count": 69,
+    "lineup_gap_card_count": 3,
+    "war_room_registered_count": 72,
+    "dashboard_registered_count": 72
+  },
+  "knockout_32": {
+    "card_count": 32,
+    "structural_placeholder_count": 32,
+    "team_generated_count": 0,
+    "fixture_id_generated_count": 0,
+    "odds_fixture_id_generated_count": 0,
+    "venue_generated_count": 0,
+    "final26_status": "STRUCTURAL_PLACEHOLDER",
+    "lineup_status": "STRUCTURAL_PLACEHOLDER",
+    "war_room_registered_count": 32,
+    "dashboard_registered_count": 32
+  },
+  "coverage_gap_summary": {
+    "reason_distribution": {
+      "FINAL26_TEAM_GAP": 3,
+      "KNOCKOUT_STRUCTURAL_PLACEHOLDER_WAIT_OFFICIAL_FIXTURE": 32,
+      "KNOCKOUT_STRUCTURAL_PLACEHOLDER_WAIT_OFFICIAL_TEAMS": 32,
+      "LINEUP_STATUS_GAP": 3,
+      "VENUE_SOURCE_REQUIRED: no local per-match venue source found": 72
+    },
+    "venue_source_required": 72,
+    "official_lineup_required": 69,
+    "knockout_structural_placeholder": 32,
+    "native_opening_closing_missing": true,
+    "odds_movement_conclusion_missing": true
+  },
   "final_26_ready": true,
   "venue_stress_ready": true,
   "tactical_profile_ready": true,

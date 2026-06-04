@@ -25,6 +25,8 @@ MATCH_CARD_104_INDEX = OUT_DIR / "v3_wc2026_104_cards_index_bridge.json"
 MATCH_CARD_104_SUMMARY = OUT_DIR / "v3_wc2026_104_cards_index_bridge_summary.json"
 MATCH_CARD_72_VIEW = OUT_DIR / "v3_wc_match_cards.json"
 DASHBOARD_104_READ_MODEL = OUT_DIR / "v3_wc2026_dashboard_104_read_model.json"
+COVERAGE_GAP_RADAR = OUT_DIR / "v3_wc2026_104_coverage_gap_radar.json"
+COVERAGE_GAP_RADAR_SUMMARY = OUT_DIR / "v3_wc2026_104_coverage_gap_radar_summary.json"
 
 PERCEPTION_DRYRUN_CSV = ROOT / "data/runtime/v3_worldcup/perception_gap_dryrun/v3_wc4d_match_level_perception_gap_dryrun_20260603.csv"
 PERCEPTION_DRYRUN_STATUS = ROOT / "data/runtime/status/check_v3_worldcup_match_level_perception_gap_dryrun_20260603.json"
@@ -115,6 +117,7 @@ def build() -> tuple[dict[str, Any], dict[str, Any]]:
     odds_timeline = load_json(ODDS_TIMELINE_STATUS)
     match_card_104 = load_json(MATCH_CARD_104_SUMMARY)
     dashboard_104 = load_json(DASHBOARD_104_READ_MODEL)
+    coverage_104 = load_json(COVERAGE_GAP_RADAR_SUMMARY)
 
     live_coverage = odds_live.get("coverage") if isinstance(odds_live, dict) and isinstance(odds_live.get("coverage"), dict) else {}
     movement = odds_movement.get("movement_eligibility") if isinstance(odds_movement, dict) and isinstance(odds_movement.get("movement_eligibility"), dict) else {}
@@ -225,6 +228,26 @@ def build() -> tuple[dict[str, Any], dict[str, Any]]:
             "Wait for official matchday lineup source before any lineup readiness update.",
         ),
         module(
+            "coverage_gap_radar_104",
+            "READY",
+            [COVERAGE_GAP_RADAR, COVERAGE_GAP_RADAR_SUMMARY, MATCH_CARD_104_INDEX],
+            ROOT / "tools/check_v3_worldcup_104_coverage_gap_radar.py",
+            (
+                f"coverage_cards={int((coverage_104.get('coverage_104') or {}).get('card_count') or 0)}; "
+                f"group_view={int((coverage_104.get('group_72') or {}).get('card_count') or 0)}; "
+                f"knockout_slots={int((coverage_104.get('knockout_32') or {}).get('card_count') or 0)}"
+            ),
+            "Expose 104 coverage and gap summary to War Room and dashboard read model.",
+            {
+                "coverage_radar": rel(COVERAGE_GAP_RADAR),
+                "coverage_summary": rel(COVERAGE_GAP_RADAR_SUMMARY),
+                "coverage_104": coverage_104.get("coverage_104") if isinstance(coverage_104, dict) else {},
+                "group_72": coverage_104.get("group_72") if isinstance(coverage_104, dict) else {},
+                "knockout_32": coverage_104.get("knockout_32") if isinstance(coverage_104, dict) else {},
+                "gap_summary": coverage_104.get("gaps") if isinstance(coverage_104, dict) else {},
+            },
+        ),
+        module(
             "match_card_104_canonical_index",
             "READY",
             [MATCH_CARD_104_INDEX, MATCH_CARD_104_SUMMARY, MATCH_CARD_72_VIEW],
@@ -298,6 +321,7 @@ def build() -> tuple[dict[str, Any], dict[str, Any]]:
             "lineup_readiness_pending": checker_status(ROOT / "data/runtime/status/check_v3_worldcup_lineup_readiness_schema_20260604.json"),
             "match_card_104_canonical_index": checker_status(ROOT / "data/runtime/status/check_v3_worldcup_104_cards_index_bridge_20260605.json"),
             "dashboard_104_read_model": checker_status(ROOT / "data/runtime/status/check_v3_worldcup_dashboard_104_read_model_20260605.json"),
+            "coverage_gap_radar_104": checker_status(ROOT / "data/runtime/status/check_v3_worldcup_104_coverage_gap_radar_20260605.json"),
         },
     }
 
@@ -313,6 +337,10 @@ def build() -> tuple[dict[str, Any], dict[str, Any]]:
         "missing_odds_movement_conclusion": True,
         "missing_injury_suspension_official_feed": True,
         "odds_available_fixture_count": odds_available_fixture_count,
+        "coverage_104": coverage_104.get("coverage_104") if isinstance(coverage_104, dict) else {},
+        "group_72": coverage_104.get("group_72") if isinstance(coverage_104, dict) else {},
+        "knockout_32": coverage_104.get("knockout_32") if isinstance(coverage_104, dict) else {},
+        "coverage_gap_summary": coverage_104.get("gaps") if isinstance(coverage_104, dict) else {},
         "final_26_ready": int(final26_counts.get("total_players") or 0) == 1248,
         "venue_stress_ready": VENUE_STRESS.exists(),
         "tactical_profile_ready": TACTICAL_PROFILE.exists(),

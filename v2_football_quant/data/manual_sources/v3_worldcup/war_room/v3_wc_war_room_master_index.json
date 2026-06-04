@@ -1,8 +1,8 @@
 {
   "pack_name": "V3_WC_WAR_ROOM_MASTER_INDEX_PACK",
-  "generated_at": "2026-06-04T18:56:49.432231+00:00",
-  "current_head": "4a03e6a",
-  "module_count": 12,
+  "generated_at": "2026-06-04T19:18:41.931314+00:00",
+  "current_head": "53d35b1",
+  "module_count": 13,
   "modules": [
     {
       "module_name": "venue_stress_layer",
@@ -156,6 +156,76 @@
       "next_action": "Wait for official matchday lineup source before any lineup readiness update."
     },
     {
+      "module_name": "coverage_gap_radar_104",
+      "status": "READY",
+      "source_files": [
+        "data/manual_sources/v3_worldcup/war_room/v3_wc2026_104_coverage_gap_radar.json",
+        "data/manual_sources/v3_worldcup/war_room/v3_wc2026_104_coverage_gap_radar_summary.json",
+        "data/manual_sources/v3_worldcup/war_room/v3_wc2026_104_cards_index_bridge.json"
+      ],
+      "source_files_exist": true,
+      "checker": "tools/check_v3_worldcup_104_coverage_gap_radar.py",
+      "observation_only": true,
+      "affects_v4": false,
+      "betting_recommendation": false,
+      "data_status": "coverage_cards=104; group_view=72; knockout_slots=32",
+      "next_action": "Expose 104 coverage and gap summary to War Room and dashboard read model.",
+      "coverage_radar": "data/manual_sources/v3_worldcup/war_room/v3_wc2026_104_coverage_gap_radar.json",
+      "coverage_summary": "data/manual_sources/v3_worldcup/war_room/v3_wc2026_104_coverage_gap_radar_summary.json",
+      "coverage_104": {
+        "card_count": 104,
+        "team_known_count": 72,
+        "team_structural_placeholder_count": 32,
+        "fixture_id_mapped_count": 72,
+        "odds_fixture_id_mapped_count": 72,
+        "venue_mapped_count": 0,
+        "final26_ready_group_card_count": 69,
+        "lineup_wait_official_count": 69,
+        "war_room_registered_count": 104,
+        "dashboard_registered_count": 104
+      },
+      "group_72": {
+        "card_count": 72,
+        "team_known_count": 72,
+        "venue_mapped_count": 0,
+        "venue_source_required_count": 72,
+        "fixture_id_mapped_count": 72,
+        "odds_fixture_id_mapped_count": 72,
+        "final26_ready_card_count": 69,
+        "final26_gap_card_count": 3,
+        "lineup_wait_official_count": 69,
+        "lineup_gap_card_count": 3,
+        "war_room_registered_count": 72,
+        "dashboard_registered_count": 72
+      },
+      "knockout_32": {
+        "card_count": 32,
+        "structural_placeholder_count": 32,
+        "team_generated_count": 0,
+        "fixture_id_generated_count": 0,
+        "odds_fixture_id_generated_count": 0,
+        "venue_generated_count": 0,
+        "final26_status": "STRUCTURAL_PLACEHOLDER",
+        "lineup_status": "STRUCTURAL_PLACEHOLDER",
+        "war_room_registered_count": 32,
+        "dashboard_registered_count": 32
+      },
+      "gap_summary": {
+        "reason_distribution": {
+          "FINAL26_TEAM_GAP": 3,
+          "KNOCKOUT_STRUCTURAL_PLACEHOLDER_WAIT_OFFICIAL_FIXTURE": 32,
+          "KNOCKOUT_STRUCTURAL_PLACEHOLDER_WAIT_OFFICIAL_TEAMS": 32,
+          "LINEUP_STATUS_GAP": 3,
+          "VENUE_SOURCE_REQUIRED: no local per-match venue source found": 72
+        },
+        "venue_source_required": 72,
+        "official_lineup_required": 69,
+        "knockout_structural_placeholder": 32,
+        "native_opening_closing_missing": true,
+        "odds_movement_conclusion_missing": true
+      }
+    },
+    {
       "module_name": "match_card_104_canonical_index",
       "status": "READY",
       "source_files": [
@@ -231,6 +301,7 @@
     "wc10_war_room": "PASS",
     "lineup_readiness_pending": "PASS",
     "match_card_104_canonical_index": "PASS",
-    "dashboard_104_read_model": "PASS"
+    "dashboard_104_read_model": "PASS",
+    "coverage_gap_radar_104": "PASS"
   }
 }
