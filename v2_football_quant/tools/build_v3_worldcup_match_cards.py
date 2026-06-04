@@ -22,6 +22,7 @@ VENUE_STRESS = ROOT / "data/v3_worldcup/venue_stress/v3_worldcup_venue_stress_20
 TACTICAL_PROFILE = ROOT / "data/v3_worldcup/tactical_profile/v3_worldcup_tactical_profile_layer_20260604.json"
 WC10_WAR_ROOM = ROOT / "data/v3_worldcup/war_room/v3_worldcup_wc10_war_room_20260602.json"
 ODDS_LIVE_STATUS = ROOT / "data/runtime/status/check_v3_worldcup_odds_snapshot_live_small_batch_20260604.json"
+ODDS_AVAILABILITY_STATUS = ROOT / "data/runtime/status/check_v3_worldcup_odds_availability_monitor_20260604.json"
 ODDS_DELTA_STATUS = ROOT / "data/runtime/status/check_v3_worldcup_odds_movement_eligibility_20260604.json"
 
 TEAM_ALIASES = {
@@ -141,6 +142,59 @@ def data_gaps(base_gaps: dict[str, Any], venue_mapped: bool, odds_available: boo
     return sorted(set(gaps))
 
 
+def venue_binding(venue: dict[str, Any], venue_name: str | None = None) -> dict[str, Any]:
+    venues = venue.get("venues") if isinstance(venue.get("venues"), list) else []
+    by_name = {
+        slugify(str(item.get("venue") or "")): item
+        for item in venues
+        if isinstance(item, dict) and item.get("venue")
+    }
+    mapped = by_name.get(slugify(venue_name or "")) if venue_name else None
+    if mapped:
+        venue_real_name = str(mapped.get("venue") or venue_name)
+        return {
+            "venue_name": venue_real_name,
+            "venue_slug": slugify(venue_real_name),
+            "venue_stress_status": str(mapped.get("composite_risk") or "READY"),
+            "venue_stress_tags": mapped.get("stress_tags") or ["WATCH_ONLY"],
+            "venue_stress_ref": f"{rel(VENUE_STRESS)}#{slugify(venue_real_name)}",
+            "venue_mapping_status": "BOUND",
+            "venue_gap_reason": "",
+        }
+    return {
+        "venue_name": "VENUE_NOT_MAPPED",
+        "venue_slug": "venue_not_mapped",
+        "venue_stress_status": "VENUE_LAYER_READY_FIXTURE_VENUE_NOT_MAPPED",
+        "venue_stress_tags": ["WATCH_ONLY"],
+        "venue_stress_ref": rel(VENUE_STRESS),
+        "venue_mapping_status": "NOT_MAPPED",
+        "venue_gap_reason": "fixture_source_missing_venue_name",
+    }
+
+
+def odds_binding(
+    odds_live: dict[str, Any],
+    odds_availability: dict[str, Any],
+    odds_delta: dict[str, Any],
+    fixture_id: str | None = None,
+) -> dict[str, Any]:
+    coverage = odds_live.get("coverage") if isinstance(odds_live.get("coverage"), dict) else {}
+    movement = odds_delta.get("movement_eligibility") if isinstance(odds_delta.get("movement_eligibility"), dict) else {}
+    successful_ids = {str(item) for item in coverage.get("successful_fixture_ids", [])}
+    mapped = bool(fixture_id and str(fixture_id) in successful_ids)
+    return {
+        "odds_fixture_id": str(fixture_id) if mapped and fixture_id else None,
+        "odds_snapshot_status": "AVAILABLE" if mapped else "GLOBAL_SNAPSHOT_AVAILABLE_NOT_MATCH_MAPPED",
+        "odds_available": mapped,
+        "bookmaker_count": int(odds_availability.get("bookmaker_count") or coverage.get("bookmaker_count") or 0),
+        "market_type_count": int(odds_availability.get("market_type_count") or len(coverage.get("market_coverage") or {})),
+        "odds_observation_delta_status": str(movement.get("eligibility_status") or "NOT_AVAILABLE"),
+        "changed_odds_count": int(movement.get("changed_odds_count") or 0) if mapped else 0,
+        "odds_gap_reason": "" if mapped else "match_card_fixture_id_not_mapped_to_api_football_odds_fixture",
+        "no_money_flow_judgment": True,
+    }
+
+
 def build() -> tuple[list[dict[str, Any]], dict[str, Any]]:
     fixtures = load_fixture_rows()
     master = load_json(MASTER_INDEX)
@@ -152,6 +206,7 @@ def build() -> tuple[list[dict[str, Any]], dict[str, Any]]:
     venue = load_json(VENUE_STRESS)
     wc10 = load_json(WC10_WAR_ROOM)
     odds_live = load_json(ODDS_LIVE_STATUS)
+    odds_availability = load_json(ODDS_AVAILABILITY_STATUS)
     odds_delta = load_json(ODDS_DELTA_STATUS)
 
     venue_count = int(venue.get("venue_count") or 0) if isinstance(venue, dict) else 0
@@ -164,6 +219,13 @@ def build() -> tuple[list[dict[str, Any]], dict[str, Any]]:
     cards_with_final26 = 0
     cards_with_tactical = 0
     cards_waiting_lineup = 0
+    cards_with_venue_binding = 0
+    cards_with_venue_stress = 0
+    cards_missing_venue_binding = 0
+    cards_with_odds_binding = 0
+    cards_with_odds_available = 0
+    cards_with_odds_delta_observed = 0
+    cards_missing_odds_binding = 0
 
     for idx, row in enumerate(fixtures, start=1):
         home_raw = str((row.get("home_team") or {}).get("name") or "")
@@ -193,6 +255,26 @@ def build() -> tuple[list[dict[str, Any]], dict[str, Any]]:
 
         match_id = str(row.get("id") or f"wc2026_match_{idx:03d}")
         group = str(row.get("group_label") or "UNKNOWN")
+        venue_bound = venue_binding(venue if isinstance(venue, dict) else {}, row.get("venue"))
+        odds_bound = odds_binding(
+            odds_live if isinstance(odds_live, dict) else {},
+            odds_availability if isinstance(odds_availability, dict) else {},
+            odds_delta if isinstance(odds_delta, dict) else {},
+            row.get("fixture_id"),
+        )
+        if venue_bound["venue_mapping_status"] == "BOUND":
+            cards_with_venue_binding += 1
+            cards_with_venue_stress += 1
+        else:
+            cards_missing_venue_binding += 1
+        if odds_bound["odds_fixture_id"]:
+            cards_with_odds_binding += 1
+        else:
+            cards_missing_odds_binding += 1
+        if odds_bound["odds_available"]:
+            cards_with_odds_available += 1
+        if odds_bound["changed_odds_count"] > 0:
+            cards_with_odds_delta_observed += 1
         card = {
             "match_id": match_id,
             "group": group,
@@ -204,12 +286,13 @@ def build() -> tuple[list[dict[str, Any]], dict[str, Any]]:
             "venue": "VENUE_NOT_MAPPED",
             "kickoff_status": str(row.get("status") or "scheduled").upper(),
             "kickoff_time_utc": row.get("utc_date"),
+            "venue_binding": venue_bound,
             "venue_stress_summary": {
-                "status": "VENUE_LAYER_READY_FIXTURE_VENUE_NOT_MAPPED",
+                "status": venue_bound["venue_stress_status"],
                 "source": rel(VENUE_STRESS),
                 "venue_count": venue_count,
-                "stress_tags": ["WATCH_ONLY"],
-                "observation_note": "venue stress layer ready; fixture venue mapping not present in current match source",
+                "stress_tags": venue_bound["venue_stress_tags"],
+                "observation_note": venue_bound["venue_gap_reason"] or "venue stress layer bound to fixture",
             },
             "home_final_26_profile_ref": team_profile_ref(home),
             "away_final_26_profile_ref": team_profile_ref(away),
@@ -231,20 +314,26 @@ def build() -> tuple[list[dict[str, Any]], dict[str, Any]]:
                 },
             },
             "odds_snapshot_status": {
-                "status": "GLOBAL_SNAPSHOT_AVAILABLE_NOT_MATCH_MAPPED" if successful_fixture_count else "CURRENT_MARKET_DATA_MISSING",
+                "status": odds_bound["odds_snapshot_status"] if successful_fixture_count else "CURRENT_MARKET_DATA_MISSING",
                 "successful_fixture_count": successful_fixture_count,
                 "source": rel(ODDS_LIVE_STATUS),
                 "has_native_opening": False,
                 "has_native_closing": False,
             },
+            "odds_binding": odds_bound,
             "odds_observation_delta_status": {
-                "status": delta_status,
+                "status": odds_bound["odds_observation_delta_status"] or delta_status,
                 "delta_label": delta.get("delta_label") or "odds_observation_delta",
-                "changed_odds_count": int(delta.get("changed_odds_count") or 0),
+                "changed_odds_count": odds_bound["changed_odds_count"],
                 "source": rel(ODDS_DELTA_STATUS),
                 "no_money_flow_judgment": True,
             },
-            "data_gaps": data_gaps(gap if isinstance(gap, dict) else {}, False, False, False),
+            "data_gaps": data_gaps(
+                gap if isinstance(gap, dict) else {},
+                venue_bound["venue_mapping_status"] == "BOUND",
+                odds_bound["odds_available"],
+                odds_bound["changed_odds_count"] > 0,
+            ),
             **SAFETY,
         }
         cards.append(card)
@@ -261,12 +350,24 @@ def build() -> tuple[list[dict[str, Any]], dict[str, Any]]:
         "teams_covered": len(teams_covered),
         "team_names_covered": sorted(teams_covered),
         "cards_with_final_26": cards_with_final26,
-        "cards_with_venue_stress": 0,
+        "cards_with_venue_binding": cards_with_venue_binding,
+        "cards_with_venue_stress": cards_with_venue_stress,
         "cards_with_tactical_profile": cards_with_tactical,
         "cards_waiting_lineup": cards_waiting_lineup,
-        "cards_with_odds_available": 0,
-        "cards_with_odds_delta": 0,
+        "cards_with_odds_binding": cards_with_odds_binding,
+        "cards_with_odds_available": cards_with_odds_available,
+        "cards_with_odds_delta": cards_with_odds_delta_observed,
+        "cards_with_odds_delta_observed": cards_with_odds_delta_observed,
+        "cards_missing_venue_binding": cards_missing_venue_binding,
+        "cards_missing_odds_binding": cards_missing_odds_binding,
         "global_data_gaps": data_gaps(gap if isinstance(gap, dict) else {}, False, False, False),
+        "global_gap_summary": {
+            "venue_binding": "fixture_source_missing_venue_name",
+            "odds_binding": "match_card_fixture_id_not_mapped_to_api_football_odds_fixture",
+            "official_lineup": "WAIT_OFFICIAL_LINEUP",
+            "native_opening_closing": "not_available_from_current_snapshot",
+            "odds_observation_delta": "global_status_only_not_per_match_bound",
+        },
         "final_26_total_players": ((final26.get("counts") or {}).get("total_players") if isinstance(final26, dict) else None),
         "wc10_status": wc10.get("status") if isinstance(wc10, dict) else "UNKNOWN",
         "master_index_module_count": master.get("module_count") if isinstance(master, dict) else None,

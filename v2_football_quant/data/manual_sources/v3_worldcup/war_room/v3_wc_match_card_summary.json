@@ -1,7 +1,7 @@
 {
   "pack_name": "V3_WC_MATCH_CARD_PACK",
-  "generated_at": "2026-06-04T15:27:18.161965+00:00",
-  "current_head": "55b54f9",
+  "generated_at": "2026-06-04T15:35:46.070033+00:00",
+  "current_head": "4ddb246",
   "source_fixtures": "data/runtime/v3_worldcup/thestatsapi_cache/20260602/world_cup_2026/matches_2026_all.json",
   "source_master_index": "data/manual_sources/v3_worldcup/war_room/v3_wc_war_room_master_index.json",
   "source_gap_radar": "data/manual_sources/v3_worldcup/war_room/v3_wc_war_room_gap_radar.json",
@@ -59,11 +59,16 @@
     "Uzbekistan"
   ],
   "cards_with_final_26": 72,
+  "cards_with_venue_binding": 0,
   "cards_with_venue_stress": 0,
   "cards_with_tactical_profile": 71,
   "cards_waiting_lineup": 72,
+  "cards_with_odds_binding": 0,
   "cards_with_odds_available": 0,
   "cards_with_odds_delta": 0,
+  "cards_with_odds_delta_observed": 0,
+  "cards_missing_venue_binding": 72,
+  "cards_missing_odds_binding": 72,
   "global_data_gaps": [
     "match_venue_not_mapped_to_fixture",
     "missing_injury_suspension_official_feed",
@@ -75,6 +80,13 @@
     "odds_delta_not_available_for_this_match",
     "odds_snapshot_not_mapped_to_this_match"
   ],
+  "global_gap_summary": {
+    "venue_binding": "fixture_source_missing_venue_name",
+    "odds_binding": "match_card_fixture_id_not_mapped_to_api_football_odds_fixture",
+    "official_lineup": "WAIT_OFFICIAL_LINEUP",
+    "native_opening_closing": "not_available_from_current_snapshot",
+    "odds_observation_delta": "global_status_only_not_per_match_bound"
+  },
   "final_26_total_players": 1248,
   "wc10_status": "WAR_ROOM_READY_WITH_WARN_ONLY",
   "master_index_module_count": 10,
