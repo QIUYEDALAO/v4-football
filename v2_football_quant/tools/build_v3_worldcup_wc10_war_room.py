@@ -28,6 +28,7 @@ MATCH_LEVEL_PG_DRYRUN_CSV = ROOT / "data/runtime/v3_worldcup/perception_gap_dryr
 MATCH_LEVEL_PG_DRYRUN_STATUS = ROOT / "data/runtime/v3_worldcup/perception_gap_dryrun/v3_wc4d_match_level_perception_gap_dryrun_status_20260603.json"
 TACTICAL_PROFILE_LAYER = ROOT / "data/v3_worldcup/tactical_profile/v3_worldcup_tactical_profile_layer_20260604.json"
 CLOSING_1X2_LAYER = ROOT / "data/v3_worldcup/closing_1x2_market_structure/v3_worldcup_closing_1x2_market_structure_20260604.json"
+FINAL26_UI_PAYLOAD = ROOT / "data/manual_sources/v3_worldcup/squads/fifa_final_26/processed/v3_wc2026_final_26_war_room_ui_payload.json"
 
 CST = timezone(timedelta(hours=8))
 
@@ -420,6 +421,48 @@ def _closing_1x2_view(payload: dict[str, Any]) -> dict[str, Any]:
     }
 
 
+def _final26_squad_observation_view(payload: dict[str, Any]) -> dict[str, Any]:
+    if not payload:
+        return {
+            "final_26_squad_observation": {
+                "module": "final_26_squad_observation",
+                "status": "FINAL_26_OBSERVATION_PAYLOAD_MISSING_WARN_ONLY",
+                "team_count": 0,
+                "total_players": 0,
+                "coach_count": 0,
+                "teams": [],
+                "safety": {
+                    "observation_only": True,
+                    "no_starting_xi": True,
+                    "no_injury_judgment": True,
+                    "betting_recommendation": False,
+                    "affects_v4": False,
+                },
+            }
+        }
+    return {
+        "final_26_squad_observation": {
+            "module": payload.get("module") or "final_26_squad_observation",
+            "status": "FINAL_26_OBSERVATION_READY",
+            "team_count": int(payload.get("team_count") or 0),
+            "total_players": int(payload.get("total_players") or 0),
+            "coach_count": int(payload.get("coach_count") or 0),
+            "global_position_distribution": payload.get("global_position_distribution") if isinstance(payload.get("global_position_distribution"), dict) else {},
+            "avg_age_global": payload.get("avg_age_global"),
+            "avg_height_global": payload.get("avg_height_global"),
+            "club_count_global": payload.get("club_count_global"),
+            "teams": payload.get("teams") if isinstance(payload.get("teams"), list) else [],
+            "safety": payload.get("safety") if isinstance(payload.get("safety"), dict) else {
+                "observation_only": True,
+                "no_starting_xi": True,
+                "no_injury_judgment": True,
+                "betting_recommendation": False,
+                "affects_v4": False,
+            },
+        }
+    }
+
+
 def main() -> int:
     rosters = _load(ROSTERS)
     profiles = _load(PROFILES)
@@ -435,6 +478,7 @@ def main() -> int:
     venue_stress = _load(VENUE_STRESS)
     tactical_profile = _load(TACTICAL_PROFILE_LAYER)
     closing_1x2 = _load(CLOSING_1X2_LAYER)
+    final26_ui_payload = _load(FINAL26_UI_PAYLOAD)
 
     meta = rosters.get("meta") or {}
     teams_total = _safe_int(meta.get("total_teams") or 46)
@@ -544,6 +588,11 @@ def main() -> int:
         warn = "WC4H_CLOSING_1X2_MISSING_WARN_ONLY"
         if warn not in warn_only_items:
             warn_only_items.append(warn)
+    final26_squad_observation_view = _final26_squad_observation_view(final26_ui_payload)
+    if not final26_ui_payload:
+        warn = "FINAL_26_OBSERVATION_PAYLOAD_MISSING_WARN_ONLY"
+        if warn not in warn_only_items:
+            warn_only_items.append(warn)
 
     now = datetime.now(CST)
     payload = {
@@ -591,6 +640,7 @@ def main() -> int:
         **match_level_pg_dryrun_view,
         **tactical_profile_view,
         **closing_1x2_view,
+        **final26_squad_observation_view,
         "perception_gap_watchlist": watch_list,
         "perception_gap_watchlist_count": len(watch_list),
         "undervalued_candidates": undervalued,

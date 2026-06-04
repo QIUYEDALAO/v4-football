@@ -1,0 +1,4063 @@
+{
+  "tournament": "FIFA World Cup 2026",
+  "source": "FIFA official final 26 war room observation layer",
+  "generated_from": {
+    "roster_index": "/Users/liudehua/.openclaw/workspace/v2_football_quant/data/manual_sources/v3_worldcup/squads/fifa_final_26/processed/v3_wc2026_final_26_war_room_roster_index.json",
+    "team_observation_cards": "/Users/liudehua/.openclaw/workspace/v2_football_quant/data/manual_sources/v3_worldcup/squads/fifa_final_26/processed/v3_wc2026_final_26_team_observation_cards.json",
+    "squad_observation_summary": "/Users/liudehua/.openclaw/workspace/v2_football_quant/data/manual_sources/v3_worldcup/squads/fifa_final_26/processed/v3_wc2026_final_26_squad_observation_summary.json"
+  },
+  "module": "final_26_squad_observation",
+  "team_count": 48,
+  "total_players": 1248,
+  "coach_count": 48,
+  "global_position_distribution": {
+    "GK": 145,
+    "DF": 421,
+    "MF": 371,
+    "FW": 311
+  },
+  "avg_age_global": 27.94,
+  "avg_height_global": 182.74,
+  "club_count_global": 449,
+  "teams": [
+    {
+      "team": "Algeria",
+      "team_slug": "algeria",
+      "head_coach": "PETKOVIC Vladimir",
+      "player_count": 26,
+      "position_counts": {
+        "GK": 3,
+        "DF": 9,
+        "MF": 7,
+        "FW": 7
+      },
+      "avg_age": 26.86,
+      "avg_height_cm": 182.65,
+      "club_count": 24,
+      "top_clubs": [
+        {
+          "club": "Lille OSC (FRA)",
+          "player_count": 2
+        },
+        {
+          "club": "USM Alger (ALG)",
+          "player_count": 2
+        },
+        {
+          "club": "FC Stade Nyonnais (SUI)",
+          "player_count": 1
+        },
+        {
+          "club": "Espérance De Tunisie (TUN)",
+          "player_count": 1
+        },
+        {
+          "club": "JS Kabylie (ALG)",
+          "player_count": 1
+        }
+      ],
+      "roster_ref": {
+        "team_slug": "algeria",
+        "player_ids": [
+          "wc2026_algeria_01_mastil_melvin",
+          "wc2026_algeria_02_mandi_aissa",
+          "wc2026_algeria_03_abada_achraf",
+          "wc2026_algeria_04_tougai_mohamed_amine",
+          "wc2026_algeria_05_belaid_zineddine",
+          "wc2026_algeria_06_zerrouki_ramiz",
+          "wc2026_algeria_07_mahrez_riyad",
+          "wc2026_algeria_08_aouar_houssem",
+          "wc2026_algeria_09_gouiri_amine",
+          "wc2026_algeria_10_chaibi_fares",
+          "wc2026_algeria_11_hadj_moussa_anis",
+          "wc2026_algeria_12_benbouali_nadhir",
+          "wc2026_algeria_13_hadjam_jaouen",
+          "wc2026_algeria_14_boudaoui_hicham",
+          "wc2026_algeria_15_ait_nouri_rayan",
+          "wc2026_algeria_16_benbot_oussama",
+          "wc2026_algeria_17_belghali_ra_k",
+          "wc2026_algeria_18_amoura_mohamed",
+          "wc2026_algeria_19_bentaleb_nabil",
+          "wc2026_algeria_20_boulbina_adil",
+          "wc2026_algeria_21_bensebaini_ramy",
+          "wc2026_algeria_22_maza_ibrahim",
+          "wc2026_algeria_23_zidane_luca",
+          "wc2026_algeria_24_titraoui_yassine",
+          "wc2026_algeria_25_ghedjemis_fares",
+          "wc2026_algeria_26_chergui_samir"
+        ]
+      },
+      "observation_card_ref": {
+        "team_slug": "algeria",
+        "metrics": [
+          "avg_age",
+          "avg_height_cm",
+          "club_count",
+          "top_clubs"
+        ]
+      },
+      "safety": {
+        "observation_only": true,
+        "no_starting_xi": true,
+        "no_injury_judgment": true,
+        "betting_recommendation": false,
+        "affects_v4": false
+      }
+    },
+    {
+      "team": "Argentina",
+      "team_slug": "argentina",
+      "head_coach": "SCALONI Lionel",
+      "player_count": 26,
+      "position_counts": {
+        "GK": 3,
+        "DF": 8,
+        "MF": 8,
+        "FW": 7
+      },
+      "avg_age": 29.05,
+      "avg_height_cm": 179.69,
+      "club_count": 18,
+      "top_clubs": [
+        {
+          "club": "Atlético De Madrid (ESP)",
+          "player_count": 6
+        },
+        {
+          "club": "Olympique Marseille (FRA)",
+          "player_count": 3
+        },
+        {
+          "club": "Inter Miami CF (USA)",
+          "player_count": 2
+        },
+        {
+          "club": "Olympique Lyonnais (FRA)",
+          "player_count": 1
+        },
+        {
+          "club": "CA River Plate (ARG)",
+          "player_count": 1
+        }
+      ],
+      "roster_ref": {
+        "team_slug": "argentina",
+        "player_ids": [
+          "wc2026_argentina_01_musso_juan",
+          "wc2026_argentina_02_balerdi_leonardo",
+          "wc2026_argentina_03_tagliafico_nicolas",
+          "wc2026_argentina_04_montiel_gonzalo",
+          "wc2026_argentina_05_paredes_leandro",
+          "wc2026_argentina_06_martinez_lisandro",
+          "wc2026_argentina_07_de_paul_rodrigo",
+          "wc2026_argentina_08_barco_valentin",
+          "wc2026_argentina_09_alvarez_julian",
+          "wc2026_argentina_10_messi_lionel",
+          "wc2026_argentina_11_lo_celso_giovani",
+          "wc2026_argentina_12_rulli_geronimo",
+          "wc2026_argentina_13_romero_cristian",
+          "wc2026_argentina_14_palacios_exequiel",
+          "wc2026_argentina_15_gonzalez_nico",
+          "wc2026_argentina_16_almada_thiago",
+          "wc2026_argentina_17_simeone_giuliano",
+          "wc2026_argentina_18_paz_nico",
+          "wc2026_argentina_19_otamendi_nicolas",
+          "wc2026_argentina_20_mac_allister_alexis",
+          "wc2026_argentina_21_lopez_jose_manuel",
+          "wc2026_argentina_22_martinez_lautaro",
+          "wc2026_argentina_23_martinez_emiliano",
+          "wc2026_argentina_24_fernandez_enzo",
+          "wc2026_argentina_25_medina_facundo",
+          "wc2026_argentina_26_molina_nahuel"
+        ]
+      },
+      "observation_card_ref": {
+        "team_slug": "argentina",
+        "metrics": [
+          "avg_age",
+          "avg_height_cm",
+          "club_count",
+          "top_clubs"
+        ]
+      },
+      "safety": {
+        "observation_only": true,
+        "no_starting_xi": true,
+        "no_injury_judgment": true,
+        "betting_recommendation": false,
+        "affects_v4": false
+      }
+    },
+    {
+      "team": "Australia",
+      "team_slug": "australia",
+      "head_coach": "POPOVIC Tony",
+      "player_count": 26,
+      "position_counts": {
+        "GK": 3,
+        "DF": 10,
+        "MF": 5,
+        "FW": 8
+      },
+      "avg_age": 27.36,
+      "avg_height_cm": 183.58,
+      "club_count": 22,
+      "top_clubs": [
+        {
+          "club": "Melbourne City FC (AUS)",
+          "player_count": 3
+        },
+        {
+          "club": "FC St. Pauli (GER)",
+          "player_count": 2
+        },
+        {
+          "club": "New York City FC (USA)",
+          "player_count": 2
+        },
+        {
+          "club": "Levante UD (ESP)",
+          "player_count": 1
+        },
+        {
+          "club": "APOEL FC (CYP)",
+          "player_count": 1
+        }
+      ],
+      "roster_ref": {
+        "team_slug": "australia",
+        "player_ids": [
+          "wc2026_australia_01_ryan_mathew",
+          "wc2026_australia_02_degenek_milos",
+          "wc2026_australia_03_circati_alessandro",
+          "wc2026_australia_04_italiano_jacob",
+          "wc2026_australia_05_bos_jordan",
+          "wc2026_australia_06_geria_jason",
+          "wc2026_australia_07_leckie_mathew",
+          "wc2026_australia_08_metcalfe_connor",
+          "wc2026_australia_09_toure_mohamed",
+          "wc2026_australia_10_hrustic_ajdin",
+          "wc2026_australia_11_mabil_awer",
+          "wc2026_australia_12_izzo_paul",
+          "wc2026_australia_13_oneill_aiden",
+          "wc2026_australia_14_devlin_cameron",
+          "wc2026_australia_15_trewin_kai",
+          "wc2026_australia_16_behich_aziz",
+          "wc2026_australia_17_irankunda_nestory",
+          "wc2026_australia_18_beach_patrick",
+          "wc2026_australia_19_souttar_harry",
+          "wc2026_australia_20_volpato_cristian",
+          "wc2026_australia_21_burgess_cameron",
+          "wc2026_australia_22_irvine_jackson",
+          "wc2026_australia_23_velupillay_nishan",
+          "wc2026_australia_24_okon_engstler_paul",
+          "wc2026_australia_25_herrington_lucas",
+          "wc2026_australia_26_yengi_tete"
+        ]
+      },
+      "observation_card_ref": {
+        "team_slug": "australia",
+        "metrics": [
+          "avg_age",
+          "avg_height_cm",
+          "club_count",
+          "top_clubs"
+        ]
+      },
+      "safety": {
+        "observation_only": true,
+        "no_starting_xi": true,
+        "no_injury_judgment": true,
+        "betting_recommendation": false,
+        "affects_v4": false
+      }
+    },
+    {
+      "team": "Austria",
+      "team_slug": "austria",
+      "head_coach": "RANGNICK Ralf",
+      "player_count": 26,
+      "position_counts": {
+        "GK": 3,
+        "DF": 8,
+        "MF": 11,
+        "FW": 4
+      },
+      "avg_age": 28.54,
+      "avg_height_cm": 184.69,
+      "club_count": 21,
+      "top_clubs": [
+        {
+          "club": "RB Leipzig (GER)",
+          "player_count": 3
+        },
+        {
+          "club": "1. FSV Mainz 05 (GER)",
+          "player_count": 2
+        },
+        {
+          "club": "Borussia Dortmund (GER)",
+          "player_count": 2
+        },
+        {
+          "club": "SV Werder Bremen (GER)",
+          "player_count": 2
+        },
+        {
+          "club": "FC Red Bull Salzburg (AUT)",
+          "player_count": 1
+        }
+      ],
+      "roster_ref": {
+        "team_slug": "austria",
+        "player_ids": [
+          "wc2026_austria_01_schlager_alexander",
+          "wc2026_austria_02_affengruber_david",
+          "wc2026_austria_03_danso_kevin",
+          "wc2026_austria_04_schlager_xaver",
+          "wc2026_austria_05_posch_stefan",
+          "wc2026_austria_06_seiwald_nicolas",
+          "wc2026_austria_07_arnautovic_marko",
+          "wc2026_austria_08_alaba_david",
+          "wc2026_austria_09_sabitzer_marcel",
+          "wc2026_austria_10_grillitsch_florian",
+          "wc2026_austria_11_gregoritsch_michael",
+          "wc2026_austria_12_wiegele_florian",
+          "wc2026_austria_13_pentz_patrick",
+          "wc2026_austria_14_kalajdzic_sasa",
+          "wc2026_austria_15_lienhart_philipp",
+          "wc2026_austria_16_mwene_phillip",
+          "wc2026_austria_17_chukwuemeka_carney",
+          "wc2026_austria_18_schmid_romano",
+          "wc2026_austria_19_baumgartner_christoph",
+          "wc2026_austria_20_laimer_konrad",
+          "wc2026_austria_21_wimmer_patrick",
+          "wc2026_austria_22_prass_alexander",
+          "wc2026_austria_23_friedl_marco",
+          "wc2026_austria_24_wanner_paul",
+          "wc2026_austria_25_svoboda_michael",
+          "wc2026_austria_26_schoepf_alessandro"
+        ]
+      },
+      "observation_card_ref": {
+        "team_slug": "austria",
+        "metrics": [
+          "avg_age",
+          "avg_height_cm",
+          "club_count",
+          "top_clubs"
+        ]
+      },
+      "safety": {
+        "observation_only": true,
+        "no_starting_xi": true,
+        "no_injury_judgment": true,
+        "betting_recommendation": false,
+        "affects_v4": false
+      }
+    },
+    {
+      "team": "Belgium",
+      "team_slug": "belgium",
+      "head_coach": "GARCIA Rudi",
+      "player_count": 26,
+      "position_counts": {
+        "GK": 3,
+        "DF": 9,
+        "MF": 8,
+        "FW": 6
+      },
+      "avg_age": 27.62,
+      "avg_height_cm": 185.81,
+      "club_count": 18,
+      "top_clubs": [
+        {
+          "club": "Club Brugge (BEL)",
+          "player_count": 3
+        },
+        {
+          "club": "Lille OSC (FRA)",
+          "player_count": 3
+        },
+        {
+          "club": "SSC Napoli (ITA)",
+          "player_count": 2
+        },
+        {
+          "club": "Aston Villa FC (ENG)",
+          "player_count": 2
+        },
+        {
+          "club": "RC Strasbourg (FRA)",
+          "player_count": 2
+        }
+      ],
+      "roster_ref": {
+        "team_slug": "belgium",
+        "player_ids": [
+          "wc2026_belgium_01_courtois_thibaut",
+          "wc2026_belgium_02_debast_zeno",
+          "wc2026_belgium_03_theate_arthur",
+          "wc2026_belgium_04_mechele_brandon",
+          "wc2026_belgium_05_de_cuyper_maxim",
+          "wc2026_belgium_06_witsel_axel",
+          "wc2026_belgium_07_de_bruyne_kevin",
+          "wc2026_belgium_08_tielemans_youri",
+          "wc2026_belgium_09_lukaku_romelu",
+          "wc2026_belgium_10_trossard_leandro",
+          "wc2026_belgium_11_doku_jeremy",
+          "wc2026_belgium_12_lammens_senne",
+          "wc2026_belgium_13_penders_mike",
+          "wc2026_belgium_14_lukebakio_dodi",
+          "wc2026_belgium_15_meunier_thomas",
+          "wc2026_belgium_16_de_winter_koni",
+          "wc2026_belgium_17_de_ketelaere_charles",
+          "wc2026_belgium_18_seys_joaquin",
+          "wc2026_belgium_19_moreira_diego",
+          "wc2026_belgium_20_vanaken_hans",
+          "wc2026_belgium_21_castagne_timothy",
+          "wc2026_belgium_22_saelemaekers_alexis",
+          "wc2026_belgium_23_raskin_nicolas",
+          "wc2026_belgium_24_onana_amadou",
+          "wc2026_belgium_25_ngoy_nathan",
+          "wc2026_belgium_26_fernandez_pardo_matias"
+        ]
+      },
+      "observation_card_ref": {
+        "team_slug": "belgium",
+        "metrics": [
+          "avg_age",
+          "avg_height_cm",
+          "club_count",
+          "top_clubs"
+        ]
+      },
+      "safety": {
+        "observation_only": true,
+        "no_starting_xi": true,
+        "no_injury_judgment": true,
+        "betting_recommendation": false,
+        "affects_v4": false
+      }
+    },
+    {
+      "team": "Bosnia And Herzegovina",
+      "team_slug": "bosnia_and_herzegovina",
+      "head_coach": "BARBAREZ Sergej",
+      "player_count": 26,
+      "position_counts": {
+        "GK": 3,
+        "DF": 8,
+        "MF": 8,
+        "FW": 7
+      },
+      "avg_age": 26.42,
+      "avg_height_cm": 187.23,
+      "club_count": 24,
+      "top_clubs": [
+        {
+          "club": "FC Schalke 04 (GER)",
+          "player_count": 2
+        },
+        {
+          "club": "HNK Rijeka (CRO)",
+          "player_count": 2
+        },
+        {
+          "club": "FC St. Pauli (GER)",
+          "player_count": 1
+        },
+        {
+          "club": "Gaziantep FK (TUR)",
+          "player_count": 1
+        },
+        {
+          "club": "UC Sampdoria (ITA)",
+          "player_count": 1
+        }
+      ],
+      "roster_ref": {
+        "team_slug": "bosnia_and_herzegovina",
+        "player_ids": [
+          "wc2026_bosnia_and_herzegovina_01_vasilj_nikola",
+          "wc2026_bosnia_and_herzegovina_02_mujakic_nihad",
+          "wc2026_bosnia_and_herzegovina_03_hadzikadunic_dennis",
+          "wc2026_bosnia_and_herzegovina_04_muharemovic_tarik",
+          "wc2026_bosnia_and_herzegovina_05_kolasinac_sead",
+          "wc2026_bosnia_and_herzegovina_06_tahirovic_benjamin",
+          "wc2026_bosnia_and_herzegovina_07_dedic_amar",
+          "wc2026_bosnia_and_herzegovina_08_gigovic_armin",
+          "wc2026_bosnia_and_herzegovina_09_bazdar_samed",
+          "wc2026_bosnia_and_herzegovina_10_demirovic_ermedin",
+          "wc2026_bosnia_and_herzegovina_11_dzeko_edin",
+          "wc2026_bosnia_and_herzegovina_12_jurkas_mladen",
+          "wc2026_bosnia_and_herzegovina_13_basic_ivan",
+          "wc2026_bosnia_and_herzegovina_14_sunjic_ivan",
+          "wc2026_bosnia_and_herzegovina_15_memic_amar",
+          "wc2026_bosnia_and_herzegovina_16_hadziahmetovic_amir",
+          "wc2026_bosnia_and_herzegovina_17_burnic_dzenis",
+          "wc2026_bosnia_and_herzegovina_18_katic_nikola",
+          "wc2026_bosnia_and_herzegovina_19_alajbegovic_kerim",
+          "wc2026_bosnia_and_herzegovina_20_bajraktarevic_esmir",
+          "wc2026_bosnia_and_herzegovina_21_radeljic_stjepan",
+          "wc2026_bosnia_and_herzegovina_22_zlomislic_martin",
+          "wc2026_bosnia_and_herzegovina_23_tabakovic_haris",
+          "wc2026_bosnia_and_herzegovina_24_celik_nidal",
+          "wc2026_bosnia_and_herzegovina_25_lukic_jovo",
+          "wc2026_bosnia_and_herzegovina_26_mahmic_ermin"
+        ]
+      },
+      "observation_card_ref": {
+        "team_slug": "bosnia_and_herzegovina",
+        "metrics": [
+          "avg_age",
+          "avg_height_cm",
+          "club_count",
+          "top_clubs"
+        ]
+      },
+      "safety": {
+        "observation_only": true,
+        "no_starting_xi": true,
+        "no_injury_judgment": true,
+        "betting_recommendation": false,
+        "affects_v4": false
+      }
+    },
+    {
+      "team": "Brazil",
+      "team_slug": "brazil",
+      "head_coach": "ANCELOTTI Carlo",
+      "player_count": 26,
+      "position_counts": {
+        "GK": 3,
+        "DF": 9,
+        "MF": 5,
+        "FW": 9
+      },
+      "avg_age": 29.2,
+      "avg_height_cm": 182.77,
+      "club_count": 20,
+      "top_clubs": [
+        {
+          "club": "CR Flamengo (BRA)",
+          "player_count": 4
+        },
+        {
+          "club": "Arsenal FC (ENG)",
+          "player_count": 2
+        },
+        {
+          "club": "Manchester United FC (ENG)",
+          "player_count": 2
+        },
+        {
+          "club": "FC Zenit St. Petersburg (RUS)",
+          "player_count": 2
+        },
+        {
+          "club": "Liverpool FC (ENG)",
+          "player_count": 1
+        }
+      ],
+      "roster_ref": {
+        "team_slug": "brazil",
+        "player_ids": [
+          "wc2026_brazil_01_alisson",
+          "wc2026_brazil_02_wesley",
+          "wc2026_brazil_03_gabriel_magalhaes",
+          "wc2026_brazil_04_marquinhos",
+          "wc2026_brazil_05_casemiro",
+          "wc2026_brazil_06_alex_sandro",
+          "wc2026_brazil_07_vinicius_junior",
+          "wc2026_brazil_08_bruno_guimaraes",
+          "wc2026_brazil_09_matheus_cunha",
+          "wc2026_brazil_10_neymar_jr",
+          "wc2026_brazil_11_raphinha",
+          "wc2026_brazil_12_weverton",
+          "wc2026_brazil_13_danilo",
+          "wc2026_brazil_14_bremer",
+          "wc2026_brazil_15_leo_pereira",
+          "wc2026_brazil_16_douglas_santos",
+          "wc2026_brazil_17_fabinho",
+          "wc2026_brazil_18_danilo_santos",
+          "wc2026_brazil_19_endrick",
+          "wc2026_brazil_20_lucas_paqueta",
+          "wc2026_brazil_21_luiz_henrique",
+          "wc2026_brazil_22_gabriel_martinelli",
+          "wc2026_brazil_23_ederson",
+          "wc2026_brazil_24_roger_ibanez",
+          "wc2026_brazil_25_igor_thiago",
+          "wc2026_brazil_26_rayan"
+        ]
+      },
+      "observation_card_ref": {
+        "team_slug": "brazil",
+        "metrics": [
+          "avg_age",
+          "avg_height_cm",
+          "club_count",
+          "top_clubs"
+        ]
+      },
+      "safety": {
+        "observation_only": true,
+        "no_starting_xi": true,
+        "no_injury_judgment": true,
+        "betting_recommendation": false,
+        "affects_v4": false
+      }
+    },
+    {
+      "team": "Cabo Verde",
+      "team_slug": "cabo_verde",
+      "head_coach": "BUBISTA",
+      "player_count": 26,
+      "position_counts": {
+        "GK": 3,
+        "DF": 8,
+        "MF": 12,
+        "FW": 3
+      },
+      "avg_age": 29.68,
+      "avg_height_cm": 181.35,
+      "club_count": 26,
+      "top_clubs": [
+        {
+          "club": "GD Chaves (POR)",
+          "player_count": 1
+        },
+        {
+          "club": "SCU Torreense (POR)",
+          "player_count": 1
+        },
+        {
+          "club": "Al Bataeh Club (UAE)",
+          "player_count": 1
+        },
+        {
+          "club": "Shamrock Rovers FC (IRL)",
+          "player_count": 1
+        },
+        {
+          "club": "Villarreal CF (ESP)",
+          "player_count": 1
+        }
+      ],
+      "roster_ref": {
+        "team_slug": "cabo_verde",
+        "player_ids": [
+          "wc2026_cabo_verde_01_vozinha",
+          "wc2026_cabo_verde_02_stopira",
+          "wc2026_cabo_verde_03_diney_borges",
+          "wc2026_cabo_verde_04_pico_lopes",
+          "wc2026_cabo_verde_05_logan_costa",
+          "wc2026_cabo_verde_06_kevin_pina",
+          "wc2026_cabo_verde_07_jovane_cabral",
+          "wc2026_cabo_verde_08_joao_paulo",
+          "wc2026_cabo_verde_09_gilson_benchimol",
+          "wc2026_cabo_verde_10_jamiro_monteiro",
+          "wc2026_cabo_verde_11_garry_rodrigues",
+          "wc2026_cabo_verde_12_marcio_rosa",
+          "wc2026_cabo_verde_13_sidny_lopes_cabral",
+          "wc2026_cabo_verde_14_deroy_duarte",
+          "wc2026_cabo_verde_15_laros_duarte",
+          "wc2026_cabo_verde_16_yannick_semedo",
+          "wc2026_cabo_verde_17_willy_semedo",
+          "wc2026_cabo_verde_18_telmo_arcanjo",
+          "wc2026_cabo_verde_19_dailon_livramento",
+          "wc2026_cabo_verde_20_ryan_mendes",
+          "wc2026_cabo_verde_21_nuno_da_costa",
+          "wc2026_cabo_verde_22_steven_moreira",
+          "wc2026_cabo_verde_23_cj_dos_santos",
+          "wc2026_cabo_verde_24_wagner_pina",
+          "wc2026_cabo_verde_25_kelvin_pires",
+          "wc2026_cabo_verde_26_helio_varela"
+        ]
+      },
+      "observation_card_ref": {
+        "team_slug": "cabo_verde",
+        "metrics": [
+          "avg_age",
+          "avg_height_cm",
+          "club_count",
+          "top_clubs"
+        ]
+      },
+      "safety": {
+        "observation_only": true,
+        "no_starting_xi": true,
+        "no_injury_judgment": true,
+        "betting_recommendation": false,
+        "affects_v4": false
+      }
+    },
+    {
+      "team": "Canada",
+      "team_slug": "canada",
+      "head_coach": "MARSCH Jesse",
+      "player_count": 26,
+      "position_counts": {
+        "GK": 3,
+        "DF": 9,
+        "MF": 8,
+        "FW": 6
+      },
+      "avg_age": 26.93,
+      "avg_height_cm": 182.08,
+      "club_count": 22,
+      "top_clubs": [
+        {
+          "club": "LAFC (USA)",
+          "player_count": 3
+        },
+        {
+          "club": "Villarreal CF (ESP)",
+          "player_count": 2
+        },
+        {
+          "club": "Toronto FC (CAN)",
+          "player_count": 2
+        },
+        {
+          "club": "Inter Miami CF (USA)",
+          "player_count": 1
+        },
+        {
+          "club": "Celtic FC (SCO)",
+          "player_count": 1
+        }
+      ],
+      "roster_ref": {
+        "team_slug": "canada",
+        "player_ids": [
+          "wc2026_canada_01_st_clair_dayne",
+          "wc2026_canada_02_johnston_alistair",
+          "wc2026_canada_03_jones_al_e",
+          "wc2026_canada_04_de_fougerolles_luc",
+          "wc2026_canada_05_waterman_joel",
+          "wc2026_canada_06_choiniere_mathieu",
+          "wc2026_canada_07_eustaquio_stephen",
+          "wc2026_canada_08_kone_ismael",
+          "wc2026_canada_09_larin_cyle",
+          "wc2026_canada_10_david_jonathan",
+          "wc2026_canada_11_millar_liam",
+          "wc2026_canada_12_oluwaseyi_tani",
+          "wc2026_canada_13_cornelius_derek",
+          "wc2026_canada_14_shaffelburg_jacob",
+          "wc2026_canada_15_bombito_moise",
+          "wc2026_canada_16_crepeau_maxime",
+          "wc2026_canada_17_buchanan_tajon",
+          "wc2026_canada_18_goodman_owen",
+          "wc2026_canada_19_davies_alphonso",
+          "wc2026_canada_20_ahmed_ali",
+          "wc2026_canada_21_osorio_jonathan",
+          "wc2026_canada_22_laryea_richie",
+          "wc2026_canada_23_sigur_niko",
+          "wc2026_canada_24_david_promise",
+          "wc2026_canada_25_saliba_nathan",
+          "wc2026_canada_26_flores_marcelo"
+        ]
+      },
+      "observation_card_ref": {
+        "team_slug": "canada",
+        "metrics": [
+          "avg_age",
+          "avg_height_cm",
+          "club_count",
+          "top_clubs"
+        ]
+      },
+      "safety": {
+        "observation_only": true,
+        "no_starting_xi": true,
+        "no_injury_judgment": true,
+        "betting_recommendation": false,
+        "affects_v4": false
+      }
+    },
+    {
+      "team": "Colombia",
+      "team_slug": "colombia",
+      "head_coach": "LORENZO Nestor",
+      "player_count": 26,
+      "position_counts": {
+        "GK": 3,
+        "DF": 9,
+        "MF": 8,
+        "FW": 6
+      },
+      "avg_age": 30.09,
+      "avg_height_cm": 180,
+      "club_count": 24,
+      "top_clubs": [
+        {
+          "club": "Crystal Palace FC (ENG)",
+          "player_count": 2
+        },
+        {
+          "club": "CA River Plate (ARG)",
+          "player_count": 2
+        },
+        {
+          "club": "Atlético Nacional (COL)",
+          "player_count": 1
+        },
+        {
+          "club": "Bologna FC (ITA)",
+          "player_count": 1
+        },
+        {
+          "club": "CA Independiente (ARG)",
+          "player_count": 1
+        }
+      ],
+      "roster_ref": {
+        "team_slug": "colombia",
+        "player_ids": [
+          "wc2026_colombia_01_ospina_david",
+          "wc2026_colombia_02_munoz_daniel",
+          "wc2026_colombia_03_lucumi_jhon",
+          "wc2026_colombia_04_arias_santiago",
+          "wc2026_colombia_05_castano_kevin",
+          "wc2026_colombia_06_rios_richard",
+          "wc2026_colombia_07_diaz_luis",
+          "wc2026_colombia_08_carrascal_jorge",
+          "wc2026_colombia_09_cordoba_jhon",
+          "wc2026_colombia_10_rodriguez_james",
+          "wc2026_colombia_11_arias_jhon",
+          "wc2026_colombia_12_vargas_camilo",
+          "wc2026_colombia_13_mina_yerry",
+          "wc2026_colombia_14_puerta_gustavo",
+          "wc2026_colombia_15_portilla_juan",
+          "wc2026_colombia_16_lerma_jefferson",
+          "wc2026_colombia_17_mojica_johan",
+          "wc2026_colombia_18_ditta_willer",
+          "wc2026_colombia_19_hernandez_cucho",
+          "wc2026_colombia_20_quintero_juan",
+          "wc2026_colombia_21_campaz_jaminton",
+          "wc2026_colombia_22_machado_deiver",
+          "wc2026_colombia_23_sanchez_davinson",
+          "wc2026_colombia_24_montero_alvaro",
+          "wc2026_colombia_25_suarez_luis",
+          "wc2026_colombia_26_gomez_andres"
+        ]
+      },
+      "observation_card_ref": {
+        "team_slug": "colombia",
+        "metrics": [
+          "avg_age",
+          "avg_height_cm",
+          "club_count",
+          "top_clubs"
+        ]
+      },
+      "safety": {
+        "observation_only": true,
+        "no_starting_xi": true,
+        "no_injury_judgment": true,
+        "betting_recommendation": false,
+        "affects_v4": false
+      }
+    },
+    {
+      "team": "Congo DR",
+      "team_slug": "congo_dr",
+      "head_coach": "DESABRE Sebastien",
+      "player_count": 26,
+      "position_counts": {
+        "GK": 3,
+        "DF": 8,
+        "MF": 8,
+        "FW": 7
+      },
+      "avg_age": 29.07,
+      "avg_height_cm": 181,
+      "club_count": 24,
+      "top_clubs": [
+        {
+          "club": "AEL FC (GRE)",
+          "player_count": 2
+        },
+        {
+          "club": "Lille OSC (FRA)",
+          "player_count": 2
+        },
+        {
+          "club": "Le Havre AC (FRA)",
+          "player_count": 1
+        },
+        {
+          "club": "West Ham United FC (ENG)",
+          "player_count": 1
+        },
+        {
+          "club": "Widzew Łódź (POL)",
+          "player_count": 1
+        }
+      ],
+      "roster_ref": {
+        "team_slug": "congo_dr",
+        "player_ids": [
+          "wc2026_congo_dr_01_mpasi_lionel",
+          "wc2026_congo_dr_02_wan_bissaka_aaron",
+          "wc2026_congo_dr_03_kapuadi_steve",
+          "wc2026_congo_dr_04_tuanzebe_axel",
+          "wc2026_congo_dr_05_batubinsika_dylan",
+          "wc2026_congo_dr_06_mukau_ngalayel",
+          "wc2026_congo_dr_07_mbuku_nathanael",
+          "wc2026_congo_dr_08_moutoussamy_samuel",
+          "wc2026_congo_dr_09_cipenga_brian",
+          "wc2026_congo_dr_10_bongonda_theo",
+          "wc2026_congo_dr_11_kakuta_gael",
+          "wc2026_congo_dr_12_kayembe_joris",
+          "wc2026_congo_dr_13_elia_meschack",
+          "wc2026_congo_dr_14_sadiki_noah",
+          "wc2026_congo_dr_15_tshibola_aaron",
+          "wc2026_congo_dr_16_fayulu_timothy",
+          "wc2026_congo_dr_17_bakambu_cedric",
+          "wc2026_congo_dr_18_pickel_charles",
+          "wc2026_congo_dr_19_mayele_fiston",
+          "wc2026_congo_dr_20_wissa_yoane",
+          "wc2026_congo_dr_21_epolo_matthieu",
+          "wc2026_congo_dr_22_mbemba_chancel",
+          "wc2026_congo_dr_23_banza_simon",
+          "wc2026_congo_dr_24_kalulu_gedeon",
+          "wc2026_congo_dr_25_kayembe_edo",
+          "wc2026_congo_dr_26_masuaku_arthur"
+        ]
+      },
+      "observation_card_ref": {
+        "team_slug": "congo_dr",
+        "metrics": [
+          "avg_age",
+          "avg_height_cm",
+          "club_count",
+          "top_clubs"
+        ]
+      },
+      "safety": {
+        "observation_only": true,
+        "no_starting_xi": true,
+        "no_injury_judgment": true,
+        "betting_recommendation": false,
+        "affects_v4": false
+      }
+    },
+    {
+      "team": "Croatia",
+      "team_slug": "croatia",
+      "head_coach": "DALIC Zlatko",
+      "player_count": 26,
+      "position_counts": {
+        "GK": 3,
+        "DF": 8,
+        "MF": 9,
+        "FW": 6
+      },
+      "avg_age": 28.33,
+      "avg_height_cm": 184.77,
+      "club_count": 24,
+      "top_clubs": [
+        {
+          "club": "Manchester City FC (ENG)",
+          "player_count": 2
+        },
+        {
+          "club": "Real Sociedad (ESP)",
+          "player_count": 2
+        },
+        {
+          "club": "GNK Dinamo Zagreb (CRO)",
+          "player_count": 1
+        },
+        {
+          "club": "FC Bayern München (GER)",
+          "player_count": 1
+        },
+        {
+          "club": "ACF Fiorentina (ITA)",
+          "player_count": 1
+        }
+      ],
+      "roster_ref": {
+        "team_slug": "croatia",
+        "player_ids": [
+          "wc2026_croatia_01_livakovic_dominik",
+          "wc2026_croatia_02_stanisic_josip",
+          "wc2026_croatia_03_pongracic_marin",
+          "wc2026_croatia_04_gvardiol_josko",
+          "wc2026_croatia_05_caleta_car_duje",
+          "wc2026_croatia_06_sutalo_josip",
+          "wc2026_croatia_07_moro_nikola",
+          "wc2026_croatia_08_kovacic_mateo",
+          "wc2026_croatia_09_kramaric_andrej",
+          "wc2026_croatia_10_modric_luka",
+          "wc2026_croatia_11_budimir_ante",
+          "wc2026_croatia_12_pandur_ivor",
+          "wc2026_croatia_13_vlasic_nikola",
+          "wc2026_croatia_14_perisic_ivan",
+          "wc2026_croatia_15_pasalic_mario",
+          "wc2026_croatia_16_baturina_martin",
+          "wc2026_croatia_17_sucic_petar",
+          "wc2026_croatia_18_jakic_kristijan",
+          "wc2026_croatia_19_fruk_toni",
+          "wc2026_croatia_20_matanovic_igor",
+          "wc2026_croatia_21_sucic_luka",
+          "wc2026_croatia_22_vuskovic_luka",
+          "wc2026_croatia_23_kotarski_dominik",
+          "wc2026_croatia_24_pasalic_marco",
+          "wc2026_croatia_25_erlic_martin",
+          "wc2026_croatia_26_musa_petar"
+        ]
+      },
+      "observation_card_ref": {
+        "team_slug": "croatia",
+        "metrics": [
+          "avg_age",
+          "avg_height_cm",
+          "club_count",
+          "top_clubs"
+        ]
+      },
+      "safety": {
+        "observation_only": true,
+        "no_starting_xi": true,
+        "no_injury_judgment": true,
+        "betting_recommendation": false,
+        "affects_v4": false
+      }
+    },
+    {
+      "team": "Curaçao",
+      "team_slug": "curacao",
+      "head_coach": "ADVOCAAT Dick",
+      "player_count": 26,
+      "position_counts": {
+        "GK": 3,
+        "DF": 8,
+        "MF": 7,
+        "FW": 8
+      },
+      "avg_age": 28.02,
+      "avg_height_cm": 181.92,
+      "club_count": 22,
+      "top_clubs": [
+        {
+          "club": "Miami FC (USA)",
+          "player_count": 2
+        },
+        {
+          "club": "RKC Waalwijk (NED)",
+          "player_count": 2
+        },
+        {
+          "club": "FC Volendam (NED)",
+          "player_count": 2
+        },
+        {
+          "club": "SC Telstar (NED)",
+          "player_count": 2
+        },
+        {
+          "club": "Sparta Rotterdam (NED)",
+          "player_count": 1
+        }
+      ],
+      "roster_ref": {
+        "team_slug": "curacao",
+        "player_ids": [
+          "wc2026_curacao_01_room_eloy",
+          "wc2026_curacao_02_sambo_shurandy",
+          "wc2026_curacao_03_gaari_jurien",
+          "wc2026_curacao_04_van_eijma_roshon",
+          "wc2026_curacao_05_floranus_sherel",
+          "wc2026_curacao_06_roemeratoe_godfried",
+          "wc2026_curacao_07_bacuna_juninho",
+          "wc2026_curacao_08_comenencia_livano",
+          "wc2026_curacao_09_locadia_juergen",
+          "wc2026_curacao_10_bacuna_leandro",
+          "wc2026_curacao_11_antonisse_jeremy",
+          "wc2026_curacao_12_hansen_sontje",
+          "wc2026_curacao_13_noslin_tyrese",
+          "wc2026_curacao_14_gorre_kenji",
+          "wc2026_curacao_15_martha_arjany",
+          "wc2026_curacao_16_margaritha_jearl",
+          "wc2026_curacao_17_kuwas_brandley",
+          "wc2026_curacao_18_obispo_armando",
+          "wc2026_curacao_19_kastaneer_gervane",
+          "wc2026_curacao_20_brenet_joshua",
+          "wc2026_curacao_21_chong_tahith",
+          "wc2026_curacao_22_felida_kevin",
+          "wc2026_curacao_23_bazoer_riechedly",
+          "wc2026_curacao_24_fonville_deveron",
+          "wc2026_curacao_25_bodak_tyrick",
+          "wc2026_curacao_26_doornbusch_trevor"
+        ]
+      },
+      "observation_card_ref": {
+        "team_slug": "curacao",
+        "metrics": [
+          "avg_age",
+          "avg_height_cm",
+          "club_count",
+          "top_clubs"
+        ]
+      },
+      "safety": {
+        "observation_only": true,
+        "no_starting_xi": true,
+        "no_injury_judgment": true,
+        "betting_recommendation": false,
+        "affects_v4": false
+      }
+    },
+    {
+      "team": "Czechia",
+      "team_slug": "czechia",
+      "head_coach": "KOUBEK Miroslav",
+      "player_count": 26,
+      "position_counts": {
+        "GK": 3,
+        "DF": 9,
+        "MF": 7,
+        "FW": 7
+      },
+      "avg_age": 27.62,
+      "avg_height_cm": 185.73,
+      "club_count": 11,
+      "top_clubs": [
+        {
+          "club": "SK Slavia Praha (CZE)",
+          "player_count": 10
+        },
+        {
+          "club": "TSG Hoffenheim (GER)",
+          "player_count": 3
+        },
+        {
+          "club": "AC Sparta Praha (CZE)",
+          "player_count": 3
+        },
+        {
+          "club": "FC Viktoria Plzeň (CZE)",
+          "player_count": 3
+        },
+        {
+          "club": "PSV Eindhoven (NED)",
+          "player_count": 1
+        }
+      ],
+      "roster_ref": {
+        "team_slug": "czechia",
+        "player_ids": [
+          "wc2026_czechia_01_kovar_matej",
+          "wc2026_czechia_02_zima_david",
+          "wc2026_czechia_03_holes_tomas",
+          "wc2026_czechia_04_hranac_robin",
+          "wc2026_czechia_05_coufal_vladimir",
+          "wc2026_czechia_06_chaloupek_stepan",
+          "wc2026_czechia_07_krejci_ladislav",
+          "wc2026_czechia_08_darida_vladimir",
+          "wc2026_czechia_09_hlozek_adam",
+          "wc2026_czechia_10_schick_patrik",
+          "wc2026_czechia_11_kuchta_jan",
+          "wc2026_czechia_12_cerv_lukas",
+          "wc2026_czechia_13_chytil_mojmir",
+          "wc2026_czechia_14_jurasek_david",
+          "wc2026_czechia_15_sulc_pavel",
+          "wc2026_czechia_16_stanek_jindrich",
+          "wc2026_czechia_17_provod_lukas",
+          "wc2026_czechia_18_sadilek_michal",
+          "wc2026_czechia_19_chory_tomas",
+          "wc2026_czechia_20_zeleny_jaroslav",
+          "wc2026_czechia_21_doudera_david",
+          "wc2026_czechia_22_soucek_tomas",
+          "wc2026_czechia_23_hornicek_lukas",
+          "wc2026_czechia_24_sojka_alexandr",
+          "wc2026_czechia_25_sochurek_hugo",
+          "wc2026_czechia_26_visinsky_denis"
+        ]
+      },
+      "observation_card_ref": {
+        "team_slug": "czechia",
+        "metrics": [
+          "avg_age",
+          "avg_height_cm",
+          "club_count",
+          "top_clubs"
+        ]
+      },
+      "safety": {
+        "observation_only": true,
+        "no_starting_xi": true,
+        "no_injury_judgment": true,
+        "betting_recommendation": false,
+        "affects_v4": false
+      }
+    },
+    {
+      "team": "Côte D'Ivoire",
+      "team_slug": "cote_d_ivoire",
+      "head_coach": "FAE Emerse",
+      "player_count": 26,
+      "position_counts": {
+        "GK": 3,
+        "DF": 8,
+        "MF": 6,
+        "FW": 9
+      },
+      "avg_age": 25.85,
+      "avg_height_cm": 182.92,
+      "club_count": 25,
+      "top_clubs": [
+        {
+          "club": "Sporting Charleroi (BEL)",
+          "player_count": 2
+        },
+        {
+          "club": "Çaykur Rizespor (TUR)",
+          "player_count": 1
+        },
+        {
+          "club": "Sporting CP (POR)",
+          "player_count": 1
+        },
+        {
+          "club": "Gil Vicente FC (POR)",
+          "player_count": 1
+        },
+        {
+          "club": "NK Maribor (SVN)",
+          "player_count": 1
+        }
+      ],
+      "roster_ref": {
+        "team_slug": "cote_d_ivoire",
+        "player_ids": [
+          "wc2026_cote_d_ivoire_01_fofana_yahia",
+          "wc2026_cote_d_ivoire_02_diomande_ousmane",
+          "wc2026_cote_d_ivoire_03_konan_ghislain",
+          "wc2026_cote_d_ivoire_04_seri_jean_michael",
+          "wc2026_cote_d_ivoire_05_singo_wilfried",
+          "wc2026_cote_d_ivoire_06_fofana_seko",
+          "wc2026_cote_d_ivoire_07_kossounou_odilon",
+          "wc2026_cote_d_ivoire_08_kessie_franck",
+          "wc2026_cote_d_ivoire_09_bonny_ange_yoan",
+          "wc2026_cote_d_ivoire_10_adingra_simon",
+          "wc2026_cote_d_ivoire_11_diomande_yan",
+          "wc2026_cote_d_ivoire_12_wahi_elye",
+          "wc2026_cote_d_ivoire_13_operi_christopher",
+          "wc2026_cote_d_ivoire_14_diakite_oumar",
+          "wc2026_cote_d_ivoire_15_diallo_amad",
+          "wc2026_cote_d_ivoire_16_kone_mohamed",
+          "wc2026_cote_d_ivoire_17_doue_guela",
+          "wc2026_cote_d_ivoire_18_sangare_ibrahim",
+          "wc2026_cote_d_ivoire_19_pepe_nicolas",
+          "wc2026_cote_d_ivoire_20_agbadou_emmanuel",
+          "wc2026_cote_d_ivoire_21_ndicka_evan",
+          "wc2026_cote_d_ivoire_22_guessand_evann",
+          "wc2026_cote_d_ivoire_23_lafont_alban",
+          "wc2026_cote_d_ivoire_24_toure_bazoumana",
+          "wc2026_cote_d_ivoire_25_guiagon_parfait",
+          "wc2026_cote_d_ivoire_26_oulai_christ_inao"
+        ]
+      },
+      "observation_card_ref": {
+        "team_slug": "cote_d_ivoire",
+        "metrics": [
+          "avg_age",
+          "avg_height_cm",
+          "club_count",
+          "top_clubs"
+        ]
+      },
+      "safety": {
+        "observation_only": true,
+        "no_starting_xi": true,
+        "no_injury_judgment": true,
+        "betting_recommendation": false,
+        "affects_v4": false
+      }
+    },
+    {
+      "team": "Ecuador",
+      "team_slug": "ecuador",
+      "head_coach": "BECCACECE Sebastian",
+      "player_count": 26,
+      "position_counts": {
+        "GK": 3,
+        "DF": 8,
+        "MF": 8,
+        "FW": 7
+      },
+      "avg_age": 26.08,
+      "avg_height_cm": 180.54,
+      "club_count": 23,
+      "top_clubs": [
+        {
+          "club": "Atlético Mineiro (BRA)",
+          "player_count": 3
+        },
+        {
+          "club": "CA Huracán (ARG)",
+          "player_count": 2
+        },
+        {
+          "club": "SC Internacional (BRA)",
+          "player_count": 1
+        },
+        {
+          "club": "Arsenal FC (ENG)",
+          "player_count": 1
+        },
+        {
+          "club": "Club Brugge (BEL)",
+          "player_count": 1
+        }
+      ],
+      "roster_ref": {
+        "team_slug": "ecuador",
+        "player_ids": [
+          "wc2026_ecuador_01_galindez_hernan",
+          "wc2026_ecuador_02_torres_felix",
+          "wc2026_ecuador_03_hincapie_piero",
+          "wc2026_ecuador_04_ordonez_joel",
+          "wc2026_ecuador_05_alcivar_jordy",
+          "wc2026_ecuador_06_pacho_willian",
+          "wc2026_ecuador_07_estupinan_pervis",
+          "wc2026_ecuador_08_valencia_anthony",
+          "wc2026_ecuador_09_yeboah_john",
+          "wc2026_ecuador_10_paez_kendry",
+          "wc2026_ecuador_11_rodriguez_kevin",
+          "wc2026_ecuador_12_ramirez_moises",
+          "wc2026_ecuador_13_valencia_enner",
+          "wc2026_ecuador_14_minda_alan",
+          "wc2026_ecuador_15_vite_pedro",
+          "wc2026_ecuador_16_caicedo_jordy",
+          "wc2026_ecuador_17_preciado_angelo",
+          "wc2026_ecuador_18_castillo_denil",
+          "wc2026_ecuador_19_plata_gonzalo",
+          "wc2026_ecuador_20_angulo_nilson",
+          "wc2026_ecuador_21_franco_alan",
+          "wc2026_ecuador_22_valle_gonzalo",
+          "wc2026_ecuador_23_caicedo_moises",
+          "wc2026_ecuador_24_arevalo_jeremy",
+          "wc2026_ecuador_25_porozo_jackson",
+          "wc2026_ecuador_26_medina_yaimar"
+        ]
+      },
+      "observation_card_ref": {
+        "team_slug": "ecuador",
+        "metrics": [
+          "avg_age",
+          "avg_height_cm",
+          "club_count",
+          "top_clubs"
+        ]
+      },
+      "safety": {
+        "observation_only": true,
+        "no_starting_xi": true,
+        "no_injury_judgment": true,
+        "betting_recommendation": false,
+        "affects_v4": false
+      }
+    },
+    {
+      "team": "Egypt",
+      "team_slug": "egypt",
+      "head_coach": "HOSSAM HASSAN",
+      "player_count": 26,
+      "position_counts": {
+        "GK": 4,
+        "DF": 8,
+        "MF": 7,
+        "FW": 7
+      },
+      "avg_age": 29.06,
+      "avg_height_cm": 181.19,
+      "club_count": 14,
+      "top_clubs": [
+        {
+          "club": "Al Ahly FC (EGY)",
+          "player_count": 8
+        },
+        {
+          "club": "Zamalek SC (EGY)",
+          "player_count": 3
+        },
+        {
+          "club": "Pyramids FC (EGY)",
+          "player_count": 3
+        },
+        {
+          "club": "ZED FC (EGY)",
+          "player_count": 2
+        },
+        {
+          "club": "Al Ain FC (UAE)",
+          "player_count": 1
+        }
+      ],
+      "roster_ref": {
+        "team_slug": "egypt",
+        "player_ids": [
+          "wc2026_egypt_01_mohamed_elshenawy",
+          "wc2026_egypt_02_yasser_ibrahim",
+          "wc2026_egypt_03_mohamed_hany",
+          "wc2026_egypt_04_hossam_abdelmaguid",
+          "wc2026_egypt_05_ramy_rabia",
+          "wc2026_egypt_06_mohamed_abdelmoneim",
+          "wc2026_egypt_07_trezeguet",
+          "wc2026_egypt_08_emam_ashour",
+          "wc2026_egypt_09_hamza_abdelkarim",
+          "wc2026_egypt_10_mohamed_salah",
+          "wc2026_egypt_11_mostafa_zico",
+          "wc2026_egypt_12_haissem_hassan",
+          "wc2026_egypt_13_ahmed_fatouh",
+          "wc2026_egypt_14_hamdy_fathy",
+          "wc2026_egypt_15_karim_hafez",
+          "wc2026_egypt_16_mahdy_soliman",
+          "wc2026_egypt_17_mohanad_lashin",
+          "wc2026_egypt_18_nabil_donga",
+          "wc2026_egypt_19_marawan_attia",
+          "wc2026_egypt_20_ibrahim_adel",
+          "wc2026_egypt_21_mahmoud_saber",
+          "wc2026_egypt_22_omar_marmoush",
+          "wc2026_egypt_23_mostafa_shoubir",
+          "wc2026_egypt_24_tarek_alaa",
+          "wc2026_egypt_25_zizo",
+          "wc2026_egypt_26_mohamed_alaa"
+        ]
+      },
+      "observation_card_ref": {
+        "team_slug": "egypt",
+        "metrics": [
+          "avg_age",
+          "avg_height_cm",
+          "club_count",
+          "top_clubs"
+        ]
+      },
+      "safety": {
+        "observation_only": true,
+        "no_starting_xi": true,
+        "no_injury_judgment": true,
+        "betting_recommendation": false,
+        "affects_v4": false
+      }
+    },
+    {
+      "team": "England",
+      "team_slug": "england",
+      "head_coach": "TUCHEL Thomas",
+      "player_count": 26,
+      "position_counts": {
+        "GK": 3,
+        "DF": 9,
+        "MF": 7,
+        "FW": 7
+      },
+      "avg_age": 27.14,
+      "avg_height_cm": 184.23,
+      "club_count": 16,
+      "top_clubs": [
+        {
+          "club": "Manchester City FC (ENG)",
+          "player_count": 4
+        },
+        {
+          "club": "Arsenal FC (ENG)",
+          "player_count": 4
+        },
+        {
+          "club": "Aston Villa FC (ENG)",
+          "player_count": 3
+        },
+        {
+          "club": "Newcastle United FC (ENG)",
+          "player_count": 3
+        },
+        {
+          "club": "Everton FC (ENG)",
+          "player_count": 1
+        }
+      ],
+      "roster_ref": {
+        "team_slug": "england",
+        "player_ids": [
+          "wc2026_england_01_pickford_jordan",
+          "wc2026_england_02_konsa_ezri",
+          "wc2026_england_03_oreilly_nico",
+          "wc2026_england_04_rice_declan",
+          "wc2026_england_05_stones_john",
+          "wc2026_england_06_guehi_marc",
+          "wc2026_england_07_saka_bukayo",
+          "wc2026_england_08_anderson_elliot",
+          "wc2026_england_09_kane_harry",
+          "wc2026_england_10_bellingham_jude",
+          "wc2026_england_11_rashford_marcus",
+          "wc2026_england_12_livramento_tino",
+          "wc2026_england_13_henderson_dean",
+          "wc2026_england_14_henderson_jordan",
+          "wc2026_england_15_burn_dan",
+          "wc2026_england_16_mainoo_kobbie",
+          "wc2026_england_17_rogers_morgan",
+          "wc2026_england_18_gordon_anthony",
+          "wc2026_england_19_watkins_ollie",
+          "wc2026_england_20_madueke_noni",
+          "wc2026_england_21_eze_eberechi",
+          "wc2026_england_22_toney_ivan",
+          "wc2026_england_23_trafford_james",
+          "wc2026_england_24_james_reece",
+          "wc2026_england_25_spence_djed",
+          "wc2026_england_26_quansah_jarell"
+        ]
+      },
+      "observation_card_ref": {
+        "team_slug": "england",
+        "metrics": [
+          "avg_age",
+          "avg_height_cm",
+          "club_count",
+          "top_clubs"
+        ]
+      },
+      "safety": {
+        "observation_only": true,
+        "no_starting_xi": true,
+        "no_injury_judgment": true,
+        "betting_recommendation": false,
+        "affects_v4": false
+      }
+    },
+    {
+      "team": "France",
+      "team_slug": "france",
+      "head_coach": "DESCHAMPS Didier",
+      "player_count": 26,
+      "position_counts": {
+        "GK": 3,
+        "DF": 9,
+        "MF": 7,
+        "FW": 7
+      },
+      "avg_age": 27.0,
+      "avg_height_cm": 184.92,
+      "club_count": 18,
+      "top_clubs": [
+        {
+          "club": "Paris Saint-Germain (FRA)",
+          "player_count": 5
+        },
+        {
+          "club": "FC Bayern München (GER)",
+          "player_count": 2
+        },
+        {
+          "club": "Real Madrid C. F. (ESP)",
+          "player_count": 2
+        },
+        {
+          "club": "AC Milan (ITA)",
+          "player_count": 2
+        },
+        {
+          "club": "Crystal Palace FC (ENG)",
+          "player_count": 2
+        }
+      ],
+      "roster_ref": {
+        "team_slug": "france",
+        "player_ids": [
+          "wc2026_france_01_samba_brice",
+          "wc2026_france_02_gusto_malo",
+          "wc2026_france_03_digne_lucas",
+          "wc2026_france_04_upamecano_dayot",
+          "wc2026_france_05_kounde_jules",
+          "wc2026_france_06_kone_manu",
+          "wc2026_france_07_dembele_ousmane",
+          "wc2026_france_08_tchouameni_aurelien",
+          "wc2026_france_09_thuram_marcus",
+          "wc2026_france_10_mbappe_kylian",
+          "wc2026_france_11_olise_michael",
+          "wc2026_france_12_barcola_bradley",
+          "wc2026_france_13_kante_ngolo",
+          "wc2026_france_14_rabiot_adrien",
+          "wc2026_france_15_konate_ibrahima",
+          "wc2026_france_16_maignan_mike",
+          "wc2026_france_17_saliba_william",
+          "wc2026_france_18_zaire_emery_warren",
+          "wc2026_france_19_hernandez_theo",
+          "wc2026_france_20_doue_desire",
+          "wc2026_france_21_hernandez_lucas",
+          "wc2026_france_22_mateta_jean_philippe",
+          "wc2026_france_23_risser_robin",
+          "wc2026_france_24_cherki_rayan",
+          "wc2026_france_25_akliouche_maghnes",
+          "wc2026_france_26_lacroix_maxence"
+        ]
+      },
+      "observation_card_ref": {
+        "team_slug": "france",
+        "metrics": [
+          "avg_age",
+          "avg_height_cm",
+          "club_count",
+          "top_clubs"
+        ]
+      },
+      "safety": {
+        "observation_only": true,
+        "no_starting_xi": true,
+        "no_injury_judgment": true,
+        "betting_recommendation": false,
+        "affects_v4": false
+      }
+    },
+    {
+      "team": "Germany",
+      "team_slug": "germany",
+      "head_coach": "NAGELSMANN Julian",
+      "player_count": 26,
+      "position_counts": {
+        "GK": 3,
+        "DF": 8,
+        "MF": 11,
+        "FW": 4
+      },
+      "avg_age": 27.98,
+      "avg_height_cm": 185.38,
+      "club_count": 13,
+      "top_clubs": [
+        {
+          "club": "FC Bayern München (GER)",
+          "player_count": 7
+        },
+        {
+          "club": "Borussia Dortmund (GER)",
+          "player_count": 4
+        },
+        {
+          "club": "VfB Stuttgart (GER)",
+          "player_count": 4
+        },
+        {
+          "club": "Newcastle United FC (ENG)",
+          "player_count": 2
+        },
+        {
+          "club": "Real Madrid C. F. (ESP)",
+          "player_count": 1
+        }
+      ],
+      "roster_ref": {
+        "team_slug": "germany",
+        "player_ids": [
+          "wc2026_germany_01_neuer_manuel",
+          "wc2026_germany_02_ruediger_antonio",
+          "wc2026_germany_03_anton_waldemar",
+          "wc2026_germany_04_tah_jonathan",
+          "wc2026_germany_05_pavlovic_aleksandar",
+          "wc2026_germany_06_kimmich_joshua",
+          "wc2026_germany_07_havertz_kai",
+          "wc2026_germany_08_goretzka_leon",
+          "wc2026_germany_09_leweling_jamie",
+          "wc2026_germany_10_musiala_jamal",
+          "wc2026_germany_11_woltemade_nick",
+          "wc2026_germany_12_baumann_oliver",
+          "wc2026_germany_13_gross_pascal",
+          "wc2026_germany_14_beier_maximilian",
+          "wc2026_germany_15_schlotterbeck_nico",
+          "wc2026_germany_16_stiller_angelo",
+          "wc2026_germany_17_wirtz_florian",
+          "wc2026_germany_18_brown_nathaniel",
+          "wc2026_germany_19_sane_leroy",
+          "wc2026_germany_20_amiri_nadiem",
+          "wc2026_germany_21_nuebel_alexander",
+          "wc2026_germany_22_raum_david",
+          "wc2026_germany_23_nmecha_felix",
+          "wc2026_germany_24_thiaw_malick",
+          "wc2026_germany_25_karl_lennart",
+          "wc2026_germany_26_undav_deniz"
+        ]
+      },
+      "observation_card_ref": {
+        "team_slug": "germany",
+        "metrics": [
+          "avg_age",
+          "avg_height_cm",
+          "club_count",
+          "top_clubs"
+        ]
+      },
+      "safety": {
+        "observation_only": true,
+        "no_starting_xi": true,
+        "no_injury_judgment": true,
+        "betting_recommendation": false,
+        "affects_v4": false
+      }
+    },
+    {
+      "team": "Ghana",
+      "team_slug": "ghana",
+      "head_coach": "CARLOS QUEIROZ",
+      "player_count": 26,
+      "position_counts": {
+        "GK": 3,
+        "DF": 9,
+        "MF": 6,
+        "FW": 8
+      },
+      "avg_age": 26.98,
+      "avg_height_cm": 182.62,
+      "club_count": 23,
+      "top_clubs": [
+        {
+          "club": "AJ Auxerre (FRA)",
+          "player_count": 3
+        },
+        {
+          "club": "Leicester City FC (ENG)",
+          "player_count": 2
+        },
+        {
+          "club": "FC St. Gallen (SUI)",
+          "player_count": 1
+        },
+        {
+          "club": "Stade Rennais FC (FRA)",
+          "player_count": 1
+        },
+        {
+          "club": "FC Nordsjælland (DEN)",
+          "player_count": 1
+        }
+      ],
+      "roster_ref": {
+        "team_slug": "ghana",
+        "player_ids": [
+          "wc2026_ghana_01_zigi_lawrence_ati",
+          "wc2026_ghana_02_seidu_alidu",
+          "wc2026_ghana_03_yirenkyi_caleb",
+          "wc2026_ghana_04_adjetey_jonas",
+          "wc2026_ghana_05_partey_thomas",
+          "wc2026_ghana_06_mumin_abdul",
+          "wc2026_ghana_07_issahaku_fatawu",
+          "wc2026_ghana_08_sibo_kwasi",
+          "wc2026_ghana_09_ayew_jordan",
+          "wc2026_ghana_10_thomas_asante_brandon",
+          "wc2026_ghana_11_semenyo_antoine",
+          "wc2026_ghana_12_anang_joseph",
+          "wc2026_ghana_13_baah_christopher_bonsu",
+          "wc2026_ghana_14_mensah_gideon",
+          "wc2026_ghana_15_owusu_elisha",
+          "wc2026_ghana_16_asare_benjamin",
+          "wc2026_ghana_17_rahman_baba",
+          "wc2026_ghana_18_opoku_jerome",
+          "wc2026_ghana_19_williams_inaki",
+          "wc2026_ghana_20_boakye_augustine",
+          "wc2026_ghana_21_oppong_kojo_peprah",
+          "wc2026_ghana_22_sulemana_kamaldeen",
+          "wc2026_ghana_23_luckassen_derrick",
+          "wc2026_ghana_24_nuamah_ernest",
+          "wc2026_ghana_25_adu_prince",
+          "wc2026_ghana_26_senaya_marvin"
+        ]
+      },
+      "observation_card_ref": {
+        "team_slug": "ghana",
+        "metrics": [
+          "avg_age",
+          "avg_height_cm",
+          "club_count",
+          "top_clubs"
+        ]
+      },
+      "safety": {
+        "observation_only": true,
+        "no_starting_xi": true,
+        "no_injury_judgment": true,
+        "betting_recommendation": false,
+        "affects_v4": false
+      }
+    },
+    {
+      "team": "Haiti",
+      "team_slug": "haiti",
+      "head_coach": "MIGNE Sebastien",
+      "player_count": 26,
+      "position_counts": {
+        "GK": 3,
+        "DF": 8,
+        "MF": 6,
+        "FW": 9
+      },
+      "avg_age": 27.58,
+      "avg_height_cm": 181.38,
+      "club_count": 25,
+      "top_clubs": [
+        {
+          "club": "FC Vizela (POR)",
+          "player_count": 2
+        },
+        {
+          "club": "SC Bastia (FRA)",
+          "player_count": 1
+        },
+        {
+          "club": "Angers SCO (FRA)",
+          "player_count": 1
+        },
+        {
+          "club": "BSC Young Boys (SUI)",
+          "player_count": 1
+        },
+        {
+          "club": "LDU Quito (ECU)",
+          "player_count": 1
+        }
+      ],
+      "roster_ref": {
+        "team_slug": "haiti",
+        "player_ids": [
+          "wc2026_haiti_01_placide_johny",
+          "wc2026_haiti_02_arcus_carlens",
+          "wc2026_haiti_03_thermoncy_keeto",
+          "wc2026_haiti_04_ade_ricardo",
+          "wc2026_haiti_05_delcroix_hannes",
+          "wc2026_haiti_06_sainte_carl",
+          "wc2026_haiti_07_etienne_derrick",
+          "wc2026_haiti_08_experience_martin",
+          "wc2026_haiti_09_nazon_duckens",
+          "wc2026_haiti_10_bellegarde_jean_ricner",
+          "wc2026_haiti_11_deedson_louicius",
+          "wc2026_haiti_12_pierre_alexandre",
+          "wc2026_haiti_13_lacroix_markhus",
+          "wc2026_haiti_14_pierre_leverton",
+          "wc2026_haiti_15_providence_ruben",
+          "wc2026_haiti_16_joseph_lenny",
+          "wc2026_haiti_17_jean_jacques_danley",
+          "wc2026_haiti_18_isidor_wilson",
+          "wc2026_haiti_19_fortune_yassin",
+          "wc2026_haiti_20_pierrot_frantzdy",
+          "wc2026_haiti_21_casimir_josue",
+          "wc2026_haiti_22_duverne_jean_kevin",
+          "wc2026_haiti_23_duverger_josue",
+          "wc2026_haiti_24_paugain_wilguens",
+          "wc2026_haiti_25_simon_dominique",
+          "wc2026_haiti_26_pierre_woodensky"
+        ]
+      },
+      "observation_card_ref": {
+        "team_slug": "haiti",
+        "metrics": [
+          "avg_age",
+          "avg_height_cm",
+          "club_count",
+          "top_clubs"
+        ]
+      },
+      "safety": {
+        "observation_only": true,
+        "no_starting_xi": true,
+        "no_injury_judgment": true,
+        "betting_recommendation": false,
+        "affects_v4": false
+      }
+    },
+    {
+      "team": "IR Iran",
+      "team_slug": "ir_iran",
+      "head_coach": "GHALEHNOY Amir",
+      "player_count": 26,
+      "position_counts": {
+        "GK": 3,
+        "DF": 9,
+        "MF": 8,
+        "FW": 6
+      },
+      "avg_age": 30.33,
+      "avg_height_cm": 183.65,
+      "club_count": 14,
+      "top_clubs": [
+        {
+          "club": "Tractor Sazi Tabriz FC (IRN)",
+          "player_count": 4
+        },
+        {
+          "club": "Persepolis FC (IRN)",
+          "player_count": 4
+        },
+        {
+          "club": "Esteghlal Tehran FC (IRN)",
+          "player_count": 3
+        },
+        {
+          "club": "Sepahan SC (IRN)",
+          "player_count": 3
+        },
+        {
+          "club": "Al Ittihad Kalba SCC (UAE)",
+          "player_count": 2
+        }
+      ],
+      "roster_ref": {
+        "team_slug": "ir_iran",
+        "player_ids": [
+          "wc2026_ir_iran_01_beiranvand_alireza",
+          "wc2026_ir_iran_02_hardani_saleh",
+          "wc2026_ir_iran_03_hajisafi_ehsan",
+          "wc2026_ir_iran_04_khalilzadeh_shoja",
+          "wc2026_ir_iran_05_mohammadi_milad",
+          "wc2026_ir_iran_06_ezatolahi_saeid",
+          "wc2026_ir_iran_07_jahanbakhsh_alireza",
+          "wc2026_ir_iran_08_mohebbi_mohammad",
+          "wc2026_ir_iran_09_taremi_mehdi",
+          "wc2026_ir_iran_10_ghayedi_mehdi",
+          "wc2026_ir_iran_11_alipour_ali",
+          "wc2026_ir_iran_12_niazmand_payam",
+          "wc2026_ir_iran_13_kanani_hossein",
+          "wc2026_ir_iran_14_ghoddos_saman",
+          "wc2026_ir_iran_15_cheshmi_roozbeh",
+          "wc2026_ir_iran_16_torabi_mehdi",
+          "wc2026_ir_iran_17_yousefi_arya",
+          "wc2026_ir_iran_18_hosseinzadeh_amirhossein",
+          "wc2026_ir_iran_19_nemati_ali",
+          "wc2026_ir_iran_20_moghanloo_shahriyar",
+          "wc2026_ir_iran_21_ghorbani_mohammad",
+          "wc2026_ir_iran_22_hosseini_hossein",
+          "wc2026_ir_iran_23_rezaeian_ramin",
+          "wc2026_ir_iran_24_dargahi_dennis",
+          "wc2026_ir_iran_25_iri_danial",
+          "wc2026_ir_iran_26_razaghinia_amirmohammad"
+        ]
+      },
+      "observation_card_ref": {
+        "team_slug": "ir_iran",
+        "metrics": [
+          "avg_age",
+          "avg_height_cm",
+          "club_count",
+          "top_clubs"
+        ]
+      },
+      "safety": {
+        "observation_only": true,
+        "no_starting_xi": true,
+        "no_injury_judgment": true,
+        "betting_recommendation": false,
+        "affects_v4": false
+      }
+    },
+    {
+      "team": "Iraq",
+      "team_slug": "iraq",
+      "head_coach": "ARNOLD Graham",
+      "player_count": 26,
+      "position_counts": {
+        "GK": 3,
+        "DF": 9,
+        "MF": 7,
+        "FW": 7
+      },
+      "avg_age": 27.16,
+      "avg_height_cm": 183.19,
+      "club_count": 20,
+      "top_clubs": [
+        {
+          "club": "Al Shorta SC (IRQ)",
+          "player_count": 4
+        },
+        {
+          "club": "Al Talaba SC (IRQ)",
+          "player_count": 3
+        },
+        {
+          "club": "Al Zawra'a SC (IRQ)",
+          "player_count": 2
+        },
+        {
+          "club": "Port FC (THA)",
+          "player_count": 1
+        },
+        {
+          "club": "Pogoń Szczecin (POL)",
+          "player_count": 1
+        }
+      ],
+      "roster_ref": {
+        "team_slug": "iraq",
+        "player_ids": [
+          "wc2026_iraq_01_fahad_talib",
+          "wc2026_iraq_02_rebin_ghareeb",
+          "wc2026_iraq_03_hussein_ali",
+          "wc2026_iraq_04_zaid_tahseen",
+          "wc2026_iraq_05_akam_hashim",
+          "wc2026_iraq_06_munaf_younus",
+          "wc2026_iraq_07_youssef_amyn",
+          "wc2026_iraq_08_ibrahim_bayesh",
+          "wc2026_iraq_09_ali_alhamadi",
+          "wc2026_iraq_10_mohanad_ali",
+          "wc2026_iraq_11_ahmed_qasim",
+          "wc2026_iraq_12_jalal_hassan",
+          "wc2026_iraq_13_ali_yousif",
+          "wc2026_iraq_14_zidane_iqbal",
+          "wc2026_iraq_15_ahmed_yahya",
+          "wc2026_iraq_16_amir_alammari",
+          "wc2026_iraq_17_ali_jasim",
+          "wc2026_iraq_18_aymen_hussein",
+          "wc2026_iraq_19_kevin_yakob",
+          "wc2026_iraq_20_aimar_sher",
+          "wc2026_iraq_21_marko_farji",
+          "wc2026_iraq_22_ahmed_basil",
+          "wc2026_iraq_23_merchas_doski",
+          "wc2026_iraq_24_zaid_ismael",
+          "wc2026_iraq_25_mustafa_saadoon",
+          "wc2026_iraq_26_frans_putros"
+        ]
+      },
+      "observation_card_ref": {
+        "team_slug": "iraq",
+        "metrics": [
+          "avg_age",
+          "avg_height_cm",
+          "club_count",
+          "top_clubs"
+        ]
+      },
+      "safety": {
+        "observation_only": true,
+        "no_starting_xi": true,
+        "no_injury_judgment": true,
+        "betting_recommendation": false,
+        "affects_v4": false
+      }
+    },
+    {
+      "team": "Japan",
+      "team_slug": "japan",
+      "head_coach": "MORIYASU Hajime",
+      "player_count": 26,
+      "position_counts": {
+        "GK": 3,
+        "DF": 9,
+        "MF": 10,
+        "FW": 4
+      },
+      "avg_age": 27.75,
+      "avg_height_cm": 181.35,
+      "club_count": 23,
+      "top_clubs": [
+        {
+          "club": "Sint-Truiden VV (BEL)",
+          "player_count": 2
+        },
+        {
+          "club": "AFC Ajax (NED)",
+          "player_count": 2
+        },
+        {
+          "club": "Feyenoord Rotterdam (NED)",
+          "player_count": 2
+        },
+        {
+          "club": "Parma (ITA)",
+          "player_count": 1
+        },
+        {
+          "club": "SV Werder Bremen (GER)",
+          "player_count": 1
+        }
+      ],
+      "roster_ref": {
+        "team_slug": "japan",
+        "player_ids": [
+          "wc2026_japan_01_suzuki_zion",
+          "wc2026_japan_02_sugawara_yukinari",
+          "wc2026_japan_03_taniguchi_shogo",
+          "wc2026_japan_04_itakura_kou",
+          "wc2026_japan_05_nagatomo_yuto",
+          "wc2026_japan_06_endo_wataru",
+          "wc2026_japan_07_tanaka_ao",
+          "wc2026_japan_08_kubo_takefusa",
+          "wc2026_japan_09_goto_keisuke",
+          "wc2026_japan_10_doan_ritsu",
+          "wc2026_japan_11_maeda_daizen",
+          "wc2026_japan_12_osako_keisuke",
+          "wc2026_japan_13_nakamura_keito",
+          "wc2026_japan_14_ito_junya",
+          "wc2026_japan_15_kamada_daichi",
+          "wc2026_japan_16_watanabe_tsuyoshi",
+          "wc2026_japan_17_suzuki_yuito",
+          "wc2026_japan_18_ueda_ayase",
+          "wc2026_japan_19_ogawa_koki",
+          "wc2026_japan_20_seko_ayumu",
+          "wc2026_japan_21_ito_hiroki",
+          "wc2026_japan_22_tomiyasu_takehiro",
+          "wc2026_japan_23_hayakawa_tomoki",
+          "wc2026_japan_24_sano_kaishu",
+          "wc2026_japan_25_suzuki_junnosuke",
+          "wc2026_japan_26_shiogai_kento"
+        ]
+      },
+      "observation_card_ref": {
+        "team_slug": "japan",
+        "metrics": [
+          "avg_age",
+          "avg_height_cm",
+          "club_count",
+          "top_clubs"
+        ]
+      },
+      "safety": {
+        "observation_only": true,
+        "no_starting_xi": true,
+        "no_injury_judgment": true,
+        "betting_recommendation": false,
+        "affects_v4": false
+      }
+    },
+    {
+      "team": "Jordan",
+      "team_slug": "jordan",
+      "head_coach": "SELLAMI Jamal",
+      "player_count": 26,
+      "position_counts": {
+        "GK": 3,
+        "DF": 9,
+        "MF": 7,
+        "FW": 7
+      },
+      "avg_age": 28.45,
+      "avg_height_cm": 180.38,
+      "club_count": 15,
+      "top_clubs": [
+        {
+          "club": "Al Hussein SC (JOR)",
+          "player_count": 6
+        },
+        {
+          "club": "Al Faisaly SC (JOR)",
+          "player_count": 3
+        },
+        {
+          "club": "Al Karma SC (IRQ)",
+          "player_count": 2
+        },
+        {
+          "club": "Al Zawra'a SC (IRQ)",
+          "player_count": 2
+        },
+        {
+          "club": "Selangor FC (MAS)",
+          "player_count": 2
+        }
+      ],
+      "roster_ref": {
+        "team_slug": "jordan",
+        "player_ids": [
+          "wc2026_jordan_01_yazeed_abulaila",
+          "wc2026_jordan_02_mohammad_abuhasheesh",
+          "wc2026_jordan_03_abdallah_nasib",
+          "wc2026_jordan_04_husam_abudahab",
+          "wc2026_jordan_05_yazan_alarab",
+          "wc2026_jordan_06_amer_jamous",
+          "wc2026_jordan_07_mohammad_abuzraiq",
+          "wc2026_jordan_08_noor_alrawabdeh",
+          "wc2026_jordan_09_ali_olwan",
+          "wc2026_jordan_10_mousa_altamari",
+          "wc2026_jordan_11_odeh_fakhoury",
+          "wc2026_jordan_12_nour_baniateyah",
+          "wc2026_jordan_13_mahmoud_almardi",
+          "wc2026_jordan_14_rajaei_ayed",
+          "wc2026_jordan_15_ibrahim_sadeh",
+          "wc2026_jordan_16_mohammad_abualnadi",
+          "wc2026_jordan_17_saleem_obaid",
+          "wc2026_jordan_18_ibrahim_sabra",
+          "wc2026_jordan_19_saed_alrosan",
+          "wc2026_jordan_20_mohannad_abutaha",
+          "wc2026_jordan_21_nizar_alrashdan",
+          "wc2026_jordan_22_abdallah_alfakhori",
+          "wc2026_jordan_23_ehsan_haddad",
+          "wc2026_jordan_24_ali_azaizeh",
+          "wc2026_jordan_25_mohammad_aldaoud",
+          "wc2026_jordan_26_anas_badawi"
+        ]
+      },
+      "observation_card_ref": {
+        "team_slug": "jordan",
+        "metrics": [
+          "avg_age",
+          "avg_height_cm",
+          "club_count",
+          "top_clubs"
+        ]
+      },
+      "safety": {
+        "observation_only": true,
+        "no_starting_xi": true,
+        "no_injury_judgment": true,
+        "betting_recommendation": false,
+        "affects_v4": false
+      }
+    },
+    {
+      "team": "Korea Republic",
+      "team_slug": "korea_republic",
+      "head_coach": "HONG Myungbo",
+      "player_count": 26,
+      "position_counts": {
+        "GK": 3,
+        "DF": 9,
+        "MF": 11,
+        "FW": 3
+      },
+      "avg_age": 28.07,
+      "avg_height_cm": 181.92,
+      "club_count": 22,
+      "top_clubs": [
+        {
+          "club": "Jeonbuk Hyundai Motors FC (KOR)",
+          "player_count": 3
+        },
+        {
+          "club": "FC Midtjylland (DEN)",
+          "player_count": 2
+        },
+        {
+          "club": "Ulsan HD (KOR)",
+          "player_count": 2
+        },
+        {
+          "club": "FC Tokyo (JPN)",
+          "player_count": 1
+        },
+        {
+          "club": "Gangwon FC (KOR)",
+          "player_count": 1
+        }
+      ],
+      "roster_ref": {
+        "team_slug": "korea_republic",
+        "player_ids": [
+          "wc2026_korea_republic_01_kim_seunggyu",
+          "wc2026_korea_republic_02_lee_hanbeom",
+          "wc2026_korea_republic_03_lee_gihyuk",
+          "wc2026_korea_republic_04_kim_minjae",
+          "wc2026_korea_republic_05_kim_taehyeon",
+          "wc2026_korea_republic_06_hwang_inbeom",
+          "wc2026_korea_republic_07_son_heungmin",
+          "wc2026_korea_republic_08_paik_seungho",
+          "wc2026_korea_republic_09_cho_guesung",
+          "wc2026_korea_republic_10_lee_jaesung",
+          "wc2026_korea_republic_11_hwang_heechan",
+          "wc2026_korea_republic_12_song_bumkeun",
+          "wc2026_korea_republic_13_lee_taeseok",
+          "wc2026_korea_republic_14_cho_wije",
+          "wc2026_korea_republic_15_kim_moonhwan",
+          "wc2026_korea_republic_16_park_jinseob",
+          "wc2026_korea_republic_17_bae_junho",
+          "wc2026_korea_republic_18_oh_hyeongyu",
+          "wc2026_korea_republic_19_lee_kangin",
+          "wc2026_korea_republic_20_yang_hyunjun",
+          "wc2026_korea_republic_21_jo_hyeonwoo",
+          "wc2026_korea_republic_22_seol_youngwoo",
+          "wc2026_korea_republic_23_castrop_jens",
+          "wc2026_korea_republic_24_kim_jingyu",
+          "wc2026_korea_republic_25_eom_jisung",
+          "wc2026_korea_republic_26_lee_donggyeong"
+        ]
+      },
+      "observation_card_ref": {
+        "team_slug": "korea_republic",
+        "metrics": [
+          "avg_age",
+          "avg_height_cm",
+          "club_count",
+          "top_clubs"
+        ]
+      },
+      "safety": {
+        "observation_only": true,
+        "no_starting_xi": true,
+        "no_injury_judgment": true,
+        "betting_recommendation": false,
+        "affects_v4": false
+      }
+    },
+    {
+      "team": "Mexico",
+      "team_slug": "mexico",
+      "head_coach": "AGUIRRE Javier",
+      "player_count": 26,
+      "position_counts": {
+        "GK": 3,
+        "DF": 7,
+        "MF": 8,
+        "FW": 8
+      },
+      "avg_age": 27.9,
+      "avg_height_cm": 179.5,
+      "club_count": 21,
+      "top_clubs": [
+        {
+          "club": "CD Guadalajara (MEX)",
+          "player_count": 5
+        },
+        {
+          "club": "Deportivo Toluca FC (MEX)",
+          "player_count": 2
+        },
+        {
+          "club": "PAOK Saloniki (GRE)",
+          "player_count": 1
+        },
+        {
+          "club": "FC Lokomotiv Moscow (RUS)",
+          "player_count": 1
+        },
+        {
+          "club": "Fenerbahçe SK (TUR)",
+          "player_count": 1
+        }
+      ],
+      "roster_ref": {
+        "team_slug": "mexico",
+        "player_ids": [
+          "wc2026_mexico_01_rangel_raul",
+          "wc2026_mexico_02_sanchez_jorge",
+          "wc2026_mexico_03_montes_cesar",
+          "wc2026_mexico_04_alvarez_edson",
+          "wc2026_mexico_05_vasquez_johan",
+          "wc2026_mexico_06_lira_erik",
+          "wc2026_mexico_07_romo_luis",
+          "wc2026_mexico_08_fidalgo_alvaro",
+          "wc2026_mexico_09_jimenez_raul",
+          "wc2026_mexico_10_vega_alexis",
+          "wc2026_mexico_11_gimenez_santiago",
+          "wc2026_mexico_12_acevedo_carlos",
+          "wc2026_mexico_13_ochoa_guillermo",
+          "wc2026_mexico_14_gonzalez_armando",
+          "wc2026_mexico_15_reyes_israel",
+          "wc2026_mexico_16_quinones_julian",
+          "wc2026_mexico_17_pineda_orbelin",
+          "wc2026_mexico_18_vargas_obed",
+          "wc2026_mexico_19_mora_gilberto",
+          "wc2026_mexico_20_chavez_mateo",
+          "wc2026_mexico_21_huerta_cesar",
+          "wc2026_mexico_22_martinez_guillermo",
+          "wc2026_mexico_23_gallardo_jesus",
+          "wc2026_mexico_24_chavez_luis",
+          "wc2026_mexico_25_alvarado_roberto",
+          "wc2026_mexico_26_gutierrez_brian"
+        ]
+      },
+      "observation_card_ref": {
+        "team_slug": "mexico",
+        "metrics": [
+          "avg_age",
+          "avg_height_cm",
+          "club_count",
+          "top_clubs"
+        ]
+      },
+      "safety": {
+        "observation_only": true,
+        "no_starting_xi": true,
+        "no_injury_judgment": true,
+        "betting_recommendation": false,
+        "affects_v4": false
+      }
+    },
+    {
+      "team": "Morocco",
+      "team_slug": "morocco",
+      "head_coach": "OUAHBI Mohamed",
+      "player_count": 26,
+      "position_counts": {
+        "GK": 3,
+        "DF": 9,
+        "MF": 9,
+        "FW": 5
+      },
+      "avg_age": 26.39,
+      "avg_height_cm": 182.65,
+      "club_count": 23,
+      "top_clubs": [
+        {
+          "club": "Real Betis (ESP)",
+          "player_count": 2
+        },
+        {
+          "club": "PSV Eindhoven (NED)",
+          "player_count": 2
+        },
+        {
+          "club": "RC Strasbourg (FRA)",
+          "player_count": 2
+        },
+        {
+          "club": "Al Hilal SC (KSA)",
+          "player_count": 1
+        },
+        {
+          "club": "Paris Saint-Germain (FRA)",
+          "player_count": 1
+        }
+      ],
+      "roster_ref": {
+        "team_slug": "morocco",
+        "player_ids": [
+          "wc2026_morocco_01_bounou_yassine",
+          "wc2026_morocco_02_hakimi_achraf",
+          "wc2026_morocco_03_mazraoui_noussair",
+          "wc2026_morocco_04_amrabat_sofyan",
+          "wc2026_morocco_05_aguerd_nayef",
+          "wc2026_morocco_06_bouaddi_ayyoub",
+          "wc2026_morocco_07_talbi_chemsdine",
+          "wc2026_morocco_08_ounahi_azzedine",
+          "wc2026_morocco_09_rahimi_sou_ane",
+          "wc2026_morocco_10_diaz_brahim",
+          "wc2026_morocco_11_saibari_ismael",
+          "wc2026_morocco_12_el_kajoui_munir",
+          "wc2026_morocco_13_el_ouahdi_zakaria",
+          "wc2026_morocco_14_diop_issa",
+          "wc2026_morocco_15_el_mourabet_samir",
+          "wc2026_morocco_16_yassine_gessime",
+          "wc2026_morocco_17_ezzalzouli_abde",
+          "wc2026_morocco_18_riad_chadi",
+          "wc2026_morocco_19_belammari_youssef",
+          "wc2026_morocco_20_el_kaabi_ayoub",
+          "wc2026_morocco_21_amaimouni_ayoub",
+          "wc2026_morocco_22_tagnaouti_ahmed_reda",
+          "wc2026_morocco_23_el_khannouss_bilal",
+          "wc2026_morocco_24_el_aynaoui_neil",
+          "wc2026_morocco_25_halhal_redouane",
+          "wc2026_morocco_26_salah_eddine_anass"
+        ]
+      },
+      "observation_card_ref": {
+        "team_slug": "morocco",
+        "metrics": [
+          "avg_age",
+          "avg_height_cm",
+          "club_count",
+          "top_clubs"
+        ]
+      },
+      "safety": {
+        "observation_only": true,
+        "no_starting_xi": true,
+        "no_injury_judgment": true,
+        "betting_recommendation": false,
+        "affects_v4": false
+      }
+    },
+    {
+      "team": "Netherlands",
+      "team_slug": "netherlands",
+      "head_coach": "KOEMAN Ronald",
+      "player_count": 26,
+      "position_counts": {
+        "GK": 3,
+        "DF": 8,
+        "MF": 8,
+        "FW": 7
+      },
+      "avg_age": 27.74,
+      "avg_height_cm": 184.92,
+      "club_count": 20,
+      "top_clubs": [
+        {
+          "club": "Brighton & Hove Albion FC (ENG)",
+          "player_count": 3
+        },
+        {
+          "club": "Liverpool FC (ENG)",
+          "player_count": 3
+        },
+        {
+          "club": "Manchester City FC (ENG)",
+          "player_count": 2
+        },
+        {
+          "club": "Sunderland AFC (ENG)",
+          "player_count": 2
+        },
+        {
+          "club": "Arsenal FC (ENG)",
+          "player_count": 1
+        }
+      ],
+      "roster_ref": {
+        "team_slug": "netherlands",
+        "player_ids": [
+          "wc2026_netherlands_01_verbruggen_bart",
+          "wc2026_netherlands_02_timber_jurrien",
+          "wc2026_netherlands_03_de_roon_marten",
+          "wc2026_netherlands_04_van_dijk_virgil",
+          "wc2026_netherlands_05_ake_nathan",
+          "wc2026_netherlands_06_van_hecke_jan_paul",
+          "wc2026_netherlands_07_kluivert_justin",
+          "wc2026_netherlands_08_gravenberch_ryan",
+          "wc2026_netherlands_09_weghorst_wout",
+          "wc2026_netherlands_10_depay_memphis",
+          "wc2026_netherlands_11_gakpo_cody",
+          "wc2026_netherlands_12_wieffer_mats",
+          "wc2026_netherlands_13_roefs_robin",
+          "wc2026_netherlands_14_reijnders_tijjani",
+          "wc2026_netherlands_15_van_de_ven_micky",
+          "wc2026_netherlands_16_til_guus",
+          "wc2026_netherlands_17_lang_noa",
+          "wc2026_netherlands_18_malen_donyell",
+          "wc2026_netherlands_19_brobbey_brian",
+          "wc2026_netherlands_20_koopmeiners_teun",
+          "wc2026_netherlands_21_de_jong_frenkie",
+          "wc2026_netherlands_22_dumfries_denzel",
+          "wc2026_netherlands_23_flekken_mark",
+          "wc2026_netherlands_24_summerville_crysencio",
+          "wc2026_netherlands_25_hato_jorrel",
+          "wc2026_netherlands_26_timber_quinten"
+        ]
+      },
+      "observation_card_ref": {
+        "team_slug": "netherlands",
+        "metrics": [
+          "avg_age",
+          "avg_height_cm",
+          "club_count",
+          "top_clubs"
+        ]
+      },
+      "safety": {
+        "observation_only": true,
+        "no_starting_xi": true,
+        "no_injury_judgment": true,
+        "betting_recommendation": false,
+        "affects_v4": false
+      }
+    },
+    {
+      "team": "New Zealand",
+      "team_slug": "new_zealand",
+      "head_coach": "BAZELEY Darren",
+      "player_count": 26,
+      "position_counts": {
+        "GK": 3,
+        "DF": 9,
+        "MF": 10,
+        "FW": 4
+      },
+      "avg_age": 28.12,
+      "avg_height_cm": 183.46,
+      "club_count": 20,
+      "top_clubs": [
+        {
+          "club": "Auckland FC (NZL)",
+          "player_count": 5
+        },
+        {
+          "club": "Wellington Phoenix FC (NZL)",
+          "player_count": 3
+        },
+        {
+          "club": "Millwall FC (ENG)",
+          "player_count": 1
+        },
+        {
+          "club": "She eld United FC (ENG)",
+          "player_count": 1
+        },
+        {
+          "club": "Minnesota United FC (USA)",
+          "player_count": 1
+        }
+      ],
+      "roster_ref": {
+        "team_slug": "new_zealand",
+        "player_ids": [
+          "wc2026_new_zealand_01_crocombe_max",
+          "wc2026_new_zealand_02_payne_tim",
+          "wc2026_new_zealand_03_de_vries_francis",
+          "wc2026_new_zealand_04_bindon_tyler",
+          "wc2026_new_zealand_05_boxall_michael",
+          "wc2026_new_zealand_06_bell_joe",
+          "wc2026_new_zealand_07_garbett_matthew",
+          "wc2026_new_zealand_08_stamenic_marko",
+          "wc2026_new_zealand_09_wood_chris",
+          "wc2026_new_zealand_10_singh_sarpreet",
+          "wc2026_new_zealand_11_just_elijah",
+          "wc2026_new_zealand_12_paulsen_alex",
+          "wc2026_new_zealand_13_cacace_liberato",
+          "wc2026_new_zealand_14_rufer_alex",
+          "wc2026_new_zealand_15_pijnaker_nando",
+          "wc2026_new_zealand_16_surman_finn",
+          "wc2026_new_zealand_17_barbarouses_kosta",
+          "wc2026_new_zealand_18_waine_ben",
+          "wc2026_new_zealand_19_old_ben",
+          "wc2026_new_zealand_20_mccowatt_callum",
+          "wc2026_new_zealand_21_randall_jesse",
+          "wc2026_new_zealand_22_woud_michael",
+          "wc2026_new_zealand_23_thomas_ryan",
+          "wc2026_new_zealand_24_elliot_callan",
+          "wc2026_new_zealand_25_bayliss_lachlan",
+          "wc2026_new_zealand_26_smith_tommy"
+        ]
+      },
+      "observation_card_ref": {
+        "team_slug": "new_zealand",
+        "metrics": [
+          "avg_age",
+          "avg_height_cm",
+          "club_count",
+          "top_clubs"
+        ]
+      },
+      "safety": {
+        "observation_only": true,
+        "no_starting_xi": true,
+        "no_injury_judgment": true,
+        "betting_recommendation": false,
+        "affects_v4": false
+      }
+    },
+    {
+      "team": "Norway",
+      "team_slug": "norway",
+      "head_coach": "SOLBAKKEN Stale",
+      "player_count": 26,
+      "position_counts": {
+        "GK": 3,
+        "DF": 8,
+        "MF": 10,
+        "FW": 5
+      },
+      "avg_age": 26.8,
+      "avg_height_cm": 187.15,
+      "club_count": 22,
+      "top_clubs": [
+        {
+          "club": "FK Bodø/Glimt (NOR)",
+          "player_count": 3
+        },
+        {
+          "club": "Fulham FC (ENG)",
+          "player_count": 2
+        },
+        {
+          "club": "SL Ben ca (POR)",
+          "player_count": 2
+        },
+        {
+          "club": "Sevilla FC (ESP)",
+          "player_count": 1
+        },
+        {
+          "club": "US Cremonese (ITA)",
+          "player_count": 1
+        }
+      ],
+      "roster_ref": {
+        "team_slug": "norway",
+        "player_ids": [
+          "wc2026_norway_01_nyland_orjan",
+          "wc2026_norway_02_thorsby_morten",
+          "wc2026_norway_03_ajer_kristoffer",
+          "wc2026_norway_04_ostigard_leo",
+          "wc2026_norway_05_moller_wolfe_david",
+          "wc2026_norway_06_berg_patrick",
+          "wc2026_norway_07_sorloth_alexander",
+          "wc2026_norway_08_berge_sander",
+          "wc2026_norway_09_haaland_erling",
+          "wc2026_norway_10_odegaard_martin",
+          "wc2026_norway_11_strand_larsen_jorgen",
+          "wc2026_norway_12_tangvik_sander",
+          "wc2026_norway_13_selvik_egil",
+          "wc2026_norway_14_aursnes_fredrik",
+          "wc2026_norway_15_bjorkan_fredrik_andre",
+          "wc2026_norway_16_holmgren_pedersen_marcus",
+          "wc2026_norway_17_heggem_torbjorn",
+          "wc2026_norway_18_thorstvedt_kristian",
+          "wc2026_norway_19_aasgaard_thelo",
+          "wc2026_norway_20_nusa_antonio",
+          "wc2026_norway_21_schjelderup_andreas",
+          "wc2026_norway_22_bobb_oscar",
+          "wc2026_norway_23_hauge_jens_petter",
+          "wc2026_norway_24_langas_sondre",
+          "wc2026_norway_25_falchener_henrik",
+          "wc2026_norway_26_ryerson_julian"
+        ]
+      },
+      "observation_card_ref": {
+        "team_slug": "norway",
+        "metrics": [
+          "avg_age",
+          "avg_height_cm",
+          "club_count",
+          "top_clubs"
+        ]
+      },
+      "safety": {
+        "observation_only": true,
+        "no_starting_xi": true,
+        "no_injury_judgment": true,
+        "betting_recommendation": false,
+        "affects_v4": false
+      }
+    },
+    {
+      "team": "Panama",
+      "team_slug": "panama",
+      "head_coach": "CHRISTIANSEN Thomas",
+      "player_count": 26,
+      "position_counts": {
+        "GK": 3,
+        "DF": 11,
+        "MF": 8,
+        "FW": 4
+      },
+      "avg_age": 30.43,
+      "avg_height_cm": 181.58,
+      "club_count": 23,
+      "top_clubs": [
+        {
+          "club": "Deportivo Saprissa (CRC)",
+          "player_count": 2
+        },
+        {
+          "club": "CD Plaza Amador (PAN)",
+          "player_count": 2
+        },
+        {
+          "club": "CD Universidad Católica (ECU)",
+          "player_count": 2
+        },
+        {
+          "club": "Club Nacional (URU)",
+          "player_count": 1
+        },
+        {
+          "club": "ŠK Slovan Bratislava (SVK)",
+          "player_count": 1
+        }
+      ],
+      "roster_ref": {
+        "team_slug": "panama",
+        "player_ids": [
+          "wc2026_panama_01_mejia_luis",
+          "wc2026_panama_02_blackman_cesar",
+          "wc2026_panama_03_cordoba_jose",
+          "wc2026_panama_04_escobar_fidel",
+          "wc2026_panama_05_farina_edgardo",
+          "wc2026_panama_06_martinez_cristian",
+          "wc2026_panama_07_rodriguez_jose_luis",
+          "wc2026_panama_08_carrasquilla_adalberto",
+          "wc2026_panama_09_rodriguez_tomas",
+          "wc2026_panama_10_diaz_ismael",
+          "wc2026_panama_11_barcenas_edgar_yoel",
+          "wc2026_panama_12_samudio_cesar",
+          "wc2026_panama_13_ramos_jiovany",
+          "wc2026_panama_14_harvey_carlos",
+          "wc2026_panama_15_davis_eric",
+          "wc2026_panama_16_andrade_andres",
+          "wc2026_panama_17_fajardo_jose",
+          "wc2026_panama_18_waterman_cecilio",
+          "wc2026_panama_19_quintero_alberto",
+          "wc2026_panama_20_godoy_anibal",
+          "wc2026_panama_21_yanis_cesar",
+          "wc2026_panama_22_mosquera_orlando",
+          "wc2026_panama_23_murillo_amir",
+          "wc2026_panama_24_londono_azarias",
+          "wc2026_panama_25_miller_roderick",
+          "wc2026_panama_26_gutierrez_jorge"
+        ]
+      },
+      "observation_card_ref": {
+        "team_slug": "panama",
+        "metrics": [
+          "avg_age",
+          "avg_height_cm",
+          "club_count",
+          "top_clubs"
+        ]
+      },
+      "safety": {
+        "observation_only": true,
+        "no_starting_xi": true,
+        "no_injury_judgment": true,
+        "betting_recommendation": false,
+        "affects_v4": false
+      }
+    },
+    {
+      "team": "Paraguay",
+      "team_slug": "paraguay",
+      "head_coach": "ALFARO Gustavo",
+      "player_count": 26,
+      "position_counts": {
+        "GK": 3,
+        "DF": 8,
+        "MF": 9,
+        "FW": 6
+      },
+      "avg_age": 29.03,
+      "avg_height_cm": 181.62,
+      "club_count": 22,
+      "top_clubs": [
+        {
+          "club": "SE Palmeiras (BRA)",
+          "player_count": 3
+        },
+        {
+          "club": "Cerro Porteño (PAR)",
+          "player_count": 2
+        },
+        {
+          "club": "Atlanta United FC (USA)",
+          "player_count": 2
+        },
+        {
+          "club": "Sunderland AFC (ENG)",
+          "player_count": 1
+        },
+        {
+          "club": "FC Dynamo Moscow (RUS)",
+          "player_count": 1
+        }
+      ],
+      "roster_ref": {
+        "team_slug": "paraguay",
+        "player_ids": [
+          "wc2026_paraguay_01_fernandez_gatito",
+          "wc2026_paraguay_02_velazquez_gustavo",
+          "wc2026_paraguay_03_alderete_omar",
+          "wc2026_paraguay_04_caceres_juan_jose",
+          "wc2026_paraguay_05_balbuena_fabian",
+          "wc2026_paraguay_06_alonso_junior",
+          "wc2026_paraguay_07_sosa_ramon",
+          "wc2026_paraguay_08_gomez_diego",
+          "wc2026_paraguay_09_sanabria_antonio",
+          "wc2026_paraguay_10_almiron_miguel",
+          "wc2026_paraguay_11_mauricio",
+          "wc2026_paraguay_12_gill_orlando",
+          "wc2026_paraguay_13_canale_jose",
+          "wc2026_paraguay_14_cubas_andres",
+          "wc2026_paraguay_15_gomez_gustavo",
+          "wc2026_paraguay_16_bobadilla_damian",
+          "wc2026_paraguay_17_romero_gamarra_alejandro",
+          "wc2026_paraguay_18_arce_alex",
+          "wc2026_paraguay_19_enciso_julio",
+          "wc2026_paraguay_20_ojeda_braian",
+          "wc2026_paraguay_21_avalos_gabriel",
+          "wc2026_paraguay_22_olveira_gaston",
+          "wc2026_paraguay_23_galarza_matias",
+          "wc2026_paraguay_24_caballero_gustavo",
+          "wc2026_paraguay_25_pitta_isidro",
+          "wc2026_paraguay_26_maidana_alexandro"
+        ]
+      },
+      "observation_card_ref": {
+        "team_slug": "paraguay",
+        "metrics": [
+          "avg_age",
+          "avg_height_cm",
+          "club_count",
+          "top_clubs"
+        ]
+      },
+      "safety": {
+        "observation_only": true,
+        "no_starting_xi": true,
+        "no_injury_judgment": true,
+        "betting_recommendation": false,
+        "affects_v4": false
+      }
+    },
+    {
+      "team": "Portugal",
+      "team_slug": "portugal",
+      "head_coach": "MARTINEZ Roberto",
+      "player_count": 26,
+      "position_counts": {
+        "GK": 3,
+        "DF": 9,
+        "MF": 6,
+        "FW": 8
+      },
+      "avg_age": 28.04,
+      "avg_height_cm": 181.5,
+      "club_count": 17,
+      "top_clubs": [
+        {
+          "club": "Paris Saint-Germain (FRA)",
+          "player_count": 4
+        },
+        {
+          "club": "Manchester City FC (ENG)",
+          "player_count": 3
+        },
+        {
+          "club": "Sporting CP (POR)",
+          "player_count": 3
+        },
+        {
+          "club": "Manchester United FC (ENG)",
+          "player_count": 2
+        },
+        {
+          "club": "Al Nassr FC (KSA)",
+          "player_count": 2
+        }
+      ],
+      "roster_ref": {
+        "team_slug": "portugal",
+        "player_ids": [
+          "wc2026_portugal_01_diogo_costa",
+          "wc2026_portugal_02_nelson_semedo",
+          "wc2026_portugal_03_ruben_dias",
+          "wc2026_portugal_04_tomas_araujo",
+          "wc2026_portugal_05_diogo_dalot",
+          "wc2026_portugal_06_matheus_nunes",
+          "wc2026_portugal_07_cristiano_ronaldo",
+          "wc2026_portugal_08_bruno_fernandes",
+          "wc2026_portugal_09_goncalo_ramos",
+          "wc2026_portugal_10_bernardo_silva",
+          "wc2026_portugal_11_joao_felix",
+          "wc2026_portugal_12_jose_sa",
+          "wc2026_portugal_13_renato_veiga",
+          "wc2026_portugal_14_goncalo_inacio",
+          "wc2026_portugal_15_joao_neves",
+          "wc2026_portugal_16_francisco_trincao",
+          "wc2026_portugal_17_rafael_leao",
+          "wc2026_portugal_18_pedro_neto",
+          "wc2026_portugal_19_goncalo_guedes",
+          "wc2026_portugal_20_joao_cancelo",
+          "wc2026_portugal_21_ruben_neves",
+          "wc2026_portugal_22_rui_silva",
+          "wc2026_portugal_23_vitinha",
+          "wc2026_portugal_24_samu_costa",
+          "wc2026_portugal_25_nuno_mendes",
+          "wc2026_portugal_26_francisco_conceicao"
+        ]
+      },
+      "observation_card_ref": {
+        "team_slug": "portugal",
+        "metrics": [
+          "avg_age",
+          "avg_height_cm",
+          "club_count",
+          "top_clubs"
+        ]
+      },
+      "safety": {
+        "observation_only": true,
+        "no_starting_xi": true,
+        "no_injury_judgment": true,
+        "betting_recommendation": false,
+        "affects_v4": false
+      }
+    },
+    {
+      "team": "Qatar",
+      "team_slug": "qatar",
+      "head_coach": "LOPETEGUI Julen",
+      "player_count": 26,
+      "position_counts": {
+        "GK": 3,
+        "DF": 9,
+        "MF": 5,
+        "FW": 9
+      },
+      "avg_age": 29.51,
+      "avg_height_cm": 179.38,
+      "club_count": 8,
+      "top_clubs": [
+        {
+          "club": "Al Duhail SC (QAT)",
+          "player_count": 6
+        },
+        {
+          "club": "Al Sadd SC (QAT)",
+          "player_count": 5
+        },
+        {
+          "club": "Al Rayyan SC (QAT)",
+          "player_count": 4
+        },
+        {
+          "club": "Al Wakrah SC (QAT)",
+          "player_count": 3
+        },
+        {
+          "club": "Al Arabi SC (QAT)",
+          "player_count": 3
+        }
+      ],
+      "roster_ref": {
+        "team_slug": "qatar",
+        "player_ids": [
+          "wc2026_qatar_01_mahmoud_abunada",
+          "wc2026_qatar_02_pedro_miguel",
+          "wc2026_qatar_03_lucas_mendes",
+          "wc2026_qatar_04_issa_laye",
+          "wc2026_qatar_05_jassem_gaber",
+          "wc2026_qatar_06_abdulaziz_hatem",
+          "wc2026_qatar_07_ahmed_alaaeldin",
+          "wc2026_qatar_08_edmilson_junior",
+          "wc2026_qatar_09_mohammed_muntari",
+          "wc2026_qatar_10_hassan_alhaydos",
+          "wc2026_qatar_11_akram_afif",
+          "wc2026_qatar_12_karim_boudiaf",
+          "wc2026_qatar_13_ayoub_aloui",
+          "wc2026_qatar_14_homam_ahmed",
+          "wc2026_qatar_15_yusuf_abdurisag",
+          "wc2026_qatar_16_boualem_khoukhi",
+          "wc2026_qatar_17_ahmed_alganehi",
+          "wc2026_qatar_18_sultan_albrake",
+          "wc2026_qatar_19_almoez_ali",
+          "wc2026_qatar_20_ahmed_fathy",
+          "wc2026_qatar_21_salah_zakaria",
+          "wc2026_qatar_22_meshaal_barsham",
+          "wc2026_qatar_23_assim_madibo",
+          "wc2026_qatar_24_tahsin_jamshid",
+          "wc2026_qatar_25_alhashmi_alhussein",
+          "wc2026_qatar_26_mohamed_manai"
+        ]
+      },
+      "observation_card_ref": {
+        "team_slug": "qatar",
+        "metrics": [
+          "avg_age",
+          "avg_height_cm",
+          "club_count",
+          "top_clubs"
+        ]
+      },
+      "safety": {
+        "observation_only": true,
+        "no_starting_xi": true,
+        "no_injury_judgment": true,
+        "betting_recommendation": false,
+        "affects_v4": false
+      }
+    },
+    {
+      "team": "Saudi Arabia",
+      "team_slug": "saudi_arabia",
+      "head_coach": "DONIS Georgios",
+      "player_count": 26,
+      "position_counts": {
+        "GK": 3,
+        "DF": 10,
+        "MF": 6,
+        "FW": 7
+      },
+      "avg_age": 28.52,
+      "avg_height_cm": 178.42,
+      "club_count": 9,
+      "top_clubs": [
+        {
+          "club": "Al Hilal SC (KSA)",
+          "player_count": 7
+        },
+        {
+          "club": "Al Nassr FC (KSA)",
+          "player_count": 6
+        },
+        {
+          "club": "Al Qadsiah FC (KSA)",
+          "player_count": 4
+        },
+        {
+          "club": "Al Ahli FC (KSA)",
+          "player_count": 3
+        },
+        {
+          "club": "Al Ittihad (KSA)",
+          "player_count": 2
+        }
+      ],
+      "roster_ref": {
+        "team_slug": "saudi_arabia",
+        "player_ids": [
+          "wc2026_saudi_arabia_01_nawaf_alaqidi",
+          "wc2026_saudi_arabia_02_ali_majrashi",
+          "wc2026_saudi_arabia_03_ali_lajami",
+          "wc2026_saudi_arabia_04_abdulelah_alamri",
+          "wc2026_saudi_arabia_05_hassan_altambakti",
+          "wc2026_saudi_arabia_06_nasser_aldawsari",
+          "wc2026_saudi_arabia_07_musab_aljuwayr",
+          "wc2026_saudi_arabia_08_aiman_yahya",
+          "wc2026_saudi_arabia_09_feras_albrikan",
+          "wc2026_saudi_arabia_10_salem_aldawsari",
+          "wc2026_saudi_arabia_11_saleh_alshehri",
+          "wc2026_saudi_arabia_12_saud_abdulhamid",
+          "wc2026_saudi_arabia_13_nawaf_bu_washl",
+          "wc2026_saudi_arabia_14_hassan_kadish",
+          "wc2026_saudi_arabia_15_abdullah_alkhaibari",
+          "wc2026_saudi_arabia_16_ziyad_aljohani",
+          "wc2026_saudi_arabia_17_khalid_alghannam",
+          "wc2026_saudi_arabia_18_ala_alhajji",
+          "wc2026_saudi_arabia_19_abdullah_alhamddan",
+          "wc2026_saudi_arabia_20_sultan_mandash",
+          "wc2026_saudi_arabia_21_mohammed_alowais",
+          "wc2026_saudi_arabia_22_ahmed_alkassar",
+          "wc2026_saudi_arabia_23_mohamed_kanno",
+          "wc2026_saudi_arabia_24_moteb_alharbi",
+          "wc2026_saudi_arabia_25_jehad_thikri",
+          "wc2026_saudi_arabia_26_mohammed_abu_alshamat"
+        ]
+      },
+      "observation_card_ref": {
+        "team_slug": "saudi_arabia",
+        "metrics": [
+          "avg_age",
+          "avg_height_cm",
+          "club_count",
+          "top_clubs"
+        ]
+      },
+      "safety": {
+        "observation_only": true,
+        "no_starting_xi": true,
+        "no_injury_judgment": true,
+        "betting_recommendation": false,
+        "affects_v4": false
+      }
+    },
+    {
+      "team": "Scotland",
+      "team_slug": "scotland",
+      "head_coach": "CLARKE Steve",
+      "player_count": 26,
+      "position_counts": {
+        "GK": 3,
+        "DF": 10,
+        "MF": 6,
+        "FW": 7
+      },
+      "avg_age": 29.2,
+      "avg_height_cm": 184.46,
+      "club_count": 22,
+      "top_clubs": [
+        {
+          "club": "Celtic FC (SCO)",
+          "player_count": 2
+        },
+        {
+          "club": "AFC Bournemouth (ENG)",
+          "player_count": 2
+        },
+        {
+          "club": "Rangers FC (SCO)",
+          "player_count": 2
+        },
+        {
+          "club": "Heart Of Midlothian FC (SCO)",
+          "player_count": 2
+        },
+        {
+          "club": "Nottingham Forest FC (ENG)",
+          "player_count": 1
+        }
+      ],
+      "roster_ref": {
+        "team_slug": "scotland",
+        "player_ids": [
+          "wc2026_scotland_01_gunn_angus",
+          "wc2026_scotland_02_hickey_aaron",
+          "wc2026_scotland_03_robertson_andy",
+          "wc2026_scotland_04_mctominay_scott",
+          "wc2026_scotland_05_hanley_grant",
+          "wc2026_scotland_06_tierney_kieran",
+          "wc2026_scotland_07_mcginn_john",
+          "wc2026_scotland_08_fletcher_tyler",
+          "wc2026_scotland_09_dykes_lyndon",
+          "wc2026_scotland_10_adams_che",
+          "wc2026_scotland_11_christie_ryan",
+          "wc2026_scotland_12_kelly_liam",
+          "wc2026_scotland_13_hendry_jack",
+          "wc2026_scotland_14_stewart_ross",
+          "wc2026_scotland_15_souttar_john",
+          "wc2026_scotland_16_hyam_dominic",
+          "wc2026_scotland_17_gannon_doak_ben",
+          "wc2026_scotland_18_hirst_george",
+          "wc2026_scotland_19_ferguson_lewis",
+          "wc2026_scotland_20_shankland_lawrence",
+          "wc2026_scotland_21_gordon_craig",
+          "wc2026_scotland_22_patterson_nathan",
+          "wc2026_scotland_23_mclean_kenny",
+          "wc2026_scotland_24_ralston_anthony",
+          "wc2026_scotland_25_curtis_findlay",
+          "wc2026_scotland_26_mckenna_scott"
+        ]
+      },
+      "observation_card_ref": {
+        "team_slug": "scotland",
+        "metrics": [
+          "avg_age",
+          "avg_height_cm",
+          "club_count",
+          "top_clubs"
+        ]
+      },
+      "safety": {
+        "observation_only": true,
+        "no_starting_xi": true,
+        "no_injury_judgment": true,
+        "betting_recommendation": false,
+        "affects_v4": false
+      }
+    },
+    {
+      "team": "Senegal",
+      "team_slug": "senegal",
+      "head_coach": "THIAW Pape",
+      "player_count": 26,
+      "position_counts": {
+        "GK": 3,
+        "DF": 8,
+        "MF": 7,
+        "FW": 8
+      },
+      "avg_age": 27.09,
+      "avg_height_cm": 183.96,
+      "club_count": 22,
+      "top_clubs": [
+        {
+          "club": "OGC Nice (FRA)",
+          "player_count": 2
+        },
+        {
+          "club": "Everton FC (ENG)",
+          "player_count": 2
+        },
+        {
+          "club": "AS Monaco (FRA)",
+          "player_count": 2
+        },
+        {
+          "club": "FC Bayern München (GER)",
+          "player_count": 2
+        },
+        {
+          "club": "Chelsea FC (ENG)",
+          "player_count": 1
+        }
+      ],
+      "roster_ref": {
+        "team_slug": "senegal",
+        "player_ids": [
+          "wc2026_senegal_01_diouf_yehvann",
+          "wc2026_senegal_02_sarr_mamadou",
+          "wc2026_senegal_03_koulibaly_kalidou",
+          "wc2026_senegal_04_seck_abdoulaye",
+          "wc2026_senegal_05_gueye_idrissa_gana",
+          "wc2026_senegal_06_ciss_pathe",
+          "wc2026_senegal_07_diao_assane",
+          "wc2026_senegal_08_camara_lamine",
+          "wc2026_senegal_09_dieng_bamba",
+          "wc2026_senegal_10_mane_sadio",
+          "wc2026_senegal_11_jackson_nicolas",
+          "wc2026_senegal_12_ndiaye_cherif",
+          "wc2026_senegal_13_ndiaye_iliman",
+          "wc2026_senegal_14_jakobs_ismail",
+          "wc2026_senegal_15_diatta_krepin",
+          "wc2026_senegal_16_mendy_edouard",
+          "wc2026_senegal_17_sarr_pape_matar",
+          "wc2026_senegal_18_sarr_ismaila",
+          "wc2026_senegal_19_niakhate_moussa",
+          "wc2026_senegal_20_mbaye_ibrahim",
+          "wc2026_senegal_21_diarra_habib",
+          "wc2026_senegal_22_ndiaye_bara_sapoko",
+          "wc2026_senegal_23_diaw_mory",
+          "wc2026_senegal_24_mendy_antoine",
+          "wc2026_senegal_25_diouf_el_hadji_malick",
+          "wc2026_senegal_26_gueye_pape"
+        ]
+      },
+      "observation_card_ref": {
+        "team_slug": "senegal",
+        "metrics": [
+          "avg_age",
+          "avg_height_cm",
+          "club_count",
+          "top_clubs"
+        ]
+      },
+      "safety": {
+        "observation_only": true,
+        "no_starting_xi": true,
+        "no_injury_judgment": true,
+        "betting_recommendation": false,
+        "affects_v4": false
+      }
+    },
+    {
+      "team": "South Africa",
+      "team_slug": "south_africa",
+      "head_coach": "BROOS Hugo",
+      "player_count": 26,
+      "position_counts": {
+        "GK": 3,
+        "DF": 10,
+        "MF": 5,
+        "FW": 8
+      },
+      "avg_age": 26.81,
+      "avg_height_cm": 178.85,
+      "club_count": 12,
+      "top_clubs": [
+        {
+          "club": "Mamelodi Sundowns FC (RSA)",
+          "player_count": 8
+        },
+        {
+          "club": "Orlando Pirates FC (RSA)",
+          "player_count": 8
+        },
+        {
+          "club": "Polokwane City FC (RSA)",
+          "player_count": 1
+        },
+        {
+          "club": "Burnley FC (ENG)",
+          "player_count": 1
+        },
+        {
+          "club": "AEL Limassol (CYP)",
+          "player_count": 1
+        }
+      ],
+      "roster_ref": {
+        "team_slug": "south_africa",
+        "player_ids": [
+          "wc2026_south_africa_01_williams_ronwen",
+          "wc2026_south_africa_02_matuludi_thabang",
+          "wc2026_south_africa_03_ndamane_khulumani",
+          "wc2026_south_africa_04_mokoena_teboho",
+          "wc2026_south_africa_05_mbatha_thalente",
+          "wc2026_south_africa_06_modiba_aubrey",
+          "wc2026_south_africa_07_appollis_oswin",
+          "wc2026_south_africa_08_moremi_tshepang",
+          "wc2026_south_africa_09_foster_lyle",
+          "wc2026_south_africa_10_mofokeng_relebohile",
+          "wc2026_south_africa_11_zwane_themba",
+          "wc2026_south_africa_12_maseko_thapelo",
+          "wc2026_south_africa_13_sithole_sphephelo",
+          "wc2026_south_africa_14_mbokazi_mbekezeli",
+          "wc2026_south_africa_15_rayners_iqraam",
+          "wc2026_south_africa_16_chaine_sipho",
+          "wc2026_south_africa_17_makgopa_evidence",
+          "wc2026_south_africa_18_kabini_samukelo",
+          "wc2026_south_africa_19_sibisi_nkosinathi",
+          "wc2026_south_africa_20_mudau_khuliso",
+          "wc2026_south_africa_21_okon_ime",
+          "wc2026_south_africa_22_goss_ricardo",
+          "wc2026_south_africa_23_adams_jayden",
+          "wc2026_south_africa_24_makhanya_olwethu",
+          "wc2026_south_africa_25_sebelebele_kamogelo",
+          "wc2026_south_africa_26_cross_bradley"
+        ]
+      },
+      "observation_card_ref": {
+        "team_slug": "south_africa",
+        "metrics": [
+          "avg_age",
+          "avg_height_cm",
+          "club_count",
+          "top_clubs"
+        ]
+      },
+      "safety": {
+        "observation_only": true,
+        "no_starting_xi": true,
+        "no_injury_judgment": true,
+        "betting_recommendation": false,
+        "affects_v4": false
+      }
+    },
+    {
+      "team": "Spain",
+      "team_slug": "spain",
+      "head_coach": "DE LA FUENTE Luis",
+      "player_count": 26,
+      "position_counts": {
+        "GK": 3,
+        "DF": 8,
+        "MF": 7,
+        "FW": 8
+      },
+      "avg_age": 26.75,
+      "avg_height_cm": 181.73,
+      "club_count": 13,
+      "top_clubs": [
+        {
+          "club": "FC Barcelona (ESP)",
+          "player_count": 8
+        },
+        {
+          "club": "Arsenal FC (ENG)",
+          "player_count": 3
+        },
+        {
+          "club": "Atlético De Madrid (ESP)",
+          "player_count": 3
+        },
+        {
+          "club": "Athletic Club (ESP)",
+          "player_count": 3
+        },
+        {
+          "club": "Bayer Leverkusen (GER)",
+          "player_count": 1
+        }
+      ],
+      "roster_ref": {
+        "team_slug": "spain",
+        "player_ids": [
+          "wc2026_spain_01_raya_david",
+          "wc2026_spain_02_pubill_marc",
+          "wc2026_spain_03_grimaldo_alex",
+          "wc2026_spain_04_garcia_eric",
+          "wc2026_spain_05_llorente_marcos",
+          "wc2026_spain_06_merino_mikel",
+          "wc2026_spain_07_torres_ferran",
+          "wc2026_spain_08_ruiz_fabian",
+          "wc2026_spain_09_gavi",
+          "wc2026_spain_10_olmo_dani",
+          "wc2026_spain_11_pino_yeremy",
+          "wc2026_spain_12_porro_pedro",
+          "wc2026_spain_13_garcia_joan",
+          "wc2026_spain_14_laporte_aymeric",
+          "wc2026_spain_15_baena_alex",
+          "wc2026_spain_16_rodri",
+          "wc2026_spain_17_williams_nico",
+          "wc2026_spain_18_zubimendi_martin",
+          "wc2026_spain_19_yamal_lamine",
+          "wc2026_spain_20_pedri",
+          "wc2026_spain_21_oyarzabal_mikel",
+          "wc2026_spain_22_cubarsi_pau",
+          "wc2026_spain_23_simon_unai",
+          "wc2026_spain_24_cucurella_marc",
+          "wc2026_spain_25_munoz_victor",
+          "wc2026_spain_26_iglesias_borja"
+        ]
+      },
+      "observation_card_ref": {
+        "team_slug": "spain",
+        "metrics": [
+          "avg_age",
+          "avg_height_cm",
+          "club_count",
+          "top_clubs"
+        ]
+      },
+      "safety": {
+        "observation_only": true,
+        "no_starting_xi": true,
+        "no_injury_judgment": true,
+        "betting_recommendation": false,
+        "affects_v4": false
+      }
+    },
+    {
+      "team": "Sweden",
+      "team_slug": "sweden",
+      "head_coach": "POTTER Graham",
+      "player_count": 26,
+      "position_counts": {
+        "GK": 3,
+        "DF": 11,
+        "MF": 7,
+        "FW": 5
+      },
+      "avg_age": 27.56,
+      "avg_height_cm": 186.19,
+      "club_count": 26,
+      "top_clubs": [
+        {
+          "club": "Derby County FC (ENG)",
+          "player_count": 1
+        },
+        {
+          "club": "SC Braga (POR)",
+          "player_count": 1
+        },
+        {
+          "club": "Aston Villa FC (ENG)",
+          "player_count": 1
+        },
+        {
+          "club": "Atalanta Bergamo (ITA)",
+          "player_count": 1
+        },
+        {
+          "club": "Leeds United FC (ENG)",
+          "player_count": 1
+        }
+      ],
+      "roster_ref": {
+        "team_slug": "sweden",
+        "player_ids": [
+          "wc2026_sweden_01_widell_zetterstrom_jacob",
+          "wc2026_sweden_02_lagerbielke_gustaf",
+          "wc2026_sweden_03_lindelof_victor",
+          "wc2026_sweden_04_hien_isak",
+          "wc2026_sweden_05_gudmundsson_gabriel",
+          "wc2026_sweden_06_johansson_herman",
+          "wc2026_sweden_07_bergvall_lucas",
+          "wc2026_sweden_08_svensson_daniel",
+          "wc2026_sweden_09_isak_alexander",
+          "wc2026_sweden_10_nygren_benjamin",
+          "wc2026_sweden_11_elanga_anthony",
+          "wc2026_sweden_12_johansson_viktor",
+          "wc2026_sweden_13_sema_ken",
+          "wc2026_sweden_14_ekdal_hjalmar",
+          "wc2026_sweden_15_starfelt_carl",
+          "wc2026_sweden_16_karlstrom_jesper",
+          "wc2026_sweden_17_gyokeres_viktor",
+          "wc2026_sweden_18_ayari_yasin",
+          "wc2026_sweden_19_svanberg_mattias",
+          "wc2026_sweden_20_smith_eric",
+          "wc2026_sweden_21_bernhardsson_alexander",
+          "wc2026_sweden_22_zeneli_besfort",
+          "wc2026_sweden_23_nordfeldt_kristoffer",
+          "wc2026_sweden_24_stroud_elliot",
+          "wc2026_sweden_25_nilsson_gustaf",
+          "wc2026_sweden_26_ali_taha"
+        ]
+      },
+      "observation_card_ref": {
+        "team_slug": "sweden",
+        "metrics": [
+          "avg_age",
+          "avg_height_cm",
+          "club_count",
+          "top_clubs"
+        ]
+      },
+      "safety": {
+        "observation_only": true,
+        "no_starting_xi": true,
+        "no_injury_judgment": true,
+        "betting_recommendation": false,
+        "affects_v4": false
+      }
+    },
+    {
+      "team": "Switzerland",
+      "team_slug": "switzerland",
+      "head_coach": "YAKIN Murat",
+      "player_count": 26,
+      "position_counts": {
+        "GK": 3,
+        "DF": 8,
+        "MF": 8,
+        "FW": 7
+      },
+      "avg_age": 28.31,
+      "avg_height_cm": 185.23,
+      "club_count": 24,
+      "top_clubs": [
+        {
+          "club": "Sevilla FC (ESP)",
+          "player_count": 2
+        },
+        {
+          "club": "BSC Young Boys (SUI)",
+          "player_count": 2
+        },
+        {
+          "club": "Borussia Dortmund (GER)",
+          "player_count": 1
+        },
+        {
+          "club": "Hamburger SV (GER)",
+          "player_count": 1
+        },
+        {
+          "club": "1. FSV Mainz 05 (GER)",
+          "player_count": 1
+        }
+      ],
+      "roster_ref": {
+        "team_slug": "switzerland",
+        "player_ids": [
+          "wc2026_switzerland_01_kobel_gregor",
+          "wc2026_switzerland_02_muheim_miro",
+          "wc2026_switzerland_03_widmer_silvan",
+          "wc2026_switzerland_04_elvedi_nico",
+          "wc2026_switzerland_05_akanji_manuel",
+          "wc2026_switzerland_06_zakaria_denis",
+          "wc2026_switzerland_07_embolo_breel",
+          "wc2026_switzerland_08_freuler_remo",
+          "wc2026_switzerland_09_manzambi_johan",
+          "wc2026_switzerland_10_xhaka_granit",
+          "wc2026_switzerland_11_ndoye_dan",
+          "wc2026_switzerland_12_mvogo_yvon",
+          "wc2026_switzerland_13_rodriguez_ricardo",
+          "wc2026_switzerland_14_jashari_ardon",
+          "wc2026_switzerland_15_sow_djibril",
+          "wc2026_switzerland_16_fassnacht_christian",
+          "wc2026_switzerland_17_vargas_ruben",
+          "wc2026_switzerland_18_coemert_eray",
+          "wc2026_switzerland_19_okafor_noah",
+          "wc2026_switzerland_20_aebischer_michel",
+          "wc2026_switzerland_21_keller_marvin",
+          "wc2026_switzerland_22_rieder_fabian",
+          "wc2026_switzerland_23_amdouni_zeki",
+          "wc2026_switzerland_24_amenda_aurele",
+          "wc2026_switzerland_25_jaquez_luca",
+          "wc2026_switzerland_26_itten_cedric"
+        ]
+      },
+      "observation_card_ref": {
+        "team_slug": "switzerland",
+        "metrics": [
+          "avg_age",
+          "avg_height_cm",
+          "club_count",
+          "top_clubs"
+        ]
+      },
+      "safety": {
+        "observation_only": true,
+        "no_starting_xi": true,
+        "no_injury_judgment": true,
+        "betting_recommendation": false,
+        "affects_v4": false
+      }
+    },
+    {
+      "team": "Tunisia",
+      "team_slug": "tunisia",
+      "head_coach": "LAMOUCHI Sabri",
+      "player_count": 26,
+      "position_counts": {
+        "GK": 3,
+        "DF": 10,
+        "MF": 8,
+        "FW": 5
+      },
+      "avg_age": 26.64,
+      "avg_height_cm": 184.58,
+      "club_count": 24,
+      "top_clubs": [
+        {
+          "club": "Club Africain (TUN)",
+          "player_count": 2
+        },
+        {
+          "club": "Kasımpaşa SK (TUR)",
+          "player_count": 2
+        },
+        {
+          "club": "OGC Nice (FRA)",
+          "player_count": 1
+        },
+        {
+          "club": "FC Lorient (FRA)",
+          "player_count": 1
+        },
+        {
+          "club": "NK Maribor (SVN)",
+          "player_count": 1
+        }
+      ],
+      "roster_ref": {
+        "team_slug": "tunisia",
+        "player_ids": [
+          "wc2026_tunisia_01_chamakh_mouhib",
+          "wc2026_tunisia_02_abdi_ali",
+          "wc2026_tunisia_03_talbi_montassar",
+          "wc2026_tunisia_04_rekik_omar",
+          "wc2026_tunisia_05_arous_adam",
+          "wc2026_tunisia_06_bronn_dylan",
+          "wc2026_tunisia_07_achouri_elias",
+          "wc2026_tunisia_08_saad_elias",
+          "wc2026_tunisia_09_mastouri_hazem",
+          "wc2026_tunisia_10_mejbri_hannibal",
+          "wc2026_tunisia_11_gharbi_ismael",
+          "wc2026_tunisia_12_ben_ouanes_mortadha",
+          "wc2026_tunisia_13_khedira_rani",
+          "wc2026_tunisia_14_ayari_khalil",
+          "wc2026_tunisia_15_hadj_mahmoud_mohamed",
+          "wc2026_tunisia_16_dahmen_aymen",
+          "wc2026_tunisia_17_skhiri_ellyes",
+          "wc2026_tunisia_18_elloumi_rayan",
+          "wc2026_tunisia_19_chaouat_firas",
+          "wc2026_tunisia_20_valery_yan",
+          "wc2026_tunisia_21_ben_hmida_mohamed_amine",
+          "wc2026_tunisia_22_ben_hessen_sabri",
+          "wc2026_tunisia_23_neffati_moutaz",
+          "wc2026_tunisia_24_chikhaoui_raed",
+          "wc2026_tunisia_25_slimane_anis",
+          "wc2026_tunisia_26_tounekti_sebastian"
+        ]
+      },
+      "observation_card_ref": {
+        "team_slug": "tunisia",
+        "metrics": [
+          "avg_age",
+          "avg_height_cm",
+          "club_count",
+          "top_clubs"
+        ]
+      },
+      "safety": {
+        "observation_only": true,
+        "no_starting_xi": true,
+        "no_injury_judgment": true,
+        "betting_recommendation": false,
+        "affects_v4": false
+      }
+    },
+    {
+      "team": "Türkiye",
+      "team_slug": "turkiye",
+      "head_coach": "MONTELLA Vincenzo",
+      "player_count": 26,
+      "position_counts": {
+        "GK": 3,
+        "DF": 9,
+        "MF": 5,
+        "FW": 9
+      },
+      "avg_age": 27.67,
+      "avg_height_cm": 183.77,
+      "club_count": 16,
+      "top_clubs": [
+        {
+          "club": "Fenerbahçe SK (TUR)",
+          "player_count": 6
+        },
+        {
+          "club": "Galatasaray SK (TUR)",
+          "player_count": 6
+        },
+        {
+          "club": "AS Roma (ITA)",
+          "player_count": 1
+        },
+        {
+          "club": "Al Ahli FC (KSA)",
+          "player_count": 1
+        },
+        {
+          "club": "Borussia Dortmund (GER)",
+          "player_count": 1
+        }
+      ],
+      "roster_ref": {
+        "team_slug": "turkiye",
+        "player_ids": [
+          "wc2026_turkiye_01_gunok_mert",
+          "wc2026_turkiye_02_celik_zeki",
+          "wc2026_turkiye_03_demiral_merih",
+          "wc2026_turkiye_04_soyuncu_caglar",
+          "wc2026_turkiye_05_ozcan_salih",
+          "wc2026_turkiye_06_kokcu_orkun",
+          "wc2026_turkiye_07_akturkoglu_kerem",
+          "wc2026_turkiye_08_guler_arda",
+          "wc2026_turkiye_09_gul_deniz",
+          "wc2026_turkiye_10_calhanoglu_hakan",
+          "wc2026_turkiye_11_yildiz_kenan",
+          "wc2026_turkiye_12_bayindir_altay",
+          "wc2026_turkiye_13_elmali_eren",
+          "wc2026_turkiye_14_bardakci_abdulkerim",
+          "wc2026_turkiye_15_kabak_ozan",
+          "wc2026_turkiye_16_yuksek_ismail",
+          "wc2026_turkiye_17_kahveci_irfan_can",
+          "wc2026_turkiye_18_muldur_mert",
+          "wc2026_turkiye_19_akgun_yunus",
+          "wc2026_turkiye_20_kadioglu_ferdi",
+          "wc2026_turkiye_21_yilmaz_baris_alper",
+          "wc2026_turkiye_22_ayhan_kaan",
+          "wc2026_turkiye_23_cakir_ugurcan",
+          "wc2026_turkiye_24_aydin_oguz",
+          "wc2026_turkiye_25_akaydin_samet",
+          "wc2026_turkiye_26_uzun_can"
+        ]
+      },
+      "observation_card_ref": {
+        "team_slug": "turkiye",
+        "metrics": [
+          "avg_age",
+          "avg_height_cm",
+          "club_count",
+          "top_clubs"
+        ]
+      },
+      "safety": {
+        "observation_only": true,
+        "no_starting_xi": true,
+        "no_injury_judgment": true,
+        "betting_recommendation": false,
+        "affects_v4": false
+      }
+    },
+    {
+      "team": "USA",
+      "team_slug": "usa",
+      "head_coach": "POCHETTINO Mauricio",
+      "player_count": 26,
+      "position_counts": {
+        "GK": 3,
+        "DF": 10,
+        "MF": 6,
+        "FW": 7
+      },
+      "avg_age": 26.91,
+      "avg_height_cm": 183.38,
+      "club_count": 24,
+      "top_clubs": [
+        {
+          "club": "PSV Eindhoven (NED)",
+          "player_count": 2
+        },
+        {
+          "club": "Borussia Mönchengladbach (GER)",
+          "player_count": 2
+        },
+        {
+          "club": "New England Revolution (USA)",
+          "player_count": 1
+        },
+        {
+          "club": "Crystal Palace FC (ENG)",
+          "player_count": 1
+        },
+        {
+          "club": "AFC Bournemouth (ENG)",
+          "player_count": 1
+        }
+      ],
+      "roster_ref": {
+        "team_slug": "usa",
+        "player_ids": [
+          "wc2026_usa_01_turner_matt",
+          "wc2026_usa_02_dest_sergino",
+          "wc2026_usa_03_richards_chris",
+          "wc2026_usa_04_adams_tyler",
+          "wc2026_usa_05_robinson_antonee",
+          "wc2026_usa_06_trusty_auston",
+          "wc2026_usa_07_reyna_giovanni",
+          "wc2026_usa_08_mckennie_weston",
+          "wc2026_usa_09_pepi_ricardo",
+          "wc2026_usa_10_pulisic_christian",
+          "wc2026_usa_11_aaronson_brenden",
+          "wc2026_usa_12_robinson_miles",
+          "wc2026_usa_13_ream_tim",
+          "wc2026_usa_14_berhalter_sebastian",
+          "wc2026_usa_15_roldan_cristian",
+          "wc2026_usa_16_freeman_alex",
+          "wc2026_usa_17_tillman_malik",
+          "wc2026_usa_18_arfsten_max",
+          "wc2026_usa_19_wright_haji",
+          "wc2026_usa_20_balogun_folarin",
+          "wc2026_usa_21_weah_timothy",
+          "wc2026_usa_22_mckenzie_mark",
+          "wc2026_usa_23_scally_joe",
+          "wc2026_usa_24_freese_matt",
+          "wc2026_usa_25_brady_chris",
+          "wc2026_usa_26_zendejas_alex"
+        ]
+      },
+      "observation_card_ref": {
+        "team_slug": "usa",
+        "metrics": [
+          "avg_age",
+          "avg_height_cm",
+          "club_count",
+          "top_clubs"
+        ]
+      },
+      "safety": {
+        "observation_only": true,
+        "no_starting_xi": true,
+        "no_injury_judgment": true,
+        "betting_recommendation": false,
+        "affects_v4": false
+      }
+    },
+    {
+      "team": "Uruguay",
+      "team_slug": "uruguay",
+      "head_coach": "BIELSA Marcelo",
+      "player_count": 26,
+      "position_counts": {
+        "GK": 3,
+        "DF": 7,
+        "MF": 11,
+        "FW": 5
+      },
+      "avg_age": 28.74,
+      "avg_height_cm": 180.46,
+      "club_count": 22,
+      "top_clubs": [
+        {
+          "club": "CR Flamengo (BRA)",
+          "player_count": 3
+        },
+        {
+          "club": "Club América (MEX)",
+          "player_count": 2
+        },
+        {
+          "club": "SE Palmeiras (BRA)",
+          "player_count": 2
+        },
+        {
+          "club": "SC Internacional (BRA)",
+          "player_count": 1
+        },
+        {
+          "club": "Atlético De Madrid (ESP)",
+          "player_count": 1
+        }
+      ],
+      "roster_ref": {
+        "team_slug": "uruguay",
+        "player_ids": [
+          "wc2026_uruguay_01_rochet_sergio",
+          "wc2026_uruguay_02_gimenez_jose_maria",
+          "wc2026_uruguay_03_caceres_sebastian",
+          "wc2026_uruguay_04_araujo_ronald",
+          "wc2026_uruguay_05_ugarte_manuel",
+          "wc2026_uruguay_06_bentancur_rodrigo",
+          "wc2026_uruguay_07_de_la_cruz_nicolas",
+          "wc2026_uruguay_08_valverde_federico",
+          "wc2026_uruguay_09_nunez_darwin",
+          "wc2026_uruguay_10_de_arrascaeta_giorgian",
+          "wc2026_uruguay_11_pellistri_facundo",
+          "wc2026_uruguay_12_mele_santiago",
+          "wc2026_uruguay_13_varela_guillermo",
+          "wc2026_uruguay_14_canobbio_agustin",
+          "wc2026_uruguay_15_martinez_emiliano",
+          "wc2026_uruguay_16_olivera_mathias",
+          "wc2026_uruguay_17_vina_matias",
+          "wc2026_uruguay_18_rodriguez_brian",
+          "wc2026_uruguay_19_aguirre_rodrigo",
+          "wc2026_uruguay_20_araujo_maxi",
+          "wc2026_uruguay_21_vinas_federico",
+          "wc2026_uruguay_22_piquerez_joaquin",
+          "wc2026_uruguay_23_muslera_fernando",
+          "wc2026_uruguay_24_bueno_santiago",
+          "wc2026_uruguay_25_sanabria_juan_manuel",
+          "wc2026_uruguay_26_zalazar_rodrigo"
+        ]
+      },
+      "observation_card_ref": {
+        "team_slug": "uruguay",
+        "metrics": [
+          "avg_age",
+          "avg_height_cm",
+          "club_count",
+          "top_clubs"
+        ]
+      },
+      "safety": {
+        "observation_only": true,
+        "no_starting_xi": true,
+        "no_injury_judgment": true,
+        "betting_recommendation": false,
+        "affects_v4": false
+      }
+    },
+    {
+      "team": "Uzbekistan",
+      "team_slug": "uzbekistan",
+      "head_coach": "CANNAVARO Fabio",
+      "player_count": 26,
+      "position_counts": {
+        "GK": 3,
+        "DF": 10,
+        "MF": 10,
+        "FW": 3
+      },
+      "avg_age": 28.51,
+      "avg_height_cm": 181.81,
+      "club_count": 16,
+      "top_clubs": [
+        {
+          "club": "Pakhtakor Tashkent FK (UZB)",
+          "player_count": 4
+        },
+        {
+          "club": "FK Neftchi Farg'ona (UZB)",
+          "player_count": 3
+        },
+        {
+          "club": "Esteghlal Tehran FC (IRN)",
+          "player_count": 2
+        },
+        {
+          "club": "Persepolis FC (IRN)",
+          "player_count": 2
+        },
+        {
+          "club": "Nasaf Qarshi FC (UZB)",
+          "player_count": 2
+        }
+      ],
+      "roster_ref": {
+        "team_slug": "uzbekistan",
+        "player_ids": [
+          "wc2026_uzbekistan_01_yusupov_utkir",
+          "wc2026_uzbekistan_02_khusanov_abdukodir",
+          "wc2026_uzbekistan_03_alijonov_khojiakbar",
+          "wc2026_uzbekistan_04_sayfiev_farrukh",
+          "wc2026_uzbekistan_05_ashurmatov_rustam",
+          "wc2026_uzbekistan_06_mozgovoy_akmal",
+          "wc2026_uzbekistan_07_shukurov_otabek",
+          "wc2026_uzbekistan_08_iskanderov_jamshid",
+          "wc2026_uzbekistan_09_xamrobekov_odiljon",
+          "wc2026_uzbekistan_10_masharipov_jaloliddin",
+          "wc2026_uzbekistan_11_urunov_oston",
+          "wc2026_uzbekistan_12_nematov_abduvohid",
+          "wc2026_uzbekistan_13_nasrullaev_sherzod",
+          "wc2026_uzbekistan_14_shomurodov_eldor",
+          "wc2026_uzbekistan_15_eshmurodov_umar",
+          "wc2026_uzbekistan_16_ergashev_botirali",
+          "wc2026_uzbekistan_17_khamdamov_dostonbek",
+          "wc2026_uzbekistan_18_abdullaev_abdulla",
+          "wc2026_uzbekistan_19_ganiev_azizjon",
+          "wc2026_uzbekistan_20_amonov_azizbek",
+          "wc2026_uzbekistan_21_sergeev_igor",
+          "wc2026_uzbekistan_22_fayzullaev_abbosbek",
+          "wc2026_uzbekistan_23_esanov_sherzod",
+          "wc2026_uzbekistan_24_karimov_behruzjon",
+          "wc2026_uzbekistan_25_ulmasaliyev_avazbek",
+          "wc2026_uzbekistan_26_urozov_jakhongir"
+        ]
+      },
+      "observation_card_ref": {
+        "team_slug": "uzbekistan",
+        "metrics": [
+          "avg_age",
+          "avg_height_cm",
+          "club_count",
+          "top_clubs"
+        ]
+      },
+      "safety": {
+        "observation_only": true,
+        "no_starting_xi": true,
+        "no_injury_judgment": true,
+        "betting_recommendation": false,
+        "affects_v4": false
+      }
+    }
+  ],
+  "safety": {
+    "observation_only": true,
+    "no_starting_xi": true,
+    "no_injury_judgment": true,
+    "betting_recommendation": false,
+    "affects_v4": false
+  }
+}
