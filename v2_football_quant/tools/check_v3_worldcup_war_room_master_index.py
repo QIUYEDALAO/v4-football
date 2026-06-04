@@ -24,6 +24,7 @@ REQUIRED_MODULES = {
     "final_26_squad_profile",
     "wc10_war_room",
     "lineup_readiness_pending",
+    "match_card_104_canonical_index",
 }
 EXPECTED_SAFETY = {
     "observation_only": True,
@@ -135,6 +136,12 @@ def main() -> int:
     final_module = next((item for item in modules if isinstance(item, dict) and item.get("module_name") == "final_26_squad_pack"), {})
     add(failures, final_module.get("status") == "LOCKED", "final_26_squad_pack_not_locked", final_module.get("status"))
     add(failures, final_module.get("total_players") == 1248, "final_26_total_players_unexpected", final_module.get("total_players"))
+    match_card_module = next((item for item in modules if isinstance(item, dict) and item.get("module_name") == "match_card_104_canonical_index"), {})
+    add(failures, match_card_module.get("canonical_source") == "data/manual_sources/v3_worldcup/war_room/v3_wc2026_104_cards_index_bridge.json", "match_card_104_canonical_source_unexpected", match_card_module.get("canonical_source"))
+    add(failures, match_card_module.get("group_stage_view") == "data/manual_sources/v3_worldcup/war_room/v3_wc_match_cards.json", "match_card_group_view_unexpected", match_card_module.get("group_stage_view"))
+    add(failures, match_card_module.get("expected_total_cards") == 104, "match_card_expected_total_unexpected", match_card_module.get("expected_total_cards"))
+    add(failures, match_card_module.get("group_stage_view_count") == 72, "match_card_group_view_count_unexpected", match_card_module.get("group_stage_view_count"))
+    add(failures, match_card_module.get("double_read_guard") == "READ_CANONICAL_104_OR_GROUP_VIEW_72_NOT_BOTH_AS_COMPLETE", "match_card_double_read_guard_missing", match_card_module.get("double_read_guard"))
 
     for key, expected in EXPECTED_SAFETY.items():
         add(failures, master.get("global_safety", {}).get(key) is expected, f"global_safety_{key}_unexpected", master.get("global_safety", {}).get(key))

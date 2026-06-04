@@ -21,6 +21,9 @@ VENUE_STRESS = ROOT / "data/v3_worldcup/venue_stress/v3_worldcup_venue_stress_20
 TACTICAL_PROFILE = ROOT / "data/v3_worldcup/tactical_profile/v3_worldcup_tactical_profile_layer_20260604.json"
 CLOSING_1X2 = ROOT / "data/v3_worldcup/closing_1x2_market_structure/v3_worldcup_closing_1x2_market_structure_20260604.json"
 WC10_WAR_ROOM = ROOT / "data/v3_worldcup/war_room/v3_worldcup_wc10_war_room_20260602.json"
+MATCH_CARD_104_INDEX = OUT_DIR / "v3_wc2026_104_cards_index_bridge.json"
+MATCH_CARD_104_SUMMARY = OUT_DIR / "v3_wc2026_104_cards_index_bridge_summary.json"
+MATCH_CARD_72_VIEW = OUT_DIR / "v3_wc_match_cards.json"
 
 PERCEPTION_DRYRUN_CSV = ROOT / "data/runtime/v3_worldcup/perception_gap_dryrun/v3_wc4d_match_level_perception_gap_dryrun_20260603.csv"
 PERCEPTION_DRYRUN_STATUS = ROOT / "data/runtime/status/check_v3_worldcup_match_level_perception_gap_dryrun_20260603.json"
@@ -109,6 +112,7 @@ def build() -> tuple[dict[str, Any], dict[str, Any]]:
     odds_live = load_json(ODDS_LIVE_STATUS)
     odds_movement = load_json(ODDS_MOVEMENT_STATUS)
     odds_timeline = load_json(ODDS_TIMELINE_STATUS)
+    match_card_104 = load_json(MATCH_CARD_104_SUMMARY)
 
     live_coverage = odds_live.get("coverage") if isinstance(odds_live, dict) and isinstance(odds_live.get("coverage"), dict) else {}
     movement = odds_movement.get("movement_eligibility") if isinstance(odds_movement, dict) and isinstance(odds_movement.get("movement_eligibility"), dict) else {}
@@ -218,6 +222,25 @@ def build() -> tuple[dict[str, Any], dict[str, Any]]:
             "starting_xi_status=NOT_AVAILABLE; matchday_lineup_status=WAIT_OFFICIAL_LINEUP",
             "Wait for official matchday lineup source before any lineup readiness update.",
         ),
+        module(
+            "match_card_104_canonical_index",
+            "READY",
+            [MATCH_CARD_104_INDEX, MATCH_CARD_104_SUMMARY, MATCH_CARD_72_VIEW],
+            ROOT / "tools/check_v3_worldcup_104_cards_index_bridge.py",
+            (
+                f"canonical_cards={int(match_card_104.get('canonical_card_count') or 0)}; "
+                f"group_view={int(match_card_104.get('group_stage_match_count') or 0)}; "
+                f"knockout_slots={int(match_card_104.get('knockout_slot_count') or 0)}"
+            ),
+            "Read the 104 canonical index as the full tournament source; use the 72-card file only as group-stage view.",
+            {
+                "canonical_source": rel(MATCH_CARD_104_INDEX),
+                "group_stage_view": rel(MATCH_CARD_72_VIEW),
+                "expected_total_cards": 104,
+                "group_stage_view_count": 72,
+                "double_read_guard": "READ_CANONICAL_104_OR_GROUP_VIEW_72_NOT_BOTH_AS_COMPLETE",
+            },
+        ),
     ]
 
     master_index = {
@@ -244,6 +267,7 @@ def build() -> tuple[dict[str, Any], dict[str, Any]]:
             "final_26_squad_profile": checker_status(ROOT / "data/runtime/status/check_v3_worldcup_final_26_squad_profile_observation_20260604.json"),
             "wc10_war_room": checker_status(ROOT / "data/runtime/status/check_v3_worldcup_wc10_war_room_20260602.json"),
             "lineup_readiness_pending": checker_status(ROOT / "data/runtime/status/check_v3_worldcup_lineup_readiness_schema_20260604.json"),
+            "match_card_104_canonical_index": checker_status(ROOT / "data/runtime/status/check_v3_worldcup_104_cards_index_bridge_20260605.json"),
         },
     }
 

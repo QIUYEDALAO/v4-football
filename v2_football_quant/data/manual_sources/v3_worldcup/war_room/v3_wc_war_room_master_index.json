@@ -1,8 +1,8 @@
 {
   "pack_name": "V3_WC_WAR_ROOM_MASTER_INDEX_PACK",
-  "generated_at": "2026-06-04T15:19:49.350690+00:00",
-  "current_head": "63343e5",
-  "module_count": 10,
+  "generated_at": "2026-06-04T18:49:20.424178+00:00",
+  "current_head": "8d9d996",
+  "module_count": 11,
   "modules": [
     {
       "module_name": "venue_stress_layer",
@@ -154,6 +154,27 @@
       "betting_recommendation": false,
       "data_status": "starting_xi_status=NOT_AVAILABLE; matchday_lineup_status=WAIT_OFFICIAL_LINEUP",
       "next_action": "Wait for official matchday lineup source before any lineup readiness update."
+    },
+    {
+      "module_name": "match_card_104_canonical_index",
+      "status": "READY",
+      "source_files": [
+        "data/manual_sources/v3_worldcup/war_room/v3_wc2026_104_cards_index_bridge.json",
+        "data/manual_sources/v3_worldcup/war_room/v3_wc2026_104_cards_index_bridge_summary.json",
+        "data/manual_sources/v3_worldcup/war_room/v3_wc_match_cards.json"
+      ],
+      "source_files_exist": true,
+      "checker": "tools/check_v3_worldcup_104_cards_index_bridge.py",
+      "observation_only": true,
+      "affects_v4": false,
+      "betting_recommendation": false,
+      "data_status": "canonical_cards=104; group_view=72; knockout_slots=32",
+      "next_action": "Read the 104 canonical index as the full tournament source; use the 72-card file only as group-stage view.",
+      "canonical_source": "data/manual_sources/v3_worldcup/war_room/v3_wc2026_104_cards_index_bridge.json",
+      "group_stage_view": "data/manual_sources/v3_worldcup/war_room/v3_wc_match_cards.json",
+      "expected_total_cards": 104,
+      "group_stage_view_count": 72,
+      "double_read_guard": "READ_CANONICAL_104_OR_GROUP_VIEW_72_NOT_BOTH_AS_COMPLETE"
     }
   ],
   "global_safety": {
@@ -179,6 +200,7 @@
     "final_26_squad_pack": "PASS",
     "final_26_squad_profile": "PASS",
     "wc10_war_room": "PASS",
-    "lineup_readiness_pending": "PASS"
+    "lineup_readiness_pending": "PASS",
+    "match_card_104_canonical_index": "PASS"
   }
 }

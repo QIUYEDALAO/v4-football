@@ -1,0 +1,32 @@
+{
+  "pack_name": "V3_WC_2026_104_CARDS_INDEX_BRIDGE_PACK",
+  "generated_at": "2026-06-04T18:49:20.279490+00:00",
+  "current_head": "8d9d996",
+  "canonical_source": "data/manual_sources/v3_worldcup/war_room/v3_wc2026_104_cards_index_bridge.json",
+  "schedule_index": "data/manual_sources/v3_worldcup/war_room/v3_wc2026_schedule_index_104.json",
+  "group_stage_view": "data/manual_sources/v3_worldcup/war_room/v3_wc_match_cards.json",
+  "total_expected_match_count": 104,
+  "canonical_card_count": 104,
+  "group_stage_match_count": 72,
+  "knockout_slot_count": 32,
+  "group_stage_source_match_count": 72,
+  "knockout_team_generated_count": 0,
+  "venue_generated_count": 0,
+  "full_tournament_canonical_source": true,
+  "group_stage_view_preserved": true,
+  "double_read_guard": {
+    "canonical_reader": "data/manual_sources/v3_worldcup/war_room/v3_wc2026_104_cards_index_bridge.json",
+    "group_stage_view_reader": "data/manual_sources/v3_worldcup/war_room/v3_wc_match_cards.json",
+    "do_not_merge_canonical_and_group_view": true,
+    "group_view_is_subset_of_canonical": true,
+    "duplicate_read_guard": "READ_CANONICAL_104_OR_GROUP_VIEW_72_NOT_BOTH_AS_COMPLETE"
+  },
+  "safety": {
+    "observation_only": true,
+    "no_starting_xi_generated": true,
+    "no_prediction": true,
+    "no_injury_judgment": true,
+    "betting_recommendation": false,
+    "affects_v4": false
+  }
+}
