@@ -1,0 +1,91 @@
+{
+  "pack_name": "V3_WC_STARTING_XI_FORMATION_OBSERVATION_PACK",
+  "phase": "PHASE_1_SOURCE_AND_SCHEMA_DESIGN_FREEZE",
+  "tournament": "FIFA World Cup 2026",
+  "schema_status": "DESIGN_FROZEN_OBSERVATION_ONLY",
+  "source_strategy": {
+    "final_26_canonical_source": {
+      "path": "data/manual_sources/v3_worldcup/squads/fifa_final_26/processed/v3_wc2026_final_26_players.json",
+      "source_trust_level": "OFFICIAL_FIFA_FINAL_26",
+      "source_status": "AVAILABLE_CANONICAL"
+    },
+    "historical_formation_source": {
+      "path": "data/v3_worldcup/tactical_profile/v3_worldcup_tactical_profile_layer_20260604.json",
+      "source_trust_level": "HISTORICAL_OBSERVATION_LAYER",
+      "source_status": "AVAILABLE_OBSERVATION_ONLY"
+    },
+    "matchday_lineup_future_source": {
+      "path": "future_matchday_official_lineup_feed_not_ingested",
+      "source_trust_level": "FUTURE_OFFICIAL_MATCHDAY_ONLY",
+      "source_status": "NOT_AVAILABLE_PHASE_1"
+    },
+    "tactical_profile_source": {
+      "path": "data/v3_worldcup/tactical_profile/v3_worldcup_tactical_profile_layer_20260604.json",
+      "source_trust_level": "TACTICAL_PROFILE_OBSERVATION",
+      "source_status": "AVAILABLE_OBSERVATION_ONLY"
+    },
+    "source_trust_level": "OBSERVATION_FRAMEWORK_ONLY",
+    "source_status": "SCHEMA_READY_NO_LINEUP_OUTPUT"
+  },
+  "team_observation_schema": {
+    "team": "string",
+    "team_slug": "string",
+    "final_26_player_count": "integer",
+    "fifa_position_distribution": {
+      "GK": "integer",
+      "DF": "integer",
+      "MF": "integer",
+      "FW": "integer"
+    },
+    "historical_formations_observed": "array[string]",
+    "most_common_historical_formations": "array[object]",
+    "formation_data_status": "FORMATION_DATA_AVAILABLE | FORMATION_DATA_INSUFFICIENT",
+    "likely_role_pool_status": "ROLE_POOL_OBSERVATION_NOT_LINEUP",
+    "starting_xi_status": "NOT_GENERATED_SCHEMA_ONLY",
+    "matchday_lineup_status": "NOT_AVAILABLE_PHASE_1",
+    "observation_only": true,
+    "no_starting_xi_generated": true,
+    "no_injury_judgment": true,
+    "no_prediction": true,
+    "betting_recommendation": false,
+    "affects_v4": false
+  },
+  "player_role_pool_schema": {
+    "player_id": "string",
+    "team": "string",
+    "squad_number": "string",
+    "fifa_position": "GK | DF | MF | FW",
+    "role_group": "OBSERVED_ROLE_GROUP_ONLY",
+    "role_confidence": "LOW | MEDIUM | HIGH | DATA_INSUFFICIENT",
+    "source": "final_26_canonical_plus_observation_source",
+    "observation_note": "string",
+    "not_starting_xi": true,
+    "observation_only": true
+  },
+  "formation_observation_schema": {
+    "team": "string",
+    "observed_formation": "string",
+    "source_year": "integer|string",
+    "sample_count": "integer",
+    "source_status": "HISTORICAL_OBSERVATION_ONLY",
+    "confidence_level": "LOW | MEDIUM | HIGH | DATA_INSUFFICIENT",
+    "observation_note": "string",
+    "no_prediction": true
+  },
+  "safety": {
+    "observation_only": true,
+    "no_starting_xi_generated": true,
+    "no_injury_judgment": true,
+    "no_prediction": true,
+    "betting_recommendation": false,
+    "affects_v4": false
+  },
+  "prohibited_outputs": [
+    "starting_eleven_players",
+    "injury_status_assessment",
+    "suspension_status_assessment",
+    "match_prediction",
+    "recommendation_output",
+    "wagering_signal"
+  ]
+}
