@@ -140,7 +140,11 @@ def main() -> int:
     add(failures, match_card_module.get("canonical_source") == "data/manual_sources/v3_worldcup/war_room/v3_wc2026_104_cards_index_bridge.json", "match_card_104_canonical_source_unexpected", match_card_module.get("canonical_source"))
     add(failures, match_card_module.get("group_stage_view") == "data/manual_sources/v3_worldcup/war_room/v3_wc_match_cards.json", "match_card_group_view_unexpected", match_card_module.get("group_stage_view"))
     add(failures, match_card_module.get("expected_total_cards") == 104, "match_card_expected_total_unexpected", match_card_module.get("expected_total_cards"))
+    add(failures, match_card_module.get("canonical_card_count") == 104, "match_card_canonical_count_unexpected", match_card_module.get("canonical_card_count"))
     add(failures, match_card_module.get("group_stage_view_count") == 72, "match_card_group_view_count_unexpected", match_card_module.get("group_stage_view_count"))
+    add(failures, match_card_module.get("knockout_slot_count") == 32, "match_card_knockout_slot_count_unexpected", match_card_module.get("knockout_slot_count"))
+    add(failures, match_card_module.get("full_tournament_match_data_complete") is False, "match_card_full_tournament_complete_unexpected", match_card_module.get("full_tournament_match_data_complete"))
+    add(failures, match_card_module.get("knockout_slot_policy") == "STRUCTURAL_ONLY_NO_TEAM_GENERATED", "match_card_knockout_slot_policy_unexpected", match_card_module.get("knockout_slot_policy"))
     add(failures, match_card_module.get("double_read_guard") == "READ_CANONICAL_104_OR_GROUP_VIEW_72_NOT_BOTH_AS_COMPLETE", "match_card_double_read_guard_missing", match_card_module.get("double_read_guard"))
 
     for key, expected in EXPECTED_SAFETY.items():

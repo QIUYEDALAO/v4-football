@@ -1,7 +1,7 @@
 {
   "pack_name": "V3_WC_WAR_ROOM_MASTER_INDEX_PACK",
-  "generated_at": "2026-06-04T18:49:20.424178+00:00",
-  "current_head": "8d9d996",
+  "generated_at": "2026-06-04T18:52:41.800177+00:00",
+  "current_head": "466c727",
   "module_count": 11,
   "modules": [
     {
@@ -173,7 +173,11 @@
       "canonical_source": "data/manual_sources/v3_worldcup/war_room/v3_wc2026_104_cards_index_bridge.json",
       "group_stage_view": "data/manual_sources/v3_worldcup/war_room/v3_wc_match_cards.json",
       "expected_total_cards": 104,
+      "canonical_card_count": 104,
       "group_stage_view_count": 72,
+      "knockout_slot_count": 32,
+      "full_tournament_match_data_complete": false,
+      "knockout_slot_policy": "STRUCTURAL_ONLY_NO_TEAM_GENERATED",
       "double_read_guard": "READ_CANONICAL_104_OR_GROUP_VIEW_72_NOT_BOTH_AS_COMPLETE"
     }
   ],
