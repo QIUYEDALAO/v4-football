@@ -1,0 +1,36 @@
+{
+  "team_count": 48,
+  "total_players": 1248,
+  "expected_team_count": 48,
+  "expected_total_players": 1248,
+  "teams_with_26_players": 48,
+  "teams_not_26_players": [],
+  "duplicate_player_id_count": 0,
+  "missing_required_field_counts": {
+    "team": 0,
+    "team_slug": 0,
+    "player_id": 0,
+    "squad_number": 0,
+    "position": 0,
+    "first_name": 0,
+    "last_name": 0,
+    "full_name": 0,
+    "shirt_name": 0,
+    "birth_date": 0,
+    "club": 0,
+    "height_cm": 0,
+    "head_coach": 0
+  },
+  "position_distribution": {
+    "GK": 145,
+    "DF": 421,
+    "MF": 371,
+    "FW": 311
+  },
+  "height_parse_warn_count": 0,
+  "birth_date_parse_warn_count": 0,
+  "source_docx": "/Users/liudehua/.openclaw/workspace/v2_football_quant/data/manual_sources/v3_worldcup/squads/fifa_final_26/raw/fifa_wc2026_final_26_squads_official.docx",
+  "observation_only": true,
+  "betting_recommendation": false,
+  "affects_v4": false
+}
