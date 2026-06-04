@@ -66,6 +66,8 @@ async function load(){
     const matchPgSamples=a(m.match_level_perception_gap_dryrun_samples);
     const matchPgGuard=m.match_level_perception_gap_dryrun_safety_guard||{};
     const matchPgCases=m.match_level_perception_gap_dryrun_market_data_status_cases||{};
+    const tacticalFocus=a(m.tactical_profile_focus_profiles);
+    const tacticalGuard=m.tactical_profile_safety_guard||{};
     const under=a(m.undervalued_candidates), over=a(m.overhyped_risk_candidates);
     root.innerHTML = `
     <div class="card">
@@ -158,6 +160,25 @@ async function load(){
       <div class="note">market data path: ${a(m.match_level_perception_gap_dryrun_market_data_status_path).join(' -> ')||'CURRENT_MARKET_DATA_MISSING -> MARKET_DATA_PARTIAL -> MARKET_DATA_AVAILABLE'}</div>
       <div class="note">market data cases: missing=${n(matchPgCases.CURRENT_MARKET_DATA_MISSING,0)} / partial=${n(matchPgCases.MARKET_DATA_PARTIAL,0)} / available=${n(matchPgCases.MARKET_DATA_AVAILABLE,0)} · real_market_cache_used=${String(n(m.match_level_perception_gap_dryrun_real_market_cache_used,false))}</div>
       <div class="note">VENUE_UPSET_WATCH definition: ${n(m.match_level_perception_gap_dryrun_upset_watch_definition,'historical_data_insufficient_for_probability')}，不是冷门预测，不进入评分。</div>
+    </div>
+    <div class="card">
+      <div class="note">WC4G Formation Tactical Profile Observation</div>
+      <div class="grid">
+        <div class="mini"><span>status</span><b>${n(m.tactical_profile_status,'DATA_MISSING')}</b></div>
+        <div class="mini"><span>teams</span><b>${n(m.tactical_profile_team_count,0)} / 48</b></div>
+        <div class="mini"><span>real samples</span><b>${n(m.tactical_profile_real_sample_team_count,0)} / 24</b></div>
+        <div class="mini"><span>insufficient</span><b>${n(m.tactical_profile_data_insufficient_team_count,0)} / 24</b></div>
+        <div class="mini"><span>matchups</span><b>${n(m.tactical_profile_matchup_count,0)} / 72</b></div>
+        <div class="mini"><span>formations</span><b>${n(m.tactical_profile_unique_formations_count,0)} / 14</b></div>
+        <div class="mini"><span>no scoring</span><b>${String(n(tacticalGuard.no_scoring,true))}</b></div>
+        <div class="mini"><span>betting_recommendation</span><b>${String(n(tacticalGuard.betting_recommendation,false))}</b></div>
+        <div class="mini"><span>affects V4 grade</span><b>${String(n(tacticalGuard.affects_v4_grade,false))}</b></div>
+      </div>
+      <div class="note">观察标签：${a(m.tactical_profile_allowed_tags).join('、')||'LOW_BLOCK_WATCH、COUNTER_ATTACK_WATCH、OPEN_GAME_WATCH、HIGH_PRESS_FATIGUE_WATCH、MIDFIELD_CONGESTION_WATCH、FORMATION_DATA_INSUFFICIENT'}</div>
+      <div class="note warn">只展示战术画像观察层，不进入推荐，不进入评分，不影响 V4。</div>
+      <div class="grid">
+        ${(tacticalFocus.map(x=>`<div class="mini"><span>${n(x.team,'UNKNOWN')} · ${n(x.common_formation,'FORMATION_DATA_INSUFFICIENT')}</span><b>${a(x.tactical_tags).join(' / ')||'WATCH_ONLY'}</b><span>samples=${n(x.formation_sample_count,0)} · confidence=${n(x.observation_confidence,'DATA_INSUFFICIENT')} · quality=${n(x.data_quality,'NO_LINEUP_DATA')}</span><span>source=${n(x.formation_data_source,'DATA_MISSING')}</span></div>`).join('')||'<div class="note">暂无 tactical profile focus rows</div>')}
+      </div>
     </div>
     <div class="card">
       <div class="note">世界杯名单候选审查 / Candidate Review</div>

@@ -11,6 +11,7 @@ from typing import Any
 ROOT = Path(__file__).resolve().parents[1]
 OUT = ROOT / "data/runtime/status/check_v3_worldcup_wc10_war_room_20260602.json"
 BUILDER = ROOT / "tools/build_v3_worldcup_wc10_war_room.py"
+TACTICAL_BUILDER = ROOT / "tools/build_v3_worldcup_tactical_profile_layer.py"
 WAR = ROOT / "data/v3_worldcup/war_room/v3_worldcup_wc10_war_room_20260602.json"
 HTML = ROOT / "data/runtime/dashboard/v3_worldcup_wc10_war_room.html"
 
@@ -32,6 +33,8 @@ def add(checks: list[dict[str, Any]], name: str, ok: bool, detail: Any = "") -> 
 
 def main() -> int:
     checks: list[dict[str, Any]] = []
+    tactical_run = subprocess.run([sys.executable, str(TACTICAL_BUILDER)], cwd=str(ROOT), capture_output=True, text=True, check=False)
+    add(checks, "tactical_builder_runs", tactical_run.returncode == 0, tactical_run.stderr or tactical_run.stdout[-500:])
     run = subprocess.run([sys.executable, str(BUILDER)], cwd=str(ROOT), capture_output=True, text=True, check=False)
     add(checks, "builder_runs", run.returncode == 0, run.stderr or run.stdout[-500:])
     add(checks, "war_room_json_exists", WAR.exists(), str(WAR))
@@ -119,6 +122,15 @@ def main() -> int:
     add(checks, "match_level_pg_dryrun_market_cases", payload.get("match_level_perception_gap_dryrun_market_data_status_cases") == {"CURRENT_MARKET_DATA_MISSING": 1, "MARKET_DATA_PARTIAL": 3, "MARKET_DATA_AVAILABLE": 1}, payload.get("match_level_perception_gap_dryrun_market_data_status_cases"))
     add(checks, "match_level_pg_dryrun_real_market_not_used", payload.get("match_level_perception_gap_dryrun_real_market_cache_used") is False, payload.get("match_level_perception_gap_dryrun_real_market_cache_used"))
     add(checks, "match_level_pg_dryrun_samples_marked", all(x.get("dryrun_market_data_sample") is True and x.get("real_market_cache_used") is False for x in mlpg_samples), mlpg_samples[:2])
+    tactical_guard = payload.get("tactical_profile_safety_guard") if isinstance(payload.get("tactical_profile_safety_guard"), dict) else {}
+    add(checks, "tactical_profile_ready", payload.get("tactical_profile_status") == "TACTICAL_PROFILE_LAYER_READY", payload.get("tactical_profile_status"))
+    add(checks, "tactical_profile_48", int(payload.get("tactical_profile_team_count") or 0) == 48, payload.get("tactical_profile_team_count"))
+    add(checks, "tactical_profile_real_samples_24", int(payload.get("tactical_profile_real_sample_team_count") or 0) == 24, payload.get("tactical_profile_real_sample_team_count"))
+    add(checks, "tactical_profile_insufficient_24", int(payload.get("tactical_profile_data_insufficient_team_count") or 0) == 24, payload.get("tactical_profile_data_insufficient_team_count"))
+    add(checks, "tactical_profile_matchups_72", int(payload.get("tactical_profile_matchup_count") or 0) == 72, payload.get("tactical_profile_matchup_count"))
+    add(checks, "tactical_profile_unique_formations_14", int(payload.get("tactical_profile_unique_formations_count") or 0) == 14, payload.get("tactical_profile_unique_formations_count"))
+    add(checks, "tactical_profile_no_scoring", tactical_guard.get("observation_only") is True and tactical_guard.get("no_scoring") is True and tactical_guard.get("scoring_changed") is False, tactical_guard)
+    add(checks, "tactical_profile_no_betting", tactical_guard.get("betting_recommendation") is False, tactical_guard)
     hints = [str(x.get("action_hint") or "") for x in wl if isinstance(x, dict)]
     add(checks, "action_hint_whitelist", all(h in ALLOW_HINTS for h in hints), hints[:12])
     add(checks, "action_hint_no_bad", all(h not in BAD_HINTS for h in hints), hints[:12])

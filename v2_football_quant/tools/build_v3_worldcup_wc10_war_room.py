@@ -26,6 +26,7 @@ PERCEPTION_GAP_BLUEPRINT = ROOT / "data/v3_worldcup/perception_gap_blueprint/v3_
 VENUE_STRESS = ROOT / "data/v3_worldcup/venue_stress/v3_worldcup_venue_stress_20260603.json"
 MATCH_LEVEL_PG_DRYRUN_CSV = ROOT / "data/runtime/v3_worldcup/perception_gap_dryrun/v3_wc4d_match_level_perception_gap_dryrun_20260603.csv"
 MATCH_LEVEL_PG_DRYRUN_STATUS = ROOT / "data/runtime/v3_worldcup/perception_gap_dryrun/v3_wc4d_match_level_perception_gap_dryrun_status_20260603.json"
+TACTICAL_PROFILE_LAYER = ROOT / "data/v3_worldcup/tactical_profile/v3_worldcup_tactical_profile_layer_20260604.json"
 
 CST = timezone(timedelta(hours=8))
 
@@ -324,6 +325,50 @@ def _match_level_perception_gap_dryrun_view(csv_path: Path, status_path: Path) -
     }
 
 
+def _tactical_profile_view(payload: dict[str, Any]) -> dict[str, Any]:
+    if not payload:
+        return {
+            "tactical_profile_status": "TACTICAL_PROFILE_MISSING_WARN_ONLY",
+            "tactical_profile_team_count": 0,
+            "tactical_profile_real_sample_team_count": 0,
+            "tactical_profile_data_insufficient_team_count": 0,
+            "tactical_profile_matchup_count": 0,
+            "tactical_profile_unique_formations_count": 0,
+            "tactical_profile_allowed_tags": [],
+            "tactical_profile_focus_profiles": [],
+            "tactical_profile_safety_guard": {
+                "observation_only": True,
+                "no_scoring": True,
+                "betting_recommendation": False,
+                "affects_v4_grade": False,
+                "scoring_changed": False,
+            },
+        }
+    profiles = payload.get("profiles") if isinstance(payload.get("profiles"), list) else []
+    focus_names = ["Belgium", "France", "Brazil", "Spain", "England", "Mexico", "USA", "Uzbekistan"]
+    by_name = {str(p.get("team") or ""): p for p in profiles if isinstance(p, dict)}
+    guard = payload.get("safety_guard") if isinstance(payload.get("safety_guard"), dict) else {}
+    return {
+        "tactical_profile_status": payload.get("status") or "TACTICAL_PROFILE_LAYER_READY",
+        "tactical_profile_team_count": int(payload.get("teams_profiled_count") or len(profiles)),
+        "tactical_profile_real_sample_team_count": int(payload.get("teams_with_real_formation_samples") or 0),
+        "tactical_profile_data_insufficient_team_count": int(payload.get("teams_formation_data_insufficient") or 0),
+        "tactical_profile_matchup_count": int(payload.get("formation_matchup_samples_count") or 0),
+        "tactical_profile_unique_formations_count": int(payload.get("unique_formations_count") or 0),
+        "tactical_profile_unique_formations": payload.get("unique_formations") if isinstance(payload.get("unique_formations"), list) else [],
+        "tactical_profile_allowed_tags": payload.get("allowed_observation_tags") if isinstance(payload.get("allowed_observation_tags"), list) else [],
+        "tactical_profile_focus_profiles": [by_name[name] for name in focus_names if name in by_name],
+        "tactical_profile_safety_guard": {
+            "observation_only": guard.get("observation_only") is True,
+            "no_scoring": guard.get("no_scoring") is True,
+            "betting_recommendation": False,
+            "affects_v4_grade": False,
+            "scoring_changed": False,
+            "no_v4_changes": guard.get("no_v4_changes", True),
+        },
+    }
+
+
 def main() -> int:
     rosters = _load(ROSTERS)
     profiles = _load(PROFILES)
@@ -337,6 +382,7 @@ def main() -> int:
     historical_market = _load(HISTORICAL_MARKET_SUMMARY)
     perception_gap_blueprint = _load(PERCEPTION_GAP_BLUEPRINT)
     venue_stress = _load(VENUE_STRESS)
+    tactical_profile = _load(TACTICAL_PROFILE_LAYER)
 
     meta = rosters.get("meta") or {}
     teams_total = _safe_int(meta.get("total_teams") or 46)
@@ -436,6 +482,11 @@ def main() -> int:
         warn = "WC4D_MATCH_LEVEL_PERCEPTION_GAP_DRYRUN_MISSING_WARN_ONLY"
         if warn not in warn_only_items:
             warn_only_items.append(warn)
+    tactical_profile_view = _tactical_profile_view(tactical_profile)
+    if tactical_profile_view["tactical_profile_status"] != "TACTICAL_PROFILE_LAYER_READY":
+        warn = "WC4G_TACTICAL_PROFILE_MISSING_WARN_ONLY"
+        if warn not in warn_only_items:
+            warn_only_items.append(warn)
 
     now = datetime.now(CST)
     payload = {
@@ -481,6 +532,7 @@ def main() -> int:
         **perception_gap_blueprint_view,
         **venue_stress_view,
         **match_level_pg_dryrun_view,
+        **tactical_profile_view,
         "perception_gap_watchlist": watch_list,
         "perception_gap_watchlist_count": len(watch_list),
         "undervalued_candidates": undervalued,
