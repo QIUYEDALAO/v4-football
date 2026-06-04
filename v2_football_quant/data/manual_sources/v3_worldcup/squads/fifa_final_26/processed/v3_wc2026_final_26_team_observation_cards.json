@@ -1,0 +1,3986 @@
+[
+  {
+    "team": "Algeria",
+    "team_slug": "algeria",
+    "head_coach": "PETKOVIC Vladimir",
+    "player_count": 26,
+    "gk_count": 3,
+    "df_count": 9,
+    "mf_count": 7,
+    "fw_count": 7,
+    "avg_age": 26.86,
+    "median_age": 26.36,
+    "avg_height_cm": 182.65,
+    "min_height_cm": 170,
+    "max_height_cm": 194,
+    "club_count": 24,
+    "top_clubs": [
+      {
+        "club": "Lille OSC (FRA)",
+        "player_count": 2
+      },
+      {
+        "club": "USM Alger (ALG)",
+        "player_count": 2
+      },
+      {
+        "club": "FC Stade Nyonnais (SUI)",
+        "player_count": 1
+      },
+      {
+        "club": "Espérance De Tunisie (TUN)",
+        "player_count": 1
+      },
+      {
+        "club": "JS Kabylie (ALG)",
+        "player_count": 1
+      }
+    ],
+    "oldest_player": {
+      "player_id": "wc2026_algeria_07_mahrez_riyad",
+      "squad_number": "7",
+      "position": "FW",
+      "full_name": "MAHREZ Riyad",
+      "shirt_name": "MAHREZ",
+      "birth_date": "1991-02-21",
+      "club": "Al Ahli FC (KSA)",
+      "height_cm": 179
+    },
+    "youngest_player": {
+      "player_id": "wc2026_algeria_22_maza_ibrahim",
+      "squad_number": "22",
+      "position": "MF",
+      "full_name": "MAZA Ibrahim",
+      "shirt_name": "MAZA",
+      "birth_date": "2005-11-24",
+      "club": "Bayer Leverkusen (GER)",
+      "height_cm": 180
+    },
+    "tallest_player": {
+      "player_id": "wc2026_algeria_01_mastil_melvin",
+      "squad_number": "1",
+      "position": "GK",
+      "full_name": "MASTIL Melvin",
+      "shirt_name": "MASTIL",
+      "birth_date": "2000-02-19",
+      "club": "FC Stade Nyonnais (SUI)",
+      "height_cm": 194
+    },
+    "shortest_player": {
+      "player_id": "wc2026_algeria_18_amoura_mohamed",
+      "squad_number": "18",
+      "position": "FW",
+      "full_name": "AMOURA Mohamed",
+      "shirt_name": "AMOURA",
+      "birth_date": "2000-05-09",
+      "club": "VfL Wolfsburg (GER)",
+      "height_cm": 170
+    },
+    "observation_only": true,
+    "no_starting_xi": true,
+    "no_injury_judgment": true,
+    "betting_recommendation": false,
+    "affects_v4": false
+  },
+  {
+    "team": "Argentina",
+    "team_slug": "argentina",
+    "head_coach": "SCALONI Lionel",
+    "player_count": 26,
+    "gk_count": 3,
+    "df_count": 8,
+    "mf_count": 8,
+    "fw_count": 7,
+    "avg_age": 29.05,
+    "median_age": 28.18,
+    "avg_height_cm": 179.69,
+    "min_height_cm": 170,
+    "max_height_cm": 195,
+    "club_count": 18,
+    "top_clubs": [
+      {
+        "club": "Atlético De Madrid (ESP)",
+        "player_count": 6
+      },
+      {
+        "club": "Olympique Marseille (FRA)",
+        "player_count": 3
+      },
+      {
+        "club": "Inter Miami CF (USA)",
+        "player_count": 2
+      },
+      {
+        "club": "Olympique Lyonnais (FRA)",
+        "player_count": 1
+      },
+      {
+        "club": "CA River Plate (ARG)",
+        "player_count": 1
+      }
+    ],
+    "oldest_player": {
+      "player_id": "wc2026_argentina_10_messi_lionel",
+      "squad_number": "10",
+      "position": "FW",
+      "full_name": "MESSI Lionel",
+      "shirt_name": "MESSI",
+      "birth_date": "1987-06-24",
+      "club": "Inter Miami CF (USA)",
+      "height_cm": 170
+    },
+    "youngest_player": {
+      "player_id": "wc2026_argentina_18_paz_nico",
+      "squad_number": "18",
+      "position": "FW",
+      "full_name": "PAZ Nico",
+      "shirt_name": "NICO PAZ",
+      "birth_date": "2004-09-08",
+      "club": "Como (ITA)",
+      "height_cm": 185
+    },
+    "tallest_player": {
+      "player_id": "wc2026_argentina_23_martinez_emiliano",
+      "squad_number": "23",
+      "position": "GK",
+      "full_name": "MARTINEZ Emiliano",
+      "shirt_name": "E. MARTINEZ",
+      "birth_date": "1992-09-02",
+      "club": "Aston Villa FC (ENG)",
+      "height_cm": 195
+    },
+    "shortest_player": {
+      "player_id": "wc2026_argentina_09_alvarez_julian",
+      "squad_number": "9",
+      "position": "FW",
+      "full_name": "ALVAREZ Julian",
+      "shirt_name": "J. ALVAREZ",
+      "birth_date": "2000-01-31",
+      "club": "Atlético De Madrid (ESP)",
+      "height_cm": 170
+    },
+    "observation_only": true,
+    "no_starting_xi": true,
+    "no_injury_judgment": true,
+    "betting_recommendation": false,
+    "affects_v4": false
+  },
+  {
+    "team": "Australia",
+    "team_slug": "australia",
+    "head_coach": "POPOVIC Tony",
+    "player_count": 26,
+    "gk_count": 3,
+    "df_count": 10,
+    "mf_count": 5,
+    "fw_count": 8,
+    "avg_age": 27.36,
+    "median_age": 27.12,
+    "avg_height_cm": 183.58,
+    "min_height_cm": 165,
+    "max_height_cm": 198,
+    "club_count": 22,
+    "top_clubs": [
+      {
+        "club": "Melbourne City FC (AUS)",
+        "player_count": 3
+      },
+      {
+        "club": "FC St. Pauli (GER)",
+        "player_count": 2
+      },
+      {
+        "club": "New York City FC (USA)",
+        "player_count": 2
+      },
+      {
+        "club": "Levante UD (ESP)",
+        "player_count": 1
+      },
+      {
+        "club": "APOEL FC (CYP)",
+        "player_count": 1
+      }
+    ],
+    "oldest_player": {
+      "player_id": "wc2026_australia_16_behich_aziz",
+      "squad_number": "16",
+      "position": "DF",
+      "full_name": "BEHICH Aziz",
+      "shirt_name": "BEHICH",
+      "birth_date": "1990-12-16",
+      "club": "Melbourne City FC (AUS)",
+      "height_cm": 170
+    },
+    "youngest_player": {
+      "player_id": "wc2026_australia_25_herrington_lucas",
+      "squad_number": "25",
+      "position": "DF",
+      "full_name": "HERRINGTON Lucas",
+      "shirt_name": "HERRINGTON",
+      "birth_date": "2007-09-05",
+      "club": "Colorado Rapids (USA)",
+      "height_cm": 193
+    },
+    "tallest_player": {
+      "player_id": "wc2026_australia_19_souttar_harry",
+      "squad_number": "19",
+      "position": "DF",
+      "full_name": "SOUTTAR Harry",
+      "shirt_name": "SOUTTAR",
+      "birth_date": "1998-10-22",
+      "club": "Leicester City FC (ENG)",
+      "height_cm": 198
+    },
+    "shortest_player": {
+      "player_id": "wc2026_australia_17_irankunda_nestory",
+      "squad_number": "17",
+      "position": "FW",
+      "full_name": "IRANKUNDA Nestory",
+      "shirt_name": "IRANKUNDA",
+      "birth_date": "2006-02-09",
+      "club": "Watford FC (ENG)",
+      "height_cm": 165
+    },
+    "observation_only": true,
+    "no_starting_xi": true,
+    "no_injury_judgment": true,
+    "betting_recommendation": false,
+    "affects_v4": false
+  },
+  {
+    "team": "Austria",
+    "team_slug": "austria",
+    "head_coach": "RANGNICK Ralf",
+    "player_count": 26,
+    "gk_count": 3,
+    "df_count": 8,
+    "mf_count": 11,
+    "fw_count": 4,
+    "avg_age": 28.54,
+    "median_age": 28.81,
+    "avg_height_cm": 184.69,
+    "min_height_cm": 168,
+    "max_height_cm": 205,
+    "club_count": 21,
+    "top_clubs": [
+      {
+        "club": "RB Leipzig (GER)",
+        "player_count": 3
+      },
+      {
+        "club": "1. FSV Mainz 05 (GER)",
+        "player_count": 2
+      },
+      {
+        "club": "Borussia Dortmund (GER)",
+        "player_count": 2
+      },
+      {
+        "club": "SV Werder Bremen (GER)",
+        "player_count": 2
+      },
+      {
+        "club": "FC Red Bull Salzburg (AUT)",
+        "player_count": 1
+      }
+    ],
+    "oldest_player": {
+      "player_id": "wc2026_austria_07_arnautovic_marko",
+      "squad_number": "7",
+      "position": "FW",
+      "full_name": "ARNAUTOVIC Marko",
+      "shirt_name": "ARNAUTOVIC",
+      "birth_date": "1989-04-19",
+      "club": "FK Crvena Zvezda (SRB)",
+      "height_cm": 192
+    },
+    "youngest_player": {
+      "player_id": "wc2026_austria_24_wanner_paul",
+      "squad_number": "24",
+      "position": "MF",
+      "full_name": "WANNER Paul",
+      "shirt_name": "WANNER",
+      "birth_date": "2005-12-23",
+      "club": "PSV Eindhoven (NED)",
+      "height_cm": 185
+    },
+    "tallest_player": {
+      "player_id": "wc2026_austria_12_wiegele_florian",
+      "squad_number": "12",
+      "position": "GK",
+      "full_name": "WIEGELE Florian",
+      "shirt_name": "WIEGELE",
+      "birth_date": "2001-03-21",
+      "club": "FC Viktoria Plzeň (CZE)",
+      "height_cm": 205
+    },
+    "shortest_player": {
+      "player_id": "wc2026_austria_18_schmid_romano",
+      "squad_number": "18",
+      "position": "MF",
+      "full_name": "SCHMID Romano",
+      "shirt_name": "SCHMID",
+      "birth_date": "2000-01-27",
+      "club": "SV Werder Bremen (GER)",
+      "height_cm": 168
+    },
+    "observation_only": true,
+    "no_starting_xi": true,
+    "no_injury_judgment": true,
+    "betting_recommendation": false,
+    "affects_v4": false
+  },
+  {
+    "team": "Belgium",
+    "team_slug": "belgium",
+    "head_coach": "GARCIA Rudi",
+    "player_count": 26,
+    "gk_count": 3,
+    "df_count": 9,
+    "mf_count": 8,
+    "fw_count": 6,
+    "avg_age": 27.62,
+    "median_age": 25.76,
+    "avg_height_cm": 185.81,
+    "min_height_cm": 172,
+    "max_height_cm": 200,
+    "club_count": 18,
+    "top_clubs": [
+      {
+        "club": "Club Brugge (BEL)",
+        "player_count": 3
+      },
+      {
+        "club": "Lille OSC (FRA)",
+        "player_count": 3
+      },
+      {
+        "club": "SSC Napoli (ITA)",
+        "player_count": 2
+      },
+      {
+        "club": "Aston Villa FC (ENG)",
+        "player_count": 2
+      },
+      {
+        "club": "RC Strasbourg (FRA)",
+        "player_count": 2
+      }
+    ],
+    "oldest_player": {
+      "player_id": "wc2026_belgium_06_witsel_axel",
+      "squad_number": "6",
+      "position": "MF",
+      "full_name": "WITSEL Axel",
+      "shirt_name": "WITSEL",
+      "birth_date": "1989-01-12",
+      "club": "Girona FC (ESP)",
+      "height_cm": 186
+    },
+    "youngest_player": {
+      "player_id": "wc2026_belgium_13_penders_mike",
+      "squad_number": "13",
+      "position": "GK",
+      "full_name": "PENDERS Mike",
+      "shirt_name": "PENDERS",
+      "birth_date": "2005-07-31",
+      "club": "RC Strasbourg (FRA)",
+      "height_cm": 200
+    },
+    "tallest_player": {
+      "player_id": "wc2026_belgium_13_penders_mike",
+      "squad_number": "13",
+      "position": "GK",
+      "full_name": "PENDERS Mike",
+      "shirt_name": "PENDERS",
+      "birth_date": "2005-07-31",
+      "club": "RC Strasbourg (FRA)",
+      "height_cm": 200
+    },
+    "shortest_player": {
+      "player_id": "wc2026_belgium_10_trossard_leandro",
+      "squad_number": "10",
+      "position": "FW",
+      "full_name": "TROSSARD Leandro",
+      "shirt_name": "TROSSARD",
+      "birth_date": "1994-12-04",
+      "club": "Arsenal FC (ENG)",
+      "height_cm": 172
+    },
+    "observation_only": true,
+    "no_starting_xi": true,
+    "no_injury_judgment": true,
+    "betting_recommendation": false,
+    "affects_v4": false
+  },
+  {
+    "team": "Bosnia And Herzegovina",
+    "team_slug": "bosnia_and_herzegovina",
+    "head_coach": "BARBAREZ Sergej",
+    "player_count": 26,
+    "gk_count": 3,
+    "df_count": 8,
+    "mf_count": 8,
+    "fw_count": 7,
+    "avg_age": 26.42,
+    "median_age": 27.68,
+    "avg_height_cm": 187.23,
+    "min_height_cm": 175,
+    "max_height_cm": 201,
+    "club_count": 24,
+    "top_clubs": [
+      {
+        "club": "FC Schalke 04 (GER)",
+        "player_count": 2
+      },
+      {
+        "club": "HNK Rijeka (CRO)",
+        "player_count": 2
+      },
+      {
+        "club": "FC St. Pauli (GER)",
+        "player_count": 1
+      },
+      {
+        "club": "Gaziantep FK (TUR)",
+        "player_count": 1
+      },
+      {
+        "club": "UC Sampdoria (ITA)",
+        "player_count": 1
+      }
+    ],
+    "oldest_player": {
+      "player_id": "wc2026_bosnia_and_herzegovina_11_dzeko_edin",
+      "squad_number": "11",
+      "position": "FW",
+      "full_name": "DZEKO Edin",
+      "shirt_name": "DŽEKO",
+      "birth_date": "1986-03-17",
+      "club": "FC Schalke 04 (GER)",
+      "height_cm": 192
+    },
+    "youngest_player": {
+      "player_id": "wc2026_bosnia_and_herzegovina_12_jurkas_mladen",
+      "squad_number": "12",
+      "position": "GK",
+      "full_name": "JURKAS Mladen",
+      "shirt_name": "JURKAS",
+      "birth_date": "2007-10-07",
+      "club": "FK Borac Banja Luka (BIH)",
+      "height_cm": 193
+    },
+    "tallest_player": {
+      "player_id": "wc2026_bosnia_and_herzegovina_21_radeljic_stjepan",
+      "squad_number": "21",
+      "position": "DF",
+      "full_name": "RADELJIC Stjepan",
+      "shirt_name": "RADELJIĆ",
+      "birth_date": "1997-09-05",
+      "club": "HNK Rijeka (CRO)",
+      "height_cm": 201
+    },
+    "shortest_player": {
+      "player_id": "wc2026_bosnia_and_herzegovina_20_bajraktarevic_esmir",
+      "squad_number": "20",
+      "position": "FW",
+      "full_name": "BAJRAKTAREVIC Esmir",
+      "shirt_name": "BAJRAKTAREVIĆ",
+      "birth_date": "2005-03-10",
+      "club": "PSV Eindhoven (NED)",
+      "height_cm": 175
+    },
+    "observation_only": true,
+    "no_starting_xi": true,
+    "no_injury_judgment": true,
+    "betting_recommendation": false,
+    "affects_v4": false
+  },
+  {
+    "team": "Brazil",
+    "team_slug": "brazil",
+    "head_coach": "ANCELOTTI Carlo",
+    "player_count": 26,
+    "gk_count": 3,
+    "df_count": 9,
+    "mf_count": 5,
+    "fw_count": 9,
+    "avg_age": 29.2,
+    "median_age": 29.01,
+    "avg_height_cm": 182.77,
+    "min_height_cm": 172,
+    "max_height_cm": 193,
+    "club_count": 20,
+    "top_clubs": [
+      {
+        "club": "CR Flamengo (BRA)",
+        "player_count": 4
+      },
+      {
+        "club": "Arsenal FC (ENG)",
+        "player_count": 2
+      },
+      {
+        "club": "Manchester United FC (ENG)",
+        "player_count": 2
+      },
+      {
+        "club": "FC Zenit St. Petersburg (RUS)",
+        "player_count": 2
+      },
+      {
+        "club": "Liverpool FC (ENG)",
+        "player_count": 1
+      }
+    ],
+    "oldest_player": {
+      "player_id": "wc2026_brazil_12_weverton",
+      "squad_number": "12",
+      "position": "GK",
+      "full_name": "WEVERTON",
+      "shirt_name": "WEVERTON",
+      "birth_date": "1987-12-13",
+      "club": "Grêmio FBPA (BRA)",
+      "height_cm": 189
+    },
+    "youngest_player": {
+      "player_id": "wc2026_brazil_26_rayan",
+      "squad_number": "26",
+      "position": "FW",
+      "full_name": "RAYAN",
+      "shirt_name": "RAYAN",
+      "birth_date": "2006-08-03",
+      "club": "AFC Bournemouth (ENG)",
+      "height_cm": 187
+    },
+    "tallest_player": {
+      "player_id": "wc2026_brazil_01_alisson",
+      "squad_number": "1",
+      "position": "GK",
+      "full_name": "ALISSON",
+      "shirt_name": "A. BECKER",
+      "birth_date": "1992-10-02",
+      "club": "Liverpool FC (ENG)",
+      "height_cm": 193
+    },
+    "shortest_player": {
+      "player_id": "wc2026_brazil_19_endrick",
+      "squad_number": "19",
+      "position": "FW",
+      "full_name": "ENDRICK",
+      "shirt_name": "ENDRICK",
+      "birth_date": "2006-07-21",
+      "club": "Olympique Lyonnais (FRA)",
+      "height_cm": 172
+    },
+    "observation_only": true,
+    "no_starting_xi": true,
+    "no_injury_judgment": true,
+    "betting_recommendation": false,
+    "affects_v4": false
+  },
+  {
+    "team": "Cabo Verde",
+    "team_slug": "cabo_verde",
+    "head_coach": "BUBISTA",
+    "player_count": 26,
+    "gk_count": 3,
+    "df_count": 8,
+    "mf_count": 12,
+    "fw_count": 3,
+    "avg_age": 29.68,
+    "median_age": 29.29,
+    "avg_height_cm": 181.35,
+    "min_height_cm": 173,
+    "max_height_cm": 193,
+    "club_count": 26,
+    "top_clubs": [
+      {
+        "club": "GD Chaves (POR)",
+        "player_count": 1
+      },
+      {
+        "club": "SCU Torreense (POR)",
+        "player_count": 1
+      },
+      {
+        "club": "Al Bataeh Club (UAE)",
+        "player_count": 1
+      },
+      {
+        "club": "Shamrock Rovers FC (IRL)",
+        "player_count": 1
+      },
+      {
+        "club": "Villarreal CF (ESP)",
+        "player_count": 1
+      }
+    ],
+    "oldest_player": {
+      "player_id": "wc2026_cabo_verde_01_vozinha",
+      "squad_number": "1",
+      "position": "GK",
+      "full_name": "VOZINHA",
+      "shirt_name": "VOZINHA",
+      "birth_date": "1986-06-03",
+      "club": "GD Chaves (POR)",
+      "height_cm": 189
+    },
+    "youngest_player": {
+      "player_id": "wc2026_cabo_verde_24_wagner_pina",
+      "squad_number": "24",
+      "position": "DF",
+      "full_name": "WAGNER PINA",
+      "shirt_name": "WAGNER P.",
+      "birth_date": "2002-11-03",
+      "club": "Trabzonspor (TUR)",
+      "height_cm": 180
+    },
+    "tallest_player": {
+      "player_id": "wc2026_cabo_verde_25_kelvin_pires",
+      "squad_number": "25",
+      "position": "DF",
+      "full_name": "KELVIN PIRES",
+      "shirt_name": "KELVIN",
+      "birth_date": "2000-06-05",
+      "club": "SJK (FIN)",
+      "height_cm": 193
+    },
+    "shortest_player": {
+      "player_id": "wc2026_cabo_verde_11_garry_rodrigues",
+      "squad_number": "11",
+      "position": "MF",
+      "full_name": "GARRY RODRIGUES",
+      "shirt_name": "RODRIGUES",
+      "birth_date": "1990-11-27",
+      "club": "Apollon Limassol (CYP)",
+      "height_cm": 173
+    },
+    "observation_only": true,
+    "no_starting_xi": true,
+    "no_injury_judgment": true,
+    "betting_recommendation": false,
+    "affects_v4": false
+  },
+  {
+    "team": "Canada",
+    "team_slug": "canada",
+    "head_coach": "MARSCH Jesse",
+    "player_count": 26,
+    "gk_count": 3,
+    "df_count": 9,
+    "mf_count": 8,
+    "fw_count": 6,
+    "avg_age": 26.93,
+    "median_age": 26.62,
+    "avg_height_cm": 182.08,
+    "min_height_cm": 164,
+    "max_height_cm": 195,
+    "club_count": 22,
+    "top_clubs": [
+      {
+        "club": "LAFC (USA)",
+        "player_count": 3
+      },
+      {
+        "club": "Villarreal CF (ESP)",
+        "player_count": 2
+      },
+      {
+        "club": "Toronto FC (CAN)",
+        "player_count": 2
+      },
+      {
+        "club": "Inter Miami CF (USA)",
+        "player_count": 1
+      },
+      {
+        "club": "Celtic FC (SCO)",
+        "player_count": 1
+      }
+    ],
+    "oldest_player": {
+      "player_id": "wc2026_canada_21_osorio_jonathan",
+      "squad_number": "21",
+      "position": "MF",
+      "full_name": "OSORIO Jonathan",
+      "shirt_name": "OSORIO",
+      "birth_date": "1992-06-12",
+      "club": "Toronto FC (CAN)",
+      "height_cm": 175
+    },
+    "youngest_player": {
+      "player_id": "wc2026_canada_04_de_fougerolles_luc",
+      "squad_number": "4",
+      "position": "DF",
+      "full_name": "DE FOUGEROLLES Luc",
+      "shirt_name": "DE FOUGEROLLES",
+      "birth_date": "2005-10-12",
+      "club": "FCV Dender EH (BEL)",
+      "height_cm": 183
+    },
+    "tallest_player": {
+      "player_id": "wc2026_canada_24_david_promise",
+      "squad_number": "24",
+      "position": "FW",
+      "full_name": "DAVID Promise",
+      "shirt_name": "PROMISE",
+      "birth_date": "2001-07-03",
+      "club": "Royale Union Saint-Gilloise (BEL)",
+      "height_cm": 195
+    },
+    "shortest_player": {
+      "player_id": "wc2026_canada_26_flores_marcelo",
+      "squad_number": "26",
+      "position": "MF",
+      "full_name": "FLORES Marcelo",
+      "shirt_name": "MARCELO",
+      "birth_date": "2003-10-01",
+      "club": "Tigres UANL (MEX)",
+      "height_cm": 164
+    },
+    "observation_only": true,
+    "no_starting_xi": true,
+    "no_injury_judgment": true,
+    "betting_recommendation": false,
+    "affects_v4": false
+  },
+  {
+    "team": "Colombia",
+    "team_slug": "colombia",
+    "head_coach": "LORENZO Nestor",
+    "player_count": 26,
+    "gk_count": 3,
+    "df_count": 9,
+    "mf_count": 8,
+    "fw_count": 6,
+    "avg_age": 30.09,
+    "median_age": 29.7,
+    "avg_height_cm": 180,
+    "min_height_cm": 166,
+    "max_height_cm": 201,
+    "club_count": 24,
+    "top_clubs": [
+      {
+        "club": "Crystal Palace FC (ENG)",
+        "player_count": 2
+      },
+      {
+        "club": "CA River Plate (ARG)",
+        "player_count": 2
+      },
+      {
+        "club": "Atlético Nacional (COL)",
+        "player_count": 1
+      },
+      {
+        "club": "Bologna FC (ITA)",
+        "player_count": 1
+      },
+      {
+        "club": "CA Independiente (ARG)",
+        "player_count": 1
+      }
+    ],
+    "oldest_player": {
+      "player_id": "wc2026_colombia_01_ospina_david",
+      "squad_number": "1",
+      "position": "GK",
+      "full_name": "OSPINA David",
+      "shirt_name": "OSPINA",
+      "birth_date": "1988-08-31",
+      "club": "Atlético Nacional (COL)",
+      "height_cm": 183
+    },
+    "youngest_player": {
+      "player_id": "wc2026_colombia_14_puerta_gustavo",
+      "squad_number": "14",
+      "position": "DF",
+      "full_name": "PUERTA Gustavo",
+      "shirt_name": "PUERTA",
+      "birth_date": "2003-07-23",
+      "club": "Racing Santander (ESP)",
+      "height_cm": 173
+    },
+    "tallest_player": {
+      "player_id": "wc2026_colombia_24_montero_alvaro",
+      "squad_number": "24",
+      "position": "GK",
+      "full_name": "MONTERO Alvaro",
+      "shirt_name": "MONTERO",
+      "birth_date": "1995-03-29",
+      "club": "CA Vélez Sars eld (ARG)",
+      "height_cm": 201
+    },
+    "shortest_player": {
+      "player_id": "wc2026_colombia_21_campaz_jaminton",
+      "squad_number": "21",
+      "position": "FW",
+      "full_name": "CAMPAZ Jaminton",
+      "shirt_name": "CAMPAZ",
+      "birth_date": "2000-05-24",
+      "club": "CA Rosario Central (ARG)",
+      "height_cm": 166
+    },
+    "observation_only": true,
+    "no_starting_xi": true,
+    "no_injury_judgment": true,
+    "betting_recommendation": false,
+    "affects_v4": false
+  },
+  {
+    "team": "Congo DR",
+    "team_slug": "congo_dr",
+    "head_coach": "DESABRE Sebastien",
+    "player_count": 26,
+    "gk_count": 3,
+    "df_count": 8,
+    "mf_count": 8,
+    "fw_count": 7,
+    "avg_age": 29.07,
+    "median_age": 29.42,
+    "avg_height_cm": 181,
+    "min_height_cm": 165,
+    "max_height_cm": 196,
+    "club_count": 24,
+    "top_clubs": [
+      {
+        "club": "AEL FC (GRE)",
+        "player_count": 2
+      },
+      {
+        "club": "Lille OSC (FRA)",
+        "player_count": 2
+      },
+      {
+        "club": "Le Havre AC (FRA)",
+        "player_count": 1
+      },
+      {
+        "club": "West Ham United FC (ENG)",
+        "player_count": 1
+      },
+      {
+        "club": "Widzew Łódź (POL)",
+        "player_count": 1
+      }
+    ],
+    "oldest_player": {
+      "player_id": "wc2026_congo_dr_17_bakambu_cedric",
+      "squad_number": "17",
+      "position": "FW",
+      "full_name": "BAKAMBU Cedric",
+      "shirt_name": "BAKAMBU",
+      "birth_date": "1991-04-11",
+      "club": "Real Betis (ESP)",
+      "height_cm": 182
+    },
+    "youngest_player": {
+      "player_id": "wc2026_congo_dr_21_epolo_matthieu",
+      "squad_number": "21",
+      "position": "GK",
+      "full_name": "EPOLO Matthieu",
+      "shirt_name": "EPOLO",
+      "birth_date": "2005-01-15",
+      "club": "Standard Liège (BEL)",
+      "height_cm": 183
+    },
+    "tallest_player": {
+      "player_id": "wc2026_congo_dr_03_kapuadi_steve",
+      "squad_number": "3",
+      "position": "DF",
+      "full_name": "KAPUADI Steve",
+      "shirt_name": "KAPUADI",
+      "birth_date": "1998-04-30",
+      "club": "Widzew Łódź (POL)",
+      "height_cm": 196
+    },
+    "shortest_player": {
+      "player_id": "wc2026_congo_dr_14_sadiki_noah",
+      "squad_number": "14",
+      "position": "MF",
+      "full_name": "SADIKI Noah",
+      "shirt_name": "SADIKI",
+      "birth_date": "2004-12-17",
+      "club": "Sunderland AFC (ENG)",
+      "height_cm": 165
+    },
+    "observation_only": true,
+    "no_starting_xi": true,
+    "no_injury_judgment": true,
+    "betting_recommendation": false,
+    "affects_v4": false
+  },
+  {
+    "team": "Croatia",
+    "team_slug": "croatia",
+    "head_coach": "DALIC Zlatko",
+    "player_count": 26,
+    "gk_count": 3,
+    "df_count": 8,
+    "mf_count": 9,
+    "fw_count": 6,
+    "avg_age": 28.33,
+    "median_age": 28.26,
+    "avg_height_cm": 184.77,
+    "min_height_cm": 172,
+    "max_height_cm": 194,
+    "club_count": 24,
+    "top_clubs": [
+      {
+        "club": "Manchester City FC (ENG)",
+        "player_count": 2
+      },
+      {
+        "club": "Real Sociedad (ESP)",
+        "player_count": 2
+      },
+      {
+        "club": "GNK Dinamo Zagreb (CRO)",
+        "player_count": 1
+      },
+      {
+        "club": "FC Bayern München (GER)",
+        "player_count": 1
+      },
+      {
+        "club": "ACF Fiorentina (ITA)",
+        "player_count": 1
+      }
+    ],
+    "oldest_player": {
+      "player_id": "wc2026_croatia_10_modric_luka",
+      "squad_number": "10",
+      "position": "MF",
+      "full_name": "MODRIC Luka",
+      "shirt_name": "MODRIĆ",
+      "birth_date": "1985-09-09",
+      "club": "AC Milan (ITA)",
+      "height_cm": 172
+    },
+    "youngest_player": {
+      "player_id": "wc2026_croatia_22_vuskovic_luka",
+      "squad_number": "22",
+      "position": "DF",
+      "full_name": "VUSKOVIC Luka",
+      "shirt_name": "VUŠKOVIĆ",
+      "birth_date": "2007-02-24",
+      "club": "Hamburger SV (GER)",
+      "height_cm": 193
+    },
+    "tallest_player": {
+      "player_id": "wc2026_croatia_20_matanovic_igor",
+      "squad_number": "20",
+      "position": "FW",
+      "full_name": "MATANOVIC Igor",
+      "shirt_name": "MATANOVIĆ",
+      "birth_date": "2003-03-31",
+      "club": "SC Freiburg (GER)",
+      "height_cm": 194
+    },
+    "shortest_player": {
+      "player_id": "wc2026_croatia_10_modric_luka",
+      "squad_number": "10",
+      "position": "MF",
+      "full_name": "MODRIC Luka",
+      "shirt_name": "MODRIĆ",
+      "birth_date": "1985-09-09",
+      "club": "AC Milan (ITA)",
+      "height_cm": 172
+    },
+    "observation_only": true,
+    "no_starting_xi": true,
+    "no_injury_judgment": true,
+    "betting_recommendation": false,
+    "affects_v4": false
+  },
+  {
+    "team": "Curaçao",
+    "team_slug": "curacao",
+    "head_coach": "ADVOCAAT Dick",
+    "player_count": 26,
+    "gk_count": 3,
+    "df_count": 8,
+    "mf_count": 7,
+    "fw_count": 8,
+    "avg_age": 28.02,
+    "median_age": 27.1,
+    "avg_height_cm": 181.92,
+    "min_height_cm": 164,
+    "max_height_cm": 193,
+    "club_count": 22,
+    "top_clubs": [
+      {
+        "club": "Miami FC (USA)",
+        "player_count": 2
+      },
+      {
+        "club": "RKC Waalwijk (NED)",
+        "player_count": 2
+      },
+      {
+        "club": "FC Volendam (NED)",
+        "player_count": 2
+      },
+      {
+        "club": "SC Telstar (NED)",
+        "player_count": 2
+      },
+      {
+        "club": "Sparta Rotterdam (NED)",
+        "player_count": 1
+      }
+    ],
+    "oldest_player": {
+      "player_id": "wc2026_curacao_01_room_eloy",
+      "squad_number": "1",
+      "position": "GK",
+      "full_name": "ROOM Eloy",
+      "shirt_name": "ROOM",
+      "birth_date": "1989-02-06",
+      "club": "Miami FC (USA)",
+      "height_cm": 190
+    },
+    "youngest_player": {
+      "player_id": "wc2026_curacao_08_comenencia_livano",
+      "squad_number": "8",
+      "position": "MF",
+      "full_name": "COMENENCIA Livano",
+      "shirt_name": "COMENENCIA",
+      "birth_date": "2004-02-03",
+      "club": "FC Zürich (SUI)",
+      "height_cm": 185
+    },
+    "tallest_player": {
+      "player_id": "wc2026_curacao_09_locadia_juergen",
+      "squad_number": "9",
+      "position": "FW",
+      "full_name": "LOCADIA Juergen",
+      "shirt_name": "LOCADIA",
+      "birth_date": "1993-11-07",
+      "club": "Miami FC (USA)",
+      "height_cm": 193
+    },
+    "shortest_player": {
+      "player_id": "wc2026_curacao_11_antonisse_jeremy",
+      "squad_number": "11",
+      "position": "FW",
+      "full_name": "ANTONISSE Jeremy",
+      "shirt_name": "ANTONISSE",
+      "birth_date": "2002-03-29",
+      "club": "AE Ki sia FC (GRE)",
+      "height_cm": 164
+    },
+    "observation_only": true,
+    "no_starting_xi": true,
+    "no_injury_judgment": true,
+    "betting_recommendation": false,
+    "affects_v4": false
+  },
+  {
+    "team": "Czechia",
+    "team_slug": "czechia",
+    "head_coach": "KOUBEK Miroslav",
+    "player_count": 26,
+    "gk_count": 3,
+    "df_count": 9,
+    "mf_count": 7,
+    "fw_count": 7,
+    "avg_age": 27.62,
+    "median_age": 27.08,
+    "avg_height_cm": 185.73,
+    "min_height_cm": 169,
+    "max_height_cm": 199,
+    "club_count": 11,
+    "top_clubs": [
+      {
+        "club": "SK Slavia Praha (CZE)",
+        "player_count": 10
+      },
+      {
+        "club": "TSG Hoffenheim (GER)",
+        "player_count": 3
+      },
+      {
+        "club": "AC Sparta Praha (CZE)",
+        "player_count": 3
+      },
+      {
+        "club": "FC Viktoria Plzeň (CZE)",
+        "player_count": 3
+      },
+      {
+        "club": "PSV Eindhoven (NED)",
+        "player_count": 1
+      }
+    ],
+    "oldest_player": {
+      "player_id": "wc2026_czechia_08_darida_vladimir",
+      "squad_number": "8",
+      "position": "MF",
+      "full_name": "DARIDA Vladimir",
+      "shirt_name": "DARIDA",
+      "birth_date": "1990-08-08",
+      "club": "FC Hradec Králové (CZE)",
+      "height_cm": 172
+    },
+    "youngest_player": {
+      "player_id": "wc2026_czechia_25_sochurek_hugo",
+      "squad_number": "25",
+      "position": "MF",
+      "full_name": "SOCHUREK Hugo",
+      "shirt_name": "SOCHŮREK",
+      "birth_date": "2008-06-07",
+      "club": "AC Sparta Praha (CZE)",
+      "height_cm": 183
+    },
+    "tallest_player": {
+      "player_id": "wc2026_czechia_19_chory_tomas",
+      "squad_number": "19",
+      "position": "FW",
+      "full_name": "CHORY Tomas",
+      "shirt_name": "CHORÝ",
+      "birth_date": "1995-01-26",
+      "club": "SK Slavia Praha (CZE)",
+      "height_cm": 199
+    },
+    "shortest_player": {
+      "player_id": "wc2026_czechia_18_sadilek_michal",
+      "squad_number": "18",
+      "position": "MF",
+      "full_name": "SADILEK Michal",
+      "shirt_name": "SADÍLEK",
+      "birth_date": "1999-05-31",
+      "club": "SK Slavia Praha (CZE)",
+      "height_cm": 169
+    },
+    "observation_only": true,
+    "no_starting_xi": true,
+    "no_injury_judgment": true,
+    "betting_recommendation": false,
+    "affects_v4": false
+  },
+  {
+    "team": "Côte D'Ivoire",
+    "team_slug": "cote_d_ivoire",
+    "head_coach": "FAE Emerse",
+    "player_count": 26,
+    "gk_count": 3,
+    "df_count": 8,
+    "mf_count": 6,
+    "fw_count": 9,
+    "avg_age": 25.85,
+    "median_age": 25.37,
+    "avg_height_cm": 182.92,
+    "min_height_cm": 165,
+    "max_height_cm": 196,
+    "club_count": 25,
+    "top_clubs": [
+      {
+        "club": "Sporting Charleroi (BEL)",
+        "player_count": 2
+      },
+      {
+        "club": "Çaykur Rizespor (TUR)",
+        "player_count": 1
+      },
+      {
+        "club": "Sporting CP (POR)",
+        "player_count": 1
+      },
+      {
+        "club": "Gil Vicente FC (POR)",
+        "player_count": 1
+      },
+      {
+        "club": "NK Maribor (SVN)",
+        "player_count": 1
+      }
+    ],
+    "oldest_player": {
+      "player_id": "wc2026_cote_d_ivoire_04_seri_jean_michael",
+      "squad_number": "4",
+      "position": "MF",
+      "full_name": "SERI Jean Michael",
+      "shirt_name": "SERI",
+      "birth_date": "1991-07-19",
+      "club": "NK Maribor (SVN)",
+      "height_cm": 168
+    },
+    "youngest_player": {
+      "player_id": "wc2026_cote_d_ivoire_11_diomande_yan",
+      "squad_number": "11",
+      "position": "FW",
+      "full_name": "DIOMANDE Yan",
+      "shirt_name": "YAN DIOMANDE",
+      "birth_date": "2006-11-14",
+      "club": "RB Leipzig (GER)",
+      "height_cm": 180
+    },
+    "tallest_player": {
+      "player_id": "wc2026_cote_d_ivoire_23_lafont_alban",
+      "squad_number": "23",
+      "position": "GK",
+      "full_name": "LAFONT Alban",
+      "shirt_name": "LAFONT",
+      "birth_date": "1999-01-23",
+      "club": "Panathinaikos FC (GRE)",
+      "height_cm": 196
+    },
+    "shortest_player": {
+      "player_id": "wc2026_cote_d_ivoire_25_guiagon_parfait",
+      "squad_number": "25",
+      "position": "MF",
+      "full_name": "GUIAGON Parfait",
+      "shirt_name": "GUIAGON",
+      "birth_date": "2001-02-22",
+      "club": "Sporting Charleroi (BEL)",
+      "height_cm": 165
+    },
+    "observation_only": true,
+    "no_starting_xi": true,
+    "no_injury_judgment": true,
+    "betting_recommendation": false,
+    "affects_v4": false
+  },
+  {
+    "team": "Ecuador",
+    "team_slug": "ecuador",
+    "head_coach": "BECCACECE Sebastian",
+    "player_count": 26,
+    "gk_count": 3,
+    "df_count": 8,
+    "mf_count": 8,
+    "fw_count": 7,
+    "avg_age": 26.08,
+    "median_age": 25.68,
+    "avg_height_cm": 180.54,
+    "min_height_cm": 168,
+    "max_height_cm": 192,
+    "club_count": 23,
+    "top_clubs": [
+      {
+        "club": "Atlético Mineiro (BRA)",
+        "player_count": 3
+      },
+      {
+        "club": "CA Huracán (ARG)",
+        "player_count": 2
+      },
+      {
+        "club": "SC Internacional (BRA)",
+        "player_count": 1
+      },
+      {
+        "club": "Arsenal FC (ENG)",
+        "player_count": 1
+      },
+      {
+        "club": "Club Brugge (BEL)",
+        "player_count": 1
+      }
+    ],
+    "oldest_player": {
+      "player_id": "wc2026_ecuador_01_galindez_hernan",
+      "squad_number": "1",
+      "position": "GK",
+      "full_name": "GALINDEZ Hernan",
+      "shirt_name": "GALINDEZ",
+      "birth_date": "1987-03-30",
+      "club": "CA Huracán (ARG)",
+      "height_cm": 189
+    },
+    "youngest_player": {
+      "player_id": "wc2026_ecuador_10_paez_kendry",
+      "squad_number": "10",
+      "position": "MF",
+      "full_name": "PAEZ Kendry",
+      "shirt_name": "PAEZ",
+      "birth_date": "2007-05-04",
+      "club": "CA River Plate (ARG)",
+      "height_cm": 178
+    },
+    "tallest_player": {
+      "player_id": "wc2026_ecuador_25_porozo_jackson",
+      "squad_number": "25",
+      "position": "DF",
+      "full_name": "POROZO Jackson",
+      "shirt_name": "POROZO",
+      "birth_date": "2000-08-04",
+      "club": "Club Tijuana (MEX)",
+      "height_cm": 192
+    },
+    "shortest_player": {
+      "player_id": "wc2026_ecuador_05_alcivar_jordy",
+      "squad_number": "5",
+      "position": "MF",
+      "full_name": "ALCIVAR Jordy",
+      "shirt_name": "ALCIVAR",
+      "birth_date": "1999-08-05",
+      "club": "Independiente Del Valle (ECU)",
+      "height_cm": 168
+    },
+    "observation_only": true,
+    "no_starting_xi": true,
+    "no_injury_judgment": true,
+    "betting_recommendation": false,
+    "affects_v4": false
+  },
+  {
+    "team": "Egypt",
+    "team_slug": "egypt",
+    "head_coach": "HOSSAM HASSAN",
+    "player_count": 26,
+    "gk_count": 4,
+    "df_count": 8,
+    "mf_count": 7,
+    "fw_count": 7,
+    "avg_age": 29.06,
+    "median_age": 28.71,
+    "avg_height_cm": 181.19,
+    "min_height_cm": 170,
+    "max_height_cm": 195,
+    "club_count": 14,
+    "top_clubs": [
+      {
+        "club": "Al Ahly FC (EGY)",
+        "player_count": 8
+      },
+      {
+        "club": "Zamalek SC (EGY)",
+        "player_count": 3
+      },
+      {
+        "club": "Pyramids FC (EGY)",
+        "player_count": 3
+      },
+      {
+        "club": "ZED FC (EGY)",
+        "player_count": 2
+      },
+      {
+        "club": "Al Ain FC (UAE)",
+        "player_count": 1
+      }
+    ],
+    "oldest_player": {
+      "player_id": "wc2026_egypt_16_mahdy_soliman",
+      "squad_number": "16",
+      "position": "GK",
+      "full_name": "MAHDY SOLIMAN",
+      "shirt_name": "M. SOLIMAN",
+      "birth_date": "1987-06-08",
+      "club": "Zamalek SC (EGY)",
+      "height_cm": 189
+    },
+    "youngest_player": {
+      "player_id": "wc2026_egypt_09_hamza_abdelkarim",
+      "squad_number": "9",
+      "position": "FW",
+      "full_name": "HAMZA ABDELKARIM",
+      "shirt_name": "ABDELKARIM",
+      "birth_date": "2008-01-01",
+      "club": "FC Barcelona (ESP)",
+      "height_cm": 182
+    },
+    "tallest_player": {
+      "player_id": "wc2026_egypt_23_mostafa_shoubir",
+      "squad_number": "23",
+      "position": "GK",
+      "full_name": "MOSTAFA SHOUBIR",
+      "shirt_name": "SHOUBIR",
+      "birth_date": "2000-05-15",
+      "club": "Al Ahly FC (EGY)",
+      "height_cm": 195
+    },
+    "shortest_player": {
+      "player_id": "wc2026_egypt_21_mahmoud_saber",
+      "squad_number": "21",
+      "position": "MF",
+      "full_name": "MAHMOUD SABER",
+      "shirt_name": "M. SABER",
+      "birth_date": "2001-07-30",
+      "club": "ZED FC (EGY)",
+      "height_cm": 170
+    },
+    "observation_only": true,
+    "no_starting_xi": true,
+    "no_injury_judgment": true,
+    "betting_recommendation": false,
+    "affects_v4": false
+  },
+  {
+    "team": "England",
+    "team_slug": "england",
+    "head_coach": "TUCHEL Thomas",
+    "player_count": 26,
+    "gk_count": 3,
+    "df_count": 9,
+    "mf_count": 7,
+    "fw_count": 7,
+    "avg_age": 27.14,
+    "median_age": 26.21,
+    "avg_height_cm": 184.23,
+    "min_height_cm": 177,
+    "max_height_cm": 201,
+    "club_count": 16,
+    "top_clubs": [
+      {
+        "club": "Manchester City FC (ENG)",
+        "player_count": 4
+      },
+      {
+        "club": "Arsenal FC (ENG)",
+        "player_count": 4
+      },
+      {
+        "club": "Aston Villa FC (ENG)",
+        "player_count": 3
+      },
+      {
+        "club": "Newcastle United FC (ENG)",
+        "player_count": 3
+      },
+      {
+        "club": "Everton FC (ENG)",
+        "player_count": 1
+      }
+    ],
+    "oldest_player": {
+      "player_id": "wc2026_england_14_henderson_jordan",
+      "squad_number": "14",
+      "position": "MF",
+      "full_name": "HENDERSON Jordan",
+      "shirt_name": "J. HENDERSON",
+      "birth_date": "1990-06-17",
+      "club": "Brentford FC (ENG)",
+      "height_cm": 183
+    },
+    "youngest_player": {
+      "player_id": "wc2026_england_16_mainoo_kobbie",
+      "squad_number": "16",
+      "position": "MF",
+      "full_name": "MAINOO Kobbie",
+      "shirt_name": "MAINOO",
+      "birth_date": "2005-04-19",
+      "club": "Manchester United FC (ENG)",
+      "height_cm": 183
+    },
+    "tallest_player": {
+      "player_id": "wc2026_england_15_burn_dan",
+      "squad_number": "15",
+      "position": "DF",
+      "full_name": "BURN Dan",
+      "shirt_name": "BURN",
+      "birth_date": "1992-05-09",
+      "club": "Newcastle United FC (ENG)",
+      "height_cm": 201
+    },
+    "shortest_player": {
+      "player_id": "wc2026_england_03_oreilly_nico",
+      "squad_number": "3",
+      "position": "DF",
+      "full_name": "OREILLY Nico",
+      "shirt_name": "O'REILLY",
+      "birth_date": "2005-03-21",
+      "club": "Manchester City FC (ENG)",
+      "height_cm": 177
+    },
+    "observation_only": true,
+    "no_starting_xi": true,
+    "no_injury_judgment": true,
+    "betting_recommendation": false,
+    "affects_v4": false
+  },
+  {
+    "team": "France",
+    "team_slug": "france",
+    "head_coach": "DESCHAMPS Didier",
+    "player_count": 26,
+    "gk_count": 3,
+    "df_count": 9,
+    "mf_count": 7,
+    "fw_count": 7,
+    "avg_age": 27.0,
+    "median_age": 27.26,
+    "avg_height_cm": 184.92,
+    "min_height_cm": 171,
+    "max_height_cm": 194,
+    "club_count": 18,
+    "top_clubs": [
+      {
+        "club": "Paris Saint-Germain (FRA)",
+        "player_count": 5
+      },
+      {
+        "club": "FC Bayern München (GER)",
+        "player_count": 2
+      },
+      {
+        "club": "Real Madrid C. F. (ESP)",
+        "player_count": 2
+      },
+      {
+        "club": "AC Milan (ITA)",
+        "player_count": 2
+      },
+      {
+        "club": "Crystal Palace FC (ENG)",
+        "player_count": 2
+      }
+    ],
+    "oldest_player": {
+      "player_id": "wc2026_france_13_kante_ngolo",
+      "squad_number": "13",
+      "position": "MF",
+      "full_name": "KANTE Ngolo",
+      "shirt_name": "KANTE",
+      "birth_date": "1991-03-29",
+      "club": "Fenerbahçe SK (TUR)",
+      "height_cm": 171
+    },
+    "youngest_player": {
+      "player_id": "wc2026_france_18_zaire_emery_warren",
+      "squad_number": "18",
+      "position": "MF",
+      "full_name": "ZAIRE-EMERY Warren",
+      "shirt_name": "ZAIRE EMERY",
+      "birth_date": "2006-03-08",
+      "club": "Paris Saint-Germain (FRA)",
+      "height_cm": 176
+    },
+    "tallest_player": {
+      "player_id": "wc2026_france_15_konate_ibrahima",
+      "squad_number": "15",
+      "position": "DF",
+      "full_name": "KONATE Ibrahima",
+      "shirt_name": "KONATE",
+      "birth_date": "1999-05-25",
+      "club": "Liverpool FC (ENG)",
+      "height_cm": 194
+    },
+    "shortest_player": {
+      "player_id": "wc2026_france_13_kante_ngolo",
+      "squad_number": "13",
+      "position": "MF",
+      "full_name": "KANTE Ngolo",
+      "shirt_name": "KANTE",
+      "birth_date": "1991-03-29",
+      "club": "Fenerbahçe SK (TUR)",
+      "height_cm": 171
+    },
+    "observation_only": true,
+    "no_starting_xi": true,
+    "no_injury_judgment": true,
+    "betting_recommendation": false,
+    "affects_v4": false
+  },
+  {
+    "team": "Germany",
+    "team_slug": "germany",
+    "head_coach": "NAGELSMANN Julian",
+    "player_count": 26,
+    "gk_count": 3,
+    "df_count": 8,
+    "mf_count": 11,
+    "fw_count": 4,
+    "avg_age": 27.98,
+    "median_age": 27.57,
+    "avg_height_cm": 185.38,
+    "min_height_cm": 170,
+    "max_height_cm": 198,
+    "club_count": 13,
+    "top_clubs": [
+      {
+        "club": "FC Bayern München (GER)",
+        "player_count": 7
+      },
+      {
+        "club": "Borussia Dortmund (GER)",
+        "player_count": 4
+      },
+      {
+        "club": "VfB Stuttgart (GER)",
+        "player_count": 4
+      },
+      {
+        "club": "Newcastle United FC (ENG)",
+        "player_count": 2
+      },
+      {
+        "club": "Real Madrid C. F. (ESP)",
+        "player_count": 1
+      }
+    ],
+    "oldest_player": {
+      "player_id": "wc2026_germany_01_neuer_manuel",
+      "squad_number": "1",
+      "position": "GK",
+      "full_name": "NEUER Manuel",
+      "shirt_name": "NEUER",
+      "birth_date": "1986-03-27",
+      "club": "FC Bayern München (GER)",
+      "height_cm": 193
+    },
+    "youngest_player": {
+      "player_id": "wc2026_germany_25_karl_lennart",
+      "squad_number": "25",
+      "position": "MF",
+      "full_name": "KARL Lennart",
+      "shirt_name": "KARL",
+      "birth_date": "2008-02-22",
+      "club": "FC Bayern München (GER)",
+      "height_cm": 170
+    },
+    "tallest_player": {
+      "player_id": "wc2026_germany_11_woltemade_nick",
+      "squad_number": "11",
+      "position": "FW",
+      "full_name": "WOLTEMADE Nick",
+      "shirt_name": "WOLTEMADE",
+      "birth_date": "2002-02-14",
+      "club": "Newcastle United FC (ENG)",
+      "height_cm": 198
+    },
+    "shortest_player": {
+      "player_id": "wc2026_germany_25_karl_lennart",
+      "squad_number": "25",
+      "position": "MF",
+      "full_name": "KARL Lennart",
+      "shirt_name": "KARL",
+      "birth_date": "2008-02-22",
+      "club": "FC Bayern München (GER)",
+      "height_cm": 170
+    },
+    "observation_only": true,
+    "no_starting_xi": true,
+    "no_injury_judgment": true,
+    "betting_recommendation": false,
+    "affects_v4": false
+  },
+  {
+    "team": "Ghana",
+    "team_slug": "ghana",
+    "head_coach": "CARLOS QUEIROZ",
+    "player_count": 26,
+    "gk_count": 3,
+    "df_count": 9,
+    "mf_count": 6,
+    "fw_count": 8,
+    "avg_age": 26.98,
+    "median_age": 26.94,
+    "avg_height_cm": 182.62,
+    "min_height_cm": 172,
+    "max_height_cm": 197,
+    "club_count": 23,
+    "top_clubs": [
+      {
+        "club": "AJ Auxerre (FRA)",
+        "player_count": 3
+      },
+      {
+        "club": "Leicester City FC (ENG)",
+        "player_count": 2
+      },
+      {
+        "club": "FC St. Gallen (SUI)",
+        "player_count": 1
+      },
+      {
+        "club": "Stade Rennais FC (FRA)",
+        "player_count": 1
+      },
+      {
+        "club": "FC Nordsjælland (DEN)",
+        "player_count": 1
+      }
+    ],
+    "oldest_player": {
+      "player_id": "wc2026_ghana_09_ayew_jordan",
+      "squad_number": "9",
+      "position": "FW",
+      "full_name": "AYEW Jordan",
+      "shirt_name": "AYEW",
+      "birth_date": "1991-09-11",
+      "club": "Leicester City FC (ENG)",
+      "height_cm": 182
+    },
+    "youngest_player": {
+      "player_id": "wc2026_ghana_03_yirenkyi_caleb",
+      "squad_number": "3",
+      "position": "MF",
+      "full_name": "YIRENKYI Caleb",
+      "shirt_name": "CALEB",
+      "birth_date": "2006-01-15",
+      "club": "FC Nordsjælland (DEN)",
+      "height_cm": 182
+    },
+    "tallest_player": {
+      "player_id": "wc2026_ghana_18_opoku_jerome",
+      "squad_number": "18",
+      "position": "DF",
+      "full_name": "OPOKU Jerome",
+      "shirt_name": "OPOKU",
+      "birth_date": "1998-10-14",
+      "club": "Başakşehir FK (TUR)",
+      "height_cm": 197
+    },
+    "shortest_player": {
+      "player_id": "wc2026_ghana_13_baah_christopher_bonsu",
+      "squad_number": "13",
+      "position": "FW",
+      "full_name": "BAAH Christopher Bonsu",
+      "shirt_name": "BAAH",
+      "birth_date": "2004-12-14",
+      "club": "Al Qadsiah FC (KSA)",
+      "height_cm": 172
+    },
+    "observation_only": true,
+    "no_starting_xi": true,
+    "no_injury_judgment": true,
+    "betting_recommendation": false,
+    "affects_v4": false
+  },
+  {
+    "team": "Haiti",
+    "team_slug": "haiti",
+    "head_coach": "MIGNE Sebastien",
+    "player_count": 26,
+    "gk_count": 3,
+    "df_count": 8,
+    "mf_count": 6,
+    "fw_count": 9,
+    "avg_age": 27.58,
+    "median_age": 26.69,
+    "avg_height_cm": 181.38,
+    "min_height_cm": 170,
+    "max_height_cm": 194,
+    "club_count": 25,
+    "top_clubs": [
+      {
+        "club": "FC Vizela (POR)",
+        "player_count": 2
+      },
+      {
+        "club": "SC Bastia (FRA)",
+        "player_count": 1
+      },
+      {
+        "club": "Angers SCO (FRA)",
+        "player_count": 1
+      },
+      {
+        "club": "BSC Young Boys (SUI)",
+        "player_count": 1
+      },
+      {
+        "club": "LDU Quito (ECU)",
+        "player_count": 1
+      }
+    ],
+    "oldest_player": {
+      "player_id": "wc2026_haiti_01_placide_johny",
+      "squad_number": "1",
+      "position": "GK",
+      "full_name": "PLACIDE Johny",
+      "shirt_name": "PLACIDE",
+      "birth_date": "1988-01-29",
+      "club": "SC Bastia (FRA)",
+      "height_cm": 181
+    },
+    "youngest_player": {
+      "player_id": "wc2026_haiti_03_thermoncy_keeto",
+      "squad_number": "3",
+      "position": "DF",
+      "full_name": "THERMONCY Keeto",
+      "shirt_name": "THERMONCY",
+      "birth_date": "2006-03-29",
+      "club": "BSC Young Boys (SUI)",
+      "height_cm": 179
+    },
+    "tallest_player": {
+      "player_id": "wc2026_haiti_20_pierrot_frantzdy",
+      "squad_number": "20",
+      "position": "FW",
+      "full_name": "PIERROT Frantzdy",
+      "shirt_name": "PIERROT",
+      "birth_date": "1995-03-29",
+      "club": "Çaykur Rizespor (TUR)",
+      "height_cm": 194
+    },
+    "shortest_player": {
+      "player_id": "wc2026_haiti_10_bellegarde_jean_ricner",
+      "squad_number": "10",
+      "position": "MF",
+      "full_name": "BELLEGARDE Jean-Ricner",
+      "shirt_name": "BELLEGARDE",
+      "birth_date": "1998-06-27",
+      "club": "Wolverhampton Wanderers FC (ENG)",
+      "height_cm": 170
+    },
+    "observation_only": true,
+    "no_starting_xi": true,
+    "no_injury_judgment": true,
+    "betting_recommendation": false,
+    "affects_v4": false
+  },
+  {
+    "team": "IR Iran",
+    "team_slug": "ir_iran",
+    "head_coach": "GHALEHNOY Amir",
+    "player_count": 26,
+    "gk_count": 3,
+    "df_count": 9,
+    "mf_count": 8,
+    "fw_count": 6,
+    "avg_age": 30.33,
+    "median_age": 31.32,
+    "avg_height_cm": 183.65,
+    "min_height_cm": 166,
+    "max_height_cm": 195,
+    "club_count": 14,
+    "top_clubs": [
+      {
+        "club": "Tractor Sazi Tabriz FC (IRN)",
+        "player_count": 4
+      },
+      {
+        "club": "Persepolis FC (IRN)",
+        "player_count": 4
+      },
+      {
+        "club": "Esteghlal Tehran FC (IRN)",
+        "player_count": 3
+      },
+      {
+        "club": "Sepahan SC (IRN)",
+        "player_count": 3
+      },
+      {
+        "club": "Al Ittihad Kalba SCC (UAE)",
+        "player_count": 2
+      }
+    ],
+    "oldest_player": {
+      "player_id": "wc2026_ir_iran_04_khalilzadeh_shoja",
+      "squad_number": "4",
+      "position": "DF",
+      "full_name": "KHALILZADEH Shoja",
+      "shirt_name": "SHOJA",
+      "birth_date": "1989-05-14",
+      "club": "Tractor Sazi Tabriz FC (IRN)",
+      "height_cm": 183
+    },
+    "youngest_player": {
+      "player_id": "wc2026_ir_iran_26_razaghinia_amirmohammad",
+      "squad_number": "26",
+      "position": "MF",
+      "full_name": "RAZAGHINIA Amirmohammad",
+      "shirt_name": "RAZAGH",
+      "birth_date": "2006-04-11",
+      "club": "Esteghlal Tehran FC (IRN)",
+      "height_cm": 187
+    },
+    "tallest_player": {
+      "player_id": "wc2026_ir_iran_01_beiranvand_alireza",
+      "squad_number": "1",
+      "position": "GK",
+      "full_name": "BEIRANVAND Alireza",
+      "shirt_name": "BEIRANVAND",
+      "birth_date": "1992-09-21",
+      "club": "Tractor Sazi Tabriz FC (IRN)",
+      "height_cm": 195
+    },
+    "shortest_player": {
+      "player_id": "wc2026_ir_iran_10_ghayedi_mehdi",
+      "squad_number": "10",
+      "position": "FW",
+      "full_name": "GHAYEDI Mehdi",
+      "shirt_name": "MEHDI GHAYEDI",
+      "birth_date": "1998-12-05",
+      "club": "Al Nasr SC (UAE)",
+      "height_cm": 166
+    },
+    "observation_only": true,
+    "no_starting_xi": true,
+    "no_injury_judgment": true,
+    "betting_recommendation": false,
+    "affects_v4": false
+  },
+  {
+    "team": "Iraq",
+    "team_slug": "iraq",
+    "head_coach": "ARNOLD Graham",
+    "player_count": 26,
+    "gk_count": 3,
+    "df_count": 9,
+    "mf_count": 7,
+    "fw_count": 7,
+    "avg_age": 27.16,
+    "median_age": 26.04,
+    "avg_height_cm": 183.19,
+    "min_height_cm": 172,
+    "max_height_cm": 193,
+    "club_count": 20,
+    "top_clubs": [
+      {
+        "club": "Al Shorta SC (IRQ)",
+        "player_count": 4
+      },
+      {
+        "club": "Al Talaba SC (IRQ)",
+        "player_count": 3
+      },
+      {
+        "club": "Al Zawra'a SC (IRQ)",
+        "player_count": 2
+      },
+      {
+        "club": "Port FC (THA)",
+        "player_count": 1
+      },
+      {
+        "club": "Pogoń Szczecin (POL)",
+        "player_count": 1
+      }
+    ],
+    "oldest_player": {
+      "player_id": "wc2026_iraq_12_jalal_hassan",
+      "squad_number": "12",
+      "position": "GK",
+      "full_name": "JALAL HASSAN",
+      "shirt_name": "JALAL",
+      "birth_date": "1991-05-18",
+      "club": "Al Zawra'a SC (IRQ)",
+      "height_cm": 188
+    },
+    "youngest_player": {
+      "player_id": "wc2026_iraq_21_marko_farji",
+      "squad_number": "21",
+      "position": "FW",
+      "full_name": "MARKO FARJI",
+      "shirt_name": "MARKO",
+      "birth_date": "2004-03-16",
+      "club": "Venezia FC (ITA)",
+      "height_cm": 185
+    },
+    "tallest_player": {
+      "player_id": "wc2026_iraq_02_rebin_ghareeb",
+      "squad_number": "2",
+      "position": "DF",
+      "full_name": "REBIN GHAREEB",
+      "shirt_name": "REBIN",
+      "birth_date": "1992-04-12",
+      "club": "Port FC (THA)",
+      "height_cm": 193
+    },
+    "shortest_player": {
+      "player_id": "wc2026_iraq_07_youssef_amyn",
+      "squad_number": "7",
+      "position": "MF",
+      "full_name": "YOUSSEF AMYN",
+      "shirt_name": "YOUSSEF",
+      "birth_date": "2003-08-21",
+      "club": "AEK Larnaca FC (CYP)",
+      "height_cm": 172
+    },
+    "observation_only": true,
+    "no_starting_xi": true,
+    "no_injury_judgment": true,
+    "betting_recommendation": false,
+    "affects_v4": false
+  },
+  {
+    "team": "Japan",
+    "team_slug": "japan",
+    "head_coach": "MORIYASU Hajime",
+    "player_count": 26,
+    "gk_count": 3,
+    "df_count": 9,
+    "mf_count": 10,
+    "fw_count": 4,
+    "avg_age": 27.75,
+    "median_age": 27.44,
+    "avg_height_cm": 181.35,
+    "min_height_cm": 170,
+    "max_height_cm": 191,
+    "club_count": 23,
+    "top_clubs": [
+      {
+        "club": "Sint-Truiden VV (BEL)",
+        "player_count": 2
+      },
+      {
+        "club": "AFC Ajax (NED)",
+        "player_count": 2
+      },
+      {
+        "club": "Feyenoord Rotterdam (NED)",
+        "player_count": 2
+      },
+      {
+        "club": "Parma (ITA)",
+        "player_count": 1
+      },
+      {
+        "club": "SV Werder Bremen (GER)",
+        "player_count": 1
+      }
+    ],
+    "oldest_player": {
+      "player_id": "wc2026_japan_05_nagatomo_yuto",
+      "squad_number": "5",
+      "position": "DF",
+      "full_name": "NAGATOMO Yuto",
+      "shirt_name": "NAGATOMO",
+      "birth_date": "1986-09-12",
+      "club": "FC Tokyo (JPN)",
+      "height_cm": 170
+    },
+    "youngest_player": {
+      "player_id": "wc2026_japan_09_goto_keisuke",
+      "squad_number": "9",
+      "position": "FW",
+      "full_name": "GOTO Keisuke",
+      "shirt_name": "GOTO",
+      "birth_date": "2005-06-03",
+      "club": "Sint-Truiden VV (BEL)",
+      "height_cm": 191
+    },
+    "tallest_player": {
+      "player_id": "wc2026_japan_09_goto_keisuke",
+      "squad_number": "9",
+      "position": "FW",
+      "full_name": "GOTO Keisuke",
+      "shirt_name": "GOTO",
+      "birth_date": "2005-06-03",
+      "club": "Sint-Truiden VV (BEL)",
+      "height_cm": 191
+    },
+    "shortest_player": {
+      "player_id": "wc2026_japan_05_nagatomo_yuto",
+      "squad_number": "5",
+      "position": "DF",
+      "full_name": "NAGATOMO Yuto",
+      "shirt_name": "NAGATOMO",
+      "birth_date": "1986-09-12",
+      "club": "FC Tokyo (JPN)",
+      "height_cm": 170
+    },
+    "observation_only": true,
+    "no_starting_xi": true,
+    "no_injury_judgment": true,
+    "betting_recommendation": false,
+    "affects_v4": false
+  },
+  {
+    "team": "Jordan",
+    "team_slug": "jordan",
+    "head_coach": "SELLAMI Jamal",
+    "player_count": 26,
+    "gk_count": 3,
+    "df_count": 9,
+    "mf_count": 7,
+    "fw_count": 7,
+    "avg_age": 28.45,
+    "median_age": 28.87,
+    "avg_height_cm": 180.38,
+    "min_height_cm": 170,
+    "max_height_cm": 190,
+    "club_count": 15,
+    "top_clubs": [
+      {
+        "club": "Al Hussein SC (JOR)",
+        "player_count": 6
+      },
+      {
+        "club": "Al Faisaly SC (JOR)",
+        "player_count": 3
+      },
+      {
+        "club": "Al Karma SC (IRQ)",
+        "player_count": 2
+      },
+      {
+        "club": "Al Zawra'a SC (IRQ)",
+        "player_count": 2
+      },
+      {
+        "club": "Selangor FC (MAS)",
+        "player_count": 2
+      }
+    ],
+    "oldest_player": {
+      "player_id": "wc2026_jordan_17_saleem_obaid",
+      "squad_number": "17",
+      "position": "DF",
+      "full_name": "SALEEM OBAID",
+      "shirt_name": "SALEEM",
+      "birth_date": "1992-01-17",
+      "club": "Al Hussein SC (JOR)",
+      "height_cm": 187
+    },
+    "youngest_player": {
+      "player_id": "wc2026_jordan_18_ibrahim_sabra",
+      "squad_number": "18",
+      "position": "FW",
+      "full_name": "IBRAHIM SABRA",
+      "shirt_name": "SABRA",
+      "birth_date": "2006-02-01",
+      "club": "NK Lokomotiva Zagreb (CRO)",
+      "height_cm": 184
+    },
+    "tallest_player": {
+      "player_id": "wc2026_jordan_22_abdallah_alfakhori",
+      "squad_number": "22",
+      "position": "GK",
+      "full_name": "ABDALLAH ALFAKHORI",
+      "shirt_name": "ALFAKHORI",
+      "birth_date": "2000-01-22",
+      "club": "Al Wahdat SC (JOR)",
+      "height_cm": 190
+    },
+    "shortest_player": {
+      "player_id": "wc2026_jordan_07_mohammad_abuzraiq",
+      "squad_number": "7",
+      "position": "FW",
+      "full_name": "MOHAMMAD ABUZRAIQ",
+      "shirt_name": "ABU ZRAIQ",
+      "birth_date": "1997-12-30",
+      "club": "Raja Casablanca (MAR)",
+      "height_cm": 170
+    },
+    "observation_only": true,
+    "no_starting_xi": true,
+    "no_injury_judgment": true,
+    "betting_recommendation": false,
+    "affects_v4": false
+  },
+  {
+    "team": "Korea Republic",
+    "team_slug": "korea_republic",
+    "head_coach": "HONG Myungbo",
+    "player_count": 26,
+    "gk_count": 3,
+    "df_count": 9,
+    "mf_count": 11,
+    "fw_count": 3,
+    "avg_age": 28.07,
+    "median_age": 28.52,
+    "avg_height_cm": 181.92,
+    "min_height_cm": 173,
+    "max_height_cm": 196,
+    "club_count": 22,
+    "top_clubs": [
+      {
+        "club": "Jeonbuk Hyundai Motors FC (KOR)",
+        "player_count": 3
+      },
+      {
+        "club": "FC Midtjylland (DEN)",
+        "player_count": 2
+      },
+      {
+        "club": "Ulsan HD (KOR)",
+        "player_count": 2
+      },
+      {
+        "club": "FC Tokyo (JPN)",
+        "player_count": 1
+      },
+      {
+        "club": "Gangwon FC (KOR)",
+        "player_count": 1
+      }
+    ],
+    "oldest_player": {
+      "player_id": "wc2026_korea_republic_01_kim_seunggyu",
+      "squad_number": "1",
+      "position": "GK",
+      "full_name": "KIM Seunggyu",
+      "shirt_name": "SEUNGGYU",
+      "birth_date": "1990-09-30",
+      "club": "FC Tokyo (JPN)",
+      "height_cm": 187
+    },
+    "youngest_player": {
+      "player_id": "wc2026_korea_republic_17_bae_junho",
+      "squad_number": "17",
+      "position": "MF",
+      "full_name": "BAE Junho",
+      "shirt_name": "JUNHO",
+      "birth_date": "2003-08-21",
+      "club": "Stoke City FC (ENG)",
+      "height_cm": 180
+    },
+    "tallest_player": {
+      "player_id": "wc2026_korea_republic_12_song_bumkeun",
+      "squad_number": "12",
+      "position": "GK",
+      "full_name": "SONG Bumkeun",
+      "shirt_name": "BUMKEUN",
+      "birth_date": "1997-10-15",
+      "club": "Jeonbuk Hyundai Motors FC (KOR)",
+      "height_cm": 196
+    },
+    "shortest_player": {
+      "player_id": "wc2026_korea_republic_15_kim_moonhwan",
+      "squad_number": "15",
+      "position": "DF",
+      "full_name": "KIM Moonhwan",
+      "shirt_name": "MOONHWAN",
+      "birth_date": "1995-08-01",
+      "club": "Daejeon Hana Citizen FC (KOR)",
+      "height_cm": 173
+    },
+    "observation_only": true,
+    "no_starting_xi": true,
+    "no_injury_judgment": true,
+    "betting_recommendation": false,
+    "affects_v4": false
+  },
+  {
+    "team": "Mexico",
+    "team_slug": "mexico",
+    "head_coach": "AGUIRRE Javier",
+    "player_count": 26,
+    "gk_count": 3,
+    "df_count": 7,
+    "mf_count": 8,
+    "fw_count": 8,
+    "avg_age": 27.9,
+    "median_age": 28.52,
+    "avg_height_cm": 179.5,
+    "min_height_cm": 169,
+    "max_height_cm": 191,
+    "club_count": 21,
+    "top_clubs": [
+      {
+        "club": "CD Guadalajara (MEX)",
+        "player_count": 5
+      },
+      {
+        "club": "Deportivo Toluca FC (MEX)",
+        "player_count": 2
+      },
+      {
+        "club": "PAOK Saloniki (GRE)",
+        "player_count": 1
+      },
+      {
+        "club": "FC Lokomotiv Moscow (RUS)",
+        "player_count": 1
+      },
+      {
+        "club": "Fenerbahçe SK (TUR)",
+        "player_count": 1
+      }
+    ],
+    "oldest_player": {
+      "player_id": "wc2026_mexico_13_ochoa_guillermo",
+      "squad_number": "13",
+      "position": "GK",
+      "full_name": "OCHOA Guillermo",
+      "shirt_name": "G. OCHOA",
+      "birth_date": "1985-07-13",
+      "club": "AEL Limassol (CYP)",
+      "height_cm": 185
+    },
+    "youngest_player": {
+      "player_id": "wc2026_mexico_19_mora_gilberto",
+      "squad_number": "19",
+      "position": "MF",
+      "full_name": "MORA Gilberto",
+      "shirt_name": "G. MORA",
+      "birth_date": "2008-10-14",
+      "club": "Club Tijuana (MEX)",
+      "height_cm": 175
+    },
+    "tallest_player": {
+      "player_id": "wc2026_mexico_03_montes_cesar",
+      "squad_number": "3",
+      "position": "DF",
+      "full_name": "MONTES Cesar",
+      "shirt_name": "C. MONTES",
+      "birth_date": "1997-02-24",
+      "club": "FC Lokomotiv Moscow (RUS)",
+      "height_cm": 191
+    },
+    "shortest_player": {
+      "player_id": "wc2026_mexico_17_pineda_orbelin",
+      "squad_number": "17",
+      "position": "MF",
+      "full_name": "PINEDA Orbelin",
+      "shirt_name": "ORBELÍN",
+      "birth_date": "1996-03-24",
+      "club": "AEK Athens (GRE)",
+      "height_cm": 169
+    },
+    "observation_only": true,
+    "no_starting_xi": true,
+    "no_injury_judgment": true,
+    "betting_recommendation": false,
+    "affects_v4": false
+  },
+  {
+    "team": "Morocco",
+    "team_slug": "morocco",
+    "head_coach": "OUAHBI Mohamed",
+    "player_count": 26,
+    "gk_count": 3,
+    "df_count": 9,
+    "mf_count": 9,
+    "fw_count": 5,
+    "avg_age": 26.39,
+    "median_age": 25.76,
+    "avg_height_cm": 182.65,
+    "min_height_cm": 170,
+    "max_height_cm": 194,
+    "club_count": 23,
+    "top_clubs": [
+      {
+        "club": "Real Betis (ESP)",
+        "player_count": 2
+      },
+      {
+        "club": "PSV Eindhoven (NED)",
+        "player_count": 2
+      },
+      {
+        "club": "RC Strasbourg (FRA)",
+        "player_count": 2
+      },
+      {
+        "club": "Al Hilal SC (KSA)",
+        "player_count": 1
+      },
+      {
+        "club": "Paris Saint-Germain (FRA)",
+        "player_count": 1
+      }
+    ],
+    "oldest_player": {
+      "player_id": "wc2026_morocco_12_el_kajoui_munir",
+      "squad_number": "12",
+      "position": "GK",
+      "full_name": "EL KAJOUI Munir",
+      "shirt_name": "EL KAJOUI",
+      "birth_date": "1989-05-10",
+      "club": "RS Berkane (MAR)",
+      "height_cm": 190
+    },
+    "youngest_player": {
+      "player_id": "wc2026_morocco_06_bouaddi_ayyoub",
+      "squad_number": "6",
+      "position": "MF",
+      "full_name": "BOUADDI Ayyoub",
+      "shirt_name": "BOUADDI",
+      "birth_date": "2007-10-02",
+      "club": "Lille OSC (FRA)",
+      "height_cm": 185
+    },
+    "tallest_player": {
+      "player_id": "wc2026_morocco_14_diop_issa",
+      "squad_number": "14",
+      "position": "DF",
+      "full_name": "DIOP Issa",
+      "shirt_name": "ISSA",
+      "birth_date": "1997-01-09",
+      "club": "Fulham FC (ENG)",
+      "height_cm": 194
+    },
+    "shortest_player": {
+      "player_id": "wc2026_morocco_10_diaz_brahim",
+      "squad_number": "10",
+      "position": "FW",
+      "full_name": "DIAZ Brahim",
+      "shirt_name": "BRAHIM",
+      "birth_date": "1999-08-03",
+      "club": "Real Madrid C. F. (ESP)",
+      "height_cm": 170
+    },
+    "observation_only": true,
+    "no_starting_xi": true,
+    "no_injury_judgment": true,
+    "betting_recommendation": false,
+    "affects_v4": false
+  },
+  {
+    "team": "Netherlands",
+    "team_slug": "netherlands",
+    "head_coach": "KOEMAN Ronald",
+    "player_count": 26,
+    "gk_count": 3,
+    "df_count": 8,
+    "mf_count": 8,
+    "fw_count": 7,
+    "avg_age": 27.74,
+    "median_age": 27.1,
+    "avg_height_cm": 184.92,
+    "min_height_cm": 172,
+    "max_height_cm": 197,
+    "club_count": 20,
+    "top_clubs": [
+      {
+        "club": "Brighton & Hove Albion FC (ENG)",
+        "player_count": 3
+      },
+      {
+        "club": "Liverpool FC (ENG)",
+        "player_count": 3
+      },
+      {
+        "club": "Manchester City FC (ENG)",
+        "player_count": 2
+      },
+      {
+        "club": "Sunderland AFC (ENG)",
+        "player_count": 2
+      },
+      {
+        "club": "Arsenal FC (ENG)",
+        "player_count": 1
+      }
+    ],
+    "oldest_player": {
+      "player_id": "wc2026_netherlands_03_de_roon_marten",
+      "squad_number": "3",
+      "position": "MF",
+      "full_name": "DE ROON Marten",
+      "shirt_name": "DE ROON",
+      "birth_date": "1991-03-29",
+      "club": "Atalanta Bergamo (ITA)",
+      "height_cm": 186
+    },
+    "youngest_player": {
+      "player_id": "wc2026_netherlands_25_hato_jorrel",
+      "squad_number": "25",
+      "position": "DF",
+      "full_name": "HATO Jorrel",
+      "shirt_name": "HATO",
+      "birth_date": "2006-03-07",
+      "club": "Chelsea FC (ENG)",
+      "height_cm": 182
+    },
+    "tallest_player": {
+      "player_id": "wc2026_netherlands_09_weghorst_wout",
+      "squad_number": "9",
+      "position": "FW",
+      "full_name": "WEGHORST Wout",
+      "shirt_name": "WEGHORST",
+      "birth_date": "1992-08-07",
+      "club": "AFC Ajax (NED)",
+      "height_cm": 197
+    },
+    "shortest_player": {
+      "player_id": "wc2026_netherlands_24_summerville_crysencio",
+      "squad_number": "24",
+      "position": "FW",
+      "full_name": "SUMMERVILLE Crysencio",
+      "shirt_name": "SUMMERVILLE",
+      "birth_date": "2001-10-30",
+      "club": "West Ham United FC (ENG)",
+      "height_cm": 172
+    },
+    "observation_only": true,
+    "no_starting_xi": true,
+    "no_injury_judgment": true,
+    "betting_recommendation": false,
+    "affects_v4": false
+  },
+  {
+    "team": "New Zealand",
+    "team_slug": "new_zealand",
+    "head_coach": "BAZELEY Darren",
+    "player_count": 26,
+    "gk_count": 3,
+    "df_count": 9,
+    "mf_count": 10,
+    "fw_count": 4,
+    "avg_age": 28.12,
+    "median_age": 27.12,
+    "avg_height_cm": 183.46,
+    "min_height_cm": 171,
+    "max_height_cm": 196,
+    "club_count": 20,
+    "top_clubs": [
+      {
+        "club": "Auckland FC (NZL)",
+        "player_count": 5
+      },
+      {
+        "club": "Wellington Phoenix FC (NZL)",
+        "player_count": 3
+      },
+      {
+        "club": "Millwall FC (ENG)",
+        "player_count": 1
+      },
+      {
+        "club": "She eld United FC (ENG)",
+        "player_count": 1
+      },
+      {
+        "club": "Minnesota United FC (USA)",
+        "player_count": 1
+      }
+    ],
+    "oldest_player": {
+      "player_id": "wc2026_new_zealand_05_boxall_michael",
+      "squad_number": "5",
+      "position": "DF",
+      "full_name": "BOXALL Michael",
+      "shirt_name": "BOXALL",
+      "birth_date": "1988-08-18",
+      "club": "Minnesota United FC (USA)",
+      "height_cm": 191
+    },
+    "youngest_player": {
+      "player_id": "wc2026_new_zealand_04_bindon_tyler",
+      "squad_number": "4",
+      "position": "DF",
+      "full_name": "BINDON Tyler",
+      "shirt_name": "BINDON",
+      "birth_date": "2005-01-27",
+      "club": "She eld United FC (ENG)",
+      "height_cm": 190
+    },
+    "tallest_player": {
+      "player_id": "wc2026_new_zealand_22_woud_michael",
+      "squad_number": "22",
+      "position": "GK",
+      "full_name": "WOUD Michael",
+      "shirt_name": "WOUD",
+      "birth_date": "1999-01-16",
+      "club": "Auckland FC (NZL)",
+      "height_cm": 196
+    },
+    "shortest_player": {
+      "player_id": "wc2026_new_zealand_17_barbarouses_kosta",
+      "squad_number": "17",
+      "position": "FW",
+      "full_name": "BARBAROUSES Kosta",
+      "shirt_name": "BARBAROUSES",
+      "birth_date": "1990-02-19",
+      "club": "WS Wanderers FC (AUS)",
+      "height_cm": 171
+    },
+    "observation_only": true,
+    "no_starting_xi": true,
+    "no_injury_judgment": true,
+    "betting_recommendation": false,
+    "affects_v4": false
+  },
+  {
+    "team": "Norway",
+    "team_slug": "norway",
+    "head_coach": "SOLBAKKEN Stale",
+    "player_count": 26,
+    "gk_count": 3,
+    "df_count": 8,
+    "mf_count": 10,
+    "fw_count": 5,
+    "avg_age": 26.8,
+    "median_age": 26.95,
+    "avg_height_cm": 187.15,
+    "min_height_cm": 177,
+    "max_height_cm": 198,
+    "club_count": 22,
+    "top_clubs": [
+      {
+        "club": "FK Bodø/Glimt (NOR)",
+        "player_count": 3
+      },
+      {
+        "club": "Fulham FC (ENG)",
+        "player_count": 2
+      },
+      {
+        "club": "SL Ben ca (POR)",
+        "player_count": 2
+      },
+      {
+        "club": "Sevilla FC (ESP)",
+        "player_count": 1
+      },
+      {
+        "club": "US Cremonese (ITA)",
+        "player_count": 1
+      }
+    ],
+    "oldest_player": {
+      "player_id": "wc2026_norway_01_nyland_orjan",
+      "squad_number": "1",
+      "position": "GK",
+      "full_name": "NYLAND Orjan",
+      "shirt_name": "NYLAND",
+      "birth_date": "1990-09-10",
+      "club": "Sevilla FC (ESP)",
+      "height_cm": 192
+    },
+    "youngest_player": {
+      "player_id": "wc2026_norway_20_nusa_antonio",
+      "squad_number": "20",
+      "position": "FW",
+      "full_name": "NUSA Antonio",
+      "shirt_name": "NUSA",
+      "birth_date": "2005-04-17",
+      "club": "RB Leipzig (GER)",
+      "height_cm": 183
+    },
+    "tallest_player": {
+      "player_id": "wc2026_norway_03_ajer_kristoffer",
+      "squad_number": "3",
+      "position": "DF",
+      "full_name": "AJER Kristoffer",
+      "shirt_name": "VASSBAKK AJER",
+      "birth_date": "1998-04-17",
+      "club": "Brentford FC (ENG)",
+      "height_cm": 198
+    },
+    "shortest_player": {
+      "player_id": "wc2026_norway_21_schjelderup_andreas",
+      "squad_number": "21",
+      "position": "MF",
+      "full_name": "SCHJELDERUP Andreas",
+      "shirt_name": "SCHJELDERUP",
+      "birth_date": "2004-06-01",
+      "club": "SL Ben ca (POR)",
+      "height_cm": 177
+    },
+    "observation_only": true,
+    "no_starting_xi": true,
+    "no_injury_judgment": true,
+    "betting_recommendation": false,
+    "affects_v4": false
+  },
+  {
+    "team": "Panama",
+    "team_slug": "panama",
+    "head_coach": "CHRISTIANSEN Thomas",
+    "player_count": 26,
+    "gk_count": 3,
+    "df_count": 11,
+    "mf_count": 8,
+    "fw_count": 4,
+    "avg_age": 30.43,
+    "median_age": 29.85,
+    "avg_height_cm": 181.58,
+    "min_height_cm": 160,
+    "max_height_cm": 195,
+    "club_count": 23,
+    "top_clubs": [
+      {
+        "club": "Deportivo Saprissa (CRC)",
+        "player_count": 2
+      },
+      {
+        "club": "CD Plaza Amador (PAN)",
+        "player_count": 2
+      },
+      {
+        "club": "CD Universidad Católica (ECU)",
+        "player_count": 2
+      },
+      {
+        "club": "Club Nacional (URU)",
+        "player_count": 1
+      },
+      {
+        "club": "ŠK Slovan Bratislava (SVK)",
+        "player_count": 1
+      }
+    ],
+    "oldest_player": {
+      "player_id": "wc2026_panama_19_quintero_alberto",
+      "squad_number": "19",
+      "position": "MF",
+      "full_name": "QUINTERO Alberto",
+      "shirt_name": "QUINTERO",
+      "birth_date": "1987-12-18",
+      "club": "CD Plaza Amador (PAN)",
+      "height_cm": 165
+    },
+    "youngest_player": {
+      "player_id": "wc2026_panama_05_farina_edgardo",
+      "squad_number": "5",
+      "position": "DF",
+      "full_name": "FARINA Edgardo",
+      "shirt_name": "FARIÑA",
+      "birth_date": "2001-10-19",
+      "club": "FC Pari Nizhny Novgorod (RUS)",
+      "height_cm": 195
+    },
+    "tallest_player": {
+      "player_id": "wc2026_panama_05_farina_edgardo",
+      "squad_number": "5",
+      "position": "DF",
+      "full_name": "FARINA Edgardo",
+      "shirt_name": "FARIÑA",
+      "birth_date": "2001-10-19",
+      "club": "FC Pari Nizhny Novgorod (RUS)",
+      "height_cm": 195
+    },
+    "shortest_player": {
+      "player_id": "wc2026_panama_21_yanis_cesar",
+      "squad_number": "21",
+      "position": "MF",
+      "full_name": "YANIS Cesar",
+      "shirt_name": "YANIS",
+      "birth_date": "1996-01-28",
+      "club": "CD Cobresal (CHI)",
+      "height_cm": 160
+    },
+    "observation_only": true,
+    "no_starting_xi": true,
+    "no_injury_judgment": true,
+    "betting_recommendation": false,
+    "affects_v4": false
+  },
+  {
+    "team": "Paraguay",
+    "team_slug": "paraguay",
+    "head_coach": "ALFARO Gustavo",
+    "player_count": 26,
+    "gk_count": 3,
+    "df_count": 8,
+    "mf_count": 9,
+    "fw_count": 6,
+    "avg_age": 29.03,
+    "median_age": 29.68,
+    "avg_height_cm": 181.62,
+    "min_height_cm": 165,
+    "max_height_cm": 192,
+    "club_count": 22,
+    "top_clubs": [
+      {
+        "club": "SE Palmeiras (BRA)",
+        "player_count": 3
+      },
+      {
+        "club": "Cerro Porteño (PAR)",
+        "player_count": 2
+      },
+      {
+        "club": "Atlanta United FC (USA)",
+        "player_count": 2
+      },
+      {
+        "club": "Sunderland AFC (ENG)",
+        "player_count": 1
+      },
+      {
+        "club": "FC Dynamo Moscow (RUS)",
+        "player_count": 1
+      }
+    ],
+    "oldest_player": {
+      "player_id": "wc2026_paraguay_01_fernandez_gatito",
+      "squad_number": "1",
+      "position": "GK",
+      "full_name": "FERNANDEZ Gatito",
+      "shirt_name": "FERNANDEZ",
+      "birth_date": "1988-03-29",
+      "club": "Cerro Porteño (PAR)",
+      "height_cm": 191
+    },
+    "youngest_player": {
+      "player_id": "wc2026_paraguay_26_maidana_alexandro",
+      "squad_number": "26",
+      "position": "DF",
+      "full_name": "MAIDANA Alexandro",
+      "shirt_name": "MAIDANA",
+      "birth_date": "2005-07-26",
+      "club": "CA Talleres (ARG)",
+      "height_cm": 173
+    },
+    "tallest_player": {
+      "player_id": "wc2026_paraguay_13_canale_jose",
+      "squad_number": "13",
+      "position": "DF",
+      "full_name": "CANALE Jose",
+      "shirt_name": "CANALE",
+      "birth_date": "1996-07-20",
+      "club": "CA Lanús (ARG)",
+      "height_cm": 192
+    },
+    "shortest_player": {
+      "player_id": "wc2026_paraguay_17_romero_gamarra_alejandro",
+      "squad_number": "17",
+      "position": "FW",
+      "full_name": "ROMERO GAMARRA Alejandro",
+      "shirt_name": "R. GAMARRA",
+      "birth_date": "1995-01-11",
+      "club": "Al Ain FC (UAE)",
+      "height_cm": 165
+    },
+    "observation_only": true,
+    "no_starting_xi": true,
+    "no_injury_judgment": true,
+    "betting_recommendation": false,
+    "affects_v4": false
+  },
+  {
+    "team": "Portugal",
+    "team_slug": "portugal",
+    "head_coach": "MARTINEZ Roberto",
+    "player_count": 26,
+    "gk_count": 3,
+    "df_count": 9,
+    "mf_count": 6,
+    "fw_count": 8,
+    "avg_age": 28.04,
+    "median_age": 26.87,
+    "avg_height_cm": 181.5,
+    "min_height_cm": 166,
+    "max_height_cm": 192,
+    "club_count": 17,
+    "top_clubs": [
+      {
+        "club": "Paris Saint-Germain (FRA)",
+        "player_count": 4
+      },
+      {
+        "club": "Manchester City FC (ENG)",
+        "player_count": 3
+      },
+      {
+        "club": "Sporting CP (POR)",
+        "player_count": 3
+      },
+      {
+        "club": "Manchester United FC (ENG)",
+        "player_count": 2
+      },
+      {
+        "club": "Al Nassr FC (KSA)",
+        "player_count": 2
+      }
+    ],
+    "oldest_player": {
+      "player_id": "wc2026_portugal_07_cristiano_ronaldo",
+      "squad_number": "7",
+      "position": "FW",
+      "full_name": "CRISTIANO RONALDO",
+      "shirt_name": "RONALDO",
+      "birth_date": "1985-02-05",
+      "club": "Al Nassr FC (KSA)",
+      "height_cm": 185
+    },
+    "youngest_player": {
+      "player_id": "wc2026_portugal_15_joao_neves",
+      "squad_number": "15",
+      "position": "MF",
+      "full_name": "JOAO NEVES",
+      "shirt_name": "JOÃO NEVES",
+      "birth_date": "2004-09-27",
+      "club": "Paris Saint-Germain (FRA)",
+      "height_cm": 171
+    },
+    "tallest_player": {
+      "player_id": "wc2026_portugal_12_jose_sa",
+      "squad_number": "12",
+      "position": "GK",
+      "full_name": "JOSE SA",
+      "shirt_name": "JOSÉ SÁ",
+      "birth_date": "1993-01-17",
+      "club": "Wolverhampton Wanderers FC (ENG)",
+      "height_cm": 192
+    },
+    "shortest_player": {
+      "player_id": "wc2026_portugal_26_francisco_conceicao",
+      "squad_number": "26",
+      "position": "FW",
+      "full_name": "FRANCISCO CONCEICAO",
+      "shirt_name": "F. CONCEIÇÃO",
+      "birth_date": "2002-12-14",
+      "club": "Juventus FC (ITA)",
+      "height_cm": 166
+    },
+    "observation_only": true,
+    "no_starting_xi": true,
+    "no_injury_judgment": true,
+    "betting_recommendation": false,
+    "affects_v4": false
+  },
+  {
+    "team": "Qatar",
+    "team_slug": "qatar",
+    "head_coach": "LOPETEGUI Julen",
+    "player_count": 26,
+    "gk_count": 3,
+    "df_count": 9,
+    "mf_count": 5,
+    "fw_count": 9,
+    "avg_age": 29.51,
+    "median_age": 29.6,
+    "avg_height_cm": 179.38,
+    "min_height_cm": 166,
+    "max_height_cm": 192,
+    "club_count": 8,
+    "top_clubs": [
+      {
+        "club": "Al Duhail SC (QAT)",
+        "player_count": 6
+      },
+      {
+        "club": "Al Sadd SC (QAT)",
+        "player_count": 5
+      },
+      {
+        "club": "Al Rayyan SC (QAT)",
+        "player_count": 4
+      },
+      {
+        "club": "Al Wakrah SC (QAT)",
+        "player_count": 3
+      },
+      {
+        "club": "Al Arabi SC (QAT)",
+        "player_count": 3
+      }
+    ],
+    "oldest_player": {
+      "player_id": "wc2026_qatar_06_abdulaziz_hatem",
+      "squad_number": "6",
+      "position": "MF",
+      "full_name": "ABDULAZIZ HATEM",
+      "shirt_name": "A. AZIZ",
+      "birth_date": "1990-01-01",
+      "club": "Al Rayyan SC (QAT)",
+      "height_cm": 179
+    },
+    "youngest_player": {
+      "player_id": "wc2026_qatar_24_tahsin_jamshid",
+      "squad_number": "24",
+      "position": "FW",
+      "full_name": "TAHSIN JAMSHID",
+      "shirt_name": "TAHSIN",
+      "birth_date": "2006-06-16",
+      "club": "Al Duhail SC (QAT)",
+      "height_cm": 166
+    },
+    "tallest_player": {
+      "player_id": "wc2026_qatar_09_mohammed_muntari",
+      "squad_number": "9",
+      "position": "FW",
+      "full_name": "MOHAMMED MUNTARI",
+      "shirt_name": "MUNTARI",
+      "birth_date": "1993-12-20",
+      "club": "Al Gharafa SC (QAT)",
+      "height_cm": 192
+    },
+    "shortest_player": {
+      "player_id": "wc2026_qatar_24_tahsin_jamshid",
+      "squad_number": "24",
+      "position": "FW",
+      "full_name": "TAHSIN JAMSHID",
+      "shirt_name": "TAHSIN",
+      "birth_date": "2006-06-16",
+      "club": "Al Duhail SC (QAT)",
+      "height_cm": 166
+    },
+    "observation_only": true,
+    "no_starting_xi": true,
+    "no_injury_judgment": true,
+    "betting_recommendation": false,
+    "affects_v4": false
+  },
+  {
+    "team": "Saudi Arabia",
+    "team_slug": "saudi_arabia",
+    "head_coach": "DONIS Georgios",
+    "player_count": 26,
+    "gk_count": 3,
+    "df_count": 10,
+    "mf_count": 6,
+    "fw_count": 7,
+    "avg_age": 28.52,
+    "median_age": 27.12,
+    "avg_height_cm": 178.42,
+    "min_height_cm": 169,
+    "max_height_cm": 191,
+    "club_count": 9,
+    "top_clubs": [
+      {
+        "club": "Al Hilal SC (KSA)",
+        "player_count": 7
+      },
+      {
+        "club": "Al Nassr FC (KSA)",
+        "player_count": 6
+      },
+      {
+        "club": "Al Qadsiah FC (KSA)",
+        "player_count": 4
+      },
+      {
+        "club": "Al Ahli FC (KSA)",
+        "player_count": 3
+      },
+      {
+        "club": "Al Ittihad (KSA)",
+        "player_count": 2
+      }
+    ],
+    "oldest_player": {
+      "player_id": "wc2026_saudi_arabia_22_ahmed_alkassar",
+      "squad_number": "22",
+      "position": "GK",
+      "full_name": "AHMED ALKASSAR",
+      "shirt_name": "ALKASSAR",
+      "birth_date": "1991-05-08",
+      "club": "Al Qadsiah FC (KSA)",
+      "height_cm": 178
+    },
+    "youngest_player": {
+      "player_id": "wc2026_saudi_arabia_07_musab_aljuwayr",
+      "squad_number": "7",
+      "position": "MF",
+      "full_name": "MUSAB ALJUWAYR",
+      "shirt_name": "MUSAB",
+      "birth_date": "2003-06-20",
+      "club": "Al Qadsiah FC (KSA)",
+      "height_cm": 175
+    },
+    "tallest_player": {
+      "player_id": "wc2026_saudi_arabia_23_mohamed_kanno",
+      "squad_number": "23",
+      "position": "MF",
+      "full_name": "MOHAMED KANNO",
+      "shirt_name": "KANNO",
+      "birth_date": "1994-09-22",
+      "club": "Al Hilal SC (KSA)",
+      "height_cm": 191
+    },
+    "shortest_player": {
+      "player_id": "wc2026_saudi_arabia_02_ali_majrashi",
+      "squad_number": "2",
+      "position": "DF",
+      "full_name": "ALI MAJRASHI",
+      "shirt_name": "MAJRASHI",
+      "birth_date": "1999-10-02",
+      "club": "Al Ahli FC (KSA)",
+      "height_cm": 169
+    },
+    "observation_only": true,
+    "no_starting_xi": true,
+    "no_injury_judgment": true,
+    "betting_recommendation": false,
+    "affects_v4": false
+  },
+  {
+    "team": "Scotland",
+    "team_slug": "scotland",
+    "head_coach": "CLARKE Steve",
+    "player_count": 26,
+    "gk_count": 3,
+    "df_count": 10,
+    "mf_count": 6,
+    "fw_count": 7,
+    "avg_age": 29.2,
+    "median_age": 29.91,
+    "avg_height_cm": 184.46,
+    "min_height_cm": 173,
+    "max_height_cm": 196,
+    "club_count": 22,
+    "top_clubs": [
+      {
+        "club": "Celtic FC (SCO)",
+        "player_count": 2
+      },
+      {
+        "club": "AFC Bournemouth (ENG)",
+        "player_count": 2
+      },
+      {
+        "club": "Rangers FC (SCO)",
+        "player_count": 2
+      },
+      {
+        "club": "Heart Of Midlothian FC (SCO)",
+        "player_count": 2
+      },
+      {
+        "club": "Nottingham Forest FC (ENG)",
+        "player_count": 1
+      }
+    ],
+    "oldest_player": {
+      "player_id": "wc2026_scotland_21_gordon_craig",
+      "squad_number": "21",
+      "position": "GK",
+      "full_name": "GORDON Craig",
+      "shirt_name": "GORDON",
+      "birth_date": "1982-12-31",
+      "club": "Heart Of Midlothian FC (SCO)",
+      "height_cm": 193
+    },
+    "youngest_player": {
+      "player_id": "wc2026_scotland_08_fletcher_tyler",
+      "squad_number": "8",
+      "position": "MF",
+      "full_name": "FLETCHER Tyler",
+      "shirt_name": "FLETCHER",
+      "birth_date": "2007-03-19",
+      "club": "Manchester United FC (ENG)",
+      "height_cm": 183
+    },
+    "tallest_player": {
+      "player_id": "wc2026_scotland_01_gunn_angus",
+      "squad_number": "1",
+      "position": "GK",
+      "full_name": "GUNN Angus",
+      "shirt_name": "GUNN",
+      "birth_date": "1996-01-22",
+      "club": "Nottingham Forest FC (ENG)",
+      "height_cm": 196
+    },
+    "shortest_player": {
+      "player_id": "wc2026_scotland_17_gannon_doak_ben",
+      "squad_number": "17",
+      "position": "FW",
+      "full_name": "GANNON-DOAK Ben",
+      "shirt_name": "GANNON DOAK",
+      "birth_date": "2005-11-11",
+      "club": "AFC Bournemouth (ENG)",
+      "height_cm": 173
+    },
+    "observation_only": true,
+    "no_starting_xi": true,
+    "no_injury_judgment": true,
+    "betting_recommendation": false,
+    "affects_v4": false
+  },
+  {
+    "team": "Senegal",
+    "team_slug": "senegal",
+    "head_coach": "THIAW Pape",
+    "player_count": 26,
+    "gk_count": 3,
+    "df_count": 8,
+    "mf_count": 7,
+    "fw_count": 8,
+    "avg_age": 27.09,
+    "median_age": 26.7,
+    "avg_height_cm": 183.96,
+    "min_height_cm": 173,
+    "max_height_cm": 197,
+    "club_count": 22,
+    "top_clubs": [
+      {
+        "club": "OGC Nice (FRA)",
+        "player_count": 2
+      },
+      {
+        "club": "Everton FC (ENG)",
+        "player_count": 2
+      },
+      {
+        "club": "AS Monaco (FRA)",
+        "player_count": 2
+      },
+      {
+        "club": "FC Bayern München (GER)",
+        "player_count": 2
+      },
+      {
+        "club": "Chelsea FC (ENG)",
+        "player_count": 1
+      }
+    ],
+    "oldest_player": {
+      "player_id": "wc2026_senegal_05_gueye_idrissa_gana",
+      "squad_number": "5",
+      "position": "MF",
+      "full_name": "GUEYE Idrissa Gana",
+      "shirt_name": "GANA",
+      "birth_date": "1989-09-26",
+      "club": "Everton FC (ENG)",
+      "height_cm": 174
+    },
+    "youngest_player": {
+      "player_id": "wc2026_senegal_20_mbaye_ibrahim",
+      "squad_number": "20",
+      "position": "FW",
+      "full_name": "MBAYE Ibrahim",
+      "shirt_name": "MBAYE",
+      "birth_date": "2008-01-24",
+      "club": "Paris Saint-Germain (FRA)",
+      "height_cm": 175
+    },
+    "tallest_player": {
+      "player_id": "wc2026_senegal_23_diaw_mory",
+      "squad_number": "23",
+      "position": "GK",
+      "full_name": "DIAW Mory",
+      "shirt_name": "DIAW",
+      "birth_date": "1993-06-22",
+      "club": "Le Havre AC (FRA)",
+      "height_cm": 197
+    },
+    "shortest_player": {
+      "player_id": "wc2026_senegal_15_diatta_krepin",
+      "squad_number": "15",
+      "position": "DF",
+      "full_name": "DIATTA Krepin",
+      "shirt_name": "KRÉPIN",
+      "birth_date": "1999-02-25",
+      "club": "AS Monaco (FRA)",
+      "height_cm": 173
+    },
+    "observation_only": true,
+    "no_starting_xi": true,
+    "no_injury_judgment": true,
+    "betting_recommendation": false,
+    "affects_v4": false
+  },
+  {
+    "team": "South Africa",
+    "team_slug": "south_africa",
+    "head_coach": "BROOS Hugo",
+    "player_count": 26,
+    "gk_count": 3,
+    "df_count": 10,
+    "mf_count": 5,
+    "fw_count": 8,
+    "avg_age": 26.81,
+    "median_age": 25.89,
+    "avg_height_cm": 178.85,
+    "min_height_cm": 166,
+    "max_height_cm": 197,
+    "club_count": 12,
+    "top_clubs": [
+      {
+        "club": "Mamelodi Sundowns FC (RSA)",
+        "player_count": 8
+      },
+      {
+        "club": "Orlando Pirates FC (RSA)",
+        "player_count": 8
+      },
+      {
+        "club": "Polokwane City FC (RSA)",
+        "player_count": 1
+      },
+      {
+        "club": "Burnley FC (ENG)",
+        "player_count": 1
+      },
+      {
+        "club": "AEL Limassol (CYP)",
+        "player_count": 1
+      }
+    ],
+    "oldest_player": {
+      "player_id": "wc2026_south_africa_11_zwane_themba",
+      "squad_number": "11",
+      "position": "MF",
+      "full_name": "ZWANE Themba",
+      "shirt_name": "ZWANE",
+      "birth_date": "1989-08-03",
+      "club": "Mamelodi Sundowns FC (RSA)",
+      "height_cm": 178
+    },
+    "youngest_player": {
+      "player_id": "wc2026_south_africa_14_mbokazi_mbekezeli",
+      "squad_number": "14",
+      "position": "DF",
+      "full_name": "MBOKAZI Mbekezeli",
+      "shirt_name": "MBOKAZI",
+      "birth_date": "2005-09-19",
+      "club": "Chicago Fire FC (USA)",
+      "height_cm": 177
+    },
+    "tallest_player": {
+      "player_id": "wc2026_south_africa_13_sithole_sphephelo",
+      "squad_number": "13",
+      "position": "MF",
+      "full_name": "SITHOLE Sphephelo",
+      "shirt_name": "SITHOLE",
+      "birth_date": "1999-03-03",
+      "club": "CD Tondela (POR)",
+      "height_cm": 197
+    },
+    "shortest_player": {
+      "player_id": "wc2026_south_africa_25_sebelebele_kamogelo",
+      "squad_number": "25",
+      "position": "FW",
+      "full_name": "SEBELEBELE Kamogelo",
+      "shirt_name": "SEBELEBELE",
+      "birth_date": "2002-07-21",
+      "club": "Orlando Pirates FC (RSA)",
+      "height_cm": 166
+    },
+    "observation_only": true,
+    "no_starting_xi": true,
+    "no_injury_judgment": true,
+    "betting_recommendation": false,
+    "affects_v4": false
+  },
+  {
+    "team": "Spain",
+    "team_slug": "spain",
+    "head_coach": "DE LA FUENTE Luis",
+    "player_count": 26,
+    "gk_count": 3,
+    "df_count": 8,
+    "mf_count": 7,
+    "fw_count": 8,
+    "avg_age": 26.75,
+    "median_age": 27.05,
+    "avg_height_cm": 181.73,
+    "min_height_cm": 171,
+    "max_height_cm": 194,
+    "club_count": 13,
+    "top_clubs": [
+      {
+        "club": "FC Barcelona (ESP)",
+        "player_count": 8
+      },
+      {
+        "club": "Arsenal FC (ENG)",
+        "player_count": 3
+      },
+      {
+        "club": "Atlético De Madrid (ESP)",
+        "player_count": 3
+      },
+      {
+        "club": "Athletic Club (ESP)",
+        "player_count": 3
+      },
+      {
+        "club": "Bayer Leverkusen (GER)",
+        "player_count": 1
+      }
+    ],
+    "oldest_player": {
+      "player_id": "wc2026_spain_26_iglesias_borja",
+      "squad_number": "26",
+      "position": "FW",
+      "full_name": "IGLESIAS Borja",
+      "shirt_name": "B. IGLESIAS",
+      "birth_date": "1993-01-17",
+      "club": "RC Celta Vigo (ESP)",
+      "height_cm": 187
+    },
+    "youngest_player": {
+      "player_id": "wc2026_spain_19_yamal_lamine",
+      "squad_number": "19",
+      "position": "FW",
+      "full_name": "YAMAL Lamine",
+      "shirt_name": "LAMINE YAMAL",
+      "birth_date": "2007-07-13",
+      "club": "FC Barcelona (ESP)",
+      "height_cm": 183
+    },
+    "tallest_player": {
+      "player_id": "wc2026_spain_13_garcia_joan",
+      "squad_number": "13",
+      "position": "GK",
+      "full_name": "GARCIA Joan",
+      "shirt_name": "JOAN GARCIA",
+      "birth_date": "2001-05-04",
+      "club": "FC Barcelona (ESP)",
+      "height_cm": 194
+    },
+    "shortest_player": {
+      "player_id": "wc2026_spain_03_grimaldo_alex",
+      "squad_number": "3",
+      "position": "DF",
+      "full_name": "GRIMALDO Alex",
+      "shirt_name": "GRIMALDO",
+      "birth_date": "1995-09-20",
+      "club": "Bayer Leverkusen (GER)",
+      "height_cm": 171
+    },
+    "observation_only": true,
+    "no_starting_xi": true,
+    "no_injury_judgment": true,
+    "betting_recommendation": false,
+    "affects_v4": false
+  },
+  {
+    "team": "Sweden",
+    "team_slug": "sweden",
+    "head_coach": "POTTER Graham",
+    "player_count": 26,
+    "gk_count": 3,
+    "df_count": 11,
+    "mf_count": 7,
+    "fw_count": 5,
+    "avg_age": 27.56,
+    "median_age": 27.69,
+    "avg_height_cm": 186.19,
+    "min_height_cm": 172,
+    "max_height_cm": 197,
+    "club_count": 26,
+    "top_clubs": [
+      {
+        "club": "Derby County FC (ENG)",
+        "player_count": 1
+      },
+      {
+        "club": "SC Braga (POR)",
+        "player_count": 1
+      },
+      {
+        "club": "Aston Villa FC (ENG)",
+        "player_count": 1
+      },
+      {
+        "club": "Atalanta Bergamo (ITA)",
+        "player_count": 1
+      },
+      {
+        "club": "Leeds United FC (ENG)",
+        "player_count": 1
+      }
+    ],
+    "oldest_player": {
+      "player_id": "wc2026_sweden_23_nordfeldt_kristoffer",
+      "squad_number": "23",
+      "position": "GK",
+      "full_name": "NORDFELDT Kristoffer",
+      "shirt_name": "NORDFELDT",
+      "birth_date": "1989-06-23",
+      "club": "AIK Stockholm (SWE)",
+      "height_cm": 190
+    },
+    "youngest_player": {
+      "player_id": "wc2026_sweden_07_bergvall_lucas",
+      "squad_number": "7",
+      "position": "MF",
+      "full_name": "BERGVALL Lucas",
+      "shirt_name": "BERGVALL",
+      "birth_date": "2006-02-02",
+      "club": "Tottenham Hotspur FC (ENG)",
+      "height_cm": 187
+    },
+    "tallest_player": {
+      "player_id": "wc2026_sweden_01_widell_zetterstrom_jacob",
+      "squad_number": "1",
+      "position": "GK",
+      "full_name": "WIDELL ZETTERSTROM Jacob",
+      "shirt_name": "ZETTERSTRÖM",
+      "birth_date": "1998-07-11",
+      "club": "Derby County FC (ENG)",
+      "height_cm": 197
+    },
+    "shortest_player": {
+      "player_id": "wc2026_sweden_18_ayari_yasin",
+      "squad_number": "18",
+      "position": "MF",
+      "full_name": "AYARI Yasin",
+      "shirt_name": "AYARI",
+      "birth_date": "2003-10-06",
+      "club": "Brighton & Hove Albion FC (ENG)",
+      "height_cm": 172
+    },
+    "observation_only": true,
+    "no_starting_xi": true,
+    "no_injury_judgment": true,
+    "betting_recommendation": false,
+    "affects_v4": false
+  },
+  {
+    "team": "Switzerland",
+    "team_slug": "switzerland",
+    "head_coach": "YAKIN Murat",
+    "player_count": 26,
+    "gk_count": 3,
+    "df_count": 8,
+    "mf_count": 8,
+    "fw_count": 7,
+    "avg_age": 28.31,
+    "median_age": 28.91,
+    "avg_height_cm": 185.23,
+    "min_height_cm": 179,
+    "max_height_cm": 196,
+    "club_count": 24,
+    "top_clubs": [
+      {
+        "club": "Sevilla FC (ESP)",
+        "player_count": 2
+      },
+      {
+        "club": "BSC Young Boys (SUI)",
+        "player_count": 2
+      },
+      {
+        "club": "Borussia Dortmund (GER)",
+        "player_count": 1
+      },
+      {
+        "club": "Hamburger SV (GER)",
+        "player_count": 1
+      },
+      {
+        "club": "1. FSV Mainz 05 (GER)",
+        "player_count": 1
+      }
+    ],
+    "oldest_player": {
+      "player_id": "wc2026_switzerland_08_freuler_remo",
+      "squad_number": "8",
+      "position": "MF",
+      "full_name": "FREULER Remo",
+      "shirt_name": "FREULER",
+      "birth_date": "1992-04-15",
+      "club": "Bologna FC (ITA)",
+      "height_cm": 181
+    },
+    "youngest_player": {
+      "player_id": "wc2026_switzerland_09_manzambi_johan",
+      "squad_number": "9",
+      "position": "MF",
+      "full_name": "MANZAMBI Johan",
+      "shirt_name": "MANZAMBI",
+      "birth_date": "2005-10-14",
+      "club": "SC Freiburg (GER)",
+      "height_cm": 182
+    },
+    "tallest_player": {
+      "player_id": "wc2026_switzerland_01_kobel_gregor",
+      "squad_number": "1",
+      "position": "GK",
+      "full_name": "KOBEL Gregor",
+      "shirt_name": "KOBEL",
+      "birth_date": "1997-12-06",
+      "club": "Borussia Dortmund (GER)",
+      "height_cm": 196
+    },
+    "shortest_player": {
+      "player_id": "wc2026_switzerland_17_vargas_ruben",
+      "squad_number": "17",
+      "position": "FW",
+      "full_name": "VARGAS Ruben",
+      "shirt_name": "VARGAS",
+      "birth_date": "1998-08-05",
+      "club": "Sevilla FC (ESP)",
+      "height_cm": 179
+    },
+    "observation_only": true,
+    "no_starting_xi": true,
+    "no_injury_judgment": true,
+    "betting_recommendation": false,
+    "affects_v4": false
+  },
+  {
+    "team": "Tunisia",
+    "team_slug": "tunisia",
+    "head_coach": "LAMOUCHI Sabri",
+    "player_count": 26,
+    "gk_count": 3,
+    "df_count": 10,
+    "mf_count": 8,
+    "fw_count": 5,
+    "avg_age": 26.64,
+    "median_age": 26.88,
+    "avg_height_cm": 184.58,
+    "min_height_cm": 174,
+    "max_height_cm": 191,
+    "club_count": 24,
+    "top_clubs": [
+      {
+        "club": "Club Africain (TUN)",
+        "player_count": 2
+      },
+      {
+        "club": "Kasımpaşa SK (TUR)",
+        "player_count": 2
+      },
+      {
+        "club": "OGC Nice (FRA)",
+        "player_count": 1
+      },
+      {
+        "club": "FC Lorient (FRA)",
+        "player_count": 1
+      },
+      {
+        "club": "NK Maribor (SVN)",
+        "player_count": 1
+      }
+    ],
+    "oldest_player": {
+      "player_id": "wc2026_tunisia_02_abdi_ali",
+      "squad_number": "2",
+      "position": "DF",
+      "full_name": "ABDI Ali",
+      "shirt_name": "ABDI",
+      "birth_date": "1993-12-20",
+      "club": "OGC Nice (FRA)",
+      "height_cm": 177
+    },
+    "youngest_player": {
+      "player_id": "wc2026_tunisia_18_elloumi_rayan",
+      "squad_number": "18",
+      "position": "FW",
+      "full_name": "ELLOUMI Rayan",
+      "shirt_name": "ELLOUMI",
+      "birth_date": "2007-09-17",
+      "club": "Vancouver Whitecaps FC (CAN)",
+      "height_cm": 180
+    },
+    "tallest_player": {
+      "player_id": "wc2026_tunisia_09_mastouri_hazem",
+      "squad_number": "9",
+      "position": "FW",
+      "full_name": "MASTOURI Hazem",
+      "shirt_name": "MASTOURI",
+      "birth_date": "1997-06-18",
+      "club": "FC Dynamo Makhachkala (RUS)",
+      "height_cm": 191
+    },
+    "shortest_player": {
+      "player_id": "wc2026_tunisia_14_ayari_khalil",
+      "squad_number": "14",
+      "position": "MF",
+      "full_name": "AYARI Khalil",
+      "shirt_name": "AYARI",
+      "birth_date": "2005-02-02",
+      "club": "Paris Saint-Germain (FRA)",
+      "height_cm": 174
+    },
+    "observation_only": true,
+    "no_starting_xi": true,
+    "no_injury_judgment": true,
+    "betting_recommendation": false,
+    "affects_v4": false
+  },
+  {
+    "team": "Türkiye",
+    "team_slug": "turkiye",
+    "head_coach": "MONTELLA Vincenzo",
+    "player_count": 26,
+    "gk_count": 3,
+    "df_count": 9,
+    "mf_count": 5,
+    "fw_count": 9,
+    "avg_age": 27.67,
+    "median_age": 27.51,
+    "avg_height_cm": 183.77,
+    "min_height_cm": 172,
+    "max_height_cm": 198,
+    "club_count": 16,
+    "top_clubs": [
+      {
+        "club": "Fenerbahçe SK (TUR)",
+        "player_count": 6
+      },
+      {
+        "club": "Galatasaray SK (TUR)",
+        "player_count": 6
+      },
+      {
+        "club": "AS Roma (ITA)",
+        "player_count": 1
+      },
+      {
+        "club": "Al Ahli FC (KSA)",
+        "player_count": 1
+      },
+      {
+        "club": "Borussia Dortmund (GER)",
+        "player_count": 1
+      }
+    ],
+    "oldest_player": {
+      "player_id": "wc2026_turkiye_01_gunok_mert",
+      "squad_number": "1",
+      "position": "GK",
+      "full_name": "GUNOK Mert",
+      "shirt_name": "MERT",
+      "birth_date": "1989-03-01",
+      "club": "Fenerbahçe SK (TUR)",
+      "height_cm": 196
+    },
+    "youngest_player": {
+      "player_id": "wc2026_turkiye_26_uzun_can",
+      "squad_number": "26",
+      "position": "FW",
+      "full_name": "UZUN Can",
+      "shirt_name": "CAN UZUN",
+      "birth_date": "2005-11-11",
+      "club": "Eintracht Frankfurt (GER)",
+      "height_cm": 186
+    },
+    "tallest_player": {
+      "player_id": "wc2026_turkiye_12_bayindir_altay",
+      "squad_number": "12",
+      "position": "GK",
+      "full_name": "BAYINDIR Altay",
+      "shirt_name": "ALTAY",
+      "birth_date": "1998-04-14",
+      "club": "Manchester United FC (ENG)",
+      "height_cm": 198
+    },
+    "shortest_player": {
+      "player_id": "wc2026_turkiye_07_akturkoglu_kerem",
+      "squad_number": "7",
+      "position": "FW",
+      "full_name": "AKTURKOGLU Kerem",
+      "shirt_name": "AKTÜRKOĞLU",
+      "birth_date": "1998-10-21",
+      "club": "Fenerbahçe SK (TUR)",
+      "height_cm": 172
+    },
+    "observation_only": true,
+    "no_starting_xi": true,
+    "no_injury_judgment": true,
+    "betting_recommendation": false,
+    "affects_v4": false
+  },
+  {
+    "team": "USA",
+    "team_slug": "usa",
+    "head_coach": "POCHETTINO Mauricio",
+    "player_count": 26,
+    "gk_count": 3,
+    "df_count": 10,
+    "mf_count": 6,
+    "fw_count": 7,
+    "avg_age": 26.91,
+    "median_age": 26.8,
+    "avg_height_cm": 183.38,
+    "min_height_cm": 167,
+    "max_height_cm": 198,
+    "club_count": 24,
+    "top_clubs": [
+      {
+        "club": "PSV Eindhoven (NED)",
+        "player_count": 2
+      },
+      {
+        "club": "Borussia Mönchengladbach (GER)",
+        "player_count": 2
+      },
+      {
+        "club": "New England Revolution (USA)",
+        "player_count": 1
+      },
+      {
+        "club": "Crystal Palace FC (ENG)",
+        "player_count": 1
+      },
+      {
+        "club": "AFC Bournemouth (ENG)",
+        "player_count": 1
+      }
+    ],
+    "oldest_player": {
+      "player_id": "wc2026_usa_13_ream_tim",
+      "squad_number": "13",
+      "position": "DF",
+      "full_name": "REAM Tim",
+      "shirt_name": "REAM",
+      "birth_date": "1987-10-05",
+      "club": "Charlotte FC (USA)",
+      "height_cm": 186
+    },
+    "youngest_player": {
+      "player_id": "wc2026_usa_16_freeman_alex",
+      "squad_number": "16",
+      "position": "DF",
+      "full_name": "FREEMAN Alex",
+      "shirt_name": "FREEMAN",
+      "birth_date": "2004-08-09",
+      "club": "Villarreal CF (ESP)",
+      "height_cm": 188
+    },
+    "tallest_player": {
+      "player_id": "wc2026_usa_24_freese_matt",
+      "squad_number": "24",
+      "position": "GK",
+      "full_name": "FREESE Matt",
+      "shirt_name": "FREESE",
+      "birth_date": "1998-09-02",
+      "club": "New York City FC (USA)",
+      "height_cm": 198
+    },
+    "shortest_player": {
+      "player_id": "wc2026_usa_26_zendejas_alex",
+      "squad_number": "26",
+      "position": "FW",
+      "full_name": "ZENDEJAS Alex",
+      "shirt_name": "ZENDEJAS",
+      "birth_date": "1998-02-07",
+      "club": "Club América (MEX)",
+      "height_cm": 167
+    },
+    "observation_only": true,
+    "no_starting_xi": true,
+    "no_injury_judgment": true,
+    "betting_recommendation": false,
+    "affects_v4": false
+  },
+  {
+    "team": "Uruguay",
+    "team_slug": "uruguay",
+    "head_coach": "BIELSA Marcelo",
+    "player_count": 26,
+    "gk_count": 3,
+    "df_count": 7,
+    "mf_count": 11,
+    "fw_count": 5,
+    "avg_age": 28.74,
+    "median_age": 27.84,
+    "avg_height_cm": 180.46,
+    "min_height_cm": 167,
+    "max_height_cm": 191,
+    "club_count": 22,
+    "top_clubs": [
+      {
+        "club": "CR Flamengo (BRA)",
+        "player_count": 3
+      },
+      {
+        "club": "Club América (MEX)",
+        "player_count": 2
+      },
+      {
+        "club": "SE Palmeiras (BRA)",
+        "player_count": 2
+      },
+      {
+        "club": "SC Internacional (BRA)",
+        "player_count": 1
+      },
+      {
+        "club": "Atlético De Madrid (ESP)",
+        "player_count": 1
+      }
+    ],
+    "oldest_player": {
+      "player_id": "wc2026_uruguay_23_muslera_fernando",
+      "squad_number": "23",
+      "position": "GK",
+      "full_name": "MUSLERA Fernando",
+      "shirt_name": "F. MUSLERA",
+      "birth_date": "1986-06-16",
+      "club": "Estudiantes LP (ARG)",
+      "height_cm": 190
+    },
+    "youngest_player": {
+      "player_id": "wc2026_uruguay_11_pellistri_facundo",
+      "squad_number": "11",
+      "position": "FW",
+      "full_name": "PELLISTRI Facundo",
+      "shirt_name": "F. PELLISTRI",
+      "birth_date": "2001-12-20",
+      "club": "Panathinaikos FC (GRE)",
+      "height_cm": 174
+    },
+    "tallest_player": {
+      "player_id": "wc2026_uruguay_24_bueno_santiago",
+      "squad_number": "24",
+      "position": "DF",
+      "full_name": "BUENO Santiago",
+      "shirt_name": "S. BUENO",
+      "birth_date": "1998-11-09",
+      "club": "Wolverhampton Wanderers FC (ENG)",
+      "height_cm": 191
+    },
+    "shortest_player": {
+      "player_id": "wc2026_uruguay_07_de_la_cruz_nicolas",
+      "squad_number": "7",
+      "position": "MF",
+      "full_name": "DE LA CRUZ Nicolas",
+      "shirt_name": "N. DE LA CRUZ",
+      "birth_date": "1997-06-01",
+      "club": "CR Flamengo (BRA)",
+      "height_cm": 167
+    },
+    "observation_only": true,
+    "no_starting_xi": true,
+    "no_injury_judgment": true,
+    "betting_recommendation": false,
+    "affects_v4": false
+  },
+  {
+    "team": "Uzbekistan",
+    "team_slug": "uzbekistan",
+    "head_coach": "CANNAVARO Fabio",
+    "player_count": 26,
+    "gk_count": 3,
+    "df_count": 10,
+    "mf_count": 10,
+    "fw_count": 3,
+    "avg_age": 28.51,
+    "median_age": 28.96,
+    "avg_height_cm": 181.81,
+    "min_height_cm": 167,
+    "max_height_cm": 190,
+    "club_count": 16,
+    "top_clubs": [
+      {
+        "club": "Pakhtakor Tashkent FK (UZB)",
+        "player_count": 4
+      },
+      {
+        "club": "FK Neftchi Farg'ona (UZB)",
+        "player_count": 3
+      },
+      {
+        "club": "Esteghlal Tehran FC (IRN)",
+        "player_count": 2
+      },
+      {
+        "club": "Persepolis FC (IRN)",
+        "player_count": 2
+      },
+      {
+        "club": "Nasaf Qarshi FC (UZB)",
+        "player_count": 2
+      }
+    ],
+    "oldest_player": {
+      "player_id": "wc2026_uzbekistan_01_yusupov_utkir",
+      "squad_number": "1",
+      "position": "GK",
+      "full_name": "YUSUPOV Utkir",
+      "shirt_name": "YUSUPOV",
+      "birth_date": "1991-01-04",
+      "club": "PFC Navbahor Namangan (UZB)",
+      "height_cm": 185
+    },
+    "youngest_player": {
+      "player_id": "wc2026_uzbekistan_24_karimov_behruzjon",
+      "squad_number": "24",
+      "position": "DF",
+      "full_name": "KARIMOV Behruzjon",
+      "shirt_name": "KARIMOV",
+      "birth_date": "2007-08-07",
+      "club": "Surkhon FK (UZB)",
+      "height_cm": 172
+    },
+    "tallest_player": {
+      "player_id": "wc2026_uzbekistan_14_shomurodov_eldor",
+      "squad_number": "14",
+      "position": "FW",
+      "full_name": "SHOMURODOV Eldor",
+      "shirt_name": "SHOMURODOV",
+      "birth_date": "1995-06-29",
+      "club": "Başakşehir FK (TUR)",
+      "height_cm": 190
+    },
+    "shortest_player": {
+      "player_id": "wc2026_uzbekistan_22_fayzullaev_abbosbek",
+      "squad_number": "22",
+      "position": "MF",
+      "full_name": "FAYZULLAEV Abbosbek",
+      "shirt_name": "FAYZULLAEV",
+      "birth_date": "2003-10-03",
+      "club": "Başakşehir FK (TUR)",
+      "height_cm": 167
+    },
+    "observation_only": true,
+    "no_starting_xi": true,
+    "no_injury_judgment": true,
+    "betting_recommendation": false,
+    "affects_v4": false
+  }
+]

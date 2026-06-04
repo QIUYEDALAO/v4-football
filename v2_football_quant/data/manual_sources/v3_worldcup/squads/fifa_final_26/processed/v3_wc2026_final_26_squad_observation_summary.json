@@ -1,0 +1,23 @@
+{
+  "team_count": 48,
+  "total_players": 1248,
+  "coach_count": 48,
+  "global_position_distribution": {
+    "GK": 145,
+    "DF": 421,
+    "MF": 371,
+    "FW": 311
+  },
+  "avg_age_global": 27.94,
+  "avg_height_global": 182.74,
+  "club_count_global": 449,
+  "teams_with_26_players": 48,
+  "source_summary_total_players": 1248,
+  "observation_only": true,
+  "is_final_26": true,
+  "is_official_fifa": true,
+  "no_starting_xi": true,
+  "no_injury_judgment": true,
+  "betting_recommendation": false,
+  "affects_v4": false
+}
