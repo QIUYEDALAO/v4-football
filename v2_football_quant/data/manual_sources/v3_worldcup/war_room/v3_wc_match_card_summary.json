@@ -1,7 +1,7 @@
 {
   "pack_name": "V3_WC_MATCH_CARD_PACK",
-  "generated_at": "2026-06-04T17:06:23.512205+00:00",
-  "current_head": "0ae3546",
+  "generated_at": "2026-06-04T17:27:55.429277+00:00",
+  "current_head": "0a1cdef",
   "source_fixtures": "data/runtime/v3_worldcup/thestatsapi_cache/20260602/world_cup_2026/matches_2026_all.json",
   "source_master_index": "data/manual_sources/v3_worldcup/war_room/v3_wc_war_room_master_index.json",
   "source_gap_radar": "data/manual_sources/v3_worldcup/war_room/v3_wc_war_room_gap_radar.json",
