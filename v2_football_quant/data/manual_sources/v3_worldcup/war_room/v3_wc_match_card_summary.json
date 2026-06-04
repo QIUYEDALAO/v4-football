@@ -1,11 +1,12 @@
 {
   "pack_name": "V3_WC_MATCH_CARD_PACK",
-  "generated_at": "2026-06-04T15:35:46.070033+00:00",
-  "current_head": "4ddb246",
+  "generated_at": "2026-06-04T16:44:53.952954+00:00",
+  "current_head": "d1de518",
   "source_fixtures": "data/runtime/v3_worldcup/thestatsapi_cache/20260602/world_cup_2026/matches_2026_all.json",
   "source_master_index": "data/manual_sources/v3_worldcup/war_room/v3_wc_war_room_master_index.json",
   "source_gap_radar": "data/manual_sources/v3_worldcup/war_room/v3_wc_war_room_gap_radar.json",
   "source_wc10_war_room": "data/v3_worldcup/war_room/v3_worldcup_wc10_war_room_20260602.json",
+  "source_fixture_mapping_bridge": "data/manual_sources/v3_worldcup/war_room/v3_wc2026_fixture_mapping_bridge.json",
   "match_count": 72,
   "teams_covered": 48,
   "team_names_covered": [
@@ -63,12 +64,12 @@
   "cards_with_venue_stress": 0,
   "cards_with_tactical_profile": 71,
   "cards_waiting_lineup": 72,
-  "cards_with_odds_binding": 0,
-  "cards_with_odds_available": 0,
+  "cards_with_odds_binding": 72,
+  "cards_with_odds_available": 1,
   "cards_with_odds_delta": 0,
   "cards_with_odds_delta_observed": 0,
   "cards_missing_venue_binding": 72,
-  "cards_missing_odds_binding": 72,
+  "cards_missing_odds_binding": 0,
   "global_data_gaps": [
     "match_venue_not_mapped_to_fixture",
     "missing_injury_suspension_official_feed",
@@ -81,8 +82,9 @@
     "odds_snapshot_not_mapped_to_this_match"
   ],
   "global_gap_summary": {
-    "venue_binding": "fixture_source_missing_venue_name",
-    "odds_binding": "match_card_fixture_id_not_mapped_to_api_football_odds_fixture",
+    "fixture_mapping": "mapped_by_fixture_mapping_bridge",
+    "venue_binding": "fixture_sources_do_not_provide_match_venue",
+    "odds_binding": "mapped_by_fixture_mapping_bridge",
     "official_lineup": "WAIT_OFFICIAL_LINEUP",
     "native_opening_closing": "not_available_from_current_snapshot",
     "odds_observation_delta": "global_status_only_not_per_match_bound"

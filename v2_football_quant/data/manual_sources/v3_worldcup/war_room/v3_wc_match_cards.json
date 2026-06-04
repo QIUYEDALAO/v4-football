@@ -7,6 +7,7 @@
     "away_team": "Austria",
     "home_team_slug": "algeria",
     "away_team_slug": "austria",
+    "api_football_fixture_id": "1489418",
     "venue": "VENUE_NOT_MAPPED",
     "kickoff_status": "SCHEDULED",
     "kickoff_time_utc": "2026-06-28T02:00:00.000Z",
@@ -18,8 +19,9 @@
         "WATCH_ONLY"
       ],
       "venue_stress_ref": "data/v3_worldcup/venue_stress/v3_worldcup_venue_stress_20260603.json",
-      "venue_mapping_status": "NOT_MAPPED",
-      "venue_gap_reason": "fixture_source_missing_venue_name"
+      "venue_mapping_status": "UNMAPPED",
+      "venue_gap_reason": "fixture_sources_do_not_provide_match_venue",
+      "fixture_mapping_bridge_ref": "data/manual_sources/v3_worldcup/war_room/v3_wc2026_fixture_mapping_bridge.json#mt_370102627"
     },
     "venue_stress_summary": {
       "status": "VENUE_LAYER_READY_FIXTURE_VENUE_NOT_MAPPED",
@@ -28,7 +30,7 @@
       "stress_tags": [
         "WATCH_ONLY"
       ],
-      "observation_note": "fixture_source_missing_venue_name"
+      "observation_note": "fixture_sources_do_not_provide_match_venue"
     },
     "home_final_26_profile_ref": "data/manual_sources/v3_worldcup/squads/fifa_final_26/processed/v3_wc2026_final_26_squad_profile_team_cards.json#algeria",
     "away_final_26_profile_ref": "data/manual_sources/v3_worldcup/squads/fifa_final_26/processed/v3_wc2026_final_26_squad_profile_team_cards.json#austria",
@@ -50,22 +52,23 @@
       }
     },
     "odds_snapshot_status": {
-      "status": "GLOBAL_SNAPSHOT_AVAILABLE_NOT_MATCH_MAPPED",
+      "status": "MAPPED_NO_CURRENT_ODDS",
       "successful_fixture_count": 1,
       "source": "data/runtime/status/check_v3_worldcup_odds_snapshot_live_small_batch_20260604.json",
       "has_native_opening": false,
       "has_native_closing": false
     },
     "odds_binding": {
-      "odds_fixture_id": null,
-      "odds_snapshot_status": "GLOBAL_SNAPSHOT_AVAILABLE_NOT_MATCH_MAPPED",
+      "odds_fixture_id": "1489418",
+      "odds_snapshot_status": "MAPPED_NO_CURRENT_ODDS",
       "odds_available": false,
       "bookmaker_count": 13,
       "market_type_count": 7,
       "odds_observation_delta_status": "ELIGIBLE_MULTIPLE_SNAPSHOTS_NO_CHANGE",
       "changed_odds_count": 0,
-      "odds_gap_reason": "match_card_fixture_id_not_mapped_to_api_football_odds_fixture",
-      "no_money_flow_judgment": true
+      "odds_gap_reason": "odds_fixture_mapped_but_current_snapshot_empty",
+      "no_money_flow_judgment": true,
+      "fixture_mapping_bridge_ref": "data/manual_sources/v3_worldcup/war_room/v3_wc2026_fixture_mapping_bridge.json#mt_370102627"
     },
     "odds_observation_delta_status": {
       "status": "ELIGIBLE_MULTIPLE_SNAPSHOTS_NO_CHANGE",
@@ -100,6 +103,7 @@
     "away_team": "Argentina",
     "home_team_slug": "jordan",
     "away_team_slug": "argentina",
+    "api_football_fixture_id": "1489421",
     "venue": "VENUE_NOT_MAPPED",
     "kickoff_status": "SCHEDULED",
     "kickoff_time_utc": "2026-06-28T02:00:00.000Z",
@@ -111,8 +115,9 @@
         "WATCH_ONLY"
       ],
       "venue_stress_ref": "data/v3_worldcup/venue_stress/v3_worldcup_venue_stress_20260603.json",
-      "venue_mapping_status": "NOT_MAPPED",
-      "venue_gap_reason": "fixture_source_missing_venue_name"
+      "venue_mapping_status": "UNMAPPED",
+      "venue_gap_reason": "fixture_sources_do_not_provide_match_venue",
+      "fixture_mapping_bridge_ref": "data/manual_sources/v3_worldcup/war_room/v3_wc2026_fixture_mapping_bridge.json#mt_028389140"
     },
     "venue_stress_summary": {
       "status": "VENUE_LAYER_READY_FIXTURE_VENUE_NOT_MAPPED",
@@ -121,7 +126,7 @@
       "stress_tags": [
         "WATCH_ONLY"
       ],
-      "observation_note": "fixture_source_missing_venue_name"
+      "observation_note": "fixture_sources_do_not_provide_match_venue"
     },
     "home_final_26_profile_ref": "data/manual_sources/v3_worldcup/squads/fifa_final_26/processed/v3_wc2026_final_26_squad_profile_team_cards.json#jordan",
     "away_final_26_profile_ref": "data/manual_sources/v3_worldcup/squads/fifa_final_26/processed/v3_wc2026_final_26_squad_profile_team_cards.json#argentina",
@@ -146,22 +151,23 @@
       }
     },
     "odds_snapshot_status": {
-      "status": "GLOBAL_SNAPSHOT_AVAILABLE_NOT_MATCH_MAPPED",
+      "status": "MAPPED_NO_CURRENT_ODDS",
       "successful_fixture_count": 1,
       "source": "data/runtime/status/check_v3_worldcup_odds_snapshot_live_small_batch_20260604.json",
       "has_native_opening": false,
       "has_native_closing": false
     },
     "odds_binding": {
-      "odds_fixture_id": null,
-      "odds_snapshot_status": "GLOBAL_SNAPSHOT_AVAILABLE_NOT_MATCH_MAPPED",
+      "odds_fixture_id": "1489421",
+      "odds_snapshot_status": "MAPPED_NO_CURRENT_ODDS",
       "odds_available": false,
       "bookmaker_count": 13,
       "market_type_count": 7,
       "odds_observation_delta_status": "ELIGIBLE_MULTIPLE_SNAPSHOTS_NO_CHANGE",
       "changed_odds_count": 0,
-      "odds_gap_reason": "match_card_fixture_id_not_mapped_to_api_football_odds_fixture",
-      "no_money_flow_judgment": true
+      "odds_gap_reason": "odds_fixture_mapped_but_current_snapshot_empty",
+      "no_money_flow_judgment": true,
+      "fixture_mapping_bridge_ref": "data/manual_sources/v3_worldcup/war_room/v3_wc2026_fixture_mapping_bridge.json#mt_028389140"
     },
     "odds_observation_delta_status": {
       "status": "ELIGIBLE_MULTIPLE_SNAPSHOTS_NO_CHANGE",
@@ -196,6 +202,7 @@
     "away_team": "Uzbekistan",
     "home_team_slug": "congo_dr",
     "away_team_slug": "uzbekistan",
+    "api_football_fixture_id": "1539013",
     "venue": "VENUE_NOT_MAPPED",
     "kickoff_status": "SCHEDULED",
     "kickoff_time_utc": "2026-06-27T23:30:00.000Z",
@@ -207,8 +214,9 @@
         "WATCH_ONLY"
       ],
       "venue_stress_ref": "data/v3_worldcup/venue_stress/v3_worldcup_venue_stress_20260603.json",
-      "venue_mapping_status": "NOT_MAPPED",
-      "venue_gap_reason": "fixture_source_missing_venue_name"
+      "venue_mapping_status": "UNMAPPED",
+      "venue_gap_reason": "fixture_sources_do_not_provide_match_venue",
+      "fixture_mapping_bridge_ref": "data/manual_sources/v3_worldcup/war_room/v3_wc2026_fixture_mapping_bridge.json#mt_370102675"
     },
     "venue_stress_summary": {
       "status": "VENUE_LAYER_READY_FIXTURE_VENUE_NOT_MAPPED",
@@ -217,7 +225,7 @@
       "stress_tags": [
         "WATCH_ONLY"
       ],
-      "observation_note": "fixture_source_missing_venue_name"
+      "observation_note": "fixture_sources_do_not_provide_match_venue"
     },
     "home_final_26_profile_ref": "data/manual_sources/v3_worldcup/squads/fifa_final_26/processed/v3_wc2026_final_26_squad_profile_team_cards.json#congo_dr",
     "away_final_26_profile_ref": "data/manual_sources/v3_worldcup/squads/fifa_final_26/processed/v3_wc2026_final_26_squad_profile_team_cards.json#uzbekistan",
@@ -239,22 +247,23 @@
       }
     },
     "odds_snapshot_status": {
-      "status": "GLOBAL_SNAPSHOT_AVAILABLE_NOT_MATCH_MAPPED",
+      "status": "MAPPED_NO_CURRENT_ODDS",
       "successful_fixture_count": 1,
       "source": "data/runtime/status/check_v3_worldcup_odds_snapshot_live_small_batch_20260604.json",
       "has_native_opening": false,
       "has_native_closing": false
     },
     "odds_binding": {
-      "odds_fixture_id": null,
-      "odds_snapshot_status": "GLOBAL_SNAPSHOT_AVAILABLE_NOT_MATCH_MAPPED",
+      "odds_fixture_id": "1539013",
+      "odds_snapshot_status": "MAPPED_NO_CURRENT_ODDS",
       "odds_available": false,
       "bookmaker_count": 13,
       "market_type_count": 7,
       "odds_observation_delta_status": "ELIGIBLE_MULTIPLE_SNAPSHOTS_NO_CHANGE",
       "changed_odds_count": 0,
-      "odds_gap_reason": "match_card_fixture_id_not_mapped_to_api_football_odds_fixture",
-      "no_money_flow_judgment": true
+      "odds_gap_reason": "odds_fixture_mapped_but_current_snapshot_empty",
+      "no_money_flow_judgment": true,
+      "fixture_mapping_bridge_ref": "data/manual_sources/v3_worldcup/war_room/v3_wc2026_fixture_mapping_bridge.json#mt_370102675"
     },
     "odds_observation_delta_status": {
       "status": "ELIGIBLE_MULTIPLE_SNAPSHOTS_NO_CHANGE",
@@ -289,6 +298,7 @@
     "away_team": "Portugal",
     "home_team_slug": "colombia",
     "away_team_slug": "portugal",
+    "api_football_fixture_id": "1489419",
     "venue": "VENUE_NOT_MAPPED",
     "kickoff_status": "SCHEDULED",
     "kickoff_time_utc": "2026-06-27T23:30:00.000Z",
@@ -300,8 +310,9 @@
         "WATCH_ONLY"
       ],
       "venue_stress_ref": "data/v3_worldcup/venue_stress/v3_worldcup_venue_stress_20260603.json",
-      "venue_mapping_status": "NOT_MAPPED",
-      "venue_gap_reason": "fixture_source_missing_venue_name"
+      "venue_mapping_status": "UNMAPPED",
+      "venue_gap_reason": "fixture_sources_do_not_provide_match_venue",
+      "fixture_mapping_bridge_ref": "data/manual_sources/v3_worldcup/war_room/v3_wc2026_fixture_mapping_bridge.json#mt_641915285"
     },
     "venue_stress_summary": {
       "status": "VENUE_LAYER_READY_FIXTURE_VENUE_NOT_MAPPED",
@@ -310,7 +321,7 @@
       "stress_tags": [
         "WATCH_ONLY"
       ],
-      "observation_note": "fixture_source_missing_venue_name"
+      "observation_note": "fixture_sources_do_not_provide_match_venue"
     },
     "home_final_26_profile_ref": "data/manual_sources/v3_worldcup/squads/fifa_final_26/processed/v3_wc2026_final_26_squad_profile_team_cards.json#colombia",
     "away_final_26_profile_ref": "data/manual_sources/v3_worldcup/squads/fifa_final_26/processed/v3_wc2026_final_26_squad_profile_team_cards.json#portugal",
@@ -336,22 +347,23 @@
       }
     },
     "odds_snapshot_status": {
-      "status": "GLOBAL_SNAPSHOT_AVAILABLE_NOT_MATCH_MAPPED",
+      "status": "MAPPED_NO_CURRENT_ODDS",
       "successful_fixture_count": 1,
       "source": "data/runtime/status/check_v3_worldcup_odds_snapshot_live_small_batch_20260604.json",
       "has_native_opening": false,
       "has_native_closing": false
     },
     "odds_binding": {
-      "odds_fixture_id": null,
-      "odds_snapshot_status": "GLOBAL_SNAPSHOT_AVAILABLE_NOT_MATCH_MAPPED",
+      "odds_fixture_id": "1489419",
+      "odds_snapshot_status": "MAPPED_NO_CURRENT_ODDS",
       "odds_available": false,
       "bookmaker_count": 13,
       "market_type_count": 7,
       "odds_observation_delta_status": "ELIGIBLE_MULTIPLE_SNAPSHOTS_NO_CHANGE",
       "changed_odds_count": 0,
-      "odds_gap_reason": "match_card_fixture_id_not_mapped_to_api_football_odds_fixture",
-      "no_money_flow_judgment": true
+      "odds_gap_reason": "odds_fixture_mapped_but_current_snapshot_empty",
+      "no_money_flow_judgment": true,
+      "fixture_mapping_bridge_ref": "data/manual_sources/v3_worldcup/war_room/v3_wc2026_fixture_mapping_bridge.json#mt_641915285"
     },
     "odds_observation_delta_status": {
       "status": "ELIGIBLE_MULTIPLE_SNAPSHOTS_NO_CHANGE",
@@ -386,6 +398,7 @@
     "away_team": "England",
     "home_team_slug": "panama",
     "away_team_slug": "england",
+    "api_football_fixture_id": "1489422",
     "venue": "VENUE_NOT_MAPPED",
     "kickoff_status": "SCHEDULED",
     "kickoff_time_utc": "2026-06-27T21:00:00.000Z",
@@ -397,8 +410,9 @@
         "WATCH_ONLY"
       ],
       "venue_stress_ref": "data/v3_worldcup/venue_stress/v3_worldcup_venue_stress_20260603.json",
-      "venue_mapping_status": "NOT_MAPPED",
-      "venue_gap_reason": "fixture_source_missing_venue_name"
+      "venue_mapping_status": "UNMAPPED",
+      "venue_gap_reason": "fixture_sources_do_not_provide_match_venue",
+      "fixture_mapping_bridge_ref": "data/manual_sources/v3_worldcup/war_room/v3_wc2026_fixture_mapping_bridge.json#mt_641915103"
     },
     "venue_stress_summary": {
       "status": "VENUE_LAYER_READY_FIXTURE_VENUE_NOT_MAPPED",
@@ -407,7 +421,7 @@
       "stress_tags": [
         "WATCH_ONLY"
       ],
-      "observation_note": "fixture_source_missing_venue_name"
+      "observation_note": "fixture_sources_do_not_provide_match_venue"
     },
     "home_final_26_profile_ref": "data/manual_sources/v3_worldcup/squads/fifa_final_26/processed/v3_wc2026_final_26_squad_profile_team_cards.json#panama",
     "away_final_26_profile_ref": "data/manual_sources/v3_worldcup/squads/fifa_final_26/processed/v3_wc2026_final_26_squad_profile_team_cards.json#england",
@@ -431,22 +445,23 @@
       }
     },
     "odds_snapshot_status": {
-      "status": "GLOBAL_SNAPSHOT_AVAILABLE_NOT_MATCH_MAPPED",
+      "status": "MAPPED_NO_CURRENT_ODDS",
       "successful_fixture_count": 1,
       "source": "data/runtime/status/check_v3_worldcup_odds_snapshot_live_small_batch_20260604.json",
       "has_native_opening": false,
       "has_native_closing": false
     },
     "odds_binding": {
-      "odds_fixture_id": null,
-      "odds_snapshot_status": "GLOBAL_SNAPSHOT_AVAILABLE_NOT_MATCH_MAPPED",
+      "odds_fixture_id": "1489422",
+      "odds_snapshot_status": "MAPPED_NO_CURRENT_ODDS",
       "odds_available": false,
       "bookmaker_count": 13,
       "market_type_count": 7,
       "odds_observation_delta_status": "ELIGIBLE_MULTIPLE_SNAPSHOTS_NO_CHANGE",
       "changed_odds_count": 0,
-      "odds_gap_reason": "match_card_fixture_id_not_mapped_to_api_football_odds_fixture",
-      "no_money_flow_judgment": true
+      "odds_gap_reason": "odds_fixture_mapped_but_current_snapshot_empty",
+      "no_money_flow_judgment": true,
+      "fixture_mapping_bridge_ref": "data/manual_sources/v3_worldcup/war_room/v3_wc2026_fixture_mapping_bridge.json#mt_641915103"
     },
     "odds_observation_delta_status": {
       "status": "ELIGIBLE_MULTIPLE_SNAPSHOTS_NO_CHANGE",
@@ -481,6 +496,7 @@
     "away_team": "Ghana",
     "home_team_slug": "croatia",
     "away_team_slug": "ghana",
+    "api_football_fixture_id": "1489420",
     "venue": "VENUE_NOT_MAPPED",
     "kickoff_status": "SCHEDULED",
     "kickoff_time_utc": "2026-06-27T21:00:00.000Z",
@@ -492,8 +508,9 @@
         "WATCH_ONLY"
       ],
       "venue_stress_ref": "data/v3_worldcup/venue_stress/v3_worldcup_venue_stress_20260603.json",
-      "venue_mapping_status": "NOT_MAPPED",
-      "venue_gap_reason": "fixture_source_missing_venue_name"
+      "venue_mapping_status": "UNMAPPED",
+      "venue_gap_reason": "fixture_sources_do_not_provide_match_venue",
+      "fixture_mapping_bridge_ref": "data/manual_sources/v3_worldcup/war_room/v3_wc2026_fixture_mapping_bridge.json#mt_028389889"
     },
     "venue_stress_summary": {
       "status": "VENUE_LAYER_READY_FIXTURE_VENUE_NOT_MAPPED",
@@ -502,7 +519,7 @@
       "stress_tags": [
         "WATCH_ONLY"
       ],
-      "observation_note": "fixture_source_missing_venue_name"
+      "observation_note": "fixture_sources_do_not_provide_match_venue"
     },
     "home_final_26_profile_ref": "data/manual_sources/v3_worldcup/squads/fifa_final_26/processed/v3_wc2026_final_26_squad_profile_team_cards.json#croatia",
     "away_final_26_profile_ref": "data/manual_sources/v3_worldcup/squads/fifa_final_26/processed/v3_wc2026_final_26_squad_profile_team_cards.json#ghana",
@@ -527,22 +544,23 @@
       }
     },
     "odds_snapshot_status": {
-      "status": "GLOBAL_SNAPSHOT_AVAILABLE_NOT_MATCH_MAPPED",
+      "status": "MAPPED_NO_CURRENT_ODDS",
       "successful_fixture_count": 1,
       "source": "data/runtime/status/check_v3_worldcup_odds_snapshot_live_small_batch_20260604.json",
       "has_native_opening": false,
       "has_native_closing": false
     },
     "odds_binding": {
-      "odds_fixture_id": null,
-      "odds_snapshot_status": "GLOBAL_SNAPSHOT_AVAILABLE_NOT_MATCH_MAPPED",
+      "odds_fixture_id": "1489420",
+      "odds_snapshot_status": "MAPPED_NO_CURRENT_ODDS",
       "odds_available": false,
       "bookmaker_count": 13,
       "market_type_count": 7,
       "odds_observation_delta_status": "ELIGIBLE_MULTIPLE_SNAPSHOTS_NO_CHANGE",
       "changed_odds_count": 0,
-      "odds_gap_reason": "match_card_fixture_id_not_mapped_to_api_football_odds_fixture",
-      "no_money_flow_judgment": true
+      "odds_gap_reason": "odds_fixture_mapped_but_current_snapshot_empty",
+      "no_money_flow_judgment": true,
+      "fixture_mapping_bridge_ref": "data/manual_sources/v3_worldcup/war_room/v3_wc2026_fixture_mapping_bridge.json#mt_028389889"
     },
     "odds_observation_delta_status": {
       "status": "ELIGIBLE_MULTIPLE_SNAPSHOTS_NO_CHANGE",
@@ -577,6 +595,7 @@
     "away_team": "IR Iran",
     "home_team_slug": "egypt",
     "away_team_slug": "ir_iran",
+    "api_football_fixture_id": "1489414",
     "venue": "VENUE_NOT_MAPPED",
     "kickoff_status": "SCHEDULED",
     "kickoff_time_utc": "2026-06-27T03:00:00.000Z",
@@ -588,8 +607,9 @@
         "WATCH_ONLY"
       ],
       "venue_stress_ref": "data/v3_worldcup/venue_stress/v3_worldcup_venue_stress_20260603.json",
-      "venue_mapping_status": "NOT_MAPPED",
-      "venue_gap_reason": "fixture_source_missing_venue_name"
+      "venue_mapping_status": "UNMAPPED",
+      "venue_gap_reason": "fixture_sources_do_not_provide_match_venue",
+      "fixture_mapping_bridge_ref": "data/manual_sources/v3_worldcup/war_room/v3_wc2026_fixture_mapping_bridge.json#mt_894046969"
     },
     "venue_stress_summary": {
       "status": "VENUE_LAYER_READY_FIXTURE_VENUE_NOT_MAPPED",
@@ -598,7 +618,7 @@
       "stress_tags": [
         "WATCH_ONLY"
       ],
-      "observation_note": "fixture_source_missing_venue_name"
+      "observation_note": "fixture_sources_do_not_provide_match_venue"
     },
     "home_final_26_profile_ref": "data/manual_sources/v3_worldcup/squads/fifa_final_26/processed/v3_wc2026_final_26_squad_profile_team_cards.json#egypt",
     "away_final_26_profile_ref": "data/manual_sources/v3_worldcup/squads/fifa_final_26/processed/v3_wc2026_final_26_squad_profile_team_cards.json#ir_iran",
@@ -620,22 +640,23 @@
       }
     },
     "odds_snapshot_status": {
-      "status": "GLOBAL_SNAPSHOT_AVAILABLE_NOT_MATCH_MAPPED",
+      "status": "MAPPED_NO_CURRENT_ODDS",
       "successful_fixture_count": 1,
       "source": "data/runtime/status/check_v3_worldcup_odds_snapshot_live_small_batch_20260604.json",
       "has_native_opening": false,
       "has_native_closing": false
     },
     "odds_binding": {
-      "odds_fixture_id": null,
-      "odds_snapshot_status": "GLOBAL_SNAPSHOT_AVAILABLE_NOT_MATCH_MAPPED",
+      "odds_fixture_id": "1489414",
+      "odds_snapshot_status": "MAPPED_NO_CURRENT_ODDS",
       "odds_available": false,
       "bookmaker_count": 13,
       "market_type_count": 7,
       "odds_observation_delta_status": "ELIGIBLE_MULTIPLE_SNAPSHOTS_NO_CHANGE",
       "changed_odds_count": 0,
-      "odds_gap_reason": "match_card_fixture_id_not_mapped_to_api_football_odds_fixture",
-      "no_money_flow_judgment": true
+      "odds_gap_reason": "odds_fixture_mapped_but_current_snapshot_empty",
+      "no_money_flow_judgment": true,
+      "fixture_mapping_bridge_ref": "data/manual_sources/v3_worldcup/war_room/v3_wc2026_fixture_mapping_bridge.json#mt_894046969"
     },
     "odds_observation_delta_status": {
       "status": "ELIGIBLE_MULTIPLE_SNAPSHOTS_NO_CHANGE",
@@ -670,6 +691,7 @@
     "away_team": "Belgium",
     "home_team_slug": "new_zealand",
     "away_team_slug": "belgium",
+    "api_football_fixture_id": "1489415",
     "venue": "VENUE_NOT_MAPPED",
     "kickoff_status": "SCHEDULED",
     "kickoff_time_utc": "2026-06-27T03:00:00.000Z",
@@ -681,8 +703,9 @@
         "WATCH_ONLY"
       ],
       "venue_stress_ref": "data/v3_worldcup/venue_stress/v3_worldcup_venue_stress_20260603.json",
-      "venue_mapping_status": "NOT_MAPPED",
-      "venue_gap_reason": "fixture_source_missing_venue_name"
+      "venue_mapping_status": "UNMAPPED",
+      "venue_gap_reason": "fixture_sources_do_not_provide_match_venue",
+      "fixture_mapping_bridge_ref": "data/manual_sources/v3_worldcup/war_room/v3_wc2026_fixture_mapping_bridge.json#mt_986264824"
     },
     "venue_stress_summary": {
       "status": "VENUE_LAYER_READY_FIXTURE_VENUE_NOT_MAPPED",
@@ -691,7 +714,7 @@
       "stress_tags": [
         "WATCH_ONLY"
       ],
-      "observation_note": "fixture_source_missing_venue_name"
+      "observation_note": "fixture_sources_do_not_provide_match_venue"
     },
     "home_final_26_profile_ref": "data/manual_sources/v3_worldcup/squads/fifa_final_26/processed/v3_wc2026_final_26_squad_profile_team_cards.json#new_zealand",
     "away_final_26_profile_ref": "data/manual_sources/v3_worldcup/squads/fifa_final_26/processed/v3_wc2026_final_26_squad_profile_team_cards.json#belgium",
@@ -716,22 +739,23 @@
       }
     },
     "odds_snapshot_status": {
-      "status": "GLOBAL_SNAPSHOT_AVAILABLE_NOT_MATCH_MAPPED",
+      "status": "MAPPED_NO_CURRENT_ODDS",
       "successful_fixture_count": 1,
       "source": "data/runtime/status/check_v3_worldcup_odds_snapshot_live_small_batch_20260604.json",
       "has_native_opening": false,
       "has_native_closing": false
     },
     "odds_binding": {
-      "odds_fixture_id": null,
-      "odds_snapshot_status": "GLOBAL_SNAPSHOT_AVAILABLE_NOT_MATCH_MAPPED",
+      "odds_fixture_id": "1489415",
+      "odds_snapshot_status": "MAPPED_NO_CURRENT_ODDS",
       "odds_available": false,
       "bookmaker_count": 13,
       "market_type_count": 7,
       "odds_observation_delta_status": "ELIGIBLE_MULTIPLE_SNAPSHOTS_NO_CHANGE",
       "changed_odds_count": 0,
-      "odds_gap_reason": "match_card_fixture_id_not_mapped_to_api_football_odds_fixture",
-      "no_money_flow_judgment": true
+      "odds_gap_reason": "odds_fixture_mapped_but_current_snapshot_empty",
+      "no_money_flow_judgment": true,
+      "fixture_mapping_bridge_ref": "data/manual_sources/v3_worldcup/war_room/v3_wc2026_fixture_mapping_bridge.json#mt_986264824"
     },
     "odds_observation_delta_status": {
       "status": "ELIGIBLE_MULTIPLE_SNAPSHOTS_NO_CHANGE",
@@ -766,6 +790,7 @@
     "away_team": "Spain",
     "home_team_slug": "uruguay",
     "away_team_slug": "spain",
+    "api_football_fixture_id": "1489417",
     "venue": "VENUE_NOT_MAPPED",
     "kickoff_status": "SCHEDULED",
     "kickoff_time_utc": "2026-06-27T00:00:00.000Z",
@@ -777,8 +802,9 @@
         "WATCH_ONLY"
       ],
       "venue_stress_ref": "data/v3_worldcup/venue_stress/v3_worldcup_venue_stress_20260603.json",
-      "venue_mapping_status": "NOT_MAPPED",
-      "venue_gap_reason": "fixture_source_missing_venue_name"
+      "venue_mapping_status": "UNMAPPED",
+      "venue_gap_reason": "fixture_sources_do_not_provide_match_venue",
+      "fixture_mapping_bridge_ref": "data/manual_sources/v3_worldcup/war_room/v3_wc2026_fixture_mapping_bridge.json#mt_209798011"
     },
     "venue_stress_summary": {
       "status": "VENUE_LAYER_READY_FIXTURE_VENUE_NOT_MAPPED",
@@ -787,7 +813,7 @@
       "stress_tags": [
         "WATCH_ONLY"
       ],
-      "observation_note": "fixture_source_missing_venue_name"
+      "observation_note": "fixture_sources_do_not_provide_match_venue"
     },
     "home_final_26_profile_ref": "data/manual_sources/v3_worldcup/squads/fifa_final_26/processed/v3_wc2026_final_26_squad_profile_team_cards.json#uruguay",
     "away_final_26_profile_ref": "data/manual_sources/v3_worldcup/squads/fifa_final_26/processed/v3_wc2026_final_26_squad_profile_team_cards.json#spain",
@@ -809,22 +835,23 @@
       }
     },
     "odds_snapshot_status": {
-      "status": "GLOBAL_SNAPSHOT_AVAILABLE_NOT_MATCH_MAPPED",
+      "status": "MAPPED_NO_CURRENT_ODDS",
       "successful_fixture_count": 1,
       "source": "data/runtime/status/check_v3_worldcup_odds_snapshot_live_small_batch_20260604.json",
       "has_native_opening": false,
       "has_native_closing": false
     },
     "odds_binding": {
-      "odds_fixture_id": null,
-      "odds_snapshot_status": "GLOBAL_SNAPSHOT_AVAILABLE_NOT_MATCH_MAPPED",
+      "odds_fixture_id": "1489417",
+      "odds_snapshot_status": "MAPPED_NO_CURRENT_ODDS",
       "odds_available": false,
       "bookmaker_count": 13,
       "market_type_count": 7,
       "odds_observation_delta_status": "ELIGIBLE_MULTIPLE_SNAPSHOTS_NO_CHANGE",
       "changed_odds_count": 0,
-      "odds_gap_reason": "match_card_fixture_id_not_mapped_to_api_football_odds_fixture",
-      "no_money_flow_judgment": true
+      "odds_gap_reason": "odds_fixture_mapped_but_current_snapshot_empty",
+      "no_money_flow_judgment": true,
+      "fixture_mapping_bridge_ref": "data/manual_sources/v3_worldcup/war_room/v3_wc2026_fixture_mapping_bridge.json#mt_209798011"
     },
     "odds_observation_delta_status": {
       "status": "ELIGIBLE_MULTIPLE_SNAPSHOTS_NO_CHANGE",
@@ -859,6 +886,7 @@
     "away_team": "Saudi Arabia",
     "home_team_slug": "cabo_verde",
     "away_team_slug": "saudi_arabia",
+    "api_football_fixture_id": "1489413",
     "venue": "VENUE_NOT_MAPPED",
     "kickoff_status": "SCHEDULED",
     "kickoff_time_utc": "2026-06-27T00:00:00.000Z",
@@ -870,8 +898,9 @@
         "WATCH_ONLY"
       ],
       "venue_stress_ref": "data/v3_worldcup/venue_stress/v3_worldcup_venue_stress_20260603.json",
-      "venue_mapping_status": "NOT_MAPPED",
-      "venue_gap_reason": "fixture_source_missing_venue_name"
+      "venue_mapping_status": "UNMAPPED",
+      "venue_gap_reason": "fixture_sources_do_not_provide_match_venue",
+      "fixture_mapping_bridge_ref": "data/manual_sources/v3_worldcup/war_room/v3_wc2026_fixture_mapping_bridge.json#mt_517473114"
     },
     "venue_stress_summary": {
       "status": "VENUE_LAYER_READY_FIXTURE_VENUE_NOT_MAPPED",
@@ -880,7 +909,7 @@
       "stress_tags": [
         "WATCH_ONLY"
       ],
-      "observation_note": "fixture_source_missing_venue_name"
+      "observation_note": "fixture_sources_do_not_provide_match_venue"
     },
     "home_final_26_profile_ref": "data/manual_sources/v3_worldcup/squads/fifa_final_26/processed/v3_wc2026_final_26_squad_profile_team_cards.json#cabo_verde",
     "away_final_26_profile_ref": "data/manual_sources/v3_worldcup/squads/fifa_final_26/processed/v3_wc2026_final_26_squad_profile_team_cards.json#saudi_arabia",
@@ -902,22 +931,23 @@
       }
     },
     "odds_snapshot_status": {
-      "status": "GLOBAL_SNAPSHOT_AVAILABLE_NOT_MATCH_MAPPED",
+      "status": "MAPPED_NO_CURRENT_ODDS",
       "successful_fixture_count": 1,
       "source": "data/runtime/status/check_v3_worldcup_odds_snapshot_live_small_batch_20260604.json",
       "has_native_opening": false,
       "has_native_closing": false
     },
     "odds_binding": {
-      "odds_fixture_id": null,
-      "odds_snapshot_status": "GLOBAL_SNAPSHOT_AVAILABLE_NOT_MATCH_MAPPED",
+      "odds_fixture_id": "1489413",
+      "odds_snapshot_status": "MAPPED_NO_CURRENT_ODDS",
       "odds_available": false,
       "bookmaker_count": 13,
       "market_type_count": 7,
       "odds_observation_delta_status": "ELIGIBLE_MULTIPLE_SNAPSHOTS_NO_CHANGE",
       "changed_odds_count": 0,
-      "odds_gap_reason": "match_card_fixture_id_not_mapped_to_api_football_odds_fixture",
-      "no_money_flow_judgment": true
+      "odds_gap_reason": "odds_fixture_mapped_but_current_snapshot_empty",
+      "no_money_flow_judgment": true,
+      "fixture_mapping_bridge_ref": "data/manual_sources/v3_worldcup/war_room/v3_wc2026_fixture_mapping_bridge.json#mt_517473114"
     },
     "odds_observation_delta_status": {
       "status": "ELIGIBLE_MULTIPLE_SNAPSHOTS_NO_CHANGE",
@@ -952,6 +982,7 @@
     "away_team": "Iraq",
     "home_team_slug": "senegal",
     "away_team_slug": "iraq",
+    "api_football_fixture_id": "1539074",
     "venue": "VENUE_NOT_MAPPED",
     "kickoff_status": "SCHEDULED",
     "kickoff_time_utc": "2026-06-26T19:00:00.000Z",
@@ -963,8 +994,9 @@
         "WATCH_ONLY"
       ],
       "venue_stress_ref": "data/v3_worldcup/venue_stress/v3_worldcup_venue_stress_20260603.json",
-      "venue_mapping_status": "NOT_MAPPED",
-      "venue_gap_reason": "fixture_source_missing_venue_name"
+      "venue_mapping_status": "UNMAPPED",
+      "venue_gap_reason": "fixture_sources_do_not_provide_match_venue",
+      "fixture_mapping_bridge_ref": "data/manual_sources/v3_worldcup/war_room/v3_wc2026_fixture_mapping_bridge.json#mt_209798033"
     },
     "venue_stress_summary": {
       "status": "VENUE_LAYER_READY_FIXTURE_VENUE_NOT_MAPPED",
@@ -973,7 +1005,7 @@
       "stress_tags": [
         "WATCH_ONLY"
       ],
-      "observation_note": "fixture_source_missing_venue_name"
+      "observation_note": "fixture_sources_do_not_provide_match_venue"
     },
     "home_final_26_profile_ref": "data/manual_sources/v3_worldcup/squads/fifa_final_26/processed/v3_wc2026_final_26_squad_profile_team_cards.json#senegal",
     "away_final_26_profile_ref": "data/manual_sources/v3_worldcup/squads/fifa_final_26/processed/v3_wc2026_final_26_squad_profile_team_cards.json#iraq",
@@ -998,22 +1030,23 @@
       }
     },
     "odds_snapshot_status": {
-      "status": "GLOBAL_SNAPSHOT_AVAILABLE_NOT_MATCH_MAPPED",
+      "status": "MAPPED_NO_CURRENT_ODDS",
       "successful_fixture_count": 1,
       "source": "data/runtime/status/check_v3_worldcup_odds_snapshot_live_small_batch_20260604.json",
       "has_native_opening": false,
       "has_native_closing": false
     },
     "odds_binding": {
-      "odds_fixture_id": null,
-      "odds_snapshot_status": "GLOBAL_SNAPSHOT_AVAILABLE_NOT_MATCH_MAPPED",
+      "odds_fixture_id": "1539074",
+      "odds_snapshot_status": "MAPPED_NO_CURRENT_ODDS",
       "odds_available": false,
       "bookmaker_count": 13,
       "market_type_count": 7,
       "odds_observation_delta_status": "ELIGIBLE_MULTIPLE_SNAPSHOTS_NO_CHANGE",
       "changed_odds_count": 0,
-      "odds_gap_reason": "match_card_fixture_id_not_mapped_to_api_football_odds_fixture",
-      "no_money_flow_judgment": true
+      "odds_gap_reason": "odds_fixture_mapped_but_current_snapshot_empty",
+      "no_money_flow_judgment": true,
+      "fixture_mapping_bridge_ref": "data/manual_sources/v3_worldcup/war_room/v3_wc2026_fixture_mapping_bridge.json#mt_209798033"
     },
     "odds_observation_delta_status": {
       "status": "ELIGIBLE_MULTIPLE_SNAPSHOTS_NO_CHANGE",
@@ -1048,6 +1081,7 @@
     "away_team": "France",
     "home_team_slug": "norway",
     "away_team_slug": "france",
+    "api_football_fixture_id": "1489416",
     "venue": "VENUE_NOT_MAPPED",
     "kickoff_status": "SCHEDULED",
     "kickoff_time_utc": "2026-06-26T19:00:00.000Z",
@@ -1059,8 +1093,9 @@
         "WATCH_ONLY"
       ],
       "venue_stress_ref": "data/v3_worldcup/venue_stress/v3_worldcup_venue_stress_20260603.json",
-      "venue_mapping_status": "NOT_MAPPED",
-      "venue_gap_reason": "fixture_source_missing_venue_name"
+      "venue_mapping_status": "UNMAPPED",
+      "venue_gap_reason": "fixture_sources_do_not_provide_match_venue",
+      "fixture_mapping_bridge_ref": "data/manual_sources/v3_worldcup/war_room/v3_wc2026_fixture_mapping_bridge.json#mt_370102505"
     },
     "venue_stress_summary": {
       "status": "VENUE_LAYER_READY_FIXTURE_VENUE_NOT_MAPPED",
@@ -1069,7 +1104,7 @@
       "stress_tags": [
         "WATCH_ONLY"
       ],
-      "observation_note": "fixture_source_missing_venue_name"
+      "observation_note": "fixture_sources_do_not_provide_match_venue"
     },
     "home_final_26_profile_ref": "data/manual_sources/v3_worldcup/squads/fifa_final_26/processed/v3_wc2026_final_26_squad_profile_team_cards.json#norway",
     "away_final_26_profile_ref": "data/manual_sources/v3_worldcup/squads/fifa_final_26/processed/v3_wc2026_final_26_squad_profile_team_cards.json#france",
@@ -1093,22 +1128,23 @@
       }
     },
     "odds_snapshot_status": {
-      "status": "GLOBAL_SNAPSHOT_AVAILABLE_NOT_MATCH_MAPPED",
+      "status": "MAPPED_NO_CURRENT_ODDS",
       "successful_fixture_count": 1,
       "source": "data/runtime/status/check_v3_worldcup_odds_snapshot_live_small_batch_20260604.json",
       "has_native_opening": false,
       "has_native_closing": false
     },
     "odds_binding": {
-      "odds_fixture_id": null,
-      "odds_snapshot_status": "GLOBAL_SNAPSHOT_AVAILABLE_NOT_MATCH_MAPPED",
+      "odds_fixture_id": "1489416",
+      "odds_snapshot_status": "MAPPED_NO_CURRENT_ODDS",
       "odds_available": false,
       "bookmaker_count": 13,
       "market_type_count": 7,
       "odds_observation_delta_status": "ELIGIBLE_MULTIPLE_SNAPSHOTS_NO_CHANGE",
       "changed_odds_count": 0,
-      "odds_gap_reason": "match_card_fixture_id_not_mapped_to_api_football_odds_fixture",
-      "no_money_flow_judgment": true
+      "odds_gap_reason": "odds_fixture_mapped_but_current_snapshot_empty",
+      "no_money_flow_judgment": true,
+      "fixture_mapping_bridge_ref": "data/manual_sources/v3_worldcup/war_room/v3_wc2026_fixture_mapping_bridge.json#mt_370102505"
     },
     "odds_observation_delta_status": {
       "status": "ELIGIBLE_MULTIPLE_SNAPSHOTS_NO_CHANGE",
@@ -1143,6 +1179,7 @@
     "away_team": "Australia",
     "home_team_slug": "paraguay",
     "away_team_slug": "australia",
+    "api_football_fixture_id": "1489411",
     "venue": "VENUE_NOT_MAPPED",
     "kickoff_status": "SCHEDULED",
     "kickoff_time_utc": "2026-06-26T02:00:00.000Z",
@@ -1154,8 +1191,9 @@
         "WATCH_ONLY"
       ],
       "venue_stress_ref": "data/v3_worldcup/venue_stress/v3_worldcup_venue_stress_20260603.json",
-      "venue_mapping_status": "NOT_MAPPED",
-      "venue_gap_reason": "fixture_source_missing_venue_name"
+      "venue_mapping_status": "UNMAPPED",
+      "venue_gap_reason": "fixture_sources_do_not_provide_match_venue",
+      "fixture_mapping_bridge_ref": "data/manual_sources/v3_worldcup/war_room/v3_wc2026_fixture_mapping_bridge.json#mt_209798660"
     },
     "venue_stress_summary": {
       "status": "VENUE_LAYER_READY_FIXTURE_VENUE_NOT_MAPPED",
@@ -1164,7 +1202,7 @@
       "stress_tags": [
         "WATCH_ONLY"
       ],
-      "observation_note": "fixture_source_missing_venue_name"
+      "observation_note": "fixture_sources_do_not_provide_match_venue"
     },
     "home_final_26_profile_ref": "data/manual_sources/v3_worldcup/squads/fifa_final_26/processed/v3_wc2026_final_26_squad_profile_team_cards.json#paraguay",
     "away_final_26_profile_ref": "data/manual_sources/v3_worldcup/squads/fifa_final_26/processed/v3_wc2026_final_26_squad_profile_team_cards.json#australia",
@@ -1188,22 +1226,23 @@
       }
     },
     "odds_snapshot_status": {
-      "status": "GLOBAL_SNAPSHOT_AVAILABLE_NOT_MATCH_MAPPED",
+      "status": "MAPPED_NO_CURRENT_ODDS",
       "successful_fixture_count": 1,
       "source": "data/runtime/status/check_v3_worldcup_odds_snapshot_live_small_batch_20260604.json",
       "has_native_opening": false,
       "has_native_closing": false
     },
     "odds_binding": {
-      "odds_fixture_id": null,
-      "odds_snapshot_status": "GLOBAL_SNAPSHOT_AVAILABLE_NOT_MATCH_MAPPED",
+      "odds_fixture_id": "1489411",
+      "odds_snapshot_status": "MAPPED_NO_CURRENT_ODDS",
       "odds_available": false,
       "bookmaker_count": 13,
       "market_type_count": 7,
       "odds_observation_delta_status": "ELIGIBLE_MULTIPLE_SNAPSHOTS_NO_CHANGE",
       "changed_odds_count": 0,
-      "odds_gap_reason": "match_card_fixture_id_not_mapped_to_api_football_odds_fixture",
-      "no_money_flow_judgment": true
+      "odds_gap_reason": "odds_fixture_mapped_but_current_snapshot_empty",
+      "no_money_flow_judgment": true,
+      "fixture_mapping_bridge_ref": "data/manual_sources/v3_worldcup/war_room/v3_wc2026_fixture_mapping_bridge.json#mt_209798660"
     },
     "odds_observation_delta_status": {
       "status": "ELIGIBLE_MULTIPLE_SNAPSHOTS_NO_CHANGE",
@@ -1238,6 +1277,7 @@
     "away_team": "USA",
     "home_team_slug": "turkiye",
     "away_team_slug": "usa",
+    "api_football_fixture_id": "1539012",
     "venue": "VENUE_NOT_MAPPED",
     "kickoff_status": "SCHEDULED",
     "kickoff_time_utc": "2026-06-26T02:00:00.000Z",
@@ -1249,8 +1289,9 @@
         "WATCH_ONLY"
       ],
       "venue_stress_ref": "data/v3_worldcup/venue_stress/v3_worldcup_venue_stress_20260603.json",
-      "venue_mapping_status": "NOT_MAPPED",
-      "venue_gap_reason": "fixture_source_missing_venue_name"
+      "venue_mapping_status": "UNMAPPED",
+      "venue_gap_reason": "fixture_sources_do_not_provide_match_venue",
+      "fixture_mapping_bridge_ref": "data/manual_sources/v3_worldcup/war_room/v3_wc2026_fixture_mapping_bridge.json#mt_370102873"
     },
     "venue_stress_summary": {
       "status": "VENUE_LAYER_READY_FIXTURE_VENUE_NOT_MAPPED",
@@ -1259,7 +1300,7 @@
       "stress_tags": [
         "WATCH_ONLY"
       ],
-      "observation_note": "fixture_source_missing_venue_name"
+      "observation_note": "fixture_sources_do_not_provide_match_venue"
     },
     "home_final_26_profile_ref": "data/manual_sources/v3_worldcup/squads/fifa_final_26/processed/v3_wc2026_final_26_squad_profile_team_cards.json#turkiye",
     "away_final_26_profile_ref": "data/manual_sources/v3_worldcup/squads/fifa_final_26/processed/v3_wc2026_final_26_squad_profile_team_cards.json#usa",
@@ -1281,22 +1322,23 @@
       }
     },
     "odds_snapshot_status": {
-      "status": "GLOBAL_SNAPSHOT_AVAILABLE_NOT_MATCH_MAPPED",
+      "status": "MAPPED_NO_CURRENT_ODDS",
       "successful_fixture_count": 1,
       "source": "data/runtime/status/check_v3_worldcup_odds_snapshot_live_small_batch_20260604.json",
       "has_native_opening": false,
       "has_native_closing": false
     },
     "odds_binding": {
-      "odds_fixture_id": null,
-      "odds_snapshot_status": "GLOBAL_SNAPSHOT_AVAILABLE_NOT_MATCH_MAPPED",
+      "odds_fixture_id": "1539012",
+      "odds_snapshot_status": "MAPPED_NO_CURRENT_ODDS",
       "odds_available": false,
       "bookmaker_count": 13,
       "market_type_count": 7,
       "odds_observation_delta_status": "ELIGIBLE_MULTIPLE_SNAPSHOTS_NO_CHANGE",
       "changed_odds_count": 0,
-      "odds_gap_reason": "match_card_fixture_id_not_mapped_to_api_football_odds_fixture",
-      "no_money_flow_judgment": true
+      "odds_gap_reason": "odds_fixture_mapped_but_current_snapshot_empty",
+      "no_money_flow_judgment": true,
+      "fixture_mapping_bridge_ref": "data/manual_sources/v3_worldcup/war_room/v3_wc2026_fixture_mapping_bridge.json#mt_370102873"
     },
     "odds_observation_delta_status": {
       "status": "ELIGIBLE_MULTIPLE_SNAPSHOTS_NO_CHANGE",
@@ -1331,6 +1373,7 @@
     "away_team": "Netherlands",
     "home_team_slug": "tunisia",
     "away_team_slug": "netherlands",
+    "api_football_fixture_id": "1489412",
     "venue": "VENUE_NOT_MAPPED",
     "kickoff_status": "SCHEDULED",
     "kickoff_time_utc": "2026-06-25T23:00:00.000Z",
@@ -1342,8 +1385,9 @@
         "WATCH_ONLY"
       ],
       "venue_stress_ref": "data/v3_worldcup/venue_stress/v3_worldcup_venue_stress_20260603.json",
-      "venue_mapping_status": "NOT_MAPPED",
-      "venue_gap_reason": "fixture_source_missing_venue_name"
+      "venue_mapping_status": "UNMAPPED",
+      "venue_gap_reason": "fixture_sources_do_not_provide_match_venue",
+      "fixture_mapping_bridge_ref": "data/manual_sources/v3_worldcup/war_room/v3_wc2026_fixture_mapping_bridge.json#mt_517473422"
     },
     "venue_stress_summary": {
       "status": "VENUE_LAYER_READY_FIXTURE_VENUE_NOT_MAPPED",
@@ -1352,7 +1396,7 @@
       "stress_tags": [
         "WATCH_ONLY"
       ],
-      "observation_note": "fixture_source_missing_venue_name"
+      "observation_note": "fixture_sources_do_not_provide_match_venue"
     },
     "home_final_26_profile_ref": "data/manual_sources/v3_worldcup/squads/fifa_final_26/processed/v3_wc2026_final_26_squad_profile_team_cards.json#tunisia",
     "away_final_26_profile_ref": "data/manual_sources/v3_worldcup/squads/fifa_final_26/processed/v3_wc2026_final_26_squad_profile_team_cards.json#netherlands",
@@ -1374,22 +1418,23 @@
       }
     },
     "odds_snapshot_status": {
-      "status": "GLOBAL_SNAPSHOT_AVAILABLE_NOT_MATCH_MAPPED",
+      "status": "MAPPED_NO_CURRENT_ODDS",
       "successful_fixture_count": 1,
       "source": "data/runtime/status/check_v3_worldcup_odds_snapshot_live_small_batch_20260604.json",
       "has_native_opening": false,
       "has_native_closing": false
     },
     "odds_binding": {
-      "odds_fixture_id": null,
-      "odds_snapshot_status": "GLOBAL_SNAPSHOT_AVAILABLE_NOT_MATCH_MAPPED",
+      "odds_fixture_id": "1489412",
+      "odds_snapshot_status": "MAPPED_NO_CURRENT_ODDS",
       "odds_available": false,
       "bookmaker_count": 13,
       "market_type_count": 7,
       "odds_observation_delta_status": "ELIGIBLE_MULTIPLE_SNAPSHOTS_NO_CHANGE",
       "changed_odds_count": 0,
-      "odds_gap_reason": "match_card_fixture_id_not_mapped_to_api_football_odds_fixture",
-      "no_money_flow_judgment": true
+      "odds_gap_reason": "odds_fixture_mapped_but_current_snapshot_empty",
+      "no_money_flow_judgment": true,
+      "fixture_mapping_bridge_ref": "data/manual_sources/v3_worldcup/war_room/v3_wc2026_fixture_mapping_bridge.json#mt_517473422"
     },
     "odds_observation_delta_status": {
       "status": "ELIGIBLE_MULTIPLE_SNAPSHOTS_NO_CHANGE",
@@ -1424,6 +1469,7 @@
     "away_team": "Sweden",
     "home_team_slug": "japan",
     "away_team_slug": "sweden",
+    "api_football_fixture_id": "1539011",
     "venue": "VENUE_NOT_MAPPED",
     "kickoff_status": "SCHEDULED",
     "kickoff_time_utc": "2026-06-25T23:00:00.000Z",
@@ -1435,8 +1481,9 @@
         "WATCH_ONLY"
       ],
       "venue_stress_ref": "data/v3_worldcup/venue_stress/v3_worldcup_venue_stress_20260603.json",
-      "venue_mapping_status": "NOT_MAPPED",
-      "venue_gap_reason": "fixture_source_missing_venue_name"
+      "venue_mapping_status": "UNMAPPED",
+      "venue_gap_reason": "fixture_sources_do_not_provide_match_venue",
+      "fixture_mapping_bridge_ref": "data/manual_sources/v3_worldcup/war_room/v3_wc2026_fixture_mapping_bridge.json#mt_986264218"
     },
     "venue_stress_summary": {
       "status": "VENUE_LAYER_READY_FIXTURE_VENUE_NOT_MAPPED",
@@ -1445,7 +1492,7 @@
       "stress_tags": [
         "WATCH_ONLY"
       ],
-      "observation_note": "fixture_source_missing_venue_name"
+      "observation_note": "fixture_sources_do_not_provide_match_venue"
     },
     "home_final_26_profile_ref": "data/manual_sources/v3_worldcup/squads/fifa_final_26/processed/v3_wc2026_final_26_squad_profile_team_cards.json#japan",
     "away_final_26_profile_ref": "data/manual_sources/v3_worldcup/squads/fifa_final_26/processed/v3_wc2026_final_26_squad_profile_team_cards.json#sweden",
@@ -1469,22 +1516,23 @@
       }
     },
     "odds_snapshot_status": {
-      "status": "GLOBAL_SNAPSHOT_AVAILABLE_NOT_MATCH_MAPPED",
+      "status": "MAPPED_NO_CURRENT_ODDS",
       "successful_fixture_count": 1,
       "source": "data/runtime/status/check_v3_worldcup_odds_snapshot_live_small_batch_20260604.json",
       "has_native_opening": false,
       "has_native_closing": false
     },
     "odds_binding": {
-      "odds_fixture_id": null,
-      "odds_snapshot_status": "GLOBAL_SNAPSHOT_AVAILABLE_NOT_MATCH_MAPPED",
+      "odds_fixture_id": "1539011",
+      "odds_snapshot_status": "MAPPED_NO_CURRENT_ODDS",
       "odds_available": false,
       "bookmaker_count": 13,
       "market_type_count": 7,
       "odds_observation_delta_status": "ELIGIBLE_MULTIPLE_SNAPSHOTS_NO_CHANGE",
       "changed_odds_count": 0,
-      "odds_gap_reason": "match_card_fixture_id_not_mapped_to_api_football_odds_fixture",
-      "no_money_flow_judgment": true
+      "odds_gap_reason": "odds_fixture_mapped_but_current_snapshot_empty",
+      "no_money_flow_judgment": true,
+      "fixture_mapping_bridge_ref": "data/manual_sources/v3_worldcup/war_room/v3_wc2026_fixture_mapping_bridge.json#mt_986264218"
     },
     "odds_observation_delta_status": {
       "status": "ELIGIBLE_MULTIPLE_SNAPSHOTS_NO_CHANGE",
@@ -1519,6 +1567,7 @@
     "away_team": "Côte D'Ivoire",
     "home_team_slug": "curacao",
     "away_team_slug": "cote_divoire",
+    "api_football_fixture_id": "1489409",
     "venue": "VENUE_NOT_MAPPED",
     "kickoff_status": "SCHEDULED",
     "kickoff_time_utc": "2026-06-25T20:00:00.000Z",
@@ -1530,8 +1579,9 @@
         "WATCH_ONLY"
       ],
       "venue_stress_ref": "data/v3_worldcup/venue_stress/v3_worldcup_venue_stress_20260603.json",
-      "venue_mapping_status": "NOT_MAPPED",
-      "venue_gap_reason": "fixture_source_missing_venue_name"
+      "venue_mapping_status": "UNMAPPED",
+      "venue_gap_reason": "fixture_sources_do_not_provide_match_venue",
+      "fixture_mapping_bridge_ref": "data/manual_sources/v3_worldcup/war_room/v3_wc2026_fixture_mapping_bridge.json#mt_894046563"
     },
     "venue_stress_summary": {
       "status": "VENUE_LAYER_READY_FIXTURE_VENUE_NOT_MAPPED",
@@ -1540,7 +1590,7 @@
       "stress_tags": [
         "WATCH_ONLY"
       ],
-      "observation_note": "fixture_source_missing_venue_name"
+      "observation_note": "fixture_sources_do_not_provide_match_venue"
     },
     "home_final_26_profile_ref": "data/manual_sources/v3_worldcup/squads/fifa_final_26/processed/v3_wc2026_final_26_squad_profile_team_cards.json#curacao",
     "away_final_26_profile_ref": "data/manual_sources/v3_worldcup/squads/fifa_final_26/processed/v3_wc2026_final_26_squad_profile_team_cards.json#cote_divoire",
@@ -1562,22 +1612,23 @@
       }
     },
     "odds_snapshot_status": {
-      "status": "GLOBAL_SNAPSHOT_AVAILABLE_NOT_MATCH_MAPPED",
+      "status": "MAPPED_NO_CURRENT_ODDS",
       "successful_fixture_count": 1,
       "source": "data/runtime/status/check_v3_worldcup_odds_snapshot_live_small_batch_20260604.json",
       "has_native_opening": false,
       "has_native_closing": false
     },
     "odds_binding": {
-      "odds_fixture_id": null,
-      "odds_snapshot_status": "GLOBAL_SNAPSHOT_AVAILABLE_NOT_MATCH_MAPPED",
+      "odds_fixture_id": "1489409",
+      "odds_snapshot_status": "MAPPED_NO_CURRENT_ODDS",
       "odds_available": false,
       "bookmaker_count": 13,
       "market_type_count": 7,
       "odds_observation_delta_status": "ELIGIBLE_MULTIPLE_SNAPSHOTS_NO_CHANGE",
       "changed_odds_count": 0,
-      "odds_gap_reason": "match_card_fixture_id_not_mapped_to_api_football_odds_fixture",
-      "no_money_flow_judgment": true
+      "odds_gap_reason": "odds_fixture_mapped_but_current_snapshot_empty",
+      "no_money_flow_judgment": true,
+      "fixture_mapping_bridge_ref": "data/manual_sources/v3_worldcup/war_room/v3_wc2026_fixture_mapping_bridge.json#mt_894046563"
     },
     "odds_observation_delta_status": {
       "status": "ELIGIBLE_MULTIPLE_SNAPSHOTS_NO_CHANGE",
@@ -1612,6 +1663,7 @@
     "away_team": "Germany",
     "home_team_slug": "ecuador",
     "away_team_slug": "germany",
+    "api_football_fixture_id": "1489410",
     "venue": "VENUE_NOT_MAPPED",
     "kickoff_status": "SCHEDULED",
     "kickoff_time_utc": "2026-06-25T20:00:00.000Z",
@@ -1623,8 +1675,9 @@
         "WATCH_ONLY"
       ],
       "venue_stress_ref": "data/v3_worldcup/venue_stress/v3_worldcup_venue_stress_20260603.json",
-      "venue_mapping_status": "NOT_MAPPED",
-      "venue_gap_reason": "fixture_source_missing_venue_name"
+      "venue_mapping_status": "UNMAPPED",
+      "venue_gap_reason": "fixture_sources_do_not_provide_match_venue",
+      "fixture_mapping_bridge_ref": "data/manual_sources/v3_worldcup/war_room/v3_wc2026_fixture_mapping_bridge.json#mt_370102820"
     },
     "venue_stress_summary": {
       "status": "VENUE_LAYER_READY_FIXTURE_VENUE_NOT_MAPPED",
@@ -1633,7 +1686,7 @@
       "stress_tags": [
         "WATCH_ONLY"
       ],
-      "observation_note": "fixture_source_missing_venue_name"
+      "observation_note": "fixture_sources_do_not_provide_match_venue"
     },
     "home_final_26_profile_ref": "data/manual_sources/v3_worldcup/squads/fifa_final_26/processed/v3_wc2026_final_26_squad_profile_team_cards.json#ecuador",
     "away_final_26_profile_ref": "data/manual_sources/v3_worldcup/squads/fifa_final_26/processed/v3_wc2026_final_26_squad_profile_team_cards.json#germany",
@@ -1657,22 +1710,23 @@
       }
     },
     "odds_snapshot_status": {
-      "status": "GLOBAL_SNAPSHOT_AVAILABLE_NOT_MATCH_MAPPED",
+      "status": "MAPPED_NO_CURRENT_ODDS",
       "successful_fixture_count": 1,
       "source": "data/runtime/status/check_v3_worldcup_odds_snapshot_live_small_batch_20260604.json",
       "has_native_opening": false,
       "has_native_closing": false
     },
     "odds_binding": {
-      "odds_fixture_id": null,
-      "odds_snapshot_status": "GLOBAL_SNAPSHOT_AVAILABLE_NOT_MATCH_MAPPED",
+      "odds_fixture_id": "1489410",
+      "odds_snapshot_status": "MAPPED_NO_CURRENT_ODDS",
       "odds_available": false,
       "bookmaker_count": 13,
       "market_type_count": 7,
       "odds_observation_delta_status": "ELIGIBLE_MULTIPLE_SNAPSHOTS_NO_CHANGE",
       "changed_odds_count": 0,
-      "odds_gap_reason": "match_card_fixture_id_not_mapped_to_api_football_odds_fixture",
-      "no_money_flow_judgment": true
+      "odds_gap_reason": "odds_fixture_mapped_but_current_snapshot_empty",
+      "no_money_flow_judgment": true,
+      "fixture_mapping_bridge_ref": "data/manual_sources/v3_worldcup/war_room/v3_wc2026_fixture_mapping_bridge.json#mt_370102820"
     },
     "odds_observation_delta_status": {
       "status": "ELIGIBLE_MULTIPLE_SNAPSHOTS_NO_CHANGE",
@@ -1707,6 +1761,7 @@
     "away_team": "Korea Republic",
     "home_team_slug": "south_africa",
     "away_team_slug": "korea_republic",
+    "api_football_fixture_id": "1489407",
     "venue": "VENUE_NOT_MAPPED",
     "kickoff_status": "SCHEDULED",
     "kickoff_time_utc": "2026-06-25T01:00:00.000Z",
@@ -1718,8 +1773,9 @@
         "WATCH_ONLY"
       ],
       "venue_stress_ref": "data/v3_worldcup/venue_stress/v3_worldcup_venue_stress_20260603.json",
-      "venue_mapping_status": "NOT_MAPPED",
-      "venue_gap_reason": "fixture_source_missing_venue_name"
+      "venue_mapping_status": "UNMAPPED",
+      "venue_gap_reason": "fixture_sources_do_not_provide_match_venue",
+      "fixture_mapping_bridge_ref": "data/manual_sources/v3_worldcup/war_room/v3_wc2026_fixture_mapping_bridge.json#mt_028389197"
     },
     "venue_stress_summary": {
       "status": "VENUE_LAYER_READY_FIXTURE_VENUE_NOT_MAPPED",
@@ -1728,7 +1784,7 @@
       "stress_tags": [
         "WATCH_ONLY"
       ],
-      "observation_note": "fixture_source_missing_venue_name"
+      "observation_note": "fixture_sources_do_not_provide_match_venue"
     },
     "home_final_26_profile_ref": "data/manual_sources/v3_worldcup/squads/fifa_final_26/processed/v3_wc2026_final_26_squad_profile_team_cards.json#south_africa",
     "away_final_26_profile_ref": "data/manual_sources/v3_worldcup/squads/fifa_final_26/processed/v3_wc2026_final_26_squad_profile_team_cards.json#korea_republic",
@@ -1750,22 +1806,23 @@
       }
     },
     "odds_snapshot_status": {
-      "status": "GLOBAL_SNAPSHOT_AVAILABLE_NOT_MATCH_MAPPED",
+      "status": "MAPPED_NO_CURRENT_ODDS",
       "successful_fixture_count": 1,
       "source": "data/runtime/status/check_v3_worldcup_odds_snapshot_live_small_batch_20260604.json",
       "has_native_opening": false,
       "has_native_closing": false
     },
     "odds_binding": {
-      "odds_fixture_id": null,
-      "odds_snapshot_status": "GLOBAL_SNAPSHOT_AVAILABLE_NOT_MATCH_MAPPED",
+      "odds_fixture_id": "1489407",
+      "odds_snapshot_status": "MAPPED_NO_CURRENT_ODDS",
       "odds_available": false,
       "bookmaker_count": 13,
       "market_type_count": 7,
       "odds_observation_delta_status": "ELIGIBLE_MULTIPLE_SNAPSHOTS_NO_CHANGE",
       "changed_odds_count": 0,
-      "odds_gap_reason": "match_card_fixture_id_not_mapped_to_api_football_odds_fixture",
-      "no_money_flow_judgment": true
+      "odds_gap_reason": "odds_fixture_mapped_but_current_snapshot_empty",
+      "no_money_flow_judgment": true,
+      "fixture_mapping_bridge_ref": "data/manual_sources/v3_worldcup/war_room/v3_wc2026_fixture_mapping_bridge.json#mt_028389197"
     },
     "odds_observation_delta_status": {
       "status": "ELIGIBLE_MULTIPLE_SNAPSHOTS_NO_CHANGE",
@@ -1800,6 +1857,7 @@
     "away_team": "Mexico",
     "home_team_slug": "czechia",
     "away_team_slug": "mexico",
+    "api_football_fixture_id": "1539010",
     "venue": "VENUE_NOT_MAPPED",
     "kickoff_status": "SCHEDULED",
     "kickoff_time_utc": "2026-06-25T01:00:00.000Z",
@@ -1811,8 +1869,9 @@
         "WATCH_ONLY"
       ],
       "venue_stress_ref": "data/v3_worldcup/venue_stress/v3_worldcup_venue_stress_20260603.json",
-      "venue_mapping_status": "NOT_MAPPED",
-      "venue_gap_reason": "fixture_source_missing_venue_name"
+      "venue_mapping_status": "UNMAPPED",
+      "venue_gap_reason": "fixture_sources_do_not_provide_match_venue",
+      "fixture_mapping_bridge_ref": "data/manual_sources/v3_worldcup/war_room/v3_wc2026_fixture_mapping_bridge.json#mt_986264714"
     },
     "venue_stress_summary": {
       "status": "VENUE_LAYER_READY_FIXTURE_VENUE_NOT_MAPPED",
@@ -1821,7 +1880,7 @@
       "stress_tags": [
         "WATCH_ONLY"
       ],
-      "observation_note": "fixture_source_missing_venue_name"
+      "observation_note": "fixture_sources_do_not_provide_match_venue"
     },
     "home_final_26_profile_ref": "data/manual_sources/v3_worldcup/squads/fifa_final_26/processed/v3_wc2026_final_26_squad_profile_team_cards.json#czechia",
     "away_final_26_profile_ref": "data/manual_sources/v3_worldcup/squads/fifa_final_26/processed/v3_wc2026_final_26_squad_profile_team_cards.json#mexico",
@@ -1843,22 +1902,23 @@
       }
     },
     "odds_snapshot_status": {
-      "status": "GLOBAL_SNAPSHOT_AVAILABLE_NOT_MATCH_MAPPED",
+      "status": "MAPPED_NO_CURRENT_ODDS",
       "successful_fixture_count": 1,
       "source": "data/runtime/status/check_v3_worldcup_odds_snapshot_live_small_batch_20260604.json",
       "has_native_opening": false,
       "has_native_closing": false
     },
     "odds_binding": {
-      "odds_fixture_id": null,
-      "odds_snapshot_status": "GLOBAL_SNAPSHOT_AVAILABLE_NOT_MATCH_MAPPED",
+      "odds_fixture_id": "1539010",
+      "odds_snapshot_status": "MAPPED_NO_CURRENT_ODDS",
       "odds_available": false,
       "bookmaker_count": 13,
       "market_type_count": 7,
       "odds_observation_delta_status": "ELIGIBLE_MULTIPLE_SNAPSHOTS_NO_CHANGE",
       "changed_odds_count": 0,
-      "odds_gap_reason": "match_card_fixture_id_not_mapped_to_api_football_odds_fixture",
-      "no_money_flow_judgment": true
+      "odds_gap_reason": "odds_fixture_mapped_but_current_snapshot_empty",
+      "no_money_flow_judgment": true,
+      "fixture_mapping_bridge_ref": "data/manual_sources/v3_worldcup/war_room/v3_wc2026_fixture_mapping_bridge.json#mt_986264714"
     },
     "odds_observation_delta_status": {
       "status": "ELIGIBLE_MULTIPLE_SNAPSHOTS_NO_CHANGE",
@@ -1893,6 +1953,7 @@
     "away_team": "Haiti",
     "home_team_slug": "morocco",
     "away_team_slug": "haiti",
+    "api_football_fixture_id": "1489405",
     "venue": "VENUE_NOT_MAPPED",
     "kickoff_status": "SCHEDULED",
     "kickoff_time_utc": "2026-06-24T22:00:00.000Z",
@@ -1904,8 +1965,9 @@
         "WATCH_ONLY"
       ],
       "venue_stress_ref": "data/v3_worldcup/venue_stress/v3_worldcup_venue_stress_20260603.json",
-      "venue_mapping_status": "NOT_MAPPED",
-      "venue_gap_reason": "fixture_source_missing_venue_name"
+      "venue_mapping_status": "UNMAPPED",
+      "venue_gap_reason": "fixture_sources_do_not_provide_match_venue",
+      "fixture_mapping_bridge_ref": "data/manual_sources/v3_worldcup/war_room/v3_wc2026_fixture_mapping_bridge.json#mt_028389482"
     },
     "venue_stress_summary": {
       "status": "VENUE_LAYER_READY_FIXTURE_VENUE_NOT_MAPPED",
@@ -1914,7 +1976,7 @@
       "stress_tags": [
         "WATCH_ONLY"
       ],
-      "observation_note": "fixture_source_missing_venue_name"
+      "observation_note": "fixture_sources_do_not_provide_match_venue"
     },
     "home_final_26_profile_ref": "data/manual_sources/v3_worldcup/squads/fifa_final_26/processed/v3_wc2026_final_26_squad_profile_team_cards.json#morocco",
     "away_final_26_profile_ref": "data/manual_sources/v3_worldcup/squads/fifa_final_26/processed/v3_wc2026_final_26_squad_profile_team_cards.json#haiti",
@@ -1938,22 +2000,23 @@
       }
     },
     "odds_snapshot_status": {
-      "status": "GLOBAL_SNAPSHOT_AVAILABLE_NOT_MATCH_MAPPED",
+      "status": "MAPPED_NO_CURRENT_ODDS",
       "successful_fixture_count": 1,
       "source": "data/runtime/status/check_v3_worldcup_odds_snapshot_live_small_batch_20260604.json",
       "has_native_opening": false,
       "has_native_closing": false
     },
     "odds_binding": {
-      "odds_fixture_id": null,
-      "odds_snapshot_status": "GLOBAL_SNAPSHOT_AVAILABLE_NOT_MATCH_MAPPED",
+      "odds_fixture_id": "1489405",
+      "odds_snapshot_status": "MAPPED_NO_CURRENT_ODDS",
       "odds_available": false,
       "bookmaker_count": 13,
       "market_type_count": 7,
       "odds_observation_delta_status": "ELIGIBLE_MULTIPLE_SNAPSHOTS_NO_CHANGE",
       "changed_odds_count": 0,
-      "odds_gap_reason": "match_card_fixture_id_not_mapped_to_api_football_odds_fixture",
-      "no_money_flow_judgment": true
+      "odds_gap_reason": "odds_fixture_mapped_but_current_snapshot_empty",
+      "no_money_flow_judgment": true,
+      "fixture_mapping_bridge_ref": "data/manual_sources/v3_worldcup/war_room/v3_wc2026_fixture_mapping_bridge.json#mt_028389482"
     },
     "odds_observation_delta_status": {
       "status": "ELIGIBLE_MULTIPLE_SNAPSHOTS_NO_CHANGE",
@@ -1988,6 +2051,7 @@
     "away_team": "Brazil",
     "home_team_slug": "scotland",
     "away_team_slug": "brazil",
+    "api_football_fixture_id": "1489406",
     "venue": "VENUE_NOT_MAPPED",
     "kickoff_status": "SCHEDULED",
     "kickoff_time_utc": "2026-06-24T22:00:00.000Z",
@@ -1999,8 +2063,9 @@
         "WATCH_ONLY"
       ],
       "venue_stress_ref": "data/v3_worldcup/venue_stress/v3_worldcup_venue_stress_20260603.json",
-      "venue_mapping_status": "NOT_MAPPED",
-      "venue_gap_reason": "fixture_source_missing_venue_name"
+      "venue_mapping_status": "UNMAPPED",
+      "venue_gap_reason": "fixture_sources_do_not_provide_match_venue",
+      "fixture_mapping_bridge_ref": "data/manual_sources/v3_worldcup/war_room/v3_wc2026_fixture_mapping_bridge.json#mt_209798693"
     },
     "venue_stress_summary": {
       "status": "VENUE_LAYER_READY_FIXTURE_VENUE_NOT_MAPPED",
@@ -2009,7 +2074,7 @@
       "stress_tags": [
         "WATCH_ONLY"
       ],
-      "observation_note": "fixture_source_missing_venue_name"
+      "observation_note": "fixture_sources_do_not_provide_match_venue"
     },
     "home_final_26_profile_ref": "data/manual_sources/v3_worldcup/squads/fifa_final_26/processed/v3_wc2026_final_26_squad_profile_team_cards.json#scotland",
     "away_final_26_profile_ref": "data/manual_sources/v3_worldcup/squads/fifa_final_26/processed/v3_wc2026_final_26_squad_profile_team_cards.json#brazil",
@@ -2033,22 +2098,23 @@
       }
     },
     "odds_snapshot_status": {
-      "status": "GLOBAL_SNAPSHOT_AVAILABLE_NOT_MATCH_MAPPED",
+      "status": "MAPPED_NO_CURRENT_ODDS",
       "successful_fixture_count": 1,
       "source": "data/runtime/status/check_v3_worldcup_odds_snapshot_live_small_batch_20260604.json",
       "has_native_opening": false,
       "has_native_closing": false
     },
     "odds_binding": {
-      "odds_fixture_id": null,
-      "odds_snapshot_status": "GLOBAL_SNAPSHOT_AVAILABLE_NOT_MATCH_MAPPED",
+      "odds_fixture_id": "1489406",
+      "odds_snapshot_status": "MAPPED_NO_CURRENT_ODDS",
       "odds_available": false,
       "bookmaker_count": 13,
       "market_type_count": 7,
       "odds_observation_delta_status": "ELIGIBLE_MULTIPLE_SNAPSHOTS_NO_CHANGE",
       "changed_odds_count": 0,
-      "odds_gap_reason": "match_card_fixture_id_not_mapped_to_api_football_odds_fixture",
-      "no_money_flow_judgment": true
+      "odds_gap_reason": "odds_fixture_mapped_but_current_snapshot_empty",
+      "no_money_flow_judgment": true,
+      "fixture_mapping_bridge_ref": "data/manual_sources/v3_worldcup/war_room/v3_wc2026_fixture_mapping_bridge.json#mt_209798693"
     },
     "odds_observation_delta_status": {
       "status": "ELIGIBLE_MULTIPLE_SNAPSHOTS_NO_CHANGE",
@@ -2083,6 +2149,7 @@
     "away_team": "Qatar",
     "home_team_slug": "bosnia_and_herzegovina",
     "away_team_slug": "qatar",
+    "api_football_fixture_id": "1539009",
     "venue": "VENUE_NOT_MAPPED",
     "kickoff_status": "SCHEDULED",
     "kickoff_time_utc": "2026-06-24T19:00:00.000Z",
@@ -2094,8 +2161,9 @@
         "WATCH_ONLY"
       ],
       "venue_stress_ref": "data/v3_worldcup/venue_stress/v3_worldcup_venue_stress_20260603.json",
-      "venue_mapping_status": "NOT_MAPPED",
-      "venue_gap_reason": "fixture_source_missing_venue_name"
+      "venue_mapping_status": "UNMAPPED",
+      "venue_gap_reason": "fixture_sources_do_not_provide_match_venue",
+      "fixture_mapping_bridge_ref": "data/manual_sources/v3_worldcup/war_room/v3_wc2026_fixture_mapping_bridge.json#mt_732520309"
     },
     "venue_stress_summary": {
       "status": "VENUE_LAYER_READY_FIXTURE_VENUE_NOT_MAPPED",
@@ -2104,7 +2172,7 @@
       "stress_tags": [
         "WATCH_ONLY"
       ],
-      "observation_note": "fixture_source_missing_venue_name"
+      "observation_note": "fixture_sources_do_not_provide_match_venue"
     },
     "home_final_26_profile_ref": "data/manual_sources/v3_worldcup/squads/fifa_final_26/processed/v3_wc2026_final_26_squad_profile_team_cards.json#bosnia_and_herzegovina",
     "away_final_26_profile_ref": "data/manual_sources/v3_worldcup/squads/fifa_final_26/processed/v3_wc2026_final_26_squad_profile_team_cards.json#qatar",
@@ -2126,22 +2194,23 @@
       }
     },
     "odds_snapshot_status": {
-      "status": "GLOBAL_SNAPSHOT_AVAILABLE_NOT_MATCH_MAPPED",
+      "status": "MAPPED_NO_CURRENT_ODDS",
       "successful_fixture_count": 1,
       "source": "data/runtime/status/check_v3_worldcup_odds_snapshot_live_small_batch_20260604.json",
       "has_native_opening": false,
       "has_native_closing": false
     },
     "odds_binding": {
-      "odds_fixture_id": null,
-      "odds_snapshot_status": "GLOBAL_SNAPSHOT_AVAILABLE_NOT_MATCH_MAPPED",
+      "odds_fixture_id": "1539009",
+      "odds_snapshot_status": "MAPPED_NO_CURRENT_ODDS",
       "odds_available": false,
       "bookmaker_count": 13,
       "market_type_count": 7,
       "odds_observation_delta_status": "ELIGIBLE_MULTIPLE_SNAPSHOTS_NO_CHANGE",
       "changed_odds_count": 0,
-      "odds_gap_reason": "match_card_fixture_id_not_mapped_to_api_football_odds_fixture",
-      "no_money_flow_judgment": true
+      "odds_gap_reason": "odds_fixture_mapped_but_current_snapshot_empty",
+      "no_money_flow_judgment": true,
+      "fixture_mapping_bridge_ref": "data/manual_sources/v3_worldcup/war_room/v3_wc2026_fixture_mapping_bridge.json#mt_732520309"
     },
     "odds_observation_delta_status": {
       "status": "ELIGIBLE_MULTIPLE_SNAPSHOTS_NO_CHANGE",
@@ -2176,6 +2245,7 @@
     "away_team": "Canada",
     "home_team_slug": "switzerland",
     "away_team_slug": "canada",
+    "api_football_fixture_id": "1489408",
     "venue": "VENUE_NOT_MAPPED",
     "kickoff_status": "SCHEDULED",
     "kickoff_time_utc": "2026-06-24T19:00:00.000Z",
@@ -2187,8 +2257,9 @@
         "WATCH_ONLY"
       ],
       "venue_stress_ref": "data/v3_worldcup/venue_stress/v3_worldcup_venue_stress_20260603.json",
-      "venue_mapping_status": "NOT_MAPPED",
-      "venue_gap_reason": "fixture_source_missing_venue_name"
+      "venue_mapping_status": "UNMAPPED",
+      "venue_gap_reason": "fixture_sources_do_not_provide_match_venue",
+      "fixture_mapping_bridge_ref": "data/manual_sources/v3_worldcup/war_room/v3_wc2026_fixture_mapping_bridge.json#mt_209798077"
     },
     "venue_stress_summary": {
       "status": "VENUE_LAYER_READY_FIXTURE_VENUE_NOT_MAPPED",
@@ -2197,7 +2268,7 @@
       "stress_tags": [
         "WATCH_ONLY"
       ],
-      "observation_note": "fixture_source_missing_venue_name"
+      "observation_note": "fixture_sources_do_not_provide_match_venue"
     },
     "home_final_26_profile_ref": "data/manual_sources/v3_worldcup/squads/fifa_final_26/processed/v3_wc2026_final_26_squad_profile_team_cards.json#switzerland",
     "away_final_26_profile_ref": "data/manual_sources/v3_worldcup/squads/fifa_final_26/processed/v3_wc2026_final_26_squad_profile_team_cards.json#canada",
@@ -2223,22 +2294,23 @@
       }
     },
     "odds_snapshot_status": {
-      "status": "GLOBAL_SNAPSHOT_AVAILABLE_NOT_MATCH_MAPPED",
+      "status": "MAPPED_NO_CURRENT_ODDS",
       "successful_fixture_count": 1,
       "source": "data/runtime/status/check_v3_worldcup_odds_snapshot_live_small_batch_20260604.json",
       "has_native_opening": false,
       "has_native_closing": false
     },
     "odds_binding": {
-      "odds_fixture_id": null,
-      "odds_snapshot_status": "GLOBAL_SNAPSHOT_AVAILABLE_NOT_MATCH_MAPPED",
+      "odds_fixture_id": "1489408",
+      "odds_snapshot_status": "MAPPED_NO_CURRENT_ODDS",
       "odds_available": false,
       "bookmaker_count": 13,
       "market_type_count": 7,
       "odds_observation_delta_status": "ELIGIBLE_MULTIPLE_SNAPSHOTS_NO_CHANGE",
       "changed_odds_count": 0,
-      "odds_gap_reason": "match_card_fixture_id_not_mapped_to_api_football_odds_fixture",
-      "no_money_flow_judgment": true
+      "odds_gap_reason": "odds_fixture_mapped_but_current_snapshot_empty",
+      "no_money_flow_judgment": true,
+      "fixture_mapping_bridge_ref": "data/manual_sources/v3_worldcup/war_room/v3_wc2026_fixture_mapping_bridge.json#mt_209798077"
     },
     "odds_observation_delta_status": {
       "status": "ELIGIBLE_MULTIPLE_SNAPSHOTS_NO_CHANGE",
@@ -2273,6 +2345,7 @@
     "away_team": "Congo DR",
     "home_team_slug": "colombia",
     "away_team_slug": "congo_dr",
+    "api_football_fixture_id": "1539008",
     "venue": "VENUE_NOT_MAPPED",
     "kickoff_status": "SCHEDULED",
     "kickoff_time_utc": "2026-06-24T02:00:00.000Z",
@@ -2284,8 +2357,9 @@
         "WATCH_ONLY"
       ],
       "venue_stress_ref": "data/v3_worldcup/venue_stress/v3_worldcup_venue_stress_20260603.json",
-      "venue_mapping_status": "NOT_MAPPED",
-      "venue_gap_reason": "fixture_source_missing_venue_name"
+      "venue_mapping_status": "UNMAPPED",
+      "venue_gap_reason": "fixture_sources_do_not_provide_match_venue",
+      "fixture_mapping_bridge_ref": "data/manual_sources/v3_worldcup/war_room/v3_wc2026_fixture_mapping_bridge.json#mt_517473884"
     },
     "venue_stress_summary": {
       "status": "VENUE_LAYER_READY_FIXTURE_VENUE_NOT_MAPPED",
@@ -2294,7 +2368,7 @@
       "stress_tags": [
         "WATCH_ONLY"
       ],
-      "observation_note": "fixture_source_missing_venue_name"
+      "observation_note": "fixture_sources_do_not_provide_match_venue"
     },
     "home_final_26_profile_ref": "data/manual_sources/v3_worldcup/squads/fifa_final_26/processed/v3_wc2026_final_26_squad_profile_team_cards.json#colombia",
     "away_final_26_profile_ref": "data/manual_sources/v3_worldcup/squads/fifa_final_26/processed/v3_wc2026_final_26_squad_profile_team_cards.json#congo_dr",
@@ -2318,22 +2392,23 @@
       }
     },
     "odds_snapshot_status": {
-      "status": "GLOBAL_SNAPSHOT_AVAILABLE_NOT_MATCH_MAPPED",
+      "status": "MAPPED_NO_CURRENT_ODDS",
       "successful_fixture_count": 1,
       "source": "data/runtime/status/check_v3_worldcup_odds_snapshot_live_small_batch_20260604.json",
       "has_native_opening": false,
       "has_native_closing": false
     },
     "odds_binding": {
-      "odds_fixture_id": null,
-      "odds_snapshot_status": "GLOBAL_SNAPSHOT_AVAILABLE_NOT_MATCH_MAPPED",
+      "odds_fixture_id": "1539008",
+      "odds_snapshot_status": "MAPPED_NO_CURRENT_ODDS",
       "odds_available": false,
       "bookmaker_count": 13,
       "market_type_count": 7,
       "odds_observation_delta_status": "ELIGIBLE_MULTIPLE_SNAPSHOTS_NO_CHANGE",
       "changed_odds_count": 0,
-      "odds_gap_reason": "match_card_fixture_id_not_mapped_to_api_football_odds_fixture",
-      "no_money_flow_judgment": true
+      "odds_gap_reason": "odds_fixture_mapped_but_current_snapshot_empty",
+      "no_money_flow_judgment": true,
+      "fixture_mapping_bridge_ref": "data/manual_sources/v3_worldcup/war_room/v3_wc2026_fixture_mapping_bridge.json#mt_517473884"
     },
     "odds_observation_delta_status": {
       "status": "ELIGIBLE_MULTIPLE_SNAPSHOTS_NO_CHANGE",
@@ -2368,6 +2443,7 @@
     "away_team": "Croatia",
     "home_team_slug": "panama",
     "away_team_slug": "croatia",
+    "api_football_fixture_id": "1489403",
     "venue": "VENUE_NOT_MAPPED",
     "kickoff_status": "SCHEDULED",
     "kickoff_time_utc": "2026-06-23T23:00:00.000Z",
@@ -2379,8 +2455,9 @@
         "WATCH_ONLY"
       ],
       "venue_stress_ref": "data/v3_worldcup/venue_stress/v3_worldcup_venue_stress_20260603.json",
-      "venue_mapping_status": "NOT_MAPPED",
-      "venue_gap_reason": "fixture_source_missing_venue_name"
+      "venue_mapping_status": "UNMAPPED",
+      "venue_gap_reason": "fixture_sources_do_not_provide_match_venue",
+      "fixture_mapping_bridge_ref": "data/manual_sources/v3_worldcup/war_room/v3_wc2026_fixture_mapping_bridge.json#mt_153636113"
     },
     "venue_stress_summary": {
       "status": "VENUE_LAYER_READY_FIXTURE_VENUE_NOT_MAPPED",
@@ -2389,7 +2466,7 @@
       "stress_tags": [
         "WATCH_ONLY"
       ],
-      "observation_note": "fixture_source_missing_venue_name"
+      "observation_note": "fixture_sources_do_not_provide_match_venue"
     },
     "home_final_26_profile_ref": "data/manual_sources/v3_worldcup/squads/fifa_final_26/processed/v3_wc2026_final_26_squad_profile_team_cards.json#panama",
     "away_final_26_profile_ref": "data/manual_sources/v3_worldcup/squads/fifa_final_26/processed/v3_wc2026_final_26_squad_profile_team_cards.json#croatia",
@@ -2414,22 +2491,23 @@
       }
     },
     "odds_snapshot_status": {
-      "status": "GLOBAL_SNAPSHOT_AVAILABLE_NOT_MATCH_MAPPED",
+      "status": "MAPPED_NO_CURRENT_ODDS",
       "successful_fixture_count": 1,
       "source": "data/runtime/status/check_v3_worldcup_odds_snapshot_live_small_batch_20260604.json",
       "has_native_opening": false,
       "has_native_closing": false
     },
     "odds_binding": {
-      "odds_fixture_id": null,
-      "odds_snapshot_status": "GLOBAL_SNAPSHOT_AVAILABLE_NOT_MATCH_MAPPED",
+      "odds_fixture_id": "1489403",
+      "odds_snapshot_status": "MAPPED_NO_CURRENT_ODDS",
       "odds_available": false,
       "bookmaker_count": 13,
       "market_type_count": 7,
       "odds_observation_delta_status": "ELIGIBLE_MULTIPLE_SNAPSHOTS_NO_CHANGE",
       "changed_odds_count": 0,
-      "odds_gap_reason": "match_card_fixture_id_not_mapped_to_api_football_odds_fixture",
-      "no_money_flow_judgment": true
+      "odds_gap_reason": "odds_fixture_mapped_but_current_snapshot_empty",
+      "no_money_flow_judgment": true,
+      "fixture_mapping_bridge_ref": "data/manual_sources/v3_worldcup/war_room/v3_wc2026_fixture_mapping_bridge.json#mt_153636113"
     },
     "odds_observation_delta_status": {
       "status": "ELIGIBLE_MULTIPLE_SNAPSHOTS_NO_CHANGE",
@@ -2464,6 +2542,7 @@
     "away_team": "Ghana",
     "home_team_slug": "england",
     "away_team_slug": "ghana",
+    "api_football_fixture_id": "1489402",
     "venue": "VENUE_NOT_MAPPED",
     "kickoff_status": "SCHEDULED",
     "kickoff_time_utc": "2026-06-23T20:00:00.000Z",
@@ -2475,8 +2554,9 @@
         "WATCH_ONLY"
       ],
       "venue_stress_ref": "data/v3_worldcup/venue_stress/v3_worldcup_venue_stress_20260603.json",
-      "venue_mapping_status": "NOT_MAPPED",
-      "venue_gap_reason": "fixture_source_missing_venue_name"
+      "venue_mapping_status": "UNMAPPED",
+      "venue_gap_reason": "fixture_sources_do_not_provide_match_venue",
+      "fixture_mapping_bridge_ref": "data/manual_sources/v3_worldcup/war_room/v3_wc2026_fixture_mapping_bridge.json#mt_986264630"
     },
     "venue_stress_summary": {
       "status": "VENUE_LAYER_READY_FIXTURE_VENUE_NOT_MAPPED",
@@ -2485,7 +2565,7 @@
       "stress_tags": [
         "WATCH_ONLY"
       ],
-      "observation_note": "fixture_source_missing_venue_name"
+      "observation_note": "fixture_sources_do_not_provide_match_venue"
     },
     "home_final_26_profile_ref": "data/manual_sources/v3_worldcup/squads/fifa_final_26/processed/v3_wc2026_final_26_squad_profile_team_cards.json#england",
     "away_final_26_profile_ref": "data/manual_sources/v3_worldcup/squads/fifa_final_26/processed/v3_wc2026_final_26_squad_profile_team_cards.json#ghana",
@@ -2509,22 +2589,23 @@
       }
     },
     "odds_snapshot_status": {
-      "status": "GLOBAL_SNAPSHOT_AVAILABLE_NOT_MATCH_MAPPED",
+      "status": "MAPPED_NO_CURRENT_ODDS",
       "successful_fixture_count": 1,
       "source": "data/runtime/status/check_v3_worldcup_odds_snapshot_live_small_batch_20260604.json",
       "has_native_opening": false,
       "has_native_closing": false
     },
     "odds_binding": {
-      "odds_fixture_id": null,
-      "odds_snapshot_status": "GLOBAL_SNAPSHOT_AVAILABLE_NOT_MATCH_MAPPED",
+      "odds_fixture_id": "1489402",
+      "odds_snapshot_status": "MAPPED_NO_CURRENT_ODDS",
       "odds_available": false,
       "bookmaker_count": 13,
       "market_type_count": 7,
       "odds_observation_delta_status": "ELIGIBLE_MULTIPLE_SNAPSHOTS_NO_CHANGE",
       "changed_odds_count": 0,
-      "odds_gap_reason": "match_card_fixture_id_not_mapped_to_api_football_odds_fixture",
-      "no_money_flow_judgment": true
+      "odds_gap_reason": "odds_fixture_mapped_but_current_snapshot_empty",
+      "no_money_flow_judgment": true,
+      "fixture_mapping_bridge_ref": "data/manual_sources/v3_worldcup/war_room/v3_wc2026_fixture_mapping_bridge.json#mt_986264630"
     },
     "odds_observation_delta_status": {
       "status": "ELIGIBLE_MULTIPLE_SNAPSHOTS_NO_CHANGE",
@@ -2559,6 +2640,7 @@
     "away_team": "Uzbekistan",
     "home_team_slug": "portugal",
     "away_team_slug": "uzbekistan",
+    "api_football_fixture_id": "1489404",
     "venue": "VENUE_NOT_MAPPED",
     "kickoff_status": "SCHEDULED",
     "kickoff_time_utc": "2026-06-23T17:00:00.000Z",
@@ -2570,8 +2652,9 @@
         "WATCH_ONLY"
       ],
       "venue_stress_ref": "data/v3_worldcup/venue_stress/v3_worldcup_venue_stress_20260603.json",
-      "venue_mapping_status": "NOT_MAPPED",
-      "venue_gap_reason": "fixture_source_missing_venue_name"
+      "venue_mapping_status": "UNMAPPED",
+      "venue_gap_reason": "fixture_sources_do_not_provide_match_venue",
+      "fixture_mapping_bridge_ref": "data/manual_sources/v3_worldcup/war_room/v3_wc2026_fixture_mapping_bridge.json#mt_894046526"
     },
     "venue_stress_summary": {
       "status": "VENUE_LAYER_READY_FIXTURE_VENUE_NOT_MAPPED",
@@ -2580,7 +2663,7 @@
       "stress_tags": [
         "WATCH_ONLY"
       ],
-      "observation_note": "fixture_source_missing_venue_name"
+      "observation_note": "fixture_sources_do_not_provide_match_venue"
     },
     "home_final_26_profile_ref": "data/manual_sources/v3_worldcup/squads/fifa_final_26/processed/v3_wc2026_final_26_squad_profile_team_cards.json#portugal",
     "away_final_26_profile_ref": "data/manual_sources/v3_worldcup/squads/fifa_final_26/processed/v3_wc2026_final_26_squad_profile_team_cards.json#uzbekistan",
@@ -2604,22 +2687,23 @@
       }
     },
     "odds_snapshot_status": {
-      "status": "GLOBAL_SNAPSHOT_AVAILABLE_NOT_MATCH_MAPPED",
+      "status": "MAPPED_NO_CURRENT_ODDS",
       "successful_fixture_count": 1,
       "source": "data/runtime/status/check_v3_worldcup_odds_snapshot_live_small_batch_20260604.json",
       "has_native_opening": false,
       "has_native_closing": false
     },
     "odds_binding": {
-      "odds_fixture_id": null,
-      "odds_snapshot_status": "GLOBAL_SNAPSHOT_AVAILABLE_NOT_MATCH_MAPPED",
+      "odds_fixture_id": "1489404",
+      "odds_snapshot_status": "MAPPED_NO_CURRENT_ODDS",
       "odds_available": false,
       "bookmaker_count": 13,
       "market_type_count": 7,
       "odds_observation_delta_status": "ELIGIBLE_MULTIPLE_SNAPSHOTS_NO_CHANGE",
       "changed_odds_count": 0,
-      "odds_gap_reason": "match_card_fixture_id_not_mapped_to_api_football_odds_fixture",
-      "no_money_flow_judgment": true
+      "odds_gap_reason": "odds_fixture_mapped_but_current_snapshot_empty",
+      "no_money_flow_judgment": true,
+      "fixture_mapping_bridge_ref": "data/manual_sources/v3_worldcup/war_room/v3_wc2026_fixture_mapping_bridge.json#mt_894046526"
     },
     "odds_observation_delta_status": {
       "status": "ELIGIBLE_MULTIPLE_SNAPSHOTS_NO_CHANGE",
@@ -2654,6 +2738,7 @@
     "away_team": "Algeria",
     "home_team_slug": "jordan",
     "away_team_slug": "algeria",
+    "api_football_fixture_id": "1489400",
     "venue": "VENUE_NOT_MAPPED",
     "kickoff_status": "SCHEDULED",
     "kickoff_time_utc": "2026-06-23T03:00:00.000Z",
@@ -2665,8 +2750,9 @@
         "WATCH_ONLY"
       ],
       "venue_stress_ref": "data/v3_worldcup/venue_stress/v3_worldcup_venue_stress_20260603.json",
-      "venue_mapping_status": "NOT_MAPPED",
-      "venue_gap_reason": "fixture_source_missing_venue_name"
+      "venue_mapping_status": "UNMAPPED",
+      "venue_gap_reason": "fixture_sources_do_not_provide_match_venue",
+      "fixture_mapping_bridge_ref": "data/manual_sources/v3_worldcup/war_room/v3_wc2026_fixture_mapping_bridge.json#mt_153637966"
     },
     "venue_stress_summary": {
       "status": "VENUE_LAYER_READY_FIXTURE_VENUE_NOT_MAPPED",
@@ -2675,7 +2761,7 @@
       "stress_tags": [
         "WATCH_ONLY"
       ],
-      "observation_note": "fixture_source_missing_venue_name"
+      "observation_note": "fixture_sources_do_not_provide_match_venue"
     },
     "home_final_26_profile_ref": "data/manual_sources/v3_worldcup/squads/fifa_final_26/processed/v3_wc2026_final_26_squad_profile_team_cards.json#jordan",
     "away_final_26_profile_ref": "data/manual_sources/v3_worldcup/squads/fifa_final_26/processed/v3_wc2026_final_26_squad_profile_team_cards.json#algeria",
@@ -2697,22 +2783,23 @@
       }
     },
     "odds_snapshot_status": {
-      "status": "GLOBAL_SNAPSHOT_AVAILABLE_NOT_MATCH_MAPPED",
+      "status": "MAPPED_NO_CURRENT_ODDS",
       "successful_fixture_count": 1,
       "source": "data/runtime/status/check_v3_worldcup_odds_snapshot_live_small_batch_20260604.json",
       "has_native_opening": false,
       "has_native_closing": false
     },
     "odds_binding": {
-      "odds_fixture_id": null,
-      "odds_snapshot_status": "GLOBAL_SNAPSHOT_AVAILABLE_NOT_MATCH_MAPPED",
+      "odds_fixture_id": "1489400",
+      "odds_snapshot_status": "MAPPED_NO_CURRENT_ODDS",
       "odds_available": false,
       "bookmaker_count": 13,
       "market_type_count": 7,
       "odds_observation_delta_status": "ELIGIBLE_MULTIPLE_SNAPSHOTS_NO_CHANGE",
       "changed_odds_count": 0,
-      "odds_gap_reason": "match_card_fixture_id_not_mapped_to_api_football_odds_fixture",
-      "no_money_flow_judgment": true
+      "odds_gap_reason": "odds_fixture_mapped_but_current_snapshot_empty",
+      "no_money_flow_judgment": true,
+      "fixture_mapping_bridge_ref": "data/manual_sources/v3_worldcup/war_room/v3_wc2026_fixture_mapping_bridge.json#mt_153637966"
     },
     "odds_observation_delta_status": {
       "status": "ELIGIBLE_MULTIPLE_SNAPSHOTS_NO_CHANGE",
@@ -2747,6 +2834,7 @@
     "away_team": "Senegal",
     "home_team_slug": "norway",
     "away_team_slug": "senegal",
+    "api_football_fixture_id": "1489401",
     "venue": "VENUE_NOT_MAPPED",
     "kickoff_status": "SCHEDULED",
     "kickoff_time_utc": "2026-06-23T00:00:00.000Z",
@@ -2758,8 +2846,9 @@
         "WATCH_ONLY"
       ],
       "venue_stress_ref": "data/v3_worldcup/venue_stress/v3_worldcup_venue_stress_20260603.json",
-      "venue_mapping_status": "NOT_MAPPED",
-      "venue_gap_reason": "fixture_source_missing_venue_name"
+      "venue_mapping_status": "UNMAPPED",
+      "venue_gap_reason": "fixture_sources_do_not_provide_match_venue",
+      "fixture_mapping_bridge_ref": "data/manual_sources/v3_worldcup/war_room/v3_wc2026_fixture_mapping_bridge.json#mt_153637911"
     },
     "venue_stress_summary": {
       "status": "VENUE_LAYER_READY_FIXTURE_VENUE_NOT_MAPPED",
@@ -2768,7 +2857,7 @@
       "stress_tags": [
         "WATCH_ONLY"
       ],
-      "observation_note": "fixture_source_missing_venue_name"
+      "observation_note": "fixture_sources_do_not_provide_match_venue"
     },
     "home_final_26_profile_ref": "data/manual_sources/v3_worldcup/squads/fifa_final_26/processed/v3_wc2026_final_26_squad_profile_team_cards.json#norway",
     "away_final_26_profile_ref": "data/manual_sources/v3_worldcup/squads/fifa_final_26/processed/v3_wc2026_final_26_squad_profile_team_cards.json#senegal",
@@ -2793,22 +2882,23 @@
       }
     },
     "odds_snapshot_status": {
-      "status": "GLOBAL_SNAPSHOT_AVAILABLE_NOT_MATCH_MAPPED",
+      "status": "MAPPED_NO_CURRENT_ODDS",
       "successful_fixture_count": 1,
       "source": "data/runtime/status/check_v3_worldcup_odds_snapshot_live_small_batch_20260604.json",
       "has_native_opening": false,
       "has_native_closing": false
     },
     "odds_binding": {
-      "odds_fixture_id": null,
-      "odds_snapshot_status": "GLOBAL_SNAPSHOT_AVAILABLE_NOT_MATCH_MAPPED",
+      "odds_fixture_id": "1489401",
+      "odds_snapshot_status": "MAPPED_NO_CURRENT_ODDS",
       "odds_available": false,
       "bookmaker_count": 13,
       "market_type_count": 7,
       "odds_observation_delta_status": "ELIGIBLE_MULTIPLE_SNAPSHOTS_NO_CHANGE",
       "changed_odds_count": 0,
-      "odds_gap_reason": "match_card_fixture_id_not_mapped_to_api_football_odds_fixture",
-      "no_money_flow_judgment": true
+      "odds_gap_reason": "odds_fixture_mapped_but_current_snapshot_empty",
+      "no_money_flow_judgment": true,
+      "fixture_mapping_bridge_ref": "data/manual_sources/v3_worldcup/war_room/v3_wc2026_fixture_mapping_bridge.json#mt_153637911"
     },
     "odds_observation_delta_status": {
       "status": "ELIGIBLE_MULTIPLE_SNAPSHOTS_NO_CHANGE",
@@ -2843,6 +2933,7 @@
     "away_team": "Iraq",
     "home_team_slug": "france",
     "away_team_slug": "iraq",
+    "api_football_fixture_id": "1539017",
     "venue": "VENUE_NOT_MAPPED",
     "kickoff_status": "SCHEDULED",
     "kickoff_time_utc": "2026-06-22T21:00:00.000Z",
@@ -2854,8 +2945,9 @@
         "WATCH_ONLY"
       ],
       "venue_stress_ref": "data/v3_worldcup/venue_stress/v3_worldcup_venue_stress_20260603.json",
-      "venue_mapping_status": "NOT_MAPPED",
-      "venue_gap_reason": "fixture_source_missing_venue_name"
+      "venue_mapping_status": "UNMAPPED",
+      "venue_gap_reason": "fixture_sources_do_not_provide_match_venue",
+      "fixture_mapping_bridge_ref": "data/manual_sources/v3_worldcup/war_room/v3_wc2026_fixture_mapping_bridge.json#mt_732520476"
     },
     "venue_stress_summary": {
       "status": "VENUE_LAYER_READY_FIXTURE_VENUE_NOT_MAPPED",
@@ -2864,7 +2956,7 @@
       "stress_tags": [
         "WATCH_ONLY"
       ],
-      "observation_note": "fixture_source_missing_venue_name"
+      "observation_note": "fixture_sources_do_not_provide_match_venue"
     },
     "home_final_26_profile_ref": "data/manual_sources/v3_worldcup/squads/fifa_final_26/processed/v3_wc2026_final_26_squad_profile_team_cards.json#france",
     "away_final_26_profile_ref": "data/manual_sources/v3_worldcup/squads/fifa_final_26/processed/v3_wc2026_final_26_squad_profile_team_cards.json#iraq",
@@ -2888,22 +2980,23 @@
       }
     },
     "odds_snapshot_status": {
-      "status": "GLOBAL_SNAPSHOT_AVAILABLE_NOT_MATCH_MAPPED",
+      "status": "MAPPED_NO_CURRENT_ODDS",
       "successful_fixture_count": 1,
       "source": "data/runtime/status/check_v3_worldcup_odds_snapshot_live_small_batch_20260604.json",
       "has_native_opening": false,
       "has_native_closing": false
     },
     "odds_binding": {
-      "odds_fixture_id": null,
-      "odds_snapshot_status": "GLOBAL_SNAPSHOT_AVAILABLE_NOT_MATCH_MAPPED",
+      "odds_fixture_id": "1539017",
+      "odds_snapshot_status": "MAPPED_NO_CURRENT_ODDS",
       "odds_available": false,
       "bookmaker_count": 13,
       "market_type_count": 7,
       "odds_observation_delta_status": "ELIGIBLE_MULTIPLE_SNAPSHOTS_NO_CHANGE",
       "changed_odds_count": 0,
-      "odds_gap_reason": "match_card_fixture_id_not_mapped_to_api_football_odds_fixture",
-      "no_money_flow_judgment": true
+      "odds_gap_reason": "odds_fixture_mapped_but_current_snapshot_empty",
+      "no_money_flow_judgment": true,
+      "fixture_mapping_bridge_ref": "data/manual_sources/v3_worldcup/war_room/v3_wc2026_fixture_mapping_bridge.json#mt_732520476"
     },
     "odds_observation_delta_status": {
       "status": "ELIGIBLE_MULTIPLE_SNAPSHOTS_NO_CHANGE",
@@ -2938,6 +3031,7 @@
     "away_team": "Austria",
     "home_team_slug": "argentina",
     "away_team_slug": "austria",
+    "api_football_fixture_id": "1489399",
     "venue": "VENUE_NOT_MAPPED",
     "kickoff_status": "SCHEDULED",
     "kickoff_time_utc": "2026-06-22T17:00:00.000Z",
@@ -2949,8 +3043,9 @@
         "WATCH_ONLY"
       ],
       "venue_stress_ref": "data/v3_worldcup/venue_stress/v3_worldcup_venue_stress_20260603.json",
-      "venue_mapping_status": "NOT_MAPPED",
-      "venue_gap_reason": "fixture_source_missing_venue_name"
+      "venue_mapping_status": "UNMAPPED",
+      "venue_gap_reason": "fixture_sources_do_not_provide_match_venue",
+      "fixture_mapping_bridge_ref": "data/manual_sources/v3_worldcup/war_room/v3_wc2026_fixture_mapping_bridge.json#mt_986262946"
     },
     "venue_stress_summary": {
       "status": "VENUE_LAYER_READY_FIXTURE_VENUE_NOT_MAPPED",
@@ -2959,7 +3054,7 @@
       "stress_tags": [
         "WATCH_ONLY"
       ],
-      "observation_note": "fixture_source_missing_venue_name"
+      "observation_note": "fixture_sources_do_not_provide_match_venue"
     },
     "home_final_26_profile_ref": "data/manual_sources/v3_worldcup/squads/fifa_final_26/processed/v3_wc2026_final_26_squad_profile_team_cards.json#argentina",
     "away_final_26_profile_ref": "data/manual_sources/v3_worldcup/squads/fifa_final_26/processed/v3_wc2026_final_26_squad_profile_team_cards.json#austria",
@@ -2984,22 +3079,23 @@
       }
     },
     "odds_snapshot_status": {
-      "status": "GLOBAL_SNAPSHOT_AVAILABLE_NOT_MATCH_MAPPED",
+      "status": "MAPPED_NO_CURRENT_ODDS",
       "successful_fixture_count": 1,
       "source": "data/runtime/status/check_v3_worldcup_odds_snapshot_live_small_batch_20260604.json",
       "has_native_opening": false,
       "has_native_closing": false
     },
     "odds_binding": {
-      "odds_fixture_id": null,
-      "odds_snapshot_status": "GLOBAL_SNAPSHOT_AVAILABLE_NOT_MATCH_MAPPED",
+      "odds_fixture_id": "1489399",
+      "odds_snapshot_status": "MAPPED_NO_CURRENT_ODDS",
       "odds_available": false,
       "bookmaker_count": 13,
       "market_type_count": 7,
       "odds_observation_delta_status": "ELIGIBLE_MULTIPLE_SNAPSHOTS_NO_CHANGE",
       "changed_odds_count": 0,
-      "odds_gap_reason": "match_card_fixture_id_not_mapped_to_api_football_odds_fixture",
-      "no_money_flow_judgment": true
+      "odds_gap_reason": "odds_fixture_mapped_but_current_snapshot_empty",
+      "no_money_flow_judgment": true,
+      "fixture_mapping_bridge_ref": "data/manual_sources/v3_worldcup/war_room/v3_wc2026_fixture_mapping_bridge.json#mt_986262946"
     },
     "odds_observation_delta_status": {
       "status": "ELIGIBLE_MULTIPLE_SNAPSHOTS_NO_CHANGE",
@@ -3034,6 +3130,7 @@
     "away_team": "Egypt",
     "home_team_slug": "new_zealand",
     "away_team_slug": "egypt",
+    "api_football_fixture_id": "1489396",
     "venue": "VENUE_NOT_MAPPED",
     "kickoff_status": "SCHEDULED",
     "kickoff_time_utc": "2026-06-22T01:00:00.000Z",
@@ -3045,8 +3142,9 @@
         "WATCH_ONLY"
       ],
       "venue_stress_ref": "data/v3_worldcup/venue_stress/v3_worldcup_venue_stress_20260603.json",
-      "venue_mapping_status": "NOT_MAPPED",
-      "venue_gap_reason": "fixture_source_missing_venue_name"
+      "venue_mapping_status": "UNMAPPED",
+      "venue_gap_reason": "fixture_sources_do_not_provide_match_venue",
+      "fixture_mapping_bridge_ref": "data/manual_sources/v3_worldcup/war_room/v3_wc2026_fixture_mapping_bridge.json#mt_370102726"
     },
     "venue_stress_summary": {
       "status": "VENUE_LAYER_READY_FIXTURE_VENUE_NOT_MAPPED",
@@ -3055,7 +3153,7 @@
       "stress_tags": [
         "WATCH_ONLY"
       ],
-      "observation_note": "fixture_source_missing_venue_name"
+      "observation_note": "fixture_sources_do_not_provide_match_venue"
     },
     "home_final_26_profile_ref": "data/manual_sources/v3_worldcup/squads/fifa_final_26/processed/v3_wc2026_final_26_squad_profile_team_cards.json#new_zealand",
     "away_final_26_profile_ref": "data/manual_sources/v3_worldcup/squads/fifa_final_26/processed/v3_wc2026_final_26_squad_profile_team_cards.json#egypt",
@@ -3077,22 +3175,23 @@
       }
     },
     "odds_snapshot_status": {
-      "status": "GLOBAL_SNAPSHOT_AVAILABLE_NOT_MATCH_MAPPED",
+      "status": "MAPPED_NO_CURRENT_ODDS",
       "successful_fixture_count": 1,
       "source": "data/runtime/status/check_v3_worldcup_odds_snapshot_live_small_batch_20260604.json",
       "has_native_opening": false,
       "has_native_closing": false
     },
     "odds_binding": {
-      "odds_fixture_id": null,
-      "odds_snapshot_status": "GLOBAL_SNAPSHOT_AVAILABLE_NOT_MATCH_MAPPED",
+      "odds_fixture_id": "1489396",
+      "odds_snapshot_status": "MAPPED_NO_CURRENT_ODDS",
       "odds_available": false,
       "bookmaker_count": 13,
       "market_type_count": 7,
       "odds_observation_delta_status": "ELIGIBLE_MULTIPLE_SNAPSHOTS_NO_CHANGE",
       "changed_odds_count": 0,
-      "odds_gap_reason": "match_card_fixture_id_not_mapped_to_api_football_odds_fixture",
-      "no_money_flow_judgment": true
+      "odds_gap_reason": "odds_fixture_mapped_but_current_snapshot_empty",
+      "no_money_flow_judgment": true,
+      "fixture_mapping_bridge_ref": "data/manual_sources/v3_worldcup/war_room/v3_wc2026_fixture_mapping_bridge.json#mt_370102726"
     },
     "odds_observation_delta_status": {
       "status": "ELIGIBLE_MULTIPLE_SNAPSHOTS_NO_CHANGE",
@@ -3127,6 +3226,7 @@
     "away_team": "Cabo Verde",
     "home_team_slug": "uruguay",
     "away_team_slug": "cabo_verde",
+    "api_football_fixture_id": "1489398",
     "venue": "VENUE_NOT_MAPPED",
     "kickoff_status": "SCHEDULED",
     "kickoff_time_utc": "2026-06-21T22:00:00.000Z",
@@ -3138,8 +3238,9 @@
         "WATCH_ONLY"
       ],
       "venue_stress_ref": "data/v3_worldcup/venue_stress/v3_worldcup_venue_stress_20260603.json",
-      "venue_mapping_status": "NOT_MAPPED",
-      "venue_gap_reason": "fixture_source_missing_venue_name"
+      "venue_mapping_status": "UNMAPPED",
+      "venue_gap_reason": "fixture_sources_do_not_provide_match_venue",
+      "fixture_mapping_bridge_ref": "data/manual_sources/v3_worldcup/war_room/v3_wc2026_fixture_mapping_bridge.json#mt_153637559"
     },
     "venue_stress_summary": {
       "status": "VENUE_LAYER_READY_FIXTURE_VENUE_NOT_MAPPED",
@@ -3148,7 +3249,7 @@
       "stress_tags": [
         "WATCH_ONLY"
       ],
-      "observation_note": "fixture_source_missing_venue_name"
+      "observation_note": "fixture_sources_do_not_provide_match_venue"
     },
     "home_final_26_profile_ref": "data/manual_sources/v3_worldcup/squads/fifa_final_26/processed/v3_wc2026_final_26_squad_profile_team_cards.json#uruguay",
     "away_final_26_profile_ref": "data/manual_sources/v3_worldcup/squads/fifa_final_26/processed/v3_wc2026_final_26_squad_profile_team_cards.json#cabo_verde",
@@ -3170,22 +3271,23 @@
       }
     },
     "odds_snapshot_status": {
-      "status": "GLOBAL_SNAPSHOT_AVAILABLE_NOT_MATCH_MAPPED",
+      "status": "MAPPED_NO_CURRENT_ODDS",
       "successful_fixture_count": 1,
       "source": "data/runtime/status/check_v3_worldcup_odds_snapshot_live_small_batch_20260604.json",
       "has_native_opening": false,
       "has_native_closing": false
     },
     "odds_binding": {
-      "odds_fixture_id": null,
-      "odds_snapshot_status": "GLOBAL_SNAPSHOT_AVAILABLE_NOT_MATCH_MAPPED",
+      "odds_fixture_id": "1489398",
+      "odds_snapshot_status": "MAPPED_NO_CURRENT_ODDS",
       "odds_available": false,
       "bookmaker_count": 13,
       "market_type_count": 7,
       "odds_observation_delta_status": "ELIGIBLE_MULTIPLE_SNAPSHOTS_NO_CHANGE",
       "changed_odds_count": 0,
-      "odds_gap_reason": "match_card_fixture_id_not_mapped_to_api_football_odds_fixture",
-      "no_money_flow_judgment": true
+      "odds_gap_reason": "odds_fixture_mapped_but_current_snapshot_empty",
+      "no_money_flow_judgment": true,
+      "fixture_mapping_bridge_ref": "data/manual_sources/v3_worldcup/war_room/v3_wc2026_fixture_mapping_bridge.json#mt_153637559"
     },
     "odds_observation_delta_status": {
       "status": "ELIGIBLE_MULTIPLE_SNAPSHOTS_NO_CHANGE",
@@ -3220,6 +3322,7 @@
     "away_team": "IR Iran",
     "home_team_slug": "belgium",
     "away_team_slug": "ir_iran",
+    "api_football_fixture_id": "1489395",
     "venue": "VENUE_NOT_MAPPED",
     "kickoff_status": "SCHEDULED",
     "kickoff_time_utc": "2026-06-21T19:00:00.000Z",
@@ -3231,8 +3334,9 @@
         "WATCH_ONLY"
       ],
       "venue_stress_ref": "data/v3_worldcup/venue_stress/v3_worldcup_venue_stress_20260603.json",
-      "venue_mapping_status": "NOT_MAPPED",
-      "venue_gap_reason": "fixture_source_missing_venue_name"
+      "venue_mapping_status": "UNMAPPED",
+      "venue_gap_reason": "fixture_sources_do_not_provide_match_venue",
+      "fixture_mapping_bridge_ref": "data/manual_sources/v3_worldcup/war_room/v3_wc2026_fixture_mapping_bridge.json#mt_732525756"
     },
     "venue_stress_summary": {
       "status": "VENUE_LAYER_READY_FIXTURE_VENUE_NOT_MAPPED",
@@ -3241,7 +3345,7 @@
       "stress_tags": [
         "WATCH_ONLY"
       ],
-      "observation_note": "fixture_source_missing_venue_name"
+      "observation_note": "fixture_sources_do_not_provide_match_venue"
     },
     "home_final_26_profile_ref": "data/manual_sources/v3_worldcup/squads/fifa_final_26/processed/v3_wc2026_final_26_squad_profile_team_cards.json#belgium",
     "away_final_26_profile_ref": "data/manual_sources/v3_worldcup/squads/fifa_final_26/processed/v3_wc2026_final_26_squad_profile_team_cards.json#ir_iran",
@@ -3266,22 +3370,23 @@
       }
     },
     "odds_snapshot_status": {
-      "status": "GLOBAL_SNAPSHOT_AVAILABLE_NOT_MATCH_MAPPED",
+      "status": "MAPPED_NO_CURRENT_ODDS",
       "successful_fixture_count": 1,
       "source": "data/runtime/status/check_v3_worldcup_odds_snapshot_live_small_batch_20260604.json",
       "has_native_opening": false,
       "has_native_closing": false
     },
     "odds_binding": {
-      "odds_fixture_id": null,
-      "odds_snapshot_status": "GLOBAL_SNAPSHOT_AVAILABLE_NOT_MATCH_MAPPED",
+      "odds_fixture_id": "1489395",
+      "odds_snapshot_status": "MAPPED_NO_CURRENT_ODDS",
       "odds_available": false,
       "bookmaker_count": 13,
       "market_type_count": 7,
       "odds_observation_delta_status": "ELIGIBLE_MULTIPLE_SNAPSHOTS_NO_CHANGE",
       "changed_odds_count": 0,
-      "odds_gap_reason": "match_card_fixture_id_not_mapped_to_api_football_odds_fixture",
-      "no_money_flow_judgment": true
+      "odds_gap_reason": "odds_fixture_mapped_but_current_snapshot_empty",
+      "no_money_flow_judgment": true,
+      "fixture_mapping_bridge_ref": "data/manual_sources/v3_worldcup/war_room/v3_wc2026_fixture_mapping_bridge.json#mt_732525756"
     },
     "odds_observation_delta_status": {
       "status": "ELIGIBLE_MULTIPLE_SNAPSHOTS_NO_CHANGE",
@@ -3316,6 +3421,7 @@
     "away_team": "Saudi Arabia",
     "home_team_slug": "spain",
     "away_team_slug": "saudi_arabia",
+    "api_football_fixture_id": "1489397",
     "venue": "VENUE_NOT_MAPPED",
     "kickoff_status": "SCHEDULED",
     "kickoff_time_utc": "2026-06-21T16:00:00.000Z",
@@ -3327,8 +3433,9 @@
         "WATCH_ONLY"
       ],
       "venue_stress_ref": "data/v3_worldcup/venue_stress/v3_worldcup_venue_stress_20260603.json",
-      "venue_mapping_status": "NOT_MAPPED",
-      "venue_gap_reason": "fixture_source_missing_venue_name"
+      "venue_mapping_status": "UNMAPPED",
+      "venue_gap_reason": "fixture_sources_do_not_provide_match_venue",
+      "fixture_mapping_bridge_ref": "data/manual_sources/v3_worldcup/war_room/v3_wc2026_fixture_mapping_bridge.json#mt_153637587"
     },
     "venue_stress_summary": {
       "status": "VENUE_LAYER_READY_FIXTURE_VENUE_NOT_MAPPED",
@@ -3337,7 +3444,7 @@
       "stress_tags": [
         "WATCH_ONLY"
       ],
-      "observation_note": "fixture_source_missing_venue_name"
+      "observation_note": "fixture_sources_do_not_provide_match_venue"
     },
     "home_final_26_profile_ref": "data/manual_sources/v3_worldcup/squads/fifa_final_26/processed/v3_wc2026_final_26_squad_profile_team_cards.json#spain",
     "away_final_26_profile_ref": "data/manual_sources/v3_worldcup/squads/fifa_final_26/processed/v3_wc2026_final_26_squad_profile_team_cards.json#saudi_arabia",
@@ -3359,22 +3466,23 @@
       }
     },
     "odds_snapshot_status": {
-      "status": "GLOBAL_SNAPSHOT_AVAILABLE_NOT_MATCH_MAPPED",
+      "status": "MAPPED_NO_CURRENT_ODDS",
       "successful_fixture_count": 1,
       "source": "data/runtime/status/check_v3_worldcup_odds_snapshot_live_small_batch_20260604.json",
       "has_native_opening": false,
       "has_native_closing": false
     },
     "odds_binding": {
-      "odds_fixture_id": null,
-      "odds_snapshot_status": "GLOBAL_SNAPSHOT_AVAILABLE_NOT_MATCH_MAPPED",
+      "odds_fixture_id": "1489397",
+      "odds_snapshot_status": "MAPPED_NO_CURRENT_ODDS",
       "odds_available": false,
       "bookmaker_count": 13,
       "market_type_count": 7,
       "odds_observation_delta_status": "ELIGIBLE_MULTIPLE_SNAPSHOTS_NO_CHANGE",
       "changed_odds_count": 0,
-      "odds_gap_reason": "match_card_fixture_id_not_mapped_to_api_football_odds_fixture",
-      "no_money_flow_judgment": true
+      "odds_gap_reason": "odds_fixture_mapped_but_current_snapshot_empty",
+      "no_money_flow_judgment": true,
+      "fixture_mapping_bridge_ref": "data/manual_sources/v3_worldcup/war_room/v3_wc2026_fixture_mapping_bridge.json#mt_153637587"
     },
     "odds_observation_delta_status": {
       "status": "ELIGIBLE_MULTIPLE_SNAPSHOTS_NO_CHANGE",
@@ -3409,6 +3517,7 @@
     "away_team": "Japan",
     "home_team_slug": "tunisia",
     "away_team_slug": "japan",
+    "api_football_fixture_id": "1489394",
     "venue": "VENUE_NOT_MAPPED",
     "kickoff_status": "SCHEDULED",
     "kickoff_time_utc": "2026-06-21T04:00:00.000Z",
@@ -3420,8 +3529,9 @@
         "WATCH_ONLY"
       ],
       "venue_stress_ref": "data/v3_worldcup/venue_stress/v3_worldcup_venue_stress_20260603.json",
-      "venue_mapping_status": "NOT_MAPPED",
-      "venue_gap_reason": "fixture_source_missing_venue_name"
+      "venue_mapping_status": "UNMAPPED",
+      "venue_gap_reason": "fixture_sources_do_not_provide_match_venue",
+      "fixture_mapping_bridge_ref": "data/manual_sources/v3_worldcup/war_room/v3_wc2026_fixture_mapping_bridge.json#mt_517473411"
     },
     "venue_stress_summary": {
       "status": "VENUE_LAYER_READY_FIXTURE_VENUE_NOT_MAPPED",
@@ -3430,7 +3540,7 @@
       "stress_tags": [
         "WATCH_ONLY"
       ],
-      "observation_note": "fixture_source_missing_venue_name"
+      "observation_note": "fixture_sources_do_not_provide_match_venue"
     },
     "home_final_26_profile_ref": "data/manual_sources/v3_worldcup/squads/fifa_final_26/processed/v3_wc2026_final_26_squad_profile_team_cards.json#tunisia",
     "away_final_26_profile_ref": "data/manual_sources/v3_worldcup/squads/fifa_final_26/processed/v3_wc2026_final_26_squad_profile_team_cards.json#japan",
@@ -3454,22 +3564,23 @@
       }
     },
     "odds_snapshot_status": {
-      "status": "GLOBAL_SNAPSHOT_AVAILABLE_NOT_MATCH_MAPPED",
+      "status": "MAPPED_NO_CURRENT_ODDS",
       "successful_fixture_count": 1,
       "source": "data/runtime/status/check_v3_worldcup_odds_snapshot_live_small_batch_20260604.json",
       "has_native_opening": false,
       "has_native_closing": false
     },
     "odds_binding": {
-      "odds_fixture_id": null,
-      "odds_snapshot_status": "GLOBAL_SNAPSHOT_AVAILABLE_NOT_MATCH_MAPPED",
+      "odds_fixture_id": "1489394",
+      "odds_snapshot_status": "MAPPED_NO_CURRENT_ODDS",
       "odds_available": false,
       "bookmaker_count": 13,
       "market_type_count": 7,
       "odds_observation_delta_status": "ELIGIBLE_MULTIPLE_SNAPSHOTS_NO_CHANGE",
       "changed_odds_count": 0,
-      "odds_gap_reason": "match_card_fixture_id_not_mapped_to_api_football_odds_fixture",
-      "no_money_flow_judgment": true
+      "odds_gap_reason": "odds_fixture_mapped_but_current_snapshot_empty",
+      "no_money_flow_judgment": true,
+      "fixture_mapping_bridge_ref": "data/manual_sources/v3_worldcup/war_room/v3_wc2026_fixture_mapping_bridge.json#mt_517473411"
     },
     "odds_observation_delta_status": {
       "status": "ELIGIBLE_MULTIPLE_SNAPSHOTS_NO_CHANGE",
@@ -3504,6 +3615,7 @@
     "away_team": "Curaçao",
     "home_team_slug": "ecuador",
     "away_team_slug": "curacao",
+    "api_football_fixture_id": "1489392",
     "venue": "VENUE_NOT_MAPPED",
     "kickoff_status": "SCHEDULED",
     "kickoff_time_utc": "2026-06-21T00:00:00.000Z",
@@ -3515,8 +3627,9 @@
         "WATCH_ONLY"
       ],
       "venue_stress_ref": "data/v3_worldcup/venue_stress/v3_worldcup_venue_stress_20260603.json",
-      "venue_mapping_status": "NOT_MAPPED",
-      "venue_gap_reason": "fixture_source_missing_venue_name"
+      "venue_mapping_status": "UNMAPPED",
+      "venue_gap_reason": "fixture_sources_do_not_provide_match_venue",
+      "fixture_mapping_bridge_ref": "data/manual_sources/v3_worldcup/war_room/v3_wc2026_fixture_mapping_bridge.json#mt_641915358"
     },
     "venue_stress_summary": {
       "status": "VENUE_LAYER_READY_FIXTURE_VENUE_NOT_MAPPED",
@@ -3525,7 +3638,7 @@
       "stress_tags": [
         "WATCH_ONLY"
       ],
-      "observation_note": "fixture_source_missing_venue_name"
+      "observation_note": "fixture_sources_do_not_provide_match_venue"
     },
     "home_final_26_profile_ref": "data/manual_sources/v3_worldcup/squads/fifa_final_26/processed/v3_wc2026_final_26_squad_profile_team_cards.json#ecuador",
     "away_final_26_profile_ref": "data/manual_sources/v3_worldcup/squads/fifa_final_26/processed/v3_wc2026_final_26_squad_profile_team_cards.json#curacao",
@@ -3549,22 +3662,23 @@
       }
     },
     "odds_snapshot_status": {
-      "status": "GLOBAL_SNAPSHOT_AVAILABLE_NOT_MATCH_MAPPED",
+      "status": "MAPPED_NO_CURRENT_ODDS",
       "successful_fixture_count": 1,
       "source": "data/runtime/status/check_v3_worldcup_odds_snapshot_live_small_batch_20260604.json",
       "has_native_opening": false,
       "has_native_closing": false
     },
     "odds_binding": {
-      "odds_fixture_id": null,
-      "odds_snapshot_status": "GLOBAL_SNAPSHOT_AVAILABLE_NOT_MATCH_MAPPED",
+      "odds_fixture_id": "1489392",
+      "odds_snapshot_status": "MAPPED_NO_CURRENT_ODDS",
       "odds_available": false,
       "bookmaker_count": 13,
       "market_type_count": 7,
       "odds_observation_delta_status": "ELIGIBLE_MULTIPLE_SNAPSHOTS_NO_CHANGE",
       "changed_odds_count": 0,
-      "odds_gap_reason": "match_card_fixture_id_not_mapped_to_api_football_odds_fixture",
-      "no_money_flow_judgment": true
+      "odds_gap_reason": "odds_fixture_mapped_but_current_snapshot_empty",
+      "no_money_flow_judgment": true,
+      "fixture_mapping_bridge_ref": "data/manual_sources/v3_worldcup/war_room/v3_wc2026_fixture_mapping_bridge.json#mt_641915358"
     },
     "odds_observation_delta_status": {
       "status": "ELIGIBLE_MULTIPLE_SNAPSHOTS_NO_CHANGE",
@@ -3599,6 +3713,7 @@
     "away_team": "Côte D'Ivoire",
     "home_team_slug": "germany",
     "away_team_slug": "cote_divoire",
+    "api_football_fixture_id": "1489393",
     "venue": "VENUE_NOT_MAPPED",
     "kickoff_status": "SCHEDULED",
     "kickoff_time_utc": "2026-06-20T20:00:00.000Z",
@@ -3610,8 +3725,9 @@
         "WATCH_ONLY"
       ],
       "venue_stress_ref": "data/v3_worldcup/venue_stress/v3_worldcup_venue_stress_20260603.json",
-      "venue_mapping_status": "NOT_MAPPED",
-      "venue_gap_reason": "fixture_source_missing_venue_name"
+      "venue_mapping_status": "UNMAPPED",
+      "venue_gap_reason": "fixture_sources_do_not_provide_match_venue",
+      "fixture_mapping_bridge_ref": "data/manual_sources/v3_worldcup/war_room/v3_wc2026_fixture_mapping_bridge.json#mt_465851784"
     },
     "venue_stress_summary": {
       "status": "VENUE_LAYER_READY_FIXTURE_VENUE_NOT_MAPPED",
@@ -3620,7 +3736,7 @@
       "stress_tags": [
         "WATCH_ONLY"
       ],
-      "observation_note": "fixture_source_missing_venue_name"
+      "observation_note": "fixture_sources_do_not_provide_match_venue"
     },
     "home_final_26_profile_ref": "data/manual_sources/v3_worldcup/squads/fifa_final_26/processed/v3_wc2026_final_26_squad_profile_team_cards.json#germany",
     "away_final_26_profile_ref": "data/manual_sources/v3_worldcup/squads/fifa_final_26/processed/v3_wc2026_final_26_squad_profile_team_cards.json#cote_divoire",
@@ -3642,22 +3758,23 @@
       }
     },
     "odds_snapshot_status": {
-      "status": "GLOBAL_SNAPSHOT_AVAILABLE_NOT_MATCH_MAPPED",
+      "status": "MAPPED_NO_CURRENT_ODDS",
       "successful_fixture_count": 1,
       "source": "data/runtime/status/check_v3_worldcup_odds_snapshot_live_small_batch_20260604.json",
       "has_native_opening": false,
       "has_native_closing": false
     },
     "odds_binding": {
-      "odds_fixture_id": null,
-      "odds_snapshot_status": "GLOBAL_SNAPSHOT_AVAILABLE_NOT_MATCH_MAPPED",
+      "odds_fixture_id": "1489393",
+      "odds_snapshot_status": "MAPPED_NO_CURRENT_ODDS",
       "odds_available": false,
       "bookmaker_count": 13,
       "market_type_count": 7,
       "odds_observation_delta_status": "ELIGIBLE_MULTIPLE_SNAPSHOTS_NO_CHANGE",
       "changed_odds_count": 0,
-      "odds_gap_reason": "match_card_fixture_id_not_mapped_to_api_football_odds_fixture",
-      "no_money_flow_judgment": true
+      "odds_gap_reason": "odds_fixture_mapped_but_current_snapshot_empty",
+      "no_money_flow_judgment": true,
+      "fixture_mapping_bridge_ref": "data/manual_sources/v3_worldcup/war_room/v3_wc2026_fixture_mapping_bridge.json#mt_465851784"
     },
     "odds_observation_delta_status": {
       "status": "ELIGIBLE_MULTIPLE_SNAPSHOTS_NO_CHANGE",
@@ -3692,6 +3809,7 @@
     "away_team": "Sweden",
     "home_team_slug": "netherlands",
     "away_team_slug": "sweden",
+    "api_football_fixture_id": "1539007",
     "venue": "VENUE_NOT_MAPPED",
     "kickoff_status": "SCHEDULED",
     "kickoff_time_utc": "2026-06-20T17:00:00.000Z",
@@ -3703,8 +3821,9 @@
         "WATCH_ONLY"
       ],
       "venue_stress_ref": "data/v3_worldcup/venue_stress/v3_worldcup_venue_stress_20260603.json",
-      "venue_mapping_status": "NOT_MAPPED",
-      "venue_gap_reason": "fixture_source_missing_venue_name"
+      "venue_mapping_status": "UNMAPPED",
+      "venue_gap_reason": "fixture_sources_do_not_provide_match_venue",
+      "fixture_mapping_bridge_ref": "data/manual_sources/v3_worldcup/war_room/v3_wc2026_fixture_mapping_bridge.json#mt_370102162"
     },
     "venue_stress_summary": {
       "status": "VENUE_LAYER_READY_FIXTURE_VENUE_NOT_MAPPED",
@@ -3713,7 +3832,7 @@
       "stress_tags": [
         "WATCH_ONLY"
       ],
-      "observation_note": "fixture_source_missing_venue_name"
+      "observation_note": "fixture_sources_do_not_provide_match_venue"
     },
     "home_final_26_profile_ref": "data/manual_sources/v3_worldcup/squads/fifa_final_26/processed/v3_wc2026_final_26_squad_profile_team_cards.json#netherlands",
     "away_final_26_profile_ref": "data/manual_sources/v3_worldcup/squads/fifa_final_26/processed/v3_wc2026_final_26_squad_profile_team_cards.json#sweden",
@@ -3735,22 +3854,23 @@
       }
     },
     "odds_snapshot_status": {
-      "status": "GLOBAL_SNAPSHOT_AVAILABLE_NOT_MATCH_MAPPED",
+      "status": "MAPPED_NO_CURRENT_ODDS",
       "successful_fixture_count": 1,
       "source": "data/runtime/status/check_v3_worldcup_odds_snapshot_live_small_batch_20260604.json",
       "has_native_opening": false,
       "has_native_closing": false
     },
     "odds_binding": {
-      "odds_fixture_id": null,
-      "odds_snapshot_status": "GLOBAL_SNAPSHOT_AVAILABLE_NOT_MATCH_MAPPED",
+      "odds_fixture_id": "1539007",
+      "odds_snapshot_status": "MAPPED_NO_CURRENT_ODDS",
       "odds_available": false,
       "bookmaker_count": 13,
       "market_type_count": 7,
       "odds_observation_delta_status": "ELIGIBLE_MULTIPLE_SNAPSHOTS_NO_CHANGE",
       "changed_odds_count": 0,
-      "odds_gap_reason": "match_card_fixture_id_not_mapped_to_api_football_odds_fixture",
-      "no_money_flow_judgment": true
+      "odds_gap_reason": "odds_fixture_mapped_but_current_snapshot_empty",
+      "no_money_flow_judgment": true,
+      "fixture_mapping_bridge_ref": "data/manual_sources/v3_worldcup/war_room/v3_wc2026_fixture_mapping_bridge.json#mt_370102162"
     },
     "odds_observation_delta_status": {
       "status": "ELIGIBLE_MULTIPLE_SNAPSHOTS_NO_CHANGE",
@@ -3785,6 +3905,7 @@
     "away_team": "Paraguay",
     "home_team_slug": "turkiye",
     "away_team_slug": "paraguay",
+    "api_football_fixture_id": "1539006",
     "venue": "VENUE_NOT_MAPPED",
     "kickoff_status": "SCHEDULED",
     "kickoff_time_utc": "2026-06-20T03:00:00.000Z",
@@ -3796,8 +3917,9 @@
         "WATCH_ONLY"
       ],
       "venue_stress_ref": "data/v3_worldcup/venue_stress/v3_worldcup_venue_stress_20260603.json",
-      "venue_mapping_status": "NOT_MAPPED",
-      "venue_gap_reason": "fixture_source_missing_venue_name"
+      "venue_mapping_status": "UNMAPPED",
+      "venue_gap_reason": "fixture_sources_do_not_provide_match_venue",
+      "fixture_mapping_bridge_ref": "data/manual_sources/v3_worldcup/war_room/v3_wc2026_fixture_mapping_bridge.json#mt_732520931"
     },
     "venue_stress_summary": {
       "status": "VENUE_LAYER_READY_FIXTURE_VENUE_NOT_MAPPED",
@@ -3806,7 +3928,7 @@
       "stress_tags": [
         "WATCH_ONLY"
       ],
-      "observation_note": "fixture_source_missing_venue_name"
+      "observation_note": "fixture_sources_do_not_provide_match_venue"
     },
     "home_final_26_profile_ref": "data/manual_sources/v3_worldcup/squads/fifa_final_26/processed/v3_wc2026_final_26_squad_profile_team_cards.json#turkiye",
     "away_final_26_profile_ref": "data/manual_sources/v3_worldcup/squads/fifa_final_26/processed/v3_wc2026_final_26_squad_profile_team_cards.json#paraguay",
@@ -3828,22 +3950,23 @@
       }
     },
     "odds_snapshot_status": {
-      "status": "GLOBAL_SNAPSHOT_AVAILABLE_NOT_MATCH_MAPPED",
+      "status": "MAPPED_NO_CURRENT_ODDS",
       "successful_fixture_count": 1,
       "source": "data/runtime/status/check_v3_worldcup_odds_snapshot_live_small_batch_20260604.json",
       "has_native_opening": false,
       "has_native_closing": false
     },
     "odds_binding": {
-      "odds_fixture_id": null,
-      "odds_snapshot_status": "GLOBAL_SNAPSHOT_AVAILABLE_NOT_MATCH_MAPPED",
+      "odds_fixture_id": "1539006",
+      "odds_snapshot_status": "MAPPED_NO_CURRENT_ODDS",
       "odds_available": false,
       "bookmaker_count": 13,
       "market_type_count": 7,
       "odds_observation_delta_status": "ELIGIBLE_MULTIPLE_SNAPSHOTS_NO_CHANGE",
       "changed_odds_count": 0,
-      "odds_gap_reason": "match_card_fixture_id_not_mapped_to_api_football_odds_fixture",
-      "no_money_flow_judgment": true
+      "odds_gap_reason": "odds_fixture_mapped_but_current_snapshot_empty",
+      "no_money_flow_judgment": true,
+      "fixture_mapping_bridge_ref": "data/manual_sources/v3_worldcup/war_room/v3_wc2026_fixture_mapping_bridge.json#mt_732520931"
     },
     "odds_observation_delta_status": {
       "status": "ELIGIBLE_MULTIPLE_SNAPSHOTS_NO_CHANGE",
@@ -3878,6 +4001,7 @@
     "away_team": "Haiti",
     "home_team_slug": "brazil",
     "away_team_slug": "haiti",
+    "api_football_fixture_id": "1489389",
     "venue": "VENUE_NOT_MAPPED",
     "kickoff_status": "SCHEDULED",
     "kickoff_time_utc": "2026-06-20T00:30:00.000Z",
@@ -3889,8 +4013,9 @@
         "WATCH_ONLY"
       ],
       "venue_stress_ref": "data/v3_worldcup/venue_stress/v3_worldcup_venue_stress_20260603.json",
-      "venue_mapping_status": "NOT_MAPPED",
-      "venue_gap_reason": "fixture_source_missing_venue_name"
+      "venue_mapping_status": "UNMAPPED",
+      "venue_gap_reason": "fixture_sources_do_not_provide_match_venue",
+      "fixture_mapping_bridge_ref": "data/manual_sources/v3_worldcup/war_room/v3_wc2026_fixture_mapping_bridge.json#mt_641915383"
     },
     "venue_stress_summary": {
       "status": "VENUE_LAYER_READY_FIXTURE_VENUE_NOT_MAPPED",
@@ -3899,7 +4024,7 @@
       "stress_tags": [
         "WATCH_ONLY"
       ],
-      "observation_note": "fixture_source_missing_venue_name"
+      "observation_note": "fixture_sources_do_not_provide_match_venue"
     },
     "home_final_26_profile_ref": "data/manual_sources/v3_worldcup/squads/fifa_final_26/processed/v3_wc2026_final_26_squad_profile_team_cards.json#brazil",
     "away_final_26_profile_ref": "data/manual_sources/v3_worldcup/squads/fifa_final_26/processed/v3_wc2026_final_26_squad_profile_team_cards.json#haiti",
@@ -3923,22 +4048,23 @@
       }
     },
     "odds_snapshot_status": {
-      "status": "GLOBAL_SNAPSHOT_AVAILABLE_NOT_MATCH_MAPPED",
+      "status": "MAPPED_NO_CURRENT_ODDS",
       "successful_fixture_count": 1,
       "source": "data/runtime/status/check_v3_worldcup_odds_snapshot_live_small_batch_20260604.json",
       "has_native_opening": false,
       "has_native_closing": false
     },
     "odds_binding": {
-      "odds_fixture_id": null,
-      "odds_snapshot_status": "GLOBAL_SNAPSHOT_AVAILABLE_NOT_MATCH_MAPPED",
+      "odds_fixture_id": "1489389",
+      "odds_snapshot_status": "MAPPED_NO_CURRENT_ODDS",
       "odds_available": false,
       "bookmaker_count": 13,
       "market_type_count": 7,
       "odds_observation_delta_status": "ELIGIBLE_MULTIPLE_SNAPSHOTS_NO_CHANGE",
       "changed_odds_count": 0,
-      "odds_gap_reason": "match_card_fixture_id_not_mapped_to_api_football_odds_fixture",
-      "no_money_flow_judgment": true
+      "odds_gap_reason": "odds_fixture_mapped_but_current_snapshot_empty",
+      "no_money_flow_judgment": true,
+      "fixture_mapping_bridge_ref": "data/manual_sources/v3_worldcup/war_room/v3_wc2026_fixture_mapping_bridge.json#mt_641915383"
     },
     "odds_observation_delta_status": {
       "status": "ELIGIBLE_MULTIPLE_SNAPSHOTS_NO_CHANGE",
@@ -3973,6 +4099,7 @@
     "away_team": "Morocco",
     "home_team_slug": "scotland",
     "away_team_slug": "morocco",
+    "api_football_fixture_id": "1489390",
     "venue": "VENUE_NOT_MAPPED",
     "kickoff_status": "SCHEDULED",
     "kickoff_time_utc": "2026-06-19T22:00:00.000Z",
@@ -3984,8 +4111,9 @@
         "WATCH_ONLY"
       ],
       "venue_stress_ref": "data/v3_worldcup/venue_stress/v3_worldcup_venue_stress_20260603.json",
-      "venue_mapping_status": "NOT_MAPPED",
-      "venue_gap_reason": "fixture_source_missing_venue_name"
+      "venue_mapping_status": "UNMAPPED",
+      "venue_gap_reason": "fixture_sources_do_not_provide_match_venue",
+      "fixture_mapping_bridge_ref": "data/manual_sources/v3_worldcup/war_room/v3_wc2026_fixture_mapping_bridge.json#mt_732520916"
     },
     "venue_stress_summary": {
       "status": "VENUE_LAYER_READY_FIXTURE_VENUE_NOT_MAPPED",
@@ -3994,7 +4122,7 @@
       "stress_tags": [
         "WATCH_ONLY"
       ],
-      "observation_note": "fixture_source_missing_venue_name"
+      "observation_note": "fixture_sources_do_not_provide_match_venue"
     },
     "home_final_26_profile_ref": "data/manual_sources/v3_worldcup/squads/fifa_final_26/processed/v3_wc2026_final_26_squad_profile_team_cards.json#scotland",
     "away_final_26_profile_ref": "data/manual_sources/v3_worldcup/squads/fifa_final_26/processed/v3_wc2026_final_26_squad_profile_team_cards.json#morocco",
@@ -4018,22 +4146,23 @@
       }
     },
     "odds_snapshot_status": {
-      "status": "GLOBAL_SNAPSHOT_AVAILABLE_NOT_MATCH_MAPPED",
+      "status": "MAPPED_NO_CURRENT_ODDS",
       "successful_fixture_count": 1,
       "source": "data/runtime/status/check_v3_worldcup_odds_snapshot_live_small_batch_20260604.json",
       "has_native_opening": false,
       "has_native_closing": false
     },
     "odds_binding": {
-      "odds_fixture_id": null,
-      "odds_snapshot_status": "GLOBAL_SNAPSHOT_AVAILABLE_NOT_MATCH_MAPPED",
+      "odds_fixture_id": "1489390",
+      "odds_snapshot_status": "MAPPED_NO_CURRENT_ODDS",
       "odds_available": false,
       "bookmaker_count": 13,
       "market_type_count": 7,
       "odds_observation_delta_status": "ELIGIBLE_MULTIPLE_SNAPSHOTS_NO_CHANGE",
       "changed_odds_count": 0,
-      "odds_gap_reason": "match_card_fixture_id_not_mapped_to_api_football_odds_fixture",
-      "no_money_flow_judgment": true
+      "odds_gap_reason": "odds_fixture_mapped_but_current_snapshot_empty",
+      "no_money_flow_judgment": true,
+      "fixture_mapping_bridge_ref": "data/manual_sources/v3_worldcup/war_room/v3_wc2026_fixture_mapping_bridge.json#mt_732520916"
     },
     "odds_observation_delta_status": {
       "status": "ELIGIBLE_MULTIPLE_SNAPSHOTS_NO_CHANGE",
@@ -4068,6 +4197,7 @@
     "away_team": "Australia",
     "home_team_slug": "usa",
     "away_team_slug": "australia",
+    "api_football_fixture_id": "1489391",
     "venue": "VENUE_NOT_MAPPED",
     "kickoff_status": "SCHEDULED",
     "kickoff_time_utc": "2026-06-19T19:00:00.000Z",
@@ -4079,8 +4209,9 @@
         "WATCH_ONLY"
       ],
       "venue_stress_ref": "data/v3_worldcup/venue_stress/v3_worldcup_venue_stress_20260603.json",
-      "venue_mapping_status": "NOT_MAPPED",
-      "venue_gap_reason": "fixture_source_missing_venue_name"
+      "venue_mapping_status": "UNMAPPED",
+      "venue_gap_reason": "fixture_sources_do_not_provide_match_venue",
+      "fixture_mapping_bridge_ref": "data/manual_sources/v3_worldcup/war_room/v3_wc2026_fixture_mapping_bridge.json#mt_894046538"
     },
     "venue_stress_summary": {
       "status": "VENUE_LAYER_READY_FIXTURE_VENUE_NOT_MAPPED",
@@ -4089,7 +4220,7 @@
       "stress_tags": [
         "WATCH_ONLY"
       ],
-      "observation_note": "fixture_source_missing_venue_name"
+      "observation_note": "fixture_sources_do_not_provide_match_venue"
     },
     "home_final_26_profile_ref": "data/manual_sources/v3_worldcup/squads/fifa_final_26/processed/v3_wc2026_final_26_squad_profile_team_cards.json#usa",
     "away_final_26_profile_ref": "data/manual_sources/v3_worldcup/squads/fifa_final_26/processed/v3_wc2026_final_26_squad_profile_team_cards.json#australia",
@@ -4113,22 +4244,23 @@
       }
     },
     "odds_snapshot_status": {
-      "status": "GLOBAL_SNAPSHOT_AVAILABLE_NOT_MATCH_MAPPED",
+      "status": "MAPPED_NO_CURRENT_ODDS",
       "successful_fixture_count": 1,
       "source": "data/runtime/status/check_v3_worldcup_odds_snapshot_live_small_batch_20260604.json",
       "has_native_opening": false,
       "has_native_closing": false
     },
     "odds_binding": {
-      "odds_fixture_id": null,
-      "odds_snapshot_status": "GLOBAL_SNAPSHOT_AVAILABLE_NOT_MATCH_MAPPED",
+      "odds_fixture_id": "1489391",
+      "odds_snapshot_status": "MAPPED_NO_CURRENT_ODDS",
       "odds_available": false,
       "bookmaker_count": 13,
       "market_type_count": 7,
       "odds_observation_delta_status": "ELIGIBLE_MULTIPLE_SNAPSHOTS_NO_CHANGE",
       "changed_odds_count": 0,
-      "odds_gap_reason": "match_card_fixture_id_not_mapped_to_api_football_odds_fixture",
-      "no_money_flow_judgment": true
+      "odds_gap_reason": "odds_fixture_mapped_but_current_snapshot_empty",
+      "no_money_flow_judgment": true,
+      "fixture_mapping_bridge_ref": "data/manual_sources/v3_worldcup/war_room/v3_wc2026_fixture_mapping_bridge.json#mt_894046538"
     },
     "odds_observation_delta_status": {
       "status": "ELIGIBLE_MULTIPLE_SNAPSHOTS_NO_CHANGE",
@@ -4163,6 +4295,7 @@
     "away_team": "Korea Republic",
     "home_team_slug": "mexico",
     "away_team_slug": "korea_republic",
+    "api_football_fixture_id": "1489388",
     "venue": "VENUE_NOT_MAPPED",
     "kickoff_status": "SCHEDULED",
     "kickoff_time_utc": "2026-06-19T01:00:00.000Z",
@@ -4174,8 +4307,9 @@
         "WATCH_ONLY"
       ],
       "venue_stress_ref": "data/v3_worldcup/venue_stress/v3_worldcup_venue_stress_20260603.json",
-      "venue_mapping_status": "NOT_MAPPED",
-      "venue_gap_reason": "fixture_source_missing_venue_name"
+      "venue_mapping_status": "UNMAPPED",
+      "venue_gap_reason": "fixture_sources_do_not_provide_match_venue",
+      "fixture_mapping_bridge_ref": "data/manual_sources/v3_worldcup/war_room/v3_wc2026_fixture_mapping_bridge.json#mt_153636108"
     },
     "venue_stress_summary": {
       "status": "VENUE_LAYER_READY_FIXTURE_VENUE_NOT_MAPPED",
@@ -4184,7 +4318,7 @@
       "stress_tags": [
         "WATCH_ONLY"
       ],
-      "observation_note": "fixture_source_missing_venue_name"
+      "observation_note": "fixture_sources_do_not_provide_match_venue"
     },
     "home_final_26_profile_ref": "data/manual_sources/v3_worldcup/squads/fifa_final_26/processed/v3_wc2026_final_26_squad_profile_team_cards.json#mexico",
     "away_final_26_profile_ref": "data/manual_sources/v3_worldcup/squads/fifa_final_26/processed/v3_wc2026_final_26_squad_profile_team_cards.json#korea_republic",
@@ -4206,22 +4340,23 @@
       }
     },
     "odds_snapshot_status": {
-      "status": "GLOBAL_SNAPSHOT_AVAILABLE_NOT_MATCH_MAPPED",
+      "status": "MAPPED_NO_CURRENT_ODDS",
       "successful_fixture_count": 1,
       "source": "data/runtime/status/check_v3_worldcup_odds_snapshot_live_small_batch_20260604.json",
       "has_native_opening": false,
       "has_native_closing": false
     },
     "odds_binding": {
-      "odds_fixture_id": null,
-      "odds_snapshot_status": "GLOBAL_SNAPSHOT_AVAILABLE_NOT_MATCH_MAPPED",
+      "odds_fixture_id": "1489388",
+      "odds_snapshot_status": "MAPPED_NO_CURRENT_ODDS",
       "odds_available": false,
       "bookmaker_count": 13,
       "market_type_count": 7,
       "odds_observation_delta_status": "ELIGIBLE_MULTIPLE_SNAPSHOTS_NO_CHANGE",
       "changed_odds_count": 0,
-      "odds_gap_reason": "match_card_fixture_id_not_mapped_to_api_football_odds_fixture",
-      "no_money_flow_judgment": true
+      "odds_gap_reason": "odds_fixture_mapped_but_current_snapshot_empty",
+      "no_money_flow_judgment": true,
+      "fixture_mapping_bridge_ref": "data/manual_sources/v3_worldcup/war_room/v3_wc2026_fixture_mapping_bridge.json#mt_153636108"
     },
     "odds_observation_delta_status": {
       "status": "ELIGIBLE_MULTIPLE_SNAPSHOTS_NO_CHANGE",
@@ -4256,6 +4391,7 @@
     "away_team": "Qatar",
     "home_team_slug": "canada",
     "away_team_slug": "qatar",
+    "api_football_fixture_id": "1489387",
     "venue": "VENUE_NOT_MAPPED",
     "kickoff_status": "SCHEDULED",
     "kickoff_time_utc": "2026-06-18T22:00:00.000Z",
@@ -4267,8 +4403,9 @@
         "WATCH_ONLY"
       ],
       "venue_stress_ref": "data/v3_worldcup/venue_stress/v3_worldcup_venue_stress_20260603.json",
-      "venue_mapping_status": "NOT_MAPPED",
-      "venue_gap_reason": "fixture_source_missing_venue_name"
+      "venue_mapping_status": "UNMAPPED",
+      "venue_gap_reason": "fixture_sources_do_not_provide_match_venue",
+      "fixture_mapping_bridge_ref": "data/manual_sources/v3_worldcup/war_room/v3_wc2026_fixture_mapping_bridge.json#mt_894046992"
     },
     "venue_stress_summary": {
       "status": "VENUE_LAYER_READY_FIXTURE_VENUE_NOT_MAPPED",
@@ -4277,7 +4414,7 @@
       "stress_tags": [
         "WATCH_ONLY"
       ],
-      "observation_note": "fixture_source_missing_venue_name"
+      "observation_note": "fixture_sources_do_not_provide_match_venue"
     },
     "home_final_26_profile_ref": "data/manual_sources/v3_worldcup/squads/fifa_final_26/processed/v3_wc2026_final_26_squad_profile_team_cards.json#canada",
     "away_final_26_profile_ref": "data/manual_sources/v3_worldcup/squads/fifa_final_26/processed/v3_wc2026_final_26_squad_profile_team_cards.json#qatar",
@@ -4301,22 +4438,23 @@
       }
     },
     "odds_snapshot_status": {
-      "status": "GLOBAL_SNAPSHOT_AVAILABLE_NOT_MATCH_MAPPED",
+      "status": "MAPPED_NO_CURRENT_ODDS",
       "successful_fixture_count": 1,
       "source": "data/runtime/status/check_v3_worldcup_odds_snapshot_live_small_batch_20260604.json",
       "has_native_opening": false,
       "has_native_closing": false
     },
     "odds_binding": {
-      "odds_fixture_id": null,
-      "odds_snapshot_status": "GLOBAL_SNAPSHOT_AVAILABLE_NOT_MATCH_MAPPED",
+      "odds_fixture_id": "1489387",
+      "odds_snapshot_status": "MAPPED_NO_CURRENT_ODDS",
       "odds_available": false,
       "bookmaker_count": 13,
       "market_type_count": 7,
       "odds_observation_delta_status": "ELIGIBLE_MULTIPLE_SNAPSHOTS_NO_CHANGE",
       "changed_odds_count": 0,
-      "odds_gap_reason": "match_card_fixture_id_not_mapped_to_api_football_odds_fixture",
-      "no_money_flow_judgment": true
+      "odds_gap_reason": "odds_fixture_mapped_but_current_snapshot_empty",
+      "no_money_flow_judgment": true,
+      "fixture_mapping_bridge_ref": "data/manual_sources/v3_worldcup/war_room/v3_wc2026_fixture_mapping_bridge.json#mt_894046992"
     },
     "odds_observation_delta_status": {
       "status": "ELIGIBLE_MULTIPLE_SNAPSHOTS_NO_CHANGE",
@@ -4351,6 +4489,7 @@
     "away_team": "Bosnia And Herzegovina",
     "home_team_slug": "switzerland",
     "away_team_slug": "bosnia_and_herzegovina",
+    "api_football_fixture_id": "1539005",
     "venue": "VENUE_NOT_MAPPED",
     "kickoff_status": "SCHEDULED",
     "kickoff_time_utc": "2026-06-18T19:00:00.000Z",
@@ -4362,8 +4501,9 @@
         "WATCH_ONLY"
       ],
       "venue_stress_ref": "data/v3_worldcup/venue_stress/v3_worldcup_venue_stress_20260603.json",
-      "venue_mapping_status": "NOT_MAPPED",
-      "venue_gap_reason": "fixture_source_missing_venue_name"
+      "venue_mapping_status": "UNMAPPED",
+      "venue_gap_reason": "fixture_sources_do_not_provide_match_venue",
+      "fixture_mapping_bridge_ref": "data/manual_sources/v3_worldcup/war_room/v3_wc2026_fixture_mapping_bridge.json#mt_641915446"
     },
     "venue_stress_summary": {
       "status": "VENUE_LAYER_READY_FIXTURE_VENUE_NOT_MAPPED",
@@ -4372,7 +4512,7 @@
       "stress_tags": [
         "WATCH_ONLY"
       ],
-      "observation_note": "fixture_source_missing_venue_name"
+      "observation_note": "fixture_sources_do_not_provide_match_venue"
     },
     "home_final_26_profile_ref": "data/manual_sources/v3_worldcup/squads/fifa_final_26/processed/v3_wc2026_final_26_squad_profile_team_cards.json#switzerland",
     "away_final_26_profile_ref": "data/manual_sources/v3_worldcup/squads/fifa_final_26/processed/v3_wc2026_final_26_squad_profile_team_cards.json#bosnia_and_herzegovina",
@@ -4396,22 +4536,23 @@
       }
     },
     "odds_snapshot_status": {
-      "status": "GLOBAL_SNAPSHOT_AVAILABLE_NOT_MATCH_MAPPED",
+      "status": "MAPPED_NO_CURRENT_ODDS",
       "successful_fixture_count": 1,
       "source": "data/runtime/status/check_v3_worldcup_odds_snapshot_live_small_batch_20260604.json",
       "has_native_opening": false,
       "has_native_closing": false
     },
     "odds_binding": {
-      "odds_fixture_id": null,
-      "odds_snapshot_status": "GLOBAL_SNAPSHOT_AVAILABLE_NOT_MATCH_MAPPED",
+      "odds_fixture_id": "1539005",
+      "odds_snapshot_status": "MAPPED_NO_CURRENT_ODDS",
       "odds_available": false,
       "bookmaker_count": 13,
       "market_type_count": 7,
       "odds_observation_delta_status": "ELIGIBLE_MULTIPLE_SNAPSHOTS_NO_CHANGE",
       "changed_odds_count": 0,
-      "odds_gap_reason": "match_card_fixture_id_not_mapped_to_api_football_odds_fixture",
-      "no_money_flow_judgment": true
+      "odds_gap_reason": "odds_fixture_mapped_but_current_snapshot_empty",
+      "no_money_flow_judgment": true,
+      "fixture_mapping_bridge_ref": "data/manual_sources/v3_worldcup/war_room/v3_wc2026_fixture_mapping_bridge.json#mt_641915446"
     },
     "odds_observation_delta_status": {
       "status": "ELIGIBLE_MULTIPLE_SNAPSHOTS_NO_CHANGE",
@@ -4446,6 +4587,7 @@
     "away_team": "South Africa",
     "home_team_slug": "czechia",
     "away_team_slug": "south_africa",
+    "api_football_fixture_id": "1539004",
     "venue": "VENUE_NOT_MAPPED",
     "kickoff_status": "SCHEDULED",
     "kickoff_time_utc": "2026-06-18T16:00:00.000Z",
@@ -4457,8 +4599,9 @@
         "WATCH_ONLY"
       ],
       "venue_stress_ref": "data/v3_worldcup/venue_stress/v3_worldcup_venue_stress_20260603.json",
-      "venue_mapping_status": "NOT_MAPPED",
-      "venue_gap_reason": "fixture_source_missing_venue_name"
+      "venue_mapping_status": "UNMAPPED",
+      "venue_gap_reason": "fixture_sources_do_not_provide_match_venue",
+      "fixture_mapping_bridge_ref": "data/manual_sources/v3_worldcup/war_room/v3_wc2026_fixture_mapping_bridge.json#mt_209798567"
     },
     "venue_stress_summary": {
       "status": "VENUE_LAYER_READY_FIXTURE_VENUE_NOT_MAPPED",
@@ -4467,7 +4610,7 @@
       "stress_tags": [
         "WATCH_ONLY"
       ],
-      "observation_note": "fixture_source_missing_venue_name"
+      "observation_note": "fixture_sources_do_not_provide_match_venue"
     },
     "home_final_26_profile_ref": "data/manual_sources/v3_worldcup/squads/fifa_final_26/processed/v3_wc2026_final_26_squad_profile_team_cards.json#czechia",
     "away_final_26_profile_ref": "data/manual_sources/v3_worldcup/squads/fifa_final_26/processed/v3_wc2026_final_26_squad_profile_team_cards.json#south_africa",
@@ -4489,22 +4632,23 @@
       }
     },
     "odds_snapshot_status": {
-      "status": "GLOBAL_SNAPSHOT_AVAILABLE_NOT_MATCH_MAPPED",
+      "status": "MAPPED_NO_CURRENT_ODDS",
       "successful_fixture_count": 1,
       "source": "data/runtime/status/check_v3_worldcup_odds_snapshot_live_small_batch_20260604.json",
       "has_native_opening": false,
       "has_native_closing": false
     },
     "odds_binding": {
-      "odds_fixture_id": null,
-      "odds_snapshot_status": "GLOBAL_SNAPSHOT_AVAILABLE_NOT_MATCH_MAPPED",
+      "odds_fixture_id": "1539004",
+      "odds_snapshot_status": "MAPPED_NO_CURRENT_ODDS",
       "odds_available": false,
       "bookmaker_count": 13,
       "market_type_count": 7,
       "odds_observation_delta_status": "ELIGIBLE_MULTIPLE_SNAPSHOTS_NO_CHANGE",
       "changed_odds_count": 0,
-      "odds_gap_reason": "match_card_fixture_id_not_mapped_to_api_football_odds_fixture",
-      "no_money_flow_judgment": true
+      "odds_gap_reason": "odds_fixture_mapped_but_current_snapshot_empty",
+      "no_money_flow_judgment": true,
+      "fixture_mapping_bridge_ref": "data/manual_sources/v3_worldcup/war_room/v3_wc2026_fixture_mapping_bridge.json#mt_209798567"
     },
     "odds_observation_delta_status": {
       "status": "ELIGIBLE_MULTIPLE_SNAPSHOTS_NO_CHANGE",
@@ -4539,6 +4683,7 @@
     "away_team": "Colombia",
     "home_team_slug": "uzbekistan",
     "away_team_slug": "colombia",
+    "api_football_fixture_id": "1489386",
     "venue": "VENUE_NOT_MAPPED",
     "kickoff_status": "SCHEDULED",
     "kickoff_time_utc": "2026-06-18T02:00:00.000Z",
@@ -4550,8 +4695,9 @@
         "WATCH_ONLY"
       ],
       "venue_stress_ref": "data/v3_worldcup/venue_stress/v3_worldcup_venue_stress_20260603.json",
-      "venue_mapping_status": "NOT_MAPPED",
-      "venue_gap_reason": "fixture_source_missing_venue_name"
+      "venue_mapping_status": "UNMAPPED",
+      "venue_gap_reason": "fixture_sources_do_not_provide_match_venue",
+      "fixture_mapping_bridge_ref": "data/manual_sources/v3_worldcup/war_room/v3_wc2026_fixture_mapping_bridge.json#mt_986264782"
     },
     "venue_stress_summary": {
       "status": "VENUE_LAYER_READY_FIXTURE_VENUE_NOT_MAPPED",
@@ -4560,7 +4706,7 @@
       "stress_tags": [
         "WATCH_ONLY"
       ],
-      "observation_note": "fixture_source_missing_venue_name"
+      "observation_note": "fixture_sources_do_not_provide_match_venue"
     },
     "home_final_26_profile_ref": "data/manual_sources/v3_worldcup/squads/fifa_final_26/processed/v3_wc2026_final_26_squad_profile_team_cards.json#uzbekistan",
     "away_final_26_profile_ref": "data/manual_sources/v3_worldcup/squads/fifa_final_26/processed/v3_wc2026_final_26_squad_profile_team_cards.json#colombia",
@@ -4584,22 +4730,23 @@
       }
     },
     "odds_snapshot_status": {
-      "status": "GLOBAL_SNAPSHOT_AVAILABLE_NOT_MATCH_MAPPED",
+      "status": "MAPPED_NO_CURRENT_ODDS",
       "successful_fixture_count": 1,
       "source": "data/runtime/status/check_v3_worldcup_odds_snapshot_live_small_batch_20260604.json",
       "has_native_opening": false,
       "has_native_closing": false
     },
     "odds_binding": {
-      "odds_fixture_id": null,
-      "odds_snapshot_status": "GLOBAL_SNAPSHOT_AVAILABLE_NOT_MATCH_MAPPED",
+      "odds_fixture_id": "1489386",
+      "odds_snapshot_status": "MAPPED_NO_CURRENT_ODDS",
       "odds_available": false,
       "bookmaker_count": 13,
       "market_type_count": 7,
       "odds_observation_delta_status": "ELIGIBLE_MULTIPLE_SNAPSHOTS_NO_CHANGE",
       "changed_odds_count": 0,
-      "odds_gap_reason": "match_card_fixture_id_not_mapped_to_api_football_odds_fixture",
-      "no_money_flow_judgment": true
+      "odds_gap_reason": "odds_fixture_mapped_but_current_snapshot_empty",
+      "no_money_flow_judgment": true,
+      "fixture_mapping_bridge_ref": "data/manual_sources/v3_worldcup/war_room/v3_wc2026_fixture_mapping_bridge.json#mt_986264782"
     },
     "odds_observation_delta_status": {
       "status": "ELIGIBLE_MULTIPLE_SNAPSHOTS_NO_CHANGE",
@@ -4634,6 +4781,7 @@
     "away_team": "Panama",
     "home_team_slug": "ghana",
     "away_team_slug": "panama",
+    "api_football_fixture_id": "1489385",
     "venue": "VENUE_NOT_MAPPED",
     "kickoff_status": "SCHEDULED",
     "kickoff_time_utc": "2026-06-17T23:00:00.000Z",
@@ -4645,8 +4793,9 @@
         "WATCH_ONLY"
       ],
       "venue_stress_ref": "data/v3_worldcup/venue_stress/v3_worldcup_venue_stress_20260603.json",
-      "venue_mapping_status": "NOT_MAPPED",
-      "venue_gap_reason": "fixture_source_missing_venue_name"
+      "venue_mapping_status": "UNMAPPED",
+      "venue_gap_reason": "fixture_sources_do_not_provide_match_venue",
+      "fixture_mapping_bridge_ref": "data/manual_sources/v3_worldcup/war_room/v3_wc2026_fixture_mapping_bridge.json#mt_370102032"
     },
     "venue_stress_summary": {
       "status": "VENUE_LAYER_READY_FIXTURE_VENUE_NOT_MAPPED",
@@ -4655,7 +4804,7 @@
       "stress_tags": [
         "WATCH_ONLY"
       ],
-      "observation_note": "fixture_source_missing_venue_name"
+      "observation_note": "fixture_sources_do_not_provide_match_venue"
     },
     "home_final_26_profile_ref": "data/manual_sources/v3_worldcup/squads/fifa_final_26/processed/v3_wc2026_final_26_squad_profile_team_cards.json#ghana",
     "away_final_26_profile_ref": "data/manual_sources/v3_worldcup/squads/fifa_final_26/processed/v3_wc2026_final_26_squad_profile_team_cards.json#panama",
@@ -4677,22 +4826,23 @@
       }
     },
     "odds_snapshot_status": {
-      "status": "GLOBAL_SNAPSHOT_AVAILABLE_NOT_MATCH_MAPPED",
+      "status": "MAPPED_NO_CURRENT_ODDS",
       "successful_fixture_count": 1,
       "source": "data/runtime/status/check_v3_worldcup_odds_snapshot_live_small_batch_20260604.json",
       "has_native_opening": false,
       "has_native_closing": false
     },
     "odds_binding": {
-      "odds_fixture_id": null,
-      "odds_snapshot_status": "GLOBAL_SNAPSHOT_AVAILABLE_NOT_MATCH_MAPPED",
+      "odds_fixture_id": "1489385",
+      "odds_snapshot_status": "MAPPED_NO_CURRENT_ODDS",
       "odds_available": false,
       "bookmaker_count": 13,
       "market_type_count": 7,
       "odds_observation_delta_status": "ELIGIBLE_MULTIPLE_SNAPSHOTS_NO_CHANGE",
       "changed_odds_count": 0,
-      "odds_gap_reason": "match_card_fixture_id_not_mapped_to_api_football_odds_fixture",
-      "no_money_flow_judgment": true
+      "odds_gap_reason": "odds_fixture_mapped_but_current_snapshot_empty",
+      "no_money_flow_judgment": true,
+      "fixture_mapping_bridge_ref": "data/manual_sources/v3_worldcup/war_room/v3_wc2026_fixture_mapping_bridge.json#mt_370102032"
     },
     "odds_observation_delta_status": {
       "status": "ELIGIBLE_MULTIPLE_SNAPSHOTS_NO_CHANGE",
@@ -4727,6 +4877,7 @@
     "away_team": "Croatia",
     "home_team_slug": "england",
     "away_team_slug": "croatia",
+    "api_football_fixture_id": "1489384",
     "venue": "VENUE_NOT_MAPPED",
     "kickoff_status": "SCHEDULED",
     "kickoff_time_utc": "2026-06-17T20:00:00.000Z",
@@ -4738,8 +4889,9 @@
         "WATCH_ONLY"
       ],
       "venue_stress_ref": "data/v3_worldcup/venue_stress/v3_worldcup_venue_stress_20260603.json",
-      "venue_mapping_status": "NOT_MAPPED",
-      "venue_gap_reason": "fixture_source_missing_venue_name"
+      "venue_mapping_status": "UNMAPPED",
+      "venue_gap_reason": "fixture_sources_do_not_provide_match_venue",
+      "fixture_mapping_bridge_ref": "data/manual_sources/v3_worldcup/war_room/v3_wc2026_fixture_mapping_bridge.json#mt_028383092"
     },
     "venue_stress_summary": {
       "status": "VENUE_LAYER_READY_FIXTURE_VENUE_NOT_MAPPED",
@@ -4748,7 +4900,7 @@
       "stress_tags": [
         "WATCH_ONLY"
       ],
-      "observation_note": "fixture_source_missing_venue_name"
+      "observation_note": "fixture_sources_do_not_provide_match_venue"
     },
     "home_final_26_profile_ref": "data/manual_sources/v3_worldcup/squads/fifa_final_26/processed/v3_wc2026_final_26_squad_profile_team_cards.json#england",
     "away_final_26_profile_ref": "data/manual_sources/v3_worldcup/squads/fifa_final_26/processed/v3_wc2026_final_26_squad_profile_team_cards.json#croatia",
@@ -4775,22 +4927,23 @@
       }
     },
     "odds_snapshot_status": {
-      "status": "GLOBAL_SNAPSHOT_AVAILABLE_NOT_MATCH_MAPPED",
+      "status": "MAPPED_NO_CURRENT_ODDS",
       "successful_fixture_count": 1,
       "source": "data/runtime/status/check_v3_worldcup_odds_snapshot_live_small_batch_20260604.json",
       "has_native_opening": false,
       "has_native_closing": false
     },
     "odds_binding": {
-      "odds_fixture_id": null,
-      "odds_snapshot_status": "GLOBAL_SNAPSHOT_AVAILABLE_NOT_MATCH_MAPPED",
+      "odds_fixture_id": "1489384",
+      "odds_snapshot_status": "MAPPED_NO_CURRENT_ODDS",
       "odds_available": false,
       "bookmaker_count": 13,
       "market_type_count": 7,
       "odds_observation_delta_status": "ELIGIBLE_MULTIPLE_SNAPSHOTS_NO_CHANGE",
       "changed_odds_count": 0,
-      "odds_gap_reason": "match_card_fixture_id_not_mapped_to_api_football_odds_fixture",
-      "no_money_flow_judgment": true
+      "odds_gap_reason": "odds_fixture_mapped_but_current_snapshot_empty",
+      "no_money_flow_judgment": true,
+      "fixture_mapping_bridge_ref": "data/manual_sources/v3_worldcup/war_room/v3_wc2026_fixture_mapping_bridge.json#mt_028383092"
     },
     "odds_observation_delta_status": {
       "status": "ELIGIBLE_MULTIPLE_SNAPSHOTS_NO_CHANGE",
@@ -4825,6 +4978,7 @@
     "away_team": "Congo DR",
     "home_team_slug": "portugal",
     "away_team_slug": "congo_dr",
+    "api_football_fixture_id": "1539003",
     "venue": "VENUE_NOT_MAPPED",
     "kickoff_status": "SCHEDULED",
     "kickoff_time_utc": "2026-06-17T17:00:00.000Z",
@@ -4836,8 +4990,9 @@
         "WATCH_ONLY"
       ],
       "venue_stress_ref": "data/v3_worldcup/venue_stress/v3_worldcup_venue_stress_20260603.json",
-      "venue_mapping_status": "NOT_MAPPED",
-      "venue_gap_reason": "fixture_source_missing_venue_name"
+      "venue_mapping_status": "UNMAPPED",
+      "venue_gap_reason": "fixture_sources_do_not_provide_match_venue",
+      "fixture_mapping_bridge_ref": "data/manual_sources/v3_worldcup/war_room/v3_wc2026_fixture_mapping_bridge.json#mt_732520442"
     },
     "venue_stress_summary": {
       "status": "VENUE_LAYER_READY_FIXTURE_VENUE_NOT_MAPPED",
@@ -4846,7 +5001,7 @@
       "stress_tags": [
         "WATCH_ONLY"
       ],
-      "observation_note": "fixture_source_missing_venue_name"
+      "observation_note": "fixture_sources_do_not_provide_match_venue"
     },
     "home_final_26_profile_ref": "data/manual_sources/v3_worldcup/squads/fifa_final_26/processed/v3_wc2026_final_26_squad_profile_team_cards.json#portugal",
     "away_final_26_profile_ref": "data/manual_sources/v3_worldcup/squads/fifa_final_26/processed/v3_wc2026_final_26_squad_profile_team_cards.json#congo_dr",
@@ -4870,22 +5025,23 @@
       }
     },
     "odds_snapshot_status": {
-      "status": "GLOBAL_SNAPSHOT_AVAILABLE_NOT_MATCH_MAPPED",
+      "status": "MAPPED_NO_CURRENT_ODDS",
       "successful_fixture_count": 1,
       "source": "data/runtime/status/check_v3_worldcup_odds_snapshot_live_small_batch_20260604.json",
       "has_native_opening": false,
       "has_native_closing": false
     },
     "odds_binding": {
-      "odds_fixture_id": null,
-      "odds_snapshot_status": "GLOBAL_SNAPSHOT_AVAILABLE_NOT_MATCH_MAPPED",
+      "odds_fixture_id": "1539003",
+      "odds_snapshot_status": "MAPPED_NO_CURRENT_ODDS",
       "odds_available": false,
       "bookmaker_count": 13,
       "market_type_count": 7,
       "odds_observation_delta_status": "ELIGIBLE_MULTIPLE_SNAPSHOTS_NO_CHANGE",
       "changed_odds_count": 0,
-      "odds_gap_reason": "match_card_fixture_id_not_mapped_to_api_football_odds_fixture",
-      "no_money_flow_judgment": true
+      "odds_gap_reason": "odds_fixture_mapped_but_current_snapshot_empty",
+      "no_money_flow_judgment": true,
+      "fixture_mapping_bridge_ref": "data/manual_sources/v3_worldcup/war_room/v3_wc2026_fixture_mapping_bridge.json#mt_732520442"
     },
     "odds_observation_delta_status": {
       "status": "ELIGIBLE_MULTIPLE_SNAPSHOTS_NO_CHANGE",
@@ -4920,6 +5076,7 @@
     "away_team": "Jordan",
     "home_team_slug": "austria",
     "away_team_slug": "jordan",
+    "api_football_fixture_id": "1489382",
     "venue": "VENUE_NOT_MAPPED",
     "kickoff_status": "SCHEDULED",
     "kickoff_time_utc": "2026-06-17T04:00:00.000Z",
@@ -4931,8 +5088,9 @@
         "WATCH_ONLY"
       ],
       "venue_stress_ref": "data/v3_worldcup/venue_stress/v3_worldcup_venue_stress_20260603.json",
-      "venue_mapping_status": "NOT_MAPPED",
-      "venue_gap_reason": "fixture_source_missing_venue_name"
+      "venue_mapping_status": "UNMAPPED",
+      "venue_gap_reason": "fixture_sources_do_not_provide_match_venue",
+      "fixture_mapping_bridge_ref": "data/manual_sources/v3_worldcup/war_room/v3_wc2026_fixture_mapping_bridge.json#mt_209798581"
     },
     "venue_stress_summary": {
       "status": "VENUE_LAYER_READY_FIXTURE_VENUE_NOT_MAPPED",
@@ -4941,7 +5099,7 @@
       "stress_tags": [
         "WATCH_ONLY"
       ],
-      "observation_note": "fixture_source_missing_venue_name"
+      "observation_note": "fixture_sources_do_not_provide_match_venue"
     },
     "home_final_26_profile_ref": "data/manual_sources/v3_worldcup/squads/fifa_final_26/processed/v3_wc2026_final_26_squad_profile_team_cards.json#austria",
     "away_final_26_profile_ref": "data/manual_sources/v3_worldcup/squads/fifa_final_26/processed/v3_wc2026_final_26_squad_profile_team_cards.json#jordan",
@@ -4963,22 +5121,23 @@
       }
     },
     "odds_snapshot_status": {
-      "status": "GLOBAL_SNAPSHOT_AVAILABLE_NOT_MATCH_MAPPED",
+      "status": "MAPPED_NO_CURRENT_ODDS",
       "successful_fixture_count": 1,
       "source": "data/runtime/status/check_v3_worldcup_odds_snapshot_live_small_batch_20260604.json",
       "has_native_opening": false,
       "has_native_closing": false
     },
     "odds_binding": {
-      "odds_fixture_id": null,
-      "odds_snapshot_status": "GLOBAL_SNAPSHOT_AVAILABLE_NOT_MATCH_MAPPED",
+      "odds_fixture_id": "1489382",
+      "odds_snapshot_status": "MAPPED_NO_CURRENT_ODDS",
       "odds_available": false,
       "bookmaker_count": 13,
       "market_type_count": 7,
       "odds_observation_delta_status": "ELIGIBLE_MULTIPLE_SNAPSHOTS_NO_CHANGE",
       "changed_odds_count": 0,
-      "odds_gap_reason": "match_card_fixture_id_not_mapped_to_api_football_odds_fixture",
-      "no_money_flow_judgment": true
+      "odds_gap_reason": "odds_fixture_mapped_but_current_snapshot_empty",
+      "no_money_flow_judgment": true,
+      "fixture_mapping_bridge_ref": "data/manual_sources/v3_worldcup/war_room/v3_wc2026_fixture_mapping_bridge.json#mt_209798581"
     },
     "odds_observation_delta_status": {
       "status": "ELIGIBLE_MULTIPLE_SNAPSHOTS_NO_CHANGE",
@@ -5013,6 +5172,7 @@
     "away_team": "Algeria",
     "home_team_slug": "argentina",
     "away_team_slug": "algeria",
+    "api_football_fixture_id": "1489381",
     "venue": "VENUE_NOT_MAPPED",
     "kickoff_status": "SCHEDULED",
     "kickoff_time_utc": "2026-06-17T01:00:00.000Z",
@@ -5024,8 +5184,9 @@
         "WATCH_ONLY"
       ],
       "venue_stress_ref": "data/v3_worldcup/venue_stress/v3_worldcup_venue_stress_20260603.json",
-      "venue_mapping_status": "NOT_MAPPED",
-      "venue_gap_reason": "fixture_source_missing_venue_name"
+      "venue_mapping_status": "UNMAPPED",
+      "venue_gap_reason": "fixture_sources_do_not_provide_match_venue",
+      "fixture_mapping_bridge_ref": "data/manual_sources/v3_worldcup/war_room/v3_wc2026_fixture_mapping_bridge.json#mt_028389471"
     },
     "venue_stress_summary": {
       "status": "VENUE_LAYER_READY_FIXTURE_VENUE_NOT_MAPPED",
@@ -5034,7 +5195,7 @@
       "stress_tags": [
         "WATCH_ONLY"
       ],
-      "observation_note": "fixture_source_missing_venue_name"
+      "observation_note": "fixture_sources_do_not_provide_match_venue"
     },
     "home_final_26_profile_ref": "data/manual_sources/v3_worldcup/squads/fifa_final_26/processed/v3_wc2026_final_26_squad_profile_team_cards.json#argentina",
     "away_final_26_profile_ref": "data/manual_sources/v3_worldcup/squads/fifa_final_26/processed/v3_wc2026_final_26_squad_profile_team_cards.json#algeria",
@@ -5059,22 +5220,23 @@
       }
     },
     "odds_snapshot_status": {
-      "status": "GLOBAL_SNAPSHOT_AVAILABLE_NOT_MATCH_MAPPED",
+      "status": "MAPPED_NO_CURRENT_ODDS",
       "successful_fixture_count": 1,
       "source": "data/runtime/status/check_v3_worldcup_odds_snapshot_live_small_batch_20260604.json",
       "has_native_opening": false,
       "has_native_closing": false
     },
     "odds_binding": {
-      "odds_fixture_id": null,
-      "odds_snapshot_status": "GLOBAL_SNAPSHOT_AVAILABLE_NOT_MATCH_MAPPED",
+      "odds_fixture_id": "1489381",
+      "odds_snapshot_status": "MAPPED_NO_CURRENT_ODDS",
       "odds_available": false,
       "bookmaker_count": 13,
       "market_type_count": 7,
       "odds_observation_delta_status": "ELIGIBLE_MULTIPLE_SNAPSHOTS_NO_CHANGE",
       "changed_odds_count": 0,
-      "odds_gap_reason": "match_card_fixture_id_not_mapped_to_api_football_odds_fixture",
-      "no_money_flow_judgment": true
+      "odds_gap_reason": "odds_fixture_mapped_but_current_snapshot_empty",
+      "no_money_flow_judgment": true,
+      "fixture_mapping_bridge_ref": "data/manual_sources/v3_worldcup/war_room/v3_wc2026_fixture_mapping_bridge.json#mt_028389471"
     },
     "odds_observation_delta_status": {
       "status": "ELIGIBLE_MULTIPLE_SNAPSHOTS_NO_CHANGE",
@@ -5109,6 +5271,7 @@
     "away_team": "Norway",
     "home_team_slug": "iraq",
     "away_team_slug": "norway",
+    "api_football_fixture_id": "1539016",
     "venue": "VENUE_NOT_MAPPED",
     "kickoff_status": "SCHEDULED",
     "kickoff_time_utc": "2026-06-16T22:00:00.000Z",
@@ -5120,8 +5283,9 @@
         "WATCH_ONLY"
       ],
       "venue_stress_ref": "data/v3_worldcup/venue_stress/v3_worldcup_venue_stress_20260603.json",
-      "venue_mapping_status": "NOT_MAPPED",
-      "venue_gap_reason": "fixture_source_missing_venue_name"
+      "venue_mapping_status": "UNMAPPED",
+      "venue_gap_reason": "fixture_sources_do_not_provide_match_venue",
+      "fixture_mapping_bridge_ref": "data/manual_sources/v3_worldcup/war_room/v3_wc2026_fixture_mapping_bridge.json#mt_517473168"
     },
     "venue_stress_summary": {
       "status": "VENUE_LAYER_READY_FIXTURE_VENUE_NOT_MAPPED",
@@ -5130,7 +5294,7 @@
       "stress_tags": [
         "WATCH_ONLY"
       ],
-      "observation_note": "fixture_source_missing_venue_name"
+      "observation_note": "fixture_sources_do_not_provide_match_venue"
     },
     "home_final_26_profile_ref": "data/manual_sources/v3_worldcup/squads/fifa_final_26/processed/v3_wc2026_final_26_squad_profile_team_cards.json#iraq",
     "away_final_26_profile_ref": "data/manual_sources/v3_worldcup/squads/fifa_final_26/processed/v3_wc2026_final_26_squad_profile_team_cards.json#norway",
@@ -5152,22 +5316,23 @@
       }
     },
     "odds_snapshot_status": {
-      "status": "GLOBAL_SNAPSHOT_AVAILABLE_NOT_MATCH_MAPPED",
+      "status": "MAPPED_NO_CURRENT_ODDS",
       "successful_fixture_count": 1,
       "source": "data/runtime/status/check_v3_worldcup_odds_snapshot_live_small_batch_20260604.json",
       "has_native_opening": false,
       "has_native_closing": false
     },
     "odds_binding": {
-      "odds_fixture_id": null,
-      "odds_snapshot_status": "GLOBAL_SNAPSHOT_AVAILABLE_NOT_MATCH_MAPPED",
+      "odds_fixture_id": "1539016",
+      "odds_snapshot_status": "MAPPED_NO_CURRENT_ODDS",
       "odds_available": false,
       "bookmaker_count": 13,
       "market_type_count": 7,
       "odds_observation_delta_status": "ELIGIBLE_MULTIPLE_SNAPSHOTS_NO_CHANGE",
       "changed_odds_count": 0,
-      "odds_gap_reason": "match_card_fixture_id_not_mapped_to_api_football_odds_fixture",
-      "no_money_flow_judgment": true
+      "odds_gap_reason": "odds_fixture_mapped_but_current_snapshot_empty",
+      "no_money_flow_judgment": true,
+      "fixture_mapping_bridge_ref": "data/manual_sources/v3_worldcup/war_room/v3_wc2026_fixture_mapping_bridge.json#mt_517473168"
     },
     "odds_observation_delta_status": {
       "status": "ELIGIBLE_MULTIPLE_SNAPSHOTS_NO_CHANGE",
@@ -5202,6 +5367,7 @@
     "away_team": "Senegal",
     "home_team_slug": "france",
     "away_team_slug": "senegal",
+    "api_football_fixture_id": "1489383",
     "venue": "VENUE_NOT_MAPPED",
     "kickoff_status": "SCHEDULED",
     "kickoff_time_utc": "2026-06-16T19:00:00.000Z",
@@ -5213,8 +5379,9 @@
         "WATCH_ONLY"
       ],
       "venue_stress_ref": "data/v3_worldcup/venue_stress/v3_worldcup_venue_stress_20260603.json",
-      "venue_mapping_status": "NOT_MAPPED",
-      "venue_gap_reason": "fixture_source_missing_venue_name"
+      "venue_mapping_status": "UNMAPPED",
+      "venue_gap_reason": "fixture_sources_do_not_provide_match_venue",
+      "fixture_mapping_bridge_ref": "data/manual_sources/v3_worldcup/war_room/v3_wc2026_fixture_mapping_bridge.json#mt_209797283"
     },
     "venue_stress_summary": {
       "status": "VENUE_LAYER_READY_FIXTURE_VENUE_NOT_MAPPED",
@@ -5223,7 +5390,7 @@
       "stress_tags": [
         "WATCH_ONLY"
       ],
-      "observation_note": "fixture_source_missing_venue_name"
+      "observation_note": "fixture_sources_do_not_provide_match_venue"
     },
     "home_final_26_profile_ref": "data/manual_sources/v3_worldcup/squads/fifa_final_26/processed/v3_wc2026_final_26_squad_profile_team_cards.json#france",
     "away_final_26_profile_ref": "data/manual_sources/v3_worldcup/squads/fifa_final_26/processed/v3_wc2026_final_26_squad_profile_team_cards.json#senegal",
@@ -5250,22 +5417,23 @@
       }
     },
     "odds_snapshot_status": {
-      "status": "GLOBAL_SNAPSHOT_AVAILABLE_NOT_MATCH_MAPPED",
+      "status": "MAPPED_NO_CURRENT_ODDS",
       "successful_fixture_count": 1,
       "source": "data/runtime/status/check_v3_worldcup_odds_snapshot_live_small_batch_20260604.json",
       "has_native_opening": false,
       "has_native_closing": false
     },
     "odds_binding": {
-      "odds_fixture_id": null,
-      "odds_snapshot_status": "GLOBAL_SNAPSHOT_AVAILABLE_NOT_MATCH_MAPPED",
+      "odds_fixture_id": "1489383",
+      "odds_snapshot_status": "MAPPED_NO_CURRENT_ODDS",
       "odds_available": false,
       "bookmaker_count": 13,
       "market_type_count": 7,
       "odds_observation_delta_status": "ELIGIBLE_MULTIPLE_SNAPSHOTS_NO_CHANGE",
       "changed_odds_count": 0,
-      "odds_gap_reason": "match_card_fixture_id_not_mapped_to_api_football_odds_fixture",
-      "no_money_flow_judgment": true
+      "odds_gap_reason": "odds_fixture_mapped_but_current_snapshot_empty",
+      "no_money_flow_judgment": true,
+      "fixture_mapping_bridge_ref": "data/manual_sources/v3_worldcup/war_room/v3_wc2026_fixture_mapping_bridge.json#mt_209797283"
     },
     "odds_observation_delta_status": {
       "status": "ELIGIBLE_MULTIPLE_SNAPSHOTS_NO_CHANGE",
@@ -5300,6 +5468,7 @@
     "away_team": "New Zealand",
     "home_team_slug": "ir_iran",
     "away_team_slug": "new_zealand",
+    "api_football_fixture_id": "1489378",
     "venue": "VENUE_NOT_MAPPED",
     "kickoff_status": "SCHEDULED",
     "kickoff_time_utc": "2026-06-16T01:00:00.000Z",
@@ -5311,8 +5480,9 @@
         "WATCH_ONLY"
       ],
       "venue_stress_ref": "data/v3_worldcup/venue_stress/v3_worldcup_venue_stress_20260603.json",
-      "venue_mapping_status": "NOT_MAPPED",
-      "venue_gap_reason": "fixture_source_missing_venue_name"
+      "venue_mapping_status": "UNMAPPED",
+      "venue_gap_reason": "fixture_sources_do_not_provide_match_venue",
+      "fixture_mapping_bridge_ref": "data/manual_sources/v3_worldcup/war_room/v3_wc2026_fixture_mapping_bridge.json#mt_986264843"
     },
     "venue_stress_summary": {
       "status": "VENUE_LAYER_READY_FIXTURE_VENUE_NOT_MAPPED",
@@ -5321,7 +5491,7 @@
       "stress_tags": [
         "WATCH_ONLY"
       ],
-      "observation_note": "fixture_source_missing_venue_name"
+      "observation_note": "fixture_sources_do_not_provide_match_venue"
     },
     "home_final_26_profile_ref": "data/manual_sources/v3_worldcup/squads/fifa_final_26/processed/v3_wc2026_final_26_squad_profile_team_cards.json#ir_iran",
     "away_final_26_profile_ref": "data/manual_sources/v3_worldcup/squads/fifa_final_26/processed/v3_wc2026_final_26_squad_profile_team_cards.json#new_zealand",
@@ -5343,22 +5513,23 @@
       }
     },
     "odds_snapshot_status": {
-      "status": "GLOBAL_SNAPSHOT_AVAILABLE_NOT_MATCH_MAPPED",
+      "status": "MAPPED_NO_CURRENT_ODDS",
       "successful_fixture_count": 1,
       "source": "data/runtime/status/check_v3_worldcup_odds_snapshot_live_small_batch_20260604.json",
       "has_native_opening": false,
       "has_native_closing": false
     },
     "odds_binding": {
-      "odds_fixture_id": null,
-      "odds_snapshot_status": "GLOBAL_SNAPSHOT_AVAILABLE_NOT_MATCH_MAPPED",
+      "odds_fixture_id": "1489378",
+      "odds_snapshot_status": "MAPPED_NO_CURRENT_ODDS",
       "odds_available": false,
       "bookmaker_count": 13,
       "market_type_count": 7,
       "odds_observation_delta_status": "ELIGIBLE_MULTIPLE_SNAPSHOTS_NO_CHANGE",
       "changed_odds_count": 0,
-      "odds_gap_reason": "match_card_fixture_id_not_mapped_to_api_football_odds_fixture",
-      "no_money_flow_judgment": true
+      "odds_gap_reason": "odds_fixture_mapped_but_current_snapshot_empty",
+      "no_money_flow_judgment": true,
+      "fixture_mapping_bridge_ref": "data/manual_sources/v3_worldcup/war_room/v3_wc2026_fixture_mapping_bridge.json#mt_986264843"
     },
     "odds_observation_delta_status": {
       "status": "ELIGIBLE_MULTIPLE_SNAPSHOTS_NO_CHANGE",
@@ -5393,6 +5564,7 @@
     "away_team": "Uruguay",
     "home_team_slug": "saudi_arabia",
     "away_team_slug": "uruguay",
+    "api_football_fixture_id": "1489379",
     "venue": "VENUE_NOT_MAPPED",
     "kickoff_status": "SCHEDULED",
     "kickoff_time_utc": "2026-06-15T22:00:00.000Z",
@@ -5404,8 +5576,9 @@
         "WATCH_ONLY"
       ],
       "venue_stress_ref": "data/v3_worldcup/venue_stress/v3_worldcup_venue_stress_20260603.json",
-      "venue_mapping_status": "NOT_MAPPED",
-      "venue_gap_reason": "fixture_source_missing_venue_name"
+      "venue_mapping_status": "UNMAPPED",
+      "venue_gap_reason": "fixture_sources_do_not_provide_match_venue",
+      "fixture_mapping_bridge_ref": "data/manual_sources/v3_worldcup/war_room/v3_wc2026_fixture_mapping_bridge.json#mt_209798066"
     },
     "venue_stress_summary": {
       "status": "VENUE_LAYER_READY_FIXTURE_VENUE_NOT_MAPPED",
@@ -5414,7 +5587,7 @@
       "stress_tags": [
         "WATCH_ONLY"
       ],
-      "observation_note": "fixture_source_missing_venue_name"
+      "observation_note": "fixture_sources_do_not_provide_match_venue"
     },
     "home_final_26_profile_ref": "data/manual_sources/v3_worldcup/squads/fifa_final_26/processed/v3_wc2026_final_26_squad_profile_team_cards.json#saudi_arabia",
     "away_final_26_profile_ref": "data/manual_sources/v3_worldcup/squads/fifa_final_26/processed/v3_wc2026_final_26_squad_profile_team_cards.json#uruguay",
@@ -5436,22 +5609,23 @@
       }
     },
     "odds_snapshot_status": {
-      "status": "GLOBAL_SNAPSHOT_AVAILABLE_NOT_MATCH_MAPPED",
+      "status": "MAPPED_NO_CURRENT_ODDS",
       "successful_fixture_count": 1,
       "source": "data/runtime/status/check_v3_worldcup_odds_snapshot_live_small_batch_20260604.json",
       "has_native_opening": false,
       "has_native_closing": false
     },
     "odds_binding": {
-      "odds_fixture_id": null,
-      "odds_snapshot_status": "GLOBAL_SNAPSHOT_AVAILABLE_NOT_MATCH_MAPPED",
+      "odds_fixture_id": "1489379",
+      "odds_snapshot_status": "MAPPED_NO_CURRENT_ODDS",
       "odds_available": false,
       "bookmaker_count": 13,
       "market_type_count": 7,
       "odds_observation_delta_status": "ELIGIBLE_MULTIPLE_SNAPSHOTS_NO_CHANGE",
       "changed_odds_count": 0,
-      "odds_gap_reason": "match_card_fixture_id_not_mapped_to_api_football_odds_fixture",
-      "no_money_flow_judgment": true
+      "odds_gap_reason": "odds_fixture_mapped_but_current_snapshot_empty",
+      "no_money_flow_judgment": true,
+      "fixture_mapping_bridge_ref": "data/manual_sources/v3_worldcup/war_room/v3_wc2026_fixture_mapping_bridge.json#mt_209798066"
     },
     "odds_observation_delta_status": {
       "status": "ELIGIBLE_MULTIPLE_SNAPSHOTS_NO_CHANGE",
@@ -5486,6 +5660,7 @@
     "away_team": "Egypt",
     "home_team_slug": "belgium",
     "away_team_slug": "egypt",
+    "api_football_fixture_id": "1489377",
     "venue": "VENUE_NOT_MAPPED",
     "kickoff_status": "SCHEDULED",
     "kickoff_time_utc": "2026-06-15T19:00:00.000Z",
@@ -5497,8 +5672,9 @@
         "WATCH_ONLY"
       ],
       "venue_stress_ref": "data/v3_worldcup/venue_stress/v3_worldcup_venue_stress_20260603.json",
-      "venue_mapping_status": "NOT_MAPPED",
-      "venue_gap_reason": "fixture_source_missing_venue_name"
+      "venue_mapping_status": "UNMAPPED",
+      "venue_gap_reason": "fixture_sources_do_not_provide_match_venue",
+      "fixture_mapping_bridge_ref": "data/manual_sources/v3_worldcup/war_room/v3_wc2026_fixture_mapping_bridge.json#mt_370102747"
     },
     "venue_stress_summary": {
       "status": "VENUE_LAYER_READY_FIXTURE_VENUE_NOT_MAPPED",
@@ -5507,7 +5683,7 @@
       "stress_tags": [
         "WATCH_ONLY"
       ],
-      "observation_note": "fixture_source_missing_venue_name"
+      "observation_note": "fixture_sources_do_not_provide_match_venue"
     },
     "home_final_26_profile_ref": "data/manual_sources/v3_worldcup/squads/fifa_final_26/processed/v3_wc2026_final_26_squad_profile_team_cards.json#belgium",
     "away_final_26_profile_ref": "data/manual_sources/v3_worldcup/squads/fifa_final_26/processed/v3_wc2026_final_26_squad_profile_team_cards.json#egypt",
@@ -5532,22 +5708,23 @@
       }
     },
     "odds_snapshot_status": {
-      "status": "GLOBAL_SNAPSHOT_AVAILABLE_NOT_MATCH_MAPPED",
+      "status": "MAPPED_NO_CURRENT_ODDS",
       "successful_fixture_count": 1,
       "source": "data/runtime/status/check_v3_worldcup_odds_snapshot_live_small_batch_20260604.json",
       "has_native_opening": false,
       "has_native_closing": false
     },
     "odds_binding": {
-      "odds_fixture_id": null,
-      "odds_snapshot_status": "GLOBAL_SNAPSHOT_AVAILABLE_NOT_MATCH_MAPPED",
+      "odds_fixture_id": "1489377",
+      "odds_snapshot_status": "MAPPED_NO_CURRENT_ODDS",
       "odds_available": false,
       "bookmaker_count": 13,
       "market_type_count": 7,
       "odds_observation_delta_status": "ELIGIBLE_MULTIPLE_SNAPSHOTS_NO_CHANGE",
       "changed_odds_count": 0,
-      "odds_gap_reason": "match_card_fixture_id_not_mapped_to_api_football_odds_fixture",
-      "no_money_flow_judgment": true
+      "odds_gap_reason": "odds_fixture_mapped_but_current_snapshot_empty",
+      "no_money_flow_judgment": true,
+      "fixture_mapping_bridge_ref": "data/manual_sources/v3_worldcup/war_room/v3_wc2026_fixture_mapping_bridge.json#mt_370102747"
     },
     "odds_observation_delta_status": {
       "status": "ELIGIBLE_MULTIPLE_SNAPSHOTS_NO_CHANGE",
@@ -5582,6 +5759,7 @@
     "away_team": "Cabo Verde",
     "home_team_slug": "spain",
     "away_team_slug": "cabo_verde",
+    "api_football_fixture_id": "1489380",
     "venue": "VENUE_NOT_MAPPED",
     "kickoff_status": "SCHEDULED",
     "kickoff_time_utc": "2026-06-15T16:00:00.000Z",
@@ -5593,8 +5771,9 @@
         "WATCH_ONLY"
       ],
       "venue_stress_ref": "data/v3_worldcup/venue_stress/v3_worldcup_venue_stress_20260603.json",
-      "venue_mapping_status": "NOT_MAPPED",
-      "venue_gap_reason": "fixture_source_missing_venue_name"
+      "venue_mapping_status": "UNMAPPED",
+      "venue_gap_reason": "fixture_sources_do_not_provide_match_venue",
+      "fixture_mapping_bridge_ref": "data/manual_sources/v3_worldcup/war_room/v3_wc2026_fixture_mapping_bridge.json#mt_517473171"
     },
     "venue_stress_summary": {
       "status": "VENUE_LAYER_READY_FIXTURE_VENUE_NOT_MAPPED",
@@ -5603,7 +5782,7 @@
       "stress_tags": [
         "WATCH_ONLY"
       ],
-      "observation_note": "fixture_source_missing_venue_name"
+      "observation_note": "fixture_sources_do_not_provide_match_venue"
     },
     "home_final_26_profile_ref": "data/manual_sources/v3_worldcup/squads/fifa_final_26/processed/v3_wc2026_final_26_squad_profile_team_cards.json#spain",
     "away_final_26_profile_ref": "data/manual_sources/v3_worldcup/squads/fifa_final_26/processed/v3_wc2026_final_26_squad_profile_team_cards.json#cabo_verde",
@@ -5625,22 +5804,23 @@
       }
     },
     "odds_snapshot_status": {
-      "status": "GLOBAL_SNAPSHOT_AVAILABLE_NOT_MATCH_MAPPED",
+      "status": "MAPPED_NO_CURRENT_ODDS",
       "successful_fixture_count": 1,
       "source": "data/runtime/status/check_v3_worldcup_odds_snapshot_live_small_batch_20260604.json",
       "has_native_opening": false,
       "has_native_closing": false
     },
     "odds_binding": {
-      "odds_fixture_id": null,
-      "odds_snapshot_status": "GLOBAL_SNAPSHOT_AVAILABLE_NOT_MATCH_MAPPED",
+      "odds_fixture_id": "1489380",
+      "odds_snapshot_status": "MAPPED_NO_CURRENT_ODDS",
       "odds_available": false,
       "bookmaker_count": 13,
       "market_type_count": 7,
       "odds_observation_delta_status": "ELIGIBLE_MULTIPLE_SNAPSHOTS_NO_CHANGE",
       "changed_odds_count": 0,
-      "odds_gap_reason": "match_card_fixture_id_not_mapped_to_api_football_odds_fixture",
-      "no_money_flow_judgment": true
+      "odds_gap_reason": "odds_fixture_mapped_but_current_snapshot_empty",
+      "no_money_flow_judgment": true,
+      "fixture_mapping_bridge_ref": "data/manual_sources/v3_worldcup/war_room/v3_wc2026_fixture_mapping_bridge.json#mt_517473171"
     },
     "odds_observation_delta_status": {
       "status": "ELIGIBLE_MULTIPLE_SNAPSHOTS_NO_CHANGE",
@@ -5675,6 +5855,7 @@
     "away_team": "Tunisia",
     "home_team_slug": "sweden",
     "away_team_slug": "tunisia",
+    "api_football_fixture_id": "1539002",
     "venue": "VENUE_NOT_MAPPED",
     "kickoff_status": "SCHEDULED",
     "kickoff_time_utc": "2026-06-15T02:00:00.000Z",
@@ -5686,8 +5867,9 @@
         "WATCH_ONLY"
       ],
       "venue_stress_ref": "data/v3_worldcup/venue_stress/v3_worldcup_venue_stress_20260603.json",
-      "venue_mapping_status": "NOT_MAPPED",
-      "venue_gap_reason": "fixture_source_missing_venue_name"
+      "venue_mapping_status": "UNMAPPED",
+      "venue_gap_reason": "fixture_sources_do_not_provide_match_venue",
+      "fixture_mapping_bridge_ref": "data/manual_sources/v3_worldcup/war_room/v3_wc2026_fixture_mapping_bridge.json#mt_209798753"
     },
     "venue_stress_summary": {
       "status": "VENUE_LAYER_READY_FIXTURE_VENUE_NOT_MAPPED",
@@ -5696,7 +5878,7 @@
       "stress_tags": [
         "WATCH_ONLY"
       ],
-      "observation_note": "fixture_source_missing_venue_name"
+      "observation_note": "fixture_sources_do_not_provide_match_venue"
     },
     "home_final_26_profile_ref": "data/manual_sources/v3_worldcup/squads/fifa_final_26/processed/v3_wc2026_final_26_squad_profile_team_cards.json#sweden",
     "away_final_26_profile_ref": "data/manual_sources/v3_worldcup/squads/fifa_final_26/processed/v3_wc2026_final_26_squad_profile_team_cards.json#tunisia",
@@ -5718,22 +5900,23 @@
       }
     },
     "odds_snapshot_status": {
-      "status": "GLOBAL_SNAPSHOT_AVAILABLE_NOT_MATCH_MAPPED",
+      "status": "MAPPED_NO_CURRENT_ODDS",
       "successful_fixture_count": 1,
       "source": "data/runtime/status/check_v3_worldcup_odds_snapshot_live_small_batch_20260604.json",
       "has_native_opening": false,
       "has_native_closing": false
     },
     "odds_binding": {
-      "odds_fixture_id": null,
-      "odds_snapshot_status": "GLOBAL_SNAPSHOT_AVAILABLE_NOT_MATCH_MAPPED",
+      "odds_fixture_id": "1539002",
+      "odds_snapshot_status": "MAPPED_NO_CURRENT_ODDS",
       "odds_available": false,
       "bookmaker_count": 13,
       "market_type_count": 7,
       "odds_observation_delta_status": "ELIGIBLE_MULTIPLE_SNAPSHOTS_NO_CHANGE",
       "changed_odds_count": 0,
-      "odds_gap_reason": "match_card_fixture_id_not_mapped_to_api_football_odds_fixture",
-      "no_money_flow_judgment": true
+      "odds_gap_reason": "odds_fixture_mapped_but_current_snapshot_empty",
+      "no_money_flow_judgment": true,
+      "fixture_mapping_bridge_ref": "data/manual_sources/v3_worldcup/war_room/v3_wc2026_fixture_mapping_bridge.json#mt_209798753"
     },
     "odds_observation_delta_status": {
       "status": "ELIGIBLE_MULTIPLE_SNAPSHOTS_NO_CHANGE",
@@ -5768,6 +5951,7 @@
     "away_team": "Ecuador",
     "home_team_slug": "cote_divoire",
     "away_team_slug": "ecuador",
+    "api_football_fixture_id": "1489375",
     "venue": "VENUE_NOT_MAPPED",
     "kickoff_status": "SCHEDULED",
     "kickoff_time_utc": "2026-06-14T23:00:00.000Z",
@@ -5779,8 +5963,9 @@
         "WATCH_ONLY"
       ],
       "venue_stress_ref": "data/v3_worldcup/venue_stress/v3_worldcup_venue_stress_20260603.json",
-      "venue_mapping_status": "NOT_MAPPED",
-      "venue_gap_reason": "fixture_source_missing_venue_name"
+      "venue_mapping_status": "UNMAPPED",
+      "venue_gap_reason": "fixture_sources_do_not_provide_match_venue",
+      "fixture_mapping_bridge_ref": "data/manual_sources/v3_worldcup/war_room/v3_wc2026_fixture_mapping_bridge.json#mt_028389435"
     },
     "venue_stress_summary": {
       "status": "VENUE_LAYER_READY_FIXTURE_VENUE_NOT_MAPPED",
@@ -5789,7 +5974,7 @@
       "stress_tags": [
         "WATCH_ONLY"
       ],
-      "observation_note": "fixture_source_missing_venue_name"
+      "observation_note": "fixture_sources_do_not_provide_match_venue"
     },
     "home_final_26_profile_ref": "data/manual_sources/v3_worldcup/squads/fifa_final_26/processed/v3_wc2026_final_26_squad_profile_team_cards.json#cote_divoire",
     "away_final_26_profile_ref": "data/manual_sources/v3_worldcup/squads/fifa_final_26/processed/v3_wc2026_final_26_squad_profile_team_cards.json#ecuador",
@@ -5813,22 +5998,23 @@
       }
     },
     "odds_snapshot_status": {
-      "status": "GLOBAL_SNAPSHOT_AVAILABLE_NOT_MATCH_MAPPED",
+      "status": "MAPPED_NO_CURRENT_ODDS",
       "successful_fixture_count": 1,
       "source": "data/runtime/status/check_v3_worldcup_odds_snapshot_live_small_batch_20260604.json",
       "has_native_opening": false,
       "has_native_closing": false
     },
     "odds_binding": {
-      "odds_fixture_id": null,
-      "odds_snapshot_status": "GLOBAL_SNAPSHOT_AVAILABLE_NOT_MATCH_MAPPED",
+      "odds_fixture_id": "1489375",
+      "odds_snapshot_status": "MAPPED_NO_CURRENT_ODDS",
       "odds_available": false,
       "bookmaker_count": 13,
       "market_type_count": 7,
       "odds_observation_delta_status": "ELIGIBLE_MULTIPLE_SNAPSHOTS_NO_CHANGE",
       "changed_odds_count": 0,
-      "odds_gap_reason": "match_card_fixture_id_not_mapped_to_api_football_odds_fixture",
-      "no_money_flow_judgment": true
+      "odds_gap_reason": "odds_fixture_mapped_but_current_snapshot_empty",
+      "no_money_flow_judgment": true,
+      "fixture_mapping_bridge_ref": "data/manual_sources/v3_worldcup/war_room/v3_wc2026_fixture_mapping_bridge.json#mt_028389435"
     },
     "odds_observation_delta_status": {
       "status": "ELIGIBLE_MULTIPLE_SNAPSHOTS_NO_CHANGE",
@@ -5863,6 +6049,7 @@
     "away_team": "Japan",
     "home_team_slug": "netherlands",
     "away_team_slug": "japan",
+    "api_football_fixture_id": "1489376",
     "venue": "VENUE_NOT_MAPPED",
     "kickoff_status": "SCHEDULED",
     "kickoff_time_utc": "2026-06-14T20:00:00.000Z",
@@ -5874,8 +6061,9 @@
         "WATCH_ONLY"
       ],
       "venue_stress_ref": "data/v3_worldcup/venue_stress/v3_worldcup_venue_stress_20260603.json",
-      "venue_mapping_status": "NOT_MAPPED",
-      "venue_gap_reason": "fixture_source_missing_venue_name"
+      "venue_mapping_status": "UNMAPPED",
+      "venue_gap_reason": "fixture_sources_do_not_provide_match_venue",
+      "fixture_mapping_bridge_ref": "data/manual_sources/v3_worldcup/war_room/v3_wc2026_fixture_mapping_bridge.json#mt_465851856"
     },
     "venue_stress_summary": {
       "status": "VENUE_LAYER_READY_FIXTURE_VENUE_NOT_MAPPED",
@@ -5884,7 +6072,7 @@
       "stress_tags": [
         "WATCH_ONLY"
       ],
-      "observation_note": "fixture_source_missing_venue_name"
+      "observation_note": "fixture_sources_do_not_provide_match_venue"
     },
     "home_final_26_profile_ref": "data/manual_sources/v3_worldcup/squads/fifa_final_26/processed/v3_wc2026_final_26_squad_profile_team_cards.json#netherlands",
     "away_final_26_profile_ref": "data/manual_sources/v3_worldcup/squads/fifa_final_26/processed/v3_wc2026_final_26_squad_profile_team_cards.json#japan",
@@ -5908,22 +6096,23 @@
       }
     },
     "odds_snapshot_status": {
-      "status": "GLOBAL_SNAPSHOT_AVAILABLE_NOT_MATCH_MAPPED",
+      "status": "MAPPED_NO_CURRENT_ODDS",
       "successful_fixture_count": 1,
       "source": "data/runtime/status/check_v3_worldcup_odds_snapshot_live_small_batch_20260604.json",
       "has_native_opening": false,
       "has_native_closing": false
     },
     "odds_binding": {
-      "odds_fixture_id": null,
-      "odds_snapshot_status": "GLOBAL_SNAPSHOT_AVAILABLE_NOT_MATCH_MAPPED",
+      "odds_fixture_id": "1489376",
+      "odds_snapshot_status": "MAPPED_NO_CURRENT_ODDS",
       "odds_available": false,
       "bookmaker_count": 13,
       "market_type_count": 7,
       "odds_observation_delta_status": "ELIGIBLE_MULTIPLE_SNAPSHOTS_NO_CHANGE",
       "changed_odds_count": 0,
-      "odds_gap_reason": "match_card_fixture_id_not_mapped_to_api_football_odds_fixture",
-      "no_money_flow_judgment": true
+      "odds_gap_reason": "odds_fixture_mapped_but_current_snapshot_empty",
+      "no_money_flow_judgment": true,
+      "fixture_mapping_bridge_ref": "data/manual_sources/v3_worldcup/war_room/v3_wc2026_fixture_mapping_bridge.json#mt_465851856"
     },
     "odds_observation_delta_status": {
       "status": "ELIGIBLE_MULTIPLE_SNAPSHOTS_NO_CHANGE",
@@ -5958,6 +6147,7 @@
     "away_team": "Curaçao",
     "home_team_slug": "germany",
     "away_team_slug": "curacao",
+    "api_football_fixture_id": "1489374",
     "venue": "VENUE_NOT_MAPPED",
     "kickoff_status": "SCHEDULED",
     "kickoff_time_utc": "2026-06-14T17:00:00.000Z",
@@ -5969,8 +6159,9 @@
         "WATCH_ONLY"
       ],
       "venue_stress_ref": "data/v3_worldcup/venue_stress/v3_worldcup_venue_stress_20260603.json",
-      "venue_mapping_status": "NOT_MAPPED",
-      "venue_gap_reason": "fixture_source_missing_venue_name"
+      "venue_mapping_status": "UNMAPPED",
+      "venue_gap_reason": "fixture_sources_do_not_provide_match_venue",
+      "fixture_mapping_bridge_ref": "data/manual_sources/v3_worldcup/war_room/v3_wc2026_fixture_mapping_bridge.json#mt_732520954"
     },
     "venue_stress_summary": {
       "status": "VENUE_LAYER_READY_FIXTURE_VENUE_NOT_MAPPED",
@@ -5979,7 +6170,7 @@
       "stress_tags": [
         "WATCH_ONLY"
       ],
-      "observation_note": "fixture_source_missing_venue_name"
+      "observation_note": "fixture_sources_do_not_provide_match_venue"
     },
     "home_final_26_profile_ref": "data/manual_sources/v3_worldcup/squads/fifa_final_26/processed/v3_wc2026_final_26_squad_profile_team_cards.json#germany",
     "away_final_26_profile_ref": "data/manual_sources/v3_worldcup/squads/fifa_final_26/processed/v3_wc2026_final_26_squad_profile_team_cards.json#curacao",
@@ -6001,22 +6192,23 @@
       }
     },
     "odds_snapshot_status": {
-      "status": "GLOBAL_SNAPSHOT_AVAILABLE_NOT_MATCH_MAPPED",
+      "status": "MAPPED_NO_CURRENT_ODDS",
       "successful_fixture_count": 1,
       "source": "data/runtime/status/check_v3_worldcup_odds_snapshot_live_small_batch_20260604.json",
       "has_native_opening": false,
       "has_native_closing": false
     },
     "odds_binding": {
-      "odds_fixture_id": null,
-      "odds_snapshot_status": "GLOBAL_SNAPSHOT_AVAILABLE_NOT_MATCH_MAPPED",
+      "odds_fixture_id": "1489374",
+      "odds_snapshot_status": "MAPPED_NO_CURRENT_ODDS",
       "odds_available": false,
       "bookmaker_count": 13,
       "market_type_count": 7,
       "odds_observation_delta_status": "ELIGIBLE_MULTIPLE_SNAPSHOTS_NO_CHANGE",
       "changed_odds_count": 0,
-      "odds_gap_reason": "match_card_fixture_id_not_mapped_to_api_football_odds_fixture",
-      "no_money_flow_judgment": true
+      "odds_gap_reason": "odds_fixture_mapped_but_current_snapshot_empty",
+      "no_money_flow_judgment": true,
+      "fixture_mapping_bridge_ref": "data/manual_sources/v3_worldcup/war_room/v3_wc2026_fixture_mapping_bridge.json#mt_732520954"
     },
     "odds_observation_delta_status": {
       "status": "ELIGIBLE_MULTIPLE_SNAPSHOTS_NO_CHANGE",
@@ -6051,6 +6243,7 @@
     "away_team": "Türkiye",
     "home_team_slug": "australia",
     "away_team_slug": "turkiye",
+    "api_football_fixture_id": "1539001",
     "venue": "VENUE_NOT_MAPPED",
     "kickoff_status": "SCHEDULED",
     "kickoff_time_utc": "2026-06-14T04:00:00.000Z",
@@ -6062,8 +6255,9 @@
         "WATCH_ONLY"
       ],
       "venue_stress_ref": "data/v3_worldcup/venue_stress/v3_worldcup_venue_stress_20260603.json",
-      "venue_mapping_status": "NOT_MAPPED",
-      "venue_gap_reason": "fixture_source_missing_venue_name"
+      "venue_mapping_status": "UNMAPPED",
+      "venue_gap_reason": "fixture_sources_do_not_provide_match_venue",
+      "fixture_mapping_bridge_ref": "data/manual_sources/v3_worldcup/war_room/v3_wc2026_fixture_mapping_bridge.json#mt_028389414"
     },
     "venue_stress_summary": {
       "status": "VENUE_LAYER_READY_FIXTURE_VENUE_NOT_MAPPED",
@@ -6072,7 +6266,7 @@
       "stress_tags": [
         "WATCH_ONLY"
       ],
-      "observation_note": "fixture_source_missing_venue_name"
+      "observation_note": "fixture_sources_do_not_provide_match_venue"
     },
     "home_final_26_profile_ref": "data/manual_sources/v3_worldcup/squads/fifa_final_26/processed/v3_wc2026_final_26_squad_profile_team_cards.json#australia",
     "away_final_26_profile_ref": "data/manual_sources/v3_worldcup/squads/fifa_final_26/processed/v3_wc2026_final_26_squad_profile_team_cards.json#turkiye",
@@ -6096,22 +6290,23 @@
       }
     },
     "odds_snapshot_status": {
-      "status": "GLOBAL_SNAPSHOT_AVAILABLE_NOT_MATCH_MAPPED",
+      "status": "MAPPED_NO_CURRENT_ODDS",
       "successful_fixture_count": 1,
       "source": "data/runtime/status/check_v3_worldcup_odds_snapshot_live_small_batch_20260604.json",
       "has_native_opening": false,
       "has_native_closing": false
     },
     "odds_binding": {
-      "odds_fixture_id": null,
-      "odds_snapshot_status": "GLOBAL_SNAPSHOT_AVAILABLE_NOT_MATCH_MAPPED",
+      "odds_fixture_id": "1539001",
+      "odds_snapshot_status": "MAPPED_NO_CURRENT_ODDS",
       "odds_available": false,
       "bookmaker_count": 13,
       "market_type_count": 7,
       "odds_observation_delta_status": "ELIGIBLE_MULTIPLE_SNAPSHOTS_NO_CHANGE",
       "changed_odds_count": 0,
-      "odds_gap_reason": "match_card_fixture_id_not_mapped_to_api_football_odds_fixture",
-      "no_money_flow_judgment": true
+      "odds_gap_reason": "odds_fixture_mapped_but_current_snapshot_empty",
+      "no_money_flow_judgment": true,
+      "fixture_mapping_bridge_ref": "data/manual_sources/v3_worldcup/war_room/v3_wc2026_fixture_mapping_bridge.json#mt_028389414"
     },
     "odds_observation_delta_status": {
       "status": "ELIGIBLE_MULTIPLE_SNAPSHOTS_NO_CHANGE",
@@ -6146,6 +6341,7 @@
     "away_team": "Scotland",
     "home_team_slug": "haiti",
     "away_team_slug": "scotland",
+    "api_football_fixture_id": "1489372",
     "venue": "VENUE_NOT_MAPPED",
     "kickoff_status": "SCHEDULED",
     "kickoff_time_utc": "2026-06-14T01:00:00.000Z",
@@ -6157,8 +6353,9 @@
         "WATCH_ONLY"
       ],
       "venue_stress_ref": "data/v3_worldcup/venue_stress/v3_worldcup_venue_stress_20260603.json",
-      "venue_mapping_status": "NOT_MAPPED",
-      "venue_gap_reason": "fixture_source_missing_venue_name"
+      "venue_mapping_status": "UNMAPPED",
+      "venue_gap_reason": "fixture_sources_do_not_provide_match_venue",
+      "fixture_mapping_bridge_ref": "data/manual_sources/v3_worldcup/war_room/v3_wc2026_fixture_mapping_bridge.json#mt_517473267"
     },
     "venue_stress_summary": {
       "status": "VENUE_LAYER_READY_FIXTURE_VENUE_NOT_MAPPED",
@@ -6167,7 +6364,7 @@
       "stress_tags": [
         "WATCH_ONLY"
       ],
-      "observation_note": "fixture_source_missing_venue_name"
+      "observation_note": "fixture_sources_do_not_provide_match_venue"
     },
     "home_final_26_profile_ref": "data/manual_sources/v3_worldcup/squads/fifa_final_26/processed/v3_wc2026_final_26_squad_profile_team_cards.json#haiti",
     "away_final_26_profile_ref": "data/manual_sources/v3_worldcup/squads/fifa_final_26/processed/v3_wc2026_final_26_squad_profile_team_cards.json#scotland",
@@ -6189,22 +6386,23 @@
       }
     },
     "odds_snapshot_status": {
-      "status": "GLOBAL_SNAPSHOT_AVAILABLE_NOT_MATCH_MAPPED",
+      "status": "MAPPED_NO_CURRENT_ODDS",
       "successful_fixture_count": 1,
       "source": "data/runtime/status/check_v3_worldcup_odds_snapshot_live_small_batch_20260604.json",
       "has_native_opening": false,
       "has_native_closing": false
     },
     "odds_binding": {
-      "odds_fixture_id": null,
-      "odds_snapshot_status": "GLOBAL_SNAPSHOT_AVAILABLE_NOT_MATCH_MAPPED",
+      "odds_fixture_id": "1489372",
+      "odds_snapshot_status": "MAPPED_NO_CURRENT_ODDS",
       "odds_available": false,
       "bookmaker_count": 13,
       "market_type_count": 7,
       "odds_observation_delta_status": "ELIGIBLE_MULTIPLE_SNAPSHOTS_NO_CHANGE",
       "changed_odds_count": 0,
-      "odds_gap_reason": "match_card_fixture_id_not_mapped_to_api_football_odds_fixture",
-      "no_money_flow_judgment": true
+      "odds_gap_reason": "odds_fixture_mapped_but_current_snapshot_empty",
+      "no_money_flow_judgment": true,
+      "fixture_mapping_bridge_ref": "data/manual_sources/v3_worldcup/war_room/v3_wc2026_fixture_mapping_bridge.json#mt_517473267"
     },
     "odds_observation_delta_status": {
       "status": "ELIGIBLE_MULTIPLE_SNAPSHOTS_NO_CHANGE",
@@ -6239,6 +6437,7 @@
     "away_team": "Morocco",
     "home_team_slug": "brazil",
     "away_team_slug": "morocco",
+    "api_football_fixture_id": "1489371",
     "venue": "VENUE_NOT_MAPPED",
     "kickoff_status": "SCHEDULED",
     "kickoff_time_utc": "2026-06-13T22:00:00.000Z",
@@ -6250,8 +6449,9 @@
         "WATCH_ONLY"
       ],
       "venue_stress_ref": "data/v3_worldcup/venue_stress/v3_worldcup_venue_stress_20260603.json",
-      "venue_mapping_status": "NOT_MAPPED",
-      "venue_gap_reason": "fixture_source_missing_venue_name"
+      "venue_mapping_status": "UNMAPPED",
+      "venue_gap_reason": "fixture_sources_do_not_provide_match_venue",
+      "fixture_mapping_bridge_ref": "data/manual_sources/v3_worldcup/war_room/v3_wc2026_fixture_mapping_bridge.json#mt_153637518"
     },
     "venue_stress_summary": {
       "status": "VENUE_LAYER_READY_FIXTURE_VENUE_NOT_MAPPED",
@@ -6260,7 +6460,7 @@
       "stress_tags": [
         "WATCH_ONLY"
       ],
-      "observation_note": "fixture_source_missing_venue_name"
+      "observation_note": "fixture_sources_do_not_provide_match_venue"
     },
     "home_final_26_profile_ref": "data/manual_sources/v3_worldcup/squads/fifa_final_26/processed/v3_wc2026_final_26_squad_profile_team_cards.json#brazil",
     "away_final_26_profile_ref": "data/manual_sources/v3_worldcup/squads/fifa_final_26/processed/v3_wc2026_final_26_squad_profile_team_cards.json#morocco",
@@ -6286,22 +6486,23 @@
       }
     },
     "odds_snapshot_status": {
-      "status": "GLOBAL_SNAPSHOT_AVAILABLE_NOT_MATCH_MAPPED",
+      "status": "MAPPED_NO_CURRENT_ODDS",
       "successful_fixture_count": 1,
       "source": "data/runtime/status/check_v3_worldcup_odds_snapshot_live_small_batch_20260604.json",
       "has_native_opening": false,
       "has_native_closing": false
     },
     "odds_binding": {
-      "odds_fixture_id": null,
-      "odds_snapshot_status": "GLOBAL_SNAPSHOT_AVAILABLE_NOT_MATCH_MAPPED",
+      "odds_fixture_id": "1489371",
+      "odds_snapshot_status": "MAPPED_NO_CURRENT_ODDS",
       "odds_available": false,
       "bookmaker_count": 13,
       "market_type_count": 7,
       "odds_observation_delta_status": "ELIGIBLE_MULTIPLE_SNAPSHOTS_NO_CHANGE",
       "changed_odds_count": 0,
-      "odds_gap_reason": "match_card_fixture_id_not_mapped_to_api_football_odds_fixture",
-      "no_money_flow_judgment": true
+      "odds_gap_reason": "odds_fixture_mapped_but_current_snapshot_empty",
+      "no_money_flow_judgment": true,
+      "fixture_mapping_bridge_ref": "data/manual_sources/v3_worldcup/war_room/v3_wc2026_fixture_mapping_bridge.json#mt_153637518"
     },
     "odds_observation_delta_status": {
       "status": "ELIGIBLE_MULTIPLE_SNAPSHOTS_NO_CHANGE",
@@ -6336,6 +6537,7 @@
     "away_team": "Switzerland",
     "home_team_slug": "qatar",
     "away_team_slug": "switzerland",
+    "api_football_fixture_id": "1489373",
     "venue": "VENUE_NOT_MAPPED",
     "kickoff_status": "SCHEDULED",
     "kickoff_time_utc": "2026-06-13T19:00:00.000Z",
@@ -6347,8 +6549,9 @@
         "WATCH_ONLY"
       ],
       "venue_stress_ref": "data/v3_worldcup/venue_stress/v3_worldcup_venue_stress_20260603.json",
-      "venue_mapping_status": "NOT_MAPPED",
-      "venue_gap_reason": "fixture_source_missing_venue_name"
+      "venue_mapping_status": "UNMAPPED",
+      "venue_gap_reason": "fixture_sources_do_not_provide_match_venue",
+      "fixture_mapping_bridge_ref": "data/manual_sources/v3_worldcup/war_room/v3_wc2026_fixture_mapping_bridge.json#mt_641919660"
     },
     "venue_stress_summary": {
       "status": "VENUE_LAYER_READY_FIXTURE_VENUE_NOT_MAPPED",
@@ -6357,7 +6560,7 @@
       "stress_tags": [
         "WATCH_ONLY"
       ],
-      "observation_note": "fixture_source_missing_venue_name"
+      "observation_note": "fixture_sources_do_not_provide_match_venue"
     },
     "home_final_26_profile_ref": "data/manual_sources/v3_worldcup/squads/fifa_final_26/processed/v3_wc2026_final_26_squad_profile_team_cards.json#qatar",
     "away_final_26_profile_ref": "data/manual_sources/v3_worldcup/squads/fifa_final_26/processed/v3_wc2026_final_26_squad_profile_team_cards.json#switzerland",
@@ -6381,22 +6584,23 @@
       }
     },
     "odds_snapshot_status": {
-      "status": "GLOBAL_SNAPSHOT_AVAILABLE_NOT_MATCH_MAPPED",
+      "status": "MAPPED_NO_CURRENT_ODDS",
       "successful_fixture_count": 1,
       "source": "data/runtime/status/check_v3_worldcup_odds_snapshot_live_small_batch_20260604.json",
       "has_native_opening": false,
       "has_native_closing": false
     },
     "odds_binding": {
-      "odds_fixture_id": null,
-      "odds_snapshot_status": "GLOBAL_SNAPSHOT_AVAILABLE_NOT_MATCH_MAPPED",
+      "odds_fixture_id": "1489373",
+      "odds_snapshot_status": "MAPPED_NO_CURRENT_ODDS",
       "odds_available": false,
       "bookmaker_count": 13,
       "market_type_count": 7,
       "odds_observation_delta_status": "ELIGIBLE_MULTIPLE_SNAPSHOTS_NO_CHANGE",
       "changed_odds_count": 0,
-      "odds_gap_reason": "match_card_fixture_id_not_mapped_to_api_football_odds_fixture",
-      "no_money_flow_judgment": true
+      "odds_gap_reason": "odds_fixture_mapped_but_current_snapshot_empty",
+      "no_money_flow_judgment": true,
+      "fixture_mapping_bridge_ref": "data/manual_sources/v3_worldcup/war_room/v3_wc2026_fixture_mapping_bridge.json#mt_641919660"
     },
     "odds_observation_delta_status": {
       "status": "ELIGIBLE_MULTIPLE_SNAPSHOTS_NO_CHANGE",
@@ -6431,6 +6635,7 @@
     "away_team": "Paraguay",
     "home_team_slug": "usa",
     "away_team_slug": "paraguay",
+    "api_football_fixture_id": "1489370",
     "venue": "VENUE_NOT_MAPPED",
     "kickoff_status": "SCHEDULED",
     "kickoff_time_utc": "2026-06-13T01:00:00.000Z",
@@ -6442,8 +6647,9 @@
         "WATCH_ONLY"
       ],
       "venue_stress_ref": "data/v3_worldcup/venue_stress/v3_worldcup_venue_stress_20260603.json",
-      "venue_mapping_status": "NOT_MAPPED",
-      "venue_gap_reason": "fixture_source_missing_venue_name"
+      "venue_mapping_status": "UNMAPPED",
+      "venue_gap_reason": "fixture_sources_do_not_provide_match_venue",
+      "fixture_mapping_bridge_ref": "data/manual_sources/v3_worldcup/war_room/v3_wc2026_fixture_mapping_bridge.json#mt_517473281"
     },
     "venue_stress_summary": {
       "status": "VENUE_LAYER_READY_FIXTURE_VENUE_NOT_MAPPED",
@@ -6452,7 +6658,7 @@
       "stress_tags": [
         "WATCH_ONLY"
       ],
-      "observation_note": "fixture_source_missing_venue_name"
+      "observation_note": "fixture_sources_do_not_provide_match_venue"
     },
     "home_final_26_profile_ref": "data/manual_sources/v3_worldcup/squads/fifa_final_26/processed/v3_wc2026_final_26_squad_profile_team_cards.json#usa",
     "away_final_26_profile_ref": "data/manual_sources/v3_worldcup/squads/fifa_final_26/processed/v3_wc2026_final_26_squad_profile_team_cards.json#paraguay",
@@ -6474,22 +6680,23 @@
       }
     },
     "odds_snapshot_status": {
-      "status": "GLOBAL_SNAPSHOT_AVAILABLE_NOT_MATCH_MAPPED",
+      "status": "MAPPED_NO_CURRENT_ODDS",
       "successful_fixture_count": 1,
       "source": "data/runtime/status/check_v3_worldcup_odds_snapshot_live_small_batch_20260604.json",
       "has_native_opening": false,
       "has_native_closing": false
     },
     "odds_binding": {
-      "odds_fixture_id": null,
-      "odds_snapshot_status": "GLOBAL_SNAPSHOT_AVAILABLE_NOT_MATCH_MAPPED",
+      "odds_fixture_id": "1489370",
+      "odds_snapshot_status": "MAPPED_NO_CURRENT_ODDS",
       "odds_available": false,
       "bookmaker_count": 13,
       "market_type_count": 7,
       "odds_observation_delta_status": "ELIGIBLE_MULTIPLE_SNAPSHOTS_NO_CHANGE",
       "changed_odds_count": 0,
-      "odds_gap_reason": "match_card_fixture_id_not_mapped_to_api_football_odds_fixture",
-      "no_money_flow_judgment": true
+      "odds_gap_reason": "odds_fixture_mapped_but_current_snapshot_empty",
+      "no_money_flow_judgment": true,
+      "fixture_mapping_bridge_ref": "data/manual_sources/v3_worldcup/war_room/v3_wc2026_fixture_mapping_bridge.json#mt_517473281"
     },
     "odds_observation_delta_status": {
       "status": "ELIGIBLE_MULTIPLE_SNAPSHOTS_NO_CHANGE",
@@ -6524,6 +6731,7 @@
     "away_team": "Bosnia And Herzegovina",
     "home_team_slug": "canada",
     "away_team_slug": "bosnia_and_herzegovina",
+    "api_football_fixture_id": "1539000",
     "venue": "VENUE_NOT_MAPPED",
     "kickoff_status": "SCHEDULED",
     "kickoff_time_utc": "2026-06-12T19:00:00.000Z",
@@ -6535,8 +6743,9 @@
         "WATCH_ONLY"
       ],
       "venue_stress_ref": "data/v3_worldcup/venue_stress/v3_worldcup_venue_stress_20260603.json",
-      "venue_mapping_status": "NOT_MAPPED",
-      "venue_gap_reason": "fixture_source_missing_venue_name"
+      "venue_mapping_status": "UNMAPPED",
+      "venue_gap_reason": "fixture_sources_do_not_provide_match_venue",
+      "fixture_mapping_bridge_ref": "data/manual_sources/v3_worldcup/war_room/v3_wc2026_fixture_mapping_bridge.json#mt_641915402"
     },
     "venue_stress_summary": {
       "status": "VENUE_LAYER_READY_FIXTURE_VENUE_NOT_MAPPED",
@@ -6545,7 +6754,7 @@
       "stress_tags": [
         "WATCH_ONLY"
       ],
-      "observation_note": "fixture_source_missing_venue_name"
+      "observation_note": "fixture_sources_do_not_provide_match_venue"
     },
     "home_final_26_profile_ref": "data/manual_sources/v3_worldcup/squads/fifa_final_26/processed/v3_wc2026_final_26_squad_profile_team_cards.json#canada",
     "away_final_26_profile_ref": "data/manual_sources/v3_worldcup/squads/fifa_final_26/processed/v3_wc2026_final_26_squad_profile_team_cards.json#bosnia_and_herzegovina",
@@ -6569,22 +6778,23 @@
       }
     },
     "odds_snapshot_status": {
-      "status": "GLOBAL_SNAPSHOT_AVAILABLE_NOT_MATCH_MAPPED",
+      "status": "MAPPED_NO_CURRENT_ODDS",
       "successful_fixture_count": 1,
       "source": "data/runtime/status/check_v3_worldcup_odds_snapshot_live_small_batch_20260604.json",
       "has_native_opening": false,
       "has_native_closing": false
     },
     "odds_binding": {
-      "odds_fixture_id": null,
-      "odds_snapshot_status": "GLOBAL_SNAPSHOT_AVAILABLE_NOT_MATCH_MAPPED",
+      "odds_fixture_id": "1539000",
+      "odds_snapshot_status": "MAPPED_NO_CURRENT_ODDS",
       "odds_available": false,
       "bookmaker_count": 13,
       "market_type_count": 7,
       "odds_observation_delta_status": "ELIGIBLE_MULTIPLE_SNAPSHOTS_NO_CHANGE",
       "changed_odds_count": 0,
-      "odds_gap_reason": "match_card_fixture_id_not_mapped_to_api_football_odds_fixture",
-      "no_money_flow_judgment": true
+      "odds_gap_reason": "odds_fixture_mapped_but_current_snapshot_empty",
+      "no_money_flow_judgment": true,
+      "fixture_mapping_bridge_ref": "data/manual_sources/v3_worldcup/war_room/v3_wc2026_fixture_mapping_bridge.json#mt_641915402"
     },
     "odds_observation_delta_status": {
       "status": "ELIGIBLE_MULTIPLE_SNAPSHOTS_NO_CHANGE",
@@ -6619,6 +6829,7 @@
     "away_team": "Czechia",
     "home_team_slug": "korea_republic",
     "away_team_slug": "czechia",
+    "api_football_fixture_id": "1538999",
     "venue": "VENUE_NOT_MAPPED",
     "kickoff_status": "SCHEDULED",
     "kickoff_time_utc": "2026-06-12T02:00:00.000Z",
@@ -6630,8 +6841,9 @@
         "WATCH_ONLY"
       ],
       "venue_stress_ref": "data/v3_worldcup/venue_stress/v3_worldcup_venue_stress_20260603.json",
-      "venue_mapping_status": "NOT_MAPPED",
-      "venue_gap_reason": "fixture_source_missing_venue_name"
+      "venue_mapping_status": "UNMAPPED",
+      "venue_gap_reason": "fixture_sources_do_not_provide_match_venue",
+      "fixture_mapping_bridge_ref": "data/manual_sources/v3_worldcup/war_room/v3_wc2026_fixture_mapping_bridge.json#mt_153637955"
     },
     "venue_stress_summary": {
       "status": "VENUE_LAYER_READY_FIXTURE_VENUE_NOT_MAPPED",
@@ -6640,7 +6852,7 @@
       "stress_tags": [
         "WATCH_ONLY"
       ],
-      "observation_note": "fixture_source_missing_venue_name"
+      "observation_note": "fixture_sources_do_not_provide_match_venue"
     },
     "home_final_26_profile_ref": "data/manual_sources/v3_worldcup/squads/fifa_final_26/processed/v3_wc2026_final_26_squad_profile_team_cards.json#korea_republic",
     "away_final_26_profile_ref": "data/manual_sources/v3_worldcup/squads/fifa_final_26/processed/v3_wc2026_final_26_squad_profile_team_cards.json#czechia",
@@ -6662,22 +6874,23 @@
       }
     },
     "odds_snapshot_status": {
-      "status": "GLOBAL_SNAPSHOT_AVAILABLE_NOT_MATCH_MAPPED",
+      "status": "MAPPED_NO_CURRENT_ODDS",
       "successful_fixture_count": 1,
       "source": "data/runtime/status/check_v3_worldcup_odds_snapshot_live_small_batch_20260604.json",
       "has_native_opening": false,
       "has_native_closing": false
     },
     "odds_binding": {
-      "odds_fixture_id": null,
-      "odds_snapshot_status": "GLOBAL_SNAPSHOT_AVAILABLE_NOT_MATCH_MAPPED",
+      "odds_fixture_id": "1538999",
+      "odds_snapshot_status": "MAPPED_NO_CURRENT_ODDS",
       "odds_available": false,
       "bookmaker_count": 13,
       "market_type_count": 7,
       "odds_observation_delta_status": "ELIGIBLE_MULTIPLE_SNAPSHOTS_NO_CHANGE",
       "changed_odds_count": 0,
-      "odds_gap_reason": "match_card_fixture_id_not_mapped_to_api_football_odds_fixture",
-      "no_money_flow_judgment": true
+      "odds_gap_reason": "odds_fixture_mapped_but_current_snapshot_empty",
+      "no_money_flow_judgment": true,
+      "fixture_mapping_bridge_ref": "data/manual_sources/v3_worldcup/war_room/v3_wc2026_fixture_mapping_bridge.json#mt_153637955"
     },
     "odds_observation_delta_status": {
       "status": "ELIGIBLE_MULTIPLE_SNAPSHOTS_NO_CHANGE",
@@ -6712,6 +6925,7 @@
     "away_team": "South Africa",
     "home_team_slug": "mexico",
     "away_team_slug": "south_africa",
+    "api_football_fixture_id": "1489369",
     "venue": "VENUE_NOT_MAPPED",
     "kickoff_status": "SCHEDULED",
     "kickoff_time_utc": "2026-06-11T19:00:00.000Z",
@@ -6723,8 +6937,9 @@
         "WATCH_ONLY"
       ],
       "venue_stress_ref": "data/v3_worldcup/venue_stress/v3_worldcup_venue_stress_20260603.json",
-      "venue_mapping_status": "NOT_MAPPED",
-      "venue_gap_reason": "fixture_source_missing_venue_name"
+      "venue_mapping_status": "UNMAPPED",
+      "venue_gap_reason": "fixture_sources_do_not_provide_match_venue",
+      "fixture_mapping_bridge_ref": "data/manual_sources/v3_worldcup/war_room/v3_wc2026_fixture_mapping_bridge.json#mt_153637999"
     },
     "venue_stress_summary": {
       "status": "VENUE_LAYER_READY_FIXTURE_VENUE_NOT_MAPPED",
@@ -6733,7 +6948,7 @@
       "stress_tags": [
         "WATCH_ONLY"
       ],
-      "observation_note": "fixture_source_missing_venue_name"
+      "observation_note": "fixture_sources_do_not_provide_match_venue"
     },
     "home_final_26_profile_ref": "data/manual_sources/v3_worldcup/squads/fifa_final_26/processed/v3_wc2026_final_26_squad_profile_team_cards.json#mexico",
     "away_final_26_profile_ref": "data/manual_sources/v3_worldcup/squads/fifa_final_26/processed/v3_wc2026_final_26_squad_profile_team_cards.json#south_africa",
@@ -6755,22 +6970,23 @@
       }
     },
     "odds_snapshot_status": {
-      "status": "GLOBAL_SNAPSHOT_AVAILABLE_NOT_MATCH_MAPPED",
+      "status": "AVAILABLE",
       "successful_fixture_count": 1,
       "source": "data/runtime/status/check_v3_worldcup_odds_snapshot_live_small_batch_20260604.json",
       "has_native_opening": false,
       "has_native_closing": false
     },
     "odds_binding": {
-      "odds_fixture_id": null,
-      "odds_snapshot_status": "GLOBAL_SNAPSHOT_AVAILABLE_NOT_MATCH_MAPPED",
-      "odds_available": false,
+      "odds_fixture_id": "1489369",
+      "odds_snapshot_status": "AVAILABLE",
+      "odds_available": true,
       "bookmaker_count": 13,
       "market_type_count": 7,
       "odds_observation_delta_status": "ELIGIBLE_MULTIPLE_SNAPSHOTS_NO_CHANGE",
       "changed_odds_count": 0,
-      "odds_gap_reason": "match_card_fixture_id_not_mapped_to_api_football_odds_fixture",
-      "no_money_flow_judgment": true
+      "odds_gap_reason": "",
+      "no_money_flow_judgment": true,
+      "fixture_mapping_bridge_ref": "data/manual_sources/v3_worldcup/war_room/v3_wc2026_fixture_mapping_bridge.json#mt_153637999"
     },
     "odds_observation_delta_status": {
       "status": "ELIGIBLE_MULTIPLE_SNAPSHOTS_NO_CHANGE",
@@ -6787,8 +7003,7 @@
       "missing_odds_movement_conclusion",
       "missing_official_matchday_lineup",
       "missing_starting_xi",
-      "odds_delta_not_available_for_this_match",
-      "odds_snapshot_not_mapped_to_this_match"
+      "odds_delta_not_available_for_this_match"
     ],
     "observation_only": true,
     "no_starting_xi_generated": true,

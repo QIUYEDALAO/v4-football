@@ -1,0 +1,35 @@
+{
+  "pack_name": "V3_WC_MATCH_CARD_PACK_PHASE_3_FIXTURE_MAPPING_BRIDGE",
+  "generated_at": "2026-06-04T16:44:53.790981+00:00",
+  "current_head": "d1de518",
+  "source_match_cards": "data/manual_sources/v3_worldcup/war_room/v3_wc_match_cards.json",
+  "mapping_sources_used": [
+    "data/v3_wc2026/group_schedule.json",
+    "data/runtime/v3_worldcup/thestatsapi_cache/20260602/world_cup_2026/matches_2026_all.json",
+    "data/v3_worldcup/venue_stress/v3_worldcup_venue_stress_20260603.json",
+    "data/runtime/status/check_v3_worldcup_odds_snapshot_live_small_batch_20260604.json"
+  ],
+  "match_count": 72,
+  "bridge_count": 72,
+  "fixture_id_mapped_count": 72,
+  "odds_fixture_id_mapped_count": 72,
+  "venue_mapped_count": 0,
+  "fixture_unmapped_count": 0,
+  "venue_unmapped_count": 72,
+  "conflict_count": 0,
+  "duplicate_fixture_id_count": 0,
+  "duplicate_odds_fixture_id_count": 0,
+  "odds_available_fixture_count": 1,
+  "global_gap_summary": {
+    "fixture_mapping": "mapped_by_exact_home_away_pair_from_group_schedule",
+    "venue_mapping": "fixture_sources_do_not_provide_match_venue",
+    "odds_mapping": "odds_fixture_id_uses_api_football_fixture_id_from_group_schedule",
+    "odds_availability": "only fixtures present in live snapshot success list are odds_available"
+  },
+  "safety": {
+    "observation_only": true,
+    "no_prediction": true,
+    "betting_recommendation": false,
+    "affects_v4": false
+  }
+}

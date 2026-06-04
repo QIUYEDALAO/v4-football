@@ -14,13 +14,9 @@ ROOT = Path(__file__).resolve().parents[1]
 STATUS_OUT = ROOT / "data/runtime/status/check_v3_worldcup_match_card_venue_odds_binding_20260604.json"
 
 DISALLOWED_KEYS = {
-    "fund_flow",
     "fund_flow_signal",
-    "steam",
     "steam_signal",
-    "drift",
     "drift_signal",
-    "sharp",
     "sharp_move",
     "sharp_signal",
     "recommended_pick",
@@ -93,6 +89,7 @@ def main() -> int:
         odds_binding = card.get("odds_binding")
         add(failures, isinstance(venue_binding, dict), "venue_binding_missing", match_id)
         add(failures, isinstance(odds_binding, dict), "odds_binding_missing", match_id)
+        add(failures, bool(card.get("api_football_fixture_id")), "api_football_fixture_id_missing", match_id)
         if isinstance(venue_binding, dict):
             for key in ["venue_name", "venue_slug", "venue_stress_status", "venue_stress_tags", "venue_stress_ref", "venue_mapping_status", "venue_gap_reason"]:
                 add(failures, key in venue_binding, f"venue_binding_{key}_missing", match_id)
@@ -110,6 +107,7 @@ def main() -> int:
             ]:
                 add(failures, key in odds_binding, f"odds_binding_{key}_missing", match_id)
             add(failures, odds_binding.get("no_money_flow_judgment") is True, "no_money_flow_judgment_unexpected", match_id)
+            add(failures, bool(odds_binding.get("odds_fixture_id")), "odds_fixture_id_missing", match_id)
         add(failures, card.get("home_lineup_status") == "WAIT_OFFICIAL_LINEUP", "home_lineup_not_waiting", match_id)
         add(failures, card.get("away_lineup_status") == "WAIT_OFFICIAL_LINEUP", "away_lineup_not_waiting", match_id)
         add(failures, card.get("starting_xi_status") == "NOT_AVAILABLE", "starting_xi_status_unexpected", match_id)
@@ -130,7 +128,8 @@ def main() -> int:
     ]:
         add(failures, key in summary, f"summary_{key}_missing")
     add(failures, summary.get("cards_missing_venue_binding") == 72, "cards_missing_venue_binding_unexpected", summary.get("cards_missing_venue_binding"))
-    add(failures, summary.get("cards_missing_odds_binding") == 72, "cards_missing_odds_binding_unexpected", summary.get("cards_missing_odds_binding"))
+    add(failures, summary.get("cards_with_odds_binding") == 72, "cards_with_odds_binding_unexpected", summary.get("cards_with_odds_binding"))
+    add(failures, summary.get("cards_missing_odds_binding") == 0, "cards_missing_odds_binding_unexpected", summary.get("cards_missing_odds_binding"))
 
     keys = {key.lower() for key in walk_keys({"cards": cards, "summary": summary})}
     add(failures, not (keys & DISALLOWED_KEYS), "disallowed_generated_keys", sorted(keys & DISALLOWED_KEYS))

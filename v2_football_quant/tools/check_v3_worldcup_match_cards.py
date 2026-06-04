@@ -105,10 +105,12 @@ def main() -> int:
         match_id = card.get("match_id")
         for key in ["home_team", "away_team", "home_team_slug", "away_team_slug"]:
             add(failures, bool(card.get(key)), f"card_{key}_missing", match_id)
+        add(failures, bool(card.get("api_football_fixture_id")), "api_football_fixture_id_missing", match_id)
         add(failures, bool(card.get("home_final_26_profile_ref")) and bool(card.get("away_final_26_profile_ref")), "final_26_profile_ref_missing", match_id)
         add(failures, isinstance(card.get("venue_binding"), dict), "venue_binding_missing", match_id)
         add(failures, isinstance(card.get("odds_binding"), dict), "odds_binding_missing", match_id)
         add(failures, card.get("odds_binding", {}).get("no_money_flow_judgment") is True, "no_money_flow_judgment_missing", match_id)
+        add(failures, bool(card.get("odds_binding", {}).get("odds_fixture_id")), "odds_fixture_id_missing", match_id)
         add(failures, card.get("home_lineup_status") in {"WAIT_OFFICIAL_LINEUP", "NOT_AVAILABLE"}, "home_lineup_status_unexpected", match_id)
         add(failures, card.get("away_lineup_status") in {"WAIT_OFFICIAL_LINEUP", "NOT_AVAILABLE"}, "away_lineup_status_unexpected", match_id)
         add(failures, card.get("starting_xi_status") == "NOT_AVAILABLE", "starting_xi_status_unexpected", match_id)
