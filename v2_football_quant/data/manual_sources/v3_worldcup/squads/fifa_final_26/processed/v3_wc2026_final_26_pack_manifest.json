@@ -1,0 +1,157 @@
+{
+  "pack_name": "V3_WC_FINAL_26_SQUAD_PACK",
+  "tournament": "FIFA World Cup 2026",
+  "source": "FIFA official final 26 canonical squad layer",
+  "current_head": "208697f",
+  "commits": {
+    "structured_ingest": "661fa4c",
+    "observation_layer": "83d67c9",
+    "ui_json_integration": "b250926",
+    "squad_profile_derived_layer": "d5be148",
+    "wc10_profile_node_integration": "208697f"
+  },
+  "artifacts": [
+    {
+      "path": "data/manual_sources/v3_worldcup/squads/fifa_final_26/processed/v3_wc2026_final_26_players.csv",
+      "artifact_type": "canonical_players_csv",
+      "exists": true,
+      "file_size": 291447,
+      "sha256": "43ce40d86b4a36ecf546786e52d29558f020a8afe0e47c1f8f1fc5a66299a2fa",
+      "record_count": 1248
+    },
+    {
+      "path": "data/manual_sources/v3_worldcup/squads/fifa_final_26/processed/v3_wc2026_final_26_players.json",
+      "artifact_type": "canonical_players_json",
+      "exists": true,
+      "file_size": 815385,
+      "sha256": "14c464663d243dfbf45a7f0285c90aed1da6b0ec4eab2c9beb43f94637e7e2f9",
+      "record_count": 1248
+    },
+    {
+      "path": "data/manual_sources/v3_worldcup/squads/fifa_final_26/processed/v3_wc2026_final_26_teams.json",
+      "artifact_type": "canonical_teams_json",
+      "exists": true,
+      "file_size": 20930,
+      "sha256": "a3db2c663222b5d0d5679ba1c3db1c5ad9f9ae15121831d4df115f7c64820e5b",
+      "record_count": 48
+    },
+    {
+      "path": "data/manual_sources/v3_worldcup/squads/fifa_final_26/processed/v3_wc2026_final_26_summary.json",
+      "artifact_type": "canonical_summary_json",
+      "exists": true,
+      "file_size": 922,
+      "sha256": "33c505b03ed6824c7b4b31999830f51054c6e69ce40abe308e1d926f2675c2d1",
+      "record_count": null
+    },
+    {
+      "path": "data/manual_sources/v3_worldcup/squads/fifa_final_26/processed/v3_wc2026_final_26_war_room_roster_index.json",
+      "artifact_type": "war_room_roster_index_json",
+      "exists": true,
+      "file_size": 485193,
+      "sha256": "31ce0c02da6ddcee1f1ac9b3316bc7967405340af22b30a8f4223c28e4b1f233",
+      "record_count": 48
+    },
+    {
+      "path": "data/manual_sources/v3_worldcup/squads/fifa_final_26/processed/v3_wc2026_final_26_team_observation_cards.json",
+      "artifact_type": "team_observation_cards_json",
+      "exists": true,
+      "file_size": 102883,
+      "sha256": "327d27e6c690a4ed38a7cb814ebaef0b847f15fe93d5b935e461f60f7485f78b",
+      "record_count": 48
+    },
+    {
+      "path": "data/manual_sources/v3_worldcup/squads/fifa_final_26/processed/v3_wc2026_final_26_squad_observation_summary.json",
+      "artifact_type": "squad_observation_summary_json",
+      "exists": true,
+      "file_size": 518,
+      "sha256": "b39906934a66fd81f2b7c0cd8a94907aac2402634344e08f003aa547c3d835f4",
+      "record_count": null
+    },
+    {
+      "path": "data/manual_sources/v3_worldcup/squads/fifa_final_26/processed/v3_wc2026_final_26_war_room_ui_payload.json",
+      "artifact_type": "war_room_ui_payload_json",
+      "exists": true,
+      "file_size": 120910,
+      "sha256": "7ba4769cb3b3348963612617c629e421133c2e1c2457981b8751c3858d4e7331",
+      "record_count": 48
+    },
+    {
+      "path": "data/manual_sources/v3_worldcup/squads/fifa_final_26/processed/v3_wc2026_final_26_squad_profile_observation.json",
+      "artifact_type": "squad_profile_observation_json",
+      "exists": true,
+      "file_size": 9334,
+      "sha256": "53f6b61aed31757aecc3860e655f917bb08200650582f9bc3b5e0a32006d6354",
+      "record_count": null
+    },
+    {
+      "path": "data/manual_sources/v3_worldcup/squads/fifa_final_26/processed/v3_wc2026_final_26_squad_profile_team_cards.json",
+      "artifact_type": "squad_profile_team_cards_json",
+      "exists": true,
+      "file_size": 216418,
+      "sha256": "b6306fd99b3680d85c7dcc29ab3d153cd1f92c95b5a0865ca1d9f992d6527a0c",
+      "record_count": 48
+    }
+  ],
+  "counts": {
+    "team_count": 48,
+    "total_players": 1248,
+    "coach_count": 48,
+    "teams_with_26_players": 48,
+    "position_distribution": {
+      "GK": 145,
+      "DF": 421,
+      "MF": 371,
+      "FW": 311
+    }
+  },
+  "war_room_nodes": {
+    "final_26_squad_observation": {
+      "exists": true,
+      "module": "final_26_squad_observation",
+      "status": "FINAL_26_OBSERVATION_READY",
+      "team_count": 48,
+      "total_players": 1248,
+      "coach_count": 48,
+      "safety": {
+        "observation_only": true,
+        "no_starting_xi": true,
+        "no_injury_judgment": true,
+        "betting_recommendation": false,
+        "affects_v4": false
+      }
+    },
+    "final_26_squad_profile_observation": {
+      "exists": true,
+      "module": "final_26_squad_profile_observation",
+      "status": "FINAL_26_SQUAD_PROFILE_READY",
+      "team_count": 48,
+      "total_players": 1248,
+      "position_distribution": {
+        "GK": 145,
+        "DF": 421,
+        "MF": 371,
+        "FW": 311
+      },
+      "ranking_type": "roster_observation_ranking",
+      "team_profile_refs_count": 48,
+      "safety": {
+        "observation_only": true,
+        "no_starting_xi": true,
+        "no_injury_judgment": true,
+        "no_prediction": true,
+        "betting_recommendation": false,
+        "affects_v4": false
+      }
+    }
+  },
+  "safety": {
+    "observation_only": true,
+    "no_starting_xi": true,
+    "no_injury_judgment": true,
+    "no_prediction": true,
+    "betting_recommendation": false,
+    "affects_v4": false
+  },
+  "raw_docx_policy": "ACCEPT_RAW_UNTRACKED",
+  "final_pack_acceptance_ready": true
+}
