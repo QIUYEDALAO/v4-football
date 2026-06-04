@@ -1,0 +1,59 @@
+{
+  "pack_name": "V3_WC_2026_DASHBOARD_104_READ_MODEL_PACK",
+  "generated_at": "2026-06-04T18:56:49.299497+00:00",
+  "current_head": "4a03e6a",
+  "dashboard_read_model": "V3_WC_2026_DASHBOARD_104_READ_MODEL",
+  "canonical_source": "data/manual_sources/v3_worldcup/war_room/v3_wc2026_104_cards_index_bridge.json",
+  "canonical_schedule_index": "data/manual_sources/v3_worldcup/war_room/v3_wc2026_schedule_index_104.json",
+  "canonical_scope": "FULL_TOURNAMENT_104_INDEX",
+  "canonical_card_count": 104,
+  "group_stage_match_count": 72,
+  "knockout_slot_count": 32,
+  "full_tournament_match_data_complete": false,
+  "group_stage_view": {
+    "source": "data/manual_sources/v3_worldcup/war_room/v3_wc_match_cards.json",
+    "summary": "data/manual_sources/v3_worldcup/war_room/v3_wc_match_card_summary.json",
+    "scope": "GROUP_STAGE_ONLY_72",
+    "match_count": 72,
+    "is_subset_of_canonical": true,
+    "do_not_treat_as_complete_source": true
+  },
+  "knockout_slots": {
+    "count": 32,
+    "policy": "STRUCTURAL_ONLY_NO_TEAM_GENERATED",
+    "round_counts": {
+      "ROUND_OF_32": 16,
+      "ROUND_OF_16": 8,
+      "QUARTER_FINAL": 4,
+      "SEMI_FINAL": 2,
+      "THIRD_PLACE": 1,
+      "FINAL": 1
+    },
+    "display_mode": "STRUCTURAL_SLOT_PLACEHOLDER",
+    "team_fields_empty": true,
+    "fixture_fields_empty": true,
+    "venue_fields_not_generated": true
+  },
+  "read_policy": {
+    "dashboard_primary_reader": "data/manual_sources/v3_worldcup/war_room/v3_wc2026_104_cards_index_bridge.json",
+    "group_stage_view_reader": "data/manual_sources/v3_worldcup/war_room/v3_wc_match_cards.json",
+    "do_not_merge_canonical_and_group_view": true,
+    "group_view_is_subset_of_canonical": true,
+    "duplicate_read_guard": "READ_CANONICAL_104_OR_GROUP_VIEW_72_NOT_BOTH_AS_COMPLETE"
+  },
+  "source_summaries": {
+    "canonical_summary": "data/manual_sources/v3_worldcup/war_room/v3_wc2026_104_cards_index_bridge_summary.json",
+    "canonical_summary_card_count": 104,
+    "group_summary_match_count": 72,
+    "war_room_master_index": "data/manual_sources/v3_worldcup/war_room/v3_wc_war_room_master_index.json",
+    "war_room_module_count": 12
+  },
+  "safety": {
+    "observation_only": true,
+    "no_starting_xi_generated": true,
+    "no_prediction": true,
+    "no_injury_judgment": true,
+    "betting_recommendation": false,
+    "affects_v4": false
+  }
+}

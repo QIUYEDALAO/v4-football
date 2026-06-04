@@ -1,8 +1,8 @@
 {
   "pack_name": "V3_WC_WAR_ROOM_MASTER_INDEX_PACK",
-  "generated_at": "2026-06-04T18:52:41.800177+00:00",
-  "current_head": "466c727",
-  "module_count": 11,
+  "generated_at": "2026-06-04T18:56:49.432231+00:00",
+  "current_head": "4a03e6a",
+  "module_count": 12,
   "modules": [
     {
       "module_name": "venue_stress_layer",
@@ -179,6 +179,31 @@
       "full_tournament_match_data_complete": false,
       "knockout_slot_policy": "STRUCTURAL_ONLY_NO_TEAM_GENERATED",
       "double_read_guard": "READ_CANONICAL_104_OR_GROUP_VIEW_72_NOT_BOTH_AS_COMPLETE"
+    },
+    {
+      "module_name": "dashboard_104_read_model",
+      "status": "READY",
+      "source_files": [
+        "data/manual_sources/v3_worldcup/war_room/v3_wc2026_dashboard_104_read_model.json",
+        "data/manual_sources/v3_worldcup/war_room/v3_wc2026_104_cards_index_bridge.json",
+        "data/manual_sources/v3_worldcup/war_room/v3_wc_match_cards.json"
+      ],
+      "source_files_exist": true,
+      "checker": "tools/check_v3_worldcup_dashboard_104_read_model.py",
+      "observation_only": true,
+      "affects_v4": false,
+      "betting_recommendation": false,
+      "data_status": "dashboard_canonical_cards=104; group_view=72; knockout_slots=32",
+      "next_action": "Use the dashboard read model as the V3 UI/API read surface for the 104 canonical schedule.",
+      "dashboard_read_model": "data/manual_sources/v3_worldcup/war_room/v3_wc2026_dashboard_104_read_model.json",
+      "canonical_source": "data/manual_sources/v3_worldcup/war_room/v3_wc2026_104_cards_index_bridge.json",
+      "group_stage_view": "data/manual_sources/v3_worldcup/war_room/v3_wc_match_cards.json",
+      "expected_total_cards": 104,
+      "canonical_card_count": 104,
+      "group_stage_view_count": 72,
+      "knockout_slot_count": 32,
+      "knockout_slot_policy": "STRUCTURAL_ONLY_NO_TEAM_GENERATED",
+      "double_read_guard": "READ_CANONICAL_104_OR_GROUP_VIEW_72_NOT_BOTH_AS_COMPLETE"
     }
   ],
   "global_safety": {
@@ -205,6 +230,7 @@
     "final_26_squad_profile": "PASS",
     "wc10_war_room": "PASS",
     "lineup_readiness_pending": "PASS",
-    "match_card_104_canonical_index": "PASS"
+    "match_card_104_canonical_index": "PASS",
+    "dashboard_104_read_model": "PASS"
   }
 }

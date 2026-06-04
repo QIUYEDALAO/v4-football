@@ -25,6 +25,7 @@ REQUIRED_MODULES = {
     "wc10_war_room",
     "lineup_readiness_pending",
     "match_card_104_canonical_index",
+    "dashboard_104_read_model",
 }
 EXPECTED_SAFETY = {
     "observation_only": True,
@@ -146,6 +147,14 @@ def main() -> int:
     add(failures, match_card_module.get("full_tournament_match_data_complete") is False, "match_card_full_tournament_complete_unexpected", match_card_module.get("full_tournament_match_data_complete"))
     add(failures, match_card_module.get("knockout_slot_policy") == "STRUCTURAL_ONLY_NO_TEAM_GENERATED", "match_card_knockout_slot_policy_unexpected", match_card_module.get("knockout_slot_policy"))
     add(failures, match_card_module.get("double_read_guard") == "READ_CANONICAL_104_OR_GROUP_VIEW_72_NOT_BOTH_AS_COMPLETE", "match_card_double_read_guard_missing", match_card_module.get("double_read_guard"))
+    dashboard_module = next((item for item in modules if isinstance(item, dict) and item.get("module_name") == "dashboard_104_read_model"), {})
+    add(failures, dashboard_module.get("dashboard_read_model") == "data/manual_sources/v3_worldcup/war_room/v3_wc2026_dashboard_104_read_model.json", "dashboard_104_read_model_unexpected", dashboard_module.get("dashboard_read_model"))
+    add(failures, dashboard_module.get("canonical_source") == "data/manual_sources/v3_worldcup/war_room/v3_wc2026_104_cards_index_bridge.json", "dashboard_104_canonical_source_unexpected", dashboard_module.get("canonical_source"))
+    add(failures, dashboard_module.get("canonical_card_count") == 104, "dashboard_104_canonical_count_unexpected", dashboard_module.get("canonical_card_count"))
+    add(failures, dashboard_module.get("group_stage_view_count") == 72, "dashboard_group_view_count_unexpected", dashboard_module.get("group_stage_view_count"))
+    add(failures, dashboard_module.get("knockout_slot_count") == 32, "dashboard_knockout_slot_count_unexpected", dashboard_module.get("knockout_slot_count"))
+    add(failures, dashboard_module.get("knockout_slot_policy") == "STRUCTURAL_ONLY_NO_TEAM_GENERATED", "dashboard_knockout_slot_policy_unexpected", dashboard_module.get("knockout_slot_policy"))
+    add(failures, dashboard_module.get("double_read_guard") == "READ_CANONICAL_104_OR_GROUP_VIEW_72_NOT_BOTH_AS_COMPLETE", "dashboard_double_read_guard_missing", dashboard_module.get("double_read_guard"))
 
     for key, expected in EXPECTED_SAFETY.items():
         add(failures, master.get("global_safety", {}).get(key) is expected, f"global_safety_{key}_unexpected", master.get("global_safety", {}).get(key))
