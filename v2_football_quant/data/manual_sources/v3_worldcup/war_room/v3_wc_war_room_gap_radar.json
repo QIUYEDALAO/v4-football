@@ -1,0 +1,31 @@
+{
+  "pack_name": "V3_WC_WAR_ROOM_MASTER_INDEX_PACK",
+  "generated_at": "2026-06-04T15:19:49.350690+00:00",
+  "source_master_index": "data/manual_sources/v3_worldcup/war_room/v3_wc_war_room_master_index.json",
+  "missing_starting_xi": true,
+  "missing_official_matchday_lineup": true,
+  "missing_native_opening_odds": true,
+  "missing_native_closing_odds": true,
+  "missing_odds_movement_conclusion": true,
+  "missing_injury_suspension_official_feed": true,
+  "odds_available_fixture_count": 1,
+  "final_26_ready": true,
+  "venue_stress_ready": true,
+  "tactical_profile_ready": true,
+  "next_data_needed": [
+    "official matchday lineup",
+    "later odds snapshots",
+    "official injury/suspension source if available"
+  ],
+  "safety": {
+    "observation_only": true,
+    "betting_recommendation": false,
+    "affects_v4": false,
+    "no_starting_xi": true,
+    "no_prediction": true,
+    "no_money_flow_judgment": true,
+    "has_native_opening": false,
+    "has_native_closing": false,
+    "movement_requires_timeline": true
+  }
+}

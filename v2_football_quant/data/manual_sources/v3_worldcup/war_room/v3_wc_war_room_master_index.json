@@ -1,0 +1,184 @@
+{
+  "pack_name": "V3_WC_WAR_ROOM_MASTER_INDEX_PACK",
+  "generated_at": "2026-06-04T15:19:49.350690+00:00",
+  "current_head": "63343e5",
+  "module_count": 10,
+  "modules": [
+    {
+      "module_name": "venue_stress_layer",
+      "status": "READY",
+      "source_files": [
+        "data/v3_worldcup/venue_stress/v3_worldcup_venue_stress_20260603.json"
+      ],
+      "source_files_exist": true,
+      "checker": "tools/check_v3_worldcup_venue_stress.py",
+      "observation_only": true,
+      "affects_v4": false,
+      "betting_recommendation": false,
+      "data_status": "16 venues; focus=5",
+      "next_action": "Keep as venue observation layer until matchday weather feeds are available."
+    },
+    {
+      "module_name": "perception_gap_dryrun",
+      "status": "DRYRUN_READY",
+      "source_files": [
+        "data/runtime/v3_worldcup/perception_gap_dryrun/v3_wc4d_match_level_perception_gap_dryrun_20260603.csv",
+        "data/runtime/status/check_v3_worldcup_match_level_perception_gap_dryrun_20260603.json"
+      ],
+      "source_files_exist": true,
+      "checker": "tools/check_v3_worldcup_match_level_perception_gap_dryrun.py",
+      "observation_only": true,
+      "affects_v4": false,
+      "betting_recommendation": false,
+      "data_status": "sample_count=5",
+      "next_action": "Refresh only when new observation inputs are authorized."
+    },
+    {
+      "module_name": "tactical_profile_layer",
+      "status": "READY",
+      "source_files": [
+        "data/v3_worldcup/tactical_profile/v3_worldcup_tactical_profile_layer_20260604.json"
+      ],
+      "source_files_exist": true,
+      "checker": "tools/check_v3_worldcup_tactical_profile_layer.py",
+      "observation_only": true,
+      "affects_v4": false,
+      "betting_recommendation": false,
+      "data_status": "profiles=48; formation_samples=72",
+      "next_action": "Use as historical formation observation only."
+    },
+    {
+      "module_name": "closing_1x2_market_structure",
+      "status": "READY",
+      "source_files": [
+        "data/v3_worldcup/closing_1x2_market_structure/v3_worldcup_closing_1x2_market_structure_20260604.json"
+      ],
+      "source_files_exist": true,
+      "checker": "tools/check_v3_worldcup_closing_1x2_market_structure.py",
+      "observation_only": true,
+      "affects_v4": false,
+      "betting_recommendation": false,
+      "data_status": "matches=192; closing_1x2_complete=True",
+      "next_action": "Keep as historical closing structure baseline; no live movement conclusion."
+    },
+    {
+      "module_name": "odds_snapshot_timeline",
+      "status": "LIVE_SNAPSHOT_FOUNDATION_READY",
+      "source_files": [
+        "data/runtime/status/check_v3_worldcup_odds_snapshot_live_small_batch_20260604.json",
+        "data/runtime/status/check_v3_worldcup_odds_polling_cadence_20260604.json"
+      ],
+      "source_files_exist": true,
+      "checker": "tools/check_v3_worldcup_odds_polling_cadence.py",
+      "observation_only": true,
+      "affects_v4": false,
+      "betting_recommendation": false,
+      "data_status": "requested=72; fixtures_with_odds=1",
+      "next_action": "Continue manual snapshots only when authorized; timeline remains observation-only."
+    },
+    {
+      "module_name": "odds_observation_delta",
+      "status": "ELIGIBILITY_READY_NO_CONCLUSION",
+      "source_files": [
+        "data/runtime/status/check_v3_worldcup_odds_movement_eligibility_20260604.json"
+      ],
+      "source_files_exist": true,
+      "checker": "tools/check_v3_worldcup_odds_movement_eligibility.py",
+      "observation_only": true,
+      "affects_v4": false,
+      "betting_recommendation": false,
+      "data_status": "snapshots=3; changed_odds_count=0; eligibility_status=ELIGIBLE_MULTIPLE_SNAPSHOTS_NO_CHANGE",
+      "next_action": "Observe odds_observation_delta only after additional snapshots; no money-flow judgment."
+    },
+    {
+      "module_name": "final_26_squad_pack",
+      "status": "LOCKED",
+      "source_files": [
+        "data/manual_sources/v3_worldcup/squads/fifa_final_26/processed/v3_wc2026_final_26_pack_manifest.json"
+      ],
+      "source_files_exist": true,
+      "checker": "tools/check_v3_worldcup_final_26_pack_manifest.py",
+      "observation_only": true,
+      "affects_v4": false,
+      "betting_recommendation": false,
+      "data_status": "teams=48; players=1248",
+      "next_action": "Use canonical final 26 artifacts as locked roster source.",
+      "team_count": 48,
+      "total_players": 1248,
+      "coach_count": 48,
+      "position_distribution": {
+        "GK": 145,
+        "DF": 421,
+        "MF": 371,
+        "FW": 311
+      }
+    },
+    {
+      "module_name": "final_26_squad_profile",
+      "status": "READY",
+      "source_files": [
+        "data/manual_sources/v3_worldcup/squads/fifa_final_26/processed/v3_wc2026_final_26_squad_profile_observation.json"
+      ],
+      "source_files_exist": true,
+      "checker": "tools/check_v3_worldcup_final_26_squad_profile_observation.py",
+      "observation_only": true,
+      "affects_v4": false,
+      "betting_recommendation": false,
+      "data_status": "profile observation derived from final 26 canonical layer",
+      "next_action": "Expose roster profile summaries only."
+    },
+    {
+      "module_name": "wc10_war_room",
+      "status": "READY",
+      "source_files": [
+        "data/v3_worldcup/war_room/v3_worldcup_wc10_war_room_20260602.json"
+      ],
+      "source_files_exist": true,
+      "checker": "tools/check_v3_worldcup_wc10_war_room.py",
+      "observation_only": true,
+      "affects_v4": false,
+      "betting_recommendation": false,
+      "data_status": "final_26_nodes=True/True",
+      "next_action": "Use WC10 as current war room summary surface."
+    },
+    {
+      "module_name": "lineup_readiness_pending",
+      "status": "PENDING_OFFICIAL_LINEUP",
+      "source_files": [
+        "data/manual_sources/v3_worldcup/squads/fifa_final_26/processed/v3_wc2026_lineup_readiness_team_status.json"
+      ],
+      "source_files_exist": true,
+      "checker": "tools/check_v3_worldcup_lineup_readiness_schema.py",
+      "observation_only": true,
+      "affects_v4": false,
+      "betting_recommendation": false,
+      "data_status": "starting_xi_status=NOT_AVAILABLE; matchday_lineup_status=WAIT_OFFICIAL_LINEUP",
+      "next_action": "Wait for official matchday lineup source before any lineup readiness update."
+    }
+  ],
+  "global_safety": {
+    "observation_only": true,
+    "betting_recommendation": false,
+    "affects_v4": false,
+    "no_starting_xi": true,
+    "no_prediction": true
+  },
+  "wc10_summary": {
+    "source": "data/v3_worldcup/war_room/v3_worldcup_wc10_war_room_20260602.json",
+    "status": "WAR_ROOM_READY_WITH_WARN_ONLY",
+    "final_26_squad_observation_present": true,
+    "final_26_squad_profile_observation_present": true
+  },
+  "checker_status": {
+    "venue_stress_layer": "PASS",
+    "perception_gap_dryrun": "PASS",
+    "tactical_profile_layer": "PASS",
+    "closing_1x2_market_structure": "PASS",
+    "odds_snapshot_timeline": "PASS",
+    "odds_observation_delta": "PASS",
+    "final_26_squad_pack": "PASS",
+    "final_26_squad_profile": "PASS",
+    "wc10_war_room": "PASS",
+    "lineup_readiness_pending": "PASS"
+  }
+}
