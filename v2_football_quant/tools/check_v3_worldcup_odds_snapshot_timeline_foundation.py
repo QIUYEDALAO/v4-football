@@ -12,7 +12,7 @@ from typing import Any
 
 ROOT = Path(__file__).resolve().parents[1]
 RUNNER = ROOT / "tools/run_v3_worldcup_odds_snapshot_dryrun.py"
-OUT_DIR = ROOT / "data/runtime/v3_worldcup/odds_snapshot_dryrun/20260604"
+OUT_DIR = ROOT / "data/runtime/v3_worldcup/odds_snapshot_dryrun/checker_dryrun"
 QUOTA_OUT_DIR = ROOT / "data/runtime/v3_worldcup/odds_snapshot_dryrun/quota_guard_test"
 STATUS_OUT = ROOT / "data/runtime/status/check_v3_worldcup_odds_snapshot_timeline_foundation_20260604.json"
 

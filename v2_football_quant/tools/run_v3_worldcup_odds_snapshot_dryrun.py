@@ -11,6 +11,8 @@ from pathlib import Path
 from typing import Any
 
 ROOT = Path(__file__).resolve().parents[1]
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
 DEFAULT_FIXTURE_SOURCE = ROOT / "data/v3_wc2026/group_schedule.json"
 DEFAULT_OUT_DIR = ROOT / "data/runtime/v3_worldcup/odds_snapshot_dryrun/20260604"
 DEFAULT_FREE_PLAN_REQUEST_LIMIT = 80
@@ -302,6 +304,8 @@ def write_outputs(out_dir: Path, payload: dict[str, Any], records: list[dict[str
     out_dir.mkdir(parents=True, exist_ok=True)
     json_path = out_dir / "v3_worldcup_odds_snapshot_dryrun_20260604.json"
     csv_path = out_dir / "v3_worldcup_odds_snapshot_timeline_20260604.csv"
+    coverage_json_path = out_dir / "v3_worldcup_odds_snapshot_live_coverage_20260604.json"
+    coverage_md_path = out_dir / "V3_WC_MARKET_INTELLIGENCE_PACK_PHASE_2_LIVE_COVERAGE_20260604.md"
     payload = dict(payload)
     payload["records"] = records
     json_path.write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
@@ -310,7 +314,104 @@ def write_outputs(out_dir: Path, payload: dict[str, Any], records: list[dict[str
         writer = csv.DictWriter(f, fieldnames=fields, extrasaction="ignore")
         writer.writeheader()
         writer.writerows(records)
-    return {"json": str(json_path), "csv": str(csv_path)}
+    coverage = payload.get("coverage_report")
+    if isinstance(coverage, dict):
+        coverage_json_path.write_text(json.dumps(coverage, ensure_ascii=False, indent=2), encoding="utf-8")
+        lines = [
+            "# V3 WC Market Intelligence Pack Phase 2 Live Coverage",
+            "",
+            f"- fixture_count: {coverage.get('fixture_count')}",
+            f"- requested_count: {coverage.get('requested_count')}",
+            f"- successful_fixture_count: {coverage.get('successful_fixture_count')}",
+            f"- total_records: {coverage.get('total_records')}",
+            f"- bookmaker_count: {coverage.get('bookmaker_count')}",
+            f"- 1X2 coverage: {coverage.get('market_coverage', {}).get('MATCH_WINNER_1X2')}",
+            f"- Asian Handicap coverage: {coverage.get('market_coverage', {}).get('ASIAN_HANDICAP')}",
+            f"- Goals Over/Under coverage: {coverage.get('market_coverage', {}).get('GOALS_OVER_UNDER')}",
+            f"- BTTS coverage: {coverage.get('market_coverage', {}).get('BOTH_TEAMS_TO_SCORE')}",
+            f"- Double Chance coverage: {coverage.get('market_coverage', {}).get('DOUBLE_CHANCE')}",
+            f"- 1st Half Winner coverage: {coverage.get('market_coverage', {}).get('FIRST_HALF_WINNER')}",
+            f"- timestamp coverage: {coverage.get('timestamp_coverage')}",
+            f"- empty_odds_fixture_count: {coverage.get('empty_odds_fixture_count')}",
+            f"- api_error_count: {coverage.get('api_error_count')}",
+            f"- quota_guard_status: {coverage.get('quota_guard_status')}",
+            f"- warn_only: {coverage.get('warn_only')}",
+        ]
+        coverage_md_path.write_text("\n".join(lines) + "\n", encoding="utf-8")
+    return {
+        "json": str(json_path),
+        "csv": str(csv_path),
+        "coverage_json": str(coverage_json_path),
+        "coverage_md": str(coverage_md_path),
+    }
+
+
+def build_coverage_report(
+    *,
+    fixtures: list[dict[str, Any]],
+    selected: list[dict[str, Any]],
+    records: list[dict[str, Any]],
+    api_errors: list[dict[str, Any]],
+    quota_status: str,
+    quota_warning: str,
+) -> dict[str, Any]:
+    requested_ids = {_fixture_id(f) for f in selected}
+    successful_ids = {str(r.get("fixture_id") or "") for r in records if r.get("fixture_id")}
+    bookmaker_names = {str(r.get("bookmaker") or "") for r in records if r.get("bookmaker")}
+    market_coverage: dict[str, dict[str, Any]] = {}
+    for market in sorted(MARKET_ALIASES):
+        fixture_ids = {str(r.get("fixture_id") or "") for r in records if r.get("market_type") == market}
+        market_coverage[market] = {
+            "fixture_count": len(fixture_ids),
+            "record_count": sum(1 for r in records if r.get("market_type") == market),
+            "requested_fixture_pct": round((len(fixture_ids) / len(requested_ids) * 100), 2) if requested_ids else 0.0,
+        }
+    timestamp_rows = [
+        r for r in records
+        if r.get("snapshot_time") and r.get("api_update_time")
+    ]
+    odds_missing_count = sum(1 for r in records if r.get("odds") in {"", None})
+    line_missing_count = sum(
+        1 for r in records
+        if r.get("market_type") in {"ASIAN_HANDICAP", "GOALS_OVER_UNDER"} and r.get("line") in {"", None}
+    )
+    unknown_market_count = sum(1 for r in records if r.get("market_type") == "OTHER_MARKET")
+    warnings: list[str] = []
+    if odds_missing_count:
+        warnings.append(f"WARN_ONLY_ODDS_MISSING_COUNT:{odds_missing_count}")
+    if line_missing_count:
+        warnings.append(f"WARN_ONLY_LINE_MISSING_COUNT:{line_missing_count}")
+    if unknown_market_count:
+        warnings.append(f"WARN_ONLY_UNKNOWN_MARKET_RAW_PRESERVED:{unknown_market_count}")
+    empty_ids = sorted(requested_ids - successful_ids)
+    return {
+        "generated_at": _now(),
+        "fixture_count": len(fixtures),
+        "requested_count": len(selected),
+        "successful_fixture_count": len(successful_ids),
+        "successful_fixture_ids": sorted(successful_ids),
+        "total_records": len(records),
+        "bookmaker_count": len(bookmaker_names),
+        "bookmakers": sorted(bookmaker_names),
+        "market_coverage": market_coverage,
+        "timestamp_coverage": {
+            "record_count": len(timestamp_rows),
+            "total_records": len(records),
+            "record_pct": round((len(timestamp_rows) / len(records) * 100), 2) if records else 0.0,
+        },
+        "empty_odds_fixture_count": len(empty_ids),
+        "empty_odds_fixture_ids": empty_ids,
+        "api_error_count": len(api_errors),
+        "quota_guard_status": "PASS" if not quota_warning and quota_status != "QUOTA_GUARD_STOP" else quota_status,
+        "quota_warning": quota_warning,
+        "warn_only": warnings,
+        "observation_only": True,
+        "betting_recommendation": False,
+        "affects_v4": False,
+        "has_native_opening": False,
+        "has_native_closing": False,
+        "movement_requires_timeline": True,
+    }
 
 
 def parse_fixture_ids(values: list[str]) -> list[str]:
@@ -362,6 +463,14 @@ def main() -> int:
             records.extend(records_from_payload(payload, fixture, snapshot_time, dry_run=dry_run))
 
     normalized_market_types = sorted({str(r["market_type"]) for r in records})
+    coverage_report = build_coverage_report(
+        fixtures=fixtures,
+        selected=selected,
+        records=records,
+        api_errors=api_errors,
+        quota_status=status,
+        quota_warning=quota_warning,
+    )
     result = {
         "schema_version": "v3_worldcup_odds_snapshot_timeline_foundation.v1",
         "generated_at": snapshot_time,
@@ -394,6 +503,7 @@ def main() -> int:
             "secret_printed": False,
         },
         "api_errors": api_errors,
+        "coverage_report": coverage_report,
     }
     paths = write_outputs(Path(args.out_dir), result, records)
     result["outputs"] = paths
