@@ -1,0 +1,40 @@
+{
+  "schema_version": "v3_worldcup_odds_polling_cadence.v1",
+  "api_provider": "api-football",
+  "max_requests_per_run": 80,
+  "default_limit": 72,
+  "fixture_batch_size": 24,
+  "quota_budget_per_day": 7500,
+  "recommended_cadence": {
+    "mode": "manual_template_only",
+    "launchd_enabled": false,
+    "production_schedule_enabled": false,
+    "note": "Phase 3 defines cadence foundation only; no scheduler is activated."
+  },
+  "pre_tournament_cadence": {
+    "recommended_interval_hours": 24,
+    "max_runs_per_day": 2,
+    "request_budget_per_day": 144
+  },
+  "matchweek_cadence": {
+    "recommended_interval_hours": 6,
+    "max_runs_per_day": 4,
+    "request_budget_per_day": 288
+  },
+  "matchday_cadence": {
+    "recommended_interval_hours": 2,
+    "max_runs_per_day": 8,
+    "request_budget_per_day": 576
+  },
+  "observation_only": true,
+  "betting_recommendation": false,
+  "affects_v4": false,
+  "has_native_opening": false,
+  "has_native_closing": false,
+  "movement_requires_timeline": true,
+  "disabled_claims": [
+    "steam",
+    "drift",
+    "fund_flow"
+  ]
+}
