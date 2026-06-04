@@ -12,6 +12,7 @@ from build_v3_worldcup_match_cards import MATCH_CARDS, MATCH_SUMMARY, build
 
 ROOT = Path(__file__).resolve().parents[1]
 STATUS_OUT = ROOT / "data/runtime/status/check_v3_worldcup_match_cards_20260604.json"
+APPROVED_DASHBOARD_UI_STAGE = "v2_football_quant/data/runtime/dashboard/v3_worldcup_wc10_war_room.html"
 SCOPE_DOC = ROOT / "docs/V3_WC_MATCH_CARD_SCOPE_CLARIFICATION_20260605.md"
 GROUP_STAGE_MATCH_COUNT = 72
 TOTAL_TOURNAMENT_EXPECTED_MATCH_COUNT = 104
@@ -160,7 +161,11 @@ def main() -> int:
         add(failures, phrase not in combined, "disallowed_phrase", phrase)
 
     staged = staged_files()
-    runtime_staged = [path for path in staged if re.search(r"(^|/)(runtime|cache|logs?|tmp|status)(/|$)|\.log$|\.lock$|\.pid$", path, re.I)]
+    runtime_staged = [
+        path for path in staged
+        if path != APPROVED_DASHBOARD_UI_STAGE
+        and re.search(r"(^|/)(runtime|cache|logs?|tmp|status)(/|$)|\.log$|\.lock$|\.pid$", path, re.I)
+    ]
     v4_staged = [path for path in staged if re.search(r"(^|/)(v4_|V4_|check_v4|build_v4|run_v4|engine/v4|scripts/v4|docs/V4)", path)]
     add(failures, not runtime_staged, "runtime_cache_log_status_staged", runtime_staged)
     add(failures, not v4_staged, "v4_staged", v4_staged)

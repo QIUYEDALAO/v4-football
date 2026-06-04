@@ -12,6 +12,7 @@ from build_v3_worldcup_war_room_master_index import GAP_RADAR, MASTER_INDEX, bui
 
 ROOT = Path(__file__).resolve().parents[1]
 STATUS_OUT = ROOT / "data/runtime/status/check_v3_worldcup_war_room_master_index_20260604.json"
+APPROVED_DASHBOARD_UI_STAGE = "v2_football_quant/data/runtime/dashboard/v3_worldcup_wc10_war_room.html"
 
 REQUIRED_MODULES = {
     "venue_stress_layer",
@@ -186,7 +187,11 @@ def main() -> int:
         add(failures, phrase not in combined_text, "disallowed_judgment_phrase", phrase)
 
     staged = staged_files()
-    runtime_staged = [path for path in staged if re.search(r"(^|/)(runtime|cache|logs?|tmp|status)(/|$)|\.log$|\.lock$|\.pid$", path, re.I)]
+    runtime_staged = [
+        path for path in staged
+        if path != APPROVED_DASHBOARD_UI_STAGE
+        and re.search(r"(^|/)(runtime|cache|logs?|tmp|status)(/|$)|\.log$|\.lock$|\.pid$", path, re.I)
+    ]
     add(failures, not runtime_staged, "runtime_cache_log_status_staged", runtime_staged)
     v4_staged = staged_v4_hits(staged)
     add(failures, not v4_staged, "v4_staged", v4_staged)

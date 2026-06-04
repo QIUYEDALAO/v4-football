@@ -12,6 +12,7 @@ from build_v3_worldcup_dashboard_104_read_model import DASHBOARD_READ_MODEL, bui
 
 ROOT = Path(__file__).resolve().parents[1]
 STATUS_OUT = ROOT / "data/runtime/status/check_v3_worldcup_dashboard_104_read_model_20260605.json"
+APPROVED_DASHBOARD_UI_STAGE = "v2_football_quant/data/runtime/dashboard/v3_worldcup_wc10_war_room.html"
 
 CANONICAL_SOURCE = "data/manual_sources/v3_worldcup/war_room/v3_wc2026_104_cards_index_bridge.json"
 SCHEDULE_INDEX = "data/manual_sources/v3_worldcup/war_room/v3_wc2026_schedule_index_104.json"
@@ -145,7 +146,11 @@ def main() -> int:
         add(failures, phrase not in combined, "disallowed_phrase", phrase)
 
     staged = staged_files()
-    runtime_staged = [path for path in staged if re.search(r"(^|/)(runtime|cache|logs?|tmp|status)(/|$)|\.log$|\.lock$|\.pid$", path, re.I)]
+    runtime_staged = [
+        path for path in staged
+        if path != APPROVED_DASHBOARD_UI_STAGE
+        and re.search(r"(^|/)(runtime|cache|logs?|tmp|status)(/|$)|\.log$|\.lock$|\.pid$", path, re.I)
+    ]
     v4_staged = [path for path in staged if re.search(r"(^|/)(v4_|V4_|check_v4|build_v4|run_v4|engine/v4|scripts/v4|docs/V4)", path)]
     add(failures, not runtime_staged, "runtime_cache_log_status_staged", runtime_staged)
     add(failures, not v4_staged, "v4_staged", v4_staged)

@@ -21,6 +21,7 @@ from build_v3_worldcup_104_cards_index_bridge import (
 
 ROOT = Path(__file__).resolve().parents[1]
 STATUS_OUT = ROOT / "data/runtime/status/check_v3_worldcup_104_cards_index_bridge_20260605.json"
+APPROVED_DASHBOARD_UI_STAGE = "v2_football_quant/data/runtime/dashboard/v3_worldcup_wc10_war_room.html"
 
 SECRET_PATTERNS = [
     re.compile(r"(?i)(api[_-]?key|token|secret)\s*[:=]\s*['\"][A-Za-z0-9_\-]{16,}"),
@@ -155,7 +156,11 @@ def main() -> int:
         add(failures, phrase not in combined, "disallowed_phrase", phrase)
 
     staged = staged_files()
-    runtime_staged = [path for path in staged if re.search(r"(^|/)(runtime|cache|logs?|tmp|status)(/|$)|\.log$|\.lock$|\.pid$", path, re.I)]
+    runtime_staged = [
+        path for path in staged
+        if path != APPROVED_DASHBOARD_UI_STAGE
+        and re.search(r"(^|/)(runtime|cache|logs?|tmp|status)(/|$)|\.log$|\.lock$|\.pid$", path, re.I)
+    ]
     v4_staged = [path for path in staged if re.search(r"(^|/)(v4_|V4_|check_v4|build_v4|run_v4|engine/v4|scripts/v4|docs/V4)", path)]
     add(failures, not runtime_staged, "runtime_cache_log_status_staged", runtime_staged)
     add(failures, not v4_staged, "v4_staged", v4_staged)

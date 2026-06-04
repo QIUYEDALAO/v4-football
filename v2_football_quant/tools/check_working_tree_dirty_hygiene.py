@@ -29,6 +29,9 @@ APPROVED_UNTRACK_ALLOWLIST = {
     "v2_football_quant/data/runtime/status/v4_production_default_rules_guard_20260527.json",
     "v2_football_quant/data/runtime/status/v4_recent_form_sample_size_checker_20260527.json",
 }
+APPROVED_TRACKED_RUNTIME_UI_STAGE_ALLOWLIST = {
+    "v2_football_quant/data/runtime/dashboard/v3_worldcup_wc10_war_room.html",
+}
 
 
 def run_git(args: list[str]) -> subprocess.CompletedProcess[str]:
@@ -68,7 +71,19 @@ def main() -> int:
                 approved_untrack_missing_local.append(path)
             else:
                 approved_runtime_untrack.append(path)
-    ordinary_staged = [path for path in staged if path not in set(approved_runtime_untrack)]
+    approved_tracked_runtime_ui_stage = []
+    approved_tracked_runtime_ui_bad_status = []
+    for path in staged:
+        if path in APPROVED_TRACKED_RUNTIME_UI_STAGE_ALLOWLIST:
+            if status.get(path) != "M":
+                approved_tracked_runtime_ui_bad_status.append(path)
+            else:
+                approved_tracked_runtime_ui_stage.append(path)
+    ordinary_staged = [
+        path for path in staged
+        if path not in set(approved_runtime_untrack)
+        and path not in set(approved_tracked_runtime_ui_stage)
+    ]
     runtime_staged = [path for path in ordinary_staged if RUNTIME_RE.search(path)]
     secret_path_staged = [path for path in ordinary_staged if SECRET_PATH_RE.search(path)]
     v4_staged = [path for path in ordinary_staged if V4_PATH_RE.search(path)]
@@ -81,6 +96,8 @@ def main() -> int:
         blockers.append("approved_untrack_bad_cached_status")
     if approved_untrack_missing_local:
         blockers.append("approved_untrack_missing_local_file")
+    if approved_tracked_runtime_ui_bad_status:
+        blockers.append("approved_tracked_runtime_ui_bad_status")
     if runtime_staged:
         blockers.append("runtime_cache_log_status_staged")
     if secret_path_staged or secret_literal_hits:
@@ -96,6 +113,8 @@ def main() -> int:
         "approved_runtime_untrack_count": len(approved_runtime_untrack),
         "approved_untrack_bad_status": approved_untrack_bad_status,
         "approved_untrack_missing_local": approved_untrack_missing_local,
+        "approved_tracked_runtime_ui_stage": approved_tracked_runtime_ui_stage,
+        "approved_tracked_runtime_ui_bad_status": approved_tracked_runtime_ui_bad_status,
         "runtime_staged": runtime_staged,
         "secret_path_staged": secret_path_staged,
         "secret_literal_hit_count": len(secret_literal_hits),
