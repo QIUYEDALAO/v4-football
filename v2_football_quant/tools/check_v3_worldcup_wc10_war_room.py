@@ -12,6 +12,7 @@ ROOT = Path(__file__).resolve().parents[1]
 OUT = ROOT / "data/runtime/status/check_v3_worldcup_wc10_war_room_20260602.json"
 BUILDER = ROOT / "tools/build_v3_worldcup_wc10_war_room.py"
 TACTICAL_BUILDER = ROOT / "tools/build_v3_worldcup_tactical_profile_layer.py"
+CLOSING_1X2_BUILDER = ROOT / "tools/build_v3_worldcup_closing_1x2_market_structure.py"
 WAR = ROOT / "data/v3_worldcup/war_room/v3_worldcup_wc10_war_room_20260602.json"
 HTML = ROOT / "data/runtime/dashboard/v3_worldcup_wc10_war_room.html"
 
@@ -35,6 +36,8 @@ def main() -> int:
     checks: list[dict[str, Any]] = []
     tactical_run = subprocess.run([sys.executable, str(TACTICAL_BUILDER)], cwd=str(ROOT), capture_output=True, text=True, check=False)
     add(checks, "tactical_builder_runs", tactical_run.returncode == 0, tactical_run.stderr or tactical_run.stdout[-500:])
+    closing_run = subprocess.run([sys.executable, str(CLOSING_1X2_BUILDER)], cwd=str(ROOT), capture_output=True, text=True, check=False)
+    add(checks, "closing_1x2_builder_runs", closing_run.returncode == 0, closing_run.stderr or closing_run.stdout[-500:])
     run = subprocess.run([sys.executable, str(BUILDER)], cwd=str(ROOT), capture_output=True, text=True, check=False)
     add(checks, "builder_runs", run.returncode == 0, run.stderr or run.stdout[-500:])
     add(checks, "war_room_json_exists", WAR.exists(), str(WAR))
@@ -131,6 +134,14 @@ def main() -> int:
     add(checks, "tactical_profile_unique_formations_14", int(payload.get("tactical_profile_unique_formations_count") or 0) == 14, payload.get("tactical_profile_unique_formations_count"))
     add(checks, "tactical_profile_no_scoring", tactical_guard.get("observation_only") is True and tactical_guard.get("no_scoring") is True and tactical_guard.get("scoring_changed") is False, tactical_guard)
     add(checks, "tactical_profile_no_betting", tactical_guard.get("betting_recommendation") is False, tactical_guard)
+    closing_guard = payload.get("closing_1x2_safety_guard") if isinstance(payload.get("closing_1x2_safety_guard"), dict) else {}
+    add(checks, "closing_1x2_ready", payload.get("closing_1x2_status") == "CLOSING_1X2_MARKET_STRUCTURE_READY", payload.get("closing_1x2_status"))
+    add(checks, "closing_1x2_matches_192", int(payload.get("closing_1x2_match_count") or 0) == 192, payload.get("closing_1x2_match_count"))
+    add(checks, "closing_1x2_complete", payload.get("closing_1x2_complete") is True, payload.get("closing_1x2_complete"))
+    add(checks, "closing_1x2_favorite_failed_42_2", round(float(payload.get("closing_1x2_favorite_failed_rate") or 0), 1) == 42.2, payload.get("closing_1x2_favorite_failed_rate"))
+    add(checks, "closing_1x2_disabled_tags", set(payload.get("closing_1x2_disabled_tags") or []) == {"FAVORITE_STEAM", "FAVORITE_DRIFT", "LATE_SHARP_MOVE", "AH_LINE_MOVEMENT", "OU_LINE_MOVEMENT", "FUND_FLOW_SIGNAL"}, payload.get("closing_1x2_disabled_tags"))
+    add(checks, "closing_1x2_no_steam_drift", closing_guard.get("no_opening_odds") is True and closing_guard.get("no_steam_drift") is True and closing_guard.get("no_fund_flow") is True, closing_guard)
+    add(checks, "closing_1x2_no_betting_no_v4", closing_guard.get("betting_recommendation") is False and closing_guard.get("affects_v4_grade") is False, closing_guard)
     hints = [str(x.get("action_hint") or "") for x in wl if isinstance(x, dict)]
     add(checks, "action_hint_whitelist", all(h in ALLOW_HINTS for h in hints), hints[:12])
     add(checks, "action_hint_no_bad", all(h not in BAD_HINTS for h in hints), hints[:12])

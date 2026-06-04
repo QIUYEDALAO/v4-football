@@ -27,6 +27,7 @@ VENUE_STRESS = ROOT / "data/v3_worldcup/venue_stress/v3_worldcup_venue_stress_20
 MATCH_LEVEL_PG_DRYRUN_CSV = ROOT / "data/runtime/v3_worldcup/perception_gap_dryrun/v3_wc4d_match_level_perception_gap_dryrun_20260603.csv"
 MATCH_LEVEL_PG_DRYRUN_STATUS = ROOT / "data/runtime/v3_worldcup/perception_gap_dryrun/v3_wc4d_match_level_perception_gap_dryrun_status_20260603.json"
 TACTICAL_PROFILE_LAYER = ROOT / "data/v3_worldcup/tactical_profile/v3_worldcup_tactical_profile_layer_20260604.json"
+CLOSING_1X2_LAYER = ROOT / "data/v3_worldcup/closing_1x2_market_structure/v3_worldcup_closing_1x2_market_structure_20260604.json"
 
 CST = timezone(timedelta(hours=8))
 
@@ -369,6 +370,56 @@ def _tactical_profile_view(payload: dict[str, Any]) -> dict[str, Any]:
     }
 
 
+def _closing_1x2_view(payload: dict[str, Any]) -> dict[str, Any]:
+    if not payload:
+        return {
+            "closing_1x2_status": "CLOSING_1X2_MISSING_WARN_ONLY",
+            "closing_1x2_match_count": 0,
+            "closing_1x2_complete": False,
+            "closing_1x2_favorite_failed_rate": 0,
+            "closing_1x2_favorite_failed_rate_by_band": {},
+            "closing_1x2_allowed_tags": [],
+            "closing_1x2_disabled_tags": [],
+            "closing_1x2_focus_records": [],
+            "closing_1x2_safety_guard": {
+                "observation_only": True,
+                "betting_recommendation": False,
+                "affects_v4_grade": False,
+                "scoring_changed": False,
+                "no_opening_odds": True,
+                "no_steam_drift": True,
+            },
+        }
+    records = payload.get("records") if isinstance(payload.get("records"), list) else []
+    guard = payload.get("safety_guard") if isinstance(payload.get("safety_guard"), dict) else {}
+    focus = sorted(
+        [r for r in records if isinstance(r, dict)],
+        key=lambda r: (float(r.get("bookmaker_spread") or 0), float(r.get("max_avg_gap") or 0)),
+        reverse=True,
+    )[:8]
+    return {
+        "closing_1x2_status": payload.get("status") or "CLOSING_1X2_MARKET_STRUCTURE_READY",
+        "closing_1x2_match_count": int(payload.get("total_matches") or len(records)),
+        "closing_1x2_by_year": payload.get("by_year") if isinstance(payload.get("by_year"), dict) else {},
+        "closing_1x2_complete": payload.get("closing_1x2_complete") is True,
+        "closing_1x2_favorite_failed_rate": float(payload.get("favorite_failed_rate") or 0),
+        "closing_1x2_favorite_failed_rate_by_band": payload.get("favorite_failed_rate_by_band") if isinstance(payload.get("favorite_failed_rate_by_band"), dict) else {},
+        "closing_1x2_allowed_tags": payload.get("allowed_observation_tags") if isinstance(payload.get("allowed_observation_tags"), list) else [],
+        "closing_1x2_disabled_tags": payload.get("disabled_tags") if isinstance(payload.get("disabled_tags"), list) else [],
+        "closing_1x2_focus_records": focus,
+        "closing_1x2_safety_guard": {
+            "observation_only": guard.get("observation_only") is True,
+            "betting_recommendation": False,
+            "affects_v4_grade": False,
+            "scoring_changed": False,
+            "no_opening_odds": guard.get("no_opening_odds", True),
+            "no_steam_drift": guard.get("no_steam_drift", True),
+            "no_fund_flow": guard.get("no_fund_flow", True),
+            "no_v4_changes": guard.get("no_v4_changes", True),
+        },
+    }
+
+
 def main() -> int:
     rosters = _load(ROSTERS)
     profiles = _load(PROFILES)
@@ -383,6 +434,7 @@ def main() -> int:
     perception_gap_blueprint = _load(PERCEPTION_GAP_BLUEPRINT)
     venue_stress = _load(VENUE_STRESS)
     tactical_profile = _load(TACTICAL_PROFILE_LAYER)
+    closing_1x2 = _load(CLOSING_1X2_LAYER)
 
     meta = rosters.get("meta") or {}
     teams_total = _safe_int(meta.get("total_teams") or 46)
@@ -487,6 +539,11 @@ def main() -> int:
         warn = "WC4G_TACTICAL_PROFILE_MISSING_WARN_ONLY"
         if warn not in warn_only_items:
             warn_only_items.append(warn)
+    closing_1x2_view = _closing_1x2_view(closing_1x2)
+    if closing_1x2_view["closing_1x2_status"] != "CLOSING_1X2_MARKET_STRUCTURE_READY":
+        warn = "WC4H_CLOSING_1X2_MISSING_WARN_ONLY"
+        if warn not in warn_only_items:
+            warn_only_items.append(warn)
 
     now = datetime.now(CST)
     payload = {
@@ -533,6 +590,7 @@ def main() -> int:
         **venue_stress_view,
         **match_level_pg_dryrun_view,
         **tactical_profile_view,
+        **closing_1x2_view,
         "perception_gap_watchlist": watch_list,
         "perception_gap_watchlist_count": len(watch_list),
         "undervalued_candidates": undervalued,
