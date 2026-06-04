@@ -12,6 +12,9 @@ from build_v3_worldcup_match_cards import MATCH_CARDS, MATCH_SUMMARY, build
 
 ROOT = Path(__file__).resolve().parents[1]
 STATUS_OUT = ROOT / "data/runtime/status/check_v3_worldcup_match_cards_20260604.json"
+SCOPE_DOC = ROOT / "docs/V3_WC_MATCH_CARD_SCOPE_CLARIFICATION_20260605.md"
+GROUP_STAGE_MATCH_COUNT = 72
+TOTAL_TOURNAMENT_EXPECTED_MATCH_COUNT = 104
 
 SECRET_PATTERNS = [
     re.compile(r"(?i)(api[_-]?key|token|secret)\s*[:=]\s*['\"][A-Za-z0-9_\-]{16,}"),
@@ -97,9 +100,20 @@ def main() -> int:
     add(failures, MATCH_CARDS.exists(), "match_cards_missing", MATCH_CARDS)
     add(failures, MATCH_SUMMARY.exists(), "match_summary_missing", MATCH_SUMMARY)
     add(failures, isinstance(cards, list) and len(cards) > 0, "match_count_not_positive", len(cards) if isinstance(cards, list) else "not_list")
+    add(failures, len(cards) == GROUP_STAGE_MATCH_COUNT, "match_cards_scope_not_group_stage_72", len(cards))
     add(failures, summary.get("match_count") == len(cards), "summary_match_count_mismatch", summary.get("match_count"))
     add(failures, summary.get("teams_covered") == 48, "teams_covered_unexpected", summary.get("teams_covered"))
     add(failures, summary.get("cards_with_final_26") == len(cards), "cards_with_final_26_unexpected", summary.get("cards_with_final_26"))
+    add(failures, SCOPE_DOC.exists(), "scope_doc_missing", SCOPE_DOC.relative_to(ROOT))
+    scope_doc = SCOPE_DOC.read_text(encoding="utf-8") if SCOPE_DOC.exists() else ""
+    add(failures, "group stage only" in scope_doc.lower(), "scope_doc_group_stage_only_missing")
+    add(failures, str(GROUP_STAGE_MATCH_COUNT) in scope_doc, "scope_doc_group_stage_count_missing", GROUP_STAGE_MATCH_COUNT)
+    add(failures, str(TOTAL_TOURNAMENT_EXPECTED_MATCH_COUNT) in scope_doc, "scope_doc_total_expected_missing", TOTAL_TOURNAMENT_EXPECTED_MATCH_COUNT)
+    add(
+        failures,
+        "not the complete 2026 world cup match set" in scope_doc.lower(),
+        "scope_doc_full_tournament_warning_missing",
+    )
 
     for card in cards:
         match_id = card.get("match_id")
@@ -165,6 +179,10 @@ def main() -> int:
         "generated_at": datetime.now().isoformat(),
         "conclusion": "PASS" if not failures else "BLOCKER",
         "failures": failures,
+        "scope": "GROUP_STAGE_ONLY",
+        "current_scope_match_count": GROUP_STAGE_MATCH_COUNT,
+        "total_tournament_expected_match_count": TOTAL_TOURNAMENT_EXPECTED_MATCH_COUNT,
+        "full_tournament_complete": False,
         "match_count": len(cards),
         "teams_covered": summary.get("teams_covered"),
         "cards_with_final_26": summary.get("cards_with_final_26"),

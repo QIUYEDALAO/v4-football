@@ -32,9 +32,14 @@ evaluation, match outcome logic, or trading signal is added.
 
 ## Current Data Limits
 
-The current 2026 fixture source has 72 group-stage matches and does not include
-venue mapping. Therefore each match card keeps `venue=VENUE_NOT_MAPPED` and a
-data gap named `match_venue_not_mapped_to_fixture`.
+The current 2026 fixture source has 72 group-stage matches only. This is not the
+complete 2026 World Cup match set; the full tournament is expected to contain
+104 matches. The remaining knockout-stage teams and pairings are not generated
+or inferred by this pack.
+
+The current source does not include venue mapping. Therefore each match card
+keeps `venue=VENUE_NOT_MAPPED` and a data gap named
+`match_venue_not_mapped_to_fixture`.
 
 Odds snapshots exist globally, but current IDs are not mapped to these match
 cards, so per-card odds fields stay status-only.

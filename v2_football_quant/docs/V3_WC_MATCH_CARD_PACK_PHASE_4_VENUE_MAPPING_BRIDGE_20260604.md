@@ -10,6 +10,11 @@ per-match venue source exists. It does not call live APIs, use network sources,
 enable automation, modify V4, create lineup claims, evaluate injuries, or create
 outcome logic.
 
+Current match cards cover the 72 group-stage fixtures only. They are not the
+complete 2026 World Cup match set; the full tournament is expected to contain
+104 matches. This phase does not generate knockout teams, infer knockout
+pairings, or guess venues.
+
 ## Outputs
 
 - `data/manual_sources/v3_worldcup/war_room/v3_wc2026_venue_mapping_bridge.json`
