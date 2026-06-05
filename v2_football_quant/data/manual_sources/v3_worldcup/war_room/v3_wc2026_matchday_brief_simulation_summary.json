@@ -4,11 +4,12 @@
   "simulation": "data/manual_sources/v3_worldcup/war_room/v3_wc2026_matchday_brief_simulation.json",
   "brief_markdown": "data/manual_sources/v3_worldcup/war_room/V3_WC2026_MATCHDAY_BRIEF_SIMULATION.md",
   "sample_match": "Algeria vs Austria",
-  "timepoint_count": 4,
+  "timepoint_count": 5,
   "timepoints": [
     "T-24h",
     "T-6h",
     "T-90m",
+    "T-60m",
     "T-30m"
   ],
   "live_api_called": false,

@@ -7,6 +7,7 @@
     "T-24h",
     "T-6h",
     "T-90m",
+    "T-60m",
     "T-30m"
   ],
   "sample_match": "Algeria vs Austria",
@@ -108,6 +109,22 @@
         "draw": 0.02,
         "away": 0.04
       }
+    },
+    {
+      "timepoint": "T-60m",
+      "snapshot_role": "lineup_wait_event_check",
+      "first_seen_odds": {
+        "home": 2.42,
+        "draw": 3.18,
+        "away": 2.96
+      },
+      "last_pre_kickoff_odds": null,
+      "odds_observation_delta": {
+        "home": -0.04,
+        "draw": 0.02,
+        "away": 0.04
+      },
+      "lineup_status": "WAIT_OFFICIAL_LINEUP"
     },
     {
       "timepoint": "T-30m",

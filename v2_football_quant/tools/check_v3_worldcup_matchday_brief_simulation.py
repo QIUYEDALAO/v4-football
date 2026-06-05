@@ -81,8 +81,8 @@ def main() -> int:
     add(failures, sim.get("simulation_mode") == "LOCAL_MOCK_ODDS_ONLY", "simulation_mode_unexpected", sim.get("simulation_mode"))
     add(failures, sim.get("live_api_called") is False, "live_api_called_true")
     add(failures, sim.get("timepoints") == TIMEPOINTS, "timepoints_unexpected", sim.get("timepoints"))
-    add(failures, len(sim.get("mock_odds_timeline") or []) == 4, "mock_timeline_count_unexpected", len(sim.get("mock_odds_timeline") or []))
-    add(failures, summary.get("timepoint_count") == 4, "summary_timepoint_count_unexpected", summary.get("timepoint_count"))
+    add(failures, len(sim.get("mock_odds_timeline") or []) == 5, "mock_timeline_count_unexpected", len(sim.get("mock_odds_timeline") or []))
+    add(failures, summary.get("timepoint_count") == 5, "summary_timepoint_count_unexpected", summary.get("timepoint_count"))
     card = sim.get("brief_card") if isinstance(sim.get("brief_card"), dict) else {}
     add(failures, card.get("card_kind") == "GROUP_STAGE_MATCH", "sample_not_group_stage", card.get("card_kind"))
     add(failures, card.get("lineup_status") == "WAIT_OFFICIAL_LINEUP", "lineup_status_unexpected", card.get("lineup_status"))
@@ -99,6 +99,8 @@ def main() -> int:
         add(failures, "first_seen_odds" in row, "mock_first_seen_missing", row)
         add(failures, "last_pre_kickoff_odds" in row, "mock_last_pre_missing", row)
         add(failures, "odds_observation_delta" in row, "mock_delta_missing", row)
+        if row.get("timepoint") == "T-60m":
+            add(failures, row.get("lineup_status") == "WAIT_OFFICIAL_LINEUP", "t60_lineup_wait_missing", row)
 
     for key, expected in {
         "observation_only": True,

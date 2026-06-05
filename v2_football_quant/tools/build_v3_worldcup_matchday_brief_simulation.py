@@ -15,7 +15,7 @@ OUT_JSON = WAR_ROOM / "v3_wc2026_matchday_brief_simulation.json"
 OUT_MD = WAR_ROOM / "V3_WC2026_MATCHDAY_BRIEF_SIMULATION.md"
 OUT_SUMMARY = WAR_ROOM / "v3_wc2026_matchday_brief_simulation_summary.json"
 
-TIMEPOINTS = ["T-24h", "T-6h", "T-90m", "T-30m"]
+TIMEPOINTS = ["T-24h", "T-6h", "T-90m", "T-60m", "T-30m"]
 
 
 def load_json(path: Path, default: Any) -> Any:
@@ -54,6 +54,14 @@ def mock_odds_timeline() -> list[dict[str, Any]]:
             "first_seen_odds": {"home": 2.42, "draw": 3.18, "away": 2.96},
             "last_pre_kickoff_odds": None,
             "odds_observation_delta": {"home": -0.04, "draw": 0.02, "away": 0.04},
+        },
+        {
+            "timepoint": "T-60m",
+            "snapshot_role": "lineup_wait_event_check",
+            "first_seen_odds": {"home": 2.42, "draw": 3.18, "away": 2.96},
+            "last_pre_kickoff_odds": None,
+            "odds_observation_delta": {"home": -0.04, "draw": 0.02, "away": 0.04},
+            "lineup_status": "WAIT_OFFICIAL_LINEUP",
         },
         {
             "timepoint": "T-30m",
