@@ -1,6 +1,6 @@
 {
   "pack_name": "V3_WC_WAR_ROOM_MASTER_INDEX_PACK",
-  "generated_at": "2026-06-04T19:23:12.993267+00:00",
+  "generated_at": "2026-06-05T05:22:28.794368+00:00",
   "source_master_index": "data/manual_sources/v3_worldcup/war_room/v3_wc_war_room_master_index.json",
   "missing_starting_xi": true,
   "missing_official_matchday_lineup": true,
@@ -51,7 +51,7 @@
     "reason_distribution": {
       "KNOCKOUT_STRUCTURAL_PLACEHOLDER_WAIT_OFFICIAL_FIXTURE": 32,
       "KNOCKOUT_STRUCTURAL_PLACEHOLDER_WAIT_OFFICIAL_TEAMS": 32,
-      "VENUE_SOURCE_REQUIRED: no local per-match venue source found": 72
+      "VENUE_SOURCE_REQUIRED: fixture_sources_do_not_provide_match_venue": 72
     },
     "venue_source_required": 72,
     "official_lineup_required": 72,

@@ -109,7 +109,9 @@ def main() -> int:
     add(failures, payload.get("full_tournament_match_data_complete") is False, "full_tournament_complete_unexpected", payload.get("full_tournament_match_data_complete"))
 
     group_view = payload.get("group_stage_view") if isinstance(payload.get("group_stage_view"), dict) else {}
-    add(failures, group_view.get("source") == GROUP_VIEW, "group_view_source_unexpected", group_view.get("source"))
+    add(failures, group_view.get("source") == CANONICAL_SOURCE, "group_view_source_unexpected", group_view.get("source"))
+    add(failures, group_view.get("source_filter") == "card_kind=GROUP_STAGE_MATCH", "group_view_source_filter_unexpected", group_view.get("source_filter"))
+    add(failures, group_view.get("legacy_match_cards_source") == GROUP_VIEW, "group_view_legacy_source_unexpected", group_view.get("legacy_match_cards_source"))
     add(failures, group_view.get("scope") == "GROUP_STAGE_ONLY_72", "group_view_scope_unexpected", group_view.get("scope"))
     add(failures, group_view.get("match_count") == 72, "group_view_match_count_unexpected", group_view.get("match_count"))
     add(failures, group_view.get("is_subset_of_canonical") is True, "group_view_subset_unexpected", group_view)

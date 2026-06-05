@@ -1,7 +1,7 @@
 {
   "pack_name": "V3_WC_2026_104_COVERAGE_GAP_RADAR_PACK",
-  "generated_at": "2026-06-04T19:23:12.738804+00:00",
-  "current_head": "5c1becc",
+  "generated_at": "2026-06-05T05:22:28.649471+00:00",
+  "current_head": "b90cc67",
   "canonical_source": "data/manual_sources/v3_worldcup/war_room/v3_wc2026_104_cards_index_bridge.json",
   "coverage_radar": "data/manual_sources/v3_worldcup/war_room/v3_wc2026_104_coverage_gap_radar.json",
   "coverage_summary": "data/manual_sources/v3_worldcup/war_room/v3_wc2026_104_coverage_gap_radar_summary.json",
@@ -47,7 +47,7 @@
     "reason_distribution": {
       "KNOCKOUT_STRUCTURAL_PLACEHOLDER_WAIT_OFFICIAL_FIXTURE": 32,
       "KNOCKOUT_STRUCTURAL_PLACEHOLDER_WAIT_OFFICIAL_TEAMS": 32,
-      "VENUE_SOURCE_REQUIRED: no local per-match venue source found": 72
+      "VENUE_SOURCE_REQUIRED: fixture_sources_do_not_provide_match_venue": 72
     },
     "venue_source_required": 72,
     "official_lineup_required": 72,

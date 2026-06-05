@@ -12,6 +12,7 @@ OUT_DIR = ROOT / "data/manual_sources/v3_worldcup/war_room"
 
 GROUP_CARDS = OUT_DIR / "v3_wc_match_cards.json"
 GROUP_SUMMARY = OUT_DIR / "v3_wc_match_card_summary.json"
+FIXTURE_MAPPING_BRIDGE = OUT_DIR / "v3_wc2026_fixture_mapping_bridge.json"
 SCOPE_DOC = ROOT / "docs/V3_WC_MATCH_CARD_SCOPE_CLARIFICATION_20260605.md"
 
 SCHEDULE_INDEX_104 = OUT_DIR / "v3_wc2026_schedule_index_104.json"
@@ -57,16 +58,32 @@ def git_head() -> str:
     return result.stdout.strip() if result.returncode == 0 else "UNKNOWN"
 
 
-def group_stage_rows(cards: list[dict[str, Any]]) -> list[dict[str, Any]]:
+def is_group_stage_source_card(card: dict[str, Any]) -> bool:
+    round_value = card.get("round")
+    try:
+        return int(round_value) in {1, 2, 3}
+    except (TypeError, ValueError):
+        return str(round_value or "").upper() == "GROUP_STAGE"
+
+
+def group_stage_rows(cards: list[dict[str, Any]], source_path: Path) -> list[dict[str, Any]]:
     rows: list[dict[str, Any]] = []
-    for index, card in enumerate(cards, start=1):
-        match_id = str(card.get("match_id") or f"group_stage_{index:03d}")
+    group_cards = [card for card in cards if is_group_stage_source_card(card)]
+    for index, card in enumerate(group_cards, start=1):
+        match_id = str(card.get("match_card_id") or card.get("match_id") or f"group_stage_{index:03d}")
+        venue_gap = card.get("venue_gap_reason")
+        if not venue_gap and card.get("mapping_gap_reason"):
+            raw_reasons = card.get("mapping_gap_reason")
+            if isinstance(raw_reasons, list):
+                venue_gap = "VENUE_SOURCE_REQUIRED: " + " / ".join(str(item) for item in raw_reasons)
+            else:
+                venue_gap = f"VENUE_SOURCE_REQUIRED: {raw_reasons}"
         rows.append({
             "canonical_card_id": f"wc2026_104_{index:03d}",
             "card_scope": "FULL_TOURNAMENT_CANONICAL",
             "card_kind": "GROUP_STAGE_MATCH",
             "source_view": "GROUP_STAGE_VIEW_72",
-            "source_card_ref": f"{rel(GROUP_CARDS)}#{match_id}",
+            "source_card_ref": f"{rel(source_path)}#{match_id}",
             "match_card_id": match_id,
             "group_stage_view_ref": f"{rel(GROUP_CARDS)}#{match_id}",
             "round": "GROUP_STAGE",
@@ -78,9 +95,9 @@ def group_stage_rows(cards: list[dict[str, Any]]) -> list[dict[str, Any]]:
             "home_team_slug": card.get("home_team_slug"),
             "away_team_slug": card.get("away_team_slug"),
             "api_football_fixture_id": card.get("api_football_fixture_id"),
-            "odds_fixture_id": (card.get("odds_binding") or {}).get("odds_fixture_id"),
-            "venue_mapping_status": (card.get("venue_binding") or {}).get("venue_mapping_status"),
-            "venue_gap_reason": (card.get("venue_binding") or {}).get("venue_gap_reason"),
+            "odds_fixture_id": card.get("odds_fixture_id") or (card.get("odds_binding") or {}).get("odds_fixture_id"),
+            "venue_mapping_status": card.get("venue_mapping_status") or (card.get("venue_binding") or {}).get("venue_mapping_status"),
+            "venue_gap_reason": venue_gap or (card.get("venue_binding") or {}).get("venue_gap_reason"),
             "schedule_source_status": "LOCAL_GROUP_STAGE_SOURCE",
             "team_source_status": "KNOWN_FROM_GROUP_STAGE_SOURCE",
             "knockout_team_generated": False,
@@ -128,9 +145,14 @@ def knockout_rows(start_index: int) -> list[dict[str, Any]]:
 def build() -> tuple[dict[str, Any], list[dict[str, Any]], dict[str, Any]]:
     cards_obj = load_json(GROUP_CARDS)
     group_cards = cards_obj if isinstance(cards_obj, list) else []
+    fixture_bridge_obj = load_json(FIXTURE_MAPPING_BRIDGE)
+    fixture_bridge_cards = fixture_bridge_obj if isinstance(fixture_bridge_obj, list) else []
+    source_cards = fixture_bridge_cards or group_cards
+    source_path = FIXTURE_MAPPING_BRIDGE if fixture_bridge_cards else GROUP_CARDS
+    group_stage_source_cards = [card for card in source_cards if isinstance(card, dict) and is_group_stage_source_card(card)]
     group_summary = load_json(GROUP_SUMMARY)
 
-    rows = group_stage_rows(group_cards)
+    rows = group_stage_rows(source_cards, source_path)
     rows.extend(knockout_rows(len(rows) + 1))
 
     schedule_index = {
@@ -156,6 +178,9 @@ def build() -> tuple[dict[str, Any], list[dict[str, Any]], dict[str, Any]]:
         "sources": {
             "group_cards": rel(GROUP_CARDS),
             "group_summary": rel(GROUP_SUMMARY),
+            "fixture_mapping_bridge": rel(FIXTURE_MAPPING_BRIDGE),
+            "group_stage_source": rel(source_path),
+            "group_stage_source_filter": "round in [1, 2, 3]",
             "scope_doc": rel(SCOPE_DOC),
         },
         "safety": SAFETY,
@@ -172,7 +197,8 @@ def build() -> tuple[dict[str, Any], list[dict[str, Any]], dict[str, Any]]:
         "canonical_card_count": len(rows),
         "group_stage_match_count": sum(1 for item in rows if item.get("card_kind") == "GROUP_STAGE_MATCH"),
         "knockout_slot_count": sum(1 for item in rows if item.get("card_kind") == "KNOCKOUT_SLOT"),
-        "group_stage_source_match_count": group_summary.get("match_count") if isinstance(group_summary, dict) else None,
+        "group_stage_source_match_count": len(group_stage_source_cards),
+        "legacy_match_card_file_count": len(group_cards),
         "knockout_team_generated_count": sum(1 for item in rows if item.get("knockout_team_generated") is True),
         "venue_generated_count": sum(1 for item in rows if item.get("venue_generated") is True),
         "full_tournament_canonical_source": True,

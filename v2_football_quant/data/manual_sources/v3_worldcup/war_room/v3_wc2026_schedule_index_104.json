@@ -1,7 +1,7 @@
 {
   "pack_name": "V3_WC_2026_104_CARDS_INDEX_BRIDGE_PACK",
-  "generated_at": "2026-06-04T18:49:20.279490+00:00",
-  "current_head": "8d9d996",
+  "generated_at": "2026-06-05T05:22:27.744760+00:00",
+  "current_head": "b90cc67",
   "canonical_source": "data/manual_sources/v3_worldcup/war_room/v3_wc2026_104_cards_index_bridge.json",
   "canonical_scope": "FULL_TOURNAMENT_104_INDEX",
   "group_stage_view": "data/manual_sources/v3_worldcup/war_room/v3_wc_match_cards.json",
@@ -21,6 +21,9 @@
   "sources": {
     "group_cards": "data/manual_sources/v3_worldcup/war_room/v3_wc_match_cards.json",
     "group_summary": "data/manual_sources/v3_worldcup/war_room/v3_wc_match_card_summary.json",
+    "fixture_mapping_bridge": "data/manual_sources/v3_worldcup/war_room/v3_wc2026_fixture_mapping_bridge.json",
+    "group_stage_source": "data/manual_sources/v3_worldcup/war_room/v3_wc2026_fixture_mapping_bridge.json",
+    "group_stage_source_filter": "round in [1, 2, 3]",
     "scope_doc": "docs/V3_WC_MATCH_CARD_SCOPE_CLARIFICATION_20260605.md"
   },
   "safety": {
