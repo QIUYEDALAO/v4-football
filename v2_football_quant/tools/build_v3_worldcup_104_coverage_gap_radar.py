@@ -117,7 +117,7 @@ def build() -> tuple[list[dict[str, Any]], dict[str, Any]]:
             structural_placeholder = False
         else:
             team_status = "STRUCTURAL_PLACEHOLDER"
-            venue_status = "STRUCTURAL_PLACEHOLDER"
+            venue_status = str(row.get("venue_mapping_status") or "STRUCTURAL_PLACEHOLDER")
             fixture_status = "STRUCTURAL_PLACEHOLDER"
             odds_status = "STRUCTURAL_PLACEHOLDER"
             final26_status = "STRUCTURAL_PLACEHOLDER"
@@ -197,7 +197,7 @@ def build() -> tuple[list[dict[str, Any]], dict[str, Any]]:
             "team_structural_placeholder_count": counters.get("knockout_32_team_STRUCTURAL_PLACEHOLDER", 0),
             "fixture_id_mapped_count": counters.get("group_72_fixture_id_MAPPED", 0),
             "odds_fixture_id_mapped_count": counters.get("group_72_odds_fixture_id_MAPPED", 0),
-            "venue_mapped_count": counters.get("group_72_venue_MAPPED", 0),
+            "venue_mapped_count": counters.get("group_72_venue_MAPPED", 0) + counters.get("knockout_32_venue_MAPPED", 0),
             "final26_ready_group_card_count": counters.get("group_72_final26_READY", 0),
             "lineup_wait_official_count": counters.get("group_72_lineup_WAIT_OFFICIAL_LINEUP", 0),
             "war_room_registered_count": counters.get("all_war_room_REGISTERED_IN_104_CHAIN", 0),
@@ -223,7 +223,8 @@ def build() -> tuple[list[dict[str, Any]], dict[str, Any]]:
             "team_generated_count": 0,
             "fixture_id_generated_count": 0,
             "odds_fixture_id_generated_count": 0,
-            "venue_generated_count": 0,
+            "venue_mapped_count": counters.get("knockout_32_venue_MAPPED", 0),
+            "venue_generated_count": counters.get("knockout_32_venue_MAPPED", 0),
             "final26_status": "STRUCTURAL_PLACEHOLDER",
             "lineup_status": "STRUCTURAL_PLACEHOLDER",
             "war_room_registered_count": counters.get("knockout_32_war_room_REGISTERED_IN_104_CHAIN", 0),

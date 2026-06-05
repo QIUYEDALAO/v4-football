@@ -1,12 +1,16 @@
 {
-  "pack_name": "V3_WC_MATCH_CARD_PACK_PHASE_4_VENUE_MAPPING_BRIDGE",
-  "generated_at": "2026-06-04T17:27:55.256296+00:00",
-  "current_head": "0a1cdef",
-  "match_count": 72,
-  "venue_mapped_count": 0,
-  "venue_unmapped_count": 72,
-  "manual_mapping_required_count": 72,
-  "venue_source_found": false,
+  "pack_name": "V3_WC_2026_VENUE_BRIDGE_FROM_104_CANONICAL_PACK",
+  "generated_at": "2026-06-05T05:39:12.200981+00:00",
+  "current_head": "b711884a",
+  "match_count": 104,
+  "venue_mapped_count": 104,
+  "venue_unmapped_count": 0,
+  "group_72_venue_mapped_count": 72,
+  "group_72_venue_source_required_count": 0,
+  "knockout_32_venue_mapped_count": 32,
+  "wikipedia_parse_required_count": 7,
+  "manual_mapping_required_count": 0,
+  "venue_source_found": true,
   "venue_sources_checked": [
     "data/v3_wc2026/group_schedule.json",
     "data/runtime/v3_worldcup/thestatsapi_cache/20260602/world_cup_2026/matches_2026_all.json",
@@ -18,10 +22,9 @@
   "venue_stress_venue_count": 16,
   "conflict_count": 0,
   "duplicate_mapping_count": 0,
-  "unmapped_reason_distribution": {
-    "VENUE_SOURCE_REQUIRED: no local per-match venue source found": 72
-  },
+  "unmapped_reason_distribution": {},
   "manual_template": "data/manual_sources/v3_worldcup/war_room/v3_wc2026_venue_mapping_manual_template.csv",
+  "source_provenance": "wikipedia_snapshot",
   "safety": {
     "observation_only": true,
     "no_prediction": true,

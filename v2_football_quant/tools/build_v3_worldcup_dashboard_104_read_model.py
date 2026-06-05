@@ -95,7 +95,8 @@ def build() -> dict[str, Any]:
             "display_mode": "STRUCTURAL_SLOT_PLACEHOLDER",
             "team_fields_empty": all(not item.get("home_team") and not item.get("away_team") for item in knockout_rows),
             "fixture_fields_empty": all(not item.get("api_football_fixture_id") and not item.get("odds_fixture_id") for item in knockout_rows),
-            "venue_fields_not_generated": all(item.get("venue_generated") is False for item in knockout_rows),
+            "venue_fields_bound_from_wikipedia_snapshot": all(item.get("venue_mapping_status") == "MAPPED" for item in knockout_rows),
+            "venue_source_provenance": "wikipedia_snapshot",
         },
         "read_policy": {
             "dashboard_primary_reader": read_policy.get("canonical_reader") or rel(CANONICAL_104),

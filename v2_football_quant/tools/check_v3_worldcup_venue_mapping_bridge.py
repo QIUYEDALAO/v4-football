@@ -96,18 +96,20 @@ def main() -> int:
     failures: list[str] = []
     add(failures, VENUE_BRIDGE.exists(), "venue_bridge_missing", VENUE_BRIDGE)
     add(failures, VENUE_SUMMARY.exists(), "venue_summary_missing", VENUE_SUMMARY)
-    add(failures, summary.get("match_count") == 72, "match_count_unexpected", summary.get("match_count"))
-    add(failures, len(bridge) == 72, "bridge_count_unexpected", len(bridge))
+    add(failures, summary.get("match_count") == 104, "match_count_unexpected", summary.get("match_count"))
+    add(failures, len(bridge) == 104, "bridge_count_unexpected", len(bridge))
     ids = [row.get("match_card_id") for row in bridge]
     add(failures, len(ids) == len(set(ids)), "duplicate_match_card_id", len(ids) - len(set(ids)))
 
     for row in bridge:
         match_id = row.get("match_card_id")
-        add(failures, row.get("venue_mapping_status") in {"MAPPED", "UNMAPPED"}, "venue_mapping_status_missing", match_id)
+        add(failures, row.get("venue_mapping_status") == "MAPPED", "venue_mapping_status_unexpected", match_id)
         if row.get("venue_mapping_status") == "MAPPED":
-            for key in ["venue_name", "venue_slug", "venue_source", "venue_mapping_confidence", "venue_stress_ref"]:
+            for key in ["venue_name", "venue_slug", "venue_source", "venue_mapping_confidence", "venue_stress_ref", "source_provenance"]:
                 add(failures, row.get(key) not in {"", None, "NONE"}, f"mapped_{key}_missing", match_id)
             add(failures, row.get("manual_mapping_required") is False, "mapped_manual_required_true", match_id)
+            add(failures, row.get("venue_source_type") == "wikipedia_snapshot", "mapped_venue_source_type_unexpected", match_id)
+            add(failures, row.get("source_provenance") == "wikipedia_snapshot", "mapped_source_provenance_unexpected", match_id)
         else:
             add(failures, bool(row.get("venue_gap_reason")), "unmapped_venue_gap_reason_missing", match_id)
             add(failures, row.get("manual_mapping_required") is True, "unmapped_manual_required_false", match_id)
@@ -116,14 +118,18 @@ def main() -> int:
         add(failures, row.get("betting_recommendation") is False, "betting_recommendation_true", match_id)
         add(failures, row.get("affects_v4") is False, "affects_v4_true", match_id)
 
-    add(failures, summary.get("venue_source_found") is False, "venue_source_found_unexpected", summary.get("venue_source_found"))
-    add(failures, summary.get("venue_mapped_count") == 0, "venue_mapped_count_unexpected", summary.get("venue_mapped_count"))
-    add(failures, summary.get("venue_unmapped_count") == 72, "venue_unmapped_count_unexpected", summary.get("venue_unmapped_count"))
-    add(failures, summary.get("manual_mapping_required_count") == 72, "manual_mapping_required_count_unexpected", summary.get("manual_mapping_required_count"))
+    add(failures, summary.get("venue_source_found") is True, "venue_source_found_unexpected", summary.get("venue_source_found"))
+    add(failures, summary.get("venue_mapped_count") == 104, "venue_mapped_count_unexpected", summary.get("venue_mapped_count"))
+    add(failures, summary.get("venue_unmapped_count") == 0, "venue_unmapped_count_unexpected", summary.get("venue_unmapped_count"))
+    add(failures, summary.get("group_72_venue_mapped_count") == 72, "group_72_venue_mapped_count_unexpected", summary.get("group_72_venue_mapped_count"))
+    add(failures, summary.get("group_72_venue_source_required_count") == 0, "group_72_venue_source_required_count_unexpected", summary.get("group_72_venue_source_required_count"))
+    add(failures, summary.get("knockout_32_venue_mapped_count") == 32, "knockout_32_venue_mapped_count_unexpected", summary.get("knockout_32_venue_mapped_count"))
+    add(failures, summary.get("manual_mapping_required_count") == 0, "manual_mapping_required_count_unexpected", summary.get("manual_mapping_required_count"))
+    add(failures, summary.get("source_provenance") == "wikipedia_snapshot", "summary_source_provenance_unexpected", summary.get("source_provenance"))
     add(failures, summary.get("conflict_count") == 0, "conflict_count_unexpected", summary.get("conflict_count"))
     add(failures, summary.get("duplicate_mapping_count") == 0, "duplicate_mapping_count_unexpected", summary.get("duplicate_mapping_count"))
     add(failures, MANUAL_TEMPLATE.exists(), "manual_template_missing", MANUAL_TEMPLATE)
-    add(failures, template_row_count() == 72, "manual_template_row_count_unexpected", template_row_count())
+    add(failures, template_row_count() == 0, "manual_template_row_count_unexpected", template_row_count())
     add(failures, summary.get("safety", {}).get("observation_only") is True, "summary_observation_only_unexpected")
     add(failures, summary.get("safety", {}).get("no_prediction") is True, "summary_no_prediction_unexpected")
     add(failures, summary.get("safety", {}).get("betting_recommendation") is False, "summary_betting_recommendation_true")
@@ -157,6 +163,11 @@ def main() -> int:
         "match_count": len(bridge),
         "venue_mapped_count": summary.get("venue_mapped_count"),
         "venue_unmapped_count": summary.get("venue_unmapped_count"),
+        "group_72_venue_mapped_count": summary.get("group_72_venue_mapped_count"),
+        "group_72_venue_source_required_count": summary.get("group_72_venue_source_required_count"),
+        "knockout_32_venue_mapped_count": summary.get("knockout_32_venue_mapped_count"),
+        "wikipedia_parse_required_count": summary.get("wikipedia_parse_required_count"),
+        "source_provenance": summary.get("source_provenance"),
         "manual_mapping_required_count": summary.get("manual_mapping_required_count"),
         "venue_source_found": summary.get("venue_source_found"),
         "manual_template_rows": template_row_count(),

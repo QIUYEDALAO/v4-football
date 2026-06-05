@@ -1,7 +1,7 @@
 {
   "pack_name": "V3_WC_WAR_ROOM_MASTER_INDEX_PACK",
-  "generated_at": "2026-06-05T05:22:28.794368+00:00",
-  "current_head": "b90cc67",
+  "generated_at": "2026-06-05T05:39:12.453729+00:00",
+  "current_head": "b711884a",
   "module_count": 13,
   "modules": [
     {
@@ -178,7 +178,7 @@
         "team_structural_placeholder_count": 32,
         "fixture_id_mapped_count": 72,
         "odds_fixture_id_mapped_count": 72,
-        "venue_mapped_count": 0,
+        "venue_mapped_count": 104,
         "final26_ready_group_card_count": 72,
         "lineup_wait_official_count": 72,
         "war_room_registered_count": 104,
@@ -187,8 +187,8 @@
       "group_72": {
         "card_count": 72,
         "team_known_count": 72,
-        "venue_mapped_count": 0,
-        "venue_source_required_count": 72,
+        "venue_mapped_count": 72,
+        "venue_source_required_count": 0,
         "fixture_id_mapped_count": 72,
         "odds_fixture_id_mapped_count": 72,
         "final26_ready_card_count": 72,
@@ -204,7 +204,8 @@
         "team_generated_count": 0,
         "fixture_id_generated_count": 0,
         "odds_fixture_id_generated_count": 0,
-        "venue_generated_count": 0,
+        "venue_mapped_count": 32,
+        "venue_generated_count": 32,
         "final26_status": "STRUCTURAL_PLACEHOLDER",
         "lineup_status": "STRUCTURAL_PLACEHOLDER",
         "war_room_registered_count": 32,
@@ -213,10 +214,9 @@
       "gap_summary": {
         "reason_distribution": {
           "KNOCKOUT_STRUCTURAL_PLACEHOLDER_WAIT_OFFICIAL_FIXTURE": 32,
-          "KNOCKOUT_STRUCTURAL_PLACEHOLDER_WAIT_OFFICIAL_TEAMS": 32,
-          "VENUE_SOURCE_REQUIRED: fixture_sources_do_not_provide_match_venue": 72
+          "KNOCKOUT_STRUCTURAL_PLACEHOLDER_WAIT_OFFICIAL_TEAMS": 32
         },
-        "venue_source_required": 72,
+        "venue_source_required": 0,
         "official_lineup_required": 72,
         "knockout_structural_placeholder": 32,
         "native_opening_closing_missing": true,

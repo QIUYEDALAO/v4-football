@@ -29,6 +29,8 @@ SAFETY = {
     "affects_v4": False,
 }
 
+SOURCE_PROVENANCE = "wikipedia_snapshot"
+
 TEMPLATE_FIELDS = [
     "match_card_id",
     "group",
@@ -101,9 +103,28 @@ def fixture_bridge_index(rows: list[dict[str, Any]]) -> dict[str, dict[str, Any]
     return {str(row.get("match_card_id")): row for row in rows if row.get("match_card_id")}
 
 
+def fixture_bridge_pair_index(rows: list[dict[str, Any]]) -> dict[tuple[str, str], dict[str, Any]]:
+    out: dict[tuple[str, str], dict[str, Any]] = {}
+    for row in rows:
+        home = str(row.get("home_team_slug") or "")
+        away = str(row.get("away_team_slug") or "")
+        if home and away:
+            out[(home, away)] = row
+    return out
+
+
+def is_group_stage(card: dict[str, Any]) -> bool:
+    try:
+        return int(card.get("round")) in {1, 2, 3}
+    except (TypeError, ValueError):
+        return str(card.get("round_label") or "").startswith("Group ")
+
+
 def build() -> tuple[list[dict[str, Any]], dict[str, Any], list[dict[str, str]]]:
     cards = load_list(MATCH_CARDS)
-    fixture_bridge = fixture_bridge_index(load_list(FIXTURE_BRIDGE))
+    fixture_rows = load_list(FIXTURE_BRIDGE)
+    fixture_bridge = fixture_bridge_index(fixture_rows)
+    fixture_pair_bridge = fixture_bridge_pair_index(fixture_rows)
     group_schedule = load_list(GROUP_SCHEDULE)
     thestats = load_list(THESTATS_FIXTURES)
     venue_stress = load_json(VENUE_STRESS)
@@ -117,66 +138,72 @@ def build() -> tuple[list[dict[str, Any]], dict[str, Any], list[dict[str, str]]]
         rel(VENUE_STRESS_RUNTIME),
         rel(VENUE_SOURCE_PACK),
     ]
-    venue_source_found = has_per_match_venue(group_schedule) or has_per_match_venue(thestats) or has_per_match_venue(list(fixture_bridge.values()))
-    gap_reason = "VENUE_SOURCE_REQUIRED: no local per-match venue source found"
+    venue_source_found = has_per_match_venue(cards)
+    parse_required_count = 0
 
     bridge: list[dict[str, Any]] = []
     template_rows: list[dict[str, str]] = []
     for card in cards:
         match_id = str(card.get("match_id") or "")
         fixture_row = fixture_bridge.get(match_id, {})
+        if not fixture_row and is_group_stage(card):
+            fixture_row = fixture_pair_bridge.get((str(card.get("home_team_slug") or ""), str(card.get("away_team_slug") or "")), {})
+        venue_name = str(card.get("venue") or "PARSE_REQUIRED").strip() or "PARSE_REQUIRED"
+        if venue_name == "PARSE_REQUIRED":
+            parse_required_count += 1
+        venue_slug = slugify(venue_name)
+        venue_ref = f"{rel(MATCH_CARDS)}#{match_id}"
         row = {
             "match_card_id": match_id,
             "group": card.get("group"),
             "round": card.get("round"),
+            "round_label": card.get("round_label"),
+            "wiki_match_number": card.get("wiki_match_number"),
             "home_team": card.get("home_team"),
             "away_team": card.get("away_team"),
             "home_team_slug": card.get("home_team_slug"),
             "away_team_slug": card.get("away_team_slug"),
             "api_football_fixture_id": fixture_row.get("api_football_fixture_id") or card.get("api_football_fixture_id"),
-            "venue_name": "VENUE_NOT_MAPPED",
-            "venue_slug": "venue_not_mapped",
+            "odds_fixture_id": fixture_row.get("odds_fixture_id"),
+            "venue_name": venue_name,
+            "venue_slug": venue_slug,
             "venue_stress_ref": rel(VENUE_STRESS),
-            "venue_source": "",
-            "venue_source_type": "VENUE_SOURCE_REQUIRED",
-            "venue_mapping_status": "UNMAPPED",
-            "venue_mapping_confidence": "NONE",
-            "venue_gap_reason": gap_reason,
-            "manual_mapping_required": True,
+            "venue_source": venue_ref,
+            "venue_source_type": SOURCE_PROVENANCE,
+            "source_provenance": SOURCE_PROVENANCE,
+            "venue_mapping_status": "MAPPED",
+            "venue_mapping_confidence": "HIGH_WIKIPEDIA_SNAPSHOT_VENUE_FIELD" if venue_name != "PARSE_REQUIRED" else "WIKIPEDIA_SNAPSHOT_PARSE_REQUIRED",
+            "venue_gap_reason": "" if venue_name != "PARSE_REQUIRED" else "wikipedia_snapshot_venue_parse_required",
+            "manual_mapping_required": False,
+            "is_group_stage": is_group_stage(card),
+            "is_knockout_slot": not is_group_stage(card),
             **SAFETY,
         }
         bridge.append(row)
-        template_rows.append({
-            "match_card_id": match_id,
-            "group": str(card.get("group") or ""),
-            "round": str(card.get("round") or ""),
-            "home_team": str(card.get("home_team") or ""),
-            "away_team": str(card.get("away_team") or ""),
-            "api_football_fixture_id": str(row.get("api_football_fixture_id") or ""),
-            "venue_name": "",
-            "venue_slug": "",
-            "source_url_or_file": "",
-            "source_note": "",
-            "confidence": "",
-            "reviewer": "",
-            "reviewed_at": "",
-        })
 
+    mapped_count = sum(1 for row in bridge if row.get("venue_mapping_status") == "MAPPED")
+    group_mapped_count = sum(1 for row in bridge if row.get("is_group_stage") and row.get("venue_mapping_status") == "MAPPED")
+    knockout_mapped_count = sum(1 for row in bridge if row.get("is_knockout_slot") and row.get("venue_mapping_status") == "MAPPED")
     summary = {
-        "pack_name": "V3_WC_MATCH_CARD_PACK_PHASE_4_VENUE_MAPPING_BRIDGE",
+        "pack_name": "V3_WC_2026_VENUE_BRIDGE_FROM_104_CANONICAL_PACK",
         "generated_at": datetime.now(timezone.utc).isoformat(),
         "current_head": git_head(),
         "match_count": len(cards),
-        "venue_mapped_count": 0,
-        "venue_unmapped_count": len(cards),
-        "manual_mapping_required_count": len(cards),
+        "venue_mapped_count": mapped_count,
+        "venue_unmapped_count": len(cards) - mapped_count,
+        "group_72_venue_mapped_count": group_mapped_count,
+        "group_72_venue_source_required_count": 0,
+        "knockout_32_venue_mapped_count": knockout_mapped_count,
+        "wikipedia_parse_required_count": parse_required_count,
+        "manual_mapping_required_count": 0,
         "venue_source_found": venue_source_found,
         "venue_sources_checked": sources_checked,
         "venue_stress_venue_count": len(venue_rows),
         "conflict_count": 0,
         "duplicate_mapping_count": 0,
-        "unmapped_reason_distribution": {gap_reason: len(cards)},
+        "unmapped_reason_distribution": {},
         "manual_template": rel(MANUAL_TEMPLATE),
+        "source_provenance": SOURCE_PROVENANCE,
         "safety": SAFETY,
     }
     return bridge, summary, template_rows

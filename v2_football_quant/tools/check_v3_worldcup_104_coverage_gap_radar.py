@@ -104,6 +104,7 @@ def main() -> int:
     add(failures, len(group) == 72, "group_72_count_unexpected", len(group))
     add(failures, len(knockout) == 32, "knockout_32_count_unexpected", len(knockout))
     add(failures, summary.get("coverage_104", {}).get("card_count") == 104, "summary_104_count_unexpected", summary.get("coverage_104"))
+    add(failures, summary.get("coverage_104", {}).get("venue_mapped_count") == 104, "summary_104_venue_mapped_unexpected", summary.get("coverage_104"))
     add(failures, summary.get("group_72", {}).get("card_count") == 72, "summary_group_count_unexpected", summary.get("group_72"))
     add(failures, summary.get("knockout_32", {}).get("card_count") == 32, "summary_knockout_count_unexpected", summary.get("knockout_32"))
 
@@ -114,13 +115,15 @@ def main() -> int:
     add(failures, summary.get("group_72", {}).get("final26_gap_card_count") == 0, "group_final26_gap_unexpected", summary.get("group_72"))
     add(failures, summary.get("group_72", {}).get("lineup_wait_official_count") == 72, "group_lineup_wait_unexpected", summary.get("group_72"))
     add(failures, summary.get("group_72", {}).get("lineup_gap_card_count") == 0, "group_lineup_gap_unexpected", summary.get("group_72"))
-    add(failures, summary.get("group_72", {}).get("venue_source_required_count") == 72, "group_venue_gap_unexpected", summary.get("group_72"))
+    add(failures, summary.get("group_72", {}).get("venue_mapped_count") == 72, "group_venue_mapped_unexpected", summary.get("group_72"))
+    add(failures, summary.get("group_72", {}).get("venue_source_required_count") == 0, "group_venue_gap_unexpected", summary.get("group_72"))
     add(failures, summary.get("group_72", {}).get("war_room_registered_count") == 72, "group_war_room_count_unexpected", summary.get("group_72"))
     add(failures, summary.get("group_72", {}).get("dashboard_registered_count") == 72, "group_dashboard_count_unexpected", summary.get("group_72"))
 
     add(failures, summary.get("knockout_32", {}).get("structural_placeholder_count") == 32, "knockout_placeholder_count_unexpected", summary.get("knockout_32"))
-    for key in ["team_generated_count", "fixture_id_generated_count", "odds_fixture_id_generated_count", "venue_generated_count"]:
+    for key in ["team_generated_count", "fixture_id_generated_count", "odds_fixture_id_generated_count"]:
         add(failures, summary.get("knockout_32", {}).get(key) == 0, f"knockout_{key}_unexpected", summary.get("knockout_32"))
+    add(failures, summary.get("knockout_32", {}).get("venue_mapped_count") == 32, "knockout_venue_mapped_unexpected", summary.get("knockout_32"))
     add(failures, summary.get("knockout_32", {}).get("war_room_registered_count") == 32, "knockout_war_room_count_unexpected", summary.get("knockout_32"))
     add(failures, summary.get("knockout_32", {}).get("dashboard_registered_count") == 32, "knockout_dashboard_count_unexpected", summary.get("knockout_32"))
 
@@ -131,7 +134,7 @@ def main() -> int:
     for row in group:
         cid = row.get("canonical_card_id")
         add(failures, row.get("team_coverage_status") == "KNOWN_FROM_GROUP_STAGE_SOURCE", "group_team_status_unexpected", cid)
-        add(failures, row.get("venue_coverage_status") in {"UNMAPPED", "VENUE_SOURCE_REQUIRED"}, "group_venue_status_unexpected", cid)
+        add(failures, row.get("venue_coverage_status") == "MAPPED", "group_venue_status_unexpected", cid)
         add(failures, row.get("fixture_id_coverage_status") == "MAPPED", "group_fixture_status_unexpected", cid)
         add(failures, row.get("odds_fixture_id_coverage_status") == "MAPPED", "group_odds_status_unexpected", cid)
         add(failures, row.get("final26_coverage_status") == "READY", "group_final26_status_unexpected", cid)
@@ -146,7 +149,7 @@ def main() -> int:
         add(failures, row.get("team_coverage_status") == "STRUCTURAL_PLACEHOLDER", "knockout_team_status_unexpected", cid)
         add(failures, row.get("fixture_id_coverage_status") == "STRUCTURAL_PLACEHOLDER", "knockout_fixture_status_unexpected", cid)
         add(failures, row.get("odds_fixture_id_coverage_status") == "STRUCTURAL_PLACEHOLDER", "knockout_odds_status_unexpected", cid)
-        add(failures, row.get("venue_coverage_status") == "STRUCTURAL_PLACEHOLDER", "knockout_venue_status_unexpected", cid)
+        add(failures, row.get("venue_coverage_status") == "MAPPED", "knockout_venue_status_unexpected", cid)
         add(failures, row.get("final26_coverage_status") == "STRUCTURAL_PLACEHOLDER", "knockout_final26_status_unexpected", cid)
         add(failures, row.get("lineup_coverage_status") == "STRUCTURAL_PLACEHOLDER", "knockout_lineup_status_unexpected", cid)
 

@@ -128,6 +128,22 @@ def bridge_index(payload: Any) -> dict[str, dict[str, Any]]:
     }
 
 
+def group_stage_venue_bridge_rows(payload: Any) -> list[dict[str, Any]]:
+    if not isinstance(payload, list):
+        return []
+    rows: list[dict[str, Any]] = []
+    for item in payload:
+        if not isinstance(item, dict):
+            continue
+        try:
+            is_group = int(item.get("round")) in {1, 2, 3}
+        except (TypeError, ValueError):
+            is_group = str(item.get("round_label") or "").startswith("Group ")
+        if is_group:
+            rows.append(item)
+    return rows
+
+
 def team_profile_ref(team: str) -> str:
     return f"{rel(PROFILE_CARDS)}#{slugify(team)}"
 
@@ -286,7 +302,9 @@ def build() -> tuple[list[dict[str, Any]], dict[str, Any]]:
     lineups = index_by_team(load_json(LINEUP_STATUS))
     tactical = tactical_index(load_json(TACTICAL_PROFILE))
     bridge = bridge_index(load_json(FIXTURE_MAPPING_BRIDGE))
-    venue_bridge = bridge_index(load_json(VENUE_MAPPING_BRIDGE))
+    venue_bridge_payload = load_json(VENUE_MAPPING_BRIDGE)
+    venue_bridge = bridge_index(venue_bridge_payload)
+    venue_bridge_group_rows = group_stage_venue_bridge_rows(venue_bridge_payload)
     venue = load_json(VENUE_STRESS)
     wc10 = load_json(WC10_WAR_ROOM)
     odds_live = load_json(ODDS_LIVE_STATUS)
@@ -341,6 +359,8 @@ def build() -> tuple[list[dict[str, Any]], dict[str, Any]]:
         group = str(row.get("group_label") or "UNKNOWN")
         bridge_row = bridge.get(match_id, {})
         venue_bridge_row = venue_bridge.get(match_id, {})
+        if not venue_bridge_row and idx - 1 < len(venue_bridge_group_rows):
+            venue_bridge_row = venue_bridge_group_rows[idx - 1]
         venue_bound = venue_binding(venue if isinstance(venue, dict) else {}, bridge_row, venue_bridge_row, row.get("venue"))
         odds_bound = odds_binding(
             odds_live if isinstance(odds_live, dict) else {},

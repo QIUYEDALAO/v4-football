@@ -1,7 +1,7 @@
 {
   "pack_name": "V3_WC_2026_DASHBOARD_104_READ_MODEL_PACK",
-  "generated_at": "2026-06-05T05:22:28.706871+00:00",
-  "current_head": "b90cc67",
+  "generated_at": "2026-06-05T05:39:12.366842+00:00",
+  "current_head": "b711884a",
   "dashboard_read_model": "V3_WC_2026_DASHBOARD_104_READ_MODEL",
   "canonical_source": "data/manual_sources/v3_worldcup/war_room/v3_wc2026_104_cards_index_bridge.json",
   "canonical_schedule_index": "data/manual_sources/v3_worldcup/war_room/v3_wc2026_schedule_index_104.json",
@@ -24,17 +24,18 @@
     "count": 32,
     "policy": "STRUCTURAL_ONLY_NO_TEAM_GENERATED",
     "round_counts": {
-      "ROUND_OF_32": 16,
-      "ROUND_OF_16": 8,
-      "QUARTER_FINAL": 4,
-      "SEMI_FINAL": 2,
-      "THIRD_PLACE": 1,
-      "FINAL": 1
+      "round_of_32": 16,
+      "round_of_16": 8,
+      "quarter_finals": 4,
+      "semi_finals": 2,
+      "third_place": 1,
+      "final": 1
     },
     "display_mode": "STRUCTURAL_SLOT_PLACEHOLDER",
     "team_fields_empty": true,
     "fixture_fields_empty": true,
-    "venue_fields_not_generated": true
+    "venue_fields_bound_from_wikipedia_snapshot": true,
+    "venue_source_provenance": "wikipedia_snapshot"
   },
   "read_policy": {
     "dashboard_primary_reader": "data/manual_sources/v3_worldcup/war_room/v3_wc2026_104_cards_index_bridge.json",
@@ -46,7 +47,7 @@
   "source_summaries": {
     "canonical_summary": "data/manual_sources/v3_worldcup/war_room/v3_wc2026_104_cards_index_bridge_summary.json",
     "canonical_summary_card_count": 104,
-    "group_summary_match_count": 72,
+    "group_summary_match_count": 104,
     "war_room_master_index": "data/manual_sources/v3_worldcup/war_room/v3_wc_war_room_master_index.json",
     "war_room_module_count": 13,
     "coverage_gap_radar": "data/manual_sources/v3_worldcup/war_room/v3_wc2026_104_coverage_gap_radar.json",
@@ -60,7 +61,7 @@
       "team_structural_placeholder_count": 32,
       "fixture_id_mapped_count": 72,
       "odds_fixture_id_mapped_count": 72,
-      "venue_mapped_count": 0,
+      "venue_mapped_count": 104,
       "final26_ready_group_card_count": 72,
       "lineup_wait_official_count": 72,
       "war_room_registered_count": 104,
@@ -69,8 +70,8 @@
     "group_72": {
       "card_count": 72,
       "team_known_count": 72,
-      "venue_mapped_count": 0,
-      "venue_source_required_count": 72,
+      "venue_mapped_count": 72,
+      "venue_source_required_count": 0,
       "fixture_id_mapped_count": 72,
       "odds_fixture_id_mapped_count": 72,
       "final26_ready_card_count": 72,
@@ -86,7 +87,8 @@
       "team_generated_count": 0,
       "fixture_id_generated_count": 0,
       "odds_fixture_id_generated_count": 0,
-      "venue_generated_count": 0,
+      "venue_mapped_count": 32,
+      "venue_generated_count": 32,
       "final26_status": "STRUCTURAL_PLACEHOLDER",
       "lineup_status": "STRUCTURAL_PLACEHOLDER",
       "war_room_registered_count": 32,
@@ -95,10 +97,9 @@
     "gaps": {
       "reason_distribution": {
         "KNOCKOUT_STRUCTURAL_PLACEHOLDER_WAIT_OFFICIAL_FIXTURE": 32,
-        "KNOCKOUT_STRUCTURAL_PLACEHOLDER_WAIT_OFFICIAL_TEAMS": 32,
-        "VENUE_SOURCE_REQUIRED: fixture_sources_do_not_provide_match_venue": 72
+        "KNOCKOUT_STRUCTURAL_PLACEHOLDER_WAIT_OFFICIAL_TEAMS": 32
       },
-      "venue_source_required": 72,
+      "venue_source_required": 0,
       "official_lineup_required": 72,
       "knockout_structural_placeholder": 32,
       "native_opening_closing_missing": true,

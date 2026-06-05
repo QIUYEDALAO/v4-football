@@ -123,7 +123,8 @@ def main() -> int:
     add(failures, knockout.get("display_mode") == "STRUCTURAL_SLOT_PLACEHOLDER", "knockout_display_mode_unexpected", knockout.get("display_mode"))
     add(failures, knockout.get("team_fields_empty") is True, "knockout_team_fields_not_empty", knockout)
     add(failures, knockout.get("fixture_fields_empty") is True, "knockout_fixture_fields_not_empty", knockout)
-    add(failures, knockout.get("venue_fields_not_generated") is True, "knockout_venue_generated", knockout)
+    add(failures, knockout.get("venue_fields_bound_from_wikipedia_snapshot") is True, "knockout_venue_not_bound_from_wikipedia", knockout)
+    add(failures, knockout.get("venue_source_provenance") == "wikipedia_snapshot", "knockout_venue_source_provenance_unexpected", knockout)
 
     read_policy = payload.get("read_policy") if isinstance(payload.get("read_policy"), dict) else {}
     add(failures, read_policy.get("dashboard_primary_reader") == CANONICAL_SOURCE, "dashboard_primary_reader_unexpected", read_policy)

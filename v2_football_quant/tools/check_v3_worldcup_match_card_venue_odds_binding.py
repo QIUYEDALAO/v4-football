@@ -77,9 +77,6 @@ def secret_hits(paths: list[Path]) -> list[str]:
 
 def main() -> int:
     cards, summary = build()
-    MATCH_CARDS.parent.mkdir(parents=True, exist_ok=True)
-    MATCH_CARDS.write_text(json.dumps(cards, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
-    MATCH_SUMMARY.write_text(json.dumps(summary, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
 
     failures: list[str] = []
     add(failures, len(cards) == 72, "match_count_unexpected", len(cards))
@@ -93,7 +90,8 @@ def main() -> int:
         if isinstance(venue_binding, dict):
             for key in ["venue_name", "venue_slug", "venue_stress_status", "venue_stress_tags", "venue_stress_ref", "venue_mapping_status", "venue_gap_reason"]:
                 add(failures, key in venue_binding, f"venue_binding_{key}_missing", match_id)
-            add(failures, venue_binding.get("manual_mapping_required") is True, "manual_mapping_required_unexpected", match_id)
+            add(failures, venue_binding.get("venue_mapping_status") == "MAPPED", "venue_mapping_status_unexpected", match_id)
+            add(failures, venue_binding.get("manual_mapping_required") is False, "manual_mapping_required_unexpected", match_id)
             add(failures, bool(venue_binding.get("venue_mapping_bridge_ref")), "venue_mapping_bridge_ref_missing", match_id)
         if isinstance(odds_binding, dict):
             for key in [
@@ -129,7 +127,8 @@ def main() -> int:
         "global_gap_summary",
     ]:
         add(failures, key in summary, f"summary_{key}_missing")
-    add(failures, summary.get("cards_missing_venue_binding") == 72, "cards_missing_venue_binding_unexpected", summary.get("cards_missing_venue_binding"))
+    add(failures, summary.get("cards_with_venue_binding") == 72, "cards_with_venue_binding_unexpected", summary.get("cards_with_venue_binding"))
+    add(failures, summary.get("cards_missing_venue_binding") == 0, "cards_missing_venue_binding_unexpected", summary.get("cards_missing_venue_binding"))
     add(failures, summary.get("cards_with_odds_binding") == 72, "cards_with_odds_binding_unexpected", summary.get("cards_with_odds_binding"))
     add(failures, summary.get("cards_missing_odds_binding") == 0, "cards_missing_odds_binding_unexpected", summary.get("cards_missing_odds_binding"))
 

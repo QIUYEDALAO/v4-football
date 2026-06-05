@@ -8,9 +8,9 @@ from datetime import datetime
 from pathlib import Path
 from typing import Any
 
-from build_v3_worldcup_match_cards import MATCH_CARDS, MATCH_SUMMARY, build
-
 ROOT = Path(__file__).resolve().parents[1]
+MATCH_CARDS = ROOT / "data/manual_sources/v3_worldcup/war_room/v3_wc_match_cards.json"
+MATCH_SUMMARY = ROOT / "data/manual_sources/v3_worldcup/war_room/v3_wc_match_card_summary.json"
 STATUS_OUT = ROOT / "data/runtime/status/check_v3_worldcup_match_cards_20260604.json"
 APPROVED_DASHBOARD_UI_STAGE = "v2_football_quant/data/runtime/dashboard/v3_worldcup_wc10_war_room.html"
 SCOPE_DOC = ROOT / "docs/V3_WC_MATCH_CARD_SCOPE_CLARIFICATION_20260605.md"
@@ -92,14 +92,81 @@ def walk_keys(obj: Any) -> list[str]:
 
 
 def main() -> int:
-    cards, summary = build()
-    MATCH_CARDS.parent.mkdir(parents=True, exist_ok=True)
-    MATCH_CARDS.write_text(json.dumps(cards, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
-    MATCH_SUMMARY.write_text(json.dumps(summary, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+    cards = json.loads(MATCH_CARDS.read_text(encoding="utf-8")) if MATCH_CARDS.exists() else []
+    summary = json.loads(MATCH_SUMMARY.read_text(encoding="utf-8")) if MATCH_SUMMARY.exists() else {}
 
     failures: list[str] = []
     add(failures, MATCH_CARDS.exists(), "match_cards_missing", MATCH_CARDS)
     add(failures, MATCH_SUMMARY.exists(), "match_summary_missing", MATCH_SUMMARY)
+    if isinstance(cards, list) and len(cards) == TOTAL_TOURNAMENT_EXPECTED_MATCH_COUNT:
+        group_cards = [card for card in cards if str(card.get("round_label") or "").startswith("Group ")]
+        knockout_cards = [card for card in cards if not str(card.get("round_label") or "").startswith("Group ")]
+        add(failures, len(group_cards) == GROUP_STAGE_MATCH_COUNT, "group_stage_subset_count_unexpected", len(group_cards))
+        add(failures, len(knockout_cards) == 32, "knockout_subset_count_unexpected", len(knockout_cards))
+        add(failures, summary.get("match_count") == TOTAL_TOURNAMENT_EXPECTED_MATCH_COUNT, "summary_match_count_unexpected", summary.get("match_count"))
+        add(failures, summary.get("group_match_count") == GROUP_STAGE_MATCH_COUNT, "summary_group_count_unexpected", summary.get("group_match_count"))
+        add(failures, summary.get("knockout_match_count") == 32, "summary_knockout_count_unexpected", summary.get("knockout_match_count"))
+        add(failures, "Wikipedia" in str(summary.get("data_source") or ""), "summary_wikipedia_source_missing", summary.get("data_source"))
+        add(failures, sum(1 for card in cards if card.get("venue")) == TOTAL_TOURNAMENT_EXPECTED_MATCH_COUNT, "venue_field_count_unexpected")
+        add(failures, sum(1 for card in cards if card.get("venue") == "PARSE_REQUIRED") == 7, "parse_required_count_unexpected")
+        for card in cards:
+            match_id = card.get("match_id")
+            add(failures, bool(card.get("home_team")) and bool(card.get("away_team")), "team_field_missing", match_id)
+            add(failures, card.get("venue_source") in {"wikipedia_footballbox", "PARSE_REQUIRED"}, "venue_source_unexpected", match_id)
+            add(failures, card.get("observation_only") is True, "observation_only_unexpected", match_id)
+            add(failures, card.get("no_starting_xi_generated") is True, "no_starting_xi_generated_unexpected", match_id)
+            add(failures, card.get("no_prediction") is True, "no_prediction_unexpected", match_id)
+            add(failures, card.get("no_injury_judgment") is True, "no_injury_judgment_unexpected", match_id)
+            add(failures, card.get("betting_recommendation") is False, "betting_recommendation_true", match_id)
+            add(failures, card.get("affects_v4") is False, "affects_v4_true", match_id)
+
+        keys = {key.lower() for key in walk_keys({"cards": cards, "summary": summary})}
+        add(failures, not (keys & DISALLOWED_KEYS), "disallowed_generated_keys", sorted(keys & DISALLOWED_KEYS))
+        combined = json.dumps({"cards": cards, "summary": summary}, ensure_ascii=False).lower()
+        for phrase in DISALLOWED_PHRASES:
+            add(failures, phrase not in combined, "disallowed_phrase", phrase)
+
+        staged = staged_files()
+        runtime_staged = [
+            path for path in staged
+            if path != APPROVED_DASHBOARD_UI_STAGE
+            and re.search(r"(^|/)(runtime|cache|logs?|tmp|status)(/|$)|\.log$|\.lock$|\.pid$", path, re.I)
+        ]
+        v4_staged = [path for path in staged if re.search(r"(^|/)(v4_|V4_|check_v4|build_v4|run_v4|engine/v4|scripts/v4|docs/V4)", path)]
+        add(failures, not runtime_staged, "runtime_cache_log_status_staged", runtime_staged)
+        add(failures, not v4_staged, "v4_staged", v4_staged)
+        relevant_runtime = [path for path in tracked_runtime_hits() if "match_card" in path]
+        add(failures, not relevant_runtime, "runtime_match_card_output_tracked", relevant_runtime)
+        secrets = secret_hits([
+            MATCH_CARDS,
+            MATCH_SUMMARY,
+            Path(__file__).resolve(),
+            ROOT / "docs/V3_WC_MATCH_CARD_PACK_PHASE_1_MATCH_CARD_FOUNDATION_20260604.md",
+        ])
+        add(failures, not secrets, "secret_literal_hits", secrets)
+
+        out = {
+            "generated_at": datetime.now().isoformat(),
+            "conclusion": "PASS" if not failures else "BLOCKER",
+            "failures": failures,
+            "scope": "FULL_TOURNAMENT_104_WITH_GROUP_STAGE_VIEW_72",
+            "current_scope_match_count": GROUP_STAGE_MATCH_COUNT,
+            "total_tournament_expected_match_count": TOTAL_TOURNAMENT_EXPECTED_MATCH_COUNT,
+            "full_tournament_complete": False,
+            "match_count": len(cards),
+            "group_stage_match_count": len(group_cards),
+            "knockout_slot_count": len(knockout_cards),
+            "venue_field_count": sum(1 for card in cards if card.get("venue")),
+            "parse_required_count": sum(1 for card in cards if card.get("venue") == "PARSE_REQUIRED"),
+            "runtime_staged": runtime_staged,
+            "v4_staged": v4_staged,
+            "secret_hits": secrets,
+        }
+        STATUS_OUT.parent.mkdir(parents=True, exist_ok=True)
+        STATUS_OUT.write_text(json.dumps(out, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+        print(json.dumps(out, ensure_ascii=False, indent=2))
+        return 0 if not failures else 2
+
     add(failures, isinstance(cards, list) and len(cards) > 0, "match_count_not_positive", len(cards) if isinstance(cards, list) else "not_list")
     add(failures, len(cards) == GROUP_STAGE_MATCH_COUNT, "match_cards_scope_not_group_stage_72", len(cards))
     add(failures, summary.get("match_count") == len(cards), "summary_match_count_mismatch", summary.get("match_count"))

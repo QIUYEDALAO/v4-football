@@ -112,6 +112,8 @@ def main() -> int:
     add(failures, summary.get("canonical_card_count") == TOTAL_EXPECTED_COUNT, "summary_canonical_count_unexpected", summary.get("canonical_card_count"))
     add(failures, summary.get("group_stage_match_count") == GROUP_STAGE_COUNT, "summary_group_stage_count_unexpected", summary.get("group_stage_match_count"))
     add(failures, summary.get("knockout_slot_count") == KNOCKOUT_SLOT_COUNT, "summary_knockout_slot_count_unexpected", summary.get("knockout_slot_count"))
+    add(failures, summary.get("venue_mapped_count") == TOTAL_EXPECTED_COUNT, "summary_venue_mapped_count_unexpected", summary.get("venue_mapped_count"))
+    add(failures, summary.get("source_provenance") == "wikipedia_snapshot", "summary_source_provenance_unexpected", summary.get("source_provenance"))
     add(failures, schedule_index.get("canonical_source") == str(CARDS_INDEX_BRIDGE_104.relative_to(ROOT)), "canonical_source_unexpected", schedule_index.get("canonical_source"))
     add(failures, schedule_index.get("full_tournament_canonical_source") is True, "canonical_source_not_marked_full_tournament")
     add(failures, schedule_index.get("group_stage_view") == str(GROUP_CARDS.relative_to(ROOT)), "group_stage_view_unexpected", schedule_index.get("group_stage_view"))
@@ -130,6 +132,8 @@ def main() -> int:
         add(failures, bool(item.get("source_card_ref")), "group_source_card_ref_missing", item.get("canonical_card_id"))
         add(failures, bool(item.get("home_team")) and bool(item.get("away_team")), "group_team_missing", item.get("canonical_card_id"))
         add(failures, item.get("knockout_team_generated") is False, "group_knockout_team_generated_true", item.get("canonical_card_id"))
+        add(failures, item.get("venue_mapping_status") == "MAPPED", "group_venue_not_mapped", item.get("canonical_card_id"))
+        add(failures, item.get("source_provenance") == "wikipedia_snapshot", "group_venue_source_provenance_unexpected", item.get("canonical_card_id"))
     for item in knockout_rows:
         cid = item.get("canonical_card_id")
         add(failures, item.get("home_team") is None and item.get("away_team") is None, "knockout_team_generated", cid)
@@ -137,7 +141,8 @@ def main() -> int:
         add(failures, item.get("api_football_fixture_id") is None, "knockout_fixture_id_generated", cid)
         add(failures, item.get("odds_fixture_id") is None, "knockout_odds_fixture_id_generated", cid)
         add(failures, item.get("team_source_status") == "WAIT_QUALIFICATION_NO_TEAM_GENERATED", "knockout_team_status_unexpected", cid)
-        add(failures, item.get("venue_generated") is False, "knockout_venue_generated_true", cid)
+        add(failures, item.get("venue_mapping_status") == "MAPPED", "knockout_venue_not_mapped", cid)
+        add(failures, item.get("source_provenance") == "wikipedia_snapshot", "knockout_venue_source_provenance_unexpected", cid)
         add(failures, item.get("knockout_team_generated") is False, "knockout_team_generated_true", cid)
 
     for item in rows:
@@ -183,6 +188,8 @@ def main() -> int:
         "canonical_card_count": len(rows),
         "group_stage_match_count": len(group_rows),
         "knockout_slot_count": len(knockout_rows),
+        "venue_mapped_count": summary.get("venue_mapped_count"),
+        "source_provenance": summary.get("source_provenance"),
         "full_tournament_canonical_source": schedule_index.get("full_tournament_canonical_source"),
         "full_tournament_match_data_complete": schedule_index.get("full_tournament_match_data_complete"),
         "double_read_guard": read_policy.get("do_not_merge_canonical_and_group_view"),
