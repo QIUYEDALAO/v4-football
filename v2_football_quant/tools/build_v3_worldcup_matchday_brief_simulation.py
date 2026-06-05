@@ -71,39 +71,50 @@ def format_odds_line(row: dict[str, Any]) -> str:
     delta = row.get("odds_observation_delta")
     first_text = f"{first.get('home')}/{first.get('draw')}/{first.get('away')}" if first else "N/A"
     last_text = f"{last.get('home')}/{last.get('draw')}/{last.get('away')}" if last else "等待后续快照"
+    delta_text = delta if isinstance(delta, str) else f"主{delta.get('home')} / 平{delta.get('draw')} / 客{delta.get('away')}"
     return (
-        f"- {row['timepoint']}：first_seen_odds={first_text}；"
-        f"last_pre_kickoff_odds={last_text}；"
-        f"odds_observation_delta={delta}"
+        f"{row['timepoint']}：首见 {first_text}；赛前最后 {last_text}；观察差 {delta_text}"
     )
 
 
 def render_md(sim: dict[str, Any]) -> str:
     card = sim["brief_card"]
+    odds_lines = "｜".join(format_odds_line(row) for row in sim["mock_odds_timeline"])
     return "\n".join(
         [
-            "# V3 世界杯赛前情报卡 dry-run",
+            "# 世界杯赛前情报卡（手机样例）",
             "",
-            "observation-only。以下为本地 mock odds 演示，不调用 live API，不生成首发，不生成预测，不生成资金流结论，不影响 V4。",
+            "仅观察，不推荐。以下为本地模拟样例，不调用实时接口。",
             "",
-            f"## {card['match_title']}",
+            "## 1. 比赛信息",
             "",
-            f"- 比赛：{card['match_label']}",
-            f"- 时间：{card['kickoff_display']}",
-            f"- 场馆：{card['venue_display']}",
-            f"- 阶段：{card['stage_display']}",
-            f"- 双方 Final26 摘要：{card['final26_summary']}",
-            f"- venue stress：{card['venue_stress_summary']}",
-            f"- lineup status：{card['lineup_status']}",
-            f"- data gaps：{' / '.join(card['data_gaps'])}",
+            f"{card['match_label']}｜{card['stage_display']}｜{card['kickoff_display']}｜{card['venue_display']}",
             "",
-            "## mock odds 时间点",
+            "## 2. 战备状态",
             "",
-            *[format_odds_line(row) for row in sim["mock_odds_timeline"]],
+            f"Final26 已入库。{card['final26_summary']}",
             "",
-            "说明：只展示 first_seen_odds、last_pre_kickoff_odds、odds_observation_delta；原生开盘/收盘缺失；不生成盘口或资金流结论。",
+            "## 3. 阵容状态",
             "",
-            "安全提示：WAIT_OFFICIAL_LINEUP；no starting XI；no prediction；no betting；affects_v4=false。",
+            "官方首发未到：WAIT_OFFICIAL_LINEUP。当前不生成预测首发，不做伤停判断。",
+            "",
+            "## 4. 场馆/环境",
+            "",
+            card["venue_stress_summary"],
+            "",
+            "## 5. 赔率观察",
+            "",
+            odds_lines,
+            "",
+            "只看首见赔率、赛前最后快照、观察差；原生开盘/收盘缺失，不生成盘口或资金流结论。",
+            "",
+            "## 6. 当前缺口",
+            "",
+            " / ".join(card["data_gaps"]),
+            "",
+            "## 7. 结论：仅观察，不推荐",
+            "",
+            "这是一张赛前情报卡，不是投注建议；不生成首发、不生成预测、不影响 V4 official。",
             "",
         ]
     )

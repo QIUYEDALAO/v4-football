@@ -1,25 +1,33 @@
-# V3 世界杯赛前情报卡 dry-run
+# 世界杯赛前情报卡（手机样例）
 
-observation-only。以下为本地 mock odds 演示，不调用 live API，不生成首发，不生成预测，不生成资金流结论，不影响 V4。
+仅观察，不推荐。以下为本地模拟样例，不调用实时接口。
 
-## Algeria vs Austria
+## 1. 比赛信息
 
-- 比赛：Algeria vs Austria
-- 时间：June 11, 2026 1:00 p.m. UTC−06:00
-- 场馆：Estadio Azteca
-- 阶段：小组赛 A 组
-- 双方 Final26 摘要：Algeria 26人；GK/DF/MF/FW=3/9/7/7；均龄 26.86；均高 182.65cm；Austria 26人；GK/DF/MF/FW=3/8/11/4；均龄 28.54；均高 184.69cm
-- venue stress：Estadio Azteca；ALTITUDE_STRESS / MIDDAY_KICKOFF_RISK / VENUE_UPSET_WATCH / WATCH_ONLY；原因：altitude=2200m; midday=HIGH (Oxygen)；来源等级：HIGH_SOURCE_CROSS_CHECKED_VIDEO_CLAIM_OBSERVATION_ONLY
-- lineup status：WAIT_OFFICIAL_LINEUP
-- data gaps：NO_NATIVE_OPENING_CLOSING_ODDS / WAIT_OFFICIAL_LINEUP
+Algeria vs Austria｜小组赛 A 组｜June 11, 2026 1:00 p.m. UTC−06:00｜Estadio Azteca
 
-## mock odds 时间点
+## 2. 战备状态
 
-- T-24h：first_seen_odds=2.42/3.18/2.96；last_pre_kickoff_odds=等待后续快照；odds_observation_delta=BASELINE_MOCK_SNAPSHOT
-- T-6h：first_seen_odds=2.42/3.18/2.96；last_pre_kickoff_odds=等待后续快照；odds_observation_delta={'home': -0.02, 'draw': 0.01, 'away': 0.03}
-- T-90m：first_seen_odds=2.42/3.18/2.96；last_pre_kickoff_odds=等待后续快照；odds_observation_delta={'home': -0.04, 'draw': 0.02, 'away': 0.04}
-- T-30m：first_seen_odds=2.42/3.18/2.96；last_pre_kickoff_odds=2.38/3.2/3.0；odds_observation_delta={'home': -0.04, 'draw': 0.02, 'away': 0.04}
+Final26 已入库。Algeria 26人；GK/DF/MF/FW=3/9/7/7；均龄 26.86；均高 182.65cm；Austria 26人；GK/DF/MF/FW=3/8/11/4；均龄 28.54；均高 184.69cm
 
-说明：只展示 first_seen_odds、last_pre_kickoff_odds、odds_observation_delta；原生开盘/收盘缺失；不生成盘口或资金流结论。
+## 3. 阵容状态
 
-安全提示：WAIT_OFFICIAL_LINEUP；no starting XI；no prediction；no betting；affects_v4=false。
+官方首发未到：WAIT_OFFICIAL_LINEUP。当前不生成预测首发，不做伤停判断。
+
+## 4. 场馆/环境
+
+Estadio Azteca；ALTITUDE_STRESS / MIDDAY_KICKOFF_RISK / VENUE_UPSET_WATCH / WATCH_ONLY；原因：altitude=2200m; midday=HIGH (Oxygen)；来源等级：HIGH_SOURCE_CROSS_CHECKED_VIDEO_CLAIM_OBSERVATION_ONLY
+
+## 5. 赔率观察
+
+T-24h：首见 2.42/3.18/2.96；赛前最后 等待后续快照；观察差 BASELINE_MOCK_SNAPSHOT｜T-6h：首见 2.42/3.18/2.96；赛前最后 等待后续快照；观察差 主-0.02 / 平0.01 / 客0.03｜T-90m：首见 2.42/3.18/2.96；赛前最后 等待后续快照；观察差 主-0.04 / 平0.02 / 客0.04｜T-30m：首见 2.42/3.18/2.96；赛前最后 2.38/3.2/3.0；观察差 主-0.04 / 平0.02 / 客0.04
+
+只看首见赔率、赛前最后快照、观察差；原生开盘/收盘缺失，不生成盘口或资金流结论。
+
+## 6. 当前缺口
+
+NO_NATIVE_OPENING_CLOSING_ODDS / WAIT_OFFICIAL_LINEUP
+
+## 7. 结论：仅观察，不推荐
+
+这是一张赛前情报卡，不是投注建议；不生成首发、不生成预测、不影响 V4 official。

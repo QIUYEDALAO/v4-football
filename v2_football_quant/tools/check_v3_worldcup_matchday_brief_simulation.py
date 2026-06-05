@@ -27,6 +27,20 @@ DISALLOWED_TEXT = [
     "sharp move",
     "predicted xi",
     "starting_xi_players",
+    "mock odds",
+    "venue stress：",
+    "lineup status",
+    "data gaps",
+    "affects_v4=false",
+]
+REQUIRED_MOBILE_SECTIONS = [
+    "## 1. 比赛信息",
+    "## 2. 战备状态",
+    "## 3. 阵容状态",
+    "## 4. 场馆/环境",
+    "## 5. 赔率观察",
+    "## 6. 当前缺口",
+    "## 7. 结论：仅观察，不推荐",
 ]
 
 
@@ -99,7 +113,13 @@ def main() -> int:
 
     combined = json.dumps({"sim": sim, "summary": summary}, ensure_ascii=False).lower() + "\n" + md.lower()
     for phrase in DISALLOWED_TEXT:
-        add(failures, phrase not in combined, "disallowed_text", phrase)
+        add(failures, phrase not in md.lower(), "disallowed_mobile_text", phrase)
+    for section in REQUIRED_MOBILE_SECTIONS:
+        add(failures, section in md, "mobile_section_missing", section)
+    add(failures, md.count("\n") <= 42, "mobile_brief_too_long", md.count("\n"))
+    add(failures, "WAIT_OFFICIAL_LINEUP" in md, "mobile_lineup_wait_missing")
+    add(failures, "首见" in md and "赛前最后" in md and "观察差" in md, "mobile_odds_terms_missing")
+    add(failures, "仅观察，不推荐" in md, "mobile_observation_conclusion_missing")
 
     staged = staged_files()
     runtime_staged = [path for path in staged if re.search(r"(^|/)(runtime|cache|logs?|tmp|status)(/|$)|\.log$|\.lock$|\.pid$", path, re.I)]
