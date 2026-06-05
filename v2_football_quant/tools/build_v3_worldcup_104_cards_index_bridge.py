@@ -15,6 +15,7 @@ GROUP_SUMMARY = OUT_DIR / "v3_wc_match_card_summary.json"
 FIXTURE_MAPPING_BRIDGE = OUT_DIR / "v3_wc2026_fixture_mapping_bridge.json"
 VENUE_MAPPING_BRIDGE = OUT_DIR / "v3_wc2026_venue_mapping_bridge.json"
 SCOPE_DOC = ROOT / "docs/V3_WC_MATCH_CARD_SCOPE_CLARIFICATION_20260605.md"
+GROUP_SCHEDULE = ROOT / "data/v3_wc2026/group_schedule.json"
 
 SCHEDULE_INDEX_104 = OUT_DIR / "v3_wc2026_schedule_index_104.json"
 CARDS_INDEX_BRIDGE_104 = OUT_DIR / "v3_wc2026_104_cards_index_bridge.json"
@@ -52,6 +53,20 @@ def load_json(path: Path) -> Any:
 
 def rel(path: Path) -> str:
     return str(path.relative_to(ROOT))
+
+
+def slugify(text: str) -> str:
+    cleaned = (
+        text.lower()
+        .replace("&", "and")
+        .replace("'", "")
+        .replace("ç", "c")
+        .replace("ô", "o")
+        .replace("ü", "u")
+        .replace("é", "e")
+        .replace("í", "i")
+    )
+    return "_".join(part for part in "".join(ch if ch.isalnum() else " " for ch in cleaned).split() if part)
 
 
 def git_head() -> str:
@@ -102,27 +117,29 @@ def group_stage_rows(cards: list[dict[str, Any]], fixture_rows: list[dict[str, A
     venues_by_match = bridge_by_match_id(venue_rows)
     for index, fixture_row in enumerate(fixture_rows, start=1):
         card = group_cards[index - 1] if index - 1 < len(group_cards) else {}
-        match_id = str(fixture_row.get("match_card_id") or f"group_stage_{index:03d}")
+        match_id = str(fixture_row.get("match_card_id") or fixture_row.get("fixture_id") or f"group_stage_{index:03d}")
         wiki_match_id = str(card.get("match_id") or f"wc_{index:03d}")
         venue = _venue_fields(card, venues_by_match.get(wiki_match_id, {}))
+        fixture_id = fixture_row.get("api_football_fixture_id") or fixture_row.get("fixture_id")
+        source_ref_path = FIXTURE_MAPPING_BRIDGE if fixture_row.get("match_card_id") else GROUP_SCHEDULE
         rows.append({
             "canonical_card_id": f"wc2026_104_{index:03d}",
             "card_scope": "FULL_TOURNAMENT_CANONICAL",
             "card_kind": "GROUP_STAGE_MATCH",
             "source_view": "GROUP_STAGE_VIEW_72",
-            "source_card_ref": f"{rel(FIXTURE_MAPPING_BRIDGE)}#{match_id}",
+            "source_card_ref": f"{rel(source_ref_path)}#{match_id}",
             "match_card_id": match_id,
             "group_stage_view_ref": f"{rel(GROUP_CARDS)}#{wiki_match_id}",
             "round": "GROUP_STAGE",
             "round_order": 1,
             "slot_number": index,
-            "group": fixture_row.get("group"),
+            "group": card.get("group") or fixture_row.get("group"),
             "home_team": fixture_row.get("home_team"),
             "away_team": fixture_row.get("away_team"),
-            "home_team_slug": fixture_row.get("home_team_slug"),
-            "away_team_slug": fixture_row.get("away_team_slug"),
-            "api_football_fixture_id": fixture_row.get("api_football_fixture_id"),
-            "odds_fixture_id": fixture_row.get("odds_fixture_id"),
+            "home_team_slug": fixture_row.get("home_team_slug") or slugify(str(fixture_row.get("home_team") or "")),
+            "away_team_slug": fixture_row.get("away_team_slug") or slugify(str(fixture_row.get("away_team") or "")),
+            "api_football_fixture_id": str(fixture_id) if fixture_id is not None else None,
+            "odds_fixture_id": str(fixture_id) if fixture_id is not None else None,
             "venue_wikipedia_match_id": wiki_match_id,
             **venue,
             "schedule_source_status": "LOCAL_GROUP_STAGE_SOURCE",
@@ -176,12 +193,16 @@ def build() -> tuple[dict[str, Any], list[dict[str, Any]], dict[str, Any]]:
     group_cards = cards_obj if isinstance(cards_obj, list) else []
     fixture_bridge_obj = load_json(FIXTURE_MAPPING_BRIDGE)
     fixture_bridge_cards = fixture_bridge_obj if isinstance(fixture_bridge_obj, list) else []
+    group_schedule_obj = load_json(GROUP_SCHEDULE)
+    group_schedule_rows = group_schedule_obj if isinstance(group_schedule_obj, list) else []
     venue_bridge_obj = load_json(VENUE_MAPPING_BRIDGE)
     venue_bridge_cards = venue_bridge_obj if isinstance(venue_bridge_obj, list) else []
     group_stage_source_cards = [card for card in group_cards if isinstance(card, dict) and is_group_stage_source_card(card)]
     group_summary = load_json(GROUP_SUMMARY)
 
-    rows = group_stage_rows(group_cards, fixture_bridge_cards, venue_bridge_cards)
+    mapped_fixture_rows = [row for row in fixture_bridge_cards if row.get("api_football_fixture_id") and row.get("odds_fixture_id")]
+    fixture_source_rows = mapped_fixture_rows[:GROUP_STAGE_COUNT] if len(mapped_fixture_rows) >= GROUP_STAGE_COUNT else group_schedule_rows[:GROUP_STAGE_COUNT]
+    rows = group_stage_rows(group_cards, fixture_source_rows, venue_bridge_cards)
     rows.extend(knockout_rows(group_cards, len(rows) + 1, venue_bridge_cards))
 
     schedule_index = {
@@ -208,6 +229,7 @@ def build() -> tuple[dict[str, Any], list[dict[str, Any]], dict[str, Any]]:
             "group_cards": rel(GROUP_CARDS),
             "group_summary": rel(GROUP_SUMMARY),
             "fixture_mapping_bridge": rel(FIXTURE_MAPPING_BRIDGE),
+            "group_schedule": rel(GROUP_SCHEDULE),
             "venue_mapping_bridge": rel(VENUE_MAPPING_BRIDGE),
             "group_stage_source": rel(GROUP_CARDS),
             "group_stage_source_filter": "round in [1, 2, 3]",
