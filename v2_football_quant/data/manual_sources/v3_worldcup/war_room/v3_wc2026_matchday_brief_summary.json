@@ -1,6 +1,6 @@
 {
   "pack_name": "V3_WC_2026_MATCHDAY_BRIEF_TEMPLATE_PACK",
-  "generated_at": "2026-06-05T08:52:57.487090+00:00",
+  "generated_at": "2026-06-05T08:53:54.484071+00:00",
   "template": "templates/v3_worldcup_matchday_brief_card.md",
   "brief_cards": "data/manual_sources/v3_worldcup/war_room/v3_wc2026_matchday_brief_cards.json",
   "brief_markdown": "data/manual_sources/v3_worldcup/war_room/V3_WC2026_MATCHDAY_BRIEF_CARDS.md",

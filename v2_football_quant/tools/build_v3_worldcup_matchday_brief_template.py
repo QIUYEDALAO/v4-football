@@ -59,6 +59,13 @@ def rel(path: Path) -> str:
     return str(path.relative_to(ROOT))
 
 
+def stable_generated_at() -> str:
+    existing = load_json(OUT_SUMMARY, {})
+    if isinstance(existing, dict) and existing.get("generated_at"):
+        return str(existing["generated_at"])
+    return datetime.now(timezone.utc).isoformat()
+
+
 def slug_text(value: str | None) -> str:
     return str(value or "").strip().lower().replace("&amp;", "and").replace(" ", "_")
 
@@ -249,7 +256,7 @@ def build() -> tuple[list[dict[str, Any]], dict[str, Any], str]:
     knockout_count = sum(1 for card in cards if card.get("card_kind") == "KNOCKOUT_SLOT")
     summary = {
         "pack_name": "V3_WC_2026_MATCHDAY_BRIEF_TEMPLATE_PACK",
-        "generated_at": datetime.now(timezone.utc).isoformat(),
+        "generated_at": stable_generated_at(),
         "template": rel(TEMPLATE),
         "brief_cards": rel(OUT_JSON),
         "brief_markdown": rel(OUT_MD),
