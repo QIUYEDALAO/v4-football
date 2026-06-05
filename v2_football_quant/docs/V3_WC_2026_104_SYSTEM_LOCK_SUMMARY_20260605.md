@@ -25,6 +25,8 @@ No live API, data guessing, venue filling, lineup generation, betting output, ru
 - odds_fixture_id mapped in group-stage view: 72
 - final26 group-stage gaps after triage: 0
 - lineup group-stage gaps after triage: 0
+- venue mapped cards: 104
+- group-stage venue source required: 0
 - dashboard registered cards: 104
 - war room registered cards: 104
 
@@ -34,18 +36,19 @@ No live API, data guessing, venue filling, lineup generation, betting output, ru
 - 72 cards are only `GROUP_STAGE_ONLY_72`, a subset view of the canonical 104.
 - Dashboard must not treat 72 cards as the complete World Cup source.
 - 32 knockout cards are only `STRUCTURAL_SLOT_PLACEHOLDER`.
-- Knockout slots do not generate teams, fixtures, odds IDs, venues, lineups, predictions, or betting fields.
+- Knockout slots do not generate teams, fixtures, odds IDs, lineups, predictions, or betting fields.
+- Knockout venue fields are bound only from the locked `wikipedia_snapshot` schedule source.
 - Coverage radar may apply deterministic local team-key aliases, currently `cote_divoire -> cote_d_ivoire`, without changing source schedule rows.
 
 ## Remaining Gaps
 
-- venue source required: 72 group-stage cards
+- venue source required: 0 group-stage cards
 - knockout real teams required: 32 structural slots
-- knockout fixture/venue/odds details required: 32 structural slots
+- knockout fixture/odds details required: 32 structural slots
 - native opening/closing odds unavailable
 - odds movement conclusion unavailable
 
-Venue remains `VENUE_SOURCE_REQUIRED`; no venue was filled or guessed.
+Venues are mapped for all 104 cards from `source_provenance=wikipedia_snapshot`. Seven rows are marked parse-required from the local snapshot source; no venue was source-free guessed.
 
 ## Safety
 
