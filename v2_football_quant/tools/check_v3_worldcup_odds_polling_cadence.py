@@ -21,17 +21,34 @@ TIMELINE_JSONL = TIMELINE_DIR / "v3_worldcup_odds_timeline.jsonl"
 STATUS_OUT = ROOT / "data/runtime/status/check_v3_worldcup_odds_polling_cadence_20260604.json"
 
 REQUIRED_CONFIG_FIELDS = [
+    "schema_version",
     "max_requests_per_run",
     "default_limit",
     "fixture_batch_size",
     "recommended_cadence",
+    "non_matchday_cadence",
     "pre_tournament_cadence",
     "matchweek_cadence",
     "matchday_cadence",
+    "match_relative_polling_plan",
     "quota_budget_per_day",
+    "system_max_daily_requests",
+    "default_target_requests_per_day",
+    "hard_stop_at_requests_per_day",
+    "fixture_scope",
+    "budget_projection",
+    "default_target_usage_plan",
+    "allowed_odds_observation_fields",
+    "opening_closing_proxy_policy",
     "api_provider",
     "observation_only",
     "affects_v4",
+]
+EXPECTED_WINDOWS = ["T-24h", "T-6h", "T-2h", "T-90m", "T-60m", "T-30m"]
+EXPECTED_ALLOWED_ODDS_FIELDS = [
+    "first_seen_odds",
+    "last_pre_kickoff_odds",
+    "odds_observation_delta",
 ]
 
 REQUIRED_TIMELINE_FIELDS = [
@@ -118,6 +135,61 @@ def main() -> int:
         failures.append("config_api_provider_not_api_football")
     if int(config.get("max_requests_per_run") or 0) > 80:
         failures.append("config_max_requests_per_run_exceeds_80")
+    if int(config.get("quota_budget_per_day") or 0) != 7500:
+        failures.append(f"config_quota_budget_per_day_unexpected:{config.get('quota_budget_per_day')}")
+    if int(config.get("system_max_daily_requests") or 0) > 1500:
+        failures.append(f"config_system_max_daily_requests_exceeds_1500:{config.get('system_max_daily_requests')}")
+    if int(config.get("default_target_requests_per_day") or 0) > 600:
+        failures.append(f"config_default_target_requests_per_day_exceeds_600:{config.get('default_target_requests_per_day')}")
+    if int(config.get("hard_stop_at_requests_per_day") or 0) > 6000:
+        failures.append(f"config_hard_stop_at_requests_per_day_exceeds_6000:{config.get('hard_stop_at_requests_per_day')}")
+    if int(config.get("hard_stop_at_requests_per_day") or 0) <= int(config.get("system_max_daily_requests") or 0):
+        failures.append("config_hard_stop_not_above_system_max")
+
+    fixture_scope = config.get("fixture_scope") if isinstance(config.get("fixture_scope"), dict) else {}
+    if fixture_scope.get("canonical_total") != 104:
+        failures.append(f"config_canonical_total_unexpected:{fixture_scope.get('canonical_total')}")
+    if fixture_scope.get("group_stage_total") != 72:
+        failures.append(f"config_group_stage_total_unexpected:{fixture_scope.get('group_stage_total')}")
+    if fixture_scope.get("knockout_reserved_total") != 32:
+        failures.append(f"config_knockout_reserved_total_unexpected:{fixture_scope.get('knockout_reserved_total')}")
+
+    plan = config.get("match_relative_polling_plan") if isinstance(config.get("match_relative_polling_plan"), list) else []
+    windows = [item.get("window") for item in plan if isinstance(item, dict)]
+    if windows != EXPECTED_WINDOWS:
+        failures.append(f"config_polling_windows_unexpected:{windows}")
+    for item in plan:
+        if not isinstance(item, dict):
+            failures.append("config_polling_window_not_object")
+            continue
+        if item.get("group_stage_request_budget") != 72:
+            failures.append(f"config_window_group_budget_unexpected:{item}")
+        if item.get("knockout_reserved_request_budget") != 32:
+            failures.append(f"config_window_knockout_budget_unexpected:{item}")
+        if item.get("full_104_request_budget") != 104:
+            failures.append(f"config_window_full_104_budget_unexpected:{item}")
+
+    projection = config.get("budget_projection") if isinstance(config.get("budget_projection"), dict) else {}
+    if projection.get("group_stage_six_window_requests") != 432:
+        failures.append(f"config_group_six_window_requests_unexpected:{projection.get('group_stage_six_window_requests')}")
+    if projection.get("knockout_reserved_six_window_requests") != 192:
+        failures.append(f"config_knockout_six_window_requests_unexpected:{projection.get('knockout_reserved_six_window_requests')}")
+    if projection.get("full_104_six_window_requests") != 624:
+        failures.append(f"config_full_104_six_window_requests_unexpected:{projection.get('full_104_six_window_requests')}")
+    if projection.get("requires_batching_or_window_thinning_to_meet_default_target") is not True:
+        failures.append("config_default_target_thinning_guard_missing")
+    if projection.get("under_system_max_daily_requests") is not True:
+        failures.append("config_under_system_max_guard_missing")
+    if projection.get("under_hard_stop") is not True:
+        failures.append("config_under_hard_stop_guard_missing")
+
+    allowed_fields = config.get("allowed_odds_observation_fields")
+    if allowed_fields != EXPECTED_ALLOWED_ODDS_FIELDS:
+        failures.append(f"config_allowed_odds_fields_unexpected:{allowed_fields}")
+    proxy = config.get("opening_closing_proxy_policy") if isinstance(config.get("opening_closing_proxy_policy"), dict) else {}
+    for field in EXPECTED_ALLOWED_ODDS_FIELDS:
+        if field not in proxy:
+            failures.append(f"config_proxy_policy_missing:{field}")
     for field, expected in {
         "observation_only": True,
         "betting_recommendation": False,
@@ -125,9 +197,14 @@ def main() -> int:
         "has_native_opening": False,
         "has_native_closing": False,
         "movement_requires_timeline": True,
+        "no_money_flow_judgment": True,
     }.items():
         if config.get(field) is not expected:
             failures.append(f"config_{field}_unexpected:{config.get(field)}")
+    disabled_claims = set(config.get("disabled_claims") or [])
+    for claim in {"steam", "drift", "fund_flow", "true_opening", "true_closing"}:
+        if claim not in disabled_claims:
+            failures.append(f"config_disabled_claim_missing:{claim}")
 
     if TIMELINE_DIR.exists():
         shutil.rmtree(TIMELINE_DIR)
@@ -228,6 +305,13 @@ def main() -> int:
         "append_first": first_payload,
         "append_second": second_payload,
         "availability_monitor": monitor_payload,
+        "api_budget": {
+            "quota_budget_per_day": config.get("quota_budget_per_day"),
+            "system_max_daily_requests": config.get("system_max_daily_requests"),
+            "default_target_requests_per_day": config.get("default_target_requests_per_day"),
+            "hard_stop_at_requests_per_day": config.get("hard_stop_at_requests_per_day"),
+            "full_104_six_window_requests": (config.get("budget_projection") or {}).get("full_104_six_window_requests") if isinstance(config.get("budget_projection"), dict) else None,
+        },
         "runtime_tracked": bool(tracked_runtime),
         "secret_hits": secret_hits,
     }

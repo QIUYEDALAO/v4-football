@@ -1,15 +1,32 @@
 {
-  "schema_version": "v3_worldcup_odds_polling_cadence.v1",
+  "schema_version": "v3_worldcup_odds_polling_cadence.v2",
   "api_provider": "api-football",
   "max_requests_per_run": 80,
   "default_limit": 72,
   "fixture_batch_size": 24,
   "quota_budget_per_day": 7500,
+  "system_max_daily_requests": 1500,
+  "default_target_requests_per_day": 600,
+  "hard_stop_at_requests_per_day": 6000,
+  "fixture_scope": {
+    "canonical_total": 104,
+    "group_stage_total": 72,
+    "knockout_reserved_total": 32,
+    "group_stage_scope": "GROUP_STAGE_ONLY_72",
+    "knockout_scope": "STRUCTURAL_PLACEHOLDER_32"
+  },
   "recommended_cadence": {
     "mode": "manual_template_only",
     "launchd_enabled": false,
     "production_schedule_enabled": false,
-    "note": "Phase 3 defines cadence foundation only; no scheduler is activated."
+    "budget_policy": "CONSERVATIVE_DAILY_BUDGET_GUARD",
+    "note": "Budget plan only; no scheduler is activated and no live API call is made by this config."
+  },
+  "non_matchday_cadence": {
+    "recommended_interval_hours": 24,
+    "max_runs_per_day": 1,
+    "request_budget_per_day": 72,
+    "scope": "GROUP_STAGE_ONLY_72_LOW_FREQUENCY"
   },
   "pre_tournament_cadence": {
     "recommended_interval_hours": 24,
@@ -26,15 +43,94 @@
     "max_runs_per_day": 8,
     "request_budget_per_day": 576
   },
+  "match_relative_polling_plan": [
+    {
+      "window": "T-24h",
+      "minutes_before_kickoff": 1440,
+      "scope": "GROUP_72_PLUS_KNOCKOUT_32_RESERVED",
+      "group_stage_request_budget": 72,
+      "knockout_reserved_request_budget": 32,
+      "full_104_request_budget": 104
+    },
+    {
+      "window": "T-6h",
+      "minutes_before_kickoff": 360,
+      "scope": "GROUP_72_PLUS_KNOCKOUT_32_RESERVED",
+      "group_stage_request_budget": 72,
+      "knockout_reserved_request_budget": 32,
+      "full_104_request_budget": 104
+    },
+    {
+      "window": "T-2h",
+      "minutes_before_kickoff": 120,
+      "scope": "GROUP_72_PLUS_KNOCKOUT_32_RESERVED",
+      "group_stage_request_budget": 72,
+      "knockout_reserved_request_budget": 32,
+      "full_104_request_budget": 104
+    },
+    {
+      "window": "T-90m",
+      "minutes_before_kickoff": 90,
+      "scope": "GROUP_72_PLUS_KNOCKOUT_32_RESERVED",
+      "group_stage_request_budget": 72,
+      "knockout_reserved_request_budget": 32,
+      "full_104_request_budget": 104
+    },
+    {
+      "window": "T-60m",
+      "minutes_before_kickoff": 60,
+      "scope": "GROUP_72_PLUS_KNOCKOUT_32_RESERVED",
+      "group_stage_request_budget": 72,
+      "knockout_reserved_request_budget": 32,
+      "full_104_request_budget": 104
+    },
+    {
+      "window": "T-30m",
+      "minutes_before_kickoff": 30,
+      "scope": "GROUP_72_PLUS_KNOCKOUT_32_RESERVED",
+      "group_stage_request_budget": 72,
+      "knockout_reserved_request_budget": 32,
+      "full_104_request_budget": 104
+    }
+  ],
+  "budget_projection": {
+    "group_stage_six_window_requests": 432,
+    "knockout_reserved_six_window_requests": 192,
+    "full_104_six_window_requests": 624,
+    "within_default_target_requests_per_day": false,
+    "requires_batching_or_window_thinning_to_meet_default_target": true,
+    "under_system_max_daily_requests": true,
+    "under_hard_stop": true
+  },
+  "default_target_usage_plan": {
+    "target_requests_per_day": 600,
+    "primary_scope": "GROUP_STAGE_ONLY_72",
+    "reserve_policy": "Knockout slots are reserved in the budget model and polled only after real teams are available.",
+    "overflow_policy": "If full 104 six-window polling would exceed the default target, thin the lowest-priority early window before increasing daily usage.",
+    "hard_stop_policy": "Stop immediately when projected daily requests exceed hard_stop_at_requests_per_day."
+  },
+  "allowed_odds_observation_fields": [
+    "first_seen_odds",
+    "last_pre_kickoff_odds",
+    "odds_observation_delta"
+  ],
+  "opening_closing_proxy_policy": {
+    "first_seen_odds": "Earliest locally captured snapshot only; not true opening odds.",
+    "last_pre_kickoff_odds": "Latest locally captured pre-kickoff snapshot only; not true closing odds.",
+    "odds_observation_delta": "Difference between locally captured snapshots only; no market conclusion."
+  },
   "observation_only": true,
   "betting_recommendation": false,
   "affects_v4": false,
   "has_native_opening": false,
   "has_native_closing": false,
   "movement_requires_timeline": true,
+  "no_money_flow_judgment": true,
   "disabled_claims": [
     "steam",
     "drift",
-    "fund_flow"
+    "fund_flow",
+    "true_opening",
+    "true_closing"
   ]
 }

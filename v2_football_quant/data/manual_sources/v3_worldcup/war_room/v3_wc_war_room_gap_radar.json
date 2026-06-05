@@ -1,6 +1,6 @@
 {
   "pack_name": "V3_WC_WAR_ROOM_MASTER_INDEX_PACK",
-  "generated_at": "2026-06-05T05:39:12.453729+00:00",
+  "generated_at": "2026-06-05T06:56:12.324065+00:00",
   "source_master_index": "data/manual_sources/v3_worldcup/war_room/v3_wc_war_room_master_index.json",
   "missing_starting_xi": true,
   "missing_official_matchday_lineup": true,
@@ -58,6 +58,48 @@
     "knockout_structural_placeholder": 32,
     "native_opening_closing_missing": true,
     "odds_movement_conclusion_missing": true
+  },
+  "odds_polling_budget": {
+    "source": "config/v3_worldcup_odds_polling_cadence.json",
+    "api_provider": "api-football",
+    "quota_budget_per_day": 7500,
+    "system_max_daily_requests": 1500,
+    "default_target_requests_per_day": 600,
+    "hard_stop_at_requests_per_day": 6000,
+    "max_requests_per_run": 80,
+    "canonical_total": 104,
+    "group_stage_total": 72,
+    "knockout_reserved_total": 32,
+    "polling_windows": [
+      "T-24h",
+      "T-6h",
+      "T-2h",
+      "T-90m",
+      "T-60m",
+      "T-30m"
+    ],
+    "group_stage_six_window_requests": 432,
+    "knockout_reserved_six_window_requests": 192,
+    "full_104_six_window_requests": 624,
+    "requires_batching_or_window_thinning_to_meet_default_target": true,
+    "default_target_policy": "If full 104 six-window polling would exceed the default target, thin the lowest-priority early window before increasing daily usage.",
+    "allowed_odds_observation_fields": [
+      "first_seen_odds",
+      "last_pre_kickoff_odds",
+      "odds_observation_delta"
+    ],
+    "opening_closing_proxy_policy": {
+      "first_seen_odds": "Earliest locally captured snapshot only; not true opening odds.",
+      "last_pre_kickoff_odds": "Latest locally captured pre-kickoff snapshot only; not true closing odds.",
+      "odds_observation_delta": "Difference between locally captured snapshots only; no market conclusion."
+    },
+    "has_native_opening": false,
+    "has_native_closing": false,
+    "movement_requires_timeline": true,
+    "no_money_flow_judgment": true,
+    "observation_only": true,
+    "betting_recommendation": false,
+    "affects_v4": false
   },
   "final_26_ready": true,
   "venue_stress_ready": true,

@@ -33,6 +33,7 @@ PERCEPTION_DRYRUN_STATUS = ROOT / "data/runtime/status/check_v3_worldcup_match_l
 ODDS_TIMELINE_STATUS = ROOT / "data/runtime/status/check_v3_worldcup_odds_polling_cadence_20260604.json"
 ODDS_LIVE_STATUS = ROOT / "data/runtime/status/check_v3_worldcup_odds_snapshot_live_small_batch_20260604.json"
 ODDS_MOVEMENT_STATUS = ROOT / "data/runtime/status/check_v3_worldcup_odds_movement_eligibility_20260604.json"
+ODDS_POLLING_CADENCE = ROOT / "config/v3_worldcup_odds_polling_cadence.json"
 
 SAFETY = {
     "observation_only": True,
@@ -103,6 +104,40 @@ def module(
     return payload
 
 
+def odds_polling_budget(config: dict[str, Any]) -> dict[str, Any]:
+    fixture_scope = config.get("fixture_scope") if isinstance(config.get("fixture_scope"), dict) else {}
+    projection = config.get("budget_projection") if isinstance(config.get("budget_projection"), dict) else {}
+    plan = config.get("match_relative_polling_plan") if isinstance(config.get("match_relative_polling_plan"), list) else []
+    target_plan = config.get("default_target_usage_plan") if isinstance(config.get("default_target_usage_plan"), dict) else {}
+    return {
+        "source": rel(ODDS_POLLING_CADENCE),
+        "api_provider": config.get("api_provider"),
+        "quota_budget_per_day": config.get("quota_budget_per_day"),
+        "system_max_daily_requests": config.get("system_max_daily_requests"),
+        "default_target_requests_per_day": config.get("default_target_requests_per_day"),
+        "hard_stop_at_requests_per_day": config.get("hard_stop_at_requests_per_day"),
+        "max_requests_per_run": config.get("max_requests_per_run"),
+        "canonical_total": fixture_scope.get("canonical_total"),
+        "group_stage_total": fixture_scope.get("group_stage_total"),
+        "knockout_reserved_total": fixture_scope.get("knockout_reserved_total"),
+        "polling_windows": [item.get("window") for item in plan if isinstance(item, dict)],
+        "group_stage_six_window_requests": projection.get("group_stage_six_window_requests"),
+        "knockout_reserved_six_window_requests": projection.get("knockout_reserved_six_window_requests"),
+        "full_104_six_window_requests": projection.get("full_104_six_window_requests"),
+        "requires_batching_or_window_thinning_to_meet_default_target": projection.get("requires_batching_or_window_thinning_to_meet_default_target"),
+        "default_target_policy": target_plan.get("overflow_policy"),
+        "allowed_odds_observation_fields": config.get("allowed_odds_observation_fields"),
+        "opening_closing_proxy_policy": config.get("opening_closing_proxy_policy"),
+        "has_native_opening": config.get("has_native_opening"),
+        "has_native_closing": config.get("has_native_closing"),
+        "movement_requires_timeline": config.get("movement_requires_timeline"),
+        "no_money_flow_judgment": config.get("no_money_flow_judgment"),
+        "observation_only": config.get("observation_only"),
+        "betting_recommendation": config.get("betting_recommendation"),
+        "affects_v4": config.get("affects_v4"),
+    }
+
+
 def build() -> tuple[dict[str, Any], dict[str, Any]]:
     final26 = load_json(FINAL26_MANIFEST)
     final26_counts = final26.get("counts") if isinstance(final26, dict) and isinstance(final26.get("counts"), dict) else {}
@@ -115,6 +150,7 @@ def build() -> tuple[dict[str, Any], dict[str, Any]]:
     odds_live = load_json(ODDS_LIVE_STATUS)
     odds_movement = load_json(ODDS_MOVEMENT_STATUS)
     odds_timeline = load_json(ODDS_TIMELINE_STATUS)
+    odds_cadence = load_json(ODDS_POLLING_CADENCE)
     match_card_104 = load_json(MATCH_CARD_104_SUMMARY)
     dashboard_104 = load_json(DASHBOARD_104_READ_MODEL)
     coverage_104 = load_json(COVERAGE_GAP_RADAR_SUMMARY)
@@ -122,6 +158,7 @@ def build() -> tuple[dict[str, Any], dict[str, Any]]:
     live_coverage = odds_live.get("coverage") if isinstance(odds_live, dict) and isinstance(odds_live.get("coverage"), dict) else {}
     movement = odds_movement.get("movement_eligibility") if isinstance(odds_movement, dict) and isinstance(odds_movement.get("movement_eligibility"), dict) else {}
     availability = odds_timeline.get("availability_monitor") if isinstance(odds_timeline, dict) and isinstance(odds_timeline.get("availability_monitor"), dict) else {}
+    polling_budget = odds_polling_budget(odds_cadence if isinstance(odds_cadence, dict) else {})
 
     modules = [
         module(
@@ -181,6 +218,21 @@ def build() -> tuple[dict[str, Any], dict[str, Any]]:
                 f"eligibility_status={movement.get('eligibility_status') or 'UNKNOWN'}"
             ),
             "Observe odds_observation_delta only after additional snapshots; no money-flow judgment.",
+        ),
+        module(
+            "odds_polling_budget_plan",
+            "READY_NO_LIVE_API",
+            [ODDS_POLLING_CADENCE],
+            ROOT / "tools/check_v3_worldcup_odds_polling_cadence.py",
+            (
+                f"quota={int(polling_budget.get('quota_budget_per_day') or 0)}/day; "
+                f"target={int(polling_budget.get('default_target_requests_per_day') or 0)}/day; "
+                f"hard_stop={int(polling_budget.get('hard_stop_at_requests_per_day') or 0)}/day"
+            ),
+            "Use as a conservative polling budget plan only; no scheduler or live API execution is enabled.",
+            {
+                "odds_polling_budget": polling_budget,
+            },
         ),
         module(
             "final_26_squad_pack",
@@ -322,6 +374,7 @@ def build() -> tuple[dict[str, Any], dict[str, Any]]:
             "match_card_104_canonical_index": checker_status(ROOT / "data/runtime/status/check_v3_worldcup_104_cards_index_bridge_20260605.json"),
             "dashboard_104_read_model": checker_status(ROOT / "data/runtime/status/check_v3_worldcup_dashboard_104_read_model_20260605.json"),
             "coverage_gap_radar_104": checker_status(ROOT / "data/runtime/status/check_v3_worldcup_104_coverage_gap_radar_20260605.json"),
+            "odds_polling_budget_plan": checker_status(ODDS_TIMELINE_STATUS),
         },
     }
 
@@ -341,6 +394,7 @@ def build() -> tuple[dict[str, Any], dict[str, Any]]:
         "group_72": coverage_104.get("group_72") if isinstance(coverage_104, dict) else {},
         "knockout_32": coverage_104.get("knockout_32") if isinstance(coverage_104, dict) else {},
         "coverage_gap_summary": coverage_104.get("gaps") if isinstance(coverage_104, dict) else {},
+        "odds_polling_budget": polling_budget,
         "final_26_ready": int(final26_counts.get("total_players") or 0) == 1248,
         "venue_stress_ready": VENUE_STRESS.exists(),
         "tactical_profile_ready": TACTICAL_PROFILE.exists(),

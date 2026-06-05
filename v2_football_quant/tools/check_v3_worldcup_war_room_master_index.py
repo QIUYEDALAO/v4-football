@@ -21,6 +21,7 @@ REQUIRED_MODULES = {
     "closing_1x2_market_structure",
     "odds_snapshot_timeline",
     "odds_observation_delta",
+    "odds_polling_budget_plan",
     "final_26_squad_pack",
     "final_26_squad_profile",
     "wc10_war_room",
@@ -36,6 +37,8 @@ EXPECTED_SAFETY = {
     "no_starting_xi": True,
     "no_prediction": True,
 }
+EXPECTED_POLLING_WINDOWS = ["T-24h", "T-6h", "T-2h", "T-90m", "T-60m", "T-30m"]
+EXPECTED_ODDS_FIELDS = ["first_seen_odds", "last_pre_kickoff_odds", "odds_observation_delta"]
 SECRET_PATTERNS = [
     re.compile(r"(?i)(api[_-]?key|token|secret)\s*[:=]\s*['\"][A-Za-z0-9_\-]{16,}"),
     re.compile(r"(?i)x-apisports-key\s*[:=]\s*[A-Za-z0-9_\-]{16,}"),
@@ -165,6 +168,28 @@ def main() -> int:
     add(failures, dashboard_module.get("knockout_slot_policy") == "STRUCTURAL_ONLY_NO_TEAM_GENERATED", "dashboard_knockout_slot_policy_unexpected", dashboard_module.get("knockout_slot_policy"))
     add(failures, dashboard_module.get("double_read_guard") == "READ_CANONICAL_104_OR_GROUP_VIEW_72_NOT_BOTH_AS_COMPLETE", "dashboard_double_read_guard_missing", dashboard_module.get("double_read_guard"))
 
+    odds_budget_module = next((item for item in modules if isinstance(item, dict) and item.get("module_name") == "odds_polling_budget_plan"), {})
+    odds_budget = odds_budget_module.get("odds_polling_budget") if isinstance(odds_budget_module.get("odds_polling_budget"), dict) else {}
+    add(failures, odds_budget_module.get("status") == "READY_NO_LIVE_API", "odds_budget_module_status_unexpected", odds_budget_module.get("status"))
+    add(failures, odds_budget.get("source") == "config/v3_worldcup_odds_polling_cadence.json", "odds_budget_source_unexpected", odds_budget.get("source"))
+    add(failures, odds_budget.get("api_provider") == "api-football", "odds_budget_provider_unexpected", odds_budget.get("api_provider"))
+    add(failures, odds_budget.get("quota_budget_per_day") == 7500, "odds_budget_quota_unexpected", odds_budget.get("quota_budget_per_day"))
+    add(failures, isinstance(odds_budget.get("system_max_daily_requests"), int) and odds_budget.get("system_max_daily_requests") <= 1500, "odds_budget_system_max_exceeds_1500", odds_budget.get("system_max_daily_requests"))
+    add(failures, isinstance(odds_budget.get("default_target_requests_per_day"), int) and odds_budget.get("default_target_requests_per_day") <= 600, "odds_budget_default_target_exceeds_600", odds_budget.get("default_target_requests_per_day"))
+    add(failures, isinstance(odds_budget.get("hard_stop_at_requests_per_day"), int) and odds_budget.get("hard_stop_at_requests_per_day") <= 6000, "odds_budget_hard_stop_exceeds_6000", odds_budget.get("hard_stop_at_requests_per_day"))
+    add(failures, odds_budget.get("canonical_total") == 104, "odds_budget_canonical_total_unexpected", odds_budget.get("canonical_total"))
+    add(failures, odds_budget.get("group_stage_total") == 72, "odds_budget_group_total_unexpected", odds_budget.get("group_stage_total"))
+    add(failures, odds_budget.get("knockout_reserved_total") == 32, "odds_budget_knockout_total_unexpected", odds_budget.get("knockout_reserved_total"))
+    add(failures, odds_budget.get("polling_windows") == EXPECTED_POLLING_WINDOWS, "odds_budget_windows_unexpected", odds_budget.get("polling_windows"))
+    add(failures, odds_budget.get("allowed_odds_observation_fields") == EXPECTED_ODDS_FIELDS, "odds_budget_allowed_fields_unexpected", odds_budget.get("allowed_odds_observation_fields"))
+    add(failures, odds_budget.get("has_native_opening") is False, "odds_budget_native_opening_unexpected", odds_budget.get("has_native_opening"))
+    add(failures, odds_budget.get("has_native_closing") is False, "odds_budget_native_closing_unexpected", odds_budget.get("has_native_closing"))
+    add(failures, odds_budget.get("movement_requires_timeline") is True, "odds_budget_timeline_required_unexpected", odds_budget.get("movement_requires_timeline"))
+    add(failures, odds_budget.get("no_money_flow_judgment") is True, "odds_budget_money_flow_guard_missing", odds_budget.get("no_money_flow_judgment"))
+    add(failures, odds_budget.get("observation_only") is True, "odds_budget_observation_only_unexpected", odds_budget.get("observation_only"))
+    add(failures, odds_budget.get("betting_recommendation") is False, "odds_budget_betting_recommendation_unexpected", odds_budget.get("betting_recommendation"))
+    add(failures, odds_budget.get("affects_v4") is False, "odds_budget_affects_v4_unexpected", odds_budget.get("affects_v4"))
+
     for key, expected in EXPECTED_SAFETY.items():
         add(failures, master.get("global_safety", {}).get(key) is expected, f"global_safety_{key}_unexpected", master.get("global_safety", {}).get(key))
     for item in modules:
@@ -180,6 +205,12 @@ def main() -> int:
     add(failures, (gap.get("group_72") or {}).get("card_count") == 72, "gap_group_72_count_unexpected", gap.get("group_72"))
     add(failures, (gap.get("knockout_32") or {}).get("card_count") == 32, "gap_knockout_32_count_unexpected", gap.get("knockout_32"))
     add(failures, isinstance(gap.get("coverage_gap_summary"), dict) and bool(gap.get("coverage_gap_summary")), "gap_coverage_gap_summary_missing", gap.get("coverage_gap_summary"))
+    gap_odds_budget = gap.get("odds_polling_budget") if isinstance(gap.get("odds_polling_budget"), dict) else {}
+    add(failures, gap_odds_budget.get("source") == "config/v3_worldcup_odds_polling_cadence.json", "gap_odds_budget_source_unexpected", gap_odds_budget.get("source"))
+    add(failures, gap_odds_budget.get("default_target_requests_per_day") == 600, "gap_odds_budget_default_target_unexpected", gap_odds_budget.get("default_target_requests_per_day"))
+    add(failures, gap_odds_budget.get("hard_stop_at_requests_per_day") == 6000, "gap_odds_budget_hard_stop_unexpected", gap_odds_budget.get("hard_stop_at_requests_per_day"))
+    add(failures, gap_odds_budget.get("polling_windows") == EXPECTED_POLLING_WINDOWS, "gap_odds_budget_windows_unexpected", gap_odds_budget.get("polling_windows"))
+    add(failures, gap_odds_budget.get("allowed_odds_observation_fields") == EXPECTED_ODDS_FIELDS, "gap_odds_budget_allowed_fields_unexpected", gap_odds_budget.get("allowed_odds_observation_fields"))
     for flag in [
         "missing_official_matchday_lineup",
         "missing_native_opening_odds",

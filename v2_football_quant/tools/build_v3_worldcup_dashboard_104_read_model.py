@@ -19,6 +19,7 @@ MASTER_INDEX = OUT_DIR / "v3_wc_war_room_master_index.json"
 DASHBOARD_READ_MODEL = OUT_DIR / "v3_wc2026_dashboard_104_read_model.json"
 COVERAGE_GAP_RADAR = OUT_DIR / "v3_wc2026_104_coverage_gap_radar.json"
 COVERAGE_GAP_RADAR_SUMMARY = OUT_DIR / "v3_wc2026_104_coverage_gap_radar_summary.json"
+ODDS_POLLING_CADENCE = ROOT / "config/v3_worldcup_odds_polling_cadence.json"
 
 SAFETY = {
     "observation_only": True,
@@ -46,6 +47,40 @@ def git_head() -> str:
     return result.stdout.strip() if result.returncode == 0 else "UNKNOWN"
 
 
+def odds_polling_budget(config: dict[str, Any]) -> dict[str, Any]:
+    fixture_scope = config.get("fixture_scope") if isinstance(config.get("fixture_scope"), dict) else {}
+    projection = config.get("budget_projection") if isinstance(config.get("budget_projection"), dict) else {}
+    target_plan = config.get("default_target_usage_plan") if isinstance(config.get("default_target_usage_plan"), dict) else {}
+    plan = config.get("match_relative_polling_plan") if isinstance(config.get("match_relative_polling_plan"), list) else []
+    return {
+        "source": rel(ODDS_POLLING_CADENCE),
+        "api_provider": config.get("api_provider"),
+        "quota_budget_per_day": config.get("quota_budget_per_day"),
+        "system_max_daily_requests": config.get("system_max_daily_requests"),
+        "default_target_requests_per_day": config.get("default_target_requests_per_day"),
+        "hard_stop_at_requests_per_day": config.get("hard_stop_at_requests_per_day"),
+        "max_requests_per_run": config.get("max_requests_per_run"),
+        "canonical_total": fixture_scope.get("canonical_total"),
+        "group_stage_total": fixture_scope.get("group_stage_total"),
+        "knockout_reserved_total": fixture_scope.get("knockout_reserved_total"),
+        "polling_windows": [item.get("window") for item in plan if isinstance(item, dict)],
+        "group_stage_six_window_requests": projection.get("group_stage_six_window_requests"),
+        "knockout_reserved_six_window_requests": projection.get("knockout_reserved_six_window_requests"),
+        "full_104_six_window_requests": projection.get("full_104_six_window_requests"),
+        "requires_batching_or_window_thinning_to_meet_default_target": projection.get("requires_batching_or_window_thinning_to_meet_default_target"),
+        "default_target_policy": target_plan.get("overflow_policy"),
+        "allowed_odds_observation_fields": config.get("allowed_odds_observation_fields"),
+        "opening_closing_proxy_policy": config.get("opening_closing_proxy_policy"),
+        "has_native_opening": config.get("has_native_opening"),
+        "has_native_closing": config.get("has_native_closing"),
+        "movement_requires_timeline": config.get("movement_requires_timeline"),
+        "no_money_flow_judgment": config.get("no_money_flow_judgment"),
+        "observation_only": config.get("observation_only"),
+        "betting_recommendation": config.get("betting_recommendation"),
+        "affects_v4": config.get("affects_v4"),
+    }
+
+
 def build() -> dict[str, Any]:
     schedule_index = load_json(SCHEDULE_INDEX_104)
     canonical_rows = load_json(CANONICAL_104)
@@ -54,6 +89,7 @@ def build() -> dict[str, Any]:
     group_summary = load_json(GROUP_VIEW_72_SUMMARY)
     master_index = load_json(MASTER_INDEX)
     coverage_summary = load_json(COVERAGE_GAP_RADAR_SUMMARY)
+    odds_cadence = load_json(ODDS_POLLING_CADENCE)
 
     rows = canonical_rows if isinstance(canonical_rows, list) else []
     group_cards = group_rows if isinstance(group_rows, list) else []
@@ -121,6 +157,7 @@ def build() -> dict[str, Any]:
             "knockout_32": coverage_summary.get("knockout_32") if isinstance(coverage_summary, dict) else {},
             "gaps": coverage_summary.get("gaps") if isinstance(coverage_summary, dict) else {},
         },
+        "odds_polling_budget": odds_polling_budget(odds_cadence if isinstance(odds_cadence, dict) else {}),
         "safety": SAFETY,
     }
 

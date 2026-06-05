@@ -1,7 +1,7 @@
 {
   "pack_name": "V3_WC_2026_DASHBOARD_104_READ_MODEL_PACK",
-  "generated_at": "2026-06-05T05:39:12.366842+00:00",
-  "current_head": "b711884a",
+  "generated_at": "2026-06-05T06:56:12.236047+00:00",
+  "current_head": "0c525f86",
   "dashboard_read_model": "V3_WC_2026_DASHBOARD_104_READ_MODEL",
   "canonical_source": "data/manual_sources/v3_worldcup/war_room/v3_wc2026_104_cards_index_bridge.json",
   "canonical_schedule_index": "data/manual_sources/v3_worldcup/war_room/v3_wc2026_schedule_index_104.json",
@@ -49,7 +49,7 @@
     "canonical_summary_card_count": 104,
     "group_summary_match_count": 104,
     "war_room_master_index": "data/manual_sources/v3_worldcup/war_room/v3_wc_war_room_master_index.json",
-    "war_room_module_count": 13,
+    "war_room_module_count": 14,
     "coverage_gap_radar": "data/manual_sources/v3_worldcup/war_room/v3_wc2026_104_coverage_gap_radar.json",
     "coverage_gap_summary": "data/manual_sources/v3_worldcup/war_room/v3_wc2026_104_coverage_gap_radar_summary.json"
   },
@@ -105,6 +105,48 @@
       "native_opening_closing_missing": true,
       "odds_movement_conclusion_missing": true
     }
+  },
+  "odds_polling_budget": {
+    "source": "config/v3_worldcup_odds_polling_cadence.json",
+    "api_provider": "api-football",
+    "quota_budget_per_day": 7500,
+    "system_max_daily_requests": 1500,
+    "default_target_requests_per_day": 600,
+    "hard_stop_at_requests_per_day": 6000,
+    "max_requests_per_run": 80,
+    "canonical_total": 104,
+    "group_stage_total": 72,
+    "knockout_reserved_total": 32,
+    "polling_windows": [
+      "T-24h",
+      "T-6h",
+      "T-2h",
+      "T-90m",
+      "T-60m",
+      "T-30m"
+    ],
+    "group_stage_six_window_requests": 432,
+    "knockout_reserved_six_window_requests": 192,
+    "full_104_six_window_requests": 624,
+    "requires_batching_or_window_thinning_to_meet_default_target": true,
+    "default_target_policy": "If full 104 six-window polling would exceed the default target, thin the lowest-priority early window before increasing daily usage.",
+    "allowed_odds_observation_fields": [
+      "first_seen_odds",
+      "last_pre_kickoff_odds",
+      "odds_observation_delta"
+    ],
+    "opening_closing_proxy_policy": {
+      "first_seen_odds": "Earliest locally captured snapshot only; not true opening odds.",
+      "last_pre_kickoff_odds": "Latest locally captured pre-kickoff snapshot only; not true closing odds.",
+      "odds_observation_delta": "Difference between locally captured snapshots only; no market conclusion."
+    },
+    "has_native_opening": false,
+    "has_native_closing": false,
+    "movement_requires_timeline": true,
+    "no_money_flow_judgment": true,
+    "observation_only": true,
+    "betting_recommendation": false,
+    "affects_v4": false
   },
   "safety": {
     "observation_only": true,

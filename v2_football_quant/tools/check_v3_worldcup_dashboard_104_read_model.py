@@ -18,6 +18,9 @@ CANONICAL_SOURCE = "data/manual_sources/v3_worldcup/war_room/v3_wc2026_104_cards
 SCHEDULE_INDEX = "data/manual_sources/v3_worldcup/war_room/v3_wc2026_schedule_index_104.json"
 GROUP_VIEW = "data/manual_sources/v3_worldcup/war_room/v3_wc_match_cards.json"
 COVERAGE_SUMMARY = "data/manual_sources/v3_worldcup/war_room/v3_wc2026_104_coverage_gap_radar_summary.json"
+ODDS_POLLING_CADENCE = "config/v3_worldcup_odds_polling_cadence.json"
+EXPECTED_POLLING_WINDOWS = ["T-24h", "T-6h", "T-2h", "T-90m", "T-60m", "T-30m"]
+EXPECTED_ODDS_FIELDS = ["first_seen_odds", "last_pre_kickoff_odds", "odds_observation_delta"]
 
 SECRET_PATTERNS = [
     re.compile(r"(?i)(api[_-]?key|token|secret)\s*[:=]\s*['\"][A-Za-z0-9_\-]{16,}"),
@@ -139,6 +142,30 @@ def main() -> int:
     add(failures, (coverage.get("knockout_32") or {}).get("card_count") == 32, "coverage_knockout_32_count_unexpected", coverage.get("knockout_32"))
     add(failures, (coverage.get("knockout_32") or {}).get("structural_placeholder_count") == 32, "coverage_knockout_placeholder_unexpected", coverage.get("knockout_32"))
     add(failures, isinstance(coverage.get("gaps"), dict) and bool(coverage.get("gaps")), "coverage_gaps_missing", coverage.get("gaps"))
+
+    odds_budget = payload.get("odds_polling_budget") if isinstance(payload.get("odds_polling_budget"), dict) else {}
+    add(failures, odds_budget.get("source") == ODDS_POLLING_CADENCE, "odds_budget_source_unexpected", odds_budget.get("source"))
+    add(failures, odds_budget.get("api_provider") == "api-football", "odds_budget_provider_unexpected", odds_budget.get("api_provider"))
+    add(failures, odds_budget.get("quota_budget_per_day") == 7500, "odds_budget_quota_unexpected", odds_budget.get("quota_budget_per_day"))
+    add(failures, isinstance(odds_budget.get("system_max_daily_requests"), int) and odds_budget.get("system_max_daily_requests") <= 1500, "odds_budget_system_max_exceeds_1500", odds_budget.get("system_max_daily_requests"))
+    add(failures, isinstance(odds_budget.get("default_target_requests_per_day"), int) and odds_budget.get("default_target_requests_per_day") <= 600, "odds_budget_default_target_exceeds_600", odds_budget.get("default_target_requests_per_day"))
+    add(failures, isinstance(odds_budget.get("hard_stop_at_requests_per_day"), int) and odds_budget.get("hard_stop_at_requests_per_day") <= 6000, "odds_budget_hard_stop_exceeds_6000", odds_budget.get("hard_stop_at_requests_per_day"))
+    add(failures, odds_budget.get("canonical_total") == 104, "odds_budget_canonical_total_unexpected", odds_budget.get("canonical_total"))
+    add(failures, odds_budget.get("group_stage_total") == 72, "odds_budget_group_total_unexpected", odds_budget.get("group_stage_total"))
+    add(failures, odds_budget.get("knockout_reserved_total") == 32, "odds_budget_knockout_total_unexpected", odds_budget.get("knockout_reserved_total"))
+    add(failures, odds_budget.get("polling_windows") == EXPECTED_POLLING_WINDOWS, "odds_budget_windows_unexpected", odds_budget.get("polling_windows"))
+    add(failures, odds_budget.get("group_stage_six_window_requests") == 432, "odds_budget_group_six_window_unexpected", odds_budget.get("group_stage_six_window_requests"))
+    add(failures, odds_budget.get("knockout_reserved_six_window_requests") == 192, "odds_budget_knockout_six_window_unexpected", odds_budget.get("knockout_reserved_six_window_requests"))
+    add(failures, odds_budget.get("full_104_six_window_requests") == 624, "odds_budget_full_104_six_window_unexpected", odds_budget.get("full_104_six_window_requests"))
+    add(failures, odds_budget.get("requires_batching_or_window_thinning_to_meet_default_target") is True, "odds_budget_default_target_guard_missing", odds_budget)
+    add(failures, odds_budget.get("allowed_odds_observation_fields") == EXPECTED_ODDS_FIELDS, "odds_budget_allowed_fields_unexpected", odds_budget.get("allowed_odds_observation_fields"))
+    add(failures, odds_budget.get("has_native_opening") is False, "odds_budget_native_opening_unexpected", odds_budget.get("has_native_opening"))
+    add(failures, odds_budget.get("has_native_closing") is False, "odds_budget_native_closing_unexpected", odds_budget.get("has_native_closing"))
+    add(failures, odds_budget.get("movement_requires_timeline") is True, "odds_budget_timeline_required_unexpected", odds_budget.get("movement_requires_timeline"))
+    add(failures, odds_budget.get("no_money_flow_judgment") is True, "odds_budget_money_flow_guard_missing", odds_budget.get("no_money_flow_judgment"))
+    add(failures, odds_budget.get("observation_only") is True, "odds_budget_observation_only_unexpected", odds_budget.get("observation_only"))
+    add(failures, odds_budget.get("betting_recommendation") is False, "odds_budget_betting_recommendation_unexpected", odds_budget.get("betting_recommendation"))
+    add(failures, odds_budget.get("affects_v4") is False, "odds_budget_affects_v4_unexpected", odds_budget.get("affects_v4"))
 
     safety = payload.get("safety") if isinstance(payload.get("safety"), dict) else {}
     for key, expected in {
