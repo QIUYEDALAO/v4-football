@@ -263,6 +263,30 @@ class H(BaseHTTPRequestHandler):
             self.wfile.write(data)
             return
 
+        if u.path == "/v3_worldcup_wc10_war_room.html":
+            p = DASH / "v3_worldcup_wc10_war_room.html"
+            if not p.exists():
+                self.send_response(404); self.end_headers(); return
+            data = p.read_bytes()
+            self.send_response(200)
+            self.send_header("Content-Type", "text/html; charset=utf-8")
+            self.send_header("Content-Length", str(len(data)))
+            self.end_headers()
+            self.wfile.write(data)
+            return
+
+        if u.path == "/data/manual_sources/v3_worldcup/war_room/v3_wc2026_dashboard_104_read_model.json":
+            p = ROOT / "data/manual_sources/v3_worldcup/war_room/v3_wc2026_dashboard_104_read_model.json"
+            if not p.exists():
+                self.send_response(404); self.end_headers(); return
+            data = p.read_bytes()
+            self.send_response(200)
+            self.send_header("Content-Type", "application/json; charset=utf-8")
+            self.send_header("Content-Length", str(len(data)))
+            self.end_headers()
+            self.wfile.write(data)
+            return
+
         if u.path == "/api/live_bets":
             date = q.get("date", [datetime.utcnow().strftime("%Y%m%d")])[0]
             return _json(self, 200, {"ok": True, "date": date, "records": store.get_day_records(date)})
@@ -356,6 +380,12 @@ class H(BaseHTTPRequestHandler):
             self.end_headers()
             self.wfile.write(data)
             return
+
+        self.send_response(404)
+        self.send_header("Content-Type", "text/plain; charset=utf-8")
+        self.end_headers()
+        self.wfile.write(b"not found")
+        return
 
     def do_POST(self):
         u = urlparse(self.path)
