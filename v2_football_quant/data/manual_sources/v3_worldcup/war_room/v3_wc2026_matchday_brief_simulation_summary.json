@@ -1,0 +1,33 @@
+{
+  "pack_name": "V3_WC_2026_MATCHDAY_BRIEF_SIMULATION_PACK",
+  "generated_at": "2026-06-05T09:00:45.095402+00:00",
+  "simulation": "data/manual_sources/v3_worldcup/war_room/v3_wc2026_matchday_brief_simulation.json",
+  "brief_markdown": "data/manual_sources/v3_worldcup/war_room/V3_WC2026_MATCHDAY_BRIEF_SIMULATION.md",
+  "sample_match": "Algeria vs Austria",
+  "timepoint_count": 4,
+  "timepoints": [
+    "T-24h",
+    "T-6h",
+    "T-90m",
+    "T-30m"
+  ],
+  "live_api_called": false,
+  "mock_odds_used": true,
+  "lineup_status": "WAIT_OFFICIAL_LINEUP",
+  "allowed_odds_fields": [
+    "first_seen_odds",
+    "last_pre_kickoff_odds",
+    "odds_observation_delta"
+  ],
+  "native_opening_closing_used": false,
+  "money_flow_conclusion_generated": false,
+  "mobile_reading": true,
+  "safety": {
+    "observation_only": true,
+    "no_starting_xi_generated": true,
+    "no_prediction": true,
+    "no_injury_judgment": true,
+    "betting_recommendation": false,
+    "affects_v4": false
+  }
+}

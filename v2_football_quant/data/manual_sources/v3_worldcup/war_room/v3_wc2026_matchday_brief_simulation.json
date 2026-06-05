@@ -1,0 +1,139 @@
+{
+  "pack_name": "V3_WC_2026_MATCHDAY_BRIEF_SIMULATION_PACK",
+  "generated_at": "2026-06-05T09:00:45.095402+00:00",
+  "simulation_mode": "LOCAL_MOCK_ODDS_ONLY",
+  "live_api_called": false,
+  "timepoints": [
+    "T-24h",
+    "T-6h",
+    "T-90m",
+    "T-30m"
+  ],
+  "sample_match": "Algeria vs Austria",
+  "brief_card": {
+    "canonical_card_id": "wc2026_104_001",
+    "match_card_id": "mt_370102627",
+    "card_kind": "GROUP_STAGE_MATCH",
+    "match_title": "Algeria vs Austria",
+    "match_label": "Algeria vs Austria",
+    "kickoff_display": "June 11, 2026 1:00 p.m. UTC−06:00",
+    "venue_display": "Estadio Azteca",
+    "venue_source_provenance": "wikipedia_snapshot",
+    "stage_display": "小组赛 A 组",
+    "home_team": "Algeria",
+    "away_team": "Austria",
+    "home_team_slug": "algeria",
+    "away_team_slug": "austria",
+    "final26_summary": "Algeria 26人；GK/DF/MF/FW=3/9/7/7；均龄 26.86；均高 182.65cm；Austria 26人；GK/DF/MF/FW=3/8/11/4；均龄 28.54；均高 184.69cm",
+    "home_final26_summary": "Algeria 26人；GK/DF/MF/FW=3/9/7/7；均龄 26.86；均高 182.65cm",
+    "away_final26_summary": "Austria 26人；GK/DF/MF/FW=3/8/11/4；均龄 28.54；均高 184.69cm",
+    "venue_stress_summary": "Estadio Azteca；ALTITUDE_STRESS / MIDDAY_KICKOFF_RISK / VENUE_UPSET_WATCH / WATCH_ONLY；原因：altitude=2200m; midday=HIGH (Oxygen)；来源等级：HIGH_SOURCE_CROSS_CHECKED_VIDEO_CLAIM_OBSERVATION_ONLY",
+    "lineup_status": "WAIT_OFFICIAL_LINEUP",
+    "matchday_lineup_source": "WAIT_OFFICIAL_LINEUP",
+    "odds_status": {
+      "odds_fixture_id": "1489418",
+      "odds_fixture_id_status": "MAPPED",
+      "first_seen_odds": "LOCAL_TIMELINE_FIELD_READY",
+      "last_pre_kickoff_odds": "WAIT_LATER_PRE_KICKOFF_SNAPSHOT",
+      "odds_observation_delta": "ELIGIBLE_MULTIPLE_SNAPSHOTS_NO_CHANGE",
+      "market_coverage_types": [
+        "ASIAN_HANDICAP",
+        "BOTH_TEAMS_TO_SCORE",
+        "DOUBLE_CHANCE",
+        "FIRST_HALF_WINNER",
+        "GOALS_OVER_UNDER",
+        "MATCH_WINNER_1X2"
+      ],
+      "has_native_opening": false,
+      "has_native_closing": false,
+      "no_money_flow_judgment": true,
+      "display_text": "赔率轮询字段已准备：first_seen_odds / last_pre_kickoff_odds / odds_observation_delta；原生开盘/收盘缺失；不生成盘口/资金流结论。",
+      "mock_odds_used": true,
+      "allowed_fields": [
+        "first_seen_odds",
+        "last_pre_kickoff_odds",
+        "odds_observation_delta"
+      ]
+    },
+    "data_gaps": [
+      "NO_NATIVE_OPENING_CLOSING_ODDS",
+      "WAIT_OFFICIAL_LINEUP"
+    ],
+    "mobile_reading": true,
+    "observation_only": true,
+    "no_starting_xi_generated": true,
+    "no_prediction": true,
+    "no_injury_judgment": true,
+    "betting_recommendation": false,
+    "affects_v4": false
+  },
+  "mock_odds_timeline": [
+    {
+      "timepoint": "T-24h",
+      "snapshot_role": "first_seen_odds",
+      "first_seen_odds": {
+        "home": 2.42,
+        "draw": 3.18,
+        "away": 2.96
+      },
+      "last_pre_kickoff_odds": null,
+      "odds_observation_delta": "BASELINE_MOCK_SNAPSHOT"
+    },
+    {
+      "timepoint": "T-6h",
+      "snapshot_role": "odds_observation_delta",
+      "first_seen_odds": {
+        "home": 2.42,
+        "draw": 3.18,
+        "away": 2.96
+      },
+      "last_pre_kickoff_odds": null,
+      "odds_observation_delta": {
+        "home": -0.02,
+        "draw": 0.01,
+        "away": 0.03
+      }
+    },
+    {
+      "timepoint": "T-90m",
+      "snapshot_role": "odds_observation_delta",
+      "first_seen_odds": {
+        "home": 2.42,
+        "draw": 3.18,
+        "away": 2.96
+      },
+      "last_pre_kickoff_odds": null,
+      "odds_observation_delta": {
+        "home": -0.04,
+        "draw": 0.02,
+        "away": 0.04
+      }
+    },
+    {
+      "timepoint": "T-30m",
+      "snapshot_role": "last_pre_kickoff_odds",
+      "first_seen_odds": {
+        "home": 2.42,
+        "draw": 3.18,
+        "away": 2.96
+      },
+      "last_pre_kickoff_odds": {
+        "home": 2.38,
+        "draw": 3.2,
+        "away": 3.0
+      },
+      "odds_observation_delta": {
+        "home": -0.04,
+        "draw": 0.02,
+        "away": 0.04
+      }
+    }
+  ],
+  "mobile_reading": true,
+  "observation_only": true,
+  "no_starting_xi_generated": true,
+  "no_prediction": true,
+  "no_injury_judgment": true,
+  "betting_recommendation": false,
+  "affects_v4": false
+}
