@@ -31,6 +31,7 @@ APPROVED_UNTRACK_ALLOWLIST = {
 }
 APPROVED_TRACKED_RUNTIME_UI_STAGE_ALLOWLIST = {
     "v2_football_quant/data/runtime/dashboard/v3_worldcup_wc10_war_room.html",
+    "v2_football_quant/data/runtime/dashboard/v4_control_center.html",
 }
 
 

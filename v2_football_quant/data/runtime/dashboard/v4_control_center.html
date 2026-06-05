@@ -440,8 +440,8 @@ th{color:var(--muted);font-weight:650}
   <main class="grid primary-layout dense-workspace">
     <section class="card candidate-panel dense-list-panel">
       <div class="section-head">
-        <h2>比赛推荐列表</h2>
-        <span class="label">30-40场密集处理：左表滚动，右侧决策</span>
+        <h2>今日扫描观察列表</h2>
+        <span class="label">左表仅展示 official A/B；C/SKIP/shadow-only 只做观察，不称为推荐</span>
       </div>
 
       <div id="candidateList" class="candidate-list">
@@ -1913,7 +1913,7 @@ const panels={
   review:['复盘与联赛',""],
   system:['系统控制',""],
   errors:['系统异常中心',""],
-  sources:['数据源映射',"<table><tr><th>模块</th><th>唯一来源</th></tr><tr><td>今日候选</td><td>候选视图</td></tr><tr><td>昨日验证</td><td>官方赛后验证汇总</td></tr><tr><td>累计验证</td><td>A/B可信累计</td></tr></table>"]
+  sources:['数据源映射',"<table><tr><th>模块</th><th>唯一来源</th></tr><tr><td>今日扫描观察</td><td>V4 official candidate view；仅 official A/B 可称推荐口径</td></tr><tr><td>昨日验证</td><td>官方赛后验证汇总</td></tr><tr><td>累计验证</td><td>A/B可信累计</td></tr></table>"]
 };
 function openPanel(key){
   let p=panels[key]||['详情','暂无'];

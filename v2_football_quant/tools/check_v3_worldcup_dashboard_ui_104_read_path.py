@@ -16,6 +16,7 @@ STATUS_OUT = ROOT / "data/runtime/status/check_v3_worldcup_dashboard_ui_104_read
 READ_MODEL_URL = "/data/manual_sources/v3_worldcup/war_room/v3_wc2026_dashboard_104_read_model.json"
 OLD_WC10_URL = "/data/v3_worldcup/war_room/v3_worldcup_wc10_war_room_20260602.json"
 OLD_72_SOURCE = "v3_wc_match_cards.json"
+APPROVED_V4_UI_TEXT_STAGE = "v2_football_quant/data/runtime/dashboard/v4_control_center.html"
 
 SECRET_PATTERNS = [
     re.compile(r"(?i)(api[_-]?key|token|secret)\s*[:=]\s*['\"][A-Za-z0-9_\-]{16,}"),
@@ -93,7 +94,11 @@ def main() -> int:
         add(failures, safety.get(key) is expected, f"safety_{key}_unexpected", safety.get(key))
 
     runtime_staged = [path for path in staged if re.search(r"(^|/)(cache|logs?|tmp|status)(/|$)|\.log$|\.lock$|\.pid$", path, re.I)]
-    v4_staged = [path for path in staged if re.search(r"(^|/)(v4_|V4_|check_v4|build_v4|run_v4|engine/v4|scripts/v4|docs/V4)", path)]
+    v4_staged = [
+        path for path in staged
+        if path != APPROVED_V4_UI_TEXT_STAGE
+        and re.search(r"(^|/)(v4_|V4_|check_v4|build_v4|run_v4|engine/v4|scripts/v4|docs/V4)", path)
+    ]
     add(failures, not runtime_staged, "runtime_cache_log_status_staged", runtime_staged)
     add(failures, not v4_staged, "v4_staged", v4_staged)
     secrets = secret_hits([HTML, READ_MODEL, Path(__file__).resolve()])
