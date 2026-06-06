@@ -22,6 +22,17 @@ UNIVERSE = ROOT / "data/universe"
 TEAM_CN_MAP = ROOT / "engine/team_cn_map.json"
 TZ = timezone(timedelta(hours=8))
 H2H_DATA_GAP_NOTE = "资料缺口：H2H样本不足，不参与评分。"
+PRICE_FIELDS = (
+    "price_source",
+    "bookmaker",
+    "market",
+    "line",
+    "odds",
+    "snapshot_time",
+    "selected_at",
+    "kickoff_time",
+    "price_status",
+)
 
 # Display-only supplemental names for current brief entries missing from the map.
 SUPPLEMENTAL_CN = {
@@ -215,6 +226,7 @@ def _universe_skip_candidates(date: str, known_fixture_ids: set[int]) -> list[di
             "recommendation_status": "skip_attribution_display_only",
             "source": f"data/universe/fixtures_universe_{date}.jsonl",
             "actual_collection_reason": row.get("actual_collection_reason") or "",
+            **_missing_price_fields(row.get("kickoff_time")),
         })
     return items
 
@@ -228,6 +240,64 @@ def _find_scout_match(home: str, away: str, scout_by_fixture: dict[int, dict[str
         if row_home == home_key and row_away == away_key:
             return row
     return {}
+
+
+def _first_present(row: dict[str, Any], keys: tuple[str, ...]) -> Any:
+    for key in keys:
+        value = row.get(key)
+        if value not in (None, ""):
+            return value
+    return None
+
+
+def _price_event_fields(row: dict[str, Any]) -> dict[str, Any]:
+    """Extract persisted real price fields without treating paper odds as real."""
+    price_source_raw = _first_present(row, ("opening_market_source", "price_source"))
+    odds_source = str(row.get("odds_source") or "")
+    if "paper_default" in odds_source.lower() or "paper_default" in str(price_source_raw or "").lower():
+        return {
+            "price_source": price_source_raw or odds_source,
+            "bookmaker": "",
+            "market": "",
+            "line": None,
+            "odds": None,
+            "snapshot_time": "",
+            "selected_at": _first_present(row, ("selected_at", "scan_time", "generated_at")) or "",
+            "kickoff_time": _first_present(row, ("kickoff_time", "kickoff", "kickoff_local")) or "",
+            "price_status": "PAPER_PROXY_FORBIDDEN",
+        }
+
+    bookmaker = _first_present(row, ("opening_market_bookmaker_used", "bookmaker"))
+    market = _first_present(row, ("opening_market_market_name", "market", "market_name"))
+    line = _first_present(row, ("opening_ht_ou_line", "prematch_ht_line", "opening_ft_ou_line", "opening_ah_line", "line"))
+    odds = _first_present(row, ("opening_ht_ou_over_odds", "prematch_over_odds", "opening_ft_ou_over_odds", "opening_ht_ou_under_odds", "prematch_under_odds", "opening_ft_ou_under_odds", "odds"))
+    snapshot_time = _first_present(row, ("opening_market_snapshot_time", "snapshot_time", "market_snapshot_time"))
+    has_real_price = bool(bookmaker and market and line is not None and odds is not None and snapshot_time)
+    return {
+        "price_source": price_source_raw or ("prematch_snapshot_from_scan" if has_real_price else ""),
+        "bookmaker": bookmaker or "",
+        "market": market or "",
+        "line": line,
+        "odds": odds,
+        "snapshot_time": snapshot_time or "",
+        "selected_at": _first_present(row, ("selected_at", "scan_time", "generated_at", "opening_market_snapshot_time")) or "",
+        "kickoff_time": _first_present(row, ("kickoff_time", "kickoff", "kickoff_local")) or "",
+        "price_status": "REAL_PRICE" if has_real_price else "PRICE_MISSING",
+    }
+
+
+def _missing_price_fields(kickoff_time: Any = "") -> dict[str, Any]:
+    return {
+        "price_source": "",
+        "bookmaker": "",
+        "market": "",
+        "line": None,
+        "odds": None,
+        "snapshot_time": "",
+        "selected_at": "",
+        "kickoff_time": kickoff_time or "",
+        "price_status": "PRICE_MISSING",
+    }
 
 
 def parse_ab_block(block: str, grade: str, idx: int, scout_by_fixture: dict[int, dict[str, Any]], brief_path: Path) -> dict[str, Any]:
@@ -288,6 +358,7 @@ def parse_ab_block(block: str, grade: str, idx: int, scout_by_fixture: dict[int,
         "source": str(brief_path.relative_to(ROOT)),
         "scout_fixture_found": bool(source),
         "grade_source": "brief_parsed",
+        **_price_event_fields(source),
     }
 
 
@@ -357,6 +428,7 @@ def parse_c_items(text: str, scout_by_fixture: dict[int, dict[str, Any]], brief_
             "grade": "C",
             "recommendation_status": "brief_observation_only",
             "source": str(brief_path.relative_to(ROOT)),
+            **_missing_price_fields(kickoff_display),
         })
     return items
 
@@ -439,6 +511,7 @@ def build_candidate_view(date: str, text: str, brief_path: Path, scout_path: Pat
             "factors_empty": not factors,
             "explain_factors_missing": explain_missing,
             "official_grade_preserved": True,
+            **_price_event_fields(row),
         }
         if grade == "A":
             merged_a.append(base)

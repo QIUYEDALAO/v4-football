@@ -35,6 +35,11 @@ APPROVED_TRACKED_RUNTIME_UI_STAGE_ALLOWLIST = {
 }
 APPROVED_V4_AUDIT_STAGE_ALLOWLIST = {
     "v2_football_quant/docs/V4_PRICE_SOURCE_AND_SELECTION_SIGNAL_INVENTORY_20260606.md",
+    "v2_football_quant/docs/V4_PRICE_FIELD_PERSISTENCE_PIPELINE_20260606.md",
+    "v2_football_quant/engine/v4_scan_and_brief.py",
+    "v2_football_quant/tools/build_v4_ab_historical_ledger.py",
+    "v2_football_quant/tools/build_v4_official_candidate_view.py",
+    "v2_football_quant/tools/check_v4_price_field_persistence_pipeline.py",
     "v2_football_quant/tools/check_v4_price_source_selection_signal_inventory.py",
 }
 

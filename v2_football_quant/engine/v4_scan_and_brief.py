@@ -473,6 +473,50 @@ def _resolve_official_grade_from_shadow(
     }
 
 
+def _first_present(row: dict[str, Any], keys: tuple[str, ...]) -> Any:
+    for key in keys:
+        value = row.get(key)
+        if value not in (None, ""):
+            return value
+    return None
+
+
+def _price_event_fields(row: dict[str, Any]) -> dict[str, Any]:
+    """Persist real scan/scout price fields without treating paper odds as real."""
+    price_source_raw = _first_present(row, ("opening_market_source", "price_source"))
+    odds_source = str(row.get("odds_source") or "")
+    if "paper_default" in odds_source.lower() or "paper_default" in str(price_source_raw or "").lower():
+        return {
+            "price_source": price_source_raw or odds_source,
+            "bookmaker": "",
+            "market": "",
+            "line": None,
+            "odds": None,
+            "snapshot_time": "",
+            "selected_at": _first_present(row, ("selected_at", "scan_time", "generated_at")) or "",
+            "kickoff_time": _first_present(row, ("kickoff_time", "kickoff", "kickoff_local")) or "",
+            "price_status": "PAPER_PROXY_FORBIDDEN",
+        }
+
+    bookmaker = _first_present(row, ("opening_market_bookmaker_used", "bookmaker"))
+    market = _first_present(row, ("opening_market_market_name", "market", "market_name"))
+    line = _first_present(row, ("opening_ht_ou_line", "prematch_ht_line", "opening_ft_ou_line", "opening_ah_line", "line"))
+    odds = _first_present(row, ("opening_ht_ou_over_odds", "prematch_over_odds", "opening_ft_ou_over_odds", "opening_ht_ou_under_odds", "prematch_under_odds", "opening_ft_ou_under_odds", "odds"))
+    snapshot_time = _first_present(row, ("opening_market_snapshot_time", "snapshot_time", "market_snapshot_time"))
+    has_real_price = bool(bookmaker and market and line is not None and odds is not None and snapshot_time)
+    return {
+        "price_source": price_source_raw or ("prematch_snapshot_from_scan" if has_real_price else ""),
+        "bookmaker": bookmaker or "",
+        "market": market or "",
+        "line": line,
+        "odds": odds,
+        "snapshot_time": snapshot_time or "",
+        "selected_at": _first_present(row, ("selected_at", "scan_time", "generated_at", "opening_market_snapshot_time")) or "",
+        "kickoff_time": _first_present(row, ("kickoff_time", "kickoff", "kickoff_local")) or "",
+        "price_status": "REAL_PRICE" if has_real_price else "PRICE_MISSING",
+    }
+
+
 def _pick_rf_shadow(record: dict, factors: dict) -> dict:
     out = {}
     for k in RF_RATE_FIELDS:
@@ -645,6 +689,7 @@ def _build_candidate_view_from_scout(
             "official_permission": official_permission,
             "recent_form_low_sample": r.get("recent_form_low_sample", False),
             "candidate_score": r.get("best_score"),
+            **_price_event_fields(r),
             **shadow,
         }
         if grade == "A" and official_permission:
@@ -852,6 +897,7 @@ def _run_parallel_scan(args, scan_date: str, today_key: str, wd, log_path: Path)
             "is_candidate": grade in ("A", "B") and official_permission,
             "recent_form_low_sample": r.get("recent_form_low_sample", False),
             "candidate_score": r.get("candidate_score"),
+            **_price_event_fields(r),
             **shadow,
         }
 
@@ -905,6 +951,7 @@ def _run_parallel_scan(args, scan_date: str, today_key: str, wd, log_path: Path)
             "factors_missing": r.get("factors_missing", False),
             "score_pack_missing": r.get("score_pack_missing", False),
             "ht_ou_lines": [],
+            **_price_event_fields(r),
             **shadow,
         }
         if not scout_entry["market_scores"] or not scout_entry["factors"]:

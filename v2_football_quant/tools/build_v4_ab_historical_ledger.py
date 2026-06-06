@@ -50,6 +50,53 @@ def jdump(p: Path, obj: Any) -> None:
     p.write_text(json.dumps(obj, ensure_ascii=False, indent=2), encoding="utf-8")
 
 
+def first_present(row: dict[str, Any], keys: tuple[str, ...]) -> Any:
+    for key in keys:
+        value = row.get(key)
+        if value not in (None, ""):
+            return value
+    return None
+
+
+def price_fields_from_candidate(row: dict[str, Any], *, fallback_kickoff: str = "") -> dict[str, Any]:
+    """Carry real persisted candidate price fields into validation rows.
+
+    Paper defaults remain explicitly forbidden as real prices.
+    """
+    price_source = first_present(row, ("price_source", "opening_market_source"))
+    odds_source = str(row.get("odds_source") or "")
+    if "paper_default" in odds_source.lower() or "paper_default" in str(price_source or "").lower():
+        return {
+            "price_source": price_source or odds_source,
+            "bookmaker": "",
+            "market": "",
+            "line": None,
+            "odds": None,
+            "snapshot_time": "",
+            "selected_at": first_present(row, ("selected_at", "scan_time", "generated_at")) or "",
+            "kickoff_time": first_present(row, ("kickoff_time", "kickoff", "kickoff_local")) or fallback_kickoff,
+            "price_status": "PAPER_PROXY_FORBIDDEN",
+        }
+
+    bookmaker = first_present(row, ("bookmaker", "opening_market_bookmaker_used"))
+    market = first_present(row, ("market", "opening_market_market_name"))
+    line = first_present(row, ("line", "opening_ht_ou_line", "prematch_ht_line", "opening_ft_ou_line", "opening_ah_line"))
+    odds = first_present(row, ("odds", "opening_ht_ou_over_odds", "prematch_over_odds", "opening_ft_ou_over_odds", "opening_ht_ou_under_odds", "prematch_under_odds", "opening_ft_ou_under_odds"))
+    snapshot_time = first_present(row, ("snapshot_time", "opening_market_snapshot_time", "market_snapshot_time"))
+    real = bool(bookmaker and market and line is not None and odds is not None and snapshot_time)
+    return {
+        "price_source": price_source or ("prematch_snapshot_from_scan" if real else ""),
+        "bookmaker": bookmaker or "",
+        "market": market or "",
+        "line": line,
+        "odds": odds,
+        "snapshot_time": snapshot_time or "",
+        "selected_at": first_present(row, ("selected_at", "scan_time", "generated_at", "opening_market_snapshot_time")) or "",
+        "kickoff_time": first_present(row, ("kickoff_time", "kickoff", "kickoff_local")) or fallback_kickoff,
+        "price_status": "REAL_PRICE" if real else "PRICE_MISSING",
+    }
+
+
 def settlement(ht_goals: int, line: float) -> str:
     if line == 0.75:
         return "LOSS" if ht_goals == 0 else ("HALF_WIN" if ht_goals == 1 else "WIN")
@@ -327,6 +374,8 @@ def main() -> int:
     ledger_rows = []
     for r in rows:
         rr = asdict(r)
+        candidate_price = price_fields_from_candidate(cv_map.get(r.fixture_id, {}), fallback_kickoff=r.kickoff_time)
+        rr.update(candidate_price)
         hg = r.ht_goal_count if r.ht_goal_count is not None else 0
         rr["settlement_o075"] = ("PENDING" if not r.settled else settlement(hg, 0.75))
         rr["settlement_o1"] = ("PENDING" if not r.settled else settlement(hg, 1.0))
