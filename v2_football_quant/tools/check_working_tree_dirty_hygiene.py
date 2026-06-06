@@ -33,6 +33,10 @@ APPROVED_TRACKED_RUNTIME_UI_STAGE_ALLOWLIST = {
     "v2_football_quant/data/runtime/dashboard/v3_worldcup_wc10_war_room.html",
     "v2_football_quant/data/runtime/dashboard/v4_control_center.html",
 }
+APPROVED_V4_AUDIT_STAGE_ALLOWLIST = {
+    "v2_football_quant/docs/V4_PRICE_SOURCE_AND_SELECTION_SIGNAL_INVENTORY_20260606.md",
+    "v2_football_quant/tools/check_v4_price_source_selection_signal_inventory.py",
+}
 
 
 def run_git(args: list[str]) -> subprocess.CompletedProcess[str]:
@@ -84,6 +88,7 @@ def main() -> int:
         path for path in staged
         if path not in set(approved_runtime_untrack)
         and path not in set(approved_tracked_runtime_ui_stage)
+        and path not in APPROVED_V4_AUDIT_STAGE_ALLOWLIST
     ]
     runtime_staged = [path for path in ordinary_staged if RUNTIME_RE.search(path)]
     secret_path_staged = [path for path in ordinary_staged if SECRET_PATH_RE.search(path)]
@@ -116,6 +121,7 @@ def main() -> int:
         "approved_untrack_missing_local": approved_untrack_missing_local,
         "approved_tracked_runtime_ui_stage": approved_tracked_runtime_ui_stage,
         "approved_tracked_runtime_ui_bad_status": approved_tracked_runtime_ui_bad_status,
+        "approved_v4_audit_stage": [path for path in staged if path in APPROVED_V4_AUDIT_STAGE_ALLOWLIST],
         "runtime_staged": runtime_staged,
         "secret_path_staged": secret_path_staged,
         "secret_literal_hit_count": len(secret_literal_hits),
