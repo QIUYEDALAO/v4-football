@@ -1,0 +1,79 @@
+{
+  "schema_version": "v4_main_league_admission_policy.v1",
+  "policy_name": "V4_MAIN_LEAGUE_WHITELIST_AND_ADMISSION_GUARD",
+  "observation_only": true,
+  "does_not_change_official_grade": true,
+  "does_not_restore_b_realtime": true,
+  "does_not_enable_qq": true,
+  "league_groups": {
+    "INCLUDE_CURRENT": [
+      {"league_id": 98, "name": "J1 League", "aliases": ["J1 League", "J-League", "日职联"]},
+      {"league_id": 169, "name": "CSL", "aliases": ["Chinese Super League", "CSL", "中超"]},
+      {"league_id": 71, "name": "Serie A Brazil", "aliases": ["Serie A", "Brasileirão Série A", "Brazil Serie A", "巴西甲"]},
+      {"league_id": 144, "name": "Belgian Pro League", "aliases": ["Pro League", "Belgian Pro League", "比甲"]},
+      {"league_id": 2, "name": "UCL", "aliases": ["UEFA Champions League", "Champions League", "欧冠"]}
+    ],
+    "INCLUDE_SEASON_AWARE": [
+      {"league_id": 39, "name": "EPL", "aliases": ["Premier League", "English Premier League", "英超"]},
+      {"league_id": 140, "name": "LaLiga", "aliases": ["La Liga", "LaLiga", "西甲"]},
+      {"league_id": 78, "name": "Bundesliga", "aliases": ["Bundesliga", "德甲"]},
+      {"league_id": 135, "name": "Serie A Italy", "aliases": ["Serie A", "Italian Serie A", "意甲"]},
+      {"league_id": 61, "name": "Ligue 1", "aliases": ["Ligue 1", "法甲"]},
+      {"league_id": 94, "name": "Liga Portugal", "aliases": ["Primeira Liga", "Liga Portugal", "葡超"]},
+      {"league_id": 88, "name": "Eredivisie", "aliases": ["Eredivisie", "荷甲"]},
+      {"league_id": 203, "name": "Super Lig", "aliases": ["Süper Lig", "Super Lig", "土超"]},
+      {"league_id": 262, "name": "Liga MX", "aliases": ["Liga MX", "墨西联"]},
+      {"league_id": 253, "name": "MLS", "aliases": ["Major League Soccer", "MLS", "美职业"]}
+    ],
+    "OBSERVE_ONLY": [
+      {"league_id": 128, "name": "Argentina Liga Profesional", "aliases": ["Liga Profesional Argentina", "Argentina Liga Profesional", "阿甲"]},
+      {"league_id": 292, "name": "K League 1", "aliases": ["K League 1", "韩K联"]},
+      {"league_id": 3, "name": "UEL", "aliases": ["UEFA Europa League", "Europa League", "欧联杯"]},
+      {"league_id": 10, "name": "Friendlies", "aliases": ["Friendlies", "Friendly", "友谊赛"]}
+    ]
+  },
+  "exclude_default": {
+    "categories": [
+      "regional_league",
+      "lower_division",
+      "youth_team",
+      "reserve_team",
+      "low_coverage_cup",
+      "unknown_league"
+    ],
+    "name_keywords": [
+      "u17",
+      "u18",
+      "u19",
+      "u20",
+      "u21",
+      "u23",
+      "youth",
+      "reserve",
+      "regional",
+      "county",
+      "district",
+      "amateur",
+      "unknown"
+    ]
+  },
+  "admission_rules": {
+    "required_market_family_count": 3,
+    "market_families": ["1X2", "FT_OU", "AH_OR_HANDICAP", "DOUBLE_CHANCE"],
+    "minimum_bookmaker_count": 5,
+    "preferred_bookmaker_count": 8,
+    "line_required_for_any": ["FT_OU", "AH_OR_HANDICAP"],
+    "standings_or_team_stats_required": true,
+    "missing_injuries_tag": "INJURY_SOURCE_MISSING",
+    "missing_lineup_tags": ["LINEUP_MISSING", "LINEUP_WAIT_EVENT"],
+    "friendlies_policy": "OBSERVE_ONLY",
+    "ht_over_policy": "AUXILIARY_ONLY_NO_STANDALONE_AB"
+  },
+  "notification_policy": {
+    "official_ab_only_can_be_called_recommendation": true,
+    "b_realtime_reminder": "PAUSED",
+    "observe_only_realtime_reminder": false,
+    "c_skip_shadow_only_realtime_reminder": false,
+    "rf_shadow_promotion": "BLOCKED"
+  }
+}

@@ -50,6 +50,7 @@ from engine.data_sources.schedule_pressure import evaluate_match_schedule_pressu
 from engine.data_sources.season_phase import season_phase_for_fixture
 from engine.v4_data_logger import append_jsonl, universe_path
 from engine.context_enrichment import fetch_fixture_context
+from engine.v4_league_admission import classify_league
 try:
     from logger import logger
 except ModuleNotFoundError:
@@ -302,14 +303,19 @@ def fetch_today_fixtures(
             lg_id = str(f["league"]["id"])
             lg_name_raw = f["league"].get("name", "")
             lg_type_raw = f["league"].get("type", "")
+            league_policy = classify_league(lg_id, lg_name_raw, lg_type_raw)
 
             # ── Fixture universe gate ──
             if fixture_universe == "whitelist":
                 if not include_outside_57 and lg_id not in WL_SET:
                     continue
+                if not league_policy.get("strategy_pool_allowed"):
+                    continue
             elif fixture_universe == "all_eligible":
                 eligible, gate_reason = _league_eligibility_gate(lg_id, lg_name_raw, lg_type_raw)
                 if not eligible:
+                    continue
+                if not league_policy.get("strategy_pool_allowed"):
                     continue
 
             status = f["fixture"]["status"]["short"]
@@ -371,6 +377,10 @@ def fetch_today_fixtures(
                 "league": lg_id,
                 "league_name": LEAGUE_CN.get(lg_id, f["league"]["name"]),
                 "league_type": lg_type_raw,
+                "league_admission_group": league_policy.get("admission_group"),
+                "league_policy_reason": league_policy.get("league_policy_reason"),
+                "strategy_pool_allowed": league_policy.get("strategy_pool_allowed"),
+                "observe_only": league_policy.get("observe_only"),
                 "country": f.get("league", {}).get("country"),
                 "fixture_timezone": f.get("fixture", {}).get("timezone"),
                 "kickoff": kickoff,
