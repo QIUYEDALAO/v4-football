@@ -42,6 +42,7 @@ APPROVED_V4_AUDIT_STAGE_ALLOWLIST = {
     "v2_football_quant/docs/V4_MARKET_STRATEGY_CARD_REPLAY_LEDGER_PACK_20260607.md",
     "v2_football_quant/docs/V4_MARKET_STRATEGY_CARD_REPLAY_EXPANSION_PACK_20260607.md",
     "v2_football_quant/docs/V4_FIVE_DIMENSION_LITE_SCHEMA_PACK_20260607.md",
+    "v2_football_quant/docs/V4_RESEARCH_CARD_DATA_COMPLETENESS_SMOKE_PACK_20260607.md",
     "v2_football_quant/config/v4_main_league_admission_policy.json",
     "v2_football_quant/config/v4_five_dimension_lite_schema.json",
     "v2_football_quant/config/v4_market_strategy_card_replay_ledger_schema.json",
@@ -72,6 +73,8 @@ APPROVED_V4_AUDIT_STAGE_ALLOWLIST = {
     "v2_football_quant/tools/check_v4_five_dimension_lite.py",
     "v2_football_quant/tools/check_v4_price_field_persistence_pipeline.py",
     "v2_football_quant/tools/check_v4_price_source_selection_signal_inventory.py",
+    "v2_football_quant/tools/run_v4_research_card_data_completeness_smoke.py",
+    "v2_football_quant/tools/check_v4_research_card_data_completeness_smoke.py",
 }
 
 
