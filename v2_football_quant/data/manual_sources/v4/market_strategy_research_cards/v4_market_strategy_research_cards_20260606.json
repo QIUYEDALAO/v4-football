@@ -1,0 +1,431 @@
+{
+  "schema_version": "v4_market_strategy_research_cards.v1",
+  "generated_at": "2026-06-06T23:00:04.020851+08:00",
+  "source": "existing_local_artifacts_only",
+  "live_api_called": false,
+  "allowed_conclusions": [
+    "OBSERVE",
+    "WAIT",
+    "PASS"
+  ],
+  "strategy_directions_required": [
+    "FULLTIME_OVER",
+    "HANDICAP_HOME_AWAY",
+    "DOUBLE_CHANCE_STRONG_SIDE",
+    "HT_OVER_AUXILIARY"
+  ],
+  "missing_context_required": [
+    "PRICE_MISSING",
+    "LINE_MISSING",
+    "MARKET_MISSING",
+    "INJURY_SOURCE_MISSING",
+    "LINEUP_MISSING",
+    "LINEUP_WAIT_EVENT",
+    "DATA_INSUFFICIENT"
+  ],
+  "cards": [
+    {
+      "schema_version": "v4_market_strategy_research_card.v1",
+      "card_type": "MARKET_STRATEGY_RESEARCH",
+      "source_artifact": "data/daily_reports/scout_v4_20260606.json",
+      "match_info": {
+        "fixture_id": 1546317,
+        "home": "Kashima",
+        "away": "Vissel Kobe",
+        "league": "日职联",
+        "league_id": "日职联",
+        "kickoff_time": "2026-06-06T13:00:00+08:00",
+        "official_grade_snapshot": "UNKNOWN",
+        "official_grade_unchanged": true
+      },
+      "league_admission_status": {
+        "admission_group": "INCLUDE_CURRENT",
+        "league_policy_name": "J1 League",
+        "league_policy_reason": "POLICY_MATCH",
+        "strategy_pool_allowed": true,
+        "observe_only": false,
+        "admission_info_complete": false,
+        "admission_blockers": [
+          "MARKET_FAMILY_COVERAGE_LT_3",
+          "BOOKMAKER_COUNT_LT_5",
+          "LINE_MISSING_FOR_FT_OU_OR_HANDICAP",
+          "STANDINGS_OR_TEAM_STATS_MISSING"
+        ]
+      },
+      "strategy_directions": [
+        {
+          "direction": "FULLTIME_OVER",
+          "market_present": false,
+          "line_present": false,
+          "price_status": "REAL_PRICE",
+          "status": "WAIT",
+          "missing_context": [
+            "LINE_MISSING",
+            "MARKET_MISSING"
+          ],
+          "standalone_ab_allowed": null
+        },
+        {
+          "direction": "HANDICAP_HOME_AWAY",
+          "market_present": false,
+          "line_present": false,
+          "price_status": "REAL_PRICE",
+          "status": "WAIT",
+          "missing_context": [
+            "LINE_MISSING",
+            "MARKET_MISSING"
+          ],
+          "standalone_ab_allowed": null
+        },
+        {
+          "direction": "DOUBLE_CHANCE_STRONG_SIDE",
+          "market_present": false,
+          "line_present": true,
+          "price_status": "REAL_PRICE",
+          "status": "WAIT",
+          "missing_context": [
+            "MARKET_MISSING"
+          ],
+          "standalone_ab_allowed": null
+        },
+        {
+          "direction": "HT_OVER_AUXILIARY",
+          "market_present": true,
+          "line_present": true,
+          "price_status": "REAL_PRICE",
+          "status": "WAIT",
+          "missing_context": [
+            "HT_OVER_AUXILIARY_ONLY"
+          ],
+          "standalone_ab_allowed": false
+        }
+      ],
+      "strength_gap": {
+        "status": "OBSERVABLE",
+        "score_ref": 65.0,
+        "confidence_ref": 81,
+        "notes": [
+          "historical_form_is_auxiliary_only"
+        ]
+      },
+      "market_confirmation": {
+        "status": "MISSING",
+        "market_families_present": [],
+        "ht_over_auxiliary_present": true,
+        "no_standalone_ht_over": true
+      },
+      "price_quality": {
+        "price_source": "prematch_snapshot_from_scan",
+        "bookmaker": "Bet365",
+        "market": "Exact Goals Number - First Half",
+        "line": 5.0,
+        "odds": 1.67,
+        "snapshot_time": "2026-06-06T13:32:45.157491",
+        "price_status": "REAL_PRICE"
+      },
+      "data_quality": {
+        "status": "DATA_INSUFFICIENT",
+        "injury_status": "INJURY_SOURCE_MISSING",
+        "lineup_status": "LINEUP_WAIT_EVENT",
+        "standings_or_team_stats": "DATA_INSUFFICIENT"
+      },
+      "missing_context": [
+        "BOOKMAKER_COUNT_LT_5",
+        "INJURY_SOURCE_MISSING",
+        "LINEUP_MISSING",
+        "LINEUP_WAIT_EVENT",
+        "LINE_MISSING",
+        "LINE_MISSING_FOR_FT_OU_OR_HANDICAP",
+        "MARKET_FAMILY_COVERAGE_LT_3",
+        "STANDINGS_OR_TEAM_STATS_MISSING"
+      ],
+      "conclusion": "WAIT",
+      "safety": {
+        "research_only": true,
+        "not_official_strategy": true,
+        "official_grade_changed": false,
+        "pending_written": false,
+        "qq_sent": false,
+        "cron_or_launchd_modified": false,
+        "realtime_reminder": false
+      }
+    },
+    {
+      "schema_version": "v4_market_strategy_research_card.v1",
+      "card_type": "MARKET_STRATEGY_RESEARCH",
+      "source_artifact": "data/daily_reports/scout_v4_20260531.json",
+      "match_info": {
+        "fixture_id": 1536925,
+        "home": "Cyprus U19",
+        "away": "England U18",
+        "league": "友谊赛",
+        "league_id": "友谊赛",
+        "kickoff_time": "2026-05-31T22:30:00+08:00",
+        "official_grade_snapshot": "UNKNOWN",
+        "official_grade_unchanged": true
+      },
+      "league_admission_status": {
+        "admission_group": "OBSERVE_ONLY",
+        "league_policy_name": "Friendlies",
+        "league_policy_reason": "POLICY_MATCH",
+        "strategy_pool_allowed": false,
+        "observe_only": true,
+        "admission_info_complete": false,
+        "admission_blockers": [
+          "MARKET_FAMILY_COVERAGE_LT_3",
+          "BOOKMAKER_COUNT_LT_5",
+          "LINE_MISSING_FOR_FT_OU_OR_HANDICAP",
+          "STANDINGS_OR_TEAM_STATS_MISSING"
+        ]
+      },
+      "strategy_directions": [
+        {
+          "direction": "FULLTIME_OVER",
+          "market_present": false,
+          "line_present": false,
+          "price_status": "PRICE_MISSING",
+          "status": "WAIT",
+          "missing_context": [
+            "LINE_MISSING",
+            "MARKET_MISSING",
+            "PRICE_MISSING"
+          ],
+          "standalone_ab_allowed": null
+        },
+        {
+          "direction": "HANDICAP_HOME_AWAY",
+          "market_present": false,
+          "line_present": false,
+          "price_status": "PRICE_MISSING",
+          "status": "WAIT",
+          "missing_context": [
+            "LINE_MISSING",
+            "MARKET_MISSING",
+            "PRICE_MISSING"
+          ],
+          "standalone_ab_allowed": null
+        },
+        {
+          "direction": "DOUBLE_CHANCE_STRONG_SIDE",
+          "market_present": false,
+          "line_present": true,
+          "price_status": "PRICE_MISSING",
+          "status": "WAIT",
+          "missing_context": [
+            "MARKET_MISSING",
+            "PRICE_MISSING"
+          ],
+          "standalone_ab_allowed": null
+        },
+        {
+          "direction": "HT_OVER_AUXILIARY",
+          "market_present": false,
+          "line_present": false,
+          "price_status": "PRICE_MISSING",
+          "status": "WAIT",
+          "missing_context": [
+            "HT_OVER_AUXILIARY_ONLY",
+            "LINE_MISSING",
+            "MARKET_MISSING",
+            "PRICE_MISSING"
+          ],
+          "standalone_ab_allowed": false
+        }
+      ],
+      "strength_gap": {
+        "status": "OBSERVABLE",
+        "score_ref": 88.2,
+        "confidence_ref": 80,
+        "notes": [
+          "historical_form_is_auxiliary_only"
+        ]
+      },
+      "market_confirmation": {
+        "status": "MISSING",
+        "market_families_present": [],
+        "ht_over_auxiliary_present": false,
+        "no_standalone_ht_over": true
+      },
+      "price_quality": {
+        "price_source": "prematch_snapshot_from_scan",
+        "bookmaker": "",
+        "market": "",
+        "line": null,
+        "odds": null,
+        "snapshot_time": "2026-05-31T19:05:22.204693",
+        "price_status": "PRICE_MISSING"
+      },
+      "data_quality": {
+        "status": "DATA_INSUFFICIENT",
+        "injury_status": "INJURY_SOURCE_MISSING",
+        "lineup_status": "LINEUP_WAIT_EVENT",
+        "standings_or_team_stats": "DATA_INSUFFICIENT"
+      },
+      "missing_context": [
+        "BOOKMAKER_COUNT_LT_5",
+        "INJURY_SOURCE_MISSING",
+        "LINEUP_MISSING",
+        "LINEUP_WAIT_EVENT",
+        "LINE_MISSING",
+        "LINE_MISSING_FOR_FT_OU_OR_HANDICAP",
+        "MARKET_FAMILY_COVERAGE_LT_3",
+        "MARKET_MISSING",
+        "PRICE_MISSING",
+        "STANDINGS_OR_TEAM_STATS_MISSING"
+      ],
+      "conclusion": "PASS",
+      "safety": {
+        "research_only": true,
+        "not_official_strategy": true,
+        "official_grade_changed": false,
+        "pending_written": false,
+        "qq_sent": false,
+        "cron_or_launchd_modified": false,
+        "realtime_reminder": false
+      }
+    },
+    {
+      "schema_version": "v4_market_strategy_research_card.v1",
+      "card_type": "MARKET_STRATEGY_RESEARCH",
+      "source_artifact": "data/daily_reports/scout_v4_20260531.json",
+      "match_info": {
+        "fixture_id": 1546065,
+        "home": "Sportivo Huracan",
+        "away": "La Luz",
+        "league": "乌拉甲B",
+        "league_id": "乌拉甲B",
+        "kickoff_time": "2026-05-31T20:30:00+08:00",
+        "official_grade_snapshot": "UNKNOWN",
+        "official_grade_unchanged": true
+      },
+      "league_admission_status": {
+        "admission_group": "EXCLUDE_DEFAULT",
+        "league_policy_name": "乌拉甲B",
+        "league_policy_reason": "LEAGUE_NOT_IN_MAIN_POLICY",
+        "strategy_pool_allowed": false,
+        "observe_only": false,
+        "admission_info_complete": false,
+        "admission_blockers": [
+          "MARKET_FAMILY_COVERAGE_LT_3",
+          "BOOKMAKER_COUNT_LT_5",
+          "LINE_MISSING_FOR_FT_OU_OR_HANDICAP",
+          "STANDINGS_OR_TEAM_STATS_MISSING"
+        ]
+      },
+      "strategy_directions": [
+        {
+          "direction": "FULLTIME_OVER",
+          "market_present": false,
+          "line_present": false,
+          "price_status": "PRICE_MISSING",
+          "status": "WAIT",
+          "missing_context": [
+            "LINE_MISSING",
+            "MARKET_MISSING",
+            "PRICE_MISSING"
+          ],
+          "standalone_ab_allowed": null
+        },
+        {
+          "direction": "HANDICAP_HOME_AWAY",
+          "market_present": false,
+          "line_present": false,
+          "price_status": "PRICE_MISSING",
+          "status": "WAIT",
+          "missing_context": [
+            "LINE_MISSING",
+            "MARKET_MISSING",
+            "PRICE_MISSING"
+          ],
+          "standalone_ab_allowed": null
+        },
+        {
+          "direction": "DOUBLE_CHANCE_STRONG_SIDE",
+          "market_present": false,
+          "line_present": true,
+          "price_status": "PRICE_MISSING",
+          "status": "WAIT",
+          "missing_context": [
+            "MARKET_MISSING",
+            "PRICE_MISSING"
+          ],
+          "standalone_ab_allowed": null
+        },
+        {
+          "direction": "HT_OVER_AUXILIARY",
+          "market_present": false,
+          "line_present": false,
+          "price_status": "PRICE_MISSING",
+          "status": "WAIT",
+          "missing_context": [
+            "HT_OVER_AUXILIARY_ONLY",
+            "LINE_MISSING",
+            "MARKET_MISSING",
+            "PRICE_MISSING"
+          ],
+          "standalone_ab_allowed": false
+        }
+      ],
+      "strength_gap": {
+        "status": "OBSERVABLE",
+        "score_ref": 57.5,
+        "confidence_ref": 50,
+        "notes": [
+          "historical_form_is_auxiliary_only"
+        ]
+      },
+      "market_confirmation": {
+        "status": "MISSING",
+        "market_families_present": [],
+        "ht_over_auxiliary_present": false,
+        "no_standalone_ht_over": true
+      },
+      "price_quality": {
+        "price_source": "prematch_snapshot_from_scan",
+        "bookmaker": "",
+        "market": "",
+        "line": null,
+        "odds": null,
+        "snapshot_time": "2026-05-31T19:02:01.242407",
+        "price_status": "PRICE_MISSING"
+      },
+      "data_quality": {
+        "status": "DATA_INSUFFICIENT",
+        "injury_status": "INJURY_SOURCE_MISSING",
+        "lineup_status": "LINEUP_WAIT_EVENT",
+        "standings_or_team_stats": "DATA_INSUFFICIENT"
+      },
+      "missing_context": [
+        "BOOKMAKER_COUNT_LT_5",
+        "INJURY_SOURCE_MISSING",
+        "LINEUP_MISSING",
+        "LINEUP_WAIT_EVENT",
+        "LINE_MISSING",
+        "LINE_MISSING_FOR_FT_OU_OR_HANDICAP",
+        "MARKET_FAMILY_COVERAGE_LT_3",
+        "MARKET_MISSING",
+        "PRICE_MISSING",
+        "STANDINGS_OR_TEAM_STATS_MISSING"
+      ],
+      "conclusion": "PASS",
+      "safety": {
+        "research_only": true,
+        "not_official_strategy": true,
+        "official_grade_changed": false,
+        "pending_written": false,
+        "qq_sent": false,
+        "cron_or_launchd_modified": false,
+        "realtime_reminder": false
+      }
+    }
+  ],
+  "policy_lock": {
+    "official_grade_changed": false,
+    "ab_threshold_changed": false,
+    "pending_written": false,
+    "qq_sent": false,
+    "cron_or_launchd_modified": false,
+    "b_realtime_restored": false,
+    "rf_shadow_promotion_released": false
+  }
+}

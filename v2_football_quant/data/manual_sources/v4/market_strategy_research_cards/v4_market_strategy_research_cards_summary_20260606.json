@@ -1,0 +1,37 @@
+{
+  "schema_version": "v4_market_strategy_research_cards_summary.v1",
+  "generated_at": "2026-06-06T23:00:04.020851+08:00",
+  "card_count": 3,
+  "conclusion_counts": {
+    "OBSERVE": 0,
+    "WAIT": 1,
+    "PASS": 2
+  },
+  "covered_markets": [
+    "FULLTIME_OVER",
+    "HANDICAP_HOME_AWAY",
+    "DOUBLE_CHANCE_STRONG_SIDE",
+    "HT_OVER_AUXILIARY"
+  ],
+  "missing_context_counts": {
+    "BOOKMAKER_COUNT_LT_5": 3,
+    "INJURY_SOURCE_MISSING": 3,
+    "LINEUP_MISSING": 3,
+    "LINEUP_WAIT_EVENT": 3,
+    "LINE_MISSING": 3,
+    "LINE_MISSING_FOR_FT_OU_OR_HANDICAP": 3,
+    "MARKET_FAMILY_COVERAGE_LT_3": 3,
+    "STANDINGS_OR_TEAM_STATS_MISSING": 3,
+    "MARKET_MISSING": 2,
+    "PRICE_MISSING": 2
+  },
+  "policy_lock": {
+    "official_grade_changed": false,
+    "ab_threshold_changed": false,
+    "pending_written": false,
+    "qq_sent": false,
+    "cron_or_launchd_modified": false,
+    "b_realtime_restored": false,
+    "rf_shadow_promotion_released": false
+  }
+}

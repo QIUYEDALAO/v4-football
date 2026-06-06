@@ -128,6 +128,7 @@ def admission_rule_status(
     if not has_injuries:
         data_gap_tags.append(str(rules.get("missing_injuries_tag") or "INJURY_SOURCE_MISSING"))
     if not has_lineup:
+        data_gap_tags.append("LINEUP_MISSING")
         data_gap_tags.append("LINEUP_WAIT_EVENT")
     return {
         "admission_info_complete": not blockers,
