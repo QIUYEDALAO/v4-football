@@ -76,6 +76,9 @@ APPROVED_V4_AUDIT_STAGE_ALLOWLIST = {
     "v2_football_quant/tools/run_v4_research_card_data_completeness_smoke.py",
     "v2_football_quant/tools/check_v4_research_card_data_completeness_smoke.py",
 }
+APPROVED_MANUAL_SOURCE_PREFIX_ALLOWLIST = (
+    "v4-football/data/manual_sources/v4_football_data_csv/",
+)
 
 
 def run_git(args: list[str]) -> subprocess.CompletedProcess[str]:
@@ -99,6 +102,10 @@ def staged_status() -> dict[str, str]:
 
 def staged_diff() -> str:
     return run_git(["diff", "--cached"]).stdout
+
+
+def approved_manual_source_path(path: str) -> bool:
+    return any(path.startswith(prefix) for prefix in APPROVED_MANUAL_SOURCE_PREFIX_ALLOWLIST)
 
 
 def main() -> int:
@@ -128,6 +135,7 @@ def main() -> int:
         if path not in set(approved_runtime_untrack)
         and path not in set(approved_tracked_runtime_ui_stage)
         and path not in APPROVED_V4_AUDIT_STAGE_ALLOWLIST
+        and not approved_manual_source_path(path)
     ]
     runtime_staged = [path for path in ordinary_staged if RUNTIME_RE.search(path)]
     secret_path_staged = [path for path in ordinary_staged if SECRET_PATH_RE.search(path)]
@@ -161,6 +169,7 @@ def main() -> int:
         "approved_tracked_runtime_ui_stage": approved_tracked_runtime_ui_stage,
         "approved_tracked_runtime_ui_bad_status": approved_tracked_runtime_ui_bad_status,
         "approved_v4_audit_stage": [path for path in staged if path in APPROVED_V4_AUDIT_STAGE_ALLOWLIST],
+        "approved_manual_source_stage": [path for path in staged if approved_manual_source_path(path)],
         "runtime_staged": runtime_staged,
         "secret_path_staged": secret_path_staged,
         "secret_literal_hit_count": len(secret_literal_hits),

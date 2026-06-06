@@ -1,0 +1,29 @@
+{
+  "generated_at": "2026-06-06 23:42:52 UTC",
+  "source": "https://www.football-data.co.uk",
+  "total_files": 54,
+  "total_ok": 54,
+  "total_error": 0,
+  "leagues": [
+    "B1",
+    "D1",
+    "E0",
+    "F1",
+    "I1",
+    "N1",
+    "P1",
+    "SP1",
+    "T1"
+  ],
+  "seasons": [
+    "2021",
+    "2122",
+    "2223",
+    "2324",
+    "2425",
+    "2526"
+  ],
+  "ready_count": 54,
+  "partial_count": 0,
+  "not_ready_count": 0
+}

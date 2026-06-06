@@ -56,6 +56,12 @@ v2_football_quant/data/
 v2_football_quant/data/deep/
 memory/
 data/
+
+# V4 Football-Data CSV manual audit source: allow only this reproducible source pack.
+!v4-football/data/
+!v4-football/data/manual_sources/
+!v4-football/data/manual_sources/v4_football_data_csv/
+!v4-football/data/manual_sources/v4_football_data_csv/**
 # Fund reports / bankroll reports - never upload
 *投注资金日报表*
 *资金日报表*
