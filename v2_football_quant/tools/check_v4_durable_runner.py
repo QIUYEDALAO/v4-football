@@ -17,6 +17,7 @@ DOC = ROOT / "docs/V4_DURABLE_RUNNER_PRODUCTION_GUARD_20260602.md"
 OPENCLAW_JOBS = Path.home() / ".openclaw/cron/jobs.json"
 INSTALLED_PLIST = Path.home() / "Library/LaunchAgents/com.openclaw.v4.daily_scan.plist"
 LAUNCHD_LABEL = "com.openclaw.v4.daily_scan"
+WATCHDOG_TASK_NAMES = {"V4_DAILY_SCAN_READONLY", "V4_DAILY_SCAN_WATCHDOG_CHECK"}
 
 
 def _launchd_loaded() -> bool:
@@ -56,7 +57,7 @@ def main() -> int:
     except Exception:
         jobs_obj = {}
     jobs = jobs_obj.get("jobs", []) if isinstance(jobs_obj, dict) else jobs_obj
-    daily_jobs = [x for x in jobs if isinstance(x, dict) and x.get("name") == "V4_DAILY_SCAN_READONLY"]
+    daily_jobs = [x for x in jobs if isinstance(x, dict) and x.get("name") in WATCHDOG_TASK_NAMES]
     daily_job = daily_jobs[0] if len(daily_jobs) == 1 else {}
     payload = daily_job.get("payload", {}) if isinstance(daily_job, dict) else {}
     payload_message = str(payload.get("message") or "")
@@ -87,6 +88,9 @@ def main() -> int:
     checks["no_openclaw_cron_mutation_in_submitted_files"] = "openclaw cron" not in runner and "openclaw cron" not in shell
     checks["openclaw_1200_job_singleton"] = len(daily_jobs) == 1
     checks["openclaw_1200_job_agentturn_status_shell"] = payload.get("kind") == "agentTurn"
+    checks["openclaw_1200_no_real_scan_completion_notify"] = "V4_DAILY_SCAN_REAL_COMPLETED" not in payload_message
+    checks["runner_uses_real_scan_completion_notify"] = "V4_DAILY_SCAN_REAL_COMPLETED" in runner
+    checks["runner_notifies_not_legacy_readonly"] = '"V4_DAILY_SCAN_READONLY"' not in runner
 
     if mode == "template":
         checks["launchd_not_installed"] = not INSTALLED_PLIST.exists()

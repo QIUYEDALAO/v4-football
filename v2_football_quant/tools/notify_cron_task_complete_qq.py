@@ -7,7 +7,7 @@
 用法：
   # Dry-run（只生成文案，不发送）
   python3 tools/notify_cron_task_complete_qq.py \
-    --task V4_DAILY_SCAN_READONLY \
+    --task V4_DAILY_SCAN_REAL_COMPLETED \
     --date 20260525 \
     --status PASS \
     --duration 269 \
@@ -15,7 +15,7 @@
 
   # 真实发送
   python3 tools/notify_cron_task_complete_qq.py \
-    --task V4_DAILY_SCAN_READONLY \
+    --task V4_DAILY_SCAN_REAL_COMPLETED \
     --date 20260525 \
     --status PASS \
     --duration 269 \
@@ -23,7 +23,7 @@
 
   # 从 marker 自动读取状态
   python3 tools/notify_cron_task_complete_qq.py \
-    --task V4_DAILY_SCAN_READONLY \
+    --task V4_DAILY_SCAN_REAL_COMPLETED \
     --date 20260525 \
     --exit-code 0
 
@@ -53,14 +53,27 @@ DEDUP_DIR = STATUS_DIR
 # 报告 QQ Bot target（与 safe_outbound_sender.py 一致）
 REPORT_TARGET = "D1BC6F68CBBAC6A473947C53ECB861EC"
 
-# 5 个 V3/V4 定时任务配置
+# V3/V4 定时任务配置。
+# 12:00 V4 拆成两个不同语义:
+# - V4_DAILY_SCAN_WATCHDOG_CHECK: OpenClaw isolated session 只读值守检查，不代表扫描完成。
+# - V4_DAILY_SCAN_REAL_COMPLETED: launchd durable runner 真实扫描结束后的 artifact-aware 通知。
 TASK_CONFIG = {
-    "V4_DAILY_SCAN_READONLY": {
+    "V4_DAILY_SCAN_WATCHDOG_CHECK": {
         "scheduled_time": "12:00",
-        "scan_result": True,
+        "scan_result": False,
+        "watchdog_check": True,
         "dashboard_for": None,
         "task_names": {
-            "scan": "V4_DAILY_SCAN_READONLY",
+            "watchdog": "V4_DAILY_SCAN_WATCHDOG_CHECK",
+        },
+    },
+    "V4_DAILY_SCAN_REAL_COMPLETED": {
+        "scheduled_time": "12:00",
+        "scan_result": True,
+        "artifact_aware": True,
+        "dashboard_for": None,
+        "task_names": {
+            "scan": "V4_DAILY_SCAN_REAL_COMPLETED",
         },
     },
     "V4_CONTROL_CENTER_REFRESH_AFTER_SCAN": {
@@ -99,10 +112,6 @@ TASK_CONFIG = {
 }
 
 STATUS_MARKER_MAP = {
-    "V4_DAILY_SCAN_READONLY": {
-        "pattern": "v4_official_candidate_view_resolution_{date}.json",
-        "key": "scan_resolution",
-    },
     "V4_CONTROL_CENTER_REFRESH_AFTER_SCAN": {
         "pattern": "v4_control_center_refresh_after_scan_apply_{date}.json",
         "key": "conclusion",
@@ -137,8 +146,76 @@ def load_json(path: Path) -> dict[str, Any]:
         return {}
 
 
+def _scan_paths(date: str) -> dict[str, Path]:
+    daily = BASE_DIR / "data" / "daily_reports"
+    return {
+        "scan_perf": daily / f"scan_perf_v4_{date}.json",
+        "scout": daily / f"scout_v4_{date}.json",
+        "brief": daily / f"v4_openclaw_brief_{date}.txt",
+        "candidate_view": STATUS_DIR / f"v4_official_candidate_view_{date}.json",
+        "durable_status": STATUS_DIR / "v4_durable_daily_scan_status.json",
+    }
+
+
+def read_real_scan_artifacts(date: str) -> dict[str, Any]:
+    """Read real V4 scan artifacts and classify scan completion without secrets."""
+    paths = _scan_paths(date)
+    exists = {name: path.exists() and path.stat().st_size > 0 for name, path in paths.items()}
+    missing = [name for name, ok in exists.items() if not ok]
+    scan_perf = load_json(paths["scan_perf"]) if exists["scan_perf"] else {}
+    candidate = load_json(paths["candidate_view"]) if exists["candidate_view"] else {}
+    durable = load_json(paths["durable_status"]) if exists["durable_status"] else {}
+
+    durable_ok = (
+        str(durable.get("scan_date") or "") == date
+        and str(durable.get("state") or "").upper() in {
+            "COMPLETED",
+            "SCAN_COMPLETED_NOTIFY_PENDING",
+            "QQ_FAILED_SCAN_OK",
+        }
+        and int(durable.get("scan_exit_code") or durable.get("last_exit_code") or 0) == 0
+    )
+    scan_total = candidate.get("scan_total", scan_perf.get("total_fixtures"))
+    counts = {
+        "A": int(candidate.get("A_count") or 0),
+        "B": int(candidate.get("B_count") or 0),
+        "C": int(candidate.get("C_count") or 0),
+        "SKIP": int(candidate.get("SKIP_count") or 0),
+    }
+    artifact_ok = not missing and durable_ok and scan_total is not None
+    status = "PASS" if artifact_ok else "FAIL"
+    return {
+        "status": status,
+        "data": {
+            "artifact_guard_status": "PASS" if artifact_ok else "MISSING_OR_FAILED",
+            "exists": exists,
+            "missing_artifacts": missing,
+            "durable_status_ok": durable_ok,
+            "durable_state": durable.get("state"),
+            "scan_exit_code": durable.get("scan_exit_code", durable.get("last_exit_code")),
+            "scan_total": scan_total,
+            "scouted_count": scan_perf.get("scouted_count"),
+            "elapsed_seconds": scan_perf.get("elapsed_seconds") or durable.get("duration_seconds"),
+            "api_calls_total": scan_perf.get("api_calls_total"),
+            "remote_requests": scan_perf.get("remote_requests"),
+            "api_cache_hits": scan_perf.get("api_cache_hits"),
+            "api_cache_misses": scan_perf.get("api_cache_misses"),
+            "counts": counts,
+            "formal_recommendation_count": candidate.get("formal_recommendation_count"),
+            "actual_send": bool(candidate.get("actual_send")),
+            "qq_sent": bool(candidate.get("qq_sent")),
+            "paths": {name: str(path.relative_to(BASE_DIR)) for name, path in paths.items()},
+        },
+        "path": str(paths["candidate_view"]),
+    }
+
+
 def read_marker_status(task_name: str, date: str) -> Optional[dict[str, Any]]:
     """从任务状态 marker 文件中读取状态信息。"""
+    if task_name == "V4_DAILY_SCAN_REAL_COMPLETED":
+        return read_real_scan_artifacts(date)
+    if task_name == "V4_DAILY_SCAN_WATCHDOG_CHECK":
+        return {"status": "PASS", "data": {"watchdog_check_only": True}, "path": ""}
     cfg = STATUS_MARKER_MAP.get(task_name)
     if not cfg:
         return None
@@ -177,10 +254,25 @@ def build_result_lines(task_name: str, date: str, status: str, duration: int, ma
     config = TASK_CONFIG.get(task_name, {})
     results = {}
 
-    if task_name == "V4_DAILY_SCAN_READONLY":
-        results["scan"] = "成功" if status in ("PASS", "WARN_ONLY") else "失败"
+    if task_name == "V4_DAILY_SCAN_WATCHDOG_CHECK":
+        results["scan"] = "未运行（值守检查）"
+        results["dashboard"] = "N/A"
+        results["validation"] = "N/A"
+        results["pending"] = "N/A"
+    elif task_name == "V4_DAILY_SCAN_REAL_COMPLETED":
+        data = marker_info.get("data", {}) if marker_info else {}
+        results["scan"] = "真实扫描完成" if status in ("PASS", "WARN_ONLY") else "失败/超时/无产物"
         results["dashboard"] = "N/A"
         results["validation"] = "待补验"
+        results["pending"] = str(data.get("formal_recommendation_count", "0"))
+        results["scan_total"] = data.get("scan_total", "?")
+        results["scouted_count"] = data.get("scouted_count", "?")
+        results["elapsed_seconds"] = data.get("elapsed_seconds", "?")
+        results["api_calls_total"] = data.get("api_calls_total", "?")
+        results["remote_requests"] = data.get("remote_requests", "?")
+        results["counts"] = data.get("counts", {})
+        results["missing_artifacts"] = data.get("missing_artifacts", [])
+        results["artifact_guard_status"] = data.get("artifact_guard_status", "?")
     elif task_name == "V4_VALIDATION_DRY_RUN_FINAL_AND_DASHBOARD_REFRESH":
         results["scan"] = "未运行"
         dashboard_ok = status in ("PASS", "WARN_ONLY")
@@ -231,7 +323,14 @@ def build_notification_text(
 ) -> str:
     """生成 iPhone 友好 QQ 通知文案。"""
     lines = []
-    lines.append("【V3/V4定时任务完成】")
+    if task_name == "V4_DAILY_SCAN_WATCHDOG_CHECK":
+        lines.append("【V4值守检查完成】")
+    elif task_name == "V4_DAILY_SCAN_REAL_COMPLETED" and status in ("PASS", "WARN_ONLY"):
+        lines.append("【V4真实扫描完成】")
+    elif task_name == "V4_DAILY_SCAN_REAL_COMPLETED":
+        lines.append("【V4扫描失败/超时/无产物】")
+    else:
+        lines.append("【V3/V4定时任务完成】")
     # 避免 QQ Markdown 把下划线当作斜体标记，用全角下划线替代
     display_name = task_name.replace("_", "＿")
     lines.append(f"任务：{display_name}")
@@ -243,19 +342,37 @@ def build_notification_text(
     lines.append(f"日期：{date}")
     lines.append("")
     lines.append("结果：")
-    lines.append(f"- scan: {results.get('scan', '?')}")
-    lines.append(f"- dashboard: {results.get('dashboard', '?')}")
-    lines.append(f"- validation: {results.get('validation', '?')}")
-    lines.append(f"- pending: {results.get('pending', '?')}场")
+    if task_name == "V4_DAILY_SCAN_REAL_COMPLETED":
+        counts = results.get("counts") or {}
+        lines.append(f"- scan: {results.get('scan', '?')}")
+        lines.append(f"- total/scouted: {results.get('scan_total', '?')}/{results.get('scouted_count', '?')}")
+        lines.append(
+            "- A/B/C/SKIP: "
+            f"{counts.get('A', 0)}/{counts.get('B', 0)}/{counts.get('C', 0)}/{counts.get('SKIP', 0)}"
+        )
+        lines.append(f"- API calls: {results.get('api_calls_total', '?')} (remote {results.get('remote_requests', '?')})")
+        lines.append(f"- artifact guard: {results.get('artifact_guard_status', '?')}")
+    else:
+        lines.append(f"- scan: {results.get('scan', '?')}")
+        lines.append(f"- dashboard: {results.get('dashboard', '?')}")
+        lines.append(f"- validation: {results.get('validation', '?')}")
+        lines.append(f"- pending: {results.get('pending', '?')}场")
     lines.append("")
     if status in ("FAIL", "BLOCKER"):
         lines.append("异常：")
-        lines.append(f"原因：任务状态为{status}")
+        if task_name == "V4_DAILY_SCAN_REAL_COMPLETED" and results.get("missing_artifacts"):
+            lines.append("原因：真实扫描产物缺失：" + ", ".join(results.get("missing_artifacts", [])))
+        else:
+            lines.append(f"原因：任务状态为{status}")
     elif status == "WARN_ONLY":
         lines.append("异常：")
         lines.append("原因：部分步骤有警告")
     else:
         lines.append("异常：无")
+    if task_name == "V4_DAILY_SCAN_WATCHDOG_CHECK":
+        lines.append("说明：这是值守检查完成，不代表真实扫描完成。")
+    if task_name == "V4_DAILY_SCAN_REAL_COMPLETED":
+        lines.append("说明：仅通知扫描状态；不推shadow/C/SKIP长表，不输出推荐。")
     return "\n".join(lines)
 
 

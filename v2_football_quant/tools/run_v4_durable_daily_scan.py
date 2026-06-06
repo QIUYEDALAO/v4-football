@@ -211,18 +211,35 @@ def run_scan(args: argparse.Namespace) -> int:
             if proc.poll() is not None and not timed_out:
                 scan_rc = int(proc.returncode or 0)
 
+        notify_duration = int((now() - started).total_seconds())
+        notify_pending_state = {
+            **status,
+            "updated_at": iso(),
+            "state": "FAILED" if scan_rc != 0 else "SCAN_COMPLETED_NOTIFY_PENDING",
+            "active_lock": True,
+            "scan_exit_code": scan_rc,
+            "last_exit_code": scan_rc,
+            "scan_failure": scan_rc != 0,
+            "ended_at": iso(),
+            "duration_seconds": notify_duration,
+            "last_completed_scan": date_key if scan_rc == 0 else status.get("last_completed_scan"),
+            "catch_up_required": scan_rc != 0,
+            "catch_up_status": "NEED_MANUAL_CATCHUP" if scan_rc != 0 else "NOT_REQUIRED",
+        }
+        atomic_write(STATUS_PATH, notify_pending_state)
+
         if args.notify:
             notify_cmd = [
                 sys.executable,
                 str(ROOT / "tools/notify_cron_task_complete_qq.py"),
                 "--task",
-                "V4_DAILY_SCAN_READONLY",
+                "V4_DAILY_SCAN_REAL_COMPLETED",
                 "--date",
                 date_key,
                 "--exit-code",
                 str(scan_rc),
                 "--duration",
-                str(int((now() - started).total_seconds())),
+                str(notify_duration),
             ]
             qq_rc = subprocess.run(notify_cmd, cwd=str(ROOT), timeout=120).returncode
     finally:
