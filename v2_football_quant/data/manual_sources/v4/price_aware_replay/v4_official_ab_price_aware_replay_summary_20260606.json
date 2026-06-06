@@ -1,0 +1,124 @@
+{
+  "schema_version": "v4_price_aware_replay_ledger.v1",
+  "generated_at": "2026-06-06T17:49:33.648759",
+  "source": "data/runtime/validation/v4_ab_historical_ledger_20260526.json",
+  "record_policy": "BOSS_OFFICIAL_AGGREGATE_RECONCILED_WITH_LEGACY_EVENT_ROWS",
+  "price_policy": "paper_default_0.80_decimal_1.80",
+  "official_target": {
+    "A": "30/49",
+    "B": "54/95 pending=1",
+    "AB": "84/144 pending=1"
+  },
+  "records_count": 145,
+  "aggregate_reconciliation_rows": 5,
+  "bucket_stats": {
+    "official_grade": [
+      {
+        "bucket": "A",
+        "sample_count": 49,
+        "settled_count": 49,
+        "hit_count": 30,
+        "hit_rate": 0.6122,
+        "avg_odds_proxy": 1.8,
+        "roi_proxy": 0.102,
+        "max_fail_streak": 19,
+        "max_drawdown_proxy": 57.2,
+        "confidence_level": "AGGREGATE_RECONCILED_PROXY"
+      },
+      {
+        "bucket": "B",
+        "sample_count": 96,
+        "settled_count": 95,
+        "hit_count": 54,
+        "hit_rate": 0.5684,
+        "avg_odds_proxy": 1.8,
+        "roi_proxy": 0.0232,
+        "max_fail_streak": 41,
+        "max_drawdown_proxy": 59.2,
+        "confidence_level": "AGGREGATE_RECONCILED_PROXY"
+      }
+    ],
+    "AB": [
+      {
+        "bucket": "A+B",
+        "sample_count": 145,
+        "settled_count": 144,
+        "hit_count": 84,
+        "hit_rate": 0.5833,
+        "avg_odds_proxy": 1.8,
+        "roi_proxy": 0.05,
+        "max_fail_streak": 56,
+        "max_drawdown_proxy": 59.2,
+        "confidence_level": "AGGREGATE_RECONCILED_PROXY"
+      }
+    ],
+    "market_conflict": [
+      {
+        "bucket": "MARKET_CONTEXT_NOT_AVAILABLE",
+        "sample_count": 145,
+        "settled_count": 144,
+        "hit_count": 84,
+        "hit_rate": 0.5833,
+        "avg_odds_proxy": 1.8,
+        "roi_proxy": 0.05,
+        "max_fail_streak": 56,
+        "max_drawdown_proxy": 59.2,
+        "confidence_level": "AGGREGATE_RECONCILED_PROXY"
+      }
+    ],
+    "league_tier": [
+      {
+        "bucket": "LEAGUE_TIER_NOT_AVAILABLE",
+        "sample_count": 145,
+        "settled_count": 144,
+        "hit_count": 84,
+        "hit_rate": 0.5833,
+        "avg_odds_proxy": 1.8,
+        "roi_proxy": 0.05,
+        "max_fail_streak": 56,
+        "max_drawdown_proxy": 59.2,
+        "confidence_level": "AGGREGATE_RECONCILED_PROXY"
+      }
+    ],
+    "season_phase": [
+      {
+        "bucket": "SEASON_PHASE_NOT_AVAILABLE",
+        "sample_count": 145,
+        "settled_count": 144,
+        "hit_count": 84,
+        "hit_rate": 0.5833,
+        "avg_odds_proxy": 1.8,
+        "roi_proxy": 0.05,
+        "max_fail_streak": 56,
+        "max_drawdown_proxy": 59.2,
+        "confidence_level": "AGGREGATE_RECONCILED_PROXY"
+      }
+    ]
+  },
+  "risk_conclusion": {
+    "A": "OBSERVE_ONLY_PRICE_GUARD_REQUIRED",
+    "B": "PAUSE_REALTIME_REMINDER",
+    "AB": "DAILY_REPORT_ONLY",
+    "forbidden_realtime_buckets": [
+      "SKIP",
+      "C",
+      "shadow-only",
+      "MARKET_NO_DATA",
+      "MARKET_EXTREME",
+      "H2H_LOW_SAMPLE",
+      "weak_recent_form",
+      "stale_recent_form",
+      "unknown_recent_form"
+    ]
+  },
+  "safety": {
+    "observation_only": true,
+    "betting_recommendation": false,
+    "official_grade_changed": false,
+    "pending_bet_candidates_written": false,
+    "qq_sent": false,
+    "cron_or_launchd_modified": false,
+    "rf_shadow_promotion_released": false,
+    "runtime_output": false
+  }
+}
