@@ -1,0 +1,49 @@
+{
+  "schema_version": "v4_market_strategy_card_replay_ledger_schema.v1",
+  "purpose": "Read-only replay ledger for V4 market strategy research cards.",
+  "record_fields": [
+    "fixture_id",
+    "match_info",
+    "league_admission_status",
+    "strategy_card_conclusion",
+    "strategy_directions",
+    "five_dimension_missing_context",
+    "price_status",
+    "line_status",
+    "market_status",
+    "result_available",
+    "result_hit",
+    "result_outcome",
+    "replay_status"
+  ],
+  "allowed_card_conclusions": [
+    "OBSERVE",
+    "WAIT",
+    "PASS"
+  ],
+  "allowed_replay_status": [
+    "RESULT_AVAILABLE",
+    "RESULT_MISSING"
+  ],
+  "warn_only_conditions": [
+    "SAMPLE_INSUFFICIENT",
+    "OBSERVE_SAMPLE_INSUFFICIENT",
+    "RESULT_COVERAGE_PARTIAL"
+  ],
+  "missing_context_policy": {
+    "PRICE_MISSING": "retain_gap_no_edge_inference",
+    "LINE_MISSING": "retain_gap_no_market_confirmation",
+    "MARKET_MISSING": "retain_gap_wait_or_pass_only",
+    "RESULT_MISSING": "excluded_from_hit_rate"
+  },
+  "policy_lock": {
+    "official_grade_changed": false,
+    "ab_threshold_changed": false,
+    "pending_written": false,
+    "qq_sent": false,
+    "cron_or_launchd_modified": false,
+    "b_realtime_restored": false,
+    "rf_shadow_promotion_released": false,
+    "live_api_called": false
+  }
+}
