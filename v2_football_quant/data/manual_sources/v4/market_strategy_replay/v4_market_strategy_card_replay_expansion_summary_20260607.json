@@ -1,0 +1,71 @@
+{
+  "schema_version": "v4_market_strategy_card_replay_expansion_summary.v1",
+  "generated_at": "2026-06-07T00:00:00+08:00",
+  "sample_count": 253,
+  "source_unique_fixture_count": 253,
+  "conclusion_distribution": {
+    "OBSERVE": 0,
+    "WAIT": 18,
+    "PASS": 235
+  },
+  "result_coverage": {
+    "OBSERVE": {
+      "sample_count": 0,
+      "result_available_count": 0,
+      "result_missing_count": 0,
+      "hit_count": 0,
+      "hit_rate": null,
+      "hit_rate_policy": "NOT_COMPUTED_RESULT_MISSING_OR_EMPTY"
+    },
+    "WAIT": {
+      "sample_count": 18,
+      "result_available_count": 2,
+      "result_missing_count": 16,
+      "hit_count": 2,
+      "hit_rate": 1.0,
+      "hit_rate_policy": "EXCLUDES_RESULT_MISSING"
+    },
+    "PASS": {
+      "sample_count": 235,
+      "result_available_count": 38,
+      "result_missing_count": 197,
+      "hit_count": 25,
+      "hit_rate": 0.6579,
+      "hit_rate_policy": "EXCLUDES_RESULT_MISSING"
+    }
+  },
+  "missing_context_summary": {
+    "PRICE_MISSING": 152,
+    "LINE_MISSING": 249,
+    "MARKET_MISSING": 249,
+    "DATA_INSUFFICIENT": 253
+  },
+  "observe_sample_sufficient": false,
+  "observe_blockers": {
+    "DATA_INSUFFICIENT": 253,
+    "EXTERNAL_CONTEXT_PENDING": 253,
+    "INJURY_SOURCE_MISSING": 253,
+    "LINEUP_MISSING": 253,
+    "LINEUP_WAIT_EVENT": 253,
+    "STANDINGS_MISSING": 253,
+    "TEAM_STATS_MISSING": 253,
+    "LINE_MISSING": 249,
+    "MARKET_MISSING": 249,
+    "PRICE_MISSING": 152
+  },
+  "next_stage_research_status": "WAIT_SAMPLE_INSUFFICIENT",
+  "warn_only": [
+    "OBSERVE_SAMPLE_INSUFFICIENT",
+    "RESULT_COVERAGE_PARTIAL"
+  ],
+  "policy_lock": {
+    "official_grade_changed": false,
+    "ab_threshold_changed": false,
+    "pending_written": false,
+    "qq_sent": false,
+    "cron_or_launchd_modified": false,
+    "b_realtime_restored": false,
+    "rf_shadow_promotion_released": false,
+    "live_api_called": false
+  }
+}

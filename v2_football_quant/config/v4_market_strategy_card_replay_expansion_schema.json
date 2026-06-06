@@ -1,0 +1,46 @@
+{
+  "schema_version": "v4_market_strategy_card_replay_expansion_schema.v1",
+  "purpose": "Expanded read-only replay ledger for V4 market strategy research cards using local artifacts only.",
+  "source_policy": "existing_local_artifacts_only",
+  "minimum_sample_count": 4,
+  "record_fields": [
+    "fixture_id",
+    "match_info",
+    "league_admission_status",
+    "strategy_card_conclusion",
+    "strategy_directions",
+    "missing_context",
+    "price_status",
+    "line_status",
+    "market_status",
+    "result_available",
+    "result_hit",
+    "result_outcome",
+    "replay_status"
+  ],
+  "allowed_card_conclusions": [
+    "OBSERVE",
+    "WAIT",
+    "PASS"
+  ],
+  "missing_context_stats": [
+    "PRICE_MISSING",
+    "LINE_MISSING",
+    "MARKET_MISSING",
+    "DATA_INSUFFICIENT"
+  ],
+  "warn_only_conditions": [
+    "OBSERVE_SAMPLE_INSUFFICIENT",
+    "RESULT_COVERAGE_PARTIAL"
+  ],
+  "policy_lock": {
+    "official_grade_changed": false,
+    "ab_threshold_changed": false,
+    "pending_written": false,
+    "qq_sent": false,
+    "cron_or_launchd_modified": false,
+    "b_realtime_restored": false,
+    "rf_shadow_promotion_released": false,
+    "live_api_called": false
+  }
+}
