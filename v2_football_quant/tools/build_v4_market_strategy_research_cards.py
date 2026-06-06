@@ -25,6 +25,7 @@ OUT_SUMMARY = OUT_DIR / "v4_market_strategy_research_cards_summary_20260606.json
 SCOUT_DIR = ROOT / "data/daily_reports"
 STATUS_DIR = ROOT / "data/runtime/status"
 TZ = timezone(timedelta(hours=8))
+BUILD_TIMESTAMP = "2026-06-06T00:00:00+08:00"
 
 STRATEGY_DIRECTIONS = [
     "FULLTIME_OVER",
@@ -288,7 +289,7 @@ def main() -> int:
     samples = [card_from_row(row, path) for row, path in pick_samples(candidate_rows())]
     payload = {
         "schema_version": "v4_market_strategy_research_cards.v1",
-        "generated_at": datetime.now(TZ).isoformat(),
+        "generated_at": BUILD_TIMESTAMP,
         "source": "existing_local_artifacts_only",
         "live_api_called": False,
         "allowed_conclusions": ALLOWED_CONCLUSIONS,
