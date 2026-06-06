@@ -72,21 +72,24 @@ Real scan completion may include compact numeric summaries:
 It must not include shadow-only rows, C/SKIP long tables, betting language, QQ
 recommendation content, secrets, or API keys.
 
-## Current Cron Note
+## Cron Source Rename
 
-This code pack does not mutate `~/.openclaw/cron/jobs.json`. The active 12:00
-OpenClaw job may still have the historical name `V4_DAILY_SCAN_READONLY` until
-a separately authorized cron-source update renames it to
+The active 12:00 OpenClaw cron source is named
 `V4_DAILY_SCAN_WATCHDOG_CHECK`.
 
-The routing guard still blocks the dangerous part now: watchdog payloads must
-not call `V4_DAILY_SCAN_REAL_COMPLETED`, and the durable runner must no longer
-call legacy `V4_DAILY_SCAN_READONLY` as a scan-completion task.
+This rename is source-only. It does not reload cron, load or unload launchd,
+send QQ, or execute a scan. The payload remains read-only and may only inspect
+launchd/durable-runner status, heartbeat, and checker output.
+
+The routing guard blocks the dangerous part: watchdog payloads must not call
+`V4_DAILY_SCAN_REAL_COMPLETED`, and the durable runner must not call legacy
+`V4_DAILY_SCAN_READONLY` as a scan-completion task.
 
 ## Checker
 
 `tools/check_v4_daily_scan_notification_routing.py` verifies:
 
+- active watchdog source is named `V4_DAILY_SCAN_WATCHDOG_CHECK`
 - watchdog and real scan task names are distinct
 - legacy `V4_DAILY_SCAN_READONLY` is not a scan-completion notify task
 - durable runner calls `V4_DAILY_SCAN_REAL_COMPLETED`
@@ -97,11 +100,6 @@ call legacy `V4_DAILY_SCAN_READONLY` as a scan-completion task.
 
 ## Follow-Up
 
-After this code pack is accepted, the safe production follow-up is a separate
-cron-source-only update:
-
-1. Rename active OpenClaw job `V4_DAILY_SCAN_READONLY` to
-   `V4_DAILY_SCAN_WATCHDOG_CHECK`.
-2. Keep the payload read-only.
-3. Do not call `V4_DAILY_SCAN_REAL_COMPLETED` from the watchdog payload.
-4. Leave launchd as the only real scan owner.
+No cron reload was performed by this pack. The operational follow-up is to let
+the existing OpenClaw scheduler read the updated source configuration through
+the normal control path. Launchd remains the only real scan owner.

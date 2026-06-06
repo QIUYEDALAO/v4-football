@@ -2,10 +2,9 @@
 """Check V4 daily scan notification routing separation.
 
 This checker is static/read-only. It does not run scan, send QQ, mutate cron,
-or touch launchd. The active OpenClaw cron may still have the legacy job name
-until a separately authorized cron update is applied; this checker verifies
-that code routing no longer lets a watchdog status check masquerade as a real
-scan completion notification.
+or touch launchd. The active OpenClaw cron source must use the watchdog-check
+task name, while keeping the payload read-only so a status check cannot
+masquerade as a real scan completion notification.
 """
 from __future__ import annotations
 
@@ -90,6 +89,7 @@ def main() -> int:
         "runner_writes_notify_pending_status": "SCAN_COMPLETED_NOTIFY_PENDING" in runner,
         "runner_notify_after_scan_process": runner.find("SCAN_COMPLETED_NOTIFY_PENDING") < runner.find("V4_DAILY_SCAN_REAL_COMPLETED"),
         "active_watchdog_job_singleton": len(watchdog_jobs) == 1,
+        "active_watchdog_name_renamed": active_watchdog_name == "V4_DAILY_SCAN_WATCHDOG_CHECK",
         "active_watchdog_not_direct_scan": "engine/v4_scan_and_brief.py" not in watchdog_payload,
         "active_watchdog_no_real_scan_completion_notify": "V4_DAILY_SCAN_REAL_COMPLETED" not in watchdog_payload,
         "active_watchdog_status_only": "check_v4_durable_runner.py" in watchdog_payload and "launchctl" in watchdog_payload,
@@ -97,8 +97,6 @@ def main() -> int:
         "secrets_not_in_runner_text": not re.search(r"(?i)(api[_-]?key|token|secret)\\s*[:=]\\s*['\\\"][A-Za-z0-9_\\-]{16,}", runner),
     }
     warnings = []
-    if active_watchdog_name == "V4_DAILY_SCAN_READONLY":
-        warnings.append("active_cron_name_legacy_pending_manual_rename_to_V4_DAILY_SCAN_WATCHDOG_CHECK")
     blockers = [name for name, ok in checks.items() if not ok]
     result = {
         "schema_version": "v4_daily_scan_notification_routing_guard.v1",
