@@ -1,0 +1,38 @@
+{
+  "schema_version": "v4_five_dimension_lite_summary.v1",
+  "generated_at": "2026-06-07T00:00:00+08:00",
+  "sample_count": 3,
+  "dimensions_required": [
+    "strength_gap",
+    "tactical_efficiency",
+    "squad_context",
+    "market_confirmation",
+    "external_risk"
+  ],
+  "conclusion_counts": {
+    "OBSERVE": 0,
+    "WAIT": 1,
+    "PASS": 2
+  },
+  "missing_context_counts": {
+    "DATA_INSUFFICIENT": 3,
+    "EXTERNAL_CONTEXT_PENDING": 3,
+    "INJURY_SOURCE_MISSING": 3,
+    "LINEUP_MISSING": 3,
+    "LINEUP_WAIT_EVENT": 3,
+    "LINE_MISSING": 3,
+    "MARKET_MISSING": 3,
+    "STANDINGS_MISSING": 3,
+    "TEAM_STATS_MISSING": 3,
+    "PRICE_MISSING": 1
+  },
+  "policy_lock": {
+    "official_grade_changed": false,
+    "ab_threshold_changed": false,
+    "pending_written": false,
+    "qq_sent": false,
+    "cron_or_launchd_modified": false,
+    "b_realtime_restored": false,
+    "rf_shadow_promotion_released": false
+  }
+}

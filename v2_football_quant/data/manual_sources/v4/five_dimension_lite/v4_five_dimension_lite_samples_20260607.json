@@ -1,0 +1,391 @@
+{
+  "schema_version": "v4_five_dimension_lite.v1",
+  "generated_at": "2026-06-07T00:00:00+08:00",
+  "source": "existing_local_artifacts_only",
+  "schema_ref": "config/v4_five_dimension_lite_schema.json",
+  "live_api_called": false,
+  "allowed_conclusions": [
+    "OBSERVE",
+    "WAIT",
+    "PASS"
+  ],
+  "dimensions_required": [
+    "strength_gap",
+    "tactical_efficiency",
+    "squad_context",
+    "market_confirmation",
+    "external_risk"
+  ],
+  "missing_context_required": [
+    "PRICE_MISSING",
+    "LINE_MISSING",
+    "MARKET_MISSING",
+    "STANDINGS_MISSING",
+    "TEAM_STATS_MISSING",
+    "LINEUP_MISSING",
+    "LINEUP_WAIT_EVENT",
+    "INJURY_SOURCE_MISSING",
+    "EXTERNAL_CONTEXT_PENDING",
+    "DATA_INSUFFICIENT"
+  ],
+  "samples": [
+    {
+      "schema_version": "v4_five_dimension_lite_sample.v1",
+      "card_type": "FIVE_DIMENSION_LITE_OBSERVATION",
+      "source_artifact": "data/daily_reports/scout_v4_20260606.json",
+      "match_info": {
+        "fixture_id": 1546317,
+        "home": "Kashima",
+        "away": "Vissel Kobe",
+        "league": "日职联",
+        "league_id": "日职联",
+        "kickoff_time": "2026-06-06T13:00:00+08:00",
+        "official_grade_snapshot": "UNKNOWN",
+        "official_grade_unchanged": true
+      },
+      "league_admission_status": {
+        "admission_group": "INCLUDE_CURRENT",
+        "league_policy_name": "J1 League",
+        "league_policy_reason": "POLICY_MATCH",
+        "strategy_pool_allowed": true,
+        "observe_only": false
+      },
+      "strength_gap": {
+        "status": "WAIT",
+        "league_tier": "TIER_2_MAINSTREAM",
+        "league_tier_reason": "mainstream_competition",
+        "standings_status": "STANDINGS_MISSING",
+        "team_stats_status": "TEAM_STATS_MISSING",
+        "h2h": {
+          "sample_count": 5,
+          "support_status": "H2H_LIGHT_BONUS",
+          "low_sample": false,
+          "policy": "AUXILIARY_ONLY_NOT_PRIMARY"
+        },
+        "historical_form_policy": "AUXILIARY_ONLY"
+      },
+      "tactical_efficiency": {
+        "status": "WAIT",
+        "goals_for_refs": {
+          "home_recent5_fh_score_rate": 0.4,
+          "away_recent5_fh_score_rate": 0.4,
+          "home_recent10_fh_score_rate": 0.5,
+          "away_recent10_fh_score_rate": 0.6
+        },
+        "goals_against_refs": {
+          "home_recent5_fh_concede_rate": 0.4,
+          "away_recent5_fh_concede_rate": 0.4
+        },
+        "shots_status": "TEAM_STATS_MISSING",
+        "home_away_stats_status": "PARTIAL_RECENT_FORM_ONLY",
+        "ft_ou_context_status": "MARKET_MISSING"
+      },
+      "squad_context": {
+        "status": "WAIT",
+        "lineup_status": "LINEUP_WAIT_EVENT",
+        "formation_status": "LINEUP_WAIT_EVENT",
+        "injury_status": "INJURY_SOURCE_MISSING",
+        "lineup_policy": "WAIT_EVENT_UNTIL_OFFICIAL"
+      },
+      "market_confirmation": {
+        "status": "WAIT",
+        "market_families": {
+          "1X2": false,
+          "FT_OU": false,
+          "AH_OR_HANDICAP": false,
+          "DOUBLE_CHANCE": false
+        },
+        "bookmaker_count": 1,
+        "bookmaker": "Bet365",
+        "market": "Exact Goals Number - First Half",
+        "line": 5.0,
+        "odds": 1.67,
+        "snapshot_time": "2026-06-06T13:32:45.157491",
+        "price_status": "REAL_PRICE",
+        "ht_over_auxiliary_present": true,
+        "ht_over_standalone_ab_allowed": false
+      },
+      "external_risk": {
+        "status": "WAIT",
+        "rest_days": {
+          "home": 7,
+          "away": 7,
+          "status": "PLACEHOLDER_ONLY"
+        },
+        "travel_status": "EXTERNAL_CONTEXT_PENDING",
+        "venue": "",
+        "weather_status": "EXTERNAL_CONTEXT_PENDING",
+        "referee_status": "EXTERNAL_CONTEXT_PENDING"
+      },
+      "missing_context": [
+        "DATA_INSUFFICIENT",
+        "EXTERNAL_CONTEXT_PENDING",
+        "INJURY_SOURCE_MISSING",
+        "LINEUP_MISSING",
+        "LINEUP_WAIT_EVENT",
+        "LINE_MISSING",
+        "MARKET_MISSING",
+        "STANDINGS_MISSING",
+        "TEAM_STATS_MISSING"
+      ],
+      "conclusion_guard": {
+        "conclusion": "WAIT",
+        "allowed_conclusions": [
+          "OBSERVE",
+          "WAIT",
+          "PASS"
+        ],
+        "not_recommendation": true,
+        "not_betting_advice": true,
+        "official_grade_changed": false,
+        "pending_written": false,
+        "qq_sent": false,
+        "cron_or_launchd_modified": false,
+        "b_realtime_restored": false,
+        "rf_shadow_promotion_released": false
+      }
+    },
+    {
+      "schema_version": "v4_five_dimension_lite_sample.v1",
+      "card_type": "FIVE_DIMENSION_LITE_OBSERVATION",
+      "source_artifact": "data/daily_reports/scout_v4_20260531.json",
+      "match_info": {
+        "fixture_id": 1544804,
+        "home": "Singapore",
+        "away": "Mongolia",
+        "league": "友谊赛",
+        "league_id": "友谊赛",
+        "kickoff_time": "2026-05-31T19:30:00+08:00",
+        "official_grade_snapshot": "UNKNOWN",
+        "official_grade_unchanged": true
+      },
+      "league_admission_status": {
+        "admission_group": "OBSERVE_ONLY",
+        "league_policy_name": "Friendlies",
+        "league_policy_reason": "POLICY_MATCH",
+        "strategy_pool_allowed": false,
+        "observe_only": true
+      },
+      "strength_gap": {
+        "status": "WAIT",
+        "league_tier": "TIER_4_NON_FORMAL",
+        "league_tier_reason": "friendly_or_u_or_women",
+        "standings_status": "STANDINGS_MISSING",
+        "team_stats_status": "TEAM_STATS_MISSING",
+        "h2h": {
+          "sample_count": 0,
+          "support_status": "H2H_LOW_SAMPLE",
+          "low_sample": true,
+          "policy": "AUXILIARY_ONLY_NOT_PRIMARY"
+        },
+        "historical_form_policy": "AUXILIARY_ONLY"
+      },
+      "tactical_efficiency": {
+        "status": "WAIT",
+        "goals_for_refs": {
+          "home_recent5_fh_score_rate": 0.8,
+          "away_recent5_fh_score_rate": 0.4,
+          "home_recent10_fh_score_rate": 0.667,
+          "away_recent10_fh_score_rate": 0.2
+        },
+        "goals_against_refs": {
+          "home_recent5_fh_concede_rate": 0.6,
+          "away_recent5_fh_concede_rate": 0.8
+        },
+        "shots_status": "TEAM_STATS_MISSING",
+        "home_away_stats_status": "PARTIAL_RECENT_FORM_ONLY",
+        "ft_ou_context_status": "MARKET_MISSING"
+      },
+      "squad_context": {
+        "status": "WAIT",
+        "lineup_status": "LINEUP_WAIT_EVENT",
+        "formation_status": "LINEUP_WAIT_EVENT",
+        "injury_status": "INJURY_SOURCE_MISSING",
+        "lineup_policy": "WAIT_EVENT_UNTIL_OFFICIAL"
+      },
+      "market_confirmation": {
+        "status": "WAIT",
+        "market_families": {
+          "1X2": false,
+          "FT_OU": false,
+          "AH_OR_HANDICAP": false,
+          "DOUBLE_CHANCE": false
+        },
+        "bookmaker_count": 1,
+        "bookmaker": "William Hill",
+        "market": "Exact Goals Number - First Half",
+        "line": 4.0,
+        "odds": 9.5,
+        "snapshot_time": "2026-05-31T19:01:03.829229",
+        "price_status": "REAL_PRICE",
+        "ht_over_auxiliary_present": true,
+        "ht_over_standalone_ab_allowed": false
+      },
+      "external_risk": {
+        "status": "WAIT",
+        "rest_days": {
+          "home": 60,
+          "away": 535,
+          "status": "PLACEHOLDER_ONLY"
+        },
+        "travel_status": "EXTERNAL_CONTEXT_PENDING",
+        "venue": "",
+        "weather_status": "EXTERNAL_CONTEXT_PENDING",
+        "referee_status": "EXTERNAL_CONTEXT_PENDING"
+      },
+      "missing_context": [
+        "DATA_INSUFFICIENT",
+        "EXTERNAL_CONTEXT_PENDING",
+        "INJURY_SOURCE_MISSING",
+        "LINEUP_MISSING",
+        "LINEUP_WAIT_EVENT",
+        "LINE_MISSING",
+        "MARKET_MISSING",
+        "STANDINGS_MISSING",
+        "TEAM_STATS_MISSING"
+      ],
+      "conclusion_guard": {
+        "conclusion": "PASS",
+        "allowed_conclusions": [
+          "OBSERVE",
+          "WAIT",
+          "PASS"
+        ],
+        "not_recommendation": true,
+        "not_betting_advice": true,
+        "official_grade_changed": false,
+        "pending_written": false,
+        "qq_sent": false,
+        "cron_or_launchd_modified": false,
+        "b_realtime_restored": false,
+        "rf_shadow_promotion_released": false
+      }
+    },
+    {
+      "schema_version": "v4_five_dimension_lite_sample.v1",
+      "card_type": "FIVE_DIMENSION_LITE_OBSERVATION",
+      "source_artifact": "data/daily_reports/scout_v4_20260531.json",
+      "match_info": {
+        "fixture_id": 1546065,
+        "home": "Sportivo Huracan",
+        "away": "La Luz",
+        "league": "乌拉甲B",
+        "league_id": "乌拉甲B",
+        "kickoff_time": "2026-05-31T20:30:00+08:00",
+        "official_grade_snapshot": "UNKNOWN",
+        "official_grade_unchanged": true
+      },
+      "league_admission_status": {
+        "admission_group": "EXCLUDE_DEFAULT",
+        "league_policy_name": "乌拉甲B",
+        "league_policy_reason": "LEAGUE_NOT_IN_MAIN_POLICY",
+        "strategy_pool_allowed": false,
+        "observe_only": false
+      },
+      "strength_gap": {
+        "status": "WAIT",
+        "league_tier": "TIER_3_WEAK_COVERAGE",
+        "league_tier_reason": "fallback_weak_coverage",
+        "standings_status": "STANDINGS_MISSING",
+        "team_stats_status": "TEAM_STATS_MISSING",
+        "h2h": {
+          "sample_count": 0,
+          "support_status": "H2H_LOW_SAMPLE",
+          "low_sample": true,
+          "policy": "AUXILIARY_ONLY_NOT_PRIMARY"
+        },
+        "historical_form_policy": "AUXILIARY_ONLY"
+      },
+      "tactical_efficiency": {
+        "status": "WAIT",
+        "goals_for_refs": {
+          "home_recent5_fh_score_rate": 0.2,
+          "away_recent5_fh_score_rate": 0.2,
+          "home_recent10_fh_score_rate": 0.4,
+          "away_recent10_fh_score_rate": 0.4
+        },
+        "goals_against_refs": {
+          "home_recent5_fh_concede_rate": 0.2,
+          "away_recent5_fh_concede_rate": 0.2
+        },
+        "shots_status": "TEAM_STATS_MISSING",
+        "home_away_stats_status": "PARTIAL_RECENT_FORM_ONLY",
+        "ft_ou_context_status": "MARKET_MISSING"
+      },
+      "squad_context": {
+        "status": "WAIT",
+        "lineup_status": "LINEUP_WAIT_EVENT",
+        "formation_status": "LINEUP_WAIT_EVENT",
+        "injury_status": "INJURY_SOURCE_MISSING",
+        "lineup_policy": "WAIT_EVENT_UNTIL_OFFICIAL"
+      },
+      "market_confirmation": {
+        "status": "WAIT",
+        "market_families": {
+          "1X2": false,
+          "FT_OU": false,
+          "AH_OR_HANDICAP": false,
+          "DOUBLE_CHANCE": false
+        },
+        "bookmaker_count": 0,
+        "bookmaker": "",
+        "market": "",
+        "line": null,
+        "odds": null,
+        "snapshot_time": "2026-05-31T19:02:01.242407",
+        "price_status": "PRICE_MISSING",
+        "ht_over_auxiliary_present": true,
+        "ht_over_standalone_ab_allowed": false
+      },
+      "external_risk": {
+        "status": "WAIT",
+        "rest_days": {
+          "home": 6,
+          "away": 6,
+          "status": "PLACEHOLDER_ONLY"
+        },
+        "travel_status": "EXTERNAL_CONTEXT_PENDING",
+        "venue": "",
+        "weather_status": "EXTERNAL_CONTEXT_PENDING",
+        "referee_status": "EXTERNAL_CONTEXT_PENDING"
+      },
+      "missing_context": [
+        "DATA_INSUFFICIENT",
+        "EXTERNAL_CONTEXT_PENDING",
+        "INJURY_SOURCE_MISSING",
+        "LINEUP_MISSING",
+        "LINEUP_WAIT_EVENT",
+        "LINE_MISSING",
+        "MARKET_MISSING",
+        "PRICE_MISSING",
+        "STANDINGS_MISSING",
+        "TEAM_STATS_MISSING"
+      ],
+      "conclusion_guard": {
+        "conclusion": "PASS",
+        "allowed_conclusions": [
+          "OBSERVE",
+          "WAIT",
+          "PASS"
+        ],
+        "not_recommendation": true,
+        "not_betting_advice": true,
+        "official_grade_changed": false,
+        "pending_written": false,
+        "qq_sent": false,
+        "cron_or_launchd_modified": false,
+        "b_realtime_restored": false,
+        "rf_shadow_promotion_released": false
+      }
+    }
+  ],
+  "policy_lock": {
+    "official_grade_changed": false,
+    "ab_threshold_changed": false,
+    "pending_written": false,
+    "qq_sent": false,
+    "cron_or_launchd_modified": false,
+    "b_realtime_restored": false,
+    "rf_shadow_promotion_released": false
+  }
+}

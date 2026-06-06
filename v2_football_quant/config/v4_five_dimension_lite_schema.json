@@ -1,0 +1,112 @@
+{
+  "schema_version": "v4_five_dimension_lite_schema.v1",
+  "purpose": "Observation-only V4 event evaluation skeleton for strength, tactical, squad, market, and external context.",
+  "allowed_conclusions": [
+    "OBSERVE",
+    "WAIT",
+    "PASS"
+  ],
+  "dimensions": {
+    "strength_gap": {
+      "inputs": [
+        "league_tier",
+        "standings",
+        "team_stats",
+        "H2H"
+      ],
+      "missing_tags": [
+        "STANDINGS_MISSING",
+        "TEAM_STATS_MISSING",
+        "DATA_INSUFFICIENT"
+      ],
+      "pass_requires": [
+        "standings_or_team_stats_present"
+      ],
+      "h2h_policy": "AUXILIARY_ONLY_NOT_PRIMARY"
+    },
+    "tactical_efficiency": {
+      "inputs": [
+        "goals_for",
+        "goals_against",
+        "shots",
+        "home_away_stats",
+        "FT O/U context"
+      ],
+      "missing_tags": [
+        "TEAM_STATS_MISSING",
+        "DATA_INSUFFICIENT"
+      ]
+    },
+    "squad_context": {
+      "inputs": [
+        "lineup",
+        "formation",
+        "injury_status"
+      ],
+      "missing_tags": [
+        "LINEUP_MISSING",
+        "LINEUP_WAIT_EVENT",
+        "INJURY_SOURCE_MISSING"
+      ],
+      "lineup_policy": "WAIT_EVENT_UNTIL_OFFICIAL"
+    },
+    "market_confirmation": {
+      "inputs": [
+        "1X2",
+        "FT O/U",
+        "AH/Handicap",
+        "Double Chance",
+        "bookmaker_count",
+        "line",
+        "odds",
+        "snapshot_time"
+      ],
+      "missing_tags": [
+        "PRICE_MISSING",
+        "LINE_MISSING",
+        "MARKET_MISSING",
+        "DATA_INSUFFICIENT"
+      ],
+      "pass_requires": [
+        "real_price",
+        "line_present",
+        "non_ht_market_present"
+      ],
+      "ht_over_policy": "AUXILIARY_ONLY_NO_STANDALONE_AB"
+    },
+    "external_risk": {
+      "inputs": [
+        "rest_days",
+        "travel",
+        "venue",
+        "weather",
+        "referee"
+      ],
+      "missing_tags": [
+        "EXTERNAL_CONTEXT_PENDING"
+      ]
+    }
+  },
+  "required_missing_tags": [
+    "PRICE_MISSING",
+    "LINE_MISSING",
+    "MARKET_MISSING",
+    "STANDINGS_MISSING",
+    "TEAM_STATS_MISSING",
+    "LINEUP_MISSING",
+    "LINEUP_WAIT_EVENT",
+    "INJURY_SOURCE_MISSING",
+    "EXTERNAL_CONTEXT_PENDING",
+    "DATA_INSUFFICIENT"
+  ],
+  "policy_lock": {
+    "official_grade_changed": false,
+    "ab_threshold_changed": false,
+    "pending_written": false,
+    "qq_sent": false,
+    "cron_or_launchd_modified": false,
+    "b_realtime_restored": false,
+    "rf_shadow_promotion_released": false,
+    "live_api_called": false
+  }
+}
