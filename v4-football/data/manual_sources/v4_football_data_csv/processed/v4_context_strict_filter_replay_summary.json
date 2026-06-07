@@ -1,0 +1,62 @@
+{
+  "schema_version": "v4_context_strict_filter_replay_summary.v1",
+  "generated_at": "2026-06-07T00:00:00+08:00",
+  "source_dataset": "processed/v4_replay_feature_enriched_dataset.csv",
+  "source_positive_bucket_audit": "processed/v4_context_positive_bucket_explanation_audit.json",
+  "positive_bucket_audit": {
+    "positive_roi_bucket_count": 2,
+    "research_candidate_count": 0,
+    "classification_summary": {
+      "EARLY_SEASON_RISK": 1,
+      "NOT_HIGH_CONFIDENCE": 2,
+      "POSITIVE_ROI_RESEARCH_ONLY": 2,
+      "SINGLE_CLUSTER_RISK": 1,
+      "SMALL_SAMPLE_NO_CANDIDATE": 2
+    }
+  },
+  "strict_filters": [
+    "exclude sample_count < 300 from candidates",
+    "exclude EARLY_SEASON_INSUFFICIENT rows",
+    "exclude SINGLE_CLUSTER_RISK buckets",
+    "exclude HIGH_DRAWDOWN_RISK buckets",
+    "exclude LOW_CONFIDENCE buckets",
+    "exclude missing price/line/market rows"
+  ],
+  "total_buckets_after_filter": 77,
+  "positive_roi_buckets_after_filter": 1,
+  "research_candidate_count": 0,
+  "research_candidates": [],
+  "confidence_counts": {
+    "HIGH_CONFIDENCE": 73,
+    "MEDIUM_RESEARCH_ONLY": 1,
+    "SMALL_SAMPLE": 3
+  },
+  "row_excluded_reason_counts": {
+    "AH_AWAY_PRICE_MOVEMENT_MISSING": 47,
+    "AH_HOME_PRICE_MOVEMENT_MISSING": 47,
+    "AH_LINE_MISSING": 58,
+    "EARLY_SEASON_INSUFFICIENT": 6489,
+    "FT_OVER25_PRICE_MOVEMENT_MISSING": 48
+  },
+  "bucket_excluded_reason_counts": {
+    "LOW_CONFIDENCE": 4,
+    "ROI_NOT_POSITIVE": 76,
+    "SINGLE_CLUSTER_RISK": 30,
+    "SMALL_SAMPLE": 3
+  },
+  "markets": [
+    "ASIAN_HANDICAP",
+    "FT_OVER25"
+  ],
+  "policy_lock": {
+    "api_football_called": false,
+    "v4_scan_executed": false,
+    "official_grade_changed": false,
+    "pending_written": false,
+    "qq_sent": false,
+    "cron_or_launchd_modified": false,
+    "strategy_online": false,
+    "recommendation_generated": false,
+    "edge_claim_generated": false
+  }
+}
