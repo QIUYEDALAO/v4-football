@@ -5,6 +5,7 @@ from __future__ import annotations
 import argparse
 import json
 import os
+import re
 import subprocess
 import sys
 import time
@@ -130,6 +131,37 @@ def detect_catchup(date_key: str) -> int:
     return 0
 
 
+def parse_scan_funnel_counts(log_path: Path) -> dict[str, int | None]:
+    """Extract pre-output fixture counts from runner log without reading scan artifacts."""
+    try:
+        text = log_path.read_text(encoding="utf-8", errors="ignore")
+    except Exception:
+        return {
+            "eligible_fixture_count": None,
+            "input_fixture_count": None,
+            "official_fixture_count": None,
+        }
+
+    input_count = None
+    official_count = None
+    m = re.search(r"\[adapter\]\s+scan complete:\s+(\d+)\s+in", text)
+    if m:
+        input_count = int(m.group(1))
+    m = re.search(r"\[outside57\]\s+input fixtures:\s+(\d+)", text)
+    if input_count is None and m:
+        input_count = int(m.group(1))
+    m = re.search(r"\[adapter\]\s+official filter:\s+(\d+)/\d+\s+", text)
+    if m:
+        official_count = int(m.group(1))
+
+    eligible = official_count if official_count is not None else input_count
+    return {
+        "eligible_fixture_count": eligible,
+        "input_fixture_count": input_count,
+        "official_fixture_count": official_count,
+    }
+
+
 def run_scan(args: argparse.Namespace) -> int:
     date_key = args.date
     status = base_status(date_key)
@@ -212,13 +244,23 @@ def run_scan(args: argparse.Namespace) -> int:
                 scan_rc = int(proc.returncode or 0)
 
         notify_duration = int((now() - started).total_seconds())
+        funnel_counts = parse_scan_funnel_counts(log_path)
         notify_pending_state = {
             **status,
             "updated_at": iso(),
-            "state": "FAILED" if scan_rc != 0 else "SCAN_COMPLETED_NOTIFY_PENDING",
+            "state": (
+                "FAILED"
+                if scan_rc != 0
+                else (
+                    "NO_ELIGIBLE_FIXTURES_NOTIFY_PENDING"
+                    if funnel_counts.get("eligible_fixture_count") == 0
+                    else "SCAN_COMPLETED_NOTIFY_PENDING"
+                )
+            ),
             "active_lock": True,
             "scan_exit_code": scan_rc,
             "last_exit_code": scan_rc,
+            **funnel_counts,
             "scan_failure": scan_rc != 0,
             "ended_at": iso(),
             "duration_seconds": notify_duration,
@@ -246,11 +288,17 @@ def run_scan(args: argparse.Namespace) -> int:
         release_lock()
 
     ended = now()
+    funnel_counts = parse_scan_funnel_counts(log_path)
     scan_failed = scan_rc != 0
     qq_failed = qq_rc not in (None, 0)
+    completed_state = (
+        "NO_ELIGIBLE_FIXTURES"
+        if (not scan_failed and funnel_counts.get("eligible_fixture_count") == 0)
+        else ("QQ_FAILED_SCAN_OK" if qq_failed else "COMPLETED")
+    )
     status.update({
         "updated_at": iso(ended),
-        "state": "FAILED" if scan_failed else ("QQ_FAILED_SCAN_OK" if qq_failed else "COMPLETED"),
+        "state": "FAILED" if scan_failed else completed_state,
         "active_lock": False,
         "heartbeat_at": iso(ended),
         "heartbeat_age_seconds": 0,
@@ -259,6 +307,7 @@ def run_scan(args: argparse.Namespace) -> int:
         "last_exit_code": scan_rc,
         "scan_exit_code": scan_rc,
         "qq_exit_code": qq_rc,
+        **funnel_counts,
         "scan_failure": scan_failed,
         "qq_failure": qq_failed,
         "catch_up_required": scan_failed,

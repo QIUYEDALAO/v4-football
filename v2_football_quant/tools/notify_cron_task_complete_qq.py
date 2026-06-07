@@ -157,23 +157,54 @@ def _scan_paths(date: str) -> dict[str, Path]:
     }
 
 
+def _to_int_or_none(value: Any) -> int | None:
+    try:
+        if value is None or value == "":
+            return None
+        return int(value)
+    except Exception:
+        return None
+
+
+def _first_int(*values: Any) -> int | None:
+    for value in values:
+        parsed = _to_int_or_none(value)
+        if parsed is not None:
+            return parsed
+    return None
+
+
 def read_real_scan_artifacts(date: str) -> dict[str, Any]:
     """Read real V4 scan artifacts and classify scan completion without secrets."""
     paths = _scan_paths(date)
     exists = {name: path.exists() and path.stat().st_size > 0 for name, path in paths.items()}
+    required_scan_artifacts = ["scan_perf", "scout", "brief", "candidate_view"]
+    missing_scan_artifacts = [name for name in required_scan_artifacts if not exists.get(name)]
     missing = [name for name, ok in exists.items() if not ok]
     scan_perf = load_json(paths["scan_perf"]) if exists["scan_perf"] else {}
     candidate = load_json(paths["candidate_view"]) if exists["candidate_view"] else {}
     durable = load_json(paths["durable_status"]) if exists["durable_status"] else {}
+    durable_state = str(durable.get("state") or "").upper()
+    scan_exit_code = _first_int(durable.get("scan_exit_code"), durable.get("last_exit_code"))
+    eligible_fixture_count = _first_int(
+        durable.get("eligible_fixture_count"),
+        durable.get("prefilter_fixture_count"),
+        durable.get("input_fixture_count"),
+        durable.get("fixture_count"),
+        scan_perf.get("total_fixtures"),
+        candidate.get("scan_total"),
+    )
 
     durable_ok = (
         str(durable.get("scan_date") or "") == date
-        and str(durable.get("state") or "").upper() in {
+        and durable_state in {
             "COMPLETED",
             "SCAN_COMPLETED_NOTIFY_PENDING",
+            "NO_ELIGIBLE_FIXTURES",
+            "NO_ELIGIBLE_FIXTURES_NOTIFY_PENDING",
             "QQ_FAILED_SCAN_OK",
         }
-        and int(durable.get("scan_exit_code") or durable.get("last_exit_code") or 0) == 0
+        and scan_exit_code == 0
     )
     scan_total = candidate.get("scan_total", scan_perf.get("total_fixtures"))
     counts = {
@@ -182,17 +213,38 @@ def read_real_scan_artifacts(date: str) -> dict[str, Any]:
         "C": int(candidate.get("C_count") or 0),
         "SKIP": int(candidate.get("SKIP_count") or 0),
     }
-    artifact_ok = not missing and durable_ok and scan_total is not None
-    status = "PASS" if artifact_ok else "FAIL"
+    paused = durable_state == "PAUSED"
+    no_eligible = bool(exists["durable_status"] and durable_ok and eligible_fixture_count == 0)
+    artifact_ok = (
+        not missing_scan_artifacts
+        and exists["durable_status"]
+        and durable_ok
+        and scan_total is not None
+    )
+    if artifact_ok:
+        status = "REAL_COMPLETED_WITH_ARTIFACTS"
+        artifact_guard_status = "REAL_COMPLETED_WITH_ARTIFACTS"
+    elif no_eligible:
+        status = "NO_ELIGIBLE_FIXTURES"
+        artifact_guard_status = "EXPECTED_NO_ELIGIBLE_FIXTURES"
+    elif paused:
+        status = "PAUSED"
+        artifact_guard_status = "PAUSED"
+    else:
+        status = "FAILED_OR_MISSING_ARTIFACTS"
+        artifact_guard_status = "MISSING_OR_FAILED"
     return {
         "status": status,
         "data": {
-            "artifact_guard_status": "PASS" if artifact_ok else "MISSING_OR_FAILED",
+            "artifact_guard_status": artifact_guard_status,
             "exists": exists,
             "missing_artifacts": missing,
+            "missing_scan_artifacts": missing_scan_artifacts,
             "durable_status_ok": durable_ok,
             "durable_state": durable.get("state"),
-            "scan_exit_code": durable.get("scan_exit_code", durable.get("last_exit_code")),
+            "scan_state": status,
+            "scan_exit_code": scan_exit_code,
+            "eligible_fixture_count": eligible_fixture_count,
             "scan_total": scan_total,
             "scouted_count": scan_perf.get("scouted_count"),
             "elapsed_seconds": scan_perf.get("elapsed_seconds") or durable.get("duration_seconds"),
@@ -215,7 +267,7 @@ def read_marker_status(task_name: str, date: str) -> Optional[dict[str, Any]]:
     if task_name == "V4_DAILY_SCAN_REAL_COMPLETED":
         return read_real_scan_artifacts(date)
     if task_name == "V4_DAILY_SCAN_WATCHDOG_CHECK":
-        return {"status": "PASS", "data": {"watchdog_check_only": True}, "path": ""}
+        return {"status": "WATCHDOG_ONLY", "data": {"watchdog_check_only": True, "scan_state": "WATCHDOG_ONLY"}, "path": ""}
     cfg = STATUS_MARKER_MAP.get(task_name)
     if not cfg:
         return None
@@ -234,6 +286,14 @@ def read_marker_status(task_name: str, date: str) -> Optional[dict[str, Any]]:
 def classify_status(exit_code: int, status_text: str) -> str:
     """将 exit code + status text 归类为标准状态。"""
     if exit_code == 0 or exit_code is None:
+        if "NO_ELIGIBLE_FIXTURES" in status_text:
+            return "PASS"
+        if "REAL_COMPLETED_WITH_ARTIFACTS" in status_text:
+            return "PASS"
+        if "PAUSED" in status_text:
+            return "WARN_ONLY"
+        if "FAILED_OR_MISSING_ARTIFACTS" in status_text:
+            return "FAIL"
         if "BLOCKER" in status_text:
             return "BLOCKER"
         if "FAIL" in status_text:
@@ -261,12 +321,22 @@ def build_result_lines(task_name: str, date: str, status: str, duration: int, ma
         results["pending"] = "N/A"
     elif task_name == "V4_DAILY_SCAN_REAL_COMPLETED":
         data = marker_info.get("data", {}) if marker_info else {}
-        results["scan"] = "真实扫描完成" if status in ("PASS", "WARN_ONLY") else "失败/超时/无产物"
+        scan_state = data.get("scan_state") or ""
+        if scan_state == "NO_ELIGIBLE_FIXTURES":
+            results["scan"] = "扫描执行完成；无符合条件比赛"
+        elif scan_state == "PAUSED":
+            results["scan"] = "扫描暂停"
+        elif status in ("PASS", "WARN_ONLY"):
+            results["scan"] = "真实扫描完成"
+        else:
+            results["scan"] = "失败/超时/无产物"
         results["dashboard"] = "N/A"
         results["validation"] = "待补验"
         results["pending"] = str(data.get("formal_recommendation_count", "0"))
+        results["scan_state"] = scan_state
         results["scan_total"] = data.get("scan_total", "?")
         results["scouted_count"] = data.get("scouted_count", "?")
+        results["eligible_fixture_count"] = data.get("eligible_fixture_count", "?")
         results["elapsed_seconds"] = data.get("elapsed_seconds", "?")
         results["api_calls_total"] = data.get("api_calls_total", "?")
         results["remote_requests"] = data.get("remote_requests", "?")
@@ -325,6 +395,13 @@ def build_notification_text(
     lines = []
     if task_name == "V4_DAILY_SCAN_WATCHDOG_CHECK":
         lines.append("【V4值守检查完成】")
+    elif (
+        task_name == "V4_DAILY_SCAN_REAL_COMPLETED"
+        and results.get("scan_state") == "NO_ELIGIBLE_FIXTURES"
+    ):
+        lines.append("【V4扫描完成：无符合条件比赛】")
+    elif task_name == "V4_DAILY_SCAN_REAL_COMPLETED" and results.get("scan_state") == "PAUSED":
+        lines.append("【V4扫描暂停】")
     elif task_name == "V4_DAILY_SCAN_REAL_COMPLETED" and status in ("PASS", "WARN_ONLY"):
         lines.append("【V4真实扫描完成】")
     elif task_name == "V4_DAILY_SCAN_REAL_COMPLETED":
@@ -345,6 +422,8 @@ def build_notification_text(
     if task_name == "V4_DAILY_SCAN_REAL_COMPLETED":
         counts = results.get("counts") or {}
         lines.append(f"- scan: {results.get('scan', '?')}")
+        if results.get("scan_state") == "NO_ELIGIBLE_FIXTURES":
+            lines.append(f"- eligible fixtures: {results.get('eligible_fixture_count', '?')}")
         lines.append(f"- total/scouted: {results.get('scan_total', '?')}/{results.get('scouted_count', '?')}")
         lines.append(
             "- A/B/C/SKIP: "
@@ -369,9 +448,13 @@ def build_notification_text(
         lines.append("原因：部分步骤有警告")
     else:
         lines.append("异常：无")
+    if task_name == "V4_DAILY_SCAN_REAL_COMPLETED" and results.get("scan_state") == "NO_ELIGIBLE_FIXTURES":
+        lines.append("说明：扫描执行完成；无符合条件比赛；无候选产物是正常结果；dashboard 不刷新。")
+    if task_name == "V4_DAILY_SCAN_REAL_COMPLETED" and results.get("scan_state") == "PAUSED":
+        lines.append("说明：扫描暂停状态不代表真实扫描完成。")
     if task_name == "V4_DAILY_SCAN_WATCHDOG_CHECK":
         lines.append("说明：这是值守检查完成，不代表真实扫描完成。")
-    if task_name == "V4_DAILY_SCAN_REAL_COMPLETED":
+    if task_name == "V4_DAILY_SCAN_REAL_COMPLETED" and results.get("scan_state") != "NO_ELIGIBLE_FIXTURES":
         lines.append("说明：仅通知扫描状态；不推shadow/C/SKIP长表，不输出推荐。")
     return "\n".join(lines)
 

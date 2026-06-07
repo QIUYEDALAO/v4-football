@@ -64,6 +64,14 @@ def main() -> int:
         "legacy_scan_task_not_in_notify_config": '"V4_DAILY_SCAN_READONLY"' not in task_config,
         "watchdog_text_distinct": "【V4值守检查完成】" in notify and "不代表真实扫描完成" in notify,
         "real_scan_text_distinct": "【V4真实扫描完成】" in notify and "【V4扫描失败/超时/无产物】" in notify,
+        "no_eligible_status_defined": all(
+            token in notify
+            for token in [
+                "NO_ELIGIBLE_FIXTURES",
+                "EXPECTED_NO_ELIGIBLE_FIXTURES",
+                "扫描执行完成；无符合条件比赛；无候选产物是正常结果；dashboard 不刷新。",
+            ]
+        ),
         "real_scan_artifact_reader": all(
             token in notify
             for token in [
@@ -74,6 +82,7 @@ def main() -> int:
                 "v4_official_candidate_view_",
                 "v4_durable_daily_scan_status.json",
                 "artifact_guard_status",
+                "eligible_fixture_count",
             ]
         ),
         "real_scan_counts_in_text": all(
@@ -87,6 +96,7 @@ def main() -> int:
         "runner_calls_real_scan_notify": '"V4_DAILY_SCAN_REAL_COMPLETED"' in runner,
         "runner_notifies_not_legacy_readonly": '"V4_DAILY_SCAN_READONLY"' not in runner,
         "runner_writes_notify_pending_status": "SCAN_COMPLETED_NOTIFY_PENDING" in runner,
+        "runner_writes_no_eligible_status": "NO_ELIGIBLE_FIXTURES" in runner and "eligible_fixture_count" in runner,
         "runner_notify_after_scan_process": runner.find("SCAN_COMPLETED_NOTIFY_PENDING") < runner.find("V4_DAILY_SCAN_REAL_COMPLETED"),
         "active_watchdog_job_singleton": len(watchdog_jobs) == 1,
         "active_watchdog_name_renamed": active_watchdog_name == "V4_DAILY_SCAN_WATCHDOG_CHECK",
