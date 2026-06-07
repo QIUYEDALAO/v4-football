@@ -1,0 +1,79 @@
+{
+  "schema_version": "v4_offline_research_phase_freeze_summary.v1",
+  "generated_at": "2026-06-07T00:00:00+08:00",
+  "source_artifacts": {
+    "replay_core_summary": "processed/v4_price_aware_replay_core_summary.json",
+    "bucket_summary": "processed/v4_price_aware_bucket_summary.json",
+    "bucket_drilldown": "processed/v4_price_aware_bucket_drilldown.json",
+    "context_aware_replay_summary": "processed/v4_context_aware_replay_summary.json",
+    "positive_bucket_audit": "processed/v4_context_positive_bucket_explanation_audit.json",
+    "negative_findings_plan": "processed/v4_price_aware_negative_findings_next_feature_plan.json"
+  },
+  "frozen_findings": {
+    "FT_OVER25": {
+      "roi_proxy_flat_1u": -0.0471,
+      "decision": "RESEARCH_ONLY_NEEDS_ATTACK_DEFENSE_TEMPO_CONTEXT"
+    },
+    "1X2": {
+      "roi_proxy_flat_1u": -0.08,
+      "decision": "AUXILIARY_ONLY_DOWNGRADED"
+    },
+    "ASIAN_HANDICAP": {
+      "roi_proxy_flat_1u": -0.0245,
+      "decision": "RESEARCH_ONLY_NEEDS_STRENGTH_PRICE_AND_SCHEDULE_CONTEXT"
+    },
+    "DOUBLE_CHANCE_PROXY": {
+      "roi_proxy_flat_1u": null,
+      "decision": "AUXILIARY_HIT_RATE_ONLY_NO_REAL_PRICE"
+    }
+  },
+  "bucket_findings": {
+    "bucket_rows": 2683,
+    "HIGH_CONFIDENCE": 0,
+    "MEDIUM_CONFIDENCE": 135,
+    "LOW_CONFIDENCE": 143,
+    "SMALL_SAMPLE": 2405,
+    "research_candidate_count": 0,
+    "low_confidence_watchlist": 13
+  },
+  "context_findings": {
+    "context_bucket_count": 85,
+    "positive_roi_bucket_count": 2,
+    "research_candidate_count": 0,
+    "positive_bucket_policy": "RESEARCH_ONLY_NOT_EDGE",
+    "positive_bucket_risk_flags": {
+      "EARLY_SEASON_RISK": 1,
+      "NOT_HIGH_CONFIDENCE": 2,
+      "POSITIVE_ROI_RESEARCH_ONLY": 2,
+      "SINGLE_CLUSTER_RISK": 1,
+      "SMALL_SAMPLE_NO_CANDIDATE": 2
+    }
+  },
+  "stop_line": {
+    "cannot_online": true,
+    "research_candidate_count": 0,
+    "restore_scan_allowed": false,
+    "restore_qq_allowed": false,
+    "official_change_allowed": false,
+    "pending_write_allowed": false,
+    "cron_or_launchd_change_allowed": false,
+    "small_sample_positive_roi_policy": "RESEARCH_ONLY_NOT_EDGE"
+  },
+  "allowed_next_actions": [
+    "ADD_CONTEXT_VARIABLES",
+    "EXPAND_REPLAY_DATA_SOURCE",
+    "REDESIGN_RESEARCH_HYPOTHESIS"
+  ],
+  "policy_lock": {
+    "api_football_called": false,
+    "v4_scan_executed": false,
+    "official_grade_changed": false,
+    "pending_written": false,
+    "qq_sent": false,
+    "cron_or_launchd_modified": false,
+    "strategy_online": false,
+    "recommendation_generated": false,
+    "edge_claim_generated": false,
+    "runtime_or_secret_committed": false
+  }
+}
