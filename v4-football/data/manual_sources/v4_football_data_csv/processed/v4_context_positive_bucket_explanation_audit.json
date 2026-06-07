@@ -1,0 +1,213 @@
+{
+  "schema_version": "v4_context_positive_bucket_explanation_audit.v1",
+  "generated_at": "2026-06-07T00:00:00+08:00",
+  "source_context_csv": "processed/v4_context_aware_replay.csv",
+  "source_context_summary": "processed/v4_context_aware_replay_summary.json",
+  "context_bucket_count": 85,
+  "positive_roi_bucket_count": 2,
+  "research_candidate_count": 0,
+  "markets": [
+    "ASIAN_HANDICAP",
+    "FT_OVER25"
+  ],
+  "audited_buckets": [
+    {
+      "market": "ASIAN_HANDICAP",
+      "context_filter": "ah_home_close_implied_prob_bucket",
+      "context_value": "LT_0_40",
+      "sample_count": 6,
+      "hit_rate": 0.5,
+      "avg_close_odds": 2.635,
+      "roi_proxy_flat_1u": 1.008333,
+      "max_fail_streak": 1,
+      "max_drawdown_proxy": -1.0,
+      "confidence_flag": "SMALL_SAMPLE",
+      "league_distribution": {
+        "N1": 4,
+        "T1": 2
+      },
+      "season_distribution": {
+        "2020/21": 2,
+        "2021/22": 4
+      },
+      "early_season_share": 0.333333,
+      "price_move_direction": {
+        "SHORTER_CLOSE:ah_away,away,draw,under25|LONGER_CLOSE:ah_home,home,over25": 2,
+        "SHORTER_CLOSE:ah_away,home,over25|LONGER_CLOSE:ah_home,away,draw,under25": 2,
+        "SHORTER_CLOSE:ah_away,home,under25|LONGER_CLOSE:ah_home,away,draw,over25": 2
+      },
+      "strength_context": {
+        "rank_gap_bucket": {
+          "3": 2,
+          "6": 2,
+          "7": 2
+        },
+        "points_gap_bucket": {
+          "1": 2,
+          "15": 2,
+          "26": 2
+        },
+        "recent_5_points_gap_bucket": {
+          "1": 4,
+          "8": 2
+        }
+      },
+      "risk_flags": [
+        "EARLY_SEASON_RISK",
+        "NOT_HIGH_CONFIDENCE",
+        "POSITIVE_ROI_RESEARCH_ONLY",
+        "SMALL_SAMPLE_NO_CANDIDATE"
+      ],
+      "online_policy": "NO_ONLINE_ACTION_RESEARCH_ONLY"
+    },
+    {
+      "market": "FT_OVER25",
+      "context_filter": "odds_over25_move_direction",
+      "context_value": "MOVE_MISSING",
+      "sample_count": 52,
+      "hit_rate": 0.846154,
+      "avg_close_odds": 1.699524,
+      "roi_proxy_flat_1u": 0.148095,
+      "max_fail_streak": 4,
+      "max_drawdown_proxy": -4.0,
+      "confidence_flag": "SMALL_SAMPLE",
+      "league_distribution": {
+        "B1": 3,
+        "E0": 1,
+        "F1": 4,
+        "I1": 4,
+        "N1": 2,
+        "P1": 1,
+        "T1": 37
+      },
+      "season_distribution": {
+        "2020/21": 12,
+        "2021/22": 4,
+        "2022/23": 33,
+        "2023/24": 1,
+        "2024/25": 2
+      },
+      "early_season_share": 0.076923,
+      "price_move_direction": {
+        "PRICE_MOVEMENT_MISSING": 46,
+        "SHORTER_CLOSE:ah_away,away|LONGER_CLOSE:ah_home,draw,home": 1,
+        "SHORTER_CLOSE:ah_away,draw|LONGER_CLOSE:ah_home,home": 1,
+        "SHORTER_CLOSE:ah_away|LONGER_CLOSE:ah_home": 1,
+        "SHORTER_CLOSE:ah_home,away|LONGER_CLOSE:ah_away,draw,home": 2,
+        "SHORTER_CLOSE:ah_home,home|LONGER_CLOSE:ah_away,away,draw": 1
+      },
+      "strength_context": {
+        "rank_gap_bucket": {
+          "-1": 2,
+          "-10": 2,
+          "-16": 1,
+          "-18": 2,
+          "-2": 4,
+          "-3": 3,
+          "-4": 3,
+          "-5": 4,
+          "-6": 1,
+          "-7": 1,
+          "-8": 3,
+          "-9": 3,
+          "1": 2,
+          "11": 2,
+          "13": 1,
+          "14": 2,
+          "15": 3,
+          "16": 1,
+          "2": 2,
+          "3": 1,
+          "5": 2,
+          "6": 3,
+          "9": 4
+        },
+        "points_gap_bucket": {
+          "-1": 3,
+          "-10": 1,
+          "-11": 3,
+          "-15": 1,
+          "-16": 2,
+          "-29": 1,
+          "-3": 4,
+          "-31": 1,
+          "-4": 2,
+          "-48": 1,
+          "-5": 1,
+          "-6": 2,
+          "-62": 1,
+          "-7": 2,
+          "-8": 2,
+          "-9": 2,
+          "1": 1,
+          "12": 2,
+          "15": 1,
+          "16": 1,
+          "18": 1,
+          "2": 1,
+          "20": 2,
+          "25": 1,
+          "28": 1,
+          "33": 1,
+          "37": 1,
+          "4": 2,
+          "43": 1,
+          "5": 2,
+          "52": 1,
+          "6": 1,
+          "8": 2,
+          "9": 1
+        },
+        "recent_5_points_gap_bucket": {
+          "-1": 2,
+          "-11": 2,
+          "-15": 1,
+          "-2": 1,
+          "-3": 6,
+          "-4": 6,
+          "-6": 3,
+          "-7": 1,
+          "-8": 2,
+          "-9": 2,
+          "0": 4,
+          "1": 2,
+          "10": 1,
+          "11": 1,
+          "13": 2,
+          "2": 3,
+          "3": 4,
+          "4": 1,
+          "5": 2,
+          "7": 4,
+          "8": 1,
+          "9": 1
+        }
+      },
+      "risk_flags": [
+        "NOT_HIGH_CONFIDENCE",
+        "POSITIVE_ROI_RESEARCH_ONLY",
+        "SINGLE_CLUSTER_RISK",
+        "SMALL_SAMPLE_NO_CANDIDATE"
+      ],
+      "online_policy": "NO_ONLINE_ACTION_RESEARCH_ONLY"
+    }
+  ],
+  "classification_summary": {
+    "EARLY_SEASON_RISK": 1,
+    "NOT_HIGH_CONFIDENCE": 2,
+    "POSITIVE_ROI_RESEARCH_ONLY": 2,
+    "SINGLE_CLUSTER_RISK": 1,
+    "SMALL_SAMPLE_NO_CANDIDATE": 2
+  },
+  "policy_lock": {
+    "api_football_called": false,
+    "v4_scan_executed": false,
+    "official_grade_changed": false,
+    "pending_written": false,
+    "qq_sent": false,
+    "cron_or_launchd_modified": false,
+    "strategy_online": false,
+    "recommendation_generated": false,
+    "edge_claim_generated": false
+  }
+}
