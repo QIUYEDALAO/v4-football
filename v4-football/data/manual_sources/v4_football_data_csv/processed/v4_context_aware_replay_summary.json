@@ -1,0 +1,58 @@
+{
+  "schema_version": "v4_context_aware_replay_summary.v1",
+  "generated_at": "2026-06-07T00:00:00+08:00",
+  "source_dataset": "processed/v4_replay_feature_enriched_dataset.csv",
+  "output_csv": "processed/v4_context_aware_replay.csv",
+  "row_count": 15448,
+  "seasons": [
+    "2020/21",
+    "2021/22",
+    "2022/23",
+    "2023/24",
+    "2024/25"
+  ],
+  "markets": [
+    "ASIAN_HANDICAP",
+    "FT_OVER25"
+  ],
+  "context_filters": [
+    "ah_home_close_implied_prob_bucket",
+    "ah_move_direction",
+    "asian_handicap_line_bucket",
+    "early_season_status",
+    "home_away_side",
+    "league_code",
+    "odds_over25_move_direction",
+    "over25_close_implied_prob_bucket",
+    "points_gap_bucket",
+    "rank_gap_bucket",
+    "recent_5_points_gap_bucket",
+    "season",
+    "strength_gap_bucket"
+  ],
+  "context_bucket_count": 85,
+  "confidence_counts": {
+    "HIGH_CONFIDENCE": 77,
+    "MEDIUM_RESEARCH_ONLY": 1,
+    "SMALL_SAMPLE": 7
+  },
+  "positive_roi_bucket_count": 2,
+  "research_candidate_count": 0,
+  "research_candidates": [],
+  "risk_summary": {
+    "small_sample_bucket_count": 7,
+    "early_season_bucket_not_candidate": 2,
+    "high_drawdown_risk_count": 0
+  },
+  "policy_lock": {
+    "api_football_called": false,
+    "v4_scan_executed": false,
+    "official_grade_changed": false,
+    "pending_written": false,
+    "qq_sent": false,
+    "cron_or_launchd_modified": false,
+    "strategy_online": false,
+    "recommendation_generated": false,
+    "edge_claim_generated": false
+  }
+}
