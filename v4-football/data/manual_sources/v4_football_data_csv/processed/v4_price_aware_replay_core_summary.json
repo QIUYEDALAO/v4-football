@@ -1,0 +1,187 @@
+{
+  "schema_version": "v4_price_aware_replay_core_summary.v1",
+  "generated_at": "2026-06-07T00:00:00+08:00",
+  "source_dataset": "processed/v4_football_data_replay_dataset.csv",
+  "dataset_rows": 15448,
+  "ledger_rows": 139032,
+  "seasons": [
+    "2020/21",
+    "2021/22",
+    "2022/23",
+    "2023/24",
+    "2024/25"
+  ],
+  "markets": [
+    "1X2",
+    "ASIAN_HANDICAP",
+    "DOUBLE_CHANCE_PROXY",
+    "FT_OVER25"
+  ],
+  "metrics": [
+    {
+      "market": "1X2",
+      "sample_count": 46344,
+      "settled_count": 46344,
+      "hit_count": 15448,
+      "hit_rate": 0.333333,
+      "avg_close_odds": 3.7048325514020712,
+      "roi_proxy_flat_1u": -0.07997967699392472,
+      "max_fail_streak": 4,
+      "max_drawdown_proxy": -3737.34,
+      "price_missing_count": 91,
+      "settlement_uncertain_count": 0,
+      "data_quality_flags": {
+        "1X2_OPEN_PARTIAL": 9,
+        "1X2_OPEN_PARTIAL|1X2_CLOSE_PARTIAL|AH_LINE_MOVED_BETWEEN_OPEN_CLOSE": 3,
+        "1X2_OPEN_PARTIAL|OU25_OPEN_PARTIAL|AH_OPEN_PARTIAL": 27,
+        "1X2_OPEN_PARTIAL|OU25_OPEN_PARTIAL|AH_OPEN_PARTIAL|AH_CLOSE_PARTIAL": 3,
+        "1X2_OPEN_PARTIAL|OU25_OPEN_PARTIAL|AH_OPEN_PARTIAL|AH_LINE_MOVED_BETWEEN_OPEN_CLOSE": 21,
+        "AH_CLOSE_PARTIAL|AH_LINE_MOVED_BETWEEN_OPEN_CLOSE": 3,
+        "AH_LINE_MOVED_BETWEEN_OPEN_CLOSE": 18318,
+        "AH_OPEN_PARTIAL": 45,
+        "AH_OPEN_PARTIAL|AH_CLOSE_PARTIAL": 3,
+        "AH_OPEN_PARTIAL|AH_LINE_MOVED_BETWEEN_OPEN_CLOSE": 51,
+        "COMPLETE_FOR_REPLAY_SCHEMA": 27729,
+        "OU25_OPEN_PARTIAL": 3,
+        "OU25_OPEN_PARTIAL|AH_LINE_MOVED_BETWEEN_OPEN_CLOSE": 9,
+        "OU25_OPEN_PARTIAL|OU25_CLOSE_PARTIAL": 6,
+        "RESULT_PARTIAL|STATS_PARTIAL": 15,
+        "RESULT_PARTIAL|STATS_PARTIAL|1X2_OPEN_PARTIAL|1X2_CLOSE_PARTIAL|OU25_OPEN_PARTIAL|OU25_CLOSE_PARTIAL|AH_OPEN_PARTIAL|AH_CLOSE_PARTIAL": 87,
+        "RESULT_PARTIAL|STATS_PARTIAL|AH_LINE_MOVED_BETWEEN_OPEN_CLOSE": 9,
+        "STATS_PARTIAL": 3
+      },
+      "status_counts": {
+        "SETTLED": 46344
+      },
+      "roi_policy": "REAL_CLOSE_ODDS_ONLY"
+    },
+    {
+      "market": "ASIAN_HANDICAP",
+      "sample_count": 30896,
+      "settled_count": 30838,
+      "hit_count": 14389,
+      "hit_rate": 0.4666,
+      "avg_close_odds": 1.9454462895692786,
+      "roi_proxy_flat_1u": -0.024547223663725998,
+      "max_fail_streak": 2,
+      "max_drawdown_proxy": -758.89,
+      "price_missing_count": 64,
+      "settlement_uncertain_count": 58,
+      "data_quality_flags": {
+        "1X2_OPEN_PARTIAL": 6,
+        "1X2_OPEN_PARTIAL|1X2_CLOSE_PARTIAL|AH_LINE_MOVED_BETWEEN_OPEN_CLOSE": 2,
+        "1X2_OPEN_PARTIAL|OU25_OPEN_PARTIAL|AH_OPEN_PARTIAL": 18,
+        "1X2_OPEN_PARTIAL|OU25_OPEN_PARTIAL|AH_OPEN_PARTIAL|AH_CLOSE_PARTIAL": 2,
+        "1X2_OPEN_PARTIAL|OU25_OPEN_PARTIAL|AH_OPEN_PARTIAL|AH_LINE_MOVED_BETWEEN_OPEN_CLOSE": 14,
+        "AH_CLOSE_PARTIAL|AH_LINE_MOVED_BETWEEN_OPEN_CLOSE": 2,
+        "AH_LINE_MOVED_BETWEEN_OPEN_CLOSE": 12212,
+        "AH_OPEN_PARTIAL": 30,
+        "AH_OPEN_PARTIAL|AH_CLOSE_PARTIAL": 2,
+        "AH_OPEN_PARTIAL|AH_LINE_MOVED_BETWEEN_OPEN_CLOSE": 34,
+        "COMPLETE_FOR_REPLAY_SCHEMA": 18486,
+        "OU25_OPEN_PARTIAL": 2,
+        "OU25_OPEN_PARTIAL|AH_LINE_MOVED_BETWEEN_OPEN_CLOSE": 6,
+        "OU25_OPEN_PARTIAL|OU25_CLOSE_PARTIAL": 4,
+        "RESULT_PARTIAL|STATS_PARTIAL": 10,
+        "RESULT_PARTIAL|STATS_PARTIAL|1X2_OPEN_PARTIAL|1X2_CLOSE_PARTIAL|OU25_OPEN_PARTIAL|OU25_CLOSE_PARTIAL|AH_OPEN_PARTIAL|AH_CLOSE_PARTIAL": 58,
+        "RESULT_PARTIAL|STATS_PARTIAL|AH_LINE_MOVED_BETWEEN_OPEN_CLOSE": 6,
+        "STATS_PARTIAL": 2
+      },
+      "status_counts": {
+        "AH_SETTLEMENT_UNCERTAIN": 58,
+        "SETTLED": 30838
+      },
+      "roi_policy": "REAL_CLOSE_ODDS_ONLY"
+    },
+    {
+      "market": "DOUBLE_CHANCE_PROXY",
+      "sample_count": 46344,
+      "settled_count": 0,
+      "hit_count": 30896,
+      "hit_rate": 0.666667,
+      "avg_close_odds": null,
+      "roi_proxy_flat_1u": null,
+      "max_fail_streak": 0,
+      "max_drawdown_proxy": 0.0,
+      "price_missing_count": 46344,
+      "settlement_uncertain_count": 0,
+      "data_quality_flags": {
+        "1X2_OPEN_PARTIAL": 9,
+        "1X2_OPEN_PARTIAL|1X2_CLOSE_PARTIAL|AH_LINE_MOVED_BETWEEN_OPEN_CLOSE": 3,
+        "1X2_OPEN_PARTIAL|OU25_OPEN_PARTIAL|AH_OPEN_PARTIAL": 27,
+        "1X2_OPEN_PARTIAL|OU25_OPEN_PARTIAL|AH_OPEN_PARTIAL|AH_CLOSE_PARTIAL": 3,
+        "1X2_OPEN_PARTIAL|OU25_OPEN_PARTIAL|AH_OPEN_PARTIAL|AH_LINE_MOVED_BETWEEN_OPEN_CLOSE": 21,
+        "AH_CLOSE_PARTIAL|AH_LINE_MOVED_BETWEEN_OPEN_CLOSE": 3,
+        "AH_LINE_MOVED_BETWEEN_OPEN_CLOSE": 18318,
+        "AH_OPEN_PARTIAL": 45,
+        "AH_OPEN_PARTIAL|AH_CLOSE_PARTIAL": 3,
+        "AH_OPEN_PARTIAL|AH_LINE_MOVED_BETWEEN_OPEN_CLOSE": 51,
+        "COMPLETE_FOR_REPLAY_SCHEMA": 27729,
+        "OU25_OPEN_PARTIAL": 3,
+        "OU25_OPEN_PARTIAL|AH_LINE_MOVED_BETWEEN_OPEN_CLOSE": 9,
+        "OU25_OPEN_PARTIAL|OU25_CLOSE_PARTIAL": 6,
+        "RESULT_PARTIAL|STATS_PARTIAL": 15,
+        "RESULT_PARTIAL|STATS_PARTIAL|1X2_OPEN_PARTIAL|1X2_CLOSE_PARTIAL|OU25_OPEN_PARTIAL|OU25_CLOSE_PARTIAL|AH_OPEN_PARTIAL|AH_CLOSE_PARTIAL": 87,
+        "RESULT_PARTIAL|STATS_PARTIAL|AH_LINE_MOVED_BETWEEN_OPEN_CLOSE": 9,
+        "STATS_PARTIAL": 3
+      },
+      "status_counts": {
+        "HIT_RATE_ONLY_NO_REAL_DC_PRICE": 46344
+      },
+      "roi_policy": "ROI_NOT_COMPUTED_NO_REAL_DC_PRICE"
+    },
+    {
+      "market": "FT_OVER25",
+      "sample_count": 15448,
+      "settled_count": 15448,
+      "hit_count": 8276,
+      "hit_rate": 0.535733,
+      "avg_close_odds": 1.8459077641564507,
+      "roi_proxy_flat_1u": -0.04712395407666861,
+      "max_fail_streak": 12,
+      "max_drawdown_proxy": -734.73,
+      "price_missing_count": 31,
+      "settlement_uncertain_count": 0,
+      "data_quality_flags": {
+        "1X2_OPEN_PARTIAL": 3,
+        "1X2_OPEN_PARTIAL|1X2_CLOSE_PARTIAL|AH_LINE_MOVED_BETWEEN_OPEN_CLOSE": 1,
+        "1X2_OPEN_PARTIAL|OU25_OPEN_PARTIAL|AH_OPEN_PARTIAL": 9,
+        "1X2_OPEN_PARTIAL|OU25_OPEN_PARTIAL|AH_OPEN_PARTIAL|AH_CLOSE_PARTIAL": 1,
+        "1X2_OPEN_PARTIAL|OU25_OPEN_PARTIAL|AH_OPEN_PARTIAL|AH_LINE_MOVED_BETWEEN_OPEN_CLOSE": 7,
+        "AH_CLOSE_PARTIAL|AH_LINE_MOVED_BETWEEN_OPEN_CLOSE": 1,
+        "AH_LINE_MOVED_BETWEEN_OPEN_CLOSE": 6106,
+        "AH_OPEN_PARTIAL": 15,
+        "AH_OPEN_PARTIAL|AH_CLOSE_PARTIAL": 1,
+        "AH_OPEN_PARTIAL|AH_LINE_MOVED_BETWEEN_OPEN_CLOSE": 17,
+        "COMPLETE_FOR_REPLAY_SCHEMA": 9243,
+        "OU25_OPEN_PARTIAL": 1,
+        "OU25_OPEN_PARTIAL|AH_LINE_MOVED_BETWEEN_OPEN_CLOSE": 3,
+        "OU25_OPEN_PARTIAL|OU25_CLOSE_PARTIAL": 2,
+        "RESULT_PARTIAL|STATS_PARTIAL": 5,
+        "RESULT_PARTIAL|STATS_PARTIAL|1X2_OPEN_PARTIAL|1X2_CLOSE_PARTIAL|OU25_OPEN_PARTIAL|OU25_CLOSE_PARTIAL|AH_OPEN_PARTIAL|AH_CLOSE_PARTIAL": 29,
+        "RESULT_PARTIAL|STATS_PARTIAL|AH_LINE_MOVED_BETWEEN_OPEN_CLOSE": 3,
+        "STATS_PARTIAL": 1
+      },
+      "status_counts": {
+        "SETTLED": 15448
+      },
+      "roi_policy": "REAL_CLOSE_ODDS_ONLY"
+    }
+  ],
+  "settlement_rules": {
+    "FT_OVER25": "total_goals > 2.5, ROI uses odds_over25_close only",
+    "1X2": "H/D/A settled against full_time_result, ROI uses 1X2 close odds only",
+    "DOUBLE_CHANCE_PROXY": "1X/X2/12 hit-rate only; no real DC odds, no ROI",
+    "ASIAN_HANDICAP": "home line from asian_handicap_line; away line is inverse; quarter lines split into two half stakes"
+  },
+  "policy_lock": {
+    "api_football_called": false,
+    "v4_scan_executed": false,
+    "official_grade_changed": false,
+    "pending_written": false,
+    "qq_sent": false,
+    "cron_or_launchd_modified": false,
+    "strategy_online": false,
+    "recommendation_generated": false
+  }
+}
