@@ -1,0 +1,5599 @@
+{
+  "schema_version": "v4_price_aware_bucket_drilldown.v1",
+  "generated_at": "2026-06-07T00:00:00+08:00",
+  "source_bucket_summary": "processed/v4_price_aware_bucket_summary.json",
+  "source_bucket_csv": "processed/v4_price_aware_bucket_analysis.csv",
+  "input_bucket_rows": 2683,
+  "input_confidence_counts": {
+    "LOW_CONFIDENCE": 143,
+    "MEDIUM_CONFIDENCE": 135,
+    "SMALL_SAMPLE": 2405
+  },
+  "source_top_research_candidates_count": 0,
+  "drilldown_focus": {
+    "primary": [
+      "ASIAN_HANDICAP",
+      "FT_OVER25"
+    ],
+    "secondary": [
+      "1X2"
+    ],
+    "hit_rate_only": [
+      "DOUBLE_CHANCE_PROXY"
+    ]
+  },
+  "candidate_rules": {
+    "confidence": "MEDIUM_CONFIDENCE_ONLY",
+    "sample_count_min": 300,
+    "roi_proxy_flat_1u": "POSITIVE_REQUIRED",
+    "cross_support": "AT_LEAST_2_SEASONS_OR_2_LEAGUES_WITH_SIMILAR_POSITIVE_DIRECTION",
+    "drawdown": "HIGH_DRAWDOWN_RISK_EXCLUDED",
+    "fail_streak": "EXTREME_FAIL_STREAK_EXCLUDED"
+  },
+  "candidates": [],
+  "watchlist": [
+    {
+      "market": "FT_OVER25",
+      "league_code": "B1",
+      "season": "2022/23",
+      "close_odds_band": "1_50_1_74",
+      "asian_handicap_line_bucket": "NOT_AH",
+      "over25_price_band": "1_50_1_74",
+      "home_away_side": "MARKET_LEVEL",
+      "sample_count": 148,
+      "hit_rate": 0.668919,
+      "avg_close_odds": 1.632568,
+      "roi_proxy_flat_1u": 0.085473,
+      "max_fail_streak": 4,
+      "max_drawdown_proxy": -5.13,
+      "confidence_flag": "LOW_CONFIDENCE",
+      "risk_flags": [
+        "LOW_CONFIDENCE_RESEARCH_ONLY"
+      ],
+      "peer_support": {
+        "positive_peer_count": 6,
+        "season_count": 3,
+        "league_count": 4
+      },
+      "status": "WATCHLIST_ONLY",
+      "not_candidate_reason": "LOW_CONFIDENCE_NOT_CANDIDATE"
+    },
+    {
+      "market": "FT_OVER25",
+      "league_code": "F1",
+      "season": "2020/21",
+      "close_odds_band": "2_00_2_49",
+      "asian_handicap_line_bucket": "NOT_AH",
+      "over25_price_band": "2_00_2_49",
+      "home_away_side": "MARKET_LEVEL",
+      "sample_count": 171,
+      "hit_rate": 0.502924,
+      "avg_close_odds": 2.149825,
+      "roi_proxy_flat_1u": 0.082281,
+      "max_fail_streak": 6,
+      "max_drawdown_proxy": -13.46,
+      "confidence_flag": "LOW_CONFIDENCE",
+      "risk_flags": [
+        "LOW_CONFIDENCE_RESEARCH_ONLY"
+      ],
+      "peer_support": {
+        "positive_peer_count": 4,
+        "season_count": 3,
+        "league_count": 4
+      },
+      "status": "WATCHLIST_ONLY",
+      "not_candidate_reason": "LOW_CONFIDENCE_NOT_CANDIDATE"
+    },
+    {
+      "market": "FT_OVER25",
+      "league_code": "D1",
+      "season": "2024/25",
+      "close_odds_band": "1_50_1_74",
+      "asian_handicap_line_bucket": "NOT_AH",
+      "over25_price_band": "1_50_1_74",
+      "home_away_side": "MARKET_LEVEL",
+      "sample_count": 142,
+      "hit_rate": 0.65493,
+      "avg_close_odds": 1.610211,
+      "roi_proxy_flat_1u": 0.054789,
+      "max_fail_streak": 4,
+      "max_drawdown_proxy": -5.36,
+      "confidence_flag": "LOW_CONFIDENCE",
+      "risk_flags": [
+        "LOW_CONFIDENCE_RESEARCH_ONLY"
+      ],
+      "peer_support": {
+        "positive_peer_count": 6,
+        "season_count": 3,
+        "league_count": 4
+      },
+      "status": "WATCHLIST_ONLY",
+      "not_candidate_reason": "LOW_CONFIDENCE_NOT_CANDIDATE"
+    },
+    {
+      "market": "FT_OVER25",
+      "league_code": "T1",
+      "season": "2021/22",
+      "close_odds_band": "2_00_2_49",
+      "asian_handicap_line_bucket": "NOT_AH",
+      "over25_price_band": "2_00_2_49",
+      "home_away_side": "MARKET_LEVEL",
+      "sample_count": 101,
+      "hit_rate": 0.49505,
+      "avg_close_odds": 2.120297,
+      "roi_proxy_flat_1u": 0.050792,
+      "max_fail_streak": 5,
+      "max_drawdown_proxy": -10.13,
+      "confidence_flag": "LOW_CONFIDENCE",
+      "risk_flags": [
+        "LOW_CONFIDENCE_RESEARCH_ONLY"
+      ],
+      "peer_support": {
+        "positive_peer_count": 4,
+        "season_count": 3,
+        "league_count": 4
+      },
+      "status": "WATCHLIST_ONLY",
+      "not_candidate_reason": "LOW_CONFIDENCE_NOT_CANDIDATE"
+    },
+    {
+      "market": "FT_OVER25",
+      "league_code": "E0",
+      "season": "2021/22",
+      "close_odds_band": "2_00_2_49",
+      "asian_handicap_line_bucket": "NOT_AH",
+      "over25_price_band": "2_00_2_49",
+      "home_away_side": "MARKET_LEVEL",
+      "sample_count": 130,
+      "hit_rate": 0.476923,
+      "avg_close_odds": 2.143385,
+      "roi_proxy_flat_1u": 0.023154,
+      "max_fail_streak": 8,
+      "max_drawdown_proxy": -12.83,
+      "confidence_flag": "LOW_CONFIDENCE",
+      "risk_flags": [
+        "LOW_CONFIDENCE_RESEARCH_ONLY"
+      ],
+      "peer_support": {
+        "positive_peer_count": 4,
+        "season_count": 3,
+        "league_count": 4
+      },
+      "status": "WATCHLIST_ONLY",
+      "not_candidate_reason": "LOW_CONFIDENCE_NOT_CANDIDATE"
+    },
+    {
+      "market": "FT_OVER25",
+      "league_code": "E0",
+      "season": "2023/24",
+      "close_odds_band": "LT_1_50",
+      "asian_handicap_line_bucket": "NOT_AH",
+      "over25_price_band": "LT_1_50",
+      "home_away_side": "MARKET_LEVEL",
+      "sample_count": 112,
+      "hit_rate": 0.741071,
+      "avg_close_odds": 1.37375,
+      "roi_proxy_flat_1u": 0.017411,
+      "max_fail_streak": 4,
+      "max_drawdown_proxy": -6.47,
+      "confidence_flag": "LOW_CONFIDENCE",
+      "risk_flags": [
+        "LOW_CONFIDENCE_RESEARCH_ONLY"
+      ],
+      "peer_support": {
+        "positive_peer_count": 1,
+        "season_count": 1,
+        "league_count": 1
+      },
+      "status": "WATCHLIST_ONLY",
+      "not_candidate_reason": "LOW_CONFIDENCE_NOT_CANDIDATE"
+    },
+    {
+      "market": "FT_OVER25",
+      "league_code": "F1",
+      "season": "2022/23",
+      "close_odds_band": "1_50_1_74",
+      "asian_handicap_line_bucket": "NOT_AH",
+      "over25_price_band": "1_50_1_74",
+      "home_away_side": "MARKET_LEVEL",
+      "sample_count": 125,
+      "hit_rate": 0.616,
+      "avg_close_odds": 1.64712,
+      "roi_proxy_flat_1u": 0.01672,
+      "max_fail_streak": 4,
+      "max_drawdown_proxy": -6.19,
+      "confidence_flag": "LOW_CONFIDENCE",
+      "risk_flags": [
+        "LOW_CONFIDENCE_RESEARCH_ONLY"
+      ],
+      "peer_support": {
+        "positive_peer_count": 6,
+        "season_count": 3,
+        "league_count": 4
+      },
+      "status": "WATCHLIST_ONLY",
+      "not_candidate_reason": "LOW_CONFIDENCE_NOT_CANDIDATE"
+    },
+    {
+      "market": "FT_OVER25",
+      "league_code": "D1",
+      "season": "2023/24",
+      "close_odds_band": "1_50_1_74",
+      "asian_handicap_line_bucket": "NOT_AH",
+      "over25_price_band": "1_50_1_74",
+      "home_away_side": "MARKET_LEVEL",
+      "sample_count": 135,
+      "hit_rate": 0.62963,
+      "avg_close_odds": 1.622889,
+      "roi_proxy_flat_1u": 0.013852,
+      "max_fail_streak": 4,
+      "max_drawdown_proxy": -14.74,
+      "confidence_flag": "LOW_CONFIDENCE",
+      "risk_flags": [
+        "LOW_CONFIDENCE_RESEARCH_ONLY"
+      ],
+      "peer_support": {
+        "positive_peer_count": 6,
+        "season_count": 3,
+        "league_count": 4
+      },
+      "status": "WATCHLIST_ONLY",
+      "not_candidate_reason": "LOW_CONFIDENCE_NOT_CANDIDATE"
+    },
+    {
+      "market": "FT_OVER25",
+      "league_code": "F1",
+      "season": "2021/22",
+      "close_odds_band": "1_75_1_99",
+      "asian_handicap_line_bucket": "NOT_AH",
+      "over25_price_band": "1_75_1_99",
+      "home_away_side": "MARKET_LEVEL",
+      "sample_count": 106,
+      "hit_rate": 0.537736,
+      "avg_close_odds": 1.879906,
+      "roi_proxy_flat_1u": 0.010566,
+      "max_fail_streak": 4,
+      "max_drawdown_proxy": -8.7,
+      "confidence_flag": "LOW_CONFIDENCE",
+      "risk_flags": [
+        "LOW_CONFIDENCE_RESEARCH_ONLY"
+      ],
+      "peer_support": {
+        "positive_peer_count": 2,
+        "season_count": 1,
+        "league_count": 2
+      },
+      "status": "WATCHLIST_ONLY",
+      "not_candidate_reason": "LOW_CONFIDENCE_NOT_CANDIDATE"
+    },
+    {
+      "market": "FT_OVER25",
+      "league_code": "T1",
+      "season": "2021/22",
+      "close_odds_band": "1_75_1_99",
+      "asian_handicap_line_bucket": "NOT_AH",
+      "over25_price_band": "1_75_1_99",
+      "home_away_side": "MARKET_LEVEL",
+      "sample_count": 138,
+      "hit_rate": 0.536232,
+      "avg_close_odds": 1.873986,
+      "roi_proxy_flat_1u": 0.004058,
+      "max_fail_streak": 6,
+      "max_drawdown_proxy": -17.36,
+      "confidence_flag": "LOW_CONFIDENCE",
+      "risk_flags": [
+        "LOW_CONFIDENCE_RESEARCH_ONLY"
+      ],
+      "peer_support": {
+        "positive_peer_count": 2,
+        "season_count": 1,
+        "league_count": 2
+      },
+      "status": "WATCHLIST_ONLY",
+      "not_candidate_reason": "LOW_CONFIDENCE_NOT_CANDIDATE"
+    },
+    {
+      "market": "FT_OVER25",
+      "league_code": "N1",
+      "season": "2022/23",
+      "close_odds_band": "1_50_1_74",
+      "asian_handicap_line_bucket": "NOT_AH",
+      "over25_price_band": "1_50_1_74",
+      "home_away_side": "MARKET_LEVEL",
+      "sample_count": 119,
+      "hit_rate": 0.621849,
+      "avg_close_odds": 1.612017,
+      "roi_proxy_flat_1u": 0.004034,
+      "max_fail_streak": 4,
+      "max_drawdown_proxy": -10.98,
+      "confidence_flag": "LOW_CONFIDENCE",
+      "risk_flags": [
+        "LOW_CONFIDENCE_RESEARCH_ONLY"
+      ],
+      "peer_support": {
+        "positive_peer_count": 6,
+        "season_count": 3,
+        "league_count": 4
+      },
+      "status": "WATCHLIST_ONLY",
+      "not_candidate_reason": "LOW_CONFIDENCE_NOT_CANDIDATE"
+    },
+    {
+      "market": "FT_OVER25",
+      "league_code": "D1",
+      "season": "2022/23",
+      "close_odds_band": "1_50_1_74",
+      "asian_handicap_line_bucket": "NOT_AH",
+      "over25_price_band": "1_50_1_74",
+      "home_away_side": "MARKET_LEVEL",
+      "sample_count": 142,
+      "hit_rate": 0.612676,
+      "avg_close_odds": 1.638732,
+      "roi_proxy_flat_1u": 0.002958,
+      "max_fail_streak": 4,
+      "max_drawdown_proxy": -10.16,
+      "confidence_flag": "LOW_CONFIDENCE",
+      "risk_flags": [
+        "LOW_CONFIDENCE_RESEARCH_ONLY"
+      ],
+      "peer_support": {
+        "positive_peer_count": 6,
+        "season_count": 3,
+        "league_count": 4
+      },
+      "status": "WATCHLIST_ONLY",
+      "not_candidate_reason": "LOW_CONFIDENCE_NOT_CANDIDATE"
+    },
+    {
+      "market": "FT_OVER25",
+      "league_code": "SP1",
+      "season": "2024/25",
+      "close_odds_band": "2_00_2_49",
+      "asian_handicap_line_bucket": "NOT_AH",
+      "over25_price_band": "2_00_2_49",
+      "home_away_side": "MARKET_LEVEL",
+      "sample_count": 130,
+      "hit_rate": 0.461538,
+      "avg_close_odds": 2.173077,
+      "roi_proxy_flat_1u": 0.002615,
+      "max_fail_streak": 5,
+      "max_drawdown_proxy": -14.55,
+      "confidence_flag": "LOW_CONFIDENCE",
+      "risk_flags": [
+        "LOW_CONFIDENCE_RESEARCH_ONLY"
+      ],
+      "peer_support": {
+        "positive_peer_count": 4,
+        "season_count": 3,
+        "league_count": 4
+      },
+      "status": "WATCHLIST_ONLY",
+      "not_candidate_reason": "LOW_CONFIDENCE_NOT_CANDIDATE"
+    }
+  ],
+  "exclusions_sample": [
+    {
+      "market": "1X2",
+      "league_code": "B1",
+      "season": "2020/21",
+      "close_odds_band": "1_50_1_74",
+      "asian_handicap_line_bucket": "NOT_AH",
+      "over25_price_band": "NOT_FT_OVER25",
+      "home_away_side": "AWAY",
+      "sample_count": 24,
+      "hit_rate": 0.541667,
+      "avg_close_odds": 1.607917,
+      "roi_proxy_flat_1u": -0.1375,
+      "max_fail_streak": 4,
+      "max_drawdown_proxy": -6.09,
+      "confidence_flag": "SMALL_SAMPLE",
+      "risk_flags": [
+        "SMALL_SAMPLE_NO_EDGE_CLAIM"
+      ],
+      "peer_support": {
+        "positive_peer_count": 0,
+        "season_count": 0,
+        "league_count": 0
+      },
+      "status": "EXCLUDED",
+      "exclude_reason": "SMALL_SAMPLE"
+    },
+    {
+      "market": "1X2",
+      "league_code": "B1",
+      "season": "2020/21",
+      "close_odds_band": "1_50_1_74",
+      "asian_handicap_line_bucket": "NOT_AH",
+      "over25_price_band": "NOT_FT_OVER25",
+      "home_away_side": "HOME",
+      "sample_count": 41,
+      "hit_rate": 0.609756,
+      "avg_close_odds": 1.610244,
+      "roi_proxy_flat_1u": -0.022683,
+      "max_fail_streak": 3,
+      "max_drawdown_proxy": -4.9,
+      "confidence_flag": "SMALL_SAMPLE",
+      "risk_flags": [
+        "SMALL_SAMPLE_NO_EDGE_CLAIM"
+      ],
+      "peer_support": {
+        "positive_peer_count": 0,
+        "season_count": 0,
+        "league_count": 0
+      },
+      "status": "EXCLUDED",
+      "exclude_reason": "SMALL_SAMPLE"
+    },
+    {
+      "market": "1X2",
+      "league_code": "B1",
+      "season": "2020/21",
+      "close_odds_band": "1_75_1_99",
+      "asian_handicap_line_bucket": "NOT_AH",
+      "over25_price_band": "NOT_FT_OVER25",
+      "home_away_side": "AWAY",
+      "sample_count": 27,
+      "hit_rate": 0.62963,
+      "avg_close_odds": 1.875185,
+      "roi_proxy_flat_1u": 0.191852,
+      "max_fail_streak": 3,
+      "max_drawdown_proxy": -3.42,
+      "confidence_flag": "SMALL_SAMPLE",
+      "risk_flags": [
+        "SMALL_SAMPLE_NO_EDGE_CLAIM"
+      ],
+      "peer_support": {
+        "positive_peer_count": 0,
+        "season_count": 0,
+        "league_count": 0
+      },
+      "status": "EXCLUDED",
+      "exclude_reason": "SMALL_SAMPLE"
+    },
+    {
+      "market": "1X2",
+      "league_code": "B1",
+      "season": "2020/21",
+      "close_odds_band": "1_75_1_99",
+      "asian_handicap_line_bucket": "NOT_AH",
+      "over25_price_band": "NOT_FT_OVER25",
+      "home_away_side": "HOME",
+      "sample_count": 43,
+      "hit_rate": 0.534884,
+      "avg_close_odds": 1.853721,
+      "roi_proxy_flat_1u": -0.001628,
+      "max_fail_streak": 5,
+      "max_drawdown_proxy": -6.4,
+      "confidence_flag": "SMALL_SAMPLE",
+      "risk_flags": [
+        "SMALL_SAMPLE_NO_EDGE_CLAIM"
+      ],
+      "peer_support": {
+        "positive_peer_count": 0,
+        "season_count": 0,
+        "league_count": 0
+      },
+      "status": "EXCLUDED",
+      "exclude_reason": "SMALL_SAMPLE"
+    },
+    {
+      "market": "1X2",
+      "league_code": "B1",
+      "season": "2020/21",
+      "close_odds_band": "2_00_2_49",
+      "asian_handicap_line_bucket": "NOT_AH",
+      "over25_price_band": "NOT_FT_OVER25",
+      "home_away_side": "AWAY",
+      "sample_count": 61,
+      "hit_rate": 0.491803,
+      "avg_close_odds": 2.198361,
+      "roi_proxy_flat_1u": 0.079016,
+      "max_fail_streak": 7,
+      "max_drawdown_proxy": -8.63,
+      "confidence_flag": "SMALL_SAMPLE",
+      "risk_flags": [
+        "SMALL_SAMPLE_NO_EDGE_CLAIM"
+      ],
+      "peer_support": {
+        "positive_peer_count": 0,
+        "season_count": 0,
+        "league_count": 0
+      },
+      "status": "EXCLUDED",
+      "exclude_reason": "SMALL_SAMPLE"
+    },
+    {
+      "market": "1X2",
+      "league_code": "B1",
+      "season": "2020/21",
+      "close_odds_band": "2_00_2_49",
+      "asian_handicap_line_bucket": "NOT_AH",
+      "over25_price_band": "NOT_FT_OVER25",
+      "home_away_side": "HOME",
+      "sample_count": 54,
+      "hit_rate": 0.388889,
+      "avg_close_odds": 2.176296,
+      "roi_proxy_flat_1u": -0.141852,
+      "max_fail_streak": 10,
+      "max_drawdown_proxy": -13.38,
+      "confidence_flag": "SMALL_SAMPLE",
+      "risk_flags": [
+        "SMALL_SAMPLE_NO_EDGE_CLAIM"
+      ],
+      "peer_support": {
+        "positive_peer_count": 1,
+        "season_count": 1,
+        "league_count": 1
+      },
+      "status": "EXCLUDED",
+      "exclude_reason": "SMALL_SAMPLE"
+    },
+    {
+      "market": "1X2",
+      "league_code": "B1",
+      "season": "2020/21",
+      "close_odds_band": "2_50_3_49",
+      "asian_handicap_line_bucket": "NOT_AH",
+      "over25_price_band": "NOT_FT_OVER25",
+      "home_away_side": "AWAY",
+      "sample_count": 60,
+      "hit_rate": 0.266667,
+      "avg_close_odds": 3.000333,
+      "roi_proxy_flat_1u": -0.178833,
+      "max_fail_streak": 6,
+      "max_drawdown_proxy": -13.15,
+      "confidence_flag": "SMALL_SAMPLE",
+      "risk_flags": [
+        "SMALL_SAMPLE_NO_EDGE_CLAIM"
+      ],
+      "peer_support": {
+        "positive_peer_count": 1,
+        "season_count": 1,
+        "league_count": 1
+      },
+      "status": "EXCLUDED",
+      "exclude_reason": "SMALL_SAMPLE"
+    },
+    {
+      "market": "1X2",
+      "league_code": "B1",
+      "season": "2020/21",
+      "close_odds_band": "2_50_3_49",
+      "asian_handicap_line_bucket": "NOT_AH",
+      "over25_price_band": "NOT_FT_OVER25",
+      "home_away_side": "DRAW",
+      "sample_count": 40,
+      "hit_rate": 0.325,
+      "avg_close_odds": 3.34875,
+      "roi_proxy_flat_1u": 0.085,
+      "max_fail_streak": 9,
+      "max_drawdown_proxy": -9.05,
+      "confidence_flag": "SMALL_SAMPLE",
+      "risk_flags": [
+        "SMALL_SAMPLE_NO_EDGE_CLAIM"
+      ],
+      "peer_support": {
+        "positive_peer_count": 12,
+        "season_count": 4,
+        "league_count": 5
+      },
+      "status": "EXCLUDED",
+      "exclude_reason": "SMALL_SAMPLE"
+    },
+    {
+      "market": "1X2",
+      "league_code": "B1",
+      "season": "2020/21",
+      "close_odds_band": "2_50_3_49",
+      "asian_handicap_line_bucket": "NOT_AH",
+      "over25_price_band": "NOT_FT_OVER25",
+      "home_away_side": "HOME",
+      "sample_count": 68,
+      "hit_rate": 0.308824,
+      "avg_close_odds": 2.983824,
+      "roi_proxy_flat_1u": -0.063382,
+      "max_fail_streak": 9,
+      "max_drawdown_proxy": -14.95,
+      "confidence_flag": "SMALL_SAMPLE",
+      "risk_flags": [
+        "SMALL_SAMPLE_NO_EDGE_CLAIM"
+      ],
+      "peer_support": {
+        "positive_peer_count": 0,
+        "season_count": 0,
+        "league_count": 0
+      },
+      "status": "EXCLUDED",
+      "exclude_reason": "SMALL_SAMPLE"
+    },
+    {
+      "market": "1X2",
+      "league_code": "B1",
+      "season": "2020/21",
+      "close_odds_band": "3_50_4_99",
+      "asian_handicap_line_bucket": "NOT_AH",
+      "over25_price_band": "NOT_FT_OVER25",
+      "home_away_side": "AWAY",
+      "sample_count": 65,
+      "hit_rate": 0.215385,
+      "avg_close_odds": 4.014615,
+      "roi_proxy_flat_1u": -0.154923,
+      "max_fail_streak": 11,
+      "max_drawdown_proxy": -15.37,
+      "confidence_flag": "SMALL_SAMPLE",
+      "risk_flags": [
+        "SMALL_SAMPLE_NO_EDGE_CLAIM"
+      ],
+      "peer_support": {
+        "positive_peer_count": 0,
+        "season_count": 0,
+        "league_count": 0
+      },
+      "status": "EXCLUDED",
+      "exclude_reason": "SMALL_SAMPLE"
+    },
+    {
+      "market": "1X2",
+      "league_code": "B1",
+      "season": "2020/21",
+      "close_odds_band": "3_50_4_99",
+      "asian_handicap_line_bucket": "NOT_AH",
+      "over25_price_band": "NOT_FT_OVER25",
+      "home_away_side": "HOME",
+      "sample_count": 41,
+      "hit_rate": 0.292683,
+      "avg_close_odds": 3.91561,
+      "roi_proxy_flat_1u": 0.143415,
+      "max_fail_streak": 7,
+      "max_drawdown_proxy": -7.0,
+      "confidence_flag": "SMALL_SAMPLE",
+      "risk_flags": [
+        "SMALL_SAMPLE_NO_EDGE_CLAIM"
+      ],
+      "peer_support": {
+        "positive_peer_count": 0,
+        "season_count": 0,
+        "league_count": 0
+      },
+      "status": "EXCLUDED",
+      "exclude_reason": "SMALL_SAMPLE"
+    },
+    {
+      "market": "1X2",
+      "league_code": "B1",
+      "season": "2020/21",
+      "close_odds_band": "GE_5_00",
+      "asian_handicap_line_bucket": "NOT_AH",
+      "over25_price_band": "NOT_FT_OVER25",
+      "home_away_side": "AWAY",
+      "sample_count": 57,
+      "hit_rate": 0.245614,
+      "avg_close_odds": 7.29386,
+      "roi_proxy_flat_1u": 0.548246,
+      "max_fail_streak": 12,
+      "max_drawdown_proxy": -12.0,
+      "confidence_flag": "SMALL_SAMPLE",
+      "risk_flags": [
+        "SMALL_SAMPLE_NO_EDGE_CLAIM"
+      ],
+      "peer_support": {
+        "positive_peer_count": 1,
+        "season_count": 1,
+        "league_count": 1
+      },
+      "status": "EXCLUDED",
+      "exclude_reason": "SMALL_SAMPLE"
+    },
+    {
+      "market": "1X2",
+      "league_code": "B1",
+      "season": "2020/21",
+      "close_odds_band": "GE_5_00",
+      "asian_handicap_line_bucket": "NOT_AH",
+      "over25_price_band": "NOT_FT_OVER25",
+      "home_away_side": "DRAW",
+      "sample_count": 20,
+      "hit_rate": 0.25,
+      "avg_close_odds": 5.8875,
+      "roi_proxy_flat_1u": 0.4375,
+      "max_fail_streak": 7,
+      "max_drawdown_proxy": -7.0,
+      "confidence_flag": "SMALL_SAMPLE",
+      "risk_flags": [
+        "SMALL_SAMPLE_NO_EDGE_CLAIM"
+      ],
+      "peer_support": {
+        "positive_peer_count": 0,
+        "season_count": 0,
+        "league_count": 0
+      },
+      "status": "EXCLUDED",
+      "exclude_reason": "SMALL_SAMPLE"
+    },
+    {
+      "market": "1X2",
+      "league_code": "B1",
+      "season": "2020/21",
+      "close_odds_band": "GE_5_00",
+      "asian_handicap_line_bucket": "NOT_AH",
+      "over25_price_band": "NOT_FT_OVER25",
+      "home_away_side": "HOME",
+      "sample_count": 26,
+      "hit_rate": 0.153846,
+      "avg_close_odds": 6.894231,
+      "roi_proxy_flat_1u": -0.096154,
+      "max_fail_streak": 13,
+      "max_drawdown_proxy": -13.0,
+      "confidence_flag": "SMALL_SAMPLE",
+      "risk_flags": [
+        "SMALL_SAMPLE_NO_EDGE_CLAIM"
+      ],
+      "peer_support": {
+        "positive_peer_count": 0,
+        "season_count": 0,
+        "league_count": 0
+      },
+      "status": "EXCLUDED",
+      "exclude_reason": "SMALL_SAMPLE"
+    },
+    {
+      "market": "1X2",
+      "league_code": "B1",
+      "season": "2020/21",
+      "close_odds_band": "LT_1_50",
+      "asian_handicap_line_bucket": "NOT_AH",
+      "over25_price_band": "NOT_FT_OVER25",
+      "home_away_side": "AWAY",
+      "sample_count": 12,
+      "hit_rate": 0.75,
+      "avg_close_odds": 1.359167,
+      "roi_proxy_flat_1u": 0.021667,
+      "max_fail_streak": 3,
+      "max_drawdown_proxy": -3.0,
+      "confidence_flag": "SMALL_SAMPLE",
+      "risk_flags": [
+        "SMALL_SAMPLE_NO_EDGE_CLAIM"
+      ],
+      "peer_support": {
+        "positive_peer_count": 0,
+        "season_count": 0,
+        "league_count": 0
+      },
+      "status": "EXCLUDED",
+      "exclude_reason": "SMALL_SAMPLE"
+    },
+    {
+      "market": "1X2",
+      "league_code": "B1",
+      "season": "2020/21",
+      "close_odds_band": "LT_1_50",
+      "asian_handicap_line_bucket": "NOT_AH",
+      "over25_price_band": "NOT_FT_OVER25",
+      "home_away_side": "HOME",
+      "sample_count": 33,
+      "hit_rate": 0.515152,
+      "avg_close_odds": 1.356061,
+      "roi_proxy_flat_1u": -0.315152,
+      "max_fail_streak": 2,
+      "max_drawdown_proxy": -10.58,
+      "confidence_flag": "SMALL_SAMPLE",
+      "risk_flags": [
+        "SMALL_SAMPLE_NO_EDGE_CLAIM"
+      ],
+      "peer_support": {
+        "positive_peer_count": 0,
+        "season_count": 0,
+        "league_count": 0
+      },
+      "status": "EXCLUDED",
+      "exclude_reason": "SMALL_SAMPLE"
+    },
+    {
+      "market": "1X2",
+      "league_code": "B1",
+      "season": "2021/22",
+      "close_odds_band": "1_50_1_74",
+      "asian_handicap_line_bucket": "NOT_AH",
+      "over25_price_band": "NOT_FT_OVER25",
+      "home_away_side": "AWAY",
+      "sample_count": 26,
+      "hit_rate": 0.692308,
+      "avg_close_odds": 1.613077,
+      "roi_proxy_flat_1u": 0.116923,
+      "max_fail_streak": 2,
+      "max_drawdown_proxy": -3.35,
+      "confidence_flag": "SMALL_SAMPLE",
+      "risk_flags": [
+        "SMALL_SAMPLE_NO_EDGE_CLAIM"
+      ],
+      "peer_support": {
+        "positive_peer_count": 0,
+        "season_count": 0,
+        "league_count": 0
+      },
+      "status": "EXCLUDED",
+      "exclude_reason": "SMALL_SAMPLE"
+    },
+    {
+      "market": "1X2",
+      "league_code": "B1",
+      "season": "2021/22",
+      "close_odds_band": "1_50_1_74",
+      "asian_handicap_line_bucket": "NOT_AH",
+      "over25_price_band": "NOT_FT_OVER25",
+      "home_away_side": "HOME",
+      "sample_count": 44,
+      "hit_rate": 0.727273,
+      "avg_close_odds": 1.574773,
+      "roi_proxy_flat_1u": 0.142045,
+      "max_fail_streak": 2,
+      "max_drawdown_proxy": -2.31,
+      "confidence_flag": "SMALL_SAMPLE",
+      "risk_flags": [
+        "SMALL_SAMPLE_NO_EDGE_CLAIM"
+      ],
+      "peer_support": {
+        "positive_peer_count": 0,
+        "season_count": 0,
+        "league_count": 0
+      },
+      "status": "EXCLUDED",
+      "exclude_reason": "SMALL_SAMPLE"
+    },
+    {
+      "market": "1X2",
+      "league_code": "B1",
+      "season": "2021/22",
+      "close_odds_band": "1_75_1_99",
+      "asian_handicap_line_bucket": "NOT_AH",
+      "over25_price_band": "NOT_FT_OVER25",
+      "home_away_side": "AWAY",
+      "sample_count": 20,
+      "hit_rate": 0.4,
+      "avg_close_odds": 1.8125,
+      "roi_proxy_flat_1u": -0.27,
+      "max_fail_streak": 4,
+      "max_drawdown_proxy": -6.1,
+      "confidence_flag": "SMALL_SAMPLE",
+      "risk_flags": [
+        "SMALL_SAMPLE_NO_EDGE_CLAIM"
+      ],
+      "peer_support": {
+        "positive_peer_count": 0,
+        "season_count": 0,
+        "league_count": 0
+      },
+      "status": "EXCLUDED",
+      "exclude_reason": "SMALL_SAMPLE"
+    },
+    {
+      "market": "1X2",
+      "league_code": "B1",
+      "season": "2021/22",
+      "close_odds_band": "1_75_1_99",
+      "asian_handicap_line_bucket": "NOT_AH",
+      "over25_price_band": "NOT_FT_OVER25",
+      "home_away_side": "HOME",
+      "sample_count": 37,
+      "hit_rate": 0.459459,
+      "avg_close_odds": 1.858378,
+      "roi_proxy_flat_1u": -0.151892,
+      "max_fail_streak": 4,
+      "max_drawdown_proxy": -6.92,
+      "confidence_flag": "SMALL_SAMPLE",
+      "risk_flags": [
+        "SMALL_SAMPLE_NO_EDGE_CLAIM"
+      ],
+      "peer_support": {
+        "positive_peer_count": 0,
+        "season_count": 0,
+        "league_count": 0
+      },
+      "status": "EXCLUDED",
+      "exclude_reason": "SMALL_SAMPLE"
+    },
+    {
+      "market": "1X2",
+      "league_code": "B1",
+      "season": "2021/22",
+      "close_odds_band": "2_00_2_49",
+      "asian_handicap_line_bucket": "NOT_AH",
+      "over25_price_band": "NOT_FT_OVER25",
+      "home_away_side": "AWAY",
+      "sample_count": 44,
+      "hit_rate": 0.522727,
+      "avg_close_odds": 2.217273,
+      "roi_proxy_flat_1u": 0.139091,
+      "max_fail_streak": 4,
+      "max_drawdown_proxy": -4.0,
+      "confidence_flag": "SMALL_SAMPLE",
+      "risk_flags": [
+        "SMALL_SAMPLE_NO_EDGE_CLAIM"
+      ],
+      "peer_support": {
+        "positive_peer_count": 0,
+        "season_count": 0,
+        "league_count": 0
+      },
+      "status": "EXCLUDED",
+      "exclude_reason": "SMALL_SAMPLE"
+    },
+    {
+      "market": "1X2",
+      "league_code": "B1",
+      "season": "2021/22",
+      "close_odds_band": "2_00_2_49",
+      "asian_handicap_line_bucket": "NOT_AH",
+      "over25_price_band": "NOT_FT_OVER25",
+      "home_away_side": "HOME",
+      "sample_count": 60,
+      "hit_rate": 0.35,
+      "avg_close_odds": 2.225667,
+      "roi_proxy_flat_1u": -0.226833,
+      "max_fail_streak": 8,
+      "max_drawdown_proxy": -14.5,
+      "confidence_flag": "SMALL_SAMPLE",
+      "risk_flags": [
+        "SMALL_SAMPLE_NO_EDGE_CLAIM"
+      ],
+      "peer_support": {
+        "positive_peer_count": 1,
+        "season_count": 1,
+        "league_count": 1
+      },
+      "status": "EXCLUDED",
+      "exclude_reason": "SMALL_SAMPLE"
+    },
+    {
+      "market": "1X2",
+      "league_code": "B1",
+      "season": "2021/22",
+      "close_odds_band": "2_50_3_49",
+      "asian_handicap_line_bucket": "NOT_AH",
+      "over25_price_band": "NOT_FT_OVER25",
+      "home_away_side": "AWAY",
+      "sample_count": 72,
+      "hit_rate": 0.333333,
+      "avg_close_odds": 2.930833,
+      "roi_proxy_flat_1u": -0.019861,
+      "max_fail_streak": 9,
+      "max_drawdown_proxy": -12.38,
+      "confidence_flag": "SMALL_SAMPLE",
+      "risk_flags": [
+        "SMALL_SAMPLE_NO_EDGE_CLAIM"
+      ],
+      "peer_support": {
+        "positive_peer_count": 1,
+        "season_count": 1,
+        "league_count": 1
+      },
+      "status": "EXCLUDED",
+      "exclude_reason": "SMALL_SAMPLE"
+    },
+    {
+      "market": "1X2",
+      "league_code": "B1",
+      "season": "2021/22",
+      "close_odds_band": "2_50_3_49",
+      "asian_handicap_line_bucket": "NOT_AH",
+      "over25_price_band": "NOT_FT_OVER25",
+      "home_away_side": "DRAW",
+      "sample_count": 62,
+      "hit_rate": 0.258065,
+      "avg_close_odds": 3.331452,
+      "roi_proxy_flat_1u": -0.13871,
+      "max_fail_streak": 12,
+      "max_drawdown_proxy": -19.25,
+      "confidence_flag": "SMALL_SAMPLE",
+      "risk_flags": [
+        "SMALL_SAMPLE_NO_EDGE_CLAIM"
+      ],
+      "peer_support": {
+        "positive_peer_count": 12,
+        "season_count": 4,
+        "league_count": 5
+      },
+      "status": "EXCLUDED",
+      "exclude_reason": "SMALL_SAMPLE"
+    },
+    {
+      "market": "1X2",
+      "league_code": "B1",
+      "season": "2021/22",
+      "close_odds_band": "2_50_3_49",
+      "asian_handicap_line_bucket": "NOT_AH",
+      "over25_price_band": "NOT_FT_OVER25",
+      "home_away_side": "HOME",
+      "sample_count": 58,
+      "hit_rate": 0.293103,
+      "avg_close_odds": 2.911552,
+      "roi_proxy_flat_1u": -0.183103,
+      "max_fail_streak": 6,
+      "max_drawdown_proxy": -14.27,
+      "confidence_flag": "SMALL_SAMPLE",
+      "risk_flags": [
+        "SMALL_SAMPLE_NO_EDGE_CLAIM"
+      ],
+      "peer_support": {
+        "positive_peer_count": 0,
+        "season_count": 0,
+        "league_count": 0
+      },
+      "status": "EXCLUDED",
+      "exclude_reason": "SMALL_SAMPLE"
+    },
+    {
+      "market": "1X2",
+      "league_code": "B1",
+      "season": "2021/22",
+      "close_odds_band": "3_50_4_99",
+      "asian_handicap_line_bucket": "NOT_AH",
+      "over25_price_band": "NOT_FT_OVER25",
+      "home_away_side": "AWAY",
+      "sample_count": 53,
+      "hit_rate": 0.283019,
+      "avg_close_odds": 3.997736,
+      "roi_proxy_flat_1u": 0.119434,
+      "max_fail_streak": 7,
+      "max_drawdown_proxy": -7.25,
+      "confidence_flag": "SMALL_SAMPLE",
+      "risk_flags": [
+        "SMALL_SAMPLE_NO_EDGE_CLAIM"
+      ],
+      "peer_support": {
+        "positive_peer_count": 0,
+        "season_count": 0,
+        "league_count": 0
+      },
+      "status": "EXCLUDED",
+      "exclude_reason": "SMALL_SAMPLE"
+    },
+    {
+      "market": "1X2",
+      "league_code": "B1",
+      "season": "2021/22",
+      "close_odds_band": "3_50_4_99",
+      "asian_handicap_line_bucket": "NOT_AH",
+      "over25_price_band": "NOT_FT_OVER25",
+      "home_away_side": "HOME",
+      "sample_count": 37,
+      "hit_rate": 0.324324,
+      "avg_close_odds": 4.279189,
+      "roi_proxy_flat_1u": 0.339189,
+      "max_fail_streak": 13,
+      "max_drawdown_proxy": -13.0,
+      "confidence_flag": "SMALL_SAMPLE",
+      "risk_flags": [
+        "SMALL_SAMPLE_NO_EDGE_CLAIM"
+      ],
+      "peer_support": {
+        "positive_peer_count": 0,
+        "season_count": 0,
+        "league_count": 0
+      },
+      "status": "EXCLUDED",
+      "exclude_reason": "SMALL_SAMPLE"
+    },
+    {
+      "market": "1X2",
+      "league_code": "B1",
+      "season": "2021/22",
+      "close_odds_band": "GE_5_00",
+      "asian_handicap_line_bucket": "NOT_AH",
+      "over25_price_band": "NOT_FT_OVER25",
+      "home_away_side": "AWAY",
+      "sample_count": 77,
+      "hit_rate": 0.103896,
+      "avg_close_odds": 7.50974,
+      "roi_proxy_flat_1u": -0.36039,
+      "max_fail_streak": 18,
+      "max_drawdown_proxy": -35.25,
+      "confidence_flag": "SMALL_SAMPLE",
+      "risk_flags": [
+        "SMALL_SAMPLE_NO_EDGE_CLAIM"
+      ],
+      "peer_support": {
+        "positive_peer_count": 1,
+        "season_count": 1,
+        "league_count": 1
+      },
+      "status": "EXCLUDED",
+      "exclude_reason": "SMALL_SAMPLE"
+    },
+    {
+      "market": "1X2",
+      "league_code": "B1",
+      "season": "2021/22",
+      "close_odds_band": "GE_5_00",
+      "asian_handicap_line_bucket": "NOT_AH",
+      "over25_price_band": "NOT_FT_OVER25",
+      "home_away_side": "DRAW",
+      "sample_count": 41,
+      "hit_rate": 0.195122,
+      "avg_close_odds": 5.652439,
+      "roi_proxy_flat_1u": 0.067073,
+      "max_fail_streak": 12,
+      "max_drawdown_proxy": -14.5,
+      "confidence_flag": "SMALL_SAMPLE",
+      "risk_flags": [
+        "SMALL_SAMPLE_NO_EDGE_CLAIM"
+      ],
+      "peer_support": {
+        "positive_peer_count": 0,
+        "season_count": 0,
+        "league_count": 0
+      },
+      "status": "EXCLUDED",
+      "exclude_reason": "SMALL_SAMPLE"
+    },
+    {
+      "market": "1X2",
+      "league_code": "B1",
+      "season": "2021/22",
+      "close_odds_band": "GE_5_00",
+      "asian_handicap_line_bucket": "NOT_AH",
+      "over25_price_band": "NOT_FT_OVER25",
+      "home_away_side": "HOME",
+      "sample_count": 25,
+      "hit_rate": 0.0,
+      "avg_close_odds": 7.03,
+      "roi_proxy_flat_1u": -1.0,
+      "max_fail_streak": 25,
+      "max_drawdown_proxy": -25.0,
+      "confidence_flag": "SMALL_SAMPLE",
+      "risk_flags": [
+        "SMALL_SAMPLE_NO_EDGE_CLAIM"
+      ],
+      "peer_support": {
+        "positive_peer_count": 0,
+        "season_count": 0,
+        "league_count": 0
+      },
+      "status": "EXCLUDED",
+      "exclude_reason": "SMALL_SAMPLE"
+    },
+    {
+      "market": "1X2",
+      "league_code": "B1",
+      "season": "2021/22",
+      "close_odds_band": "LT_1_50",
+      "asian_handicap_line_bucket": "NOT_AH",
+      "over25_price_band": "NOT_FT_OVER25",
+      "home_away_side": "AWAY",
+      "sample_count": 14,
+      "hit_rate": 1.0,
+      "avg_close_odds": 1.342857,
+      "roi_proxy_flat_1u": 0.342857,
+      "max_fail_streak": 0,
+      "max_drawdown_proxy": 0.0,
+      "confidence_flag": "SMALL_SAMPLE",
+      "risk_flags": [
+        "SMALL_SAMPLE_NO_EDGE_CLAIM"
+      ],
+      "peer_support": {
+        "positive_peer_count": 0,
+        "season_count": 0,
+        "league_count": 0
+      },
+      "status": "EXCLUDED",
+      "exclude_reason": "SMALL_SAMPLE"
+    },
+    {
+      "market": "1X2",
+      "league_code": "B1",
+      "season": "2021/22",
+      "close_odds_band": "LT_1_50",
+      "asian_handicap_line_bucket": "NOT_AH",
+      "over25_price_band": "NOT_FT_OVER25",
+      "home_away_side": "HOME",
+      "sample_count": 45,
+      "hit_rate": 0.644444,
+      "avg_close_odds": 1.320667,
+      "roi_proxy_flat_1u": -0.163333,
+      "max_fail_streak": 4,
+      "max_drawdown_proxy": -9.43,
+      "confidence_flag": "SMALL_SAMPLE",
+      "risk_flags": [
+        "SMALL_SAMPLE_NO_EDGE_CLAIM"
+      ],
+      "peer_support": {
+        "positive_peer_count": 0,
+        "season_count": 0,
+        "league_count": 0
+      },
+      "status": "EXCLUDED",
+      "exclude_reason": "SMALL_SAMPLE"
+    },
+    {
+      "market": "1X2",
+      "league_code": "B1",
+      "season": "2022/23",
+      "close_odds_band": "1_50_1_74",
+      "asian_handicap_line_bucket": "NOT_AH",
+      "over25_price_band": "NOT_FT_OVER25",
+      "home_away_side": "AWAY",
+      "sample_count": 21,
+      "hit_rate": 0.666667,
+      "avg_close_odds": 1.63381,
+      "roi_proxy_flat_1u": 0.094762,
+      "max_fail_streak": 4,
+      "max_drawdown_proxy": -4.0,
+      "confidence_flag": "SMALL_SAMPLE",
+      "risk_flags": [
+        "SMALL_SAMPLE_NO_EDGE_CLAIM"
+      ],
+      "peer_support": {
+        "positive_peer_count": 0,
+        "season_count": 0,
+        "league_count": 0
+      },
+      "status": "EXCLUDED",
+      "exclude_reason": "SMALL_SAMPLE"
+    },
+    {
+      "market": "1X2",
+      "league_code": "B1",
+      "season": "2022/23",
+      "close_odds_band": "1_50_1_74",
+      "asian_handicap_line_bucket": "NOT_AH",
+      "over25_price_band": "NOT_FT_OVER25",
+      "home_away_side": "HOME",
+      "sample_count": 52,
+      "hit_rate": 0.596154,
+      "avg_close_odds": 1.609808,
+      "roi_proxy_flat_1u": -0.039615,
+      "max_fail_streak": 2,
+      "max_drawdown_proxy": -5.46,
+      "confidence_flag": "SMALL_SAMPLE",
+      "risk_flags": [
+        "SMALL_SAMPLE_NO_EDGE_CLAIM"
+      ],
+      "peer_support": {
+        "positive_peer_count": 0,
+        "season_count": 0,
+        "league_count": 0
+      },
+      "status": "EXCLUDED",
+      "exclude_reason": "SMALL_SAMPLE"
+    },
+    {
+      "market": "1X2",
+      "league_code": "B1",
+      "season": "2022/23",
+      "close_odds_band": "1_75_1_99",
+      "asian_handicap_line_bucket": "NOT_AH",
+      "over25_price_band": "NOT_FT_OVER25",
+      "home_away_side": "AWAY",
+      "sample_count": 29,
+      "hit_rate": 0.551724,
+      "avg_close_odds": 1.867586,
+      "roi_proxy_flat_1u": 0.026207,
+      "max_fail_streak": 4,
+      "max_drawdown_proxy": -5.29,
+      "confidence_flag": "SMALL_SAMPLE",
+      "risk_flags": [
+        "SMALL_SAMPLE_NO_EDGE_CLAIM"
+      ],
+      "peer_support": {
+        "positive_peer_count": 0,
+        "season_count": 0,
+        "league_count": 0
+      },
+      "status": "EXCLUDED",
+      "exclude_reason": "SMALL_SAMPLE"
+    },
+    {
+      "market": "1X2",
+      "league_code": "B1",
+      "season": "2022/23",
+      "close_odds_band": "1_75_1_99",
+      "asian_handicap_line_bucket": "NOT_AH",
+      "over25_price_band": "NOT_FT_OVER25",
+      "home_away_side": "HOME",
+      "sample_count": 29,
+      "hit_rate": 0.517241,
+      "avg_close_odds": 1.843793,
+      "roi_proxy_flat_1u": -0.04,
+      "max_fail_streak": 4,
+      "max_drawdown_proxy": -5.82,
+      "confidence_flag": "SMALL_SAMPLE",
+      "risk_flags": [
+        "SMALL_SAMPLE_NO_EDGE_CLAIM"
+      ],
+      "peer_support": {
+        "positive_peer_count": 0,
+        "season_count": 0,
+        "league_count": 0
+      },
+      "status": "EXCLUDED",
+      "exclude_reason": "SMALL_SAMPLE"
+    },
+    {
+      "market": "1X2",
+      "league_code": "B1",
+      "season": "2022/23",
+      "close_odds_band": "2_00_2_49",
+      "asian_handicap_line_bucket": "NOT_AH",
+      "over25_price_band": "NOT_FT_OVER25",
+      "home_away_side": "AWAY",
+      "sample_count": 58,
+      "hit_rate": 0.448276,
+      "avg_close_odds": 2.252241,
+      "roi_proxy_flat_1u": 0.018621,
+      "max_fail_streak": 7,
+      "max_drawdown_proxy": -7.2,
+      "confidence_flag": "SMALL_SAMPLE",
+      "risk_flags": [
+        "SMALL_SAMPLE_NO_EDGE_CLAIM"
+      ],
+      "peer_support": {
+        "positive_peer_count": 0,
+        "season_count": 0,
+        "league_count": 0
+      },
+      "status": "EXCLUDED",
+      "exclude_reason": "SMALL_SAMPLE"
+    },
+    {
+      "market": "1X2",
+      "league_code": "B1",
+      "season": "2022/23",
+      "close_odds_band": "2_00_2_49",
+      "asian_handicap_line_bucket": "NOT_AH",
+      "over25_price_band": "NOT_FT_OVER25",
+      "home_away_side": "HOME",
+      "sample_count": 58,
+      "hit_rate": 0.431034,
+      "avg_close_odds": 2.18569,
+      "roi_proxy_flat_1u": -0.070345,
+      "max_fail_streak": 10,
+      "max_drawdown_proxy": -13.7,
+      "confidence_flag": "SMALL_SAMPLE",
+      "risk_flags": [
+        "SMALL_SAMPLE_NO_EDGE_CLAIM"
+      ],
+      "peer_support": {
+        "positive_peer_count": 1,
+        "season_count": 1,
+        "league_count": 1
+      },
+      "status": "EXCLUDED",
+      "exclude_reason": "SMALL_SAMPLE"
+    },
+    {
+      "market": "1X2",
+      "league_code": "B1",
+      "season": "2022/23",
+      "close_odds_band": "2_50_3_49",
+      "asian_handicap_line_bucket": "NOT_AH",
+      "over25_price_band": "NOT_FT_OVER25",
+      "home_away_side": "AWAY",
+      "sample_count": 60,
+      "hit_rate": 0.3,
+      "avg_close_odds": 2.9755,
+      "roi_proxy_flat_1u": -0.1175,
+      "max_fail_streak": 7,
+      "max_drawdown_proxy": -15.65,
+      "confidence_flag": "SMALL_SAMPLE",
+      "risk_flags": [
+        "SMALL_SAMPLE_NO_EDGE_CLAIM"
+      ],
+      "peer_support": {
+        "positive_peer_count": 1,
+        "season_count": 1,
+        "league_count": 1
+      },
+      "status": "EXCLUDED",
+      "exclude_reason": "SMALL_SAMPLE"
+    },
+    {
+      "market": "1X2",
+      "league_code": "B1",
+      "season": "2022/23",
+      "close_odds_band": "2_50_3_49",
+      "asian_handicap_line_bucket": "NOT_AH",
+      "over25_price_band": "NOT_FT_OVER25",
+      "home_away_side": "DRAW",
+      "sample_count": 94,
+      "hit_rate": 0.297872,
+      "avg_close_odds": 3.290426,
+      "roi_proxy_flat_1u": -0.017021,
+      "max_fail_streak": 13,
+      "max_drawdown_proxy": -24.1,
+      "confidence_flag": "SMALL_SAMPLE",
+      "risk_flags": [
+        "SMALL_SAMPLE_NO_EDGE_CLAIM"
+      ],
+      "peer_support": {
+        "positive_peer_count": 12,
+        "season_count": 4,
+        "league_count": 5
+      },
+      "status": "EXCLUDED",
+      "exclude_reason": "SMALL_SAMPLE"
+    },
+    {
+      "market": "1X2",
+      "league_code": "B1",
+      "season": "2022/23",
+      "close_odds_band": "2_50_3_49",
+      "asian_handicap_line_bucket": "NOT_AH",
+      "over25_price_band": "NOT_FT_OVER25",
+      "home_away_side": "HOME",
+      "sample_count": 67,
+      "hit_rate": 0.283582,
+      "avg_close_odds": 2.908806,
+      "roi_proxy_flat_1u": -0.16791,
+      "max_fail_streak": 9,
+      "max_drawdown_proxy": -16.15,
+      "confidence_flag": "SMALL_SAMPLE",
+      "risk_flags": [
+        "SMALL_SAMPLE_NO_EDGE_CLAIM"
+      ],
+      "peer_support": {
+        "positive_peer_count": 0,
+        "season_count": 0,
+        "league_count": 0
+      },
+      "status": "EXCLUDED",
+      "exclude_reason": "SMALL_SAMPLE"
+    },
+    {
+      "market": "1X2",
+      "league_code": "B1",
+      "season": "2022/23",
+      "close_odds_band": "3_50_4_99",
+      "asian_handicap_line_bucket": "NOT_AH",
+      "over25_price_band": "NOT_FT_OVER25",
+      "home_away_side": "AWAY",
+      "sample_count": 61,
+      "hit_rate": 0.262295,
+      "avg_close_odds": 4.085574,
+      "roi_proxy_flat_1u": 0.056393,
+      "max_fail_streak": 6,
+      "max_drawdown_proxy": -6.0,
+      "confidence_flag": "SMALL_SAMPLE",
+      "risk_flags": [
+        "SMALL_SAMPLE_NO_EDGE_CLAIM"
+      ],
+      "peer_support": {
+        "positive_peer_count": 0,
+        "season_count": 0,
+        "league_count": 0
+      },
+      "status": "EXCLUDED",
+      "exclude_reason": "SMALL_SAMPLE"
+    },
+    {
+      "market": "1X2",
+      "league_code": "B1",
+      "season": "2022/23",
+      "close_odds_band": "3_50_4_99",
+      "asian_handicap_line_bucket": "NOT_AH",
+      "over25_price_band": "NOT_FT_OVER25",
+      "home_away_side": "HOME",
+      "sample_count": 42,
+      "hit_rate": 0.214286,
+      "avg_close_odds": 4.04619,
+      "roi_proxy_flat_1u": -0.127857,
+      "max_fail_streak": 10,
+      "max_drawdown_proxy": -15.0,
+      "confidence_flag": "SMALL_SAMPLE",
+      "risk_flags": [
+        "SMALL_SAMPLE_NO_EDGE_CLAIM"
+      ],
+      "peer_support": {
+        "positive_peer_count": 0,
+        "season_count": 0,
+        "league_count": 0
+      },
+      "status": "EXCLUDED",
+      "exclude_reason": "SMALL_SAMPLE"
+    },
+    {
+      "market": "1X2",
+      "league_code": "B1",
+      "season": "2022/23",
+      "close_odds_band": "GE_5_00",
+      "asian_handicap_line_bucket": "NOT_AH",
+      "over25_price_band": "NOT_FT_OVER25",
+      "home_away_side": "AWAY",
+      "sample_count": 70,
+      "hit_rate": 0.128571,
+      "avg_close_odds": 7.378571,
+      "roi_proxy_flat_1u": -0.15,
+      "max_fail_streak": 27,
+      "max_drawdown_proxy": -36.5,
+      "confidence_flag": "SMALL_SAMPLE",
+      "risk_flags": [
+        "SMALL_SAMPLE_NO_EDGE_CLAIM"
+      ],
+      "peer_support": {
+        "positive_peer_count": 1,
+        "season_count": 1,
+        "league_count": 1
+      },
+      "status": "EXCLUDED",
+      "exclude_reason": "SMALL_SAMPLE"
+    },
+    {
+      "market": "1X2",
+      "league_code": "B1",
+      "season": "2022/23",
+      "close_odds_band": "GE_5_00",
+      "asian_handicap_line_bucket": "NOT_AH",
+      "over25_price_band": "NOT_FT_OVER25",
+      "home_away_side": "DRAW",
+      "sample_count": 28,
+      "hit_rate": 0.071429,
+      "avg_close_odds": 5.714286,
+      "roi_proxy_flat_1u": -0.625,
+      "max_fail_streak": 21,
+      "max_drawdown_proxy": -21.0,
+      "confidence_flag": "SMALL_SAMPLE",
+      "risk_flags": [
+        "SMALL_SAMPLE_NO_EDGE_CLAIM"
+      ],
+      "peer_support": {
+        "positive_peer_count": 0,
+        "season_count": 0,
+        "league_count": 0
+      },
+      "status": "EXCLUDED",
+      "exclude_reason": "SMALL_SAMPLE"
+    },
+    {
+      "market": "1X2",
+      "league_code": "B1",
+      "season": "2022/23",
+      "close_odds_band": "GE_5_00",
+      "asian_handicap_line_bucket": "NOT_AH",
+      "over25_price_band": "NOT_FT_OVER25",
+      "home_away_side": "HOME",
+      "sample_count": 18,
+      "hit_rate": 0.166667,
+      "avg_close_odds": 6.0,
+      "roi_proxy_flat_1u": -0.041667,
+      "max_fail_streak": 9,
+      "max_drawdown_proxy": -9.0,
+      "confidence_flag": "SMALL_SAMPLE",
+      "risk_flags": [
+        "SMALL_SAMPLE_NO_EDGE_CLAIM"
+      ],
+      "peer_support": {
+        "positive_peer_count": 0,
+        "season_count": 0,
+        "league_count": 0
+      },
+      "status": "EXCLUDED",
+      "exclude_reason": "SMALL_SAMPLE"
+    },
+    {
+      "market": "1X2",
+      "league_code": "B1",
+      "season": "2022/23",
+      "close_odds_band": "LT_1_50",
+      "asian_handicap_line_bucket": "NOT_AH",
+      "over25_price_band": "NOT_FT_OVER25",
+      "home_away_side": "AWAY",
+      "sample_count": 7,
+      "hit_rate": 0.571429,
+      "avg_close_odds": 1.404286,
+      "roi_proxy_flat_1u": -0.21,
+      "max_fail_streak": 1,
+      "max_drawdown_proxy": -1.87,
+      "confidence_flag": "SMALL_SAMPLE",
+      "risk_flags": [
+        "SMALL_SAMPLE_NO_EDGE_CLAIM"
+      ],
+      "peer_support": {
+        "positive_peer_count": 0,
+        "season_count": 0,
+        "league_count": 0
+      },
+      "status": "EXCLUDED",
+      "exclude_reason": "SMALL_SAMPLE"
+    },
+    {
+      "market": "1X2",
+      "league_code": "B1",
+      "season": "2022/23",
+      "close_odds_band": "LT_1_50",
+      "asian_handicap_line_bucket": "NOT_AH",
+      "over25_price_band": "NOT_FT_OVER25",
+      "home_away_side": "HOME",
+      "sample_count": 40,
+      "hit_rate": 0.825,
+      "avg_close_odds": 1.328,
+      "roi_proxy_flat_1u": 0.09,
+      "max_fail_streak": 2,
+      "max_drawdown_proxy": -2.0,
+      "confidence_flag": "SMALL_SAMPLE",
+      "risk_flags": [
+        "SMALL_SAMPLE_NO_EDGE_CLAIM"
+      ],
+      "peer_support": {
+        "positive_peer_count": 0,
+        "season_count": 0,
+        "league_count": 0
+      },
+      "status": "EXCLUDED",
+      "exclude_reason": "SMALL_SAMPLE"
+    },
+    {
+      "market": "1X2",
+      "league_code": "B1",
+      "season": "2023/24",
+      "close_odds_band": "1_50_1_74",
+      "asian_handicap_line_bucket": "NOT_AH",
+      "over25_price_band": "NOT_FT_OVER25",
+      "home_away_side": "AWAY",
+      "sample_count": 27,
+      "hit_rate": 0.555556,
+      "avg_close_odds": 1.624444,
+      "roi_proxy_flat_1u": -0.095926,
+      "max_fail_streak": 2,
+      "max_drawdown_proxy": -5.74,
+      "confidence_flag": "SMALL_SAMPLE",
+      "risk_flags": [
+        "SMALL_SAMPLE_NO_EDGE_CLAIM"
+      ],
+      "peer_support": {
+        "positive_peer_count": 0,
+        "season_count": 0,
+        "league_count": 0
+      },
+      "status": "EXCLUDED",
+      "exclude_reason": "SMALL_SAMPLE"
+    },
+    {
+      "market": "1X2",
+      "league_code": "B1",
+      "season": "2023/24",
+      "close_odds_band": "1_50_1_74",
+      "asian_handicap_line_bucket": "NOT_AH",
+      "over25_price_band": "NOT_FT_OVER25",
+      "home_away_side": "HOME",
+      "sample_count": 49,
+      "hit_rate": 0.693878,
+      "avg_close_odds": 1.604286,
+      "roi_proxy_flat_1u": 0.114286,
+      "max_fail_streak": 2,
+      "max_drawdown_proxy": -2.38,
+      "confidence_flag": "SMALL_SAMPLE",
+      "risk_flags": [
+        "SMALL_SAMPLE_NO_EDGE_CLAIM"
+      ],
+      "peer_support": {
+        "positive_peer_count": 0,
+        "season_count": 0,
+        "league_count": 0
+      },
+      "status": "EXCLUDED",
+      "exclude_reason": "SMALL_SAMPLE"
+    },
+    {
+      "market": "1X2",
+      "league_code": "B1",
+      "season": "2023/24",
+      "close_odds_band": "1_75_1_99",
+      "asian_handicap_line_bucket": "NOT_AH",
+      "over25_price_band": "NOT_FT_OVER25",
+      "home_away_side": "AWAY",
+      "sample_count": 22,
+      "hit_rate": 0.409091,
+      "avg_close_odds": 1.87,
+      "roi_proxy_flat_1u": -0.227727,
+      "max_fail_streak": 6,
+      "max_drawdown_proxy": -9.39,
+      "confidence_flag": "SMALL_SAMPLE",
+      "risk_flags": [
+        "SMALL_SAMPLE_NO_EDGE_CLAIM"
+      ],
+      "peer_support": {
+        "positive_peer_count": 0,
+        "season_count": 0,
+        "league_count": 0
+      },
+      "status": "EXCLUDED",
+      "exclude_reason": "SMALL_SAMPLE"
+    },
+    {
+      "market": "1X2",
+      "league_code": "B1",
+      "season": "2023/24",
+      "close_odds_band": "1_75_1_99",
+      "asian_handicap_line_bucket": "NOT_AH",
+      "over25_price_band": "NOT_FT_OVER25",
+      "home_away_side": "HOME",
+      "sample_count": 30,
+      "hit_rate": 0.6,
+      "avg_close_odds": 1.851333,
+      "roi_proxy_flat_1u": 0.102,
+      "max_fail_streak": 3,
+      "max_drawdown_proxy": -3.55,
+      "confidence_flag": "SMALL_SAMPLE",
+      "risk_flags": [
+        "SMALL_SAMPLE_NO_EDGE_CLAIM"
+      ],
+      "peer_support": {
+        "positive_peer_count": 0,
+        "season_count": 0,
+        "league_count": 0
+      },
+      "status": "EXCLUDED",
+      "exclude_reason": "SMALL_SAMPLE"
+    },
+    {
+      "market": "1X2",
+      "league_code": "B1",
+      "season": "2023/24",
+      "close_odds_band": "2_00_2_49",
+      "asian_handicap_line_bucket": "NOT_AH",
+      "over25_price_band": "NOT_FT_OVER25",
+      "home_away_side": "AWAY",
+      "sample_count": 50,
+      "hit_rate": 0.44,
+      "avg_close_odds": 2.2502,
+      "roi_proxy_flat_1u": -0.0216,
+      "max_fail_streak": 7,
+      "max_drawdown_proxy": -10.19,
+      "confidence_flag": "SMALL_SAMPLE",
+      "risk_flags": [
+        "SMALL_SAMPLE_NO_EDGE_CLAIM"
+      ],
+      "peer_support": {
+        "positive_peer_count": 0,
+        "season_count": 0,
+        "league_count": 0
+      },
+      "status": "EXCLUDED",
+      "exclude_reason": "SMALL_SAMPLE"
+    },
+    {
+      "market": "1X2",
+      "league_code": "B1",
+      "season": "2023/24",
+      "close_odds_band": "2_00_2_49",
+      "asian_handicap_line_bucket": "NOT_AH",
+      "over25_price_band": "NOT_FT_OVER25",
+      "home_away_side": "HOME",
+      "sample_count": 66,
+      "hit_rate": 0.333333,
+      "avg_close_odds": 2.207424,
+      "roi_proxy_flat_1u": -0.250606,
+      "max_fail_streak": 12,
+      "max_drawdown_proxy": -18.64,
+      "confidence_flag": "SMALL_SAMPLE",
+      "risk_flags": [
+        "SMALL_SAMPLE_NO_EDGE_CLAIM"
+      ],
+      "peer_support": {
+        "positive_peer_count": 1,
+        "season_count": 1,
+        "league_count": 1
+      },
+      "status": "EXCLUDED",
+      "exclude_reason": "SMALL_SAMPLE"
+    },
+    {
+      "market": "1X2",
+      "league_code": "B1",
+      "season": "2023/24",
+      "close_odds_band": "2_50_3_49",
+      "asian_handicap_line_bucket": "NOT_AH",
+      "over25_price_band": "NOT_FT_OVER25",
+      "home_away_side": "AWAY",
+      "sample_count": 76,
+      "hit_rate": 0.25,
+      "avg_close_odds": 2.974737,
+      "roi_proxy_flat_1u": -0.287368,
+      "max_fail_streak": 12,
+      "max_drawdown_proxy": -29.32,
+      "confidence_flag": "SMALL_SAMPLE",
+      "risk_flags": [
+        "SMALL_SAMPLE_NO_EDGE_CLAIM"
+      ],
+      "peer_support": {
+        "positive_peer_count": 1,
+        "season_count": 1,
+        "league_count": 1
+      },
+      "status": "EXCLUDED",
+      "exclude_reason": "SMALL_SAMPLE"
+    },
+    {
+      "market": "1X2",
+      "league_code": "B1",
+      "season": "2023/24",
+      "close_odds_band": "2_50_3_49",
+      "asian_handicap_line_bucket": "NOT_AH",
+      "over25_price_band": "NOT_FT_OVER25",
+      "home_away_side": "DRAW",
+      "sample_count": 73,
+      "hit_rate": 0.383562,
+      "avg_close_odds": 3.30589,
+      "roi_proxy_flat_1u": 0.274384,
+      "max_fail_streak": 5,
+      "max_drawdown_proxy": -5.2,
+      "confidence_flag": "SMALL_SAMPLE",
+      "risk_flags": [
+        "SMALL_SAMPLE_NO_EDGE_CLAIM"
+      ],
+      "peer_support": {
+        "positive_peer_count": 12,
+        "season_count": 4,
+        "league_count": 5
+      },
+      "status": "EXCLUDED",
+      "exclude_reason": "SMALL_SAMPLE"
+    },
+    {
+      "market": "1X2",
+      "league_code": "B1",
+      "season": "2023/24",
+      "close_odds_band": "2_50_3_49",
+      "asian_handicap_line_bucket": "NOT_AH",
+      "over25_price_band": "NOT_FT_OVER25",
+      "home_away_side": "HOME",
+      "sample_count": 66,
+      "hit_rate": 0.348485,
+      "avg_close_odds": 2.905758,
+      "roi_proxy_flat_1u": -0.006212,
+      "max_fail_streak": 6,
+      "max_drawdown_proxy": -6.92,
+      "confidence_flag": "SMALL_SAMPLE",
+      "risk_flags": [
+        "SMALL_SAMPLE_NO_EDGE_CLAIM"
+      ],
+      "peer_support": {
+        "positive_peer_count": 0,
+        "season_count": 0,
+        "league_count": 0
+      },
+      "status": "EXCLUDED",
+      "exclude_reason": "SMALL_SAMPLE"
+    },
+    {
+      "market": "1X2",
+      "league_code": "B1",
+      "season": "2023/24",
+      "close_odds_band": "3_50_4_99",
+      "asian_handicap_line_bucket": "NOT_AH",
+      "over25_price_band": "NOT_FT_OVER25",
+      "home_away_side": "AWAY",
+      "sample_count": 55,
+      "hit_rate": 0.181818,
+      "avg_close_odds": 4.085455,
+      "roi_proxy_flat_1u": -0.332727,
+      "max_fail_streak": 9,
+      "max_drawdown_proxy": -18.8,
+      "confidence_flag": "SMALL_SAMPLE",
+      "risk_flags": [
+        "SMALL_SAMPLE_NO_EDGE_CLAIM"
+      ],
+      "peer_support": {
+        "positive_peer_count": 0,
+        "season_count": 0,
+        "league_count": 0
+      },
+      "status": "EXCLUDED",
+      "exclude_reason": "SMALL_SAMPLE"
+    },
+    {
+      "market": "1X2",
+      "league_code": "B1",
+      "season": "2023/24",
+      "close_odds_band": "3_50_4_99",
+      "asian_handicap_line_bucket": "NOT_AH",
+      "over25_price_band": "NOT_FT_OVER25",
+      "home_away_side": "HOME",
+      "sample_count": 36,
+      "hit_rate": 0.25,
+      "avg_close_odds": 4.128056,
+      "roi_proxy_flat_1u": 0.038333,
+      "max_fail_streak": 6,
+      "max_drawdown_proxy": -8.5,
+      "confidence_flag": "SMALL_SAMPLE",
+      "risk_flags": [
+        "SMALL_SAMPLE_NO_EDGE_CLAIM"
+      ],
+      "peer_support": {
+        "positive_peer_count": 0,
+        "season_count": 0,
+        "league_count": 0
+      },
+      "status": "EXCLUDED",
+      "exclude_reason": "SMALL_SAMPLE"
+    },
+    {
+      "market": "1X2",
+      "league_code": "B1",
+      "season": "2023/24",
+      "close_odds_band": "GE_5_00",
+      "asian_handicap_line_bucket": "NOT_AH",
+      "over25_price_band": "NOT_FT_OVER25",
+      "home_away_side": "AWAY",
+      "sample_count": 72,
+      "hit_rate": 0.111111,
+      "avg_close_odds": 7.486111,
+      "roi_proxy_flat_1u": -0.277778,
+      "max_fail_streak": 35,
+      "max_drawdown_proxy": -36.75,
+      "confidence_flag": "SMALL_SAMPLE",
+      "risk_flags": [
+        "SMALL_SAMPLE_NO_EDGE_CLAIM"
+      ],
+      "peer_support": {
+        "positive_peer_count": 1,
+        "season_count": 1,
+        "league_count": 1
+      },
+      "status": "EXCLUDED",
+      "exclude_reason": "SMALL_SAMPLE"
+    },
+    {
+      "market": "1X2",
+      "league_code": "B1",
+      "season": "2023/24",
+      "close_odds_band": "GE_5_00",
+      "asian_handicap_line_bucket": "NOT_AH",
+      "over25_price_band": "NOT_FT_OVER25",
+      "home_away_side": "DRAW",
+      "sample_count": 36,
+      "hit_rate": 0.111111,
+      "avg_close_odds": 5.930556,
+      "roi_proxy_flat_1u": -0.3125,
+      "max_fail_streak": 16,
+      "max_drawdown_proxy": -18.0,
+      "confidence_flag": "SMALL_SAMPLE",
+      "risk_flags": [
+        "SMALL_SAMPLE_NO_EDGE_CLAIM"
+      ],
+      "peer_support": {
+        "positive_peer_count": 0,
+        "season_count": 0,
+        "league_count": 0
+      },
+      "status": "EXCLUDED",
+      "exclude_reason": "SMALL_SAMPLE"
+    },
+    {
+      "market": "1X2",
+      "league_code": "B1",
+      "season": "2023/24",
+      "close_odds_band": "GE_5_00",
+      "asian_handicap_line_bucket": "NOT_AH",
+      "over25_price_band": "NOT_FT_OVER25",
+      "home_away_side": "HOME",
+      "sample_count": 25,
+      "hit_rate": 0.16,
+      "avg_close_odds": 6.34,
+      "roi_proxy_flat_1u": 0.02,
+      "max_fail_streak": 11,
+      "max_drawdown_proxy": -11.5,
+      "confidence_flag": "SMALL_SAMPLE",
+      "risk_flags": [
+        "SMALL_SAMPLE_NO_EDGE_CLAIM"
+      ],
+      "peer_support": {
+        "positive_peer_count": 0,
+        "season_count": 0,
+        "league_count": 0
+      },
+      "status": "EXCLUDED",
+      "exclude_reason": "SMALL_SAMPLE"
+    },
+    {
+      "market": "1X2",
+      "league_code": "B1",
+      "season": "2023/24",
+      "close_odds_band": "LT_1_50",
+      "asian_handicap_line_bucket": "NOT_AH",
+      "over25_price_band": "NOT_FT_OVER25",
+      "home_away_side": "AWAY",
+      "sample_count": 10,
+      "hit_rate": 0.9,
+      "avg_close_odds": 1.357,
+      "roi_proxy_flat_1u": 0.228,
+      "max_fail_streak": 1,
+      "max_drawdown_proxy": -1.0,
+      "confidence_flag": "SMALL_SAMPLE",
+      "risk_flags": [
+        "SMALL_SAMPLE_NO_EDGE_CLAIM"
+      ],
+      "peer_support": {
+        "positive_peer_count": 0,
+        "season_count": 0,
+        "league_count": 0
+      },
+      "status": "EXCLUDED",
+      "exclude_reason": "SMALL_SAMPLE"
+    },
+    {
+      "market": "1X2",
+      "league_code": "B1",
+      "season": "2023/24",
+      "close_odds_band": "LT_1_50",
+      "asian_handicap_line_bucket": "NOT_AH",
+      "over25_price_band": "NOT_FT_OVER25",
+      "home_away_side": "HOME",
+      "sample_count": 40,
+      "hit_rate": 0.725,
+      "avg_close_odds": 1.30675,
+      "roi_proxy_flat_1u": -0.065,
+      "max_fail_streak": 2,
+      "max_drawdown_proxy": -3.66,
+      "confidence_flag": "SMALL_SAMPLE",
+      "risk_flags": [
+        "SMALL_SAMPLE_NO_EDGE_CLAIM"
+      ],
+      "peer_support": {
+        "positive_peer_count": 0,
+        "season_count": 0,
+        "league_count": 0
+      },
+      "status": "EXCLUDED",
+      "exclude_reason": "SMALL_SAMPLE"
+    },
+    {
+      "market": "1X2",
+      "league_code": "B1",
+      "season": "2024/25",
+      "close_odds_band": "1_50_1_74",
+      "asian_handicap_line_bucket": "NOT_AH",
+      "over25_price_band": "NOT_FT_OVER25",
+      "home_away_side": "AWAY",
+      "sample_count": 20,
+      "hit_rate": 0.55,
+      "avg_close_odds": 1.649,
+      "roi_proxy_flat_1u": -0.0805,
+      "max_fail_streak": 3,
+      "max_drawdown_proxy": -4.71,
+      "confidence_flag": "SMALL_SAMPLE",
+      "risk_flags": [
+        "SMALL_SAMPLE_NO_EDGE_CLAIM"
+      ],
+      "peer_support": {
+        "positive_peer_count": 0,
+        "season_count": 0,
+        "league_count": 0
+      },
+      "status": "EXCLUDED",
+      "exclude_reason": "SMALL_SAMPLE"
+    },
+    {
+      "market": "1X2",
+      "league_code": "B1",
+      "season": "2024/25",
+      "close_odds_band": "1_50_1_74",
+      "asian_handicap_line_bucket": "NOT_AH",
+      "over25_price_band": "NOT_FT_OVER25",
+      "home_away_side": "HOME",
+      "sample_count": 46,
+      "hit_rate": 0.673913,
+      "avg_close_odds": 1.630652,
+      "roi_proxy_flat_1u": 0.100652,
+      "max_fail_streak": 4,
+      "max_drawdown_proxy": -4.0,
+      "confidence_flag": "SMALL_SAMPLE",
+      "risk_flags": [
+        "SMALL_SAMPLE_NO_EDGE_CLAIM"
+      ],
+      "peer_support": {
+        "positive_peer_count": 0,
+        "season_count": 0,
+        "league_count": 0
+      },
+      "status": "EXCLUDED",
+      "exclude_reason": "SMALL_SAMPLE"
+    },
+    {
+      "market": "1X2",
+      "league_code": "B1",
+      "season": "2024/25",
+      "close_odds_band": "1_75_1_99",
+      "asian_handicap_line_bucket": "NOT_AH",
+      "over25_price_band": "NOT_FT_OVER25",
+      "home_away_side": "AWAY",
+      "sample_count": 18,
+      "hit_rate": 0.444444,
+      "avg_close_odds": 1.867778,
+      "roi_proxy_flat_1u": -0.166667,
+      "max_fail_streak": 4,
+      "max_drawdown_proxy": -6.55,
+      "confidence_flag": "SMALL_SAMPLE",
+      "risk_flags": [
+        "SMALL_SAMPLE_NO_EDGE_CLAIM"
+      ],
+      "peer_support": {
+        "positive_peer_count": 0,
+        "season_count": 0,
+        "league_count": 0
+      },
+      "status": "EXCLUDED",
+      "exclude_reason": "SMALL_SAMPLE"
+    },
+    {
+      "market": "1X2",
+      "league_code": "B1",
+      "season": "2024/25",
+      "close_odds_band": "1_75_1_99",
+      "asian_handicap_line_bucket": "NOT_AH",
+      "over25_price_band": "NOT_FT_OVER25",
+      "home_away_side": "HOME",
+      "sample_count": 42,
+      "hit_rate": 0.47619,
+      "avg_close_odds": 1.863095,
+      "roi_proxy_flat_1u": -0.115476,
+      "max_fail_streak": 5,
+      "max_drawdown_proxy": -7.55,
+      "confidence_flag": "SMALL_SAMPLE",
+      "risk_flags": [
+        "SMALL_SAMPLE_NO_EDGE_CLAIM"
+      ],
+      "peer_support": {
+        "positive_peer_count": 0,
+        "season_count": 0,
+        "league_count": 0
+      },
+      "status": "EXCLUDED",
+      "exclude_reason": "SMALL_SAMPLE"
+    },
+    {
+      "market": "1X2",
+      "league_code": "B1",
+      "season": "2024/25",
+      "close_odds_band": "2_00_2_49",
+      "asian_handicap_line_bucket": "NOT_AH",
+      "over25_price_band": "NOT_FT_OVER25",
+      "home_away_side": "AWAY",
+      "sample_count": 51,
+      "hit_rate": 0.509804,
+      "avg_close_odds": 2.225882,
+      "roi_proxy_flat_1u": 0.137059,
+      "max_fail_streak": 5,
+      "max_drawdown_proxy": -7.25,
+      "confidence_flag": "SMALL_SAMPLE",
+      "risk_flags": [
+        "SMALL_SAMPLE_NO_EDGE_CLAIM"
+      ],
+      "peer_support": {
+        "positive_peer_count": 0,
+        "season_count": 0,
+        "league_count": 0
+      },
+      "status": "EXCLUDED",
+      "exclude_reason": "SMALL_SAMPLE"
+    },
+    {
+      "market": "1X2",
+      "league_code": "B1",
+      "season": "2024/25",
+      "close_odds_band": "2_00_2_49",
+      "asian_handicap_line_bucket": "NOT_AH",
+      "over25_price_band": "NOT_FT_OVER25",
+      "home_away_side": "HOME",
+      "sample_count": 57,
+      "hit_rate": 0.438596,
+      "avg_close_odds": 2.224211,
+      "roi_proxy_flat_1u": -0.02193,
+      "max_fail_streak": 5,
+      "max_drawdown_proxy": -10.8,
+      "confidence_flag": "SMALL_SAMPLE",
+      "risk_flags": [
+        "SMALL_SAMPLE_NO_EDGE_CLAIM"
+      ],
+      "peer_support": {
+        "positive_peer_count": 1,
+        "season_count": 1,
+        "league_count": 1
+      },
+      "status": "EXCLUDED",
+      "exclude_reason": "SMALL_SAMPLE"
+    },
+    {
+      "market": "1X2",
+      "league_code": "B1",
+      "season": "2024/25",
+      "close_odds_band": "2_50_3_49",
+      "asian_handicap_line_bucket": "NOT_AH",
+      "over25_price_band": "NOT_FT_OVER25",
+      "home_away_side": "AWAY",
+      "sample_count": 79,
+      "hit_rate": 0.189873,
+      "avg_close_odds": 2.895696,
+      "roi_proxy_flat_1u": -0.456709,
+      "max_fail_streak": 18,
+      "max_drawdown_proxy": -38.16,
+      "confidence_flag": "SMALL_SAMPLE",
+      "risk_flags": [
+        "SMALL_SAMPLE_NO_EDGE_CLAIM"
+      ],
+      "peer_support": {
+        "positive_peer_count": 1,
+        "season_count": 1,
+        "league_count": 1
+      },
+      "status": "EXCLUDED",
+      "exclude_reason": "SMALL_SAMPLE"
+    },
+    {
+      "market": "1X2",
+      "league_code": "B1",
+      "season": "2024/25",
+      "close_odds_band": "2_50_3_49",
+      "asian_handicap_line_bucket": "NOT_AH",
+      "over25_price_band": "NOT_FT_OVER25",
+      "home_away_side": "DRAW",
+      "sample_count": 98,
+      "hit_rate": 0.367347,
+      "avg_close_odds": 3.28449,
+      "roi_proxy_flat_1u": 0.20102,
+      "max_fail_streak": 8,
+      "max_drawdown_proxy": -8.0,
+      "confidence_flag": "SMALL_SAMPLE",
+      "risk_flags": [
+        "SMALL_SAMPLE_NO_EDGE_CLAIM"
+      ],
+      "peer_support": {
+        "positive_peer_count": 12,
+        "season_count": 4,
+        "league_count": 5
+      },
+      "status": "EXCLUDED",
+      "exclude_reason": "SMALL_SAMPLE"
+    },
+    {
+      "market": "1X2",
+      "league_code": "B1",
+      "season": "2024/25",
+      "close_odds_band": "2_50_3_49",
+      "asian_handicap_line_bucket": "NOT_AH",
+      "over25_price_band": "NOT_FT_OVER25",
+      "home_away_side": "HOME",
+      "sample_count": 77,
+      "hit_rate": 0.25974,
+      "avg_close_odds": 2.885844,
+      "roi_proxy_flat_1u": -0.248831,
+      "max_fail_streak": 10,
+      "max_drawdown_proxy": -22.75,
+      "confidence_flag": "SMALL_SAMPLE",
+      "risk_flags": [
+        "SMALL_SAMPLE_NO_EDGE_CLAIM"
+      ],
+      "peer_support": {
+        "positive_peer_count": 0,
+        "season_count": 0,
+        "league_count": 0
+      },
+      "status": "EXCLUDED",
+      "exclude_reason": "SMALL_SAMPLE"
+    },
+    {
+      "market": "1X2",
+      "league_code": "B1",
+      "season": "2024/25",
+      "close_odds_band": "3_50_4_99",
+      "asian_handicap_line_bucket": "NOT_AH",
+      "over25_price_band": "NOT_FT_OVER25",
+      "home_away_side": "AWAY",
+      "sample_count": 76,
+      "hit_rate": 0.157895,
+      "avg_close_odds": 4.133816,
+      "roi_proxy_flat_1u": -0.366711,
+      "max_fail_streak": 14,
+      "max_drawdown_proxy": -32.85,
+      "confidence_flag": "SMALL_SAMPLE",
+      "risk_flags": [
+        "SMALL_SAMPLE_NO_EDGE_CLAIM"
+      ],
+      "peer_support": {
+        "positive_peer_count": 0,
+        "season_count": 0,
+        "league_count": 0
+      },
+      "status": "EXCLUDED",
+      "exclude_reason": "SMALL_SAMPLE"
+    },
+    {
+      "market": "1X2",
+      "league_code": "B1",
+      "season": "2024/25",
+      "close_odds_band": "3_50_4_99",
+      "asian_handicap_line_bucket": "NOT_AH",
+      "over25_price_band": "NOT_FT_OVER25",
+      "home_away_side": "HOME",
+      "sample_count": 30,
+      "hit_rate": 0.2,
+      "avg_close_odds": 4.044333,
+      "roi_proxy_flat_1u": -0.173333,
+      "max_fail_streak": 7,
+      "max_drawdown_proxy": -10.15,
+      "confidence_flag": "SMALL_SAMPLE",
+      "risk_flags": [
+        "SMALL_SAMPLE_NO_EDGE_CLAIM"
+      ],
+      "peer_support": {
+        "positive_peer_count": 0,
+        "season_count": 0,
+        "league_count": 0
+      },
+      "status": "EXCLUDED",
+      "exclude_reason": "SMALL_SAMPLE"
+    },
+    {
+      "market": "1X2",
+      "league_code": "B1",
+      "season": "2024/25",
+      "close_odds_band": "GE_5_00",
+      "asian_handicap_line_bucket": "NOT_AH",
+      "over25_price_band": "NOT_FT_OVER25",
+      "home_away_side": "AWAY",
+      "sample_count": 62,
+      "hit_rate": 0.145161,
+      "avg_close_odds": 7.096774,
+      "roi_proxy_flat_1u": -0.125,
+      "max_fail_streak": 12,
+      "max_drawdown_proxy": -18.5,
+      "confidence_flag": "SMALL_SAMPLE",
+      "risk_flags": [
+        "SMALL_SAMPLE_NO_EDGE_CLAIM"
+      ],
+      "peer_support": {
+        "positive_peer_count": 1,
+        "season_count": 1,
+        "league_count": 1
+      },
+      "status": "EXCLUDED",
+      "exclude_reason": "SMALL_SAMPLE"
+    },
+    {
+      "market": "1X2",
+      "league_code": "B1",
+      "season": "2024/25",
+      "close_odds_band": "GE_5_00",
+      "asian_handicap_line_bucket": "NOT_AH",
+      "over25_price_band": "NOT_FT_OVER25",
+      "home_away_side": "DRAW",
+      "sample_count": 22,
+      "hit_rate": 0.181818,
+      "avg_close_odds": 6.022727,
+      "roi_proxy_flat_1u": 0.193182,
+      "max_fail_streak": 7,
+      "max_drawdown_proxy": -8.0,
+      "confidence_flag": "SMALL_SAMPLE",
+      "risk_flags": [
+        "SMALL_SAMPLE_NO_EDGE_CLAIM"
+      ],
+      "peer_support": {
+        "positive_peer_count": 0,
+        "season_count": 0,
+        "league_count": 0
+      },
+      "status": "EXCLUDED",
+      "exclude_reason": "SMALL_SAMPLE"
+    },
+    {
+      "market": "1X2",
+      "league_code": "B1",
+      "season": "2024/25",
+      "close_odds_band": "GE_5_00",
+      "asian_handicap_line_bucket": "NOT_AH",
+      "over25_price_band": "NOT_FT_OVER25",
+      "home_away_side": "HOME",
+      "sample_count": 17,
+      "hit_rate": 0.176471,
+      "avg_close_odds": 5.529412,
+      "roi_proxy_flat_1u": -0.073529,
+      "max_fail_streak": 9,
+      "max_drawdown_proxy": -9.0,
+      "confidence_flag": "SMALL_SAMPLE",
+      "risk_flags": [
+        "SMALL_SAMPLE_NO_EDGE_CLAIM"
+      ],
+      "peer_support": {
+        "positive_peer_count": 0,
+        "season_count": 0,
+        "league_count": 0
+      },
+      "status": "EXCLUDED",
+      "exclude_reason": "SMALL_SAMPLE"
+    },
+    {
+      "market": "1X2",
+      "league_code": "B1",
+      "season": "2024/25",
+      "close_odds_band": "LT_1_50",
+      "asian_handicap_line_bucket": "NOT_AH",
+      "over25_price_band": "NOT_FT_OVER25",
+      "home_away_side": "AWAY",
+      "sample_count": 6,
+      "hit_rate": 0.666667,
+      "avg_close_odds": 1.413333,
+      "roi_proxy_flat_1u": -0.045,
+      "max_fail_streak": 2,
+      "max_drawdown_proxy": -2.0,
+      "confidence_flag": "SMALL_SAMPLE",
+      "risk_flags": [
+        "SMALL_SAMPLE_NO_EDGE_CLAIM"
+      ],
+      "peer_support": {
+        "positive_peer_count": 0,
+        "season_count": 0,
+        "league_count": 0
+      },
+      "status": "EXCLUDED",
+      "exclude_reason": "SMALL_SAMPLE"
+    },
+    {
+      "market": "1X2",
+      "league_code": "B1",
+      "season": "2024/25",
+      "close_odds_band": "LT_1_50",
+      "asian_handicap_line_bucket": "NOT_AH",
+      "over25_price_band": "NOT_FT_OVER25",
+      "home_away_side": "HOME",
+      "sample_count": 43,
+      "hit_rate": 0.744186,
+      "avg_close_odds": 1.35907,
+      "roi_proxy_flat_1u": 0.008372,
+      "max_fail_streak": 2,
+      "max_drawdown_proxy": -4.54,
+      "confidence_flag": "SMALL_SAMPLE",
+      "risk_flags": [
+        "SMALL_SAMPLE_NO_EDGE_CLAIM"
+      ],
+      "peer_support": {
+        "positive_peer_count": 0,
+        "season_count": 0,
+        "league_count": 0
+      },
+      "status": "EXCLUDED",
+      "exclude_reason": "SMALL_SAMPLE"
+    },
+    {
+      "market": "1X2",
+      "league_code": "D1",
+      "season": "2020/21",
+      "close_odds_band": "1_50_1_74",
+      "asian_handicap_line_bucket": "NOT_AH",
+      "over25_price_band": "NOT_FT_OVER25",
+      "home_away_side": "AWAY",
+      "sample_count": 21,
+      "hit_rate": 0.666667,
+      "avg_close_odds": 1.595238,
+      "roi_proxy_flat_1u": 0.058095,
+      "max_fail_streak": 2,
+      "max_drawdown_proxy": -3.6,
+      "confidence_flag": "SMALL_SAMPLE",
+      "risk_flags": [
+        "SMALL_SAMPLE_NO_EDGE_CLAIM"
+      ],
+      "peer_support": {
+        "positive_peer_count": 0,
+        "season_count": 0,
+        "league_count": 0
+      },
+      "status": "EXCLUDED",
+      "exclude_reason": "SMALL_SAMPLE"
+    },
+    {
+      "market": "1X2",
+      "league_code": "D1",
+      "season": "2020/21",
+      "close_odds_band": "1_50_1_74",
+      "asian_handicap_line_bucket": "NOT_AH",
+      "over25_price_band": "NOT_FT_OVER25",
+      "home_away_side": "HOME",
+      "sample_count": 39,
+      "hit_rate": 0.666667,
+      "avg_close_odds": 1.605128,
+      "roi_proxy_flat_1u": 0.060256,
+      "max_fail_streak": 2,
+      "max_drawdown_proxy": -3.37,
+      "confidence_flag": "SMALL_SAMPLE",
+      "risk_flags": [
+        "SMALL_SAMPLE_NO_EDGE_CLAIM"
+      ],
+      "peer_support": {
+        "positive_peer_count": 0,
+        "season_count": 0,
+        "league_count": 0
+      },
+      "status": "EXCLUDED",
+      "exclude_reason": "SMALL_SAMPLE"
+    },
+    {
+      "market": "1X2",
+      "league_code": "D1",
+      "season": "2020/21",
+      "close_odds_band": "1_75_1_99",
+      "asian_handicap_line_bucket": "NOT_AH",
+      "over25_price_band": "NOT_FT_OVER25",
+      "home_away_side": "AWAY",
+      "sample_count": 24,
+      "hit_rate": 0.583333,
+      "avg_close_odds": 1.832917,
+      "roi_proxy_flat_1u": 0.062917,
+      "max_fail_streak": 2,
+      "max_drawdown_proxy": -3.8,
+      "confidence_flag": "SMALL_SAMPLE",
+      "risk_flags": [
+        "SMALL_SAMPLE_NO_EDGE_CLAIM"
+      ],
+      "peer_support": {
+        "positive_peer_count": 0,
+        "season_count": 0,
+        "league_count": 0
+      },
+      "status": "EXCLUDED",
+      "exclude_reason": "SMALL_SAMPLE"
+    },
+    {
+      "market": "1X2",
+      "league_code": "D1",
+      "season": "2020/21",
+      "close_odds_band": "1_75_1_99",
+      "asian_handicap_line_bucket": "NOT_AH",
+      "over25_price_band": "NOT_FT_OVER25",
+      "home_away_side": "HOME",
+      "sample_count": 32,
+      "hit_rate": 0.40625,
+      "avg_close_odds": 1.8575,
+      "roi_proxy_flat_1u": -0.249062,
+      "max_fail_streak": 5,
+      "max_drawdown_proxy": -7.97,
+      "confidence_flag": "SMALL_SAMPLE",
+      "risk_flags": [
+        "SMALL_SAMPLE_NO_EDGE_CLAIM"
+      ],
+      "peer_support": {
+        "positive_peer_count": 0,
+        "season_count": 0,
+        "league_count": 0
+      },
+      "status": "EXCLUDED",
+      "exclude_reason": "SMALL_SAMPLE"
+    },
+    {
+      "market": "1X2",
+      "league_code": "D1",
+      "season": "2020/21",
+      "close_odds_band": "2_00_2_49",
+      "asian_handicap_line_bucket": "NOT_AH",
+      "over25_price_band": "NOT_FT_OVER25",
+      "home_away_side": "AWAY",
+      "sample_count": 49,
+      "hit_rate": 0.285714,
+      "avg_close_odds": 2.224286,
+      "roi_proxy_flat_1u": -0.364286,
+      "max_fail_streak": 10,
+      "max_drawdown_proxy": -20.65,
+      "confidence_flag": "SMALL_SAMPLE",
+      "risk_flags": [
+        "SMALL_SAMPLE_NO_EDGE_CLAIM"
+      ],
+      "peer_support": {
+        "positive_peer_count": 0,
+        "season_count": 0,
+        "league_count": 0
+      },
+      "status": "EXCLUDED",
+      "exclude_reason": "SMALL_SAMPLE"
+    },
+    {
+      "market": "1X2",
+      "league_code": "D1",
+      "season": "2020/21",
+      "close_odds_band": "2_00_2_49",
+      "asian_handicap_line_bucket": "NOT_AH",
+      "over25_price_band": "NOT_FT_OVER25",
+      "home_away_side": "HOME",
+      "sample_count": 58,
+      "hit_rate": 0.396552,
+      "avg_close_odds": 2.223276,
+      "roi_proxy_flat_1u": -0.133276,
+      "max_fail_streak": 8,
+      "max_drawdown_proxy": -17.48,
+      "confidence_flag": "SMALL_SAMPLE",
+      "risk_flags": [
+        "SMALL_SAMPLE_NO_EDGE_CLAIM"
+      ],
+      "peer_support": {
+        "positive_peer_count": 1,
+        "season_count": 1,
+        "league_count": 1
+      },
+      "status": "EXCLUDED",
+      "exclude_reason": "SMALL_SAMPLE"
+    },
+    {
+      "market": "1X2",
+      "league_code": "D1",
+      "season": "2020/21",
+      "close_odds_band": "2_50_3_49",
+      "asian_handicap_line_bucket": "NOT_AH",
+      "over25_price_band": "NOT_FT_OVER25",
+      "home_away_side": "AWAY",
+      "sample_count": 61,
+      "hit_rate": 0.344262,
+      "avg_close_odds": 2.898033,
+      "roi_proxy_flat_1u": 0.005738,
+      "max_fail_streak": 11,
+      "max_drawdown_proxy": -17.05,
+      "confidence_flag": "SMALL_SAMPLE",
+      "risk_flags": [
+        "SMALL_SAMPLE_NO_EDGE_CLAIM"
+      ],
+      "peer_support": {
+        "positive_peer_count": 1,
+        "season_count": 1,
+        "league_count": 1
+      },
+      "status": "EXCLUDED",
+      "exclude_reason": "SMALL_SAMPLE"
+    },
+    {
+      "market": "1X2",
+      "league_code": "D1",
+      "season": "2020/21",
+      "close_odds_band": "2_50_3_49",
+      "asian_handicap_line_bucket": "NOT_AH",
+      "over25_price_band": "NOT_FT_OVER25",
+      "home_away_side": "DRAW",
+      "sample_count": 48,
+      "hit_rate": 0.333333,
+      "avg_close_odds": 3.309375,
+      "roi_proxy_flat_1u": 0.104167,
+      "max_fail_streak": 7,
+      "max_drawdown_proxy": -7.45,
+      "confidence_flag": "SMALL_SAMPLE",
+      "risk_flags": [
+        "SMALL_SAMPLE_NO_EDGE_CLAIM"
+      ],
+      "peer_support": {
+        "positive_peer_count": 12,
+        "season_count": 4,
+        "league_count": 5
+      },
+      "status": "EXCLUDED",
+      "exclude_reason": "SMALL_SAMPLE"
+    },
+    {
+      "market": "1X2",
+      "league_code": "D1",
+      "season": "2020/21",
+      "close_odds_band": "2_50_3_49",
+      "asian_handicap_line_bucket": "NOT_AH",
+      "over25_price_band": "NOT_FT_OVER25",
+      "home_away_side": "HOME",
+      "sample_count": 61,
+      "hit_rate": 0.295082,
+      "avg_close_odds": 2.919016,
+      "roi_proxy_flat_1u": -0.146066,
+      "max_fail_streak": 6,
+      "max_drawdown_proxy": -13.2,
+      "confidence_flag": "SMALL_SAMPLE",
+      "risk_flags": [
+        "SMALL_SAMPLE_NO_EDGE_CLAIM"
+      ],
+      "peer_support": {
+        "positive_peer_count": 0,
+        "season_count": 0,
+        "league_count": 0
+      },
+      "status": "EXCLUDED",
+      "exclude_reason": "SMALL_SAMPLE"
+    },
+    {
+      "market": "1X2",
+      "league_code": "D1",
+      "season": "2020/21",
+      "close_odds_band": "3_50_4_99",
+      "asian_handicap_line_bucket": "NOT_AH",
+      "over25_price_band": "NOT_FT_OVER25",
+      "home_away_side": "AWAY",
+      "sample_count": 57,
+      "hit_rate": 0.210526,
+      "avg_close_odds": 3.988246,
+      "roi_proxy_flat_1u": -0.170526,
+      "max_fail_streak": 9,
+      "max_drawdown_proxy": -12.72,
+      "confidence_flag": "SMALL_SAMPLE",
+      "risk_flags": [
+        "SMALL_SAMPLE_NO_EDGE_CLAIM"
+      ],
+      "peer_support": {
+        "positive_peer_count": 0,
+        "season_count": 0,
+        "league_count": 0
+      },
+      "status": "EXCLUDED",
+      "exclude_reason": "SMALL_SAMPLE"
+    },
+    {
+      "market": "1X2",
+      "league_code": "D1",
+      "season": "2020/21",
+      "close_odds_band": "3_50_4_99",
+      "asian_handicap_line_bucket": "NOT_AH",
+      "over25_price_band": "NOT_FT_OVER25",
+      "home_away_side": "HOME",
+      "sample_count": 37,
+      "hit_rate": 0.297297,
+      "avg_close_odds": 4.025405,
+      "roi_proxy_flat_1u": 0.231892,
+      "max_fail_streak": 9,
+      "max_drawdown_proxy": -9.0,
+      "confidence_flag": "SMALL_SAMPLE",
+      "risk_flags": [
+        "SMALL_SAMPLE_NO_EDGE_CLAIM"
+      ],
+      "peer_support": {
+        "positive_peer_count": 0,
+        "season_count": 0,
+        "league_count": 0
+      },
+      "status": "EXCLUDED",
+      "exclude_reason": "SMALL_SAMPLE"
+    },
+    {
+      "market": "1X2",
+      "league_code": "D1",
+      "season": "2020/21",
+      "close_odds_band": "GE_5_00",
+      "asian_handicap_line_bucket": "NOT_AH",
+      "over25_price_band": "NOT_FT_OVER25",
+      "home_away_side": "AWAY",
+      "sample_count": 70,
+      "hit_rate": 0.071429,
+      "avg_close_odds": 8.653571,
+      "roi_proxy_flat_1u": -0.478571,
+      "max_fail_streak": 16,
+      "max_drawdown_proxy": -35.0,
+      "confidence_flag": "SMALL_SAMPLE",
+      "risk_flags": [
+        "SMALL_SAMPLE_NO_EDGE_CLAIM"
+      ],
+      "peer_support": {
+        "positive_peer_count": 1,
+        "season_count": 1,
+        "league_count": 1
+      },
+      "status": "EXCLUDED",
+      "exclude_reason": "SMALL_SAMPLE"
+    },
+    {
+      "market": "1X2",
+      "league_code": "D1",
+      "season": "2020/21",
+      "close_odds_band": "GE_5_00",
+      "asian_handicap_line_bucket": "NOT_AH",
+      "over25_price_band": "NOT_FT_OVER25",
+      "home_away_side": "DRAW",
+      "sample_count": 51,
+      "hit_rate": 0.137255,
+      "avg_close_odds": 6.642157,
+      "roi_proxy_flat_1u": -0.04902,
+      "max_fail_streak": 11,
+      "max_drawdown_proxy": -11.0,
+      "confidence_flag": "SMALL_SAMPLE",
+      "risk_flags": [
+        "SMALL_SAMPLE_NO_EDGE_CLAIM"
+      ],
+      "peer_support": {
+        "positive_peer_count": 0,
+        "season_count": 0,
+        "league_count": 0
+      },
+      "status": "EXCLUDED",
+      "exclude_reason": "SMALL_SAMPLE"
+    },
+    {
+      "market": "1X2",
+      "league_code": "D1",
+      "season": "2020/21",
+      "close_odds_band": "GE_5_00",
+      "asian_handicap_line_bucket": "NOT_AH",
+      "over25_price_band": "NOT_FT_OVER25",
+      "home_away_side": "HOME",
+      "sample_count": 37,
+      "hit_rate": 0.189189,
+      "avg_close_odds": 8.087838,
+      "roi_proxy_flat_1u": 0.554054,
+      "max_fail_streak": 13,
+      "max_drawdown_proxy": -16.5,
+      "confidence_flag": "SMALL_SAMPLE",
+      "risk_flags": [
+        "SMALL_SAMPLE_NO_EDGE_CLAIM"
+      ],
+      "peer_support": {
+        "positive_peer_count": 0,
+        "season_count": 0,
+        "league_count": 0
+      },
+      "status": "EXCLUDED",
+      "exclude_reason": "SMALL_SAMPLE"
+    },
+    {
+      "market": "1X2",
+      "league_code": "D1",
+      "season": "2020/21",
+      "close_odds_band": "LT_1_50",
+      "asian_handicap_line_bucket": "NOT_AH",
+      "over25_price_band": "NOT_FT_OVER25",
+      "home_away_side": "AWAY",
+      "sample_count": 24,
+      "hit_rate": 0.666667,
+      "avg_close_odds": 1.299583,
+      "roi_proxy_flat_1u": -0.136667,
+      "max_fail_streak": 3,
+      "max_drawdown_proxy": -3.68,
+      "confidence_flag": "SMALL_SAMPLE",
+      "risk_flags": [
+        "SMALL_SAMPLE_NO_EDGE_CLAIM"
+      ],
+      "peer_support": {
+        "positive_peer_count": 0,
+        "season_count": 0,
+        "league_count": 0
+      },
+      "status": "EXCLUDED",
+      "exclude_reason": "SMALL_SAMPLE"
+    },
+    {
+      "market": "1X2",
+      "league_code": "D1",
+      "season": "2020/21",
+      "close_odds_band": "LT_1_50",
+      "asian_handicap_line_bucket": "NOT_AH",
+      "over25_price_band": "NOT_FT_OVER25",
+      "home_away_side": "HOME",
+      "sample_count": 42,
+      "hit_rate": 0.738095,
+      "avg_close_odds": 1.283571,
+      "roi_proxy_flat_1u": -0.06119,
+      "max_fail_streak": 3,
+      "max_drawdown_proxy": -6.57,
+      "confidence_flag": "SMALL_SAMPLE",
+      "risk_flags": [
+        "SMALL_SAMPLE_NO_EDGE_CLAIM"
+      ],
+      "peer_support": {
+        "positive_peer_count": 0,
+        "season_count": 0,
+        "league_count": 0
+      },
+      "status": "EXCLUDED",
+      "exclude_reason": "SMALL_SAMPLE"
+    },
+    {
+      "market": "1X2",
+      "league_code": "D1",
+      "season": "2021/22",
+      "close_odds_band": "1_50_1_74",
+      "asian_handicap_line_bucket": "NOT_AH",
+      "over25_price_band": "NOT_FT_OVER25",
+      "home_away_side": "AWAY",
+      "sample_count": 19,
+      "hit_rate": 0.631579,
+      "avg_close_odds": 1.621579,
+      "roi_proxy_flat_1u": 0.007895,
+      "max_fail_streak": 2,
+      "max_drawdown_proxy": -2.0,
+      "confidence_flag": "SMALL_SAMPLE",
+      "risk_flags": [
+        "SMALL_SAMPLE_NO_EDGE_CLAIM"
+      ],
+      "peer_support": {
+        "positive_peer_count": 0,
+        "season_count": 0,
+        "league_count": 0
+      },
+      "status": "EXCLUDED",
+      "exclude_reason": "SMALL_SAMPLE"
+    },
+    {
+      "market": "1X2",
+      "league_code": "D1",
+      "season": "2021/22",
+      "close_odds_band": "1_50_1_74",
+      "asian_handicap_line_bucket": "NOT_AH",
+      "over25_price_band": "NOT_FT_OVER25",
+      "home_away_side": "HOME",
+      "sample_count": 34,
+      "hit_rate": 0.735294,
+      "avg_close_odds": 1.602647,
+      "roi_proxy_flat_1u": 0.172647,
+      "max_fail_streak": 2,
+      "max_drawdown_proxy": -2.0,
+      "confidence_flag": "SMALL_SAMPLE",
+      "risk_flags": [
+        "SMALL_SAMPLE_NO_EDGE_CLAIM"
+      ],
+      "peer_support": {
+        "positive_peer_count": 0,
+        "season_count": 0,
+        "league_count": 0
+      },
+      "status": "EXCLUDED",
+      "exclude_reason": "SMALL_SAMPLE"
+    },
+    {
+      "market": "1X2",
+      "league_code": "D1",
+      "season": "2021/22",
+      "close_odds_band": "1_75_1_99",
+      "asian_handicap_line_bucket": "NOT_AH",
+      "over25_price_band": "NOT_FT_OVER25",
+      "home_away_side": "AWAY",
+      "sample_count": 14,
+      "hit_rate": 0.285714,
+      "avg_close_odds": 1.875,
+      "roi_proxy_flat_1u": -0.467857,
+      "max_fail_streak": 5,
+      "max_drawdown_proxy": -6.55,
+      "confidence_flag": "SMALL_SAMPLE",
+      "risk_flags": [
+        "SMALL_SAMPLE_NO_EDGE_CLAIM"
+      ],
+      "peer_support": {
+        "positive_peer_count": 0,
+        "season_count": 0,
+        "league_count": 0
+      },
+      "status": "EXCLUDED",
+      "exclude_reason": "SMALL_SAMPLE"
+    },
+    {
+      "market": "1X2",
+      "league_code": "D1",
+      "season": "2021/22",
+      "close_odds_band": "1_75_1_99",
+      "asian_handicap_line_bucket": "NOT_AH",
+      "over25_price_band": "NOT_FT_OVER25",
+      "home_away_side": "HOME",
+      "sample_count": 38,
+      "hit_rate": 0.342105,
+      "avg_close_odds": 1.868684,
+      "roi_proxy_flat_1u": -0.368421,
+      "max_fail_streak": 6,
+      "max_drawdown_proxy": -14.75,
+      "confidence_flag": "SMALL_SAMPLE",
+      "risk_flags": [
+        "SMALL_SAMPLE_NO_EDGE_CLAIM"
+      ],
+      "peer_support": {
+        "positive_peer_count": 0,
+        "season_count": 0,
+        "league_count": 0
+      },
+      "status": "EXCLUDED",
+      "exclude_reason": "SMALL_SAMPLE"
+    },
+    {
+      "market": "1X2",
+      "league_code": "D1",
+      "season": "2021/22",
+      "close_odds_band": "2_00_2_49",
+      "asian_handicap_line_bucket": "NOT_AH",
+      "over25_price_band": "NOT_FT_OVER25",
+      "home_away_side": "AWAY",
+      "sample_count": 54,
+      "hit_rate": 0.407407,
+      "avg_close_odds": 2.194815,
+      "roi_proxy_flat_1u": -0.098148,
+      "max_fail_streak": 6,
+      "max_drawdown_proxy": -12.16,
+      "confidence_flag": "SMALL_SAMPLE",
+      "risk_flags": [
+        "SMALL_SAMPLE_NO_EDGE_CLAIM"
+      ],
+      "peer_support": {
+        "positive_peer_count": 0,
+        "season_count": 0,
+        "league_count": 0
+      },
+      "status": "EXCLUDED",
+      "exclude_reason": "SMALL_SAMPLE"
+    },
+    {
+      "market": "1X2",
+      "league_code": "D1",
+      "season": "2021/22",
+      "close_odds_band": "2_00_2_49",
+      "asian_handicap_line_bucket": "NOT_AH",
+      "over25_price_band": "NOT_FT_OVER25",
+      "home_away_side": "HOME",
+      "sample_count": 51,
+      "hit_rate": 0.333333,
+      "avg_close_odds": 2.188824,
+      "roi_proxy_flat_1u": -0.26,
+      "max_fail_streak": 8,
+      "max_drawdown_proxy": -20.23,
+      "confidence_flag": "SMALL_SAMPLE",
+      "risk_flags": [
+        "SMALL_SAMPLE_NO_EDGE_CLAIM"
+      ],
+      "peer_support": {
+        "positive_peer_count": 1,
+        "season_count": 1,
+        "league_count": 1
+      },
+      "status": "EXCLUDED",
+      "exclude_reason": "SMALL_SAMPLE"
+    },
+    {
+      "market": "1X2",
+      "league_code": "D1",
+      "season": "2021/22",
+      "close_odds_band": "2_50_3_49",
+      "asian_handicap_line_bucket": "NOT_AH",
+      "over25_price_band": "NOT_FT_OVER25",
+      "home_away_side": "AWAY",
+      "sample_count": 60,
+      "hit_rate": 0.316667,
+      "avg_close_odds": 2.951833,
+      "roi_proxy_flat_1u": -0.032667,
+      "max_fail_streak": 8,
+      "max_drawdown_proxy": -8.43,
+      "confidence_flag": "SMALL_SAMPLE",
+      "risk_flags": [
+        "SMALL_SAMPLE_NO_EDGE_CLAIM"
+      ],
+      "peer_support": {
+        "positive_peer_count": 1,
+        "season_count": 1,
+        "league_count": 1
+      },
+      "status": "EXCLUDED",
+      "exclude_reason": "SMALL_SAMPLE"
+    },
+    {
+      "market": "1X2",
+      "league_code": "D1",
+      "season": "2021/22",
+      "close_odds_band": "2_50_3_49",
+      "asian_handicap_line_bucket": "NOT_AH",
+      "over25_price_band": "NOT_FT_OVER25",
+      "home_away_side": "DRAW",
+      "sample_count": 58,
+      "hit_rate": 0.293103,
+      "avg_close_odds": 3.332759,
+      "roi_proxy_flat_1u": -0.017241,
+      "max_fail_streak": 11,
+      "max_drawdown_proxy": -11.75,
+      "confidence_flag": "SMALL_SAMPLE",
+      "risk_flags": [
+        "SMALL_SAMPLE_NO_EDGE_CLAIM"
+      ],
+      "peer_support": {
+        "positive_peer_count": 12,
+        "season_count": 4,
+        "league_count": 5
+      },
+      "status": "EXCLUDED",
+      "exclude_reason": "SMALL_SAMPLE"
+    },
+    {
+      "market": "1X2",
+      "league_code": "D1",
+      "season": "2021/22",
+      "close_odds_band": "2_50_3_49",
+      "asian_handicap_line_bucket": "NOT_AH",
+      "over25_price_band": "NOT_FT_OVER25",
+      "home_away_side": "HOME",
+      "sample_count": 66,
+      "hit_rate": 0.424242,
+      "avg_close_odds": 2.942273,
+      "roi_proxy_flat_1u": 0.208485,
+      "max_fail_streak": 5,
+      "max_drawdown_proxy": -5.0,
+      "confidence_flag": "SMALL_SAMPLE",
+      "risk_flags": [
+        "SMALL_SAMPLE_NO_EDGE_CLAIM"
+      ],
+      "peer_support": {
+        "positive_peer_count": 0,
+        "season_count": 0,
+        "league_count": 0
+      },
+      "status": "EXCLUDED",
+      "exclude_reason": "SMALL_SAMPLE"
+    },
+    {
+      "market": "1X2",
+      "league_code": "D1",
+      "season": "2021/22",
+      "close_odds_band": "3_50_4_99",
+      "asian_handicap_line_bucket": "NOT_AH",
+      "over25_price_band": "NOT_FT_OVER25",
+      "home_away_side": "AWAY",
+      "sample_count": 59,
+      "hit_rate": 0.288136,
+      "avg_close_odds": 4.046102,
+      "roi_proxy_flat_1u": 0.173898,
+      "max_fail_streak": 8,
+      "max_drawdown_proxy": -8.0,
+      "confidence_flag": "SMALL_SAMPLE",
+      "risk_flags": [
+        "SMALL_SAMPLE_NO_EDGE_CLAIM"
+      ],
+      "peer_support": {
+        "positive_peer_count": 0,
+        "season_count": 0,
+        "league_count": 0
+      },
+      "status": "EXCLUDED",
+      "exclude_reason": "SMALL_SAMPLE"
+    },
+    {
+      "market": "1X2",
+      "league_code": "D1",
+      "season": "2021/22",
+      "close_odds_band": "3_50_4_99",
+      "asian_handicap_line_bucket": "NOT_AH",
+      "over25_price_band": "NOT_FT_OVER25",
+      "home_away_side": "HOME",
+      "sample_count": 34,
+      "hit_rate": 0.294118,
+      "avg_close_odds": 3.987353,
+      "roi_proxy_flat_1u": 0.199412,
+      "max_fail_streak": 8,
+      "max_drawdown_proxy": -8.5,
+      "confidence_flag": "SMALL_SAMPLE",
+      "risk_flags": [
+        "SMALL_SAMPLE_NO_EDGE_CLAIM"
+      ],
+      "peer_support": {
+        "positive_peer_count": 0,
+        "season_count": 0,
+        "league_count": 0
+      },
+      "status": "EXCLUDED",
+      "exclude_reason": "SMALL_SAMPLE"
+    },
+    {
+      "market": "1X2",
+      "league_code": "D1",
+      "season": "2021/22",
+      "close_odds_band": "GE_5_00",
+      "asian_handicap_line_bucket": "NOT_AH",
+      "over25_price_band": "NOT_FT_OVER25",
+      "home_away_side": "AWAY",
+      "sample_count": 83,
+      "hit_rate": 0.084337,
+      "avg_close_odds": 9.334337,
+      "roi_proxy_flat_1u": -0.186747,
+      "max_fail_streak": 26,
+      "max_drawdown_proxy": -28.5,
+      "confidence_flag": "SMALL_SAMPLE",
+      "risk_flags": [
+        "SMALL_SAMPLE_NO_EDGE_CLAIM"
+      ],
+      "peer_support": {
+        "positive_peer_count": 1,
+        "season_count": 1,
+        "league_count": 1
+      },
+      "status": "EXCLUDED",
+      "exclude_reason": "SMALL_SAMPLE"
+    },
+    {
+      "market": "1X2",
+      "league_code": "D1",
+      "season": "2021/22",
+      "close_odds_band": "GE_5_00",
+      "asian_handicap_line_bucket": "NOT_AH",
+      "over25_price_band": "NOT_FT_OVER25",
+      "home_away_side": "DRAW",
+      "sample_count": 60,
+      "hit_rate": 0.133333,
+      "avg_close_odds": 7.045833,
+      "roi_proxy_flat_1u": -0.183333,
+      "max_fail_streak": 26,
+      "max_drawdown_proxy": -33.75,
+      "confidence_flag": "SMALL_SAMPLE",
+      "risk_flags": [
+        "SMALL_SAMPLE_NO_EDGE_CLAIM"
+      ],
+      "peer_support": {
+        "positive_peer_count": 0,
+        "season_count": 0,
+        "league_count": 0
+      },
+      "status": "EXCLUDED",
+      "exclude_reason": "SMALL_SAMPLE"
+    },
+    {
+      "market": "1X2",
+      "league_code": "D1",
+      "season": "2021/22",
+      "close_odds_band": "GE_5_00",
+      "asian_handicap_line_bucket": "NOT_AH",
+      "over25_price_band": "NOT_FT_OVER25",
+      "home_away_side": "HOME",
+      "sample_count": 25,
+      "hit_rate": 0.16,
+      "avg_close_odds": 8.62,
+      "roi_proxy_flat_1u": 0.58,
+      "max_fail_streak": 10,
+      "max_drawdown_proxy": -10.0,
+      "confidence_flag": "SMALL_SAMPLE",
+      "risk_flags": [
+        "SMALL_SAMPLE_NO_EDGE_CLAIM"
+      ],
+      "peer_support": {
+        "positive_peer_count": 0,
+        "season_count": 0,
+        "league_count": 0
+      },
+      "status": "EXCLUDED",
+      "exclude_reason": "SMALL_SAMPLE"
+    },
+    {
+      "market": "1X2",
+      "league_code": "D1",
+      "season": "2021/22",
+      "close_odds_band": "LT_1_50",
+      "asian_handicap_line_bucket": "NOT_AH",
+      "over25_price_band": "NOT_FT_OVER25",
+      "home_away_side": "AWAY",
+      "sample_count": 17,
+      "hit_rate": 0.529412,
+      "avg_close_odds": 1.298824,
+      "roi_proxy_flat_1u": -0.331765,
+      "max_fail_streak": 2,
+      "max_drawdown_proxy": -5.64,
+      "confidence_flag": "SMALL_SAMPLE",
+      "risk_flags": [
+        "SMALL_SAMPLE_NO_EDGE_CLAIM"
+      ],
+      "peer_support": {
+        "positive_peer_count": 0,
+        "season_count": 0,
+        "league_count": 0
+      },
+      "status": "EXCLUDED",
+      "exclude_reason": "SMALL_SAMPLE"
+    },
+    {
+      "market": "1X2",
+      "league_code": "D1",
+      "season": "2021/22",
+      "close_odds_band": "LT_1_50",
+      "asian_handicap_line_bucket": "NOT_AH",
+      "over25_price_band": "NOT_FT_OVER25",
+      "home_away_side": "HOME",
+      "sample_count": 58,
+      "hit_rate": 0.793103,
+      "avg_close_odds": 1.289655,
+      "roi_proxy_flat_1u": 0.020862,
+      "max_fail_streak": 3,
+      "max_drawdown_proxy": -5.35,
+      "confidence_flag": "SMALL_SAMPLE",
+      "risk_flags": [
+        "SMALL_SAMPLE_NO_EDGE_CLAIM"
+      ],
+      "peer_support": {
+        "positive_peer_count": 0,
+        "season_count": 0,
+        "league_count": 0
+      },
+      "status": "EXCLUDED",
+      "exclude_reason": "SMALL_SAMPLE"
+    },
+    {
+      "market": "1X2",
+      "league_code": "D1",
+      "season": "2022/23",
+      "close_odds_band": "1_50_1_74",
+      "asian_handicap_line_bucket": "NOT_AH",
+      "over25_price_band": "NOT_FT_OVER25",
+      "home_away_side": "AWAY",
+      "sample_count": 12,
+      "hit_rate": 0.5,
+      "avg_close_odds": 1.624167,
+      "roi_proxy_flat_1u": -0.194167,
+      "max_fail_streak": 2,
+      "max_drawdown_proxy": -3.33,
+      "confidence_flag": "SMALL_SAMPLE",
+      "risk_flags": [
+        "SMALL_SAMPLE_NO_EDGE_CLAIM"
+      ],
+      "peer_support": {
+        "positive_peer_count": 0,
+        "season_count": 0,
+        "league_count": 0
+      },
+      "status": "EXCLUDED",
+      "exclude_reason": "SMALL_SAMPLE"
+    },
+    {
+      "market": "1X2",
+      "league_code": "D1",
+      "season": "2022/23",
+      "close_odds_band": "1_50_1_74",
+      "asian_handicap_line_bucket": "NOT_AH",
+      "over25_price_band": "NOT_FT_OVER25",
+      "home_away_side": "HOME",
+      "sample_count": 45,
+      "hit_rate": 0.6,
+      "avg_close_odds": 1.593778,
+      "roi_proxy_flat_1u": -0.052222,
+      "max_fail_streak": 3,
+      "max_drawdown_proxy": -7.33,
+      "confidence_flag": "SMALL_SAMPLE",
+      "risk_flags": [
+        "SMALL_SAMPLE_NO_EDGE_CLAIM"
+      ],
+      "peer_support": {
+        "positive_peer_count": 0,
+        "season_count": 0,
+        "league_count": 0
+      },
+      "status": "EXCLUDED",
+      "exclude_reason": "SMALL_SAMPLE"
+    },
+    {
+      "market": "1X2",
+      "league_code": "D1",
+      "season": "2022/23",
+      "close_odds_band": "1_75_1_99",
+      "asian_handicap_line_bucket": "NOT_AH",
+      "over25_price_band": "NOT_FT_OVER25",
+      "home_away_side": "AWAY",
+      "sample_count": 15,
+      "hit_rate": 0.466667,
+      "avg_close_odds": 1.86,
+      "roi_proxy_flat_1u": -0.146667,
+      "max_fail_streak": 5,
+      "max_drawdown_proxy": -5.5,
+      "confidence_flag": "SMALL_SAMPLE",
+      "risk_flags": [
+        "SMALL_SAMPLE_NO_EDGE_CLAIM"
+      ],
+      "peer_support": {
+        "positive_peer_count": 0,
+        "season_count": 0,
+        "league_count": 0
+      },
+      "status": "EXCLUDED",
+      "exclude_reason": "SMALL_SAMPLE"
+    },
+    {
+      "market": "1X2",
+      "league_code": "D1",
+      "season": "2022/23",
+      "close_odds_band": "1_75_1_99",
+      "asian_handicap_line_bucket": "NOT_AH",
+      "over25_price_band": "NOT_FT_OVER25",
+      "home_away_side": "HOME",
+      "sample_count": 33,
+      "hit_rate": 0.636364,
+      "avg_close_odds": 1.851818,
+      "roi_proxy_flat_1u": 0.183636,
+      "max_fail_streak": 4,
+      "max_drawdown_proxy": -4.35,
+      "confidence_flag": "SMALL_SAMPLE",
+      "risk_flags": [
+        "SMALL_SAMPLE_NO_EDGE_CLAIM"
+      ],
+      "peer_support": {
+        "positive_peer_count": 0,
+        "season_count": 0,
+        "league_count": 0
+      },
+      "status": "EXCLUDED",
+      "exclude_reason": "SMALL_SAMPLE"
+    },
+    {
+      "market": "1X2",
+      "league_code": "D1",
+      "season": "2022/23",
+      "close_odds_band": "2_00_2_49",
+      "asian_handicap_line_bucket": "NOT_AH",
+      "over25_price_band": "NOT_FT_OVER25",
+      "home_away_side": "AWAY",
+      "sample_count": 45,
+      "hit_rate": 0.377778,
+      "avg_close_odds": 2.226,
+      "roi_proxy_flat_1u": -0.155333,
+      "max_fail_streak": 8,
+      "max_drawdown_proxy": -10.75,
+      "confidence_flag": "SMALL_SAMPLE",
+      "risk_flags": [
+        "SMALL_SAMPLE_NO_EDGE_CLAIM"
+      ],
+      "peer_support": {
+        "positive_peer_count": 0,
+        "season_count": 0,
+        "league_count": 0
+      },
+      "status": "EXCLUDED",
+      "exclude_reason": "SMALL_SAMPLE"
+    },
+    {
+      "market": "1X2",
+      "league_code": "D1",
+      "season": "2022/23",
+      "close_odds_band": "2_00_2_49",
+      "asian_handicap_line_bucket": "NOT_AH",
+      "over25_price_band": "NOT_FT_OVER25",
+      "home_away_side": "HOME",
+      "sample_count": 78,
+      "hit_rate": 0.512821,
+      "avg_close_odds": 2.205897,
+      "roi_proxy_flat_1u": 0.115641,
+      "max_fail_streak": 8,
+      "max_drawdown_proxy": -8.0,
+      "confidence_flag": "SMALL_SAMPLE",
+      "risk_flags": [
+        "SMALL_SAMPLE_NO_EDGE_CLAIM"
+      ],
+      "peer_support": {
+        "positive_peer_count": 1,
+        "season_count": 1,
+        "league_count": 1
+      },
+      "status": "EXCLUDED",
+      "exclude_reason": "SMALL_SAMPLE"
+    },
+    {
+      "market": "1X2",
+      "league_code": "D1",
+      "season": "2022/23",
+      "close_odds_band": "2_50_3_49",
+      "asian_handicap_line_bucket": "NOT_AH",
+      "over25_price_band": "NOT_FT_OVER25",
+      "home_away_side": "AWAY",
+      "sample_count": 91,
+      "hit_rate": 0.296703,
+      "avg_close_odds": 2.944945,
+      "roi_proxy_flat_1u": -0.16011,
+      "max_fail_streak": 12,
+      "max_drawdown_proxy": -19.21,
+      "confidence_flag": "SMALL_SAMPLE",
+      "risk_flags": [
+        "SMALL_SAMPLE_NO_EDGE_CLAIM"
+      ],
+      "peer_support": {
+        "positive_peer_count": 1,
+        "season_count": 1,
+        "league_count": 1
+      },
+      "status": "EXCLUDED",
+      "exclude_reason": "SMALL_SAMPLE"
+    },
+    {
+      "market": "1X2",
+      "league_code": "D1",
+      "season": "2022/23",
+      "close_odds_band": "2_50_3_49",
+      "asian_handicap_line_bucket": "NOT_AH",
+      "over25_price_band": "NOT_FT_OVER25",
+      "home_away_side": "DRAW",
+      "sample_count": 57,
+      "hit_rate": 0.192982,
+      "avg_close_odds": 3.308772,
+      "roi_proxy_flat_1u": -0.362281,
+      "max_fail_streak": 12,
+      "max_drawdown_proxy": -23.8,
+      "confidence_flag": "SMALL_SAMPLE",
+      "risk_flags": [
+        "SMALL_SAMPLE_NO_EDGE_CLAIM"
+      ],
+      "peer_support": {
+        "positive_peer_count": 12,
+        "season_count": 4,
+        "league_count": 5
+      },
+      "status": "EXCLUDED",
+      "exclude_reason": "SMALL_SAMPLE"
+    },
+    {
+      "market": "1X2",
+      "league_code": "D1",
+      "season": "2022/23",
+      "close_odds_band": "2_50_3_49",
+      "asian_handicap_line_bucket": "NOT_AH",
+      "over25_price_band": "NOT_FT_OVER25",
+      "home_away_side": "HOME",
+      "sample_count": 67,
+      "hit_rate": 0.313433,
+      "avg_close_odds": 2.897015,
+      "roi_proxy_flat_1u": -0.091045,
+      "max_fail_streak": 10,
+      "max_drawdown_proxy": -10.0,
+      "confidence_flag": "SMALL_SAMPLE",
+      "risk_flags": [
+        "SMALL_SAMPLE_NO_EDGE_CLAIM"
+      ],
+      "peer_support": {
+        "positive_peer_count": 0,
+        "season_count": 0,
+        "league_count": 0
+      },
+      "status": "EXCLUDED",
+      "exclude_reason": "SMALL_SAMPLE"
+    },
+    {
+      "market": "1X2",
+      "league_code": "D1",
+      "season": "2022/23",
+      "close_odds_band": "3_50_4_99",
+      "asian_handicap_line_bucket": "NOT_AH",
+      "over25_price_band": "NOT_FT_OVER25",
+      "home_away_side": "AWAY",
+      "sample_count": 54,
+      "hit_rate": 0.203704,
+      "avg_close_odds": 4.041296,
+      "roi_proxy_flat_1u": -0.177222,
+      "max_fail_streak": 9,
+      "max_drawdown_proxy": -18.95,
+      "confidence_flag": "SMALL_SAMPLE",
+      "risk_flags": [
+        "SMALL_SAMPLE_NO_EDGE_CLAIM"
+      ],
+      "peer_support": {
+        "positive_peer_count": 0,
+        "season_count": 0,
+        "league_count": 0
+      },
+      "status": "EXCLUDED",
+      "exclude_reason": "SMALL_SAMPLE"
+    },
+    {
+      "market": "1X2",
+      "league_code": "D1",
+      "season": "2022/23",
+      "close_odds_band": "3_50_4_99",
+      "asian_handicap_line_bucket": "NOT_AH",
+      "over25_price_band": "NOT_FT_OVER25",
+      "home_away_side": "HOME",
+      "sample_count": 26,
+      "hit_rate": 0.230769,
+      "avg_close_odds": 3.963846,
+      "roi_proxy_flat_1u": -0.066154,
+      "max_fail_streak": 5,
+      "max_drawdown_proxy": -5.75,
+      "confidence_flag": "SMALL_SAMPLE",
+      "risk_flags": [
+        "SMALL_SAMPLE_NO_EDGE_CLAIM"
+      ],
+      "peer_support": {
+        "positive_peer_count": 0,
+        "season_count": 0,
+        "league_count": 0
+      },
+      "status": "EXCLUDED",
+      "exclude_reason": "SMALL_SAMPLE"
+    },
+    {
+      "market": "1X2",
+      "league_code": "D1",
+      "season": "2022/23",
+      "close_odds_band": "GE_5_00",
+      "asian_handicap_line_bucket": "NOT_AH",
+      "over25_price_band": "NOT_FT_OVER25",
+      "home_away_side": "AWAY",
+      "sample_count": 76,
+      "hit_rate": 0.118421,
+      "avg_close_odds": 7.792763,
+      "roi_proxy_flat_1u": -0.207237,
+      "max_fail_streak": 30,
+      "max_drawdown_proxy": -37.5,
+      "confidence_flag": "SMALL_SAMPLE",
+      "risk_flags": [
+        "SMALL_SAMPLE_NO_EDGE_CLAIM"
+      ],
+      "peer_support": {
+        "positive_peer_count": 1,
+        "season_count": 1,
+        "league_count": 1
+      },
+      "status": "EXCLUDED",
+      "exclude_reason": "SMALL_SAMPLE"
+    },
+    {
+      "market": "1X2",
+      "league_code": "D1",
+      "season": "2022/23",
+      "close_odds_band": "GE_5_00",
+      "asian_handicap_line_bucket": "NOT_AH",
+      "over25_price_band": "NOT_FT_OVER25",
+      "home_away_side": "DRAW",
+      "sample_count": 48,
+      "hit_rate": 0.208333,
+      "avg_close_odds": 6.494792,
+      "roi_proxy_flat_1u": 0.348958,
+      "max_fail_streak": 12,
+      "max_drawdown_proxy": -12.0,
+      "confidence_flag": "SMALL_SAMPLE",
+      "risk_flags": [
+        "SMALL_SAMPLE_NO_EDGE_CLAIM"
+      ],
+      "peer_support": {
+        "positive_peer_count": 0,
+        "season_count": 0,
+        "league_count": 0
+      },
+      "status": "EXCLUDED",
+      "exclude_reason": "SMALL_SAMPLE"
+    },
+    {
+      "market": "1X2",
+      "league_code": "D1",
+      "season": "2022/23",
+      "close_odds_band": "GE_5_00",
+      "asian_handicap_line_bucket": "NOT_AH",
+      "over25_price_band": "NOT_FT_OVER25",
+      "home_away_side": "HOME",
+      "sample_count": 19,
+      "hit_rate": 0.210526,
+      "avg_close_odds": 7.526316,
+      "roi_proxy_flat_1u": 0.776316,
+      "max_fail_streak": 5,
+      "max_drawdown_proxy": -5.0,
+      "confidence_flag": "SMALL_SAMPLE",
+      "risk_flags": [
+        "SMALL_SAMPLE_NO_EDGE_CLAIM"
+      ],
+      "peer_support": {
+        "positive_peer_count": 0,
+        "season_count": 0,
+        "league_count": 0
+      },
+      "status": "EXCLUDED",
+      "exclude_reason": "SMALL_SAMPLE"
+    },
+    {
+      "market": "1X2",
+      "league_code": "D1",
+      "season": "2022/23",
+      "close_odds_band": "LT_1_50",
+      "asian_handicap_line_bucket": "NOT_AH",
+      "over25_price_band": "NOT_FT_OVER25",
+      "home_away_side": "AWAY",
+      "sample_count": 13,
+      "hit_rate": 0.692308,
+      "avg_close_odds": 1.353077,
+      "roi_proxy_flat_1u": -0.063846,
+      "max_fail_streak": 2,
+      "max_drawdown_proxy": -2.61,
+      "confidence_flag": "SMALL_SAMPLE",
+      "risk_flags": [
+        "SMALL_SAMPLE_NO_EDGE_CLAIM"
+      ],
+      "peer_support": {
+        "positive_peer_count": 0,
+        "season_count": 0,
+        "league_count": 0
+      },
+      "status": "EXCLUDED",
+      "exclude_reason": "SMALL_SAMPLE"
+    },
+    {
+      "market": "1X2",
+      "league_code": "D1",
+      "season": "2022/23",
+      "close_odds_band": "LT_1_50",
+      "asian_handicap_line_bucket": "NOT_AH",
+      "over25_price_band": "NOT_FT_OVER25",
+      "home_away_side": "HOME",
+      "sample_count": 38,
+      "hit_rate": 0.684211,
+      "avg_close_odds": 1.284737,
+      "roi_proxy_flat_1u": -0.121842,
+      "max_fail_streak": 3,
+      "max_drawdown_proxy": -5.44,
+      "confidence_flag": "SMALL_SAMPLE",
+      "risk_flags": [
+        "SMALL_SAMPLE_NO_EDGE_CLAIM"
+      ],
+      "peer_support": {
+        "positive_peer_count": 0,
+        "season_count": 0,
+        "league_count": 0
+      },
+      "status": "EXCLUDED",
+      "exclude_reason": "SMALL_SAMPLE"
+    },
+    {
+      "market": "1X2",
+      "league_code": "D1",
+      "season": "2023/24",
+      "close_odds_band": "1_50_1_74",
+      "asian_handicap_line_bucket": "NOT_AH",
+      "over25_price_band": "NOT_FT_OVER25",
+      "home_away_side": "AWAY",
+      "sample_count": 24,
+      "hit_rate": 0.708333,
+      "avg_close_odds": 1.615,
+      "roi_proxy_flat_1u": 0.140833,
+      "max_fail_streak": 3,
+      "max_drawdown_proxy": -3.0,
+      "confidence_flag": "SMALL_SAMPLE",
+      "risk_flags": [
+        "SMALL_SAMPLE_NO_EDGE_CLAIM"
+      ],
+      "peer_support": {
+        "positive_peer_count": 0,
+        "season_count": 0,
+        "league_count": 0
+      },
+      "status": "EXCLUDED",
+      "exclude_reason": "SMALL_SAMPLE"
+    },
+    {
+      "market": "1X2",
+      "league_code": "D1",
+      "season": "2023/24",
+      "close_odds_band": "1_50_1_74",
+      "asian_handicap_line_bucket": "NOT_AH",
+      "over25_price_band": "NOT_FT_OVER25",
+      "home_away_side": "HOME",
+      "sample_count": 33,
+      "hit_rate": 0.515152,
+      "avg_close_odds": 1.629394,
+      "roi_proxy_flat_1u": -0.163636,
+      "max_fail_streak": 3,
+      "max_drawdown_proxy": -9.7,
+      "confidence_flag": "SMALL_SAMPLE",
+      "risk_flags": [
+        "SMALL_SAMPLE_NO_EDGE_CLAIM"
+      ],
+      "peer_support": {
+        "positive_peer_count": 0,
+        "season_count": 0,
+        "league_count": 0
+      },
+      "status": "EXCLUDED",
+      "exclude_reason": "SMALL_SAMPLE"
+    },
+    {
+      "market": "1X2",
+      "league_code": "D1",
+      "season": "2023/24",
+      "close_odds_band": "1_75_1_99",
+      "asian_handicap_line_bucket": "NOT_AH",
+      "over25_price_band": "NOT_FT_OVER25",
+      "home_away_side": "AWAY",
+      "sample_count": 12,
+      "hit_rate": 0.583333,
+      "avg_close_odds": 1.826667,
+      "roi_proxy_flat_1u": 0.0625,
+      "max_fail_streak": 2,
+      "max_drawdown_proxy": -2.4,
+      "confidence_flag": "SMALL_SAMPLE",
+      "risk_flags": [
+        "SMALL_SAMPLE_NO_EDGE_CLAIM"
+      ],
+      "peer_support": {
+        "positive_peer_count": 0,
+        "season_count": 0,
+        "league_count": 0
+      },
+      "status": "EXCLUDED",
+      "exclude_reason": "SMALL_SAMPLE"
+    },
+    {
+      "market": "1X2",
+      "league_code": "D1",
+      "season": "2023/24",
+      "close_odds_band": "1_75_1_99",
+      "asian_handicap_line_bucket": "NOT_AH",
+      "over25_price_band": "NOT_FT_OVER25",
+      "home_away_side": "HOME",
+      "sample_count": 39,
+      "hit_rate": 0.487179,
+      "avg_close_odds": 1.849231,
+      "roi_proxy_flat_1u": -0.103846,
+      "max_fail_streak": 5,
+      "max_drawdown_proxy": -8.43,
+      "confidence_flag": "SMALL_SAMPLE",
+      "risk_flags": [
+        "SMALL_SAMPLE_NO_EDGE_CLAIM"
+      ],
+      "peer_support": {
+        "positive_peer_count": 0,
+        "season_count": 0,
+        "league_count": 0
+      },
+      "status": "EXCLUDED",
+      "exclude_reason": "SMALL_SAMPLE"
+    },
+    {
+      "market": "1X2",
+      "league_code": "D1",
+      "season": "2023/24",
+      "close_odds_band": "2_00_2_49",
+      "asian_handicap_line_bucket": "NOT_AH",
+      "over25_price_band": "NOT_FT_OVER25",
+      "home_away_side": "AWAY",
+      "sample_count": 33,
+      "hit_rate": 0.484848,
+      "avg_close_odds": 2.256667,
+      "roi_proxy_flat_1u": 0.081818,
+      "max_fail_streak": 6,
+      "max_drawdown_proxy": -9.0,
+      "confidence_flag": "SMALL_SAMPLE",
+      "risk_flags": [
+        "SMALL_SAMPLE_NO_EDGE_CLAIM"
+      ],
+      "peer_support": {
+        "positive_peer_count": 0,
+        "season_count": 0,
+        "league_count": 0
+      },
+      "status": "EXCLUDED",
+      "exclude_reason": "SMALL_SAMPLE"
+    },
+    {
+      "market": "1X2",
+      "league_code": "D1",
+      "season": "2023/24",
+      "close_odds_band": "2_00_2_49",
+      "asian_handicap_line_bucket": "NOT_AH",
+      "over25_price_band": "NOT_FT_OVER25",
+      "home_away_side": "HOME",
+      "sample_count": 65,
+      "hit_rate": 0.446154,
+      "avg_close_odds": 2.209385,
+      "roi_proxy_flat_1u": -0.010615,
+      "max_fail_streak": 7,
+      "max_drawdown_proxy": -8.4,
+      "confidence_flag": "SMALL_SAMPLE",
+      "risk_flags": [
+        "SMALL_SAMPLE_NO_EDGE_CLAIM"
+      ],
+      "peer_support": {
+        "positive_peer_count": 1,
+        "season_count": 1,
+        "league_count": 1
+      },
+      "status": "EXCLUDED",
+      "exclude_reason": "SMALL_SAMPLE"
+    },
+    {
+      "market": "1X2",
+      "league_code": "D1",
+      "season": "2023/24",
+      "close_odds_band": "2_50_3_49",
+      "asian_handicap_line_bucket": "NOT_AH",
+      "over25_price_band": "NOT_FT_OVER25",
+      "home_away_side": "AWAY",
+      "sample_count": 82,
+      "hit_rate": 0.256098,
+      "avg_close_odds": 2.933293,
+      "roi_proxy_flat_1u": -0.239146,
+      "max_fail_streak": 9,
+      "max_drawdown_proxy": -24.42,
+      "confidence_flag": "SMALL_SAMPLE",
+      "risk_flags": [
+        "SMALL_SAMPLE_NO_EDGE_CLAIM"
+      ],
+      "peer_support": {
+        "positive_peer_count": 1,
+        "season_count": 1,
+        "league_count": 1
+      },
+      "status": "EXCLUDED",
+      "exclude_reason": "SMALL_SAMPLE"
+    },
+    {
+      "market": "1X2",
+      "league_code": "D1",
+      "season": "2023/24",
+      "close_odds_band": "2_50_3_49",
+      "asian_handicap_line_bucket": "NOT_AH",
+      "over25_price_band": "NOT_FT_OVER25",
+      "home_away_side": "DRAW",
+      "sample_count": 41,
+      "hit_rate": 0.341463,
+      "avg_close_odds": 3.356098,
+      "roi_proxy_flat_1u": 0.154878,
+      "max_fail_streak": 6,
+      "max_drawdown_proxy": -6.0,
+      "confidence_flag": "SMALL_SAMPLE",
+      "risk_flags": [
+        "SMALL_SAMPLE_NO_EDGE_CLAIM"
+      ],
+      "peer_support": {
+        "positive_peer_count": 12,
+        "season_count": 4,
+        "league_count": 5
+      },
+      "status": "EXCLUDED",
+      "exclude_reason": "SMALL_SAMPLE"
+    },
+    {
+      "market": "1X2",
+      "league_code": "D1",
+      "season": "2023/24",
+      "close_odds_band": "2_50_3_49",
+      "asian_handicap_line_bucket": "NOT_AH",
+      "over25_price_band": "NOT_FT_OVER25",
+      "home_away_side": "HOME",
+      "sample_count": 55,
+      "hit_rate": 0.254545,
+      "avg_close_odds": 2.801636,
+      "roi_proxy_flat_1u": -0.318182,
+      "max_fail_streak": 11,
+      "max_drawdown_proxy": -17.95,
+      "confidence_flag": "SMALL_SAMPLE",
+      "risk_flags": [
+        "SMALL_SAMPLE_NO_EDGE_CLAIM"
+      ],
+      "peer_support": {
+        "positive_peer_count": 0,
+        "season_count": 0,
+        "league_count": 0
+      },
+      "status": "EXCLUDED",
+      "exclude_reason": "SMALL_SAMPLE"
+    },
+    {
+      "market": "1X2",
+      "league_code": "D1",
+      "season": "2023/24",
+      "close_odds_band": "3_50_4_99",
+      "asian_handicap_line_bucket": "NOT_AH",
+      "over25_price_band": "NOT_FT_OVER25",
+      "home_away_side": "AWAY",
+      "sample_count": 69,
+      "hit_rate": 0.173913,
+      "avg_close_odds": 4.157101,
+      "roi_proxy_flat_1u": -0.29058,
+      "max_fail_streak": 14,
+      "max_drawdown_proxy": -24.35,
+      "confidence_flag": "SMALL_SAMPLE",
+      "risk_flags": [
+        "SMALL_SAMPLE_NO_EDGE_CLAIM"
+      ],
+      "peer_support": {
+        "positive_peer_count": 0,
+        "season_count": 0,
+        "league_count": 0
+      },
+      "status": "EXCLUDED",
+      "exclude_reason": "SMALL_SAMPLE"
+    },
+    {
+      "market": "1X2",
+      "league_code": "D1",
+      "season": "2023/24",
+      "close_odds_band": "3_50_4_99",
+      "asian_handicap_line_bucket": "NOT_AH",
+      "over25_price_band": "NOT_FT_OVER25",
+      "home_away_side": "HOME",
+      "sample_count": 26,
+      "hit_rate": 0.230769,
+      "avg_close_odds": 4.014615,
+      "roi_proxy_flat_1u": -0.094231,
+      "max_fail_streak": 9,
+      "max_drawdown_proxy": -9.0,
+      "confidence_flag": "SMALL_SAMPLE",
+      "risk_flags": [
+        "SMALL_SAMPLE_NO_EDGE_CLAIM"
+      ],
+      "peer_support": {
+        "positive_peer_count": 0,
+        "season_count": 0,
+        "league_count": 0
+      },
+      "status": "EXCLUDED",
+      "exclude_reason": "SMALL_SAMPLE"
+    },
+    {
+      "market": "1X2",
+      "league_code": "D1",
+      "season": "2023/24",
+      "close_odds_band": "GE_5_00",
+      "asian_handicap_line_bucket": "NOT_AH",
+      "over25_price_band": "NOT_FT_OVER25",
+      "home_away_side": "AWAY",
+      "sample_count": 69,
+      "hit_rate": 0.072464,
+      "avg_close_odds": 9.880435,
+      "roi_proxy_flat_1u": -0.286232,
+      "max_fail_streak": 31,
+      "max_drawdown_proxy": -31.0,
+      "confidence_flag": "SMALL_SAMPLE",
+      "risk_flags": [
+        "SMALL_SAMPLE_NO_EDGE_CLAIM"
+      ],
+      "peer_support": {
+        "positive_peer_count": 1,
+        "season_count": 1,
+        "league_count": 1
+      },
+      "status": "EXCLUDED",
+      "exclude_reason": "SMALL_SAMPLE"
+    },
+    {
+      "market": "1X2",
+      "league_code": "D1",
+      "season": "2023/24",
+      "close_odds_band": "GE_5_00",
+      "asian_handicap_line_bucket": "NOT_AH",
+      "over25_price_band": "NOT_FT_OVER25",
+      "home_away_side": "DRAW",
+      "sample_count": 75,
+      "hit_rate": 0.12,
+      "avg_close_odds": 6.573333,
+      "roi_proxy_flat_1u": -0.31,
+      "max_fail_streak": 25,
+      "max_drawdown_proxy": -28.5,
+      "confidence_flag": "SMALL_SAMPLE",
+      "risk_flags": [
+        "SMALL_SAMPLE_NO_EDGE_CLAIM"
+      ],
+      "peer_support": {
+        "positive_peer_count": 0,
+        "season_count": 0,
+        "league_count": 0
+      },
+      "status": "EXCLUDED",
+      "exclude_reason": "SMALL_SAMPLE"
+    },
+    {
+      "market": "1X2",
+      "league_code": "D1",
+      "season": "2023/24",
+      "close_odds_band": "GE_5_00",
+      "asian_handicap_line_bucket": "NOT_AH",
+      "over25_price_band": "NOT_FT_OVER25",
+      "home_away_side": "HOME",
+      "sample_count": 30,
+      "hit_rate": 0.133333,
+      "avg_close_odds": 7.0,
+      "roi_proxy_flat_1u": -0.108333,
+      "max_fail_streak": 7,
+      "max_drawdown_proxy": -7.5,
+      "confidence_flag": "SMALL_SAMPLE",
+      "risk_flags": [
+        "SMALL_SAMPLE_NO_EDGE_CLAIM"
+      ],
+      "peer_support": {
+        "positive_peer_count": 0,
+        "season_count": 0,
+        "league_count": 0
+      },
+      "status": "EXCLUDED",
+      "exclude_reason": "SMALL_SAMPLE"
+    },
+    {
+      "market": "1X2",
+      "league_code": "D1",
+      "season": "2023/24",
+      "close_odds_band": "LT_1_50",
+      "asian_handicap_line_bucket": "NOT_AH",
+      "over25_price_band": "NOT_FT_OVER25",
+      "home_away_side": "AWAY",
+      "sample_count": 17,
+      "hit_rate": 0.764706,
+      "avg_close_odds": 1.346471,
+      "roi_proxy_flat_1u": 0.020588,
+      "max_fail_streak": 2,
+      "max_drawdown_proxy": -2.07,
+      "confidence_flag": "SMALL_SAMPLE",
+      "risk_flags": [
+        "SMALL_SAMPLE_NO_EDGE_CLAIM"
+      ],
+      "peer_support": {
+        "positive_peer_count": 0,
+        "season_count": 0,
+        "league_count": 0
+      },
+      "status": "EXCLUDED",
+      "exclude_reason": "SMALL_SAMPLE"
+    },
+    {
+      "market": "1X2",
+      "league_code": "D1",
+      "season": "2023/24",
+      "close_odds_band": "LT_1_50",
+      "asian_handicap_line_bucket": "NOT_AH",
+      "over25_price_band": "NOT_FT_OVER25",
+      "home_away_side": "HOME",
+      "sample_count": 58,
+      "hit_rate": 0.775862,
+      "avg_close_odds": 1.278276,
+      "roi_proxy_flat_1u": -0.02,
+      "max_fail_streak": 4,
+      "max_drawdown_proxy": -5.74,
+      "confidence_flag": "SMALL_SAMPLE",
+      "risk_flags": [
+        "SMALL_SAMPLE_NO_EDGE_CLAIM"
+      ],
+      "peer_support": {
+        "positive_peer_count": 0,
+        "season_count": 0,
+        "league_count": 0
+      },
+      "status": "EXCLUDED",
+      "exclude_reason": "SMALL_SAMPLE"
+    },
+    {
+      "market": "1X2",
+      "league_code": "D1",
+      "season": "2024/25",
+      "close_odds_band": "1_50_1_74",
+      "asian_handicap_line_bucket": "NOT_AH",
+      "over25_price_band": "NOT_FT_OVER25",
+      "home_away_side": "AWAY",
+      "sample_count": 15,
+      "hit_rate": 0.533333,
+      "avg_close_odds": 1.636667,
+      "roi_proxy_flat_1u": -0.118667,
+      "max_fail_streak": 2,
+      "max_drawdown_proxy": -3.05,
+      "confidence_flag": "SMALL_SAMPLE",
+      "risk_flags": [
+        "SMALL_SAMPLE_NO_EDGE_CLAIM"
+      ],
+      "peer_support": {
+        "positive_peer_count": 0,
+        "season_count": 0,
+        "league_count": 0
+      },
+      "status": "EXCLUDED",
+      "exclude_reason": "SMALL_SAMPLE"
+    },
+    {
+      "market": "1X2",
+      "league_code": "D1",
+      "season": "2024/25",
+      "close_odds_band": "1_50_1_74",
+      "asian_handicap_line_bucket": "NOT_AH",
+      "over25_price_band": "NOT_FT_OVER25",
+      "home_away_side": "HOME",
+      "sample_count": 42,
+      "hit_rate": 0.52381,
+      "avg_close_odds": 1.634048,
+      "roi_proxy_flat_1u": -0.144524,
+      "max_fail_streak": 2,
+      "max_drawdown_proxy": -8.16,
+      "confidence_flag": "SMALL_SAMPLE",
+      "risk_flags": [
+        "SMALL_SAMPLE_NO_EDGE_CLAIM"
+      ],
+      "peer_support": {
+        "positive_peer_count": 0,
+        "season_count": 0,
+        "league_count": 0
+      },
+      "status": "EXCLUDED",
+      "exclude_reason": "SMALL_SAMPLE"
+    },
+    {
+      "market": "1X2",
+      "league_code": "D1",
+      "season": "2024/25",
+      "close_odds_band": "1_75_1_99",
+      "asian_handicap_line_bucket": "NOT_AH",
+      "over25_price_band": "NOT_FT_OVER25",
+      "home_away_side": "AWAY",
+      "sample_count": 14,
+      "hit_rate": 0.714286,
+      "avg_close_odds": 1.882143,
+      "roi_proxy_flat_1u": 0.341429,
+      "max_fail_streak": 2,
+      "max_drawdown_proxy": -2.22,
+      "confidence_flag": "SMALL_SAMPLE",
+      "risk_flags": [
+        "SMALL_SAMPLE_NO_EDGE_CLAIM"
+      ],
+      "peer_support": {
+        "positive_peer_count": 0,
+        "season_count": 0,
+        "league_count": 0
+      },
+      "status": "EXCLUDED",
+      "exclude_reason": "SMALL_SAMPLE"
+    },
+    {
+      "market": "1X2",
+      "league_code": "D1",
+      "season": "2024/25",
+      "close_odds_band": "1_75_1_99",
+      "asian_handicap_line_bucket": "NOT_AH",
+      "over25_price_band": "NOT_FT_OVER25",
+      "home_away_side": "HOME",
+      "sample_count": 38,
+      "hit_rate": 0.394737,
+      "avg_close_odds": 1.872632,
+      "roi_proxy_flat_1u": -0.262632,
+      "max_fail_streak": 7,
+      "max_drawdown_proxy": -14.19,
+      "confidence_flag": "SMALL_SAMPLE",
+      "risk_flags": [
+        "SMALL_SAMPLE_NO_EDGE_CLAIM"
+      ],
+      "peer_support": {
+        "positive_peer_count": 0,
+        "season_count": 0,
+        "league_count": 0
+      },
+      "status": "EXCLUDED",
+      "exclude_reason": "SMALL_SAMPLE"
+    },
+    {
+      "market": "1X2",
+      "league_code": "D1",
+      "season": "2024/25",
+      "close_odds_band": "2_00_2_49",
+      "asian_handicap_line_bucket": "NOT_AH",
+      "over25_price_band": "NOT_FT_OVER25",
+      "home_away_side": "AWAY",
+      "sample_count": 44,
+      "hit_rate": 0.5,
+      "avg_close_odds": 2.222273,
+      "roi_proxy_flat_1u": 0.120455,
+      "max_fail_streak": 7,
+      "max_drawdown_proxy": -8.25,
+      "confidence_flag": "SMALL_SAMPLE",
+      "risk_flags": [
+        "SMALL_SAMPLE_NO_EDGE_CLAIM"
+      ],
+      "peer_support": {
+        "positive_peer_count": 0,
+        "season_count": 0,
+        "league_count": 0
+      },
+      "status": "EXCLUDED",
+      "exclude_reason": "SMALL_SAMPLE"
+    },
+    {
+      "market": "1X2",
+      "league_code": "D1",
+      "season": "2024/25",
+      "close_odds_band": "2_00_2_49",
+      "asian_handicap_line_bucket": "NOT_AH",
+      "over25_price_band": "NOT_FT_OVER25",
+      "home_away_side": "HOME",
+      "sample_count": 67,
+      "hit_rate": 0.402985,
+      "avg_close_odds": 2.251493,
+      "roi_proxy_flat_1u": -0.099851,
+      "max_fail_streak": 8,
+      "max_drawdown_proxy": -12.0,
+      "confidence_flag": "SMALL_SAMPLE",
+      "risk_flags": [
+        "SMALL_SAMPLE_NO_EDGE_CLAIM"
+      ],
+      "peer_support": {
+        "positive_peer_count": 1,
+        "season_count": 1,
+        "league_count": 1
+      },
+      "status": "EXCLUDED",
+      "exclude_reason": "SMALL_SAMPLE"
+    },
+    {
+      "market": "1X2",
+      "league_code": "D1",
+      "season": "2024/25",
+      "close_odds_band": "2_50_3_49",
+      "asian_handicap_line_bucket": "NOT_AH",
+      "over25_price_band": "NOT_FT_OVER25",
+      "home_away_side": "AWAY",
+      "sample_count": 73,
+      "hit_rate": 0.369863,
+      "avg_close_odds": 2.937671,
+      "roi_proxy_flat_1u": 0.06726,
+      "max_fail_streak": 10,
+      "max_drawdown_proxy": -12.45,
+      "confidence_flag": "SMALL_SAMPLE",
+      "risk_flags": [
+        "SMALL_SAMPLE_NO_EDGE_CLAIM"
+      ],
+      "peer_support": {
+        "positive_peer_count": 1,
+        "season_count": 1,
+        "league_count": 1
+      },
+      "status": "EXCLUDED",
+      "exclude_reason": "SMALL_SAMPLE"
+    },
+    {
+      "market": "1X2",
+      "league_code": "D1",
+      "season": "2024/25",
+      "close_odds_band": "2_50_3_49",
+      "asian_handicap_line_bucket": "NOT_AH",
+      "over25_price_band": "NOT_FT_OVER25",
+      "home_away_side": "DRAW",
+      "sample_count": 54,
+      "hit_rate": 0.333333,
+      "avg_close_odds": 3.325,
+      "roi_proxy_flat_1u": 0.108333,
+      "max_fail_streak": 7,
+      "max_drawdown_proxy": -14.35,
+      "confidence_flag": "SMALL_SAMPLE",
+      "risk_flags": [
+        "SMALL_SAMPLE_NO_EDGE_CLAIM"
+      ],
+      "peer_support": {
+        "positive_peer_count": 12,
+        "season_count": 4,
+        "league_count": 5
+      },
+      "status": "EXCLUDED",
+      "exclude_reason": "SMALL_SAMPLE"
+    },
+    {
+      "market": "1X2",
+      "league_code": "D1",
+      "season": "2024/25",
+      "close_odds_band": "2_50_3_49",
+      "asian_handicap_line_bucket": "NOT_AH",
+      "over25_price_band": "NOT_FT_OVER25",
+      "home_away_side": "HOME",
+      "sample_count": 54,
+      "hit_rate": 0.166667,
+      "avg_close_odds": 2.918704,
+      "roi_proxy_flat_1u": -0.506852,
+      "max_fail_streak": 13,
+      "max_drawdown_proxy": -27.37,
+      "confidence_flag": "SMALL_SAMPLE",
+      "risk_flags": [
+        "SMALL_SAMPLE_NO_EDGE_CLAIM"
+      ],
+      "peer_support": {
+        "positive_peer_count": 0,
+        "season_count": 0,
+        "league_count": 0
+      },
+      "status": "EXCLUDED",
+      "exclude_reason": "SMALL_SAMPLE"
+    },
+    {
+      "market": "1X2",
+      "league_code": "D1",
+      "season": "2024/25",
+      "close_odds_band": "3_50_4_99",
+      "asian_handicap_line_bucket": "NOT_AH",
+      "over25_price_band": "NOT_FT_OVER25",
+      "home_away_side": "AWAY",
+      "sample_count": 70,
+      "hit_rate": 0.328571,
+      "avg_close_odds": 4.115143,
+      "roi_proxy_flat_1u": 0.323,
+      "max_fail_streak": 8,
+      "max_drawdown_proxy": -9.5,
+      "confidence_flag": "SMALL_SAMPLE",
+      "risk_flags": [
+        "SMALL_SAMPLE_NO_EDGE_CLAIM"
+      ],
+      "peer_support": {
+        "positive_peer_count": 0,
+        "season_count": 0,
+        "league_count": 0
+      },
+      "status": "EXCLUDED",
+      "exclude_reason": "SMALL_SAMPLE"
+    },
+    {
+      "market": "1X2",
+      "league_code": "D1",
+      "season": "2024/25",
+      "close_odds_band": "3_50_4_99",
+      "asian_handicap_line_bucket": "NOT_AH",
+      "over25_price_band": "NOT_FT_OVER25",
+      "home_away_side": "HOME",
+      "sample_count": 29,
+      "hit_rate": 0.137931,
+      "avg_close_odds": 4.01,
+      "roi_proxy_flat_1u": -0.475862,
+      "max_fail_streak": 18,
+      "max_drawdown_proxy": -18.0,
+      "confidence_flag": "SMALL_SAMPLE",
+      "risk_flags": [
+        "SMALL_SAMPLE_NO_EDGE_CLAIM"
+      ],
+      "peer_support": {
+        "positive_peer_count": 0,
+        "season_count": 0,
+        "league_count": 0
+      },
+      "status": "EXCLUDED",
+      "exclude_reason": "SMALL_SAMPLE"
+    },
+    {
+      "market": "1X2",
+      "league_code": "D1",
+      "season": "2024/25",
+      "close_odds_band": "GE_5_00",
+      "asian_handicap_line_bucket": "NOT_AH",
+      "over25_price_band": "NOT_FT_OVER25",
+      "home_away_side": "AWAY",
+      "sample_count": 73,
+      "hit_rate": 0.123288,
+      "avg_close_odds": 9.075342,
+      "roi_proxy_flat_1u": -0.133562,
+      "max_fail_streak": 21,
+      "max_drawdown_proxy": -31.75,
+      "confidence_flag": "SMALL_SAMPLE",
+      "risk_flags": [
+        "SMALL_SAMPLE_NO_EDGE_CLAIM"
+      ],
+      "peer_support": {
+        "positive_peer_count": 1,
+        "season_count": 1,
+        "league_count": 1
+      },
+      "status": "EXCLUDED",
+      "exclude_reason": "SMALL_SAMPLE"
+    },
+    {
+      "market": "1X2",
+      "league_code": "D1",
+      "season": "2024/25",
+      "close_odds_band": "GE_5_00",
+      "asian_handicap_line_bucket": "NOT_AH",
+      "over25_price_band": "NOT_FT_OVER25",
+      "home_away_side": "DRAW",
+      "sample_count": 56,
+      "hit_rate": 0.160714,
+      "avg_close_odds": 7.044643,
+      "roi_proxy_flat_1u": -0.008929,
+      "max_fail_streak": 8,
+      "max_drawdown_proxy": -12.5,
+      "confidence_flag": "SMALL_SAMPLE",
+      "risk_flags": [
+        "SMALL_SAMPLE_NO_EDGE_CLAIM"
+      ],
+      "peer_support": {
+        "positive_peer_count": 0,
+        "season_count": 0,
+        "league_count": 0
+      },
+      "status": "EXCLUDED",
+      "exclude_reason": "SMALL_SAMPLE"
+    },
+    {
+      "market": "1X2",
+      "league_code": "D1",
+      "season": "2024/25",
+      "close_odds_band": "GE_5_00",
+      "asian_handicap_line_bucket": "NOT_AH",
+      "over25_price_band": "NOT_FT_OVER25",
+      "home_away_side": "HOME",
+      "sample_count": 23,
+      "hit_rate": 0.130435,
+      "avg_close_odds": 8.021739,
+      "roi_proxy_flat_1u": -0.217391,
+      "max_fail_streak": 12,
+      "max_drawdown_proxy": -12.0,
+      "confidence_flag": "SMALL_SAMPLE",
+      "risk_flags": [
+        "SMALL_SAMPLE_NO_EDGE_CLAIM"
+      ],
+      "peer_support": {
+        "positive_peer_count": 0,
+        "season_count": 0,
+        "league_count": 0
+      },
+      "status": "EXCLUDED",
+      "exclude_reason": "SMALL_SAMPLE"
+    },
+    {
+      "market": "1X2",
+      "league_code": "D1",
+      "season": "2024/25",
+      "close_odds_band": "LT_1_50",
+      "asian_handicap_line_bucket": "NOT_AH",
+      "over25_price_band": "NOT_FT_OVER25",
+      "home_away_side": "AWAY",
+      "sample_count": 17,
+      "hit_rate": 0.705882,
+      "avg_close_odds": 1.328824,
+      "roi_proxy_flat_1u": -0.08,
+      "max_fail_streak": 2,
+      "max_drawdown_proxy": -3.43,
+      "confidence_flag": "SMALL_SAMPLE",
+      "risk_flags": [
+        "SMALL_SAMPLE_NO_EDGE_CLAIM"
+      ],
+      "peer_support": {
+        "positive_peer_count": 0,
+        "season_count": 0,
+        "league_count": 0
+      },
+      "status": "EXCLUDED",
+      "exclude_reason": "SMALL_SAMPLE"
+    },
+    {
+      "market": "1X2",
+      "league_code": "D1",
+      "season": "2024/25",
+      "close_odds_band": "LT_1_50",
+      "asian_handicap_line_bucket": "NOT_AH",
+      "over25_price_band": "NOT_FT_OVER25",
+      "home_away_side": "HOME",
+      "sample_count": 53,
+      "hit_rate": 0.716981,
+      "avg_close_odds": 1.289434,
+      "roi_proxy_flat_1u": -0.097547,
+      "max_fail_streak": 4,
+      "max_drawdown_proxy": -8.51,
+      "confidence_flag": "SMALL_SAMPLE",
+      "risk_flags": [
+        "SMALL_SAMPLE_NO_EDGE_CLAIM"
+      ],
+      "peer_support": {
+        "positive_peer_count": 0,
+        "season_count": 0,
+        "league_count": 0
+      },
+      "status": "EXCLUDED",
+      "exclude_reason": "SMALL_SAMPLE"
+    },
+    {
+      "market": "1X2",
+      "league_code": "E0",
+      "season": "2020/21",
+      "close_odds_band": "1_50_1_74",
+      "asian_handicap_line_bucket": "NOT_AH",
+      "over25_price_band": "NOT_FT_OVER25",
+      "home_away_side": "AWAY",
+      "sample_count": 30,
+      "hit_rate": 0.633333,
+      "avg_close_odds": 1.612333,
+      "roi_proxy_flat_1u": 0.012,
+      "max_fail_streak": 4,
+      "max_drawdown_proxy": -4.0,
+      "confidence_flag": "SMALL_SAMPLE",
+      "risk_flags": [
+        "SMALL_SAMPLE_NO_EDGE_CLAIM"
+      ],
+      "peer_support": {
+        "positive_peer_count": 0,
+        "season_count": 0,
+        "league_count": 0
+      },
+      "status": "EXCLUDED",
+      "exclude_reason": "SMALL_SAMPLE"
+    },
+    {
+      "market": "1X2",
+      "league_code": "E0",
+      "season": "2020/21",
+      "close_odds_band": "1_50_1_74",
+      "asian_handicap_line_bucket": "NOT_AH",
+      "over25_price_band": "NOT_FT_OVER25",
+      "home_away_side": "HOME",
+      "sample_count": 46,
+      "hit_rate": 0.673913,
+      "avg_close_odds": 1.594348,
+      "roi_proxy_flat_1u": 0.069348,
+      "max_fail_streak": 5,
+      "max_drawdown_proxy": -6.31,
+      "confidence_flag": "SMALL_SAMPLE",
+      "risk_flags": [
+        "SMALL_SAMPLE_NO_EDGE_CLAIM"
+      ],
+      "peer_support": {
+        "positive_peer_count": 0,
+        "season_count": 0,
+        "league_count": 0
+      },
+      "status": "EXCLUDED",
+      "exclude_reason": "SMALL_SAMPLE"
+    },
+    {
+      "market": "1X2",
+      "league_code": "E0",
+      "season": "2020/21",
+      "close_odds_band": "1_75_1_99",
+      "asian_handicap_line_bucket": "NOT_AH",
+      "over25_price_band": "NOT_FT_OVER25",
+      "home_away_side": "AWAY",
+      "sample_count": 24,
+      "hit_rate": 0.541667,
+      "avg_close_odds": 1.855833,
+      "roi_proxy_flat_1u": 0.025417,
+      "max_fail_streak": 3,
+      "max_drawdown_proxy": -5.15,
+      "confidence_flag": "SMALL_SAMPLE",
+      "risk_flags": [
+        "SMALL_SAMPLE_NO_EDGE_CLAIM"
+      ],
+      "peer_support": {
+        "positive_peer_count": 0,
+        "season_count": 0,
+        "league_count": 0
+      },
+      "status": "EXCLUDED",
+      "exclude_reason": "SMALL_SAMPLE"
+    },
+    {
+      "market": "1X2",
+      "league_code": "E0",
+      "season": "2020/21",
+      "close_odds_band": "1_75_1_99",
+      "asian_handicap_line_bucket": "NOT_AH",
+      "over25_price_band": "NOT_FT_OVER25",
+      "home_away_side": "HOME",
+      "sample_count": 40,
+      "hit_rate": 0.475,
+      "avg_close_odds": 1.83825,
+      "roi_proxy_flat_1u": -0.1415,
+      "max_fail_streak": 5,
+      "max_drawdown_proxy": -7.39,
+      "confidence_flag": "SMALL_SAMPLE",
+      "risk_flags": [
+        "SMALL_SAMPLE_NO_EDGE_CLAIM"
+      ],
+      "peer_support": {
+        "positive_peer_count": 0,
+        "season_count": 0,
+        "league_count": 0
+      },
+      "status": "EXCLUDED",
+      "exclude_reason": "SMALL_SAMPLE"
+    },
+    {
+      "market": "1X2",
+      "league_code": "E0",
+      "season": "2020/21",
+      "close_odds_band": "2_00_2_49",
+      "asian_handicap_line_bucket": "NOT_AH",
+      "over25_price_band": "NOT_FT_OVER25",
+      "home_away_side": "AWAY",
+      "sample_count": 64,
+      "hit_rate": 0.421875,
+      "avg_close_odds": 2.201563,
+      "roi_proxy_flat_1u": -0.08,
+      "max_fail_streak": 6,
+      "max_drawdown_proxy": -11.55,
+      "confidence_flag": "SMALL_SAMPLE",
+      "risk_flags": [
+        "SMALL_SAMPLE_NO_EDGE_CLAIM"
+      ],
+      "peer_support": {
+        "positive_peer_count": 0,
+        "season_count": 0,
+        "league_count": 0
+      },
+      "status": "EXCLUDED",
+      "exclude_reason": "SMALL_SAMPLE"
+    },
+    {
+      "market": "1X2",
+      "league_code": "E0",
+      "season": "2020/21",
+      "close_odds_band": "2_00_2_49",
+      "asian_handicap_line_bucket": "NOT_AH",
+      "over25_price_band": "NOT_FT_OVER25",
+      "home_away_side": "HOME",
+      "sample_count": 62,
+      "hit_rate": 0.33871,
+      "avg_close_odds": 2.192903,
+      "roi_proxy_flat_1u": -0.25371,
+      "max_fail_streak": 5,
+      "max_drawdown_proxy": -17.55,
+      "confidence_flag": "SMALL_SAMPLE",
+      "risk_flags": [
+        "SMALL_SAMPLE_NO_EDGE_CLAIM"
+      ],
+      "peer_support": {
+        "positive_peer_count": 1,
+        "season_count": 1,
+        "league_count": 1
+      },
+      "status": "EXCLUDED",
+      "exclude_reason": "SMALL_SAMPLE"
+    },
+    {
+      "market": "1X2",
+      "league_code": "E0",
+      "season": "2020/21",
+      "close_odds_band": "2_50_3_49",
+      "asian_handicap_line_bucket": "NOT_AH",
+      "over25_price_band": "NOT_FT_OVER25",
+      "home_away_side": "AWAY",
+      "sample_count": 73,
+      "hit_rate": 0.493151,
+      "avg_close_odds": 2.957123,
+      "roi_proxy_flat_1u": 0.453151,
+      "max_fail_streak": 8,
+      "max_drawdown_proxy": -8.0,
+      "confidence_flag": "SMALL_SAMPLE",
+      "risk_flags": [
+        "SMALL_SAMPLE_NO_EDGE_CLAIM"
+      ],
+      "peer_support": {
+        "positive_peer_count": 1,
+        "season_count": 1,
+        "league_count": 1
+      },
+      "status": "EXCLUDED",
+      "exclude_reason": "SMALL_SAMPLE"
+    },
+    {
+      "market": "1X2",
+      "league_code": "E0",
+      "season": "2020/21",
+      "close_odds_band": "2_50_3_49",
+      "asian_handicap_line_bucket": "NOT_AH",
+      "over25_price_band": "NOT_FT_OVER25",
+      "home_away_side": "HOME",
+      "sample_count": 75,
+      "hit_rate": 0.28,
+      "avg_close_odds": 2.9488,
+      "roi_proxy_flat_1u": -0.1732,
+      "max_fail_streak": 8,
+      "max_drawdown_proxy": -17.79,
+      "confidence_flag": "SMALL_SAMPLE",
+      "risk_flags": [
+        "SMALL_SAMPLE_NO_EDGE_CLAIM"
+      ],
+      "peer_support": {
+        "positive_peer_count": 0,
+        "season_count": 0,
+        "league_count": 0
+      },
+      "status": "EXCLUDED",
+      "exclude_reason": "SMALL_SAMPLE"
+    },
+    {
+      "market": "1X2",
+      "league_code": "E0",
+      "season": "2020/21",
+      "close_odds_band": "3_50_4_99",
+      "asian_handicap_line_bucket": "NOT_AH",
+      "over25_price_band": "NOT_FT_OVER25",
+      "home_away_side": "AWAY",
+      "sample_count": 67,
+      "hit_rate": 0.313433,
+      "avg_close_odds": 4.072239,
+      "roi_proxy_flat_1u": 0.218657,
+      "max_fail_streak": 11,
+      "max_drawdown_proxy": -12.5,
+      "confidence_flag": "SMALL_SAMPLE",
+      "risk_flags": [
+        "SMALL_SAMPLE_NO_EDGE_CLAIM"
+      ],
+      "peer_support": {
+        "positive_peer_count": 0,
+        "season_count": 0,
+        "league_count": 0
+      },
+      "status": "EXCLUDED",
+      "exclude_reason": "SMALL_SAMPLE"
+    },
+    {
+      "market": "1X2",
+      "league_code": "E0",
+      "season": "2020/21",
+      "close_odds_band": "3_50_4_99",
+      "asian_handicap_line_bucket": "NOT_AH",
+      "over25_price_band": "NOT_FT_OVER25",
+      "home_away_side": "HOME",
+      "sample_count": 51,
+      "hit_rate": 0.215686,
+      "avg_close_odds": 3.897647,
+      "roi_proxy_flat_1u": -0.130392,
+      "max_fail_streak": 6,
+      "max_drawdown_proxy": -10.0,
+      "confidence_flag": "SMALL_SAMPLE",
+      "risk_flags": [
+        "SMALL_SAMPLE_NO_EDGE_CLAIM"
+      ],
+      "peer_support": {
+        "positive_peer_count": 0,
+        "season_count": 0,
+        "league_count": 0
+      },
+      "status": "EXCLUDED",
+      "exclude_reason": "SMALL_SAMPLE"
+    },
+    {
+      "market": "1X2",
+      "league_code": "E0",
+      "season": "2020/21",
+      "close_odds_band": "GE_5_00",
+      "asian_handicap_line_bucket": "NOT_AH",
+      "over25_price_band": "NOT_FT_OVER25",
+      "home_away_side": "AWAY",
+      "sample_count": 93,
+      "hit_rate": 0.193548,
+      "avg_close_odds": 8.427419,
+      "roi_proxy_flat_1u": 0.475806,
+      "max_fail_streak": 14,
+      "max_drawdown_proxy": -15.0,
+      "confidence_flag": "SMALL_SAMPLE",
+      "risk_flags": [
+        "SMALL_SAMPLE_NO_EDGE_CLAIM"
+      ],
+      "peer_support": {
+        "positive_peer_count": 1,
+        "season_count": 1,
+        "league_count": 1
+      },
+      "status": "EXCLUDED",
+      "exclude_reason": "SMALL_SAMPLE"
+    },
+    {
+      "market": "1X2",
+      "league_code": "E0",
+      "season": "2020/21",
+      "close_odds_band": "GE_5_00",
+      "asian_handicap_line_bucket": "NOT_AH",
+      "over25_price_band": "NOT_FT_OVER25",
+      "home_away_side": "DRAW",
+      "sample_count": 54,
+      "hit_rate": 0.166667,
+      "avg_close_odds": 6.435185,
+      "roi_proxy_flat_1u": 0.175926,
+      "max_fail_streak": 12,
+      "max_drawdown_proxy": -18.25,
+      "confidence_flag": "SMALL_SAMPLE",
+      "risk_flags": [
+        "SMALL_SAMPLE_NO_EDGE_CLAIM"
+      ],
+      "peer_support": {
+        "positive_peer_count": 0,
+        "season_count": 0,
+        "league_count": 0
+      },
+      "status": "EXCLUDED",
+      "exclude_reason": "SMALL_SAMPLE"
+    },
+    {
+      "market": "1X2",
+      "league_code": "E0",
+      "season": "2020/21",
+      "close_odds_band": "GE_5_00",
+      "asian_handicap_line_bucket": "NOT_AH",
+      "over25_price_band": "NOT_FT_OVER25",
+      "home_away_side": "HOME",
+      "sample_count": 54,
+      "hit_rate": 0.111111,
+      "avg_close_odds": 7.25,
+      "roi_proxy_flat_1u": -0.314815,
+      "max_fail_streak": 22,
+      "max_drawdown_proxy": -27.5,
+      "confidence_flag": "SMALL_SAMPLE",
+      "risk_flags": [
+        "SMALL_SAMPLE_NO_EDGE_CLAIM"
+      ],
+      "peer_support": {
+        "positive_peer_count": 0,
+        "season_count": 0,
+        "league_count": 0
+      },
+      "status": "EXCLUDED",
+      "exclude_reason": "SMALL_SAMPLE"
+    },
+    {
+      "market": "1X2",
+      "league_code": "E0",
+      "season": "2020/21",
+      "close_odds_band": "LT_1_50",
+      "asian_handicap_line_bucket": "NOT_AH",
+      "over25_price_band": "NOT_FT_OVER25",
+      "home_away_side": "AWAY",
+      "sample_count": 29,
+      "hit_rate": 0.655172,
+      "avg_close_odds": 1.351379,
+      "roi_proxy_flat_1u": -0.120345,
+      "max_fail_streak": 4,
+      "max_drawdown_proxy": -4.39,
+      "confidence_flag": "SMALL_SAMPLE",
+      "risk_flags": [
+        "SMALL_SAMPLE_NO_EDGE_CLAIM"
+      ],
+      "peer_support": {
+        "positive_peer_count": 0,
+        "season_count": 0,
+        "league_count": 0
+      },
+      "status": "EXCLUDED",
+      "exclude_reason": "SMALL_SAMPLE"
+    },
+    {
+      "market": "1X2",
+      "league_code": "E0",
+      "season": "2020/21",
+      "close_odds_band": "LT_1_50",
+      "asian_handicap_line_bucket": "NOT_AH",
+      "over25_price_band": "NOT_FT_OVER25",
+      "home_away_side": "HOME",
+      "sample_count": 52,
+      "hit_rate": 0.673077,
+      "avg_close_odds": 1.300192,
+      "roi_proxy_flat_1u": -0.126538,
+      "max_fail_streak": 2,
+      "max_drawdown_proxy": -7.27,
+      "confidence_flag": "SMALL_SAMPLE",
+      "risk_flags": [
+        "SMALL_SAMPLE_NO_EDGE_CLAIM"
+      ],
+      "peer_support": {
+        "positive_peer_count": 0,
+        "season_count": 0,
+        "league_count": 0
+      },
+      "status": "EXCLUDED",
+      "exclude_reason": "SMALL_SAMPLE"
+    },
+    {
+      "market": "1X2",
+      "league_code": "E0",
+      "season": "2021/22",
+      "close_odds_band": "1_50_1_74",
+      "asian_handicap_line_bucket": "NOT_AH",
+      "over25_price_band": "NOT_FT_OVER25",
+      "home_away_side": "AWAY",
+      "sample_count": 29,
+      "hit_rate": 0.689655,
+      "avg_close_odds": 1.617241,
+      "roi_proxy_flat_1u": 0.107241,
+      "max_fail_streak": 2,
+      "max_drawdown_proxy": -2.0,
+      "confidence_flag": "SMALL_SAMPLE",
+      "risk_flags": [
+        "SMALL_SAMPLE_NO_EDGE_CLAIM"
+      ],
+      "peer_support": {
+        "positive_peer_count": 0,
+        "season_count": 0,
+        "league_count": 0
+      },
+      "status": "EXCLUDED",
+      "exclude_reason": "SMALL_SAMPLE"
+    },
+    {
+      "market": "1X2",
+      "league_code": "E0",
+      "season": "2021/22",
+      "close_odds_band": "1_50_1_74",
+      "asian_handicap_line_bucket": "NOT_AH",
+      "over25_price_band": "NOT_FT_OVER25",
+      "home_away_side": "HOME",
+      "sample_count": 50,
+      "hit_rate": 0.56,
+      "avg_close_odds": 1.6114,
+      "roi_proxy_flat_1u": -0.0868,
+      "max_fail_streak": 4,
+      "max_drawdown_proxy": -7.91,
+      "confidence_flag": "SMALL_SAMPLE",
+      "risk_flags": [
+        "SMALL_SAMPLE_NO_EDGE_CLAIM"
+      ],
+      "peer_support": {
+        "positive_peer_count": 0,
+        "season_count": 0,
+        "league_count": 0
+      },
+      "status": "EXCLUDED",
+      "exclude_reason": "SMALL_SAMPLE"
+    },
+    {
+      "market": "1X2",
+      "league_code": "E0",
+      "season": "2021/22",
+      "close_odds_band": "1_75_1_99",
+      "asian_handicap_line_bucket": "NOT_AH",
+      "over25_price_band": "NOT_FT_OVER25",
+      "home_away_side": "AWAY",
+      "sample_count": 21,
+      "hit_rate": 0.571429,
+      "avg_close_odds": 1.867143,
+      "roi_proxy_flat_1u": 0.066667,
+      "max_fail_streak": 3,
+      "max_drawdown_proxy": -3.65,
+      "confidence_flag": "SMALL_SAMPLE",
+      "risk_flags": [
+        "SMALL_SAMPLE_NO_EDGE_CLAIM"
+      ],
+      "peer_support": {
+        "positive_peer_count": 0,
+        "season_count": 0,
+        "league_count": 0
+      },
+      "status": "EXCLUDED",
+      "exclude_reason": "SMALL_SAMPLE"
+    },
+    {
+      "market": "1X2",
+      "league_code": "E0",
+      "season": "2021/22",
+      "close_odds_band": "1_75_1_99",
+      "asian_handicap_line_bucket": "NOT_AH",
+      "over25_price_band": "NOT_FT_OVER25",
+      "home_away_side": "HOME",
+      "sample_count": 32,
+      "hit_rate": 0.34375,
+      "avg_close_odds": 1.861875,
+      "roi_proxy_flat_1u": -0.36875,
+      "max_fail_streak": 6,
+      "max_drawdown_proxy": -13.35,
+      "confidence_flag": "SMALL_SAMPLE",
+      "risk_flags": [
+        "SMALL_SAMPLE_NO_EDGE_CLAIM"
+      ],
+      "peer_support": {
+        "positive_peer_count": 0,
+        "season_count": 0,
+        "league_count": 0
+      },
+      "status": "EXCLUDED",
+      "exclude_reason": "SMALL_SAMPLE"
+    },
+    {
+      "market": "1X2",
+      "league_code": "E0",
+      "season": "2021/22",
+      "close_odds_band": "2_00_2_49",
+      "asian_handicap_line_bucket": "NOT_AH",
+      "over25_price_band": "NOT_FT_OVER25",
+      "home_away_side": "AWAY",
+      "sample_count": 44,
+      "hit_rate": 0.5,
+      "avg_close_odds": 2.214545,
+      "roi_proxy_flat_1u": 0.112955,
+      "max_fail_streak": 6,
+      "max_drawdown_proxy": -6.0,
+      "confidence_flag": "SMALL_SAMPLE",
+      "risk_flags": [
+        "SMALL_SAMPLE_NO_EDGE_CLAIM"
+      ],
+      "peer_support": {
+        "positive_peer_count": 0,
+        "season_count": 0,
+        "league_count": 0
+      },
+      "status": "EXCLUDED",
+      "exclude_reason": "SMALL_SAMPLE"
+    },
+    {
+      "market": "1X2",
+      "league_code": "E0",
+      "season": "2021/22",
+      "close_odds_band": "2_00_2_49",
+      "asian_handicap_line_bucket": "NOT_AH",
+      "over25_price_band": "NOT_FT_OVER25",
+      "home_away_side": "HOME",
+      "sample_count": 73,
+      "hit_rate": 0.561644,
+      "avg_close_odds": 2.204521,
+      "roi_proxy_flat_1u": 0.229726,
+      "max_fail_streak": 5,
+      "max_drawdown_proxy": -5.0,
+      "confidence_flag": "SMALL_SAMPLE",
+      "risk_flags": [
+        "SMALL_SAMPLE_NO_EDGE_CLAIM"
+      ],
+      "peer_support": {
+        "positive_peer_count": 1,
+        "season_count": 1,
+        "league_count": 1
+      },
+      "status": "EXCLUDED",
+      "exclude_reason": "SMALL_SAMPLE"
+    },
+    {
+      "market": "1X2",
+      "league_code": "E0",
+      "season": "2021/22",
+      "close_odds_band": "2_50_3_49",
+      "asian_handicap_line_bucket": "NOT_AH",
+      "over25_price_band": "NOT_FT_OVER25",
+      "home_away_side": "AWAY",
+      "sample_count": 78,
+      "hit_rate": 0.320513,
+      "avg_close_odds": 2.894487,
+      "roi_proxy_flat_1u": -0.084487,
+      "max_fail_streak": 9,
+      "max_drawdown_proxy": -19.63,
+      "confidence_flag": "SMALL_SAMPLE",
+      "risk_flags": [
+        "SMALL_SAMPLE_NO_EDGE_CLAIM"
+      ],
+      "peer_support": {
+        "positive_peer_count": 1,
+        "season_count": 1,
+        "league_count": 1
+      },
+      "status": "EXCLUDED",
+      "exclude_reason": "SMALL_SAMPLE"
+    },
+    {
+      "market": "1X2",
+      "league_code": "E0",
+      "season": "2021/22",
+      "close_odds_band": "2_50_3_49",
+      "asian_handicap_line_bucket": "NOT_AH",
+      "over25_price_band": "NOT_FT_OVER25",
+      "home_away_side": "HOME",
+      "sample_count": 65,
+      "hit_rate": 0.230769,
+      "avg_close_odds": 2.881538,
+      "roi_proxy_flat_1u": -0.357077,
+      "max_fail_streak": 16,
+      "max_drawdown_proxy": -27.91,
+      "confidence_flag": "SMALL_SAMPLE",
+      "risk_flags": [
+        "SMALL_SAMPLE_NO_EDGE_CLAIM"
+      ],
+      "peer_support": {
+        "positive_peer_count": 0,
+        "season_count": 0,
+        "league_count": 0
+      },
+      "status": "EXCLUDED",
+      "exclude_reason": "SMALL_SAMPLE"
+    },
+    {
+      "market": "1X2",
+      "league_code": "E0",
+      "season": "2021/22",
+      "close_odds_band": "3_50_4_99",
+      "asian_handicap_line_bucket": "NOT_AH",
+      "over25_price_band": "NOT_FT_OVER25",
+      "home_away_side": "AWAY",
+      "sample_count": 69,
+      "hit_rate": 0.202899,
+      "avg_close_odds": 4.013478,
+      "roi_proxy_flat_1u": -0.171739,
+      "max_fail_streak": 11,
+      "max_drawdown_proxy": -14.15,
+      "confidence_flag": "SMALL_SAMPLE",
+      "risk_flags": [
+        "SMALL_SAMPLE_NO_EDGE_CLAIM"
+      ],
+      "peer_support": {
+        "positive_peer_count": 0,
+        "season_count": 0,
+        "league_count": 0
+      },
+      "status": "EXCLUDED",
+      "exclude_reason": "SMALL_SAMPLE"
+    },
+    {
+      "market": "1X2",
+      "league_code": "E0",
+      "season": "2021/22",
+      "close_odds_band": "3_50_4_99",
+      "asian_handicap_line_bucket": "NOT_AH",
+      "over25_price_band": "NOT_FT_OVER25",
+      "home_away_side": "HOME",
+      "sample_count": 44,
+      "hit_rate": 0.295455,
+      "avg_close_odds": 4.021136,
+      "roi_proxy_flat_1u": 0.164773,
+      "max_fail_streak": 5,
+      "max_drawdown_proxy": -6.6,
+      "confidence_flag": "SMALL_SAMPLE",
+      "risk_flags": [
+        "SMALL_SAMPLE_NO_EDGE_CLAIM"
+      ],
+      "peer_support": {
+        "positive_peer_count": 0,
+        "season_count": 0,
+        "league_count": 0
+      },
+      "status": "EXCLUDED",
+      "exclude_reason": "SMALL_SAMPLE"
+    },
+    {
+      "market": "1X2",
+      "league_code": "E0",
+      "season": "2021/22",
+      "close_odds_band": "GE_5_00",
+      "asian_handicap_line_bucket": "NOT_AH",
+      "over25_price_band": "NOT_FT_OVER25",
+      "home_away_side": "DRAW",
+      "sample_count": 72,
+      "hit_rate": 0.166667,
+      "avg_close_odds": 6.586806,
+      "roi_proxy_flat_1u": -0.059028,
+      "max_fail_streak": 11,
+      "max_drawdown_proxy": -11.75,
+      "confidence_flag": "SMALL_SAMPLE",
+      "risk_flags": [
+        "SMALL_SAMPLE_NO_EDGE_CLAIM"
+      ],
+      "peer_support": {
+        "positive_peer_count": 0,
+        "season_count": 0,
+        "league_count": 0
+      },
+      "status": "EXCLUDED",
+      "exclude_reason": "SMALL_SAMPLE"
+    },
+    {
+      "market": "1X2",
+      "league_code": "E0",
+      "season": "2021/22",
+      "close_odds_band": "GE_5_00",
+      "asian_handicap_line_bucket": "NOT_AH",
+      "over25_price_band": "NOT_FT_OVER25",
+      "home_away_side": "HOME",
+      "sample_count": 51,
+      "hit_rate": 0.078431,
+      "avg_close_odds": 8.034314,
+      "roi_proxy_flat_1u": -0.480392,
+      "max_fail_streak": 19,
+      "max_drawdown_proxy": -28.5,
+      "confidence_flag": "SMALL_SAMPLE",
+      "risk_flags": [
+        "SMALL_SAMPLE_NO_EDGE_CLAIM"
+      ],
+      "peer_support": {
+        "positive_peer_count": 0,
+        "season_count": 0,
+        "league_count": 0
+      },
+      "status": "EXCLUDED",
+      "exclude_reason": "SMALL_SAMPLE"
+    },
+    {
+      "market": "1X2",
+      "league_code": "E0",
+      "season": "2021/22",
+      "close_odds_band": "LT_1_50",
+      "asian_handicap_line_bucket": "NOT_AH",
+      "over25_price_band": "NOT_FT_OVER25",
+      "home_away_side": "AWAY",
+      "sample_count": 29,
+      "hit_rate": 0.758621,
+      "avg_close_odds": 1.324483,
+      "roi_proxy_flat_1u": -0.003793,
+      "max_fail_streak": 2,
+      "max_drawdown_proxy": -2.88,
+      "confidence_flag": "SMALL_SAMPLE",
+      "risk_flags": [
+        "SMALL_SAMPLE_NO_EDGE_CLAIM"
+      ],
+      "peer_support": {
+        "positive_peer_count": 0,
+        "season_count": 0,
+        "league_count": 0
+      },
+      "status": "EXCLUDED",
+      "exclude_reason": "SMALL_SAMPLE"
+    },
+    {
+      "market": "1X2",
+      "league_code": "E0",
+      "season": "2021/22",
+      "close_odds_band": "LT_1_50",
+      "asian_handicap_line_bucket": "NOT_AH",
+      "over25_price_band": "NOT_FT_OVER25",
+      "home_away_side": "HOME",
+      "sample_count": 65,
+      "hit_rate": 0.784615,
+      "avg_close_odds": 1.266,
+      "roi_proxy_flat_1u": -0.013692,
+      "max_fail_streak": 3,
+      "max_drawdown_proxy": -4.81,
+      "confidence_flag": "SMALL_SAMPLE",
+      "risk_flags": [
+        "SMALL_SAMPLE_NO_EDGE_CLAIM"
+      ],
+      "peer_support": {
+        "positive_peer_count": 0,
+        "season_count": 0,
+        "league_count": 0
+      },
+      "status": "EXCLUDED",
+      "exclude_reason": "SMALL_SAMPLE"
+    },
+    {
+      "market": "1X2",
+      "league_code": "E0",
+      "season": "2022/23",
+      "close_odds_band": "1_50_1_74",
+      "asian_handicap_line_bucket": "NOT_AH",
+      "over25_price_band": "NOT_FT_OVER25",
+      "home_away_side": "AWAY",
+      "sample_count": 25,
+      "hit_rate": 0.48,
+      "avg_close_odds": 1.6156,
+      "roi_proxy_flat_1u": -0.2156,
+      "max_fail_streak": 3,
+      "max_drawdown_proxy": -5.94,
+      "confidence_flag": "SMALL_SAMPLE",
+      "risk_flags": [
+        "SMALL_SAMPLE_NO_EDGE_CLAIM"
+      ],
+      "peer_support": {
+        "positive_peer_count": 0,
+        "season_count": 0,
+        "league_count": 0
+      },
+      "status": "EXCLUDED",
+      "exclude_reason": "SMALL_SAMPLE"
+    },
+    {
+      "market": "1X2",
+      "league_code": "E0",
+      "season": "2022/23",
+      "close_odds_band": "1_50_1_74",
+      "asian_handicap_line_bucket": "NOT_AH",
+      "over25_price_band": "NOT_FT_OVER25",
+      "home_away_side": "HOME",
+      "sample_count": 60,
+      "hit_rate": 0.766667,
+      "avg_close_odds": 1.603333,
+      "roi_proxy_flat_1u": 0.229833,
+      "max_fail_streak": 4,
+      "max_drawdown_proxy": -5.25,
+      "confidence_flag": "SMALL_SAMPLE",
+      "risk_flags": [
+        "SMALL_SAMPLE_NO_EDGE_CLAIM"
+      ],
+      "peer_support": {
+        "positive_peer_count": 0,
+        "season_count": 0,
+        "league_count": 0
+      },
+      "status": "EXCLUDED",
+      "exclude_reason": "SMALL_SAMPLE"
+    },
+    {
+      "market": "1X2",
+      "league_code": "E0",
+      "season": "2022/23",
+      "close_odds_band": "1_75_1_99",
+      "asian_handicap_line_bucket": "NOT_AH",
+      "over25_price_band": "NOT_FT_OVER25",
+      "home_away_side": "AWAY",
+      "sample_count": 30,
+      "hit_rate": 0.466667,
+      "avg_close_odds": 1.857333,
+      "roi_proxy_flat_1u": -0.129333,
+      "max_fail_streak": 7,
+      "max_drawdown_proxy": -7.0,
+      "confidence_flag": "SMALL_SAMPLE",
+      "risk_flags": [
+        "SMALL_SAMPLE_NO_EDGE_CLAIM"
+      ],
+      "peer_support": {
+        "positive_peer_count": 0,
+        "season_count": 0,
+        "league_count": 0
+      },
+      "status": "EXCLUDED",
+      "exclude_reason": "SMALL_SAMPLE"
+    },
+    {
+      "market": "1X2",
+      "league_code": "E0",
+      "season": "2022/23",
+      "close_odds_band": "1_75_1_99",
+      "asian_handicap_line_bucket": "NOT_AH",
+      "over25_price_band": "NOT_FT_OVER25",
+      "home_away_side": "HOME",
+      "sample_count": 36,
+      "hit_rate": 0.583333,
+      "avg_close_odds": 1.853889,
+      "roi_proxy_flat_1u": 0.079444,
+      "max_fail_streak": 2,
+      "max_drawdown_proxy": -3.09,
+      "confidence_flag": "SMALL_SAMPLE",
+      "risk_flags": [
+        "SMALL_SAMPLE_NO_EDGE_CLAIM"
+      ],
+      "peer_support": {
+        "positive_peer_count": 0,
+        "season_count": 0,
+        "league_count": 0
+      },
+      "status": "EXCLUDED",
+      "exclude_reason": "SMALL_SAMPLE"
+    },
+    {
+      "market": "1X2",
+      "league_code": "E0",
+      "season": "2022/23",
+      "close_odds_band": "2_00_2_49",
+      "asian_handicap_line_bucket": "NOT_AH",
+      "over25_price_band": "NOT_FT_OVER25",
+      "home_away_side": "AWAY",
+      "sample_count": 46,
+      "hit_rate": 0.413043,
+      "avg_close_odds": 2.230217,
+      "roi_proxy_flat_1u": -0.089348,
+      "max_fail_streak": 4,
+      "max_drawdown_proxy": -7.25,
+      "confidence_flag": "SMALL_SAMPLE",
+      "risk_flags": [
+        "SMALL_SAMPLE_NO_EDGE_CLAIM"
+      ],
+      "peer_support": {
+        "positive_peer_count": 0,
+        "season_count": 0,
+        "league_count": 0
+      },
+      "status": "EXCLUDED",
+      "exclude_reason": "SMALL_SAMPLE"
+    },
+    {
+      "market": "1X2",
+      "league_code": "E0",
+      "season": "2022/23",
+      "close_odds_band": "2_00_2_49",
+      "asian_handicap_line_bucket": "NOT_AH",
+      "over25_price_band": "NOT_FT_OVER25",
+      "home_away_side": "HOME",
+      "sample_count": 68,
+      "hit_rate": 0.397059,
+      "avg_close_odds": 2.221765,
+      "roi_proxy_flat_1u": -0.113529,
+      "max_fail_streak": 5,
+      "max_drawdown_proxy": -15.22,
+      "confidence_flag": "SMALL_SAMPLE",
+      "risk_flags": [
+        "SMALL_SAMPLE_NO_EDGE_CLAIM"
+      ],
+      "peer_support": {
+        "positive_peer_count": 1,
+        "season_count": 1,
+        "league_count": 1
+      },
+      "status": "EXCLUDED",
+      "exclude_reason": "SMALL_SAMPLE"
+    },
+    {
+      "market": "1X2",
+      "league_code": "E0",
+      "season": "2022/23",
+      "close_odds_band": "2_50_3_49",
+      "asian_handicap_line_bucket": "NOT_AH",
+      "over25_price_band": "NOT_FT_OVER25",
+      "home_away_side": "AWAY",
+      "sample_count": 82,
+      "hit_rate": 0.341463,
+      "avg_close_odds": 2.902073,
+      "roi_proxy_flat_1u": -0.012439,
+      "max_fail_streak": 6,
+      "max_drawdown_proxy": -10.32,
+      "confidence_flag": "SMALL_SAMPLE",
+      "risk_flags": [
+        "SMALL_SAMPLE_NO_EDGE_CLAIM"
+      ],
+      "peer_support": {
+        "positive_peer_count": 1,
+        "season_count": 1,
+        "league_count": 1
+      },
+      "status": "EXCLUDED",
+      "exclude_reason": "SMALL_SAMPLE"
+    },
+    {
+      "market": "1X2",
+      "league_code": "E0",
+      "season": "2022/23",
+      "close_odds_band": "2_50_3_49",
+      "asian_handicap_line_bucket": "NOT_AH",
+      "over25_price_band": "NOT_FT_OVER25",
+      "home_away_side": "DRAW",
+      "sample_count": 93,
+      "hit_rate": 0.236559,
+      "avg_close_odds": 3.28172,
+      "roi_proxy_flat_1u": -0.226882,
+      "max_fail_streak": 11,
+      "max_drawdown_proxy": -32.2,
+      "confidence_flag": "SMALL_SAMPLE",
+      "risk_flags": [
+        "SMALL_SAMPLE_NO_EDGE_CLAIM"
+      ],
+      "peer_support": {
+        "positive_peer_count": 12,
+        "season_count": 4,
+        "league_count": 5
+      },
+      "status": "EXCLUDED",
+      "exclude_reason": "SMALL_SAMPLE"
+    },
+    {
+      "market": "1X2",
+      "league_code": "E0",
+      "season": "2022/23",
+      "close_odds_band": "2_50_3_49",
+      "asian_handicap_line_bucket": "NOT_AH",
+      "over25_price_band": "NOT_FT_OVER25",
+      "home_away_side": "HOME",
+      "sample_count": 73,
+      "hit_rate": 0.383562,
+      "avg_close_odds": 2.91726,
+      "roi_proxy_flat_1u": 0.104932,
+      "max_fail_streak": 6,
+      "max_drawdown_proxy": -8.12,
+      "confidence_flag": "SMALL_SAMPLE",
+      "risk_flags": [
+        "SMALL_SAMPLE_NO_EDGE_CLAIM"
+      ],
+      "peer_support": {
+        "positive_peer_count": 0,
+        "season_count": 0,
+        "league_count": 0
+      },
+      "status": "EXCLUDED",
+      "exclude_reason": "SMALL_SAMPLE"
+    },
+    {
+      "market": "1X2",
+      "league_code": "E0",
+      "season": "2022/23",
+      "close_odds_band": "3_50_4_99",
+      "asian_handicap_line_bucket": "NOT_AH",
+      "over25_price_band": "NOT_FT_OVER25",
+      "home_away_side": "AWAY",
+      "sample_count": 65,
+      "hit_rate": 0.230769,
+      "avg_close_odds": 4.047846,
+      "roi_proxy_flat_1u": -0.074308,
+      "max_fail_streak": 11,
+      "max_drawdown_proxy": -14.57,
+      "confidence_flag": "SMALL_SAMPLE",
+      "risk_flags": [
+        "SMALL_SAMPLE_NO_EDGE_CLAIM"
+      ],
+      "peer_support": {
+        "positive_peer_count": 0,
+        "season_count": 0,
+        "league_count": 0
+      },
+      "status": "EXCLUDED",
+      "exclude_reason": "SMALL_SAMPLE"
+    },
+    {
+      "market": "1X2",
+      "league_code": "E0",
+      "season": "2022/23",
+      "close_odds_band": "3_50_4_99",
+      "asian_handicap_line_bucket": "NOT_AH",
+      "over25_price_band": "NOT_FT_OVER25",
+      "home_away_side": "HOME",
+      "sample_count": 46,
+      "hit_rate": 0.26087,
+      "avg_close_odds": 4.09413,
+      "roi_proxy_flat_1u": 0.041304,
+      "max_fail_streak": 9,
+      "max_drawdown_proxy": -10.75,
+      "confidence_flag": "SMALL_SAMPLE",
+      "risk_flags": [
+        "SMALL_SAMPLE_NO_EDGE_CLAIM"
+      ],
+      "peer_support": {
+        "positive_peer_count": 0,
+        "season_count": 0,
+        "league_count": 0
+      },
+      "status": "EXCLUDED",
+      "exclude_reason": "SMALL_SAMPLE"
+    }
+  ],
+  "exclusion_counts": {
+    "small_sample": 2405,
+    "low_confidence_not_candidate": 143,
+    "medium_roi_not_positive": 135,
+    "high_drawdown_risk": 15,
+    "double_chance_no_real_roi": 135
+  },
+  "double_chance_policy": {
+    "roi_proxy_flat_1u": null,
+    "reason": "NO_REAL_DC_ODDS",
+    "row_count": 135
+  },
+  "policy_lock": {
+    "api_football_called": false,
+    "v4_scan_executed": false,
+    "official_grade_changed": false,
+    "pending_written": false,
+    "qq_sent": false,
+    "cron_or_launchd_modified": false,
+    "strategy_online": false,
+    "recommendation_generated": false,
+    "edge_claim_generated": false
+  }
+}
