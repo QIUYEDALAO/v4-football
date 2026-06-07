@@ -1,0 +1,80 @@
+{
+  "schema_version": "v4_replay_feature_enriched_summary.v1",
+  "generated_at": "2026-06-07T00:00:00+08:00",
+  "source_dataset": "processed/v4_football_data_replay_dataset.csv",
+  "output_dataset": "processed/v4_replay_feature_enriched_dataset.csv",
+  "row_count": 15448,
+  "seasons": [
+    "2020/21",
+    "2021/22",
+    "2022/23",
+    "2023/24",
+    "2024/25"
+  ],
+  "leagues": [
+    "B1",
+    "D1",
+    "E0",
+    "F1",
+    "I1",
+    "N1",
+    "P1",
+    "SP1",
+    "T1"
+  ],
+  "team_strength_context": {
+    "fields": [
+      "home_points_before_match",
+      "away_points_before_match",
+      "home_rank_before_match",
+      "away_rank_before_match",
+      "rank_gap",
+      "points_gap",
+      "home_goal_diff_before_match",
+      "away_goal_diff_before_match",
+      "home_recent_5_points",
+      "away_recent_5_points",
+      "recent_5_points_gap",
+      "home_home_points_before_match",
+      "away_away_points_before_match",
+      "home_advantage_context_flag",
+      "team_strength_context_flags"
+    ],
+    "early_season_insufficient_count": 2163,
+    "no_prior_match_sample_count": 440,
+    "leakage_policy": "PRE_MATCH_ACCUMULATION_ONLY"
+  },
+  "price_movement_context": {
+    "fields": [
+      "odds_1x2_home_move",
+      "odds_1x2_draw_move",
+      "odds_1x2_away_move",
+      "odds_over25_move",
+      "odds_under25_move",
+      "ah_home_move",
+      "ah_away_move",
+      "market_home_avg_vs_b365_close",
+      "market_home_max_vs_b365_close",
+      "over25_close_implied_prob",
+      "ah_home_close_implied_prob",
+      "price_move_direction_flag",
+      "line_movement_flag",
+      "price_movement_context_flags"
+    ],
+    "price_movement_missing_count": 91,
+    "market_avg_max_source_missing_count": 15448,
+    "line_movement_source_flag_count": 6138,
+    "movement_policy": "OPEN_CLOSE_DIFF_ONLY"
+  },
+  "policy_lock": {
+    "api_football_called": false,
+    "v4_scan_executed": false,
+    "official_grade_changed": false,
+    "pending_written": false,
+    "qq_sent": false,
+    "cron_or_launchd_modified": false,
+    "strategy_online": false,
+    "recommendation_generated": false,
+    "edge_claim_generated": false
+  }
+}
