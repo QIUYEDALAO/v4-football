@@ -1,0 +1,115 @@
+{
+  "schema_version": "v4_price_aware_negative_findings_next_feature_plan.v1",
+  "generated_at": "2026-06-07T00:00:00+08:00",
+  "source_artifacts": {
+    "replay_core_summary": "processed/v4_price_aware_replay_core_summary.json",
+    "bucket_summary": "processed/v4_price_aware_bucket_summary.json",
+    "bucket_drilldown": "processed/v4_price_aware_bucket_drilldown.json"
+  },
+  "market_metrics": {
+    "FT_OVER25": {
+      "sample_count": 15448,
+      "roi_proxy_flat_1u": -0.04712395407666861,
+      "decision": "RESEARCH_CONTINUE_NEEDS_ATTACK_DEFENSE_TEMPO_CONTEXT"
+    },
+    "1X2": {
+      "sample_count": 46344,
+      "roi_proxy_flat_1u": -0.07997967699392472,
+      "decision": "AUXILIARY_ONLY_DOWNGRADED"
+    },
+    "ASIAN_HANDICAP": {
+      "sample_count": 30896,
+      "roi_proxy_flat_1u": -0.024547223663725998,
+      "decision": "RESEARCH_CONTINUE_NEEDS_STRENGTH_PRICE_AND_SCHEDULE_CONTEXT"
+    },
+    "DOUBLE_CHANCE_PROXY": {
+      "sample_count": 46344,
+      "roi_proxy_flat_1u": null,
+      "decision": "AUXILIARY_HIT_RATE_ONLY_NO_REAL_ROI"
+    }
+  },
+  "bucket_findings": {
+    "bucket_rows": 2683,
+    "HIGH_CONFIDENCE": 0,
+    "MEDIUM_CONFIDENCE": 135,
+    "LOW_CONFIDENCE": 143,
+    "SMALL_SAMPLE": 2405,
+    "research_candidate": 0,
+    "low_confidence_watchlist": 13
+  },
+  "negative_attribution": [
+    "MARKET_PRICES_ALREADY_STRONG_AT_COARSE_FEATURE_LEVEL",
+    "LEAGUE_SEASON_PRICE_BAND_AND_LINE_BUCKETS_NOT_ENOUGH",
+    "1X2_WORST_NEGATIVE_ROI_AUXILIARY_ONLY",
+    "AH_CLOSEST_TO_FLAT_BUT_STILL_NEGATIVE",
+    "FT_OVER25_NEEDS_ATTACK_DEFENSE_TEMPO_CONTEXT",
+    "DOUBLE_CHANCE_PROXY_HAS_NO_REAL_PRICE"
+  ],
+  "next_feature_plan": [
+    {
+      "priority": 1,
+      "feature_group": "team_strength_context",
+      "fields": [
+        "rank",
+        "points_gap",
+        "home_away_strength_split",
+        "recent_form_quality",
+        "promotion_or_relegation_pressure"
+      ]
+    },
+    {
+      "priority": 2,
+      "feature_group": "price_movement_context",
+      "fields": [
+        "open_close_odds_movement",
+        "line_movement",
+        "market_average_vs_best_price",
+        "close_price_quality_band"
+      ]
+    },
+    {
+      "priority": 3,
+      "feature_group": "tactical_stat_context",
+      "fields": [
+        "shots_trend",
+        "shots_on_target_trend",
+        "corner_profile",
+        "goals_for_against_trend",
+        "ft_ou_tempo_context"
+      ]
+    },
+    {
+      "priority": 4,
+      "feature_group": "fatigue_context",
+      "fields": [
+        "rest_days",
+        "consecutive_away_matches",
+        "fixture_congestion",
+        "travel_placeholder"
+      ]
+    },
+    {
+      "priority": 5,
+      "feature_group": "exclusion_filters",
+      "fields": [
+        "low_sample",
+        "high_drawdown",
+        "extreme_odds",
+        "non_mainstream_league",
+        "missing_real_price_or_line"
+      ]
+    }
+  ],
+  "policy_lock": {
+    "cannot_online": true,
+    "api_football_called": false,
+    "v4_scan_executed": false,
+    "official_grade_changed": false,
+    "pending_written": false,
+    "qq_sent": false,
+    "cron_or_launchd_modified": false,
+    "strategy_online": false,
+    "recommendation_generated": false,
+    "edge_claim_generated": false
+  }
+}
