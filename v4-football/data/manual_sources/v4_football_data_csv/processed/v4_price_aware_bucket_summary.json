@@ -1,0 +1,42 @@
+{
+  "schema_version": "v4_price_aware_bucket_summary.v1",
+  "generated_at": "2026-06-07T00:00:00+08:00",
+  "source_ledger": "processed/v4_price_aware_replay_core_ledger.csv",
+  "ledger_rows": 139032,
+  "bucket_rows": 2683,
+  "markets": {
+    "1X2": 46344,
+    "ASIAN_HANDICAP": 30896,
+    "DOUBLE_CHANCE_PROXY": 46344,
+    "FT_OVER25": 15448
+  },
+  "bucket_dimensions": [
+    "market",
+    "league_code",
+    "season",
+    "close_odds_band",
+    "asian_handicap_line_bucket",
+    "over25_price_band",
+    "home_away_side",
+    "sample_size_bucket"
+  ],
+  "confidence_counts": {
+    "LOW_CONFIDENCE": 143,
+    "MEDIUM_CONFIDENCE": 135,
+    "SMALL_SAMPLE": 2405
+  },
+  "positive_roi_bucket_count": 1036,
+  "positive_roi_high_drawdown_risk_count": 15,
+  "top_research_candidates": [],
+  "policy_lock": {
+    "api_football_called": false,
+    "v4_scan_executed": false,
+    "official_grade_changed": false,
+    "pending_written": false,
+    "qq_sent": false,
+    "cron_or_launchd_modified": false,
+    "strategy_online": false,
+    "recommendation_generated": false,
+    "edge_claim_generated": false
+  }
+}
