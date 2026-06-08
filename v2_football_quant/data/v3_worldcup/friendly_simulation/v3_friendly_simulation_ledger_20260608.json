@@ -1,0 +1,73 @@
+{
+  "schema_version": "v3_friendly_simulation_ledger.v1",
+  "generated_at": "2026-06-08T00:00:00+08:00",
+  "ledger_date": "2026-06-08",
+  "mode": "SIMULATION_ONLY",
+  "scope": "friendly_match_simulation",
+  "sample_count": 1,
+  "hit_rate": null,
+  "hit_rate_label": "N/A",
+  "settled_direction_count": 1,
+  "no_direction_reference_count": 4,
+  "records": [
+    {
+      "match": "Denmark vs Ukraine",
+      "fixture_id": 1543830,
+      "date": "2026-06-08",
+      "mode": "SIMULATION_ONLY",
+      "direction": "Denmark -0.75",
+      "confidence": "MEDIUM-LOW",
+      "score": "2-1",
+      "settlement": "HALF_WIN",
+      "sample_included": true,
+      "result_status": "SETTLED_SIMULATION",
+      "notes": "Single simulation ledger entry; sample_count is too small for hit-rate reporting."
+    },
+    {
+      "match": "Croatia vs Slovenia",
+      "date": "2026-06-08",
+      "mode": "SIMULATION_ONLY",
+      "score": "2-1",
+      "settlement": "NO_DIRECTION_NOT_SETTLED",
+      "sample_included": false,
+      "result_status": "REFERENCE_ONLY"
+    },
+    {
+      "match": "Morocco vs Norway",
+      "date": "2026-06-08",
+      "mode": "SIMULATION_ONLY",
+      "score": "1-1",
+      "settlement": "NO_DIRECTION_NOT_SETTLED",
+      "sample_included": false,
+      "result_status": "REFERENCE_ONLY"
+    },
+    {
+      "match": "Greece vs Italy",
+      "date": "2026-06-08",
+      "mode": "SIMULATION_ONLY",
+      "score": "0-1",
+      "settlement": "NO_DIRECTION_NOT_SETTLED",
+      "sample_included": false,
+      "result_status": "REFERENCE_ONLY"
+    },
+    {
+      "match": "Colombia vs Jordan",
+      "date": "2026-06-08",
+      "mode": "SIMULATION_ONLY",
+      "score": "2-0",
+      "settlement": "NO_DIRECTION_NOT_SETTLED",
+      "sample_included": false,
+      "result_status": "REFERENCE_ONLY"
+    }
+  ],
+  "safety": {
+    "simulation_only": true,
+    "observation_only": true,
+    "sample_too_small_for_hit_rate": true,
+    "recommendation_output": false,
+    "pending_written": false,
+    "qq_sent": false,
+    "affects_v4": false,
+    "runtime_output": false
+  }
+}
