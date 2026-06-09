@@ -1,0 +1,61 @@
+{
+  "schema_version": "v3_ai_match_judge_lite.fixed_schema.v1",
+  "fixed_input_fields": [
+    "match",
+    "mode",
+    "lineup_status",
+    "odds_handicap_status",
+    "score_gap",
+    "market_check",
+    "match_type",
+    "rotation_risk"
+  ],
+  "fixed_five_dimension_weights": {
+    "lineup": 20,
+    "odds_handicap": 25,
+    "score_gap": 25,
+    "match_type": 15,
+    "rotation_risk": 15
+  },
+  "fixed_scoring_policy": {
+    "lineup_status_not_confirmed": "WAIT",
+    "odds_handicap_status_not_present": "WAIT",
+    "score_gap_8_market_support_non_friendly_low_rotation": "PLAY",
+    "score_gap_8_friendly": "OBSERVE",
+    "score_gap_5_to_7": "OBSERVE",
+    "score_gap_below_5": "PASS",
+    "market_conflict": "PASS",
+    "rotation_high": "downgrade_to_PASS_or_OBSERVE"
+  },
+  "threshold_lock": {
+    "model_may_change_thresholds": false,
+    "score_gap_play_min": 8,
+    "score_gap_observe_min": 5,
+    "score_gap_pass_below": 5
+  },
+  "output_json_schema": {
+    "match": "string",
+    "mode": "SIMULATION_ONLY|WORLDCUP_PREMATCH_LITE|FRIENDLY_LITE",
+    "ai_direction": "string",
+    "confidence": "LOW|MEDIUM-LOW|MEDIUM|HIGH",
+    "top_reasons": "array[string]",
+    "top_risks": "array[string]",
+    "guard_result": {
+      "lineup_check": "PASS|WAIT",
+      "odds_handicap_check": "PASS|WAIT",
+      "mode_check": "PASS|DOWNGRADE_FRIENDLY",
+      "ledger_check": "REQUIRED",
+      "overall": "PLAY|WAIT|OBSERVE|PASS"
+    },
+    "final_decision": "PLAY|WAIT|OBSERVE|PASS",
+    "ledger_required": "boolean"
+  },
+  "safety": {
+    "simulation_only": true,
+    "lite_output": true,
+    "no_official_change": true,
+    "pending_written": false,
+    "qq_sent": false,
+    "affects_v4": false
+  }
+}

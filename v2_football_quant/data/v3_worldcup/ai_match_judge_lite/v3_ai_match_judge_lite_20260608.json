@@ -2,6 +2,9 @@
   "schema_version": "v3_ai_match_judge_lite.v1",
   "generated_at": "2026-06-10T00:00:00+08:00",
   "source_ledger": "data/v3_worldcup/friendly_simulation/v3_friendly_simulation_ledger_20260608.json",
+  "schema_path": "data/v3_worldcup/ai_match_judge_lite/v3_ai_match_judge_lite_schema.json",
+  "prompt_template_path": "data/v3_worldcup/ai_match_judge_lite/V3_AI_MATCH_JUDGE_LITE_PROMPT_TEMPLATE.md",
+  "decision_engine_path": "tools/v3_ai_match_judge_lite_decision_engine.py",
   "sample_count": 1,
   "hit_rate": null,
   "hit_rate_label": "N/A",
@@ -11,14 +14,25 @@
       "mode": "SIMULATION_ONLY",
       "ai_direction": "Denmark -0.75",
       "confidence": "MEDIUM-LOW",
+      "decision_input": {
+        "lineup_status": "CONFIRMED",
+        "odds_handicap_status": "PRESENT",
+        "score_gap": 8,
+        "market_check": "SUPPORT",
+        "match_type": "FRIENDLY",
+        "rotation_risk": "MEDIUM"
+      },
+      "decision_rule_id": "SCORE_GAP_8_FRIENDLY_DOWNGRADE",
+      "downgrade_reason": "friendly_mode",
       "top_reasons": [
         "AI主判断给出丹麦方向，但置信度未达到高档。",
-        "友谊赛模式下轮换与临场信息不确定。",
+        "首发与赔率/盘口检查均通过固定guard。",
+        "友谊赛模式触发固定降级规则。",
         "赛后模拟记录为2-1，对-0.75方向仅为半赢结算。"
       ],
       "top_risks": [
-        "首发确认需要临场检查。",
-        "赔率/盘口需要赛前复核。",
+        "友谊赛模式不可直接升级为执行判断。",
+        "轮换风险虽非HIGH，但仍保留观察折扣。",
         "友谊赛样本不可外推，不能形成稳定结论。"
       ],
       "guard_result": {
@@ -45,6 +59,7 @@
     }
   ],
   "allowed_decisions": [
+    "PLAY",
     "PASS",
     "WAIT",
     "OBSERVE"
