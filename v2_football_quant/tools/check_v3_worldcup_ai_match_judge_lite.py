@@ -127,10 +127,10 @@ def main() -> int:
 
         guard = record.get("guard_result") or {}
         expected_guard = {
-            "lineup_check": "WAIT",
-            "odds_handicap_check": "WAIT",
-            "mode_check": "PASS",
-            "ledger_check": "PASS",
+            "lineup_check": "PASS",
+            "odds_handicap_check": "PASS",
+            "mode_check": "DOWNGRADE_FRIENDLY",
+            "ledger_check": "REQUIRED",
             "overall": "OBSERVE",
         }
         for key, value in expected_guard.items():

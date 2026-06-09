@@ -22,10 +22,10 @@
         "友谊赛样本不可外推，不能形成稳定结论。"
       ],
       "guard_result": {
-        "lineup_check": "WAIT",
-        "odds_handicap_check": "WAIT",
-        "mode_check": "PASS",
-        "ledger_check": "PASS",
+        "lineup_check": "PASS",
+        "odds_handicap_check": "PASS",
+        "mode_check": "DOWNGRADE_FRIENDLY",
+        "ledger_check": "REQUIRED",
         "overall": "OBSERVE"
       },
       "final_decision": "OBSERVE",
