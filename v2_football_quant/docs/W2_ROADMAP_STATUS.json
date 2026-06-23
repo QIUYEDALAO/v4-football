@@ -1,0 +1,24 @@
+{
+  "w2_roadmap": {
+    "phase": "W2_BASELIGHT_ONBOARDING",
+    "gate3": {
+      "status": "OPEN",
+      "baselight_minimal_acceptance": {
+        "status": "COMPLETE",
+        "checked_at": "2026-06-23T19:38:24Z",
+        "baselight_status": "LICENSE_UNVERIFIED",
+        "report_md": "reports/W2_GATE3_BASELIGHT_MINIMAL_ACCEPTANCE.md",
+        "report_json": "reports/W2_GATE3_BASELIGHT_MINIMAL_ACCEPTANCE.json"
+      },
+      "full_ingestion": {
+        "status": "PENDING"
+      },
+      "adapter_build": {
+        "status": "PENDING"
+      },
+      "walk_forward": {
+        "status": "PENDING"
+      }
+    }
+  }
+}
