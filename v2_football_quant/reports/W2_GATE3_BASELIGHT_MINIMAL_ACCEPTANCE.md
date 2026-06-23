@@ -1,6 +1,6 @@
 # W2 Gate 3 — Baselight 最小验收报告
 
-**日期**: 2026-06-23 19:38 UTC
+**日期**: 2026-06-23 19:40 UTC
 
 **BASELIGHT_STATUS**: `LICENSE_UNVERIFIED`
 
@@ -63,7 +63,7 @@ Settlement 自测试已通过。
 - Release manifest: settlement_version=V4_SETTLEMENT_AH_v1
 - Release manifest has 'license' field: False
 - Odds data annotation: [1531637, 1533674, 1540308, 1533675, 1533673, 1391603, 1403823, 1492615, 1492614, 1396507, 1391138, 1392162, 1387973, 1378199, 1530579, 1531636, 1540280, 1380354, 1536973, 1396513, 1396511, 1537093, 1
-- Baselight metadata files: ['tools/run_w2_baselight_minimal_acceptance.py']
+- Baselight metadata files: ['tools/run_w2_baselight_minimal_acceptance.py', 'reports/W2_GATE3_BASELIGHT_MINIMAL_ACCEPTANCE.json', 'reports/W2_GATE3_BASELIGHT_MINIMAL_ACCEPTANCE.md']
 
 **建议**:
 
@@ -96,4 +96,4 @@ Settlement 自测试已通过。
 - ✅ 未修改 W1 或 Stage7I runtime
 
 ---
-_报告由 W2_GATE3_BASELIGHT_MINIMAL_ACCEPTANCE 自动生成于 2026-06-23 19:38 UTC_
+_报告由 W2_GATE3_BASELIGHT_MINIMAL_ACCEPTANCE 自动生成于 2026-06-23 19:40 UTC_
